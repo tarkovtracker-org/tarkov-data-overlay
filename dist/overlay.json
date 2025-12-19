@@ -20,35 +20,42 @@
     },
     "675c1ff1a757ddd00404f0aa": {
       "minPlayerLevel": 35
+    },
+    "66058cb22cee99303f1ba067": {
+      "minPlayerLevel": 10
     }
   },
   "editions": {
     "standard": {
       "id": "standard",
+      "value": 1,
       "title": "Standard Edition",
-      "stashLevel": 1,
-      "cultistCircleLevel": 0,
+      "defaultStashLevel": 1,
+      "defaultCultistCircleLevel": 0,
       "traderRepBonus": {}
     },
     "left_behind": {
       "id": "left_behind",
+      "value": 2,
       "title": "Left Behind Edition",
-      "stashLevel": 2,
-      "cultistCircleLevel": 0,
+      "defaultStashLevel": 2,
+      "defaultCultistCircleLevel": 0,
       "traderRepBonus": {}
     },
     "prepare_for_escape": {
       "id": "prepare_for_escape",
+      "value": 3,
       "title": "Prepare for Escape Edition",
-      "stashLevel": 3,
-      "cultistCircleLevel": 0,
+      "defaultStashLevel": 3,
+      "defaultCultistCircleLevel": 0,
       "traderRepBonus": {}
     },
     "edge_of_darkness": {
       "id": "edge_of_darkness",
+      "value": 4,
       "title": "Edge of Darkness Edition",
-      "stashLevel": 4,
-      "cultistCircleLevel": 0,
+      "defaultStashLevel": 4,
+      "defaultCultistCircleLevel": 0,
       "traderRepBonus": {
         "prapor": 0.2,
         "therapist": 0.2,
@@ -62,9 +69,27 @@
     },
     "unheard": {
       "id": "unheard",
+      "value": 5,
       "title": "The Unheard Edition",
-      "stashLevel": 5,
-      "cultistCircleLevel": 3,
+      "defaultStashLevel": 5,
+      "defaultCultistCircleLevel": 3,
+      "traderRepBonus": {
+        "prapor": 0.2,
+        "therapist": 0.2,
+        "fence": 0.2,
+        "skier": 0.2,
+        "peacekeeper": 0.2,
+        "mechanic": 0.2,
+        "ragman": 0.2,
+        "jaeger": 0.2
+      }
+    },
+    "edge_of_darkness_unheard": {
+      "id": "edge_of_darkness_unheard",
+      "value": 6,
+      "title": "Edge of Darkness + Unheard Edition",
+      "defaultStashLevel": 5,
+      "defaultCultistCircleLevel": 3,
       "traderRepBonus": {
         "prapor": 0.2,
         "therapist": 0.2,
@@ -79,7 +104,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2025-12-19T12:34:33.558Z",
-    "sha256": "a15be831872eb7c871a5fd676cc83e5cbfa1da3d382dcfb5d0ee0b069876d603"
+    "generated": "2025-12-19T12:53:42.104Z",
+    "sha256": "d7d03928220aee9ca83e8bfedd6114d894fef44e838de4a319a72c8f5d2b6e4c"
   }
 }

@@ -1,36 +1,48 @@
 {
   // Game Edition data - not available in tarkov.dev API
   // Source: In-game data and official Battlestate Games information
+  //
+  // Fields:
+  // - id: Unique identifier for the edition
+  // - value: Numeric ID used by TarkovTracker (1-6)
+  // - title: Display name
+  // - defaultStashLevel: Starting stash level (1-5)
+  // - defaultCultistCircleLevel: Starting cultist circle level (0 or 3)
+  // - traderRepBonus: Starting reputation bonus per trader (0.0 or 0.2)
 
   "standard": {
     "id": "standard",
+    "value": 1,
     "title": "Standard Edition",
-    "stashLevel": 1,
-    "cultistCircleLevel": 0,
+    "defaultStashLevel": 1,
+    "defaultCultistCircleLevel": 0,
     "traderRepBonus": {}
   },
 
   "left_behind": {
     "id": "left_behind",
+    "value": 2,
     "title": "Left Behind Edition",
-    "stashLevel": 2,
-    "cultistCircleLevel": 0,
+    "defaultStashLevel": 2,
+    "defaultCultistCircleLevel": 0,
     "traderRepBonus": {}
   },
 
   "prepare_for_escape": {
     "id": "prepare_for_escape",
+    "value": 3,
     "title": "Prepare for Escape Edition",
-    "stashLevel": 3,
-    "cultistCircleLevel": 0,
+    "defaultStashLevel": 3,
+    "defaultCultistCircleLevel": 0,
     "traderRepBonus": {}
   },
 
   "edge_of_darkness": {
     "id": "edge_of_darkness",
+    "value": 4,
     "title": "Edge of Darkness Edition",
-    "stashLevel": 4,
-    "cultistCircleLevel": 0,
+    "defaultStashLevel": 4,
+    "defaultCultistCircleLevel": 0,
     "traderRepBonus": {
       "prapor": 0.2,
       "therapist": 0.2,
@@ -45,9 +57,28 @@
 
   "unheard": {
     "id": "unheard",
+    "value": 5,
     "title": "The Unheard Edition",
-    "stashLevel": 5,
-    "cultistCircleLevel": 3,
+    "defaultStashLevel": 5,
+    "defaultCultistCircleLevel": 3,
+    "traderRepBonus": {
+      "prapor": 0.2,
+      "therapist": 0.2,
+      "fence": 0.2,
+      "skier": 0.2,
+      "peacekeeper": 0.2,
+      "mechanic": 0.2,
+      "ragman": 0.2,
+      "jaeger": 0.2
+    }
+  },
+
+  "edge_of_darkness_unheard": {
+    "id": "edge_of_darkness_unheard",
+    "value": 6,
+    "title": "Edge of Darkness + Unheard Edition",
+    "defaultStashLevel": 5,
+    "defaultCultistCircleLevel": 3,
     "traderRepBonus": {
       "prapor": 0.2,
       "therapist": 0.2,

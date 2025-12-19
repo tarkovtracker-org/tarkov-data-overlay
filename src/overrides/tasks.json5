@@ -40,5 +40,12 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_6
   "675c1ff1a757ddd00404f0aa": {
     "minPlayerLevel": 35  // Was: 40
+  },
+
+  // Easy Money - Part 1 - Level requirement incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_1
+  // tarkov.dev shows 20, wiki confirms 10
+  "66058cb22cee99303f1ba067": {
+    "minPlayerLevel": 10  // Was: 20
   }
 }
