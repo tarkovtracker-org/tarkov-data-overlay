@@ -9,11 +9,31 @@ Community-maintained data overlay for tarkov.dev API corrections and additions. 
 ## Commands
 
 ```bash
-npm run validate    # Validate source files against JSON schemas
-npm run build       # Build dist/overlay.json from source files
-npm test            # Run tests (vitest)
-npm run test:watch  # Run tests in watch mode
+npm run validate        # Validate source files against JSON schemas
+npm run build           # Build dist/overlay.json from source files
+npm run check-overrides # Check if overrides are still needed (queries tarkov.dev API)
+npm test                # Run tests (vitest)
+npm run test:watch      # Run tests in watch mode
 ```
+
+### Checking Override Validity
+
+The `check-overrides` script validates whether existing overrides are still needed by comparing them against current tarkov.dev API data:
+
+```bash
+npm run check-overrides
+```
+
+This will:
+- Load all task overrides from `src/overrides/tasks.json5`
+- Query the tarkov.dev API for current data
+- Compare each override field-by-field
+- Report which overrides are:
+  - ✅ Still needed (API data still incorrect)
+  - 🔄 Fixed in API (can be removed)
+  - 🗑️  Task removed from API (can be deleted)
+
+Run this periodically (weekly/monthly) to keep the overlay lean and up-to-date.
 
 ## Architecture
 

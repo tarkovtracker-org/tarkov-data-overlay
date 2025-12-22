@@ -1,15 +1,11 @@
 {
   "tasks": {
     "5c0d190cd09282029f5390d8": {
-      "minPlayerLevel": 10,
       "objectives": {
         "5c1b760686f77412780211a3": {
           "count": 5
         }
-      }
-    },
-    "5c0bd94186f7747a727f09b2": {
-      "minPlayerLevel": 18,
+      },
       "taskRequirements": [
         {
           "task": {
@@ -19,48 +15,9 @@
         }
       ]
     },
-    "63a5cf262964a7488f5243ce": {
-      "minPlayerLevel": 22
-    },
-    "64f5deac39e45b527a7c4232": {
-      "minPlayerLevel": 25
-    },
-    "6574e0dedc0d635f633a5805": {
-      "minPlayerLevel": 28
-    },
-    "669fa3a40c828825de06d6a1": {
-      "minPlayerLevel": 32
-    },
-    "675c1ff1a757ddd00404f0aa": {
-      "minPlayerLevel": 35
-    },
-    "66058cb22cee99303f1ba067": {
-      "minPlayerLevel": 10
-    },
-    "60e71c48c1bfa3050473b8e5": {
-      "minPlayerLevel": 38
-    },
     "6740a2c17e3818d5bb0648b6": {
       "name": "Half Empty",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
-    },
-    "6863cf925eaeb676d50a9651": {
-      "disabled": true
-    },
-    "6863d9bcd3bfdcb2bc075956": {
-      "disabled": true
-    },
-    "6863e09a5f4d17fd3e01feee": {
-      "disabled": true
-    },
-    "686403eeb4aaef121c0f0f06": {
-      "disabled": true
-    },
-    "686404d348e7bb4146002cac": {
-      "disabled": true
-    },
-    "6864fcef9809a149400dd2ee": {
-      "disabled": true
     }
   },
   "editions": {
@@ -142,7 +99,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2025-12-22T16:29:28.151Z",
-    "sha256": "9e8da862d4fab2a7c397d04da39c726ad1588b1a1ecced4476f447d997ba8358"
+    "generated": "2025-12-22T19:54:35.929Z",
+    "sha256": "30e2e0a44ef06b8e6dc68ad1d033f438d01fba68a93b82075681caa0995bb71e"
   }
 }

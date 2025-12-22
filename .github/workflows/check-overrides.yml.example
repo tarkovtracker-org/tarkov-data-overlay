@@ -1,0 +1,64 @@
+# Example GitHub Actions workflow for automated override validation
+#
+# To enable:
+#   1. Rename this file to check-overrides.yml
+#   2. Commit and push to your repository
+#
+# This workflow runs weekly to check if overrides are still needed
+
+name: Check Overrides
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  validate-overrides:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check overrides
+        id: check
+        run: |
+          npm run check-overrides > check-output.txt 2>&1 || true
+          cat check-output.txt
+
+      - name: Create issue if overrides need updating
+        uses: actions/github-script@v7
+        if: contains(steps.check.outputs.stdout, 'can remove')
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('check-output.txt', 'utf8');
+
+            // Check if there's already an open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['override-validation']
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔄 Overlay overrides may need updating',
+                labels: ['override-validation', 'maintenance'],
+                body: `The automated override validation check found overrides that may no longer be needed.\n\n**Action required:** Review and update \`src/overrides/tasks.json5\`\n\n<details>\n<summary>Validation Output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n\n</details>\n\nRun \`npm run check-overrides\` locally to see the full report.`
+              });
+            }

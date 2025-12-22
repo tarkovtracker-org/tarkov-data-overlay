@@ -1,20 +1,14 @@
 {
-  // Grenadier - Level requirement and objective count incorrect
+  // Grenadier - Objective count and task prerequisite incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Grenadier
-  // tarkov.dev shows level 20 and 8 kills, wiki confirms level 10 and 5 kills
+  // tarkov.dev shows 8 kills, wiki confirms 5 kills
+  // tarkov.dev shows no prerequisites, wiki shows "Previous: Shooting Cans"
   "5c0d190cd09282029f5390d8": {
-    minPlayerLevel: 10, // Was: 20
     objectives: {
       "5c1b760686f77412780211a3": {
         count: 5, // Was: 8
       },
     },
-  },
-
-  // Test Drive - Part 1 - Level requirement and task prerequisite incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
-  "5c0bd94186f7747a727f09b2": {
-    minPlayerLevel: 18, // Was: 30
     taskRequirements: [
       {
         task: {
@@ -22,51 +16,7 @@
           name: "Shooting Cans",
         },
       },
-    ], // Was: Grenadier (5c0d190cd09282029f5390d8)
-  },
-
-  // Test Drive - Part 2 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
-  "63a5cf262964a7488f5243ce": {
-    minPlayerLevel: 22, // Was: 30
-  },
-
-  // Test Drive - Part 3 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_3
-  "64f5deac39e45b527a7c4232": {
-    minPlayerLevel: 25, // Was: 30
-  },
-
-  // Test Drive - Part 4 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
-  "6574e0dedc0d635f633a5805": {
-    minPlayerLevel: 28, // Was: 40
-  },
-
-  // Test Drive - Part 5 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
-  "669fa3a40c828825de06d6a1": {
-    minPlayerLevel: 32, // Was: 40
-  },
-
-  // Test Drive - Part 6 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_6
-  "675c1ff1a757ddd00404f0aa": {
-    minPlayerLevel: 35, // Was: 40
-  },
-
-  // Easy Money - Part 1 - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_1
-  // tarkov.dev shows 20, wiki confirms 10
-  "66058cb22cee99303f1ba067": {
-    minPlayerLevel: 10, // Was: 20
-  },
-
-  // Crisis - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
-  // tarkov.dev shows 48, wiki confirms 38
-  "60e71c48c1bfa3050473b8e5": {
-    minPlayerLevel: 38, // Was: 48
+    ], // Was: [] (empty)
   },
 
   // Half Empty - Name and wiki link incorrect
@@ -75,47 +25,5 @@
   "6740a2c17e3818d5bb0648b6": {
     name: "Half Empty", // Was: "Half-Empty"
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Half_Empty", // Was: https://escapefromtarkov.fandom.com/wiki/Half-Empty
-  },
-
-  // Friend from Norvinsk - Part 1 - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_from_Norvinsk_-_Part_1
-  // Wiki states: "This page describes content that was removed or replaced."
-  "6863cf925eaeb676d50a9651": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
-  },
-
-  // Friend from Norvinsk - Part 2 - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_from_Norvinsk_-_Part_2
-  // Part of removed questline
-  "6863d9bcd3bfdcb2bc075956": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
-  },
-
-  // Friend from Norvinsk - Part 3 - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_from_Norvinsk_-_Part_3
-  // Part of removed questline
-  "6863e09a5f4d17fd3e01feee": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
-  },
-
-  // Friend from Norvinsk - Part 4 - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_from_Norvinsk_-_Part_4
-  // Part of removed questline
-  "686403eeb4aaef121c0f0f06": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
-  },
-
-  // Friend from Norvinsk - Part 5 - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_from_Norvinsk_-_Part_5
-  // Part of removed questline
-  "686404d348e7bb4146002cac": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
-  },
-
-  // Breathing Room - Quest removed from game
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Breathing_Room
-  // Follows Friend from Norvinsk questline, also event-only
-  "6864fcef9809a149400dd2ee": {
-    disabled: true, // Quest only available during special events, not in standard gameplay
   },
 }

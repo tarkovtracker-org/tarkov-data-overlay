@@ -6,6 +6,7 @@
   "scripts": {
     "validate": "tsx scripts/validate.ts",
     "build": "tsx scripts/build.ts",
+    "check-overrides": "tsx scripts/check-overrides.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
