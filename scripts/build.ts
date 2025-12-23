@@ -1,78 +1,49 @@
-import JSON5 from 'json5';
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+/**
+ * Build script for tarkov-data-overlay
+ *
+ * Compiles JSON5 source files from src/ into a single dist/overlay.json
+ * with metadata including version, timestamp, and SHA256 hash.
+ */
+
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 import { createHash } from 'crypto';
+import {
+  getProjectPaths,
+  loadAllJson5FromDir,
+  getPackageVersion,
+  type OverlayOutput,
+} from '../src/lib/index.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = join(__dirname, '..');
-const SRC_DIR = join(ROOT_DIR, 'src');
-const DIST_DIR = join(ROOT_DIR, 'dist');
+const { rootDir, srcDir, distDir } = getProjectPaths(import.meta.url);
 
-interface OverlayOutput {
-  tasks?: Record<string, unknown>;
-  items?: Record<string, unknown>;
-  traders?: Record<string, unknown>;
-  hideout?: Record<string, unknown>;
-  editions?: Record<string, unknown>;
-  $meta: {
-    version: string;
-    generated: string;
-    sha256?: string;
-  };
-}
-
-function loadJson5File(filePath: string): Record<string, unknown> {
-  const content = readFileSync(filePath, 'utf-8');
-  return JSON5.parse(content) as Record<string, unknown>;
-}
-
+/**
+ * Load all source files from overrides and additions directories
+ */
 function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
   const output: Omit<OverlayOutput, '$meta'> = {};
 
-  // Load overrides
-  const overridesDir = join(SRC_DIR, 'overrides');
-  if (existsSync(overridesDir)) {
-    const files = readdirSync(overridesDir).filter(f => f.endsWith('.json5'));
+  // Load overrides (corrections to tarkov.dev data)
+  const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
+  Object.assign(output, overrides);
 
-    for (const file of files) {
-      const filePath = join(overridesDir, file);
-      const data = loadJson5File(filePath);
-
-      // Skip empty objects
-      if (Object.keys(data).length === 0) continue;
-
-      const key = file.replace('.json5', '') as keyof Omit<OverlayOutput, '$meta'>;
-      output[key] = data;
-    }
-  }
-
-  // Load additions
-  const additionsDir = join(SRC_DIR, 'additions');
-  if (existsSync(additionsDir)) {
-    const files = readdirSync(additionsDir).filter(f => f.endsWith('.json5'));
-
-    for (const file of files) {
-      const filePath = join(additionsDir, file);
-      const data = loadJson5File(filePath);
-
-      const key = file.replace('.json5', '') as keyof Omit<OverlayOutput, '$meta'>;
-      output[key] = data;
-    }
-  }
+  // Load additions (new data not in tarkov.dev)
+  const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
+  Object.assign(output, additions);
 
   return output;
 }
 
-function getVersion(): string {
-  const packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8'));
-  return packageJson.version;
-}
-
+/**
+ * Generate SHA256 hash of content
+ */
 function generateSha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
+/**
+ * Build the overlay.json file
+ */
 function build(): void {
   console.log('Building overlay...\n');
 
@@ -83,9 +54,9 @@ function build(): void {
   const output: OverlayOutput = {
     ...data,
     $meta: {
-      version: getVersion(),
-      generated: new Date().toISOString()
-    }
+      version: getPackageVersion(rootDir),
+      generated: new Date().toISOString(),
+    },
   };
 
   // Generate JSON output (without sha256 first)
@@ -98,21 +69,20 @@ function build(): void {
   const finalContent = JSON.stringify(output, null, 2);
 
   // Ensure dist directory exists
-  if (!existsSync(DIST_DIR)) {
-    mkdirSync(DIST_DIR, { recursive: true });
+  if (!existsSync(distDir)) {
+    mkdirSync(distDir, { recursive: true });
   }
 
   // Write output
-  const outputPath = join(DIST_DIR, 'overlay.json');
+  const outputPath = join(distDir, 'overlay.json');
   writeFileSync(outputPath, finalContent);
 
   // Summary
   const entityCounts = Object.entries(data)
-    .filter(([key]) => key !== '$meta')
     .map(([key, value]) => `${key}: ${Object.keys(value as object).length}`)
     .join(', ');
 
-  console.log(`✅ Built overlay.json`);
+  console.log('✅ Built overlay.json');
   console.log(`   Entities: ${entityCounts}`);
   console.log(`   Version: ${output.$meta.version}`);
   console.log(`   Generated: ${output.$meta.generated}`);
