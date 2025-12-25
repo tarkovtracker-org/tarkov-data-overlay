@@ -68,7 +68,7 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 
 | Task | Field | tarkov.dev | Correct |
 |------|-------|------------|---------|
-| Half Empty | minLevelPlayer | 65 | 55 |
+| Half Empty | minPlayerLevel | 65 | 55 |
 
 ## Current Additions
 
