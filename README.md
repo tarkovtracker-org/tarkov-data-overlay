@@ -64,6 +64,12 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 | Half Empty | name | "Half-Empty" | "Half Empty" |
 | Half Empty | wikiLink | Half-Empty | Half_Empty |
 
+### Task Level Requirements Corrections
+
+| Task | Field | tarkov.dev | Correct |
+|------|-------|------------|---------|
+| Half Empty | minLevelPlayer | 65 | 55 |
+
 ## Current Additions
 
 - **Game Editions**: Standard, Left Behind, Prepare for Escape, Edge of Darkness, The Unheard, Edge of Darkness + Unheard
