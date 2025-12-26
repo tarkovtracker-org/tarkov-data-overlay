@@ -55,6 +55,11 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 | Task | Change |
 |------|--------|
 | Grenadier | taskRequirements changed from [] (empty) to Shooting Cans |
+| The Tarkov Shooter - Part 2 | taskRequirements changed from [] (empty) to The Tarkov Shooter - Part 1 |
+| Hell on Earth - Part 1 | taskRequirements changed from [] (empty) to The Good Times - Part 1 |
+| Revision - Lighthouse | taskRequirements changed from [] (empty) to Revision - Reserve |
+| Energy Crisis | taskRequirements changed from [] (empty) to Farming - Part 4 |
+| Drip-Out - Part 2 | taskRequirements changed from [] (empty) to Dandies |
 
 ### Task Name/Link Corrections
 
@@ -62,6 +67,12 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 |------|-------|------------|---------|
 | Half Empty | name | "Half-Empty" | "Half Empty" |
 | Half Empty | wikiLink | Half-Empty | Half_Empty |
+
+### Task Level Requirements Corrections
+
+| Task | Field | tarkov.dev | Correct |
+|------|-------|------------|---------|
+| Task ID 60e71e8ed54b755a3b53eb67 | minPlayerLevel | 65 | 55 |
 
 ## Current Additions
 

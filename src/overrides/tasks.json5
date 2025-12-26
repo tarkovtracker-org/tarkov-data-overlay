@@ -48,11 +48,18 @@
     },
   },
 
-  // Hell on Earth - Part 1 - Experience incorrect
+  // Hell on Earth - Part 1 - Experience incorrect + prerequisite missing
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
   // Verified in-game: 2300 XP
   "666314b0acf8442f8b0531a1": {
-    experience: 2300, // Was: 15600
+    taskRequirements: [
+      {
+        task: {
+          id: "666314b4d7f171c4c20226c3",
+          name: "The Good Times - Part 1",
+        },
+      },
+    ], // Was: [] (empty)    experience: 2300, // Was: 15600
   },
 
   // Hell on Earth - Part 2 - Experience incorrect
@@ -127,5 +134,63 @@
         },
       ],
     },
+  },
+
+  // The Huntsman Path - Relentless - Minimum player level incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
+  "60e71e8ed54b755a3b53eb67": {
+    minPlayerLevel: 55, // Was: 65
+  },
+
+  // The Tarkov Shooter - Part 2 - prerequisite missing
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_2
+  "5bc479e586f7747f376c7da3": {
+    taskRequirements: [
+      {
+        task: {
+          id: "5bc4776586f774512d07cf05",
+          name: "The Tarkov Shooter - Part 1",
+        },
+      },
+    ], // Was: [] (empty)
+  },
+
+  // Revision - Lighthouse - prerequisite missing
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Lighthouse
+  "6179b4d1bca27a099552e04e": {
+    taskRequirements: [
+      {
+        task: {
+          id: "6086c852c945025d41566124",
+          name: "Revision - Reserve",
+        },
+      },
+    ], // Was: [] (empty)
+  },
+
+  // Energy Crisis - prerequisite should unlock on accept
+  // tarkov.dev requires completion; should require Farming - Part 4 to be accepted
+  "6179b3a12153c15e937d52bc": {
+    taskRequirements: [
+      {
+        task: {
+          id: "5ac3464c86f7741d651d6877",
+          name: "Farming - Part 4",
+        },
+      },
+    ], // Was: [] (empty)
+  },
+
+  // Drip-Out - Part 2 - prerequisite should unlock on accept
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
+  "6615141bfda04449120269a7": {
+    taskRequirements: [
+      {
+        task: {
+          id: "65734c186dc1e402c80dc19e",
+          name: "Dandies",
+        },
+      },
+    ], // Was: [] (empty)
   },
 }
