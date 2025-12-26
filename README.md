@@ -56,6 +56,8 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 |------|--------|
 | Grenadier | taskRequirements changed from [] (empty) to Shooting Cans |
 | Polikhim Hobo | taskRequirements changed from [] (empty) to Chemical - Part 1 |
+| The Tarkov Shooter - Part 2 | taskRequirements changed from [] (empty) to The Tarkov Shooter - Part 1 |
+| Revision - Lighthouse | taskRequirements changed from [] (empty) to Revision - Reserve |
 
 ### Task Name/Link Corrections
 
