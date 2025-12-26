@@ -36,6 +36,16 @@
         }
       ]
     },
+    "6179b4d1bca27a099552e04e": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6086c852c945025d41566124",
+            "name": "Revision - Reserve"
+          }
+        }
+      ]
+    },
     "6740a2c17e3818d5bb0648b6": {
       "name": "Half Empty",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
