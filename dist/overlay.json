@@ -26,6 +26,16 @@
         }
       ]
     },
+    "5bc47dbf86f7741ee74e93b9": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5bc479e586f7747f376c7da3",
+            "name": "The Tarkov Shooter - Part 1"
+          }
+        }
+      ]
+    },
     "6740a2c17e3818d5bb0648b6": {
       "name": "Half Empty",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
