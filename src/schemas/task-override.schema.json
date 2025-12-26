@@ -61,6 +61,52 @@
                 },
                 "required": ["id", "name"]
               }
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "objectivesAdd": {
+        "type": "array",
+        "description": "Objective additions for missing API objectives",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "count": { "type": "integer", "minimum": 1 },
+            "description": { "type": "string" },
+            "maps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["name"]
+              }
             }
           },
           "additionalProperties": true

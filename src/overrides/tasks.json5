@@ -128,4 +128,19 @@
       ],
     },
   },
+
+  // Collector - Missing objective items
+  // Proof: TBC
+  "5c51aac186f77432ea65c552": {
+    objectivesAdd: [
+      {
+        items: [
+          { name: "Nut Sack balaclava" },
+          { name: "Mazoni golden dumbbell" },
+          { name: "Tigzresq splint" },
+          { name: "Domontovich ushanka hat" },
+        ],
+      },
+    ],
+  },
 }

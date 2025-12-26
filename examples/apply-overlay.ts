@@ -16,6 +16,7 @@ interface TaskObjective {
   description: string;
   count?: number;
   maps?: TarkovMap[];
+  items?: Array<{ id?: string; name: string }>;
 }
 
 interface Task {
@@ -30,12 +31,22 @@ interface ObjectiveOverride {
   count?: number;
   description?: string;
   maps?: TarkovMap[];
+  items?: Array<{ id?: string; name: string }>;
+}
+
+interface ObjectiveAdd {
+  id?: string;
+  count?: number;
+  description?: string;
+  maps?: TarkovMap[];
+  items?: Array<{ id?: string; name: string }>;
 }
 
 interface TaskOverride {
   minPlayerLevel?: number;
   map?: TarkovMap;
   objectives?: Record<string, ObjectiveOverride>;
+  objectivesAdd?: ObjectiveAdd[];
 }
 
 interface Edition {
@@ -75,7 +86,7 @@ async function fetchTasksFromTarkovDev(): Promise<Task[]> {
         objectives {
           id
           description
-          ... on TaskObjectiveItem { count }
+          ... on TaskObjectiveItem { count items { id name } }
           ... on TaskObjectiveShoot { count }
           maps { id name }
         }
@@ -117,7 +128,7 @@ function applyTaskOverlay(task: Task, overlay: Overlay): Task {
 
   // Apply top-level field overrides (shallow merge)
   for (const [key, value] of Object.entries(taskOverride)) {
-    if (key === 'objectives') continue; // Handle separately
+    if (key === 'objectives' || key === 'objectivesAdd') continue; // Handle separately
     (result as Record<string, unknown>)[key] = value;
   }
 
@@ -130,6 +141,14 @@ function applyTaskOverlay(task: Task, overlay: Overlay): Task {
       // Shallow merge the objective with its patch
       return { ...objective, ...patch };
     });
+  }
+
+  // Append missing objectives
+  if (taskOverride.objectivesAdd) {
+    result.objectives = [
+      ...(result.objectives || []),
+      ...taskOverride.objectivesAdd,
+    ];
   }
 
   return result;

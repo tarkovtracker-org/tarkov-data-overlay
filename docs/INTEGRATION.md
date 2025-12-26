@@ -98,7 +98,7 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task {
 
   // Apply top-level fields
   for (const [key, value] of Object.entries(taskOverride)) {
-    if (key === 'objectives') continue; // Handle separately
+    if (key === 'objectives' || key === 'objectivesAdd') continue; // Handle separately
     (result as any)[key] = value;
   }
 
@@ -110,9 +110,23 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task {
     });
   }
 
+  // Append missing objectives
+  if (taskOverride.objectivesAdd && Array.isArray(taskOverride.objectivesAdd)) {
+    result.objectives = [
+      ...(result.objectives || []),
+      ...taskOverride.objectivesAdd,
+    ] as any;
+  }
+
   return result;
 }
 ```
+
+### With Added Objectives
+
+If tarkov.dev is missing objectives (like new Collector items), you can append
+them using `objectivesAdd` in the overlay. The merge example above already
+handles this by appending `objectivesAdd` to the objective list.
 
 ---
 
@@ -145,7 +159,7 @@ async function fetchTasks(): Promise<Task[]> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      query: `{ tasks { id name minPlayerLevel map { id name } objectives { id count } } }`
+      query: `{ tasks { id name minPlayerLevel map { id name } objectives { id count ... on TaskObjectiveItem { items { id name } } } } }`
     })
   });
   const { data } = await response.json();
@@ -198,13 +212,23 @@ interface TaskOverride {
   disabled?: boolean;
   map?: { id: string; name: string };
   objectives?: Record<string, ObjectiveOverride>;
+  objectivesAdd?: ObjectiveAdd[];
   // ... other fields
 }
 
 interface ObjectiveOverride {
   count?: number;
   maps?: Array<{ id: string; name: string }>;
+  items?: Array<{ id?: string; name: string }>;
   // ... other fields
+}
+
+interface ObjectiveAdd {
+  id?: string;
+  count?: number;
+  description?: string;
+  maps?: Array<{ id: string; name: string }>;
+  items?: Array<{ id?: string; name: string }>;
 }
 
 interface Edition {
