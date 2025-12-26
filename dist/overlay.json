@@ -16,6 +16,16 @@
         }
       ]
     },
+    "5979f8bb86f7743ec214c7a6": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5979f9ba86f7740f6c3fe9f2",
+            "name": "Chemical - Part 1"
+          }
+        }
+      ]
+    },
     "6740a2c17e3818d5bb0648b6": {
       "name": "Half Empty",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
@@ -75,6 +85,9 @@
           }
         ]
       }
+    },
+    "60e71e8ed54b755a3b53eb67": {
+      "minPlayerLevel": 55
     }
   },
   "editions": {

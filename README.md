@@ -55,6 +55,7 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 | Task | Change |
 |------|--------|
 | Grenadier | taskRequirements changed from [] (empty) to Shooting Cans |
+| Polikhim Hobo | taskRequirements changed from [] (empty) to Chemical - Part 1 |
 
 ### Task Name/Link Corrections
 
@@ -62,6 +63,12 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 |------|-------|------------|---------|
 | Half Empty | name | "Half-Empty" | "Half Empty" |
 | Half Empty | wikiLink | Half-Empty | Half_Empty |
+
+### Task Level Requirements Corrections
+
+| Task | Field | tarkov.dev | Correct |
+|------|-------|------------|---------|
+| Half Empty | minPlayerLevel | 65 | 55 |
 
 ## Current Additions
 
