@@ -37,7 +37,9 @@ function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
       status: isMatch ? 'fixed' : 'needed',
       message: isMatch
         ? `${field}: ${formatValue(apiValue)} - FIXED IN API`
-        : `${field}: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - STILL NEEDED`,
+        : `${field}: API=${formatValue(apiValue)}, Override=${formatValue(
+            overrideValue
+          )} - STILL NEEDED`,
     };
   };
 }
@@ -47,7 +49,7 @@ function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
  */
 function formatValue(value: unknown): string {
   if (value === undefined || value === null) return 'undefined';
-  if (typeof value === 'string') return `"${value}"`;
+  if (typeof value === 'string') return `'${value}'`;
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
 }
@@ -59,7 +61,7 @@ const validateTaskRequirements: FieldValidator = (override, apiTask) => {
   if (override.taskRequirements === undefined) return null;
 
   const apiReqs = (apiTask.taskRequirements || []).filter(
-    r => !r.status || !r.status.includes('active')
+    (r) => !r.status || !r.status.includes('active')
   );
   const overrideReqs = override.taskRequirements;
 
@@ -72,14 +74,16 @@ const validateTaskRequirements: FieldValidator = (override, apiTask) => {
   }
 
   if (apiReqs.length > 0) {
-    const apiReqIds = apiReqs.map(r => r.task?.id).sort();
-    const overrideReqIds = overrideReqs.map(r => r.task?.id).sort();
+    const apiReqIds = apiReqs.map((r) => r.task?.id).sort();
+    const overrideReqIds = overrideReqs.map((r) => r.task?.id).sort();
 
     if (JSON.stringify(apiReqIds) !== JSON.stringify(overrideReqIds)) {
       return {
         field: 'taskRequirements',
         status: 'needed',
-        message: `taskRequirements: API has different requirements (${apiReqIds.join(', ')}) vs Override (${overrideReqIds.join(', ')}) - NEEDS REVIEW`,
+        message: `taskRequirements: API has different requirements (${apiReqIds.join(
+          ', '
+        )}) vs Override (${overrideReqIds.join(', ')}) - NEEDS REVIEW`,
       };
     }
 
@@ -114,7 +118,7 @@ export function validateTaskOverride(
   override: TaskOverride,
   apiTasks: TaskData[]
 ): ValidationResult {
-  const apiTask = apiTasks.find(t => t.id === taskId);
+  const apiTask = apiTasks.find((t) => t.id === taskId);
 
   // Task not found in API
   if (!apiTask) {
@@ -123,11 +127,13 @@ export function validateTaskOverride(
       name: 'Unknown',
       status: 'REMOVED_FROM_API',
       stillNeeded: false,
-      details: [{
-        field: 'task',
-        status: 'info',
-        message: 'Task not found in API - has been removed from tarkov.dev',
-      }],
+      details: [
+        {
+          field: 'task',
+          status: 'info',
+          message: 'Task not found in API - has been removed from tarkov.dev',
+        },
+      ],
     };
   }
 
@@ -138,11 +144,14 @@ export function validateTaskOverride(
       name: apiTask.name,
       status: 'REMOVED_FROM_API',
       stillNeeded: false,
-      details: [{
-        field: 'disabled',
-        status: 'info',
-        message: 'Task still in API but marked as disabled - should be removed from API or override can be removed',
-      }],
+      details: [
+        {
+          field: 'disabled',
+          status: 'info',
+          message:
+            'Task still in API but marked as disabled - should be removed from API or override can be removed',
+        },
+      ],
     };
   }
 
@@ -157,7 +166,7 @@ export function validateTaskOverride(
   // Handle nested objective validations separately for full detail
   if (override.objectives) {
     for (const [objId, objOverride] of Object.entries(override.objectives)) {
-      const apiObj = apiTask.objectives?.find(o => o.id === objId);
+      const apiObj = apiTask.objectives?.find((o) => o.id === objId);
 
       if (!apiObj) {
         details.push({
@@ -165,7 +174,10 @@ export function validateTaskOverride(
           status: 'check',
           message: `objective ${objId}: Not found in API - CHECK MANUALLY`,
         });
-      } else if (objOverride.count !== undefined && apiObj.count !== objOverride.count) {
+      } else if (
+        objOverride.count !== undefined &&
+        apiObj.count !== objOverride.count
+      ) {
         details.push({
           field: `objective:${objId}:count`,
           status: 'needed',
@@ -181,8 +193,32 @@ export function validateTaskOverride(
     }
   }
 
+  // Check if added objectives have appeared in API
+  if (override.objectivesAdd) {
+    for (const added of override.objectivesAdd) {
+      const apiMatch = apiTask.objectives?.find(
+        (o) => o.id === added.id || o.description === added.description
+      );
+      if (apiMatch) {
+        details.push({
+          field: `objectivesAdd:${added.id || added.description}`,
+          status: 'fixed',
+          message: `added objective '${added.description}': NOW IN API - MOVE TO OBJECTIVES OR REMOVE`,
+        });
+      } else {
+        details.push({
+          field: `objectivesAdd:${added.id || added.description}`,
+          status: 'needed',
+          message: `added objective '${added.description}': Still missing from API - STILL NEEDED`,
+        });
+      }
+    }
+  }
+
   // Determine overall status
-  const needsOverride = details.some(d => d.status === 'needed' || d.status === 'check');
+  const needsOverride = details.some(
+    (d) => d.status === 'needed' || d.status === 'check'
+  );
   const status: ValidationStatus = needsOverride ? 'NEEDED' : 'FIXED';
 
   return {
@@ -215,8 +251,8 @@ export function validateAllOverrides(
  */
 export function categorizeResults(results: ValidationResult[]) {
   return {
-    stillNeeded: results.filter(r => r.stillNeeded),
-    fixed: results.filter(r => r.status === 'FIXED'),
-    removedFromApi: results.filter(r => r.status === 'REMOVED_FROM_API'),
+    stillNeeded: results.filter((r) => r.stillNeeded),
+    fixed: results.filter((r) => r.status === 'FIXED'),
+    removedFromApi: results.filter((r) => r.status === 'REMOVED_FROM_API'),
   };
 }

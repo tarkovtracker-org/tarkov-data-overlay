@@ -8,7 +8,7 @@ How to use tarkov-data-overlay in your application.
 
 The overlay is distributed via jsDelivr CDN:
 
-```
+```bash
 https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json
 ```
 
@@ -224,9 +224,9 @@ interface ObjectiveOverride {
 }
 
 interface ObjectiveAdd {
-  id?: string;
+  id: string;
   count?: number;
-  description?: string;
+  description: string;
   maps?: Array<{ id: string; name: string }>;
   items?: Array<{ id?: string; name: string }>;
 }

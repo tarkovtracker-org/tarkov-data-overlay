@@ -26,7 +26,11 @@ describe('validateTaskOverride', () => {
   describe('when task not found in API', () => {
     it('returns REMOVED_FROM_API status', () => {
       const override: TaskOverride = { minPlayerLevel: 15 };
-      const result = validateTaskOverride('non-existent-id', override, apiTasks);
+      const result = validateTaskOverride(
+        'non-existent-id',
+        override,
+        apiTasks
+      );
 
       expect(result.status).toBe('REMOVED_FROM_API');
       expect(result.stillNeeded).toBe(false);
@@ -51,7 +55,11 @@ describe('validateTaskOverride', () => {
 
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
-      expect(result.details.some(d => d.field === 'minPlayerLevel' && d.status === 'needed')).toBe(true);
+      expect(
+        result.details.some(
+          (d) => d.field === 'minPlayerLevel' && d.status === 'needed'
+        )
+      ).toBe(true);
     });
 
     it('returns FIXED when API value matches override', () => {
@@ -60,7 +68,11 @@ describe('validateTaskOverride', () => {
 
       expect(result.status).toBe('FIXED');
       expect(result.stillNeeded).toBe(false);
-      expect(result.details.some(d => d.field === 'minPlayerLevel' && d.status === 'fixed')).toBe(true);
+      expect(
+        result.details.some(
+          (d) => d.field === 'minPlayerLevel' && d.status === 'fixed'
+        )
+      ).toBe(true);
     });
   });
 
@@ -104,7 +116,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'obj-1': { count: 8 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
+      const result = validateTaskOverride('test-task-id', override, [
+        apiTaskWithObjectives,
+      ]);
 
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
@@ -114,7 +128,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'obj-1': { count: 5 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
+      const result = validateTaskOverride('test-task-id', override, [
+        apiTaskWithObjectives,
+      ]);
 
       expect(result.status).toBe('FIXED');
       expect(result.stillNeeded).toBe(false);
@@ -124,10 +140,56 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'non-existent-obj': { count: 5 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
+      const result = validateTaskOverride('test-task-id', override, [
+        apiTaskWithObjectives,
+      ]);
 
       expect(result.stillNeeded).toBe(true);
-      expect(result.details.some(d => d.status === 'check')).toBe(true);
+      expect(result.details.some((d) => d.status === 'check')).toBe(true);
+    });
+  });
+
+  describe('objectivesAdd validation', () => {
+    it('returns FIXED when an added objective appears in API (by ID)', () => {
+      const apiTask = createApiTask({
+        objectives: [{ id: 'new-obj-id', description: 'Some description' }],
+      });
+      const override: TaskOverride = {
+        objectivesAdd: [{ id: 'new-obj-id', description: 'Some description' }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('FIXED');
+      expect(result.stillNeeded).toBe(false);
+      expect(
+        result.details.some(
+          (d) => d.status === 'fixed' && d.message.includes('NOW IN API')
+        )
+      ).toBe(true);
+    });
+
+    it('returns FIXED when an added objective appears in API (by description)', () => {
+      const apiTask = createApiTask({
+        objectives: [{ id: 'api-id', description: 'Unique Description' }],
+      });
+      const override: TaskOverride = {
+        objectivesAdd: [{ id: 'manual-id', description: 'Unique Description' }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('FIXED');
+      expect(result.stillNeeded).toBe(false);
+    });
+
+    it('returns NEEDED when added objective is not in API', () => {
+      const apiTask = createApiTask({ objectives: [] });
+      const override: TaskOverride = {
+        objectivesAdd: [{ id: 'manual-id', description: 'Not in API' }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(result.stillNeeded).toBe(true);
     });
   });
 
@@ -184,18 +246,42 @@ describe('validateAllOverrides', () => {
     const results = validateAllOverrides(overrides, apiTasks);
 
     expect(results).toHaveLength(2);
-    expect(results.find(r => r.id === 'task-1')?.status).toBe('FIXED');
-    expect(results.find(r => r.id === 'task-2')?.status).toBe('NEEDED');
+    expect(results.find((r) => r.id === 'task-1')?.status).toBe('FIXED');
+    expect(results.find((r) => r.id === 'task-2')?.status).toBe('NEEDED');
   });
 });
 
 describe('categorizeResults', () => {
   it('categorizes results into stillNeeded, fixed, and removedFromApi', () => {
     const results = [
-      { id: '1', name: 'Task 1', status: 'NEEDED' as const, stillNeeded: true, details: [] },
-      { id: '2', name: 'Task 2', status: 'FIXED' as const, stillNeeded: false, details: [] },
-      { id: '3', name: 'Task 3', status: 'REMOVED_FROM_API' as const, stillNeeded: false, details: [] },
-      { id: '4', name: 'Task 4', status: 'NEEDED' as const, stillNeeded: true, details: [] },
+      {
+        id: '1',
+        name: 'Task 1',
+        status: 'NEEDED' as const,
+        stillNeeded: true,
+        details: [],
+      },
+      {
+        id: '2',
+        name: 'Task 2',
+        status: 'FIXED' as const,
+        stillNeeded: false,
+        details: [],
+      },
+      {
+        id: '3',
+        name: 'Task 3',
+        status: 'REMOVED_FROM_API' as const,
+        stillNeeded: false,
+        details: [],
+      },
+      {
+        id: '4',
+        name: 'Task 4',
+        status: 'NEEDED' as const,
+        stillNeeded: true,
+        details: [],
+      },
     ];
 
     const categorized = categorizeResults(results);
