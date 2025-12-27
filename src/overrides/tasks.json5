@@ -135,10 +135,10 @@
     objectivesAdd: [
       {
         items: [
-          { name: "Nut Sack balaclava" },
-          { name: "Mazoni golden dumbbell" },
-          { name: "Tigzresq splint" },
-          { name: "Domontovich ushanka hat" },
+          { id: "69398e94ca94fd2877039504", name: "Nut Sack balaclava" },
+          { id: "6937edb912d456a817083e82", name: "Mazoni golden dumbbell" },
+          { id: "6937ecf8628ee476240c07cb", name: "Tigzresq splint" },
+          { id: "6937f02dfd6488bb27024839", name: "Domontovich ushanka hat" },
         ],
       },
     ],
