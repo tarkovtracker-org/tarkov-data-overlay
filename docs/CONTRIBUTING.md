@@ -101,6 +101,46 @@ To patch a specific objective within a task, use the objective's ID as a key:
 }
 ```
 
+You can also patch objective item lists (for TaskObjectiveItem objectives) by
+providing an `items` array:
+
+```json5
+{
+  // Task Name - Missing objective items
+  // Proof: [link]
+  "task-id-here": {
+    "objectives": {
+      "objective-id-here": {
+        "items": [
+          { "id": "item-id-1", "name": "Item Name 1" },
+          { "id": "item-id-2", "name": "Item Name 2" }
+        ]
+      }
+    }
+  }
+}
+```
+
+If tarkov.dev is missing the objective entirely, add it using `objectivesAdd`:
+
+```json5
+{
+  // Task Name - Missing objective in API
+  // Proof: [link]
+  "task-id-here": {
+    "objectivesAdd": [
+      {
+        "description": "Find in raid",
+        "items": [
+          { "name": "Item Name 1" },
+          { "name": "Item Name 2", "id": "item-id-2" }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ## Local Development

@@ -33,6 +33,10 @@ const TASKS_QUERY = `
         }
         ... on TaskObjectiveItem {
           count
+          items {
+            id
+            name
+          }
         }
         ... on TaskObjectiveQuestItem {
           count

@@ -15,6 +15,7 @@ export interface TaskOverride {
   kappaRequired?: boolean;
   lightkeeperRequired?: boolean;
   objectives?: Record<string, ObjectiveOverride>;
+  objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
 }
 
@@ -23,6 +24,16 @@ export interface ObjectiveOverride {
   count?: number;
   description?: string;
   maps?: Array<{ id: string; name: string }>;
+  items?: Array<{ id?: string; name: string }>;
+}
+
+/** Objective addition for missing objectives */
+export interface ObjectiveAdd {
+  id: string;
+  count?: number;
+  description: string;
+  maps?: Array<{ id: string; name: string }>;
+  items?: Array<{ id?: string; name: string }>;
 }
 
 /** Task requirement reference */
@@ -48,6 +59,7 @@ export interface TaskObjective {
   description?: string;
   count?: number;
   maps?: Array<{ id: string; name: string }>;
+  items?: Array<{ id?: string; name: string }>;
 }
 
 /** Validation result for a single override */
@@ -60,7 +72,11 @@ export interface ValidationResult {
 }
 
 /** Possible validation statuses */
-export type ValidationStatus = 'NEEDED' | 'FIXED' | 'NOT_FOUND' | 'REMOVED_FROM_API';
+export type ValidationStatus =
+  | 'NEEDED'
+  | 'FIXED'
+  | 'NOT_FOUND'
+  | 'REMOVED_FROM_API';
 
 /** Detail about a specific field validation */
 export interface ValidationDetail {
