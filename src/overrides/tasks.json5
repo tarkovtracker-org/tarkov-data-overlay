@@ -29,6 +29,18 @@
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Half_Empty", // Was: https://escapefromtarkov.fandom.com/wiki/Half-Empty
   },
 
+  // Sales Night - Objective count missing and description wording incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
+  // tarkov.dev objective lacks count; wiki specifies 7 extracts on Interchange
+  "5ae449c386f7744bde357697": {
+    objectives: {
+      "5bb60cbc88a45011a8235cc5": {
+        count: 7, // Was: undefined
+        description: "Survive and extract on Interchange 7 times", // Was: "Survive and extract from Interchange"
+      },
+    },
+  },
+
   // A Shooter Born in Heaven - Experience incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Shooter_Born_in_Heaven
   // Verified in-game: 55000 XP

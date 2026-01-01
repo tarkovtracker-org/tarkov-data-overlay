@@ -20,6 +20,14 @@
       "name": "Half Empty",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
     },
+    "5ae449c386f7744bde357697": {
+      "objectives": {
+        "5bb60cbc88a45011a8235cc5": {
+          "count": 7,
+          "description": "Survive and extract on Interchange 7 times"
+        }
+      }
+    },
     "5c0bde0986f77479cf22c2f8": {
       "experience": 55000
     },
@@ -382,7 +390,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-01T14:20:37.578Z",
-    "sha256": "e648b827d0b3aa2b5bcc3165230a2d45969023aae17bd703b5b5e98211bbeeb2"
+    "generated": "2026-01-01T20:48:56.827Z",
+    "sha256": "c831197f965bf28a6f913ed73431efff824f50153296bdfeec4ea91e82610b37"
   }
 }
