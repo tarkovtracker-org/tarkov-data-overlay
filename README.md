@@ -21,47 +21,7 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 
 ## Current Corrections
 
-### Task Experience Corrections
-
-| Task | tarkov.dev | Correct |
-|------|------------|---------|
-| Grenadier | 18,000 | 12,500 |
-| A Shooter Born in Heaven | 12,500 | 55,000 |
-| Test Drive - Part 1 | 18,200 | 9,100 |
-| Hell on Earth - Part 1 | 15,600 | 2,300 |
-| Hell on Earth - Part 2 | 98,000 | 16,000 |
-| Pyramid Scheme | 25,500 | 12,400 |
-| Athlete | 21,900 | 3,500 |
-| Dandies | 33,000 | 11,000 |
-| Decontamination Service | 30,500 | 12,500 |
-
-### Task Objective Count Corrections
-
-| Task | tarkov.dev | Correct |
-|------|------------|---------|
-| Grenadier | 8 | 5 |
-| Test Drive - Part 1 | 5 | 10 |
-| Easy Job - Part 2 | 20 | 10 |
-| Long Road | 8 | 4 |
-
-### Task Reward Corrections
-
-| Task | Field | tarkov.dev | Correct |
-|------|-------|------------|---------|
-| To Great Heights! - Part 4 [PVP ZONE] | money | 1,000,002 | 2,500,000 |
-
-### Task Prerequisite Corrections
-
-| Task | Change |
-|------|--------|
-| Grenadier | taskRequirements changed from [] (empty) to Shooting Cans |
-
-### Task Name/Link Corrections
-
-| Task | Field | tarkov.dev | Correct |
-|------|-------|------------|---------|
-| Half Empty | name | "Half-Empty" | "Half Empty" |
-| Half Empty | wikiLink | Half-Empty | Half_Empty |
+See corrections in: https://monitor.nivmizz7.fr
 
 ## Current Additions
 

@@ -1,0 +1,39 @@
+<!doctype html>  
+<html lang="en">  
+  <head>  
+    <meta charset="utf-8" />  
+    <meta name="viewport" content="width=device-width, initial-scale=1" />  
+    <title>Overlay Monitor</title>  
+    <link rel="stylesheet" href="/styles.css" />  
+  </head>  
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Overlay Monitor</p>
+          <h1 id="page-title">Corrections</h1>
+          <p class="lede" id="page-lede">
+            Live correction tables per file.
+          </p>
+        </div>
+        <div class="meta">
+          <div class="status" id="status">Loading...</div>
+          <div class="updated" id="updated">Last update: --</div>
+        </div>
+      </header>
+      <nav class="nav" id="nav">
+        <a href="/tasks" data-type="tasks">Tasks</a>
+        <a href="/hideout" data-type="hideout">Hideout</a>
+        <a href="/items" data-type="items">Items</a>
+        <a href="/traders" data-type="traders">Traders</a>
+      </nav>
+      <main>
+        <section class="content">
+          <div class="empty" id="empty">No changes detected.</div>
+          <div class="sections" id="sections"></div>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>
