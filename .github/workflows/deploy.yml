@@ -20,10 +20,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ secrets.SSH_PROJECT_PATH }}
-            git fetch origin main  
-            git reset --hard origin/main  
-            npm ci --production  
-            if pm2 describe monitor > /dev/null 2>&1; then  
-              pm2 restart monitor  
-            else  
-              pm2 start monitor/server.js --name monitor  
+            git fetch origin main
+            git reset --hard origin/main
+            npm ci --production
+
+            if pm2 describe monitor > /dev/null 2>&1; then
+              pm2 restart monitor
+            else
+              pm2 start monitor/server.js --name monitor
+            fi
