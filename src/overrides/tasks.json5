@@ -179,20 +179,6 @@
     objectives: {
       "64f5deac39e45b527a7c4235": {
         description: "Eliminate PMC operatives while using an AK-12 with the proprietary suppressor and PS-320 scope on Lighthouse, Customs, or Reserve",
-        usingWeaponMods: [
-          [
-            {
-              id: "64c196ad26a15b84aa07132f",
-              name: "AK-12 5.45x39 sound suppressor",
-              shortName: "AK-12",
-            },
-            {
-              id: "5c0517910db83400232ffee5",
-              name: "Valday PS-320 1/6x scope",
-              shortName: "PS-320",
-            },
-          ],
-        ],
         maps: [
           { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
           { id: "56f40101d2720b2a4d8b45d6", name: "Customs" },
