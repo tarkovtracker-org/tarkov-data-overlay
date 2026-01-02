@@ -196,13 +196,6 @@
     objectives: {
       "6574e0dedc0d635f633a5807": {
         description: "Eliminate any targets while using an RPDN with EKP-1S-03 sight on Shoreline, Interchange or Woods",
-        usingWeapon: [
-          {
-            id: "65268d8ecb944ff1e90ea385",
-            name: "Degtyarev RPDN 7.62x39 machine gun",
-            shortName: "RPDN",
-          },
-        ],
         usingWeaponMods: [
           [
             {
