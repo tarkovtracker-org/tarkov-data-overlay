@@ -193,7 +193,6 @@
   // Recent wiki update (post-1.0); not verified in-game
   "6574e0dedc0d635f633a5805": {
     experience: 20000, // Was: 40000
-    map: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" },
     objectives: {
       "6574e0dedc0d635f633a5807": {
         description: "Eliminate any targets while using an RPDN with EKP-1S-03 sight on Shoreline, Interchange or Woods",
