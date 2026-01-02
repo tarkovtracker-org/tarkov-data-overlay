@@ -179,13 +179,6 @@
     objectives: {
       "64f5deac39e45b527a7c4235": {
         description: "Eliminate PMC operatives while using an AK-12 with the proprietary suppressor and PS-320 scope on Lighthouse, Customs, or Reserve",
-        usingWeapon: [
-          {
-            id: "6499849fc93611967b034949",
-            name: "Kalashnikov AK-12 5.45x39 assault rifle",
-            shortName: "AK-12",
-          },
-        ],
         usingWeaponMods: [
           [
             {
