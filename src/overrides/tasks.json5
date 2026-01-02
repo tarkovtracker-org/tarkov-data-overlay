@@ -65,20 +65,6 @@
             shortName: "SR-25",
           },
         ],
-        usingWeaponMods: [
-          [
-            {
-              id: "59bffbb386f77435b379b9c2",
-              name: "SilencerCo Hybrid 46 multi-caliber sound suppressor",
-              shortName: "Hybrid 46",
-            },
-            {
-              id: "617151c1d92c473c770214ab",
-              name: "Schmidt & Bender PM II 1-8x24 30mm riflescope",
-              shortName: "PM II 1-8",
-            },
-          ],
-        ],
       },
     },
   },
@@ -187,7 +173,6 @@
   // Recent wiki update (post-1.0); not verified in-game
   "63a5cf262964a7488f5243ce": {
     experience: 12000, // Was: 28000
-    map: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" },
     objectives: {
       "63a5cf262964a7488f5243d1": {
         description: "Eliminate PMC operatives while using an MP5SD with PRO sight on Streets of Tarkov, Ground Zero or Interchange",
@@ -221,31 +206,9 @@
   // Recent wiki update (post-1.0); not verified in-game
   "64f5deac39e45b527a7c4232": {
     experience: 18000, // Was: 35300
-    map: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
     objectives: {
       "64f5deac39e45b527a7c4235": {
         description: "Eliminate PMC operatives while using an AK-12 with the proprietary suppressor and PS-320 scope on Lighthouse, Customs, or Reserve",
-        usingWeapon: [
-          {
-            id: "6499849fc93611967b034949",
-            name: "Kalashnikov AK-12 5.45x39 assault rifle",
-            shortName: "AK-12",
-          },
-        ],
-        usingWeaponMods: [
-          [
-            {
-              id: "64c196ad26a15b84aa07132f",
-              name: "AK-12 5.45x39 sound suppressor",
-              shortName: "AK-12",
-            },
-            {
-              id: "5c0517910db83400232ffee5",
-              name: "Valday PS-320 1/6x scope",
-              shortName: "PS-320",
-            },
-          ],
-        ],
         maps: [
           { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
           { id: "56f40101d2720b2a4d8b45d6", name: "Customs" },
@@ -260,17 +223,9 @@
   // Recent wiki update (post-1.0); not verified in-game
   "6574e0dedc0d635f633a5805": {
     experience: 20000, // Was: 40000
-    map: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" },
     objectives: {
       "6574e0dedc0d635f633a5807": {
         description: "Eliminate any targets while using an RPDN with EKP-1S-03 sight on Shoreline, Interchange or Woods",
-        usingWeapon: [
-          {
-            id: "65268d8ecb944ff1e90ea385",
-            name: "Degtyarev RPDN 7.62x39 machine gun",
-            shortName: "RPDN",
-          },
-        ],
         usingWeaponMods: [
           [
             {
