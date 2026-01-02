@@ -143,7 +143,6 @@
   // Recent wiki update (post-1.0); not verified in-game
   "63a5cf262964a7488f5243ce": {
     experience: 12000, // Was: 28000
-    map: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" },
     objectives: {
       "63a5cf262964a7488f5243d1": {
         description: "Eliminate PMC operatives while using an MP5SD with PRO sight on Streets of Tarkov, Ground Zero or Interchange",
