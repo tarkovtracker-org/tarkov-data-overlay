@@ -1,0 +1,468 @@
+{
+  // Winter 2025 event tasks not available in tarkov.dev.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Missing_in_Action
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Clearing_the_Way
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Come_by_the_Fire
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Knuckle_Sandwich
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Small_Celebration
+
+  "winter_2025_missing_in_action": {
+    "id": "winter_2025_missing_in_action",
+    "name": "Missing in Action",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Missing_in_Action",
+    "trader": {
+      "id": "54cb50c76803fa8b248b4571",
+      "name": "Prapor"
+    },
+    "maps": [
+      { "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" },
+      { "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" },
+      { "id": "5714dbc024597771384a510d", "name": "Interchange" }
+    ],
+    "kappaRequired": false,
+    "objectives": [
+      {
+        "id": "winter_2025_missing_in_action_obj01",
+        "description": "Stash a Pack of Arseniy buckwheat at the Scav house on Woods",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": {
+          "id": "6389c6463485cf0eeb260715",
+          "name": "Pack of Arseniy buckwheat",
+          "shortName": "Buckwheat"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj02",
+        "description": "Stash a Bottle of Tarkovskaya vodka at the Scav house on Woods",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": {
+          "id": "5d40407c86f774318526545a",
+          "name": "Bottle of Tarkovskaya vodka",
+          "shortName": "Vodka"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj03",
+        "description": "Stash an Iskra ration pack at the Scav house on Woods",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": {
+          "id": "590c5d4b86f774784e1b9c45",
+          "name": "Iskra ration pack",
+          "shortName": "Iskra"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj04",
+        "description": "Stash a Pack of Arseniy buckwheat at the guard barrack on Reserve",
+        "maps": [{ "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" }],
+        "item": {
+          "id": "6389c6463485cf0eeb260715",
+          "name": "Pack of Arseniy buckwheat",
+          "shortName": "Buckwheat"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj05",
+        "description": "Stash a Bottle of Tarkovskaya vodka at the guard barrack on Reserve",
+        "maps": [{ "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" }],
+        "item": {
+          "id": "5d40407c86f774318526545a",
+          "name": "Bottle of Tarkovskaya vodka",
+          "shortName": "Vodka"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj06",
+        "description": "Stash an Iskra ration pack at the guard barrack on Reserve",
+        "maps": [{ "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" }],
+        "item": {
+          "id": "590c5d4b86f774784e1b9c45",
+          "name": "Iskra ration pack",
+          "shortName": "Iskra"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj07",
+        "description": "Stash a Pack of Arseniy buckwheat at the Path to River shack on Interchange",
+        "maps": [{ "id": "5714dbc024597771384a510d", "name": "Interchange" }],
+        "item": {
+          "id": "6389c6463485cf0eeb260715",
+          "name": "Pack of Arseniy buckwheat",
+          "shortName": "Buckwheat"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj08",
+        "description": "Stash a Bottle of Tarkovskaya vodka at the Path to River shack on Interchange",
+        "maps": [{ "id": "5714dbc024597771384a510d", "name": "Interchange" }],
+        "item": {
+          "id": "5d40407c86f774318526545a",
+          "name": "Bottle of Tarkovskaya vodka",
+          "shortName": "Vodka"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_missing_in_action_obj09",
+        "description": "Stash an Iskra ration pack at the Path to River shack on Interchange",
+        "maps": [{ "id": "5714dbc024597771384a510d", "name": "Interchange" }],
+        "item": {
+          "id": "590c5d4b86f774784e1b9c45",
+          "name": "Iskra ration pack",
+          "shortName": "Iskra"
+        },
+        "count": 1
+      }
+    ],
+    "experience": 5000,
+    "finishRewards": {
+      "items": [
+        {
+          "count": 21000,
+          "item": { "id": "5449016a4bdc2d6f028b456f", "name": "Roubles", "shortName": "RUB" }
+        },
+        {
+          "count": 1,
+          "item": {
+            "id": "6499849fc93611967b034949",
+            "name": "Kalashnikov AK-12 5.45x39 assault rifle",
+            "shortName": "AK-12"
+          }
+        },
+        {
+          "count": 3,
+          "item": {
+            "id": "649ec30cb013f04a700e60fb",
+            "name": "AK-12 5.45x39 early model 30-round magazine",
+            "shortName": "AK-12 old"
+          }
+        },
+        {
+          "count": 1,
+          "item": {
+            "id": "6570900858b315e8b70a8a98",
+            "name": "5.45x39mm 7N40 ammo pack (120 pcs)",
+            "shortName": "7N40"
+          }
+        }
+      ],
+      "traderStanding": [
+        {
+          "trader": { "id": "54cb50c76803fa8b248b4571", "name": "Prapor" },
+          "standing": 0.01
+        }
+      ]
+    }
+  },
+
+  "winter_2025_clearing_the_way": {
+    "id": "winter_2025_clearing_the_way",
+    "name": "Clearing the Way",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Clearing_the_Way",
+    "trader": {
+      "id": "58330581ace78e27b8b10cee",
+      "name": "Skier"
+    },
+    "maps": [{ "id": "56f40101d2720b2a4d8b45d6", "name": "Customs" }],
+    "kappaRequired": false,
+    "taskRequirements": [
+      { "task": { "id": "winter_2025_missing_in_action", "name": "Missing in Action" } }
+    ],
+    "objectives": [
+      {
+        "id": "winter_2025_clearing_the_way_obj01",
+        "description": "Eliminate any 20 targets on Customs",
+        "maps": [{ "id": "56f40101d2720b2a4d8b45d6", "name": "Customs" }],
+        "count": 20
+      }
+    ],
+    "experience": 12000,
+    "finishRewards": {
+      "items": [
+        {
+          "count": 51000,
+          "item": { "id": "5449016a4bdc2d6f028b456f", "name": "Roubles", "shortName": "RUB" }
+        },
+        {
+          "count": 2,
+          "item": {
+            "id": "62a0a0bb621468534a797ad5",
+            "name": "Set of files \"Master\"",
+            "shortName": "Master"
+          }
+        },
+        {
+          "count": 2,
+          "item": {
+            "id": "5e2af00086f7746d3f3c33f7",
+            "name": "Smoked Chimney drain cleaner",
+            "shortName": "DCleaner"
+          }
+        }
+      ],
+      "traderStanding": [
+        {
+          "trader": { "id": "58330581ace78e27b8b10cee", "name": "Skier" },
+          "standing": 0.01
+        }
+      ]
+    }
+  },
+
+  "winter_2025_come_by_the_fire": {
+    "id": "winter_2025_come_by_the_fire",
+    "name": "Come by the Fire",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Come_by_the_Fire",
+    "trader": {
+      "id": "58330581ace78e27b8b10cee",
+      "name": "Skier"
+    },
+    "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+    "kappaRequired": false,
+    "taskRequirements": [
+      { "task": { "id": "winter_2025_clearing_the_way", "name": "Clearing the Way" } }
+    ],
+    "objectives": [
+      {
+        "id": "winter_2025_come_by_the_fire_obj01",
+        "description": "Locate and mark the first spot from Skier's route with an MS2000 Marker",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "markerItem": { "id": "5991b51486f77447b112d44f", "name": "MS2000 Marker", "shortName": "MS2000" }
+      },
+      {
+        "id": "winter_2025_come_by_the_fire_obj02",
+        "description": "Locate and mark the second spot from Skier's route with an MS2000 Marker",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "markerItem": { "id": "5991b51486f77447b112d44f", "name": "MS2000 Marker", "shortName": "MS2000" }
+      },
+      {
+        "id": "winter_2025_come_by_the_fire_obj03",
+        "description": "Locate and mark the third spot from Skier's route with an MS2000 Marker",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "markerItem": { "id": "5991b51486f77447b112d44f", "name": "MS2000 Marker", "shortName": "MS2000" }
+      },
+      {
+        "id": "winter_2025_come_by_the_fire_obj04",
+        "description": "Locate and mark the fourth spot from Skier's route with an MS2000 Marker",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "markerItem": { "id": "5991b51486f77447b112d44f", "name": "MS2000 Marker", "shortName": "MS2000" }
+      },
+      {
+        "id": "winter_2025_come_by_the_fire_obj05",
+        "description": "Eliminate any 5 targets while wearing a Pompon hat on Woods",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "count": 5
+      }
+    ],
+    "experience": 10000,
+    "finishRewards": {
+      "items": [
+        {
+          "count": 42000,
+          "item": { "id": "5449016a4bdc2d6f028b456f", "name": "Roubles", "shortName": "RUB" }
+        },
+        {
+          "count": 1,
+          "item": {
+            "id": "5fc3f2d5900b1d5091531e57",
+            "name": "TDI KRISS Vector Gen.2 9x19 submachine gun",
+            "shortName": "Vector 9x19"
+          }
+        },
+        {
+          "count": 4,
+          "item": {
+            "id": "5a7ad2e851dfba0016153692",
+            "name": "Glock 9x19 \"Big Stick\" 33-round magazine",
+            "shortName": "Big Stick"
+          }
+        },
+        {
+          "count": 4,
+          "item": {
+            "id": "65702591c5d7d4cb4d07857c",
+            "name": "9x19mm AP 6.3 ammo pack (50 pcs)",
+            "shortName": "AP 6.3"
+          }
+        }
+      ],
+      "traderStanding": [
+        {
+          "trader": { "id": "58330581ace78e27b8b10cee", "name": "Skier" },
+          "standing": 0.01
+        }
+      ]
+    }
+  },
+
+  "winter_2025_knuckle_sandwich": {
+    "id": "winter_2025_knuckle_sandwich",
+    "name": "Knuckle Sandwich",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Knuckle_Sandwich",
+    "trader": {
+      "id": "54cb50c76803fa8b248b4571",
+      "name": "Prapor"
+    },
+    "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+    "kappaRequired": false,
+    "taskRequirements": [
+      { "task": { "id": "winter_2025_come_by_the_fire", "name": "Come by the Fire" } }
+    ],
+    "objectives": [
+      {
+        "id": "winter_2025_knuckle_sandwich_obj01",
+        "description": "Stash a TP-200 TNT brick at the first spot from Skier's route",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": { "id": "60391b0fb847c71012789415", "name": "TP-200 TNT brick", "shortName": "TP-200" },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_knuckle_sandwich_obj02",
+        "description": "Stash a TP-200 TNT brick at the second spot from Skier's route",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": { "id": "60391b0fb847c71012789415", "name": "TP-200 TNT brick", "shortName": "TP-200" },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_knuckle_sandwich_obj03",
+        "description": "Stash a TP-200 TNT brick at the third spot from Skier's route",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": { "id": "60391b0fb847c71012789415", "name": "TP-200 TNT brick", "shortName": "TP-200" },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_knuckle_sandwich_obj04",
+        "description": "Stash a TP-200 TNT brick at the fourth spot from Skier's route",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "item": { "id": "60391b0fb847c71012789415", "name": "TP-200 TNT brick", "shortName": "TP-200" },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_knuckle_sandwich_obj05",
+        "description": "Eliminate any 15 targets while wearing a Ushanka ear flap hat on Woods",
+        "maps": [{ "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }],
+        "count": 15
+      }
+    ],
+    "experience": 15000,
+    "finishRewards": {
+      "items": [
+        {
+          "count": 63000,
+          "item": { "id": "5449016a4bdc2d6f028b456f", "name": "Roubles", "shortName": "RUB" }
+        },
+        {
+          "count": 2,
+          "item": { "id": "59e35de086f7741778269d84", "name": "Electric drill", "shortName": "Drill" }
+        },
+        {
+          "count": 2,
+          "item": { "id": "590a3c0a86f774385a33c450", "name": "Spark plug", "shortName": "SPlug" }
+        }
+      ],
+      "traderStanding": [
+        {
+          "trader": { "id": "54cb50c76803fa8b248b4571", "name": "Prapor" },
+          "standing": 0.01
+        }
+      ]
+    }
+  },
+
+  "winter_2025_a_small_celebration": {
+    "id": "winter_2025_a_small_celebration",
+    "name": "A Small Celebration",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/A_Small_Celebration",
+    "trader": {
+      "id": "5ac3b934156ae10c4430e83c",
+      "name": "Ragman"
+    },
+    "maps": [
+      { "id": "56f40101d2720b2a4d8b45d6", "name": "Customs" },
+      { "id": "5714dbc024597771384a510d", "name": "Interchange" },
+      { "id": "5704e4dad2720bb55b8b4567", "name": "Lighthouse" },
+      { "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" },
+      { "id": "5704e554d2720bac5b8b456e", "name": "Shoreline" },
+      { "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }
+    ],
+    "kappaRequired": false,
+    "taskRequirements": [
+      { "task": { "id": "winter_2025_knuckle_sandwich", "name": "Knuckle Sandwich" } }
+    ],
+    "objectives": [
+      {
+        "id": "winter_2025_a_small_celebration_obj01",
+        "description": "Launch a firework in the appropriate spot",
+        "maps": [
+          { "id": "56f40101d2720b2a4d8b45d6", "name": "Customs" },
+          { "id": "5714dbc024597771384a510d", "name": "Interchange" },
+          { "id": "5704e4dad2720bb55b8b4567", "name": "Lighthouse" },
+          { "id": "5704e5fad2720bc05b8b4567", "name": "Reserve" },
+          { "id": "5704e554d2720bac5b8b456e", "name": "Shoreline" },
+          { "id": "5704e3c2d2720bac5b8b4567", "name": "Woods" }
+        ],
+        "item": {
+          "id": "675ea3d6312c0a5c4e04e317",
+          "name": "RSP-30 reactive signal cartridge (Firework)",
+          "shortName": "Firework"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_a_small_celebration_obj02",
+        "description": "Eat some Olivier salad",
+        "item": {
+          "id": "67586b7e49c2fa592e0d8ed9",
+          "name": "Olivier salad box",
+          "shortName": "Salad"
+        },
+        "count": 1
+      },
+      {
+        "id": "winter_2025_a_small_celebration_obj03",
+        "description": "Drink some vodka",
+        "item": {
+          "id": "5d40407c86f774318526545a",
+          "name": "Bottle of Tarkovskaya vodka",
+          "shortName": "Vodka"
+        },
+        "count": 1
+      }
+    ],
+    "experience": 20000,
+    // Wiki lists Roubles as "???" and an achievement unlock (Whiteout).
+    "finishRewards": {
+      "items": [
+        {
+          "count": 2,
+          "item": {
+            "id": "544a5caa4bdc2d1a388b4568",
+            "name": "Crye Precision AVS plate carrier (Ranger Green)",
+            "shortName": "AVS"
+          }
+        },
+        {
+          "count": 1,
+          "item": {
+            "id": "67600929bd0a0549d70993f6",
+            "name": "Ballistic plate case",
+            "shortName": "Plates"
+          }
+        }
+      ],
+      "traderStanding": [
+        {
+          "trader": { "id": "5ac3b934156ae10c4430e83c", "name": "Ragman" },
+          "standing": 0.01
+        }
+      ]
+    }
+  }
+}

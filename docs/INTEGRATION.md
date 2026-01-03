@@ -35,6 +35,16 @@ async function fetchOverlay() {
       "map": { "id": "...", "name": "Customs" }
     }
   },
+  "tasksAdd": {
+    "<added-task-id>": {
+      "id": "<added-task-id>",
+      "name": "Missing in Action",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Missing_in_Action",
+      "trader": { "id": "...", "name": "Prapor" },
+      "maps": [{ "id": "...", "name": "Woods" }],
+      "objectives": [{ "id": "...", "description": "Stash ..." }]
+    }
+  },
   "editions": {
     "standard": { "id": "standard", "title": "Standard Edition", ... },
     "unheard": { "id": "unheard", "title": "The Unheard Edition", ... }
@@ -143,6 +153,16 @@ const unheardEdition = editions?.unheard;
 console.log(unheardEdition?.stashLevel); // 5
 ```
 
+### Task Additions (Event-Only / Missing from API)
+
+Tasks that are not present in tarkov.dev are provided under `tasksAdd`. Consumers
+should treat these as new tasks and append them to the API task list.
+
+```typescript
+const addedTasks = Object.values(overlay.tasksAdd ?? {});
+const allTasks = [...tasksFromApi, ...addedTasks];
+```
+
 ---
 
 ## Full Integration Example
@@ -196,6 +216,7 @@ async function getTasksWithOverlay(): Promise<Task[]> {
 ```typescript
 interface Overlay {
   tasks?: Record<string, TaskOverride>;
+  tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, ItemOverride>;
   editions?: Record<string, Edition>;
   $meta: {
@@ -214,6 +235,26 @@ interface TaskOverride {
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
   // ... other fields
+}
+
+interface TaskAddition {
+  id: string;
+  name: string;
+  wikiLink: string;
+  trader: { id?: string; name: string };
+  map?: { id: string; name: string } | null;
+  maps?: Array<{ id: string; name: string }>;
+  objectives: TaskObjectiveAdd[];
+  // ... other fields
+}
+
+interface TaskObjectiveAdd {
+  id: string;
+  description: string;
+  count?: number;
+  maps?: Array<{ id: string; name: string }>;
+  item?: { id: string; name: string; shortName?: string };
+  markerItem?: { id: string; name: string; shortName?: string };
 }
 
 interface ObjectiveOverride {

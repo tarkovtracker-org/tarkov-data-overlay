@@ -1,0 +1,286 @@
+{
+  "$id": "task-additions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task Additions",
+  "description": "Schema for new tasks not available in tarkov.dev",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      "id": {
+        "description": "Unique identifier for the added task",
+        "type": "string"
+      },
+      "name": {
+        "description": "Task name",
+        "type": "string"
+      },
+      "wikiLink": {
+        "description": "Quest wiki link",
+        "type": "string"
+      },
+      "disabled": {
+        "description": "Mark task as disabled/removed from standard gameplay",
+        "type": "boolean"
+      },
+      "kappaRequired": {
+        "description": "Whether task is required for Kappa container",
+        "type": "boolean"
+      },
+      "lightkeeperRequired": {
+        "description": "Whether task is required for Lightkeeper access",
+        "type": "boolean"
+      },
+      "trader": {
+        "description": "Trader who gives the task",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["name"],
+        "type": "object"
+      },
+      "map": {
+        "description": "Primary map for the task",
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["id", "name"],
+            "type": "object"
+          },
+          { "type": "null" }
+        ]
+      },
+      "maps": {
+        "description": "Maps where the task takes place",
+        "type": "array",
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" }
+          },
+          "required": ["id", "name"],
+          "type": "object"
+        }
+      },
+      "objectives": {
+        "description": "Task objectives",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "id": { "type": "string" },
+            "type": { "type": "string" },
+            "description": { "type": "string" },
+            "count": { "type": "integer", "minimum": 1 },
+            "foundInRaid": { "type": "boolean" },
+            "maps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "item": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "required": ["id", "name"]
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "markerItem": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "required": ["id", "name"]
+            },
+            "questItem": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "required": ["id", "name"]
+            },
+            "containsAll": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "requiredKeys": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "shortName": { "type": "string" }
+                  },
+                  "required": ["id", "name"]
+                }
+              }
+            },
+            "useAny": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "usingWeapon": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"]
+              }
+            },
+            "usingWeaponMods": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "shortName": { "type": "string" }
+                  },
+                  "required": ["id", "name"]
+                }
+              }
+            }
+          },
+          "required": ["id", "description"]
+        }
+      },
+      "taskRequirements": {
+        "description": "Task prerequisites/requirements",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "task": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              },
+              "required": ["id", "name"]
+            }
+          },
+          "required": ["task"]
+        }
+      },
+      "experience": {
+        "description": "Experience points rewarded on task completion",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "finishRewards": {
+        "description": "Rewards given on task completion",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer", "minimum": 1 },
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "shortName": { "type": "string" }
+                  },
+                  "required": ["id", "name"]
+                }
+              },
+              "required": ["item", "count"]
+            }
+          },
+          "traderStanding": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "standing": { "type": "number" },
+                "trader": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" }
+                  },
+                  "required": ["name"]
+                }
+              },
+              "required": ["trader", "standing"]
+            }
+          }
+        }
+      }
+    },
+    "required": ["id", "name", "wikiLink", "trader", "objectives"]
+  }
+}

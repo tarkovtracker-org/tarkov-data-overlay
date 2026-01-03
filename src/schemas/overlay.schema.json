@@ -8,6 +8,9 @@
     "tasks": {
       "$ref": "task-override.schema.json"
     },
+    "tasksAdd": {
+      "$ref": "task-additions.schema.json"
+    },
     "items": {
       "type": "object",
       "description": "Item corrections"

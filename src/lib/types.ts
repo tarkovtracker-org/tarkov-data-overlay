@@ -78,6 +78,30 @@ export interface TaskRequirement {
   status?: string[];
 }
 
+/** Task addition structure for new tasks not in tarkov.dev */
+export interface TaskAddition {
+  id: string;
+  name: string;
+  wikiLink: string;
+  trader: { id?: string; name: string };
+  map?: { id: string; name: string } | null;
+  maps?: Array<{ id: string; name: string }>;
+  objectives: TaskObjectiveAdd[];
+  taskRequirements?: TaskRequirement[];
+  experience?: number;
+  finishRewards?: TaskFinishRewards;
+  kappaRequired?: boolean;
+  lightkeeperRequired?: boolean;
+  disabled?: boolean;
+}
+
+/** Objective definition for task additions */
+export interface TaskObjectiveAdd
+  extends Omit<Partial<TaskObjective>, "id" | "description"> {
+  id: string;
+  description: string;
+}
+
 /** Task data from tarkov.dev API */
 export interface TaskData {
   id: string;
@@ -117,6 +141,7 @@ export interface ValidationDetail {
 /** Built overlay output structure */
 export interface OverlayOutput {
   tasks?: Record<string, TaskOverride>;
+  tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, unknown>;
   traders?: Record<string, unknown>;
   hideout?: Record<string, unknown>;
@@ -149,5 +174,6 @@ export interface SchemaConfig {
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: "tasks.json5", schemaFile: "task-override.schema.json" },
+  { pattern: "tasksAdd.json5", schemaFile: "task-additions.schema.json" },
   { pattern: "editions.json5", schemaFile: "edition.schema.json" },
 ];
