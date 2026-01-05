@@ -1108,11 +1108,69 @@
           }
         ]
       }
+    },
+    "setting_priorities": {
+      "id": "setting_priorities",
+      "name": "Setting Priorities",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Setting_Priorities",
+      "trader": {
+        "id": "5a7c2d2c46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      "kappaRequired": false,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5c0bde0986f77479cf22c2f8",
+            "name": "A Shooter Born in Heaven"
+          }
+        },
+        {
+          "task": {
+            "id": "61958c366726521dd96828ec",
+            "name": "Cargo X - Part 4"
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "setting_priorities_obj01",
+          "description": "Eliminate 15 PMC operatives while using an active headset without wearing any armor",
+          "count": 15
+        },
+        {
+          "id": "setting_priorities_obj02",
+          "description": "Eliminate 15 PMC operatives while wearing the TSh-4M-L soft tank crew helmet without wearing any active headset",
+          "count": 15
+        }
+      ],
+      "experience": 11300,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 850,
+            "item": {
+              "id": "569668774bdc2da2298b4568",
+              "name": "Euros",
+              "shortName": "EUR"
+            }
+          }
+        ],
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5a7c2d2c46aef81a7ca2145d",
+              "name": "Mechanic"
+            },
+            "standing": 0.01
+          }
+        ]
+      }
     }
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-05T18:35:34.432Z",
-    "sha256": "2811c3e369564218c1fcb6834737f66c1f111bb39a6e0bbf018be495da3f079e"
+    "generated": "2026-01-05T20:46:07.397Z",
+    "sha256": "faaf370c987ed19c3ab1524fc9b2f1400b9a0d2c0da66050a10f4f54ba128ba8"
   }
 }
