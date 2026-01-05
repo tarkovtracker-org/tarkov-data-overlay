@@ -647,7 +647,31 @@ const server = http.createServer((req, res) => {
   serveStatic(res, filePath);
 });
 
-server.listen(PORT, () => {
+let currentPort = PORT;
+
+function startServer(port) {
+  currentPort = port;
+  server.listen(port, () => {
+    const address = server.address();
+    const activePort =
+      typeof address === "object" && address !== null ? address.port : port;
+    // eslint-disable-next-line no-console
+    console.log(`Overlay monitor running at http://localhost:${activePort}`);
+  });
+}
+
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Port ${currentPort} in use, retrying on a random available port...`,
+    );
+    // Retry on an ephemeral port assigned by the OS
+    startServer(0);
+    return;
+  }
   // eslint-disable-next-line no-console
-  console.log(`Overlay monitor running at http://localhost:${PORT}`);
+  console.error("Failed to start overlay monitor:", error);
 });
+
+startServer(currentPort);
