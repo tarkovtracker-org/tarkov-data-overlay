@@ -1166,11 +1166,65 @@
           }
         ]
       }
+    },
+    "no_questions_asked": {
+      "id": "no_questions_asked",
+      "name": "No Questions Asked",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Questions_Asked",
+      "trader": {
+        "id": "54cb50c76803fa8b248b4571",
+        "name": "Prapor"
+      },
+      "kappaRequired": false,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "59ca2eb686f77445a80ed049",
+            "name": "The Punisher - Part 6"
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "no_questions_asked_obj01",
+          "description": "Hand over 2 found in raid Red Rebel ice picks",
+          "items": [
+            {
+              "id": "5c0126f40db834002a125382",
+              "name": "Red Rebel ice pick",
+              "shortName": "RedRebel"
+            }
+          ],
+          "foundInRaid": true,
+          "count": 2
+        }
+      ],
+      "experience": 11200,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1,
+            "item": {
+              "id": "68ec0c1e4a10ddacb2069398",
+              "name": "TKPD 9.3x64 carbine Assault",
+              "shortName": "TKPD Assault"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "68ee0103b5db65191e0ec07c",
+              "name": "9.3x64mm 7N33 ammo pack (20 pcs)",
+              "shortName": "7N33"
+            }
+          }
+        ]
+      }
     }
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-05T20:46:07.397Z",
-    "sha256": "faaf370c987ed19c3ab1524fc9b2f1400b9a0d2c0da66050a10f4f54ba128ba8"
+    "generated": "2026-01-05T20:54:46.272Z",
+    "sha256": "0d288e525e8e4edb1db51f7181d785ddb9f8b673754f44f728c466285e9c0d1b"
   }
 }
