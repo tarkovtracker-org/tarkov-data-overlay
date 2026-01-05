@@ -280,6 +280,16 @@
     },
     "60e71b62a0beca400d69efc4": {
       "minPlayerLevel": 46
+    },
+    "66ab9da7eb102b9bcd08591c": {
+      "objectives": {
+        "66ab9da7eb102b9bcd08591d": {
+          "description": "Eliminate 5 Scavs on Lighthouse (In one raid)"
+        },
+        "66ab9da7eb102b9bcd085922": {
+          "description": "Eliminate 5 Scavs on Shoreline (In one raid)"
+        }
+      }
     }
   },
   "editions": {
@@ -1102,7 +1112,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-05T18:07:35.923Z",
-    "sha256": "3932d7695eb6c0deb5118f3c948b1a30c7a8692ec62ac325833b9618e9eec968"
+    "generated": "2026-01-05T18:35:34.432Z",
+    "sha256": "2811c3e369564218c1fcb6834737f66c1f111bb39a6e0bbf018be495da3f079e"
   }
 }
