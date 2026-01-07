@@ -339,4 +339,18 @@
     },
   },
 
+  // Small Business - Part 3 - objectives description were swapped incorrectly
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
+  // Verified by TT map and Wiki review.
+  "66631493312343839d032d22" {
+    objectives: {
+      "666733e565831d5bafa18bbb": {
+        description: "Stash a Cultist knife at the sawmill marked circle on Woods", // Was: Stash a Cultist knife at the river village marked circle on Woods
+      },
+      "666733e7430c8972d6a5f438": {
+        description: "Stash a Cultist knife at the river village marked circle on Woods", // Was: Stash a Cultist knife at the sawmill marked circle on Woods
+      },
+    },
+  }
+
 }
