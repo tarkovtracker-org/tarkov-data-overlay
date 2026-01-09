@@ -318,6 +318,13 @@
     },
   },
 
+  // The Huntsman Path - Relentless - Level requirement incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
+  // User confirmed: level 55 required, not 65
+  '60e71e8ed54b755a3b53eb67': {
+    minPlayerLevel: 55, // Was: 65
+  },
+
   // Forced Alliance - Task removed from standard gameplay
   // Proof: https://escapefromtarkov.fandom.com/wiki/Forced_Alliance
   '67a0966817e34930e500754c': {
