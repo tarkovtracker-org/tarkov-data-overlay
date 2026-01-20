@@ -378,4 +378,10 @@
       },
     },
   },
+  // The Guide - incorrect level required (40 -> 32)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
+  '5c0d4e61d09282029f53920e': {
+    minPlayerLevel: 32, // Was: 40
+  },
+  },
 }
