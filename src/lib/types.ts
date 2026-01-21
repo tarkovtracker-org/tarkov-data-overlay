@@ -50,6 +50,25 @@ export interface TaskObjective {
   containsAll?: TaskItemRef[];
   requiredKeys?: Array<TaskItemRef[]>;
   foundInRaid?: boolean;
+  zones?: Array<{
+    map?: { id: string; name: string };
+    outline?: Array<{ x: number; y?: number; z: number }>;
+    position?: { x: number; y?: number; z: number };
+    top?: number;
+    bottom?: number;
+  }>;
+  possibleLocations?: Array<{
+    map?: { id: string; name: string };
+    positions?: Array<{ x: number; y?: number; z: number }>;
+  }>;
+  wearing?: TaskItemRef[];
+  notWearing?: TaskItemRef[];
+  minDurability?: number;
+  maxDurability?: number;
+  distance?: number;
+  timeFromHour?: number;
+  timeUntilHour?: number;
+  optional?: boolean;
 }
 
 /** Task item reference */

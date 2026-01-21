@@ -373,6 +373,146 @@
                 "type": "array"
               },
               "type": "array"
+            },
+            "zones": {
+              "description": "Objective zones with outlines for map rendering",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "map": {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["id", "name"],
+                    "type": "object"
+                  },
+                  "outline": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "required": ["x", "z"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "position": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "x": { "type": "number" },
+                      "y": { "type": "number" },
+                      "z": { "type": "number" }
+                    },
+                    "required": ["x", "z"],
+                    "type": "object"
+                  },
+                  "top": { "type": "number" },
+                  "bottom": { "type": "number" }
+                },
+                "required": ["map", "outline"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "possibleLocations": {
+              "description": "Possible point locations for quest items or zones",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "map": {
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" }
+                    },
+                    "required": ["id", "name"],
+                    "type": "object"
+                  },
+                  "positions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "required": ["x", "z"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": ["map", "positions"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "wearing": {
+              "description": "Items that must be worn",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "notWearing": {
+              "description": "Items that must not be worn",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "minDurability": {
+              "description": "Minimum allowed item durability (percent)",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "maxDurability": {
+              "description": "Maximum allowed item durability (percent)",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "distance": {
+              "description": "Distance requirement for the action",
+              "type": "number"
+            },
+            "timeFromHour": {
+              "description": "Earliest in-raid hour when the objective counts",
+              "maximum": 24,
+              "minimum": 0,
+              "type": "number"
+            },
+            "timeUntilHour": {
+              "description": "Latest in-raid hour when the objective counts",
+              "maximum": 24,
+              "minimum": 0,
+              "type": "number"
+            },
+            "optional": {
+              "description": "Whether the objective is optional",
+              "type": "boolean"
             }
           },
           "required": ["id", "description"],
