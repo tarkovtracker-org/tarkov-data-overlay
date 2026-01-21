@@ -367,6 +367,27 @@
         "description": "Task name override",
         "type": "string"
       },
+      "factionName": {
+        "description": "Faction that can do the task",
+        "enum": ["Any", "USEC", "BEAR"],
+        "type": "string"
+      },
+      "requiredPrestige": {
+        "description": "Prestige requirement to unlock the task",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prestigeLevel": {
+            "type": "integer"
+          }
+        },
+        "required": ["name", "prestigeLevel"],
+        "type": "object"
+      },
       "objectives": {
         "additionalProperties": {
           "additionalProperties": true,
@@ -946,7 +967,7 @@
                   "type": "string"
                 }
               },
-              "required": ["name"],
+              "required": ["id", "name"],
               "type": "object"
             },
             "value": {

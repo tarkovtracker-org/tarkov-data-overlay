@@ -14,9 +14,16 @@ export interface TaskOverride {
   map?: { id: string; name: string } | null;
   kappaRequired?: boolean;
   lightkeeperRequired?: boolean;
+  factionName?: string;
+  requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  traderRequirements?: Array<{
+    trader: { id: string; name: string };
+    value: number;
+    compareMethod?: string;
+  }>;
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -118,10 +125,13 @@ export interface TaskAddition {
   trader: { id?: string; name: string };
   map?: { id: string; name: string } | null;
   maps?: Array<{ id: string; name: string }>;
+  minPlayerLevel?: number;
+  factionName?: string;
+  requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives: TaskObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
   traderRequirements?: Array<{
-    trader: { id?: string; name: string };
+    trader: { id: string; name: string };
     value: number;
     compareMethod?: string;
   }>;
@@ -147,9 +157,11 @@ export interface TaskData {
   minPlayerLevel?: number;
   wikiLink?: string;
   map?: { id: string; name: string } | null;
+  factionName?: string;
+  requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   taskRequirements?: TaskRequirement[];
   traderRequirements?: Array<{
-    trader: { id?: string; name: string };
+    trader: { id: string; name: string };
     value: number;
     compareMethod?: string;
   }>;

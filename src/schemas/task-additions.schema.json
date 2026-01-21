@@ -319,6 +319,12 @@
         "description": "Whether task is required for Lightkeeper access",
         "type": "boolean"
       },
+      "minPlayerLevel": {
+        "description": "Minimum PMC level required to start the task",
+        "maximum": 79,
+        "minimum": 1,
+        "type": "integer"
+      },
       "map": {
         "anyOf": [
           {
@@ -360,6 +366,27 @@
       "name": {
         "description": "Task name",
         "type": "string"
+      },
+      "factionName": {
+        "description": "Faction that can do the task",
+        "enum": ["Any", "USEC", "BEAR"],
+        "type": "string"
+      },
+      "requiredPrestige": {
+        "description": "Prestige requirement to unlock the task",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prestigeLevel": {
+            "type": "integer"
+          }
+        },
+        "required": ["name", "prestigeLevel"],
+        "type": "object"
       },
       "objectives": {
         "description": "Task objectives",
@@ -757,7 +784,7 @@
                   "type": "string"
                 }
               },
-              "required": ["name"],
+              "required": ["id", "name"],
               "type": "object"
             },
             "value": {
