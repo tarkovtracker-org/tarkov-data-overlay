@@ -461,31 +461,40 @@
           "type": "shoot",
           "wearing": [
             {
-              "id": "5b432b965acfc47a8774094e"
+              "id": "5b432b965acfc47a8774094e",
+              "name": "GSSh-01 active headset"
             },
             {
-              "id": "5aa2ba71e5b5b000137b758f"
+              "id": "5aa2ba71e5b5b000137b758f",
+              "name": "MSA Sordin Supreme PRO-X/L headset"
             },
             {
-              "id": "6033fa48ffd42c541047f728"
+              "id": "6033fa48ffd42c541047f728",
+              "name": "OPSMEN Earmor M32 headset"
             },
             {
-              "id": "5a16b9fffcdbcb0176308b34"
+              "id": "5a16b9fffcdbcb0176308b34",
+              "name": "Ops-Core FAST RAC Headset"
             },
             {
-              "id": "5645bcc04bdc2d363b8b4572"
+              "id": "5645bcc04bdc2d363b8b4572",
+              "name": "Peltor ComTac II headset (OD Green)"
             },
             {
-              "id": "628e4e576d783146b124c64d"
+              "id": "628e4e576d783146b124c64d",
+              "name": "Peltor ComTac IV Hybrid headset (Coyote Brown)"
             },
             {
-              "id": "5c165d832e2216398b5a7e36"
+              "id": "5c165d832e2216398b5a7e36",
+              "name": "Peltor Tactical Sport headset"
             },
             {
-              "id": "5e4d34ca86f774264f758330"
+              "id": "5e4d34ca86f774264f758330",
+              "name": "Walker's Razor Digital headset"
             },
             {
-              "id": "5f60cd6cf2bcbb675b00dac6"
+              "id": "5f60cd6cf2bcbb675b00dac6",
+              "name": "Walker's XCEL 500BT Digital headset"
             }
           ],
           "count": 15
@@ -496,36 +505,46 @@
           "type": "shoot",
           "wearing": [
             {
-              "id": "5df8a58286f77412631087ed"
+              "id": "5df8a58286f77412631087ed",
+              "name": "TSh-4M-L soft tank crew helmet"
             }
           ],
           "notWearing": [
             {
-              "id": "5b432b965acfc47a8774094e"
+              "id": "5b432b965acfc47a8774094e",
+              "name": "GSSh-01 active headset"
             },
             {
-              "id": "5aa2ba71e5b5b000137b758f"
+              "id": "5aa2ba71e5b5b000137b758f",
+              "name": "MSA Sordin Supreme PRO-X/L headset"
             },
             {
-              "id": "6033fa48ffd42c541047f728"
+              "id": "6033fa48ffd42c541047f728",
+              "name": "OPSMEN Earmor M32 headset"
             },
             {
-              "id": "5a16b9fffcdbcb0176308b34"
+              "id": "5a16b9fffcdbcb0176308b34",
+              "name": "Ops-Core FAST RAC Headset"
             },
             {
-              "id": "5645bcc04bdc2d363b8b4572"
+              "id": "5645bcc04bdc2d363b8b4572",
+              "name": "Peltor ComTac II headset (OD Green)"
             },
             {
-              "id": "628e4e576d783146b124c64d"
+              "id": "628e4e576d783146b124c64d",
+              "name": "Peltor ComTac IV Hybrid headset (Coyote Brown)"
             },
             {
-              "id": "5c165d832e2216398b5a7e36"
+              "id": "5c165d832e2216398b5a7e36",
+              "name": "Peltor Tactical Sport headset"
             },
             {
-              "id": "5e4d34ca86f774264f758330"
+              "id": "5e4d34ca86f774264f758330",
+              "name": "Walker's Razor Digital headset"
             },
             {
-              "id": "5f60cd6cf2bcbb675b00dac6"
+              "id": "5f60cd6cf2bcbb675b00dac6",
+              "name": "Walker's XCEL 500BT Digital headset"
             }
           ],
           "count": 15
@@ -730,7 +749,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-17T03:07:07.841Z",
-    "sha256": "ce98428d8d4e7063a449f67797d62e015f9395bd92d002bed5d884f867d5834f"
+    "generated": "2026-01-21T08:10:59.658Z",
+    "sha256": "51daaffc36d8b751611af9ad8e8715f37cd70c15a6a4c577a7fa3f5c7d26e6f9"
   }
 }
