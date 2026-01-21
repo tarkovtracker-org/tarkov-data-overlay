@@ -12,6 +12,7 @@ export interface TaskOverride {
   wikiLink?: string;
   disabled?: boolean;
   map?: { id: string; name: string } | null;
+  maps?: Array<{ id: string; name: string }>;
   kappaRequired?: boolean;
   lightkeeperRequired?: boolean;
   factionName?: string;
