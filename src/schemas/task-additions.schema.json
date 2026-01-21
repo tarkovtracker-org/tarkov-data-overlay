@@ -13,6 +13,153 @@
         "minimum": 0,
         "type": "integer"
       },
+      "startRewards": {
+        "description": "Rewards given when starting the task",
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "count": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "item": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "shortName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id", "name"],
+                  "type": "object"
+                }
+              },
+              "required": ["item", "count"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "offerUnlock": {
+            "description": "Trader offer unlocks (barter/cash offers)",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "item": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "shortName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id", "name"],
+                  "type": "object"
+                },
+                "level": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "trader": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name"],
+                  "type": "object"
+                }
+              },
+              "required": ["trader", "level", "item"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "traderStanding": {
+            "items": {
+              "properties": {
+                "standing": {
+                  "type": "number"
+                },
+                "trader": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name"],
+                  "type": "object"
+                }
+              },
+              "required": ["trader", "standing"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "skillLevelReward": {
+            "description": "Skill level rewards",
+            "items": {
+              "properties": {
+                "level": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "skill": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "imageLink": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id", "name"],
+                  "type": "object"
+                }
+              },
+              "required": ["name", "level"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "traderUnlock": {
+            "description": "Trader unlock rewards",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "name"],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "finishRewards": {
         "description": "Rewards given on task completion",
         "properties": {

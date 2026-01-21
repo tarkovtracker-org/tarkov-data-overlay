@@ -18,11 +18,12 @@ export interface TaskOverride {
   objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
   experience?: number;
-  finishRewards?: TaskFinishRewards;
+  startRewards?: TaskRewards;
+  finishRewards?: TaskRewards;
 }
 
 /** Task completion rewards */
-export interface TaskFinishRewards {
+export interface TaskRewards {
   items?: Array<{ item: { id?: string; name: string; shortName?: string }; count: number }>;
   traderStanding?: Array<{ trader: { id?: string; name: string }; standing: number }>;
   offerUnlock?: Array<{
@@ -125,7 +126,8 @@ export interface TaskAddition {
     compareMethod?: string;
   }>;
   experience?: number;
-  finishRewards?: TaskFinishRewards;
+  startRewards?: TaskRewards;
+  finishRewards?: TaskRewards;
   kappaRequired?: boolean;
   lightkeeperRequired?: boolean;
   disabled?: boolean;
@@ -153,7 +155,8 @@ export interface TaskData {
   }>;
   objectives?: TaskObjective[];
   experience?: number;
-  finishRewards?: TaskFinishRewards;
+  startRewards?: TaskRewards;
+  finishRewards?: TaskRewards;
 }
 
 /** Validation result for a single override */
