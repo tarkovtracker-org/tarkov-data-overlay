@@ -149,7 +149,7 @@
         "description": "Primary map for the task"
       },
       "maps": {
-        "description": "Maps where the task takes place",
+        "description": "Legacy field kept for compatibility and possible future use. Tracker currently ignores task.maps and uses task.map plus objectives[].maps for filtering/rendering. Prefer setting task.map and objectives[].maps.",
         "items": {
           "additionalProperties": false,
           "properties": {
