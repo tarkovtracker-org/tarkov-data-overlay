@@ -259,7 +259,10 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('wikiLink'),
   validateMap,
   createFieldValidator('experience'),
+  createFieldValidator('startRewards'),
   createFieldValidator('finishRewards'),
+  createFieldValidator('factionName'),
+  createFieldValidator('requiredPrestige'),
   validateTaskRequirements,
 ];
 

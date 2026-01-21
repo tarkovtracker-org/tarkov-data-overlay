@@ -31,6 +31,19 @@ const TASKS_QUERY = `
         }
         status
       }
+      traderRequirements {
+        trader {
+          id
+          name
+        }
+        value
+      }
+      factionName
+      requiredPrestige {
+        id
+        name
+        prestigeLevel
+      }
       objectives {
         id
         type
@@ -76,10 +89,41 @@ const TASKS_QUERY = `
           containsAll { id name shortName }
         }
       }
+      startRewards {
+        items { item { id name shortName } count }
+        traderStanding { trader { id name } standing }
+        offerUnlock { id trader { id name } level item { id name shortName } }
+        skillLevelReward {
+          name
+          level
+          skill {
+            id
+            name
+            imageLink
+          }
+        }
+        traderUnlock {
+          id
+          name
+        }
+      }
       finishRewards {
         items { item { id name shortName } count }
         traderStanding { trader { id name } standing }
         offerUnlock { id trader { id name } level item { id name shortName } }
+        skillLevelReward {
+          name
+          level
+          skill {
+            id
+            name
+            imageLink
+          }
+        }
+        traderUnlock {
+          id
+          name
+        }
       }
     }
   }
