@@ -582,6 +582,14 @@
               },
               "required": ["id", "name"],
               "type": "object"
+            },
+            "status": {
+              "description": "Allowed statuses used by task graph logic: accepted/active (links predecessors), complete/completed (normal prerequisite), failed (marks as alternative)",
+              "items": {
+                "enum": ["accepted", "active", "complete", "completed", "failed"],
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           "required": ["task"],
