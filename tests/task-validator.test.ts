@@ -435,6 +435,122 @@ describe('validateTaskOverride', () => {
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
     });
+
+    it('ignores accepted/active statuses when comparing requirements', () => {
+      const apiTask = createApiTask({
+        taskRequirements: [
+          { task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['accepted'] },
+          { task: { id: 'prereq-2', name: 'Completed Task' }, status: ['completed'] },
+          { task: { id: 'prereq-3', name: 'Active Task' }, status: ['active'] },
+        ],
+      });
+      const override: TaskOverride = {
+        taskRequirements: [{ task: { id: 'prereq-2', name: 'Completed Task' } }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'taskRequirements' && d.status === 'fixed')
+      ).toBe(true);
+    });
+  });
+
+  describe('startRewards validation', () => {
+    it('returns FIXED when startRewards matches API', () => {
+      const apiTask = createApiTask({
+        startRewards: {
+          items: [
+            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
+          ],
+        },
+      });
+      const override: TaskOverride = {
+        startRewards: {
+          items: [
+            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
+          ],
+        },
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
+    it('returns NEEDED when startRewards differs from API', () => {
+      const apiTask = createApiTask({
+        startRewards: {
+          items: [
+            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
+          ],
+        },
+      });
+      const override: TaskOverride = {
+        startRewards: {
+          items: [
+            { item: { id: 'item-1', name: 'Item One' }, count: 3 },
+          ],
+        },
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'startRewards' && d.status === 'needed')
+      ).toBe(true);
+    });
+  });
+
+  describe('factionName validation', () => {
+    it('returns FIXED when factionName matches API', () => {
+      const apiTask = createApiTask({ factionName: 'USEC' });
+      const override: TaskOverride = { factionName: 'USEC' };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'factionName' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
+    it('returns NEEDED when factionName differs from API', () => {
+      const apiTask = createApiTask({ factionName: 'USEC' });
+      const override: TaskOverride = { factionName: 'BEAR' };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'factionName' && d.status === 'needed')
+      ).toBe(true);
+    });
+  });
+
+  describe('requiredPrestige validation', () => {
+    it('returns FIXED when requiredPrestige matches API', () => {
+      const apiTask = createApiTask({
+        requiredPrestige: { id: 'prestige-1', name: 'Prestige 1', prestigeLevel: 1 },
+      });
+      const override: TaskOverride = {
+        requiredPrestige: { id: 'prestige-1', name: 'Prestige 1', prestigeLevel: 1 },
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'requiredPrestige' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
+    it('returns NEEDED when requiredPrestige differs from API', () => {
+      const apiTask = createApiTask({
+        requiredPrestige: { id: 'prestige-1', name: 'Prestige 1', prestigeLevel: 1 },
+      });
+      const override: TaskOverride = {
+        requiredPrestige: { id: 'prestige-2', name: 'Prestige 2', prestigeLevel: 2 },
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'requiredPrestige' && d.status === 'needed')
+      ).toBe(true);
+    });
   });
 
   describe('multiple field validation', () => {
