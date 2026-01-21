@@ -31,6 +31,9 @@
                     },
                     "name": {
                       "type": "string"
+                    },
+                    "shortName": {
+                      "type": "string"
                     }
                   },
                   "required": ["id", "name"],
@@ -110,6 +113,51 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "skillLevelReward": {
+            "description": "Skill level rewards",
+            "items": {
+              "properties": {
+                "level": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "skill": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "imageLink": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id", "name"],
+                  "type": "object"
+                }
+              },
+              "required": ["name", "level"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "traderUnlock": {
+            "description": "Trader unlock rewards",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "name"],
+            "type": "object"
           }
         },
         "type": "object"
@@ -724,6 +772,38 @@
             }
           },
           "required": ["task"],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "traderRequirements": {
+        "description": "Trader loyalty requirements to start the task",
+        "items": {
+          "properties": {
+            "trader": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": ["name"],
+              "type": "object"
+            },
+            "value": {
+              "description": "Required trader level/loyalty",
+              "maximum": 4,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "compareMethod": {
+              "description": "Comparison method for the requirement (e.g., '>=')",
+              "type": "string"
+            }
+          },
+          "required": ["trader", "value"],
           "type": "object"
         },
         "type": "array"

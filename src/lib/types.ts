@@ -31,6 +31,12 @@ export interface TaskFinishRewards {
     level: number;
     item: { id?: string; name: string; shortName?: string };
   }>;
+  skillLevelReward?: Array<{
+    name: string;
+    level: number;
+    skill?: { id: string; name: string; imageLink?: string };
+  }>;
+  traderUnlock?: { id: string; name: string };
 }
 
 /** Task objective from tarkov.dev API */
@@ -113,6 +119,11 @@ export interface TaskAddition {
   maps?: Array<{ id: string; name: string }>;
   objectives: TaskObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  traderRequirements?: Array<{
+    trader: { id?: string; name: string };
+    value: number;
+    compareMethod?: string;
+  }>;
   experience?: number;
   finishRewards?: TaskFinishRewards;
   kappaRequired?: boolean;
@@ -135,6 +146,11 @@ export interface TaskData {
   wikiLink?: string;
   map?: { id: string; name: string } | null;
   taskRequirements?: TaskRequirement[];
+  traderRequirements?: Array<{
+    trader: { id?: string; name: string };
+    value: number;
+    compareMethod?: string;
+  }>;
   objectives?: TaskObjective[];
   experience?: number;
   finishRewards?: TaskFinishRewards;
