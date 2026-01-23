@@ -1,4 +1,4 @@
-# Contributing to tarkov-data-overlay
+﻿# Contributing to tarkov-data-overlay
 
 Thank you for helping improve Tarkov data accuracy for the community!
 
@@ -214,6 +214,12 @@ npm run validate
 # Build the overlay locally
 npm run build
 ```
+
+---
+
+## Master Samples
+
+See `docs/MASTER_SAMPLES.md` for the comprehensive, copy-paste JSON5 master reference.
 
 ---
 
