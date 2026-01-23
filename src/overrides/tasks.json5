@@ -378,4 +378,19 @@
       },
     },
   },
+  // The Guide - incorrect level required (40 -> 32)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
+  '5c0d4e61d09282029f53920e': {
+    minPlayerLevel: 32, // Was: 40
+  },
+
+//  // The Blood of War - Part 1 - objectives description missong one
+//  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+//  '5ae448f286f77448d73c0131': {
+//    objectives: {
+//      'XXXXXXXXXXXXXXXXXXXXXXXX': {
+//        description: 'Locate and mark the fourth fuel tank with an MS2000 Marker on Interchange', // need to add it but, no maps points...
+//      },
+//    },
+//  },
 }
