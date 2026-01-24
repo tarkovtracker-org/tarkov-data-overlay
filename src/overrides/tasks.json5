@@ -384,6 +384,16 @@
     minPlayerLevel: 32, // Was: 40
   },
 
+    // To Great Heights! - Part 3 - Inaccurate count and description.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
+  '66058cc5bb83da7ba474aba9': {
+    objectives: {
+      '662ba61d3ed61b6b78187b71': {
+        description: 'Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena', // Was: Win a match while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
+        count: 2, // Was: 1
+      },
+    },
+  },
 //  // The Blood of War - Part 1 - objectives description missong one
 //  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
 //  '5ae448f286f77448d73c0131': {

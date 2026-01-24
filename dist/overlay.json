@@ -319,6 +319,14 @@
     },
     "5c0d4e61d09282029f53920e": {
       "minPlayerLevel": 32
+    },
+    "66058cc5bb83da7ba474aba9": {
+      "objectives": {
+        "662ba61d3ed61b6b78187b71": {
+          "description": "Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena",
+          "count": 2
+        }
+      }
     }
   },
   "editions": {
