@@ -384,7 +384,7 @@
     minPlayerLevel: 32, // Was: 40
   },
 
-    // To Great Heights! - Part 3 - Inaccurate count and description.
+  // To Great Heights! - Part 3 - Inaccurate count and description.
   // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
   '66058cc5bb83da7ba474aba9': {
     objectives: {
@@ -394,13 +394,103 @@
       },
     },
   },
-//  // The Blood of War - Part 1 - objectives description missong one
-//  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
-//  '5ae448f286f77448d73c0131': {
-//    objectives: {
-//      'XXXXXXXXXXXXXXXXXXXXXXXX': {
-//        description: 'Locate and mark the fourth fuel tank with an MS2000 Marker on Interchange', // need to add it but, no maps points...
-//      },
-//    },
-//  },
+  // The Blood of War - Part 1 - Truck #2 Location Change, Truck #4 Missing
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+  "5ae448f286f77448d73c0131": {
+    objectives: {
+      "5ae452de86f77450595c4333": {
+        zones: [
+          {
+            map: {
+              id: '5714dbc024597771384a510d',
+              name: 'Interchange',
+            },
+            outline: [
+              {
+                x: 425.018925, // Was: 268.3624
+                y: 28.55, // Was: 22.85
+                z: 130.950611, // Was: 12.3246861
+              },
+              {
+                x: 428.681993, // Was: 270.8711
+                y: 28.55, // Was: 22.85
+                z: 119.523366, // Was: 9.209181
+              },
+              {
+                x: 432.491075, // Was: 280.217621
+                y: 28.55, // Was: 22.85
+                z: 120.744389, // Was: 16.7353134
+              },
+              {
+                x: 428.828007, // Was: 277.708923
+                y: 28.55, // Was: 22.85
+                z: 132.171634, // Was: 19.8508186
+              },
+            ],
+            position: {
+              x: 428.755, // Was: 274.29
+              y: 28.55, // Was: 22.85
+              z: 125.8475, // Was: 14.53
+            },
+          },
+        ],
+      },
+    },
+    objectivesAdd: [
+      {
+        id: "the_blood_of_war_-_part_1_obj04",
+        description: "Mark the fourth fuel tank with an MS2000 Marker on Interchange",
+        type: "mark",
+        maps: [
+          {
+            id: "5714dbc024597771384a510d",
+            name: "Interchange",
+          },
+        ],
+        markerItem: {
+          id: "5991b51486f77447b112d44f",
+          name: "MS2000 Marker",
+          shortName: "MS2000",
+        },
+        optional: true,
+        zones: [
+          {
+            map: {
+              id: "5714dbc024597771384a510d",
+              name: "Interchange",
+            },
+            outline: [
+              {
+                x: 35.316765,
+                y: 22.91,
+                z: 303.477869,
+              },
+              {
+                x: 46.143366,
+                y: 22.91,
+                z: 308.653264,
+              },
+              {
+                x: 44.418235,
+                y: 22.91,
+                z: 312.262131,
+              },
+              {
+                x: 33.591634,
+                y: 22.91,
+                z: 307.086736,
+              },
+            ],
+            position: {
+              x: 39.8675,
+              y: 22.91,
+              z: 307.87,
+            },
+            top: 24.35,
+            bottom: 21.35,
+          },
+        ],
+      },
+    ],
+  },
 }
