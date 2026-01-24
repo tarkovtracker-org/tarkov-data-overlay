@@ -835,6 +835,90 @@
               "required": ["id", "name"],
               "type": "object"
             },
+            "optional": {
+              "description": "Whether the objective is optional",
+              "type": "boolean"
+            },
+            "zones": {
+              "description": "Objective zones with outlines for map rendering",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "map": {
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["id", "name"],
+                    "type": "object"
+                  },
+                  "outline": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "required": ["x", "z"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "position": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "x": { "type": "number" },
+                      "y": { "type": "number" },
+                      "z": { "type": "number" }
+                    },
+                    "required": ["x", "z"],
+                    "type": "object"
+                  },
+                  "top": { "type": "number" },
+                  "bottom": { "type": "number" }
+                },
+                "required": ["map", "outline"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "possibleLocations": {
+              "description": "Possible point locations for quest items or zones",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "map": {
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" }
+                    },
+                    "required": ["id", "name"],
+                    "type": "object"
+                  },
+                  "positions": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "required": ["x", "z"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": ["map", "positions"],
+                "type": "object"
+              },
+              "type": "array"
+            },
             "requiredKeys": {
               "items": {
                 "items": {

@@ -65,17 +65,8 @@ export interface TaskObjective {
   containsAll?: TaskItemRef[];
   requiredKeys?: Array<TaskItemRef[]>;
   foundInRaid?: boolean;
-  zones?: Array<{
-    map?: { id: string; name: string };
-    outline?: Array<{ x: number; y?: number; z: number }>;
-    position?: { x: number; y?: number; z: number };
-    top?: number;
-    bottom?: number;
-  }>;
-  possibleLocations?: Array<{
-    map?: { id: string; name: string };
-    positions?: Array<{ x: number; y?: number; z: number }>;
-  }>;
+  zones?: ObjectiveZone[];
+  possibleLocations?: ObjectivePossibleLocation[];
   wearing?: TaskItemRef[];
   notWearing?: TaskItemRef[];
   minDurability?: number;
@@ -93,6 +84,32 @@ export interface TaskItemRef {
   shortName?: string;
 }
 
+export interface ObjectiveZone {
+  map?: { id: string; name: string };
+  outline?: Array<{ x: number; y?: number; z: number }>;
+  position?: { x: number; y?: number; z: number };
+  top?: number;
+  bottom?: number;
+}
+
+export interface ObjectiveZoneAdd extends Omit<ObjectiveZone, "map" | "outline"> {
+  map: { id: string; name: string };
+  outline: Array<{ x: number; y?: number; z: number }>;
+}
+
+export interface ObjectivePossibleLocation {
+  map?: { id: string; name: string };
+  positions?: Array<{ x: number; y?: number; z: number }>;
+}
+
+export interface ObjectivePossibleLocationAdd extends Omit<
+  ObjectivePossibleLocation,
+  "map" | "positions"
+> {
+  map: { id: string; name: string };
+  positions: Array<{ x: number; y?: number; z: number }>;
+}
+
 /** Objective override for nested corrections */
 export interface ObjectiveOverride extends Omit<Partial<TaskObjective>, "id"> {}
 
@@ -106,10 +123,15 @@ export interface TaskItemRefAdd {
 
 /** Objective addition for missing objectives */
 export interface ObjectiveAdd
-  extends Omit<Partial<TaskObjective>, "id" | "description" | "items"> {
+  extends Omit<
+    Partial<TaskObjective>,
+    "id" | "description" | "items" | "zones" | "possibleLocations"
+  > {
   id: string;
   description: string;
   items?: TaskItemRefAdd[];
+  zones?: ObjectiveZoneAdd[];
+  possibleLocations?: ObjectivePossibleLocationAdd[];
 }
 
 /** Task requirement reference */
@@ -146,9 +168,11 @@ export interface TaskAddition {
 
 /** Objective definition for task additions */
 export interface TaskObjectiveAdd
-  extends Omit<Partial<TaskObjective>, "id" | "description"> {
+  extends Omit<Partial<TaskObjective>, "id" | "description" | "zones" | "possibleLocations"> {
   id: string;
   description: string;
+  zones?: ObjectiveZoneAdd[];
+  possibleLocations?: ObjectivePossibleLocationAdd[];
 }
 
 /** Task data from tarkov.dev API */
