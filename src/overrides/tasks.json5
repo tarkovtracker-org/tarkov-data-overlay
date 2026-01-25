@@ -384,7 +384,7 @@
     minPlayerLevel: 32, // Was: 40
   },
 
-    // To Great Heights! - Part 3 - Inaccurate count and description.
+  // To Great Heights! - Part 3 - Inaccurate count and description.
   // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
   '66058cc5bb83da7ba474aba9': {
     objectives: {
@@ -394,13 +394,79 @@
       },
     },
   },
-//  // The Blood of War - Part 1 - objectives description missong one
-//  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
-//  '5ae448f286f77448d73c0131': {
-//    objectives: {
-//      'XXXXXXXXXXXXXXXXXXXXXXXX': {
-//        description: 'Locate and mark the fourth fuel tank with an MS2000 Marker on Interchange', // need to add it but, no maps points...
-//      },
-//    },
-//  },
+  //  // The Blood of War - Part 1 - objectives description missong one
+  //  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+  //  '5ae448f286f77448d73c0131': {
+  //    objectives: {
+  //      'XXXXXXXXXXXXXXXXXXXXXXXX': {
+  //        description: 'Locate and mark the fourth fuel tank with an MS2000 Marker on Interchange', // need to add it but, no maps points...
+  //      },
+  //    },
+  //  },
+
+  // You've Got Mail - min level requirement incorrect (15 -> 10)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/You've_Got_Mail
+  '6391359b9444fb141f4e6ee6': {
+    minPlayerLevel: 10, // Was 15
+  },
+
+  // Glory to CPSU - Part 1 - min level requirement incorrect (17 -> 15)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
+  '639135b04ed9512be67647d7': {
+    minPlayerLevel: 15, // Was 17
+  },
+
+  // Inventory Check - min level requirement incorrect (17 -> 15)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Check
+  '608974af4b05530f55550c21': {
+    minPlayerLevel: 15, // Was 17
+  },
+
+  // A Fuel Matter - min level requirement incorrect (17 -> 15)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
+  '608974d01a66564e74191fc0': {
+    minPlayerLevel: 15, // Was 17
+  },
+
+  // The Cult - Part 2 - min level requirement incorrect (18 -> 12)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Cult_-_Part_2
+  '5a27ba1c86f77461ea5a3c56': {
+    minPlayerLevel: 12, // Was 18
+  },
+
+  // Pest Control - min level requirement incorrect (20 -> 10)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pest_Control
+  '608a768d82e40b3c727fd17d': {
+    minPlayerLevel: 10, // Was 20
+  },
+
+  // Developer's Secrets - Part 1 - min level requirement incorrect (25 -> 23)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Developer%27s_Secrets_-_Part_1
+  '65733403eefc2c312a759ddb': {
+    minPlayerLevel: 23, // Was 25
+  },
+
+  // The Blood of War - Part 2 - min level requirement incorrect (25 -> 23)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_2
+  '5b47876e86f7744d1c353205': {
+    minPlayerLevel: 23, // Was 25
+  },
+
+  // Fishing Place - min level requirement incorrect (28 -> 25)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Place
+  '5d25e4b786f77408251c4bfc': {
+    minPlayerLevel: 25, // Was 28
+  },
+
+  // The Huntsman Path - Sellout - min level requirement incorrect (30 -> 32)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sellout
+  '5d25e2e286f77444001e2e48': {
+    minPlayerLevel: 32, // Was 30
+  },
+
+  // Psycho Sniper - min level requirement incorrect (35 -> 27)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
+  '5c0be13186f7746f016734aa': {
+    minPlayerLevel: 27, // Was 35
+  },
 }
