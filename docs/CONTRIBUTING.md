@@ -1,4 +1,4 @@
-﻿# Contributing to tarkov-data-overlay
+# Contributing to tarkov-data-overlay
 
 Thank you for helping improve Tarkov data accuracy for the community!
 

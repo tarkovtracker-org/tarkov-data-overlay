@@ -24,7 +24,7 @@ Notes:
     name: "Task Name 1", // Optional | UI
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Task_Name_1", // Optional | UI
     map: { id: "map-id-1", name: "Map Name 1" }, // Optional | UI
-    maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | Console-only; NOT used by TarkovTracker. TT uses task.map for the map badge, and uses objectives[].maps + task.locations (when present) for map filtering/markers.
+    maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | Console-only; NOT used by TarkovTracker. TT uses task.map for the map badge, and objectives[].maps for map filtering/markers.
     minPlayerLevel: 20, // Optional | UI
     factionName: "USEC", // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
     kappaRequired: false, // Optional | UI (logic)
@@ -253,7 +253,7 @@ Notes:
     wikiLink: "https://escapefromtarkov.fandom.com/wiki/Task_Name_2", // Required | UI
     trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | UI; include trader.id to allow app to merge in icon/image
     map: { id: "map-id-1", name: "Map Name 1" }, // Optional | UI
-    maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | Console-only; NOT used by TarkovTracker. TT uses task.map for the map badge, and uses objectives[].maps + task.locations (when present) for map filtering/markers.
+    maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | Console-only; NOT used by TarkovTracker. TT uses task.map for the map badge, and objectives[].maps for map filtering/markers.
     kappaRequired: false, // Optional | UI (logic)
     lightkeeperRequired: false, // Optional | UI (logic)
     factionName: "Any", // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
