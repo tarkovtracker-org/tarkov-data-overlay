@@ -555,4 +555,14 @@
       },
     },
   },
+  // Vacate the Premises - Inaccurate objective count
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Vacate_the_Premises
+  '67d03be712fb5f8fd2096332': {
+    objectives: {
+      '67d03be712fb5f8fd2096334': {
+        // count: 24, // Was: 36 | This would be the appropriate fix for PvP after we address the inability to specify gameModes per tasks, but cordinated changes are needed between TarkovTracker and tarkov-data-overlay.
+        description: 'Eliminate any target inside The Labyrinth (PvP: 24 kills / PvE: 36 kills)', // Was: "Eliminate any target inside The Labyrinth" | Temporary fix til above mentioned issue is coordinated and addressed.
+      },
+    },
+  },
 }
