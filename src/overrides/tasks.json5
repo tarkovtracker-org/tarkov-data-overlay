@@ -493,36 +493,38 @@
       },
     ],
   },
-
-  // Ballet Lover - Missing key requirements
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
-  '639135a7e705511c8a4a1b78': {
-    neededKeys: [
-      {
-        map: {
-          id: '5714dc692459777137212e12',
-          name: 'Streets of Tarkov',
+// Ballet Lover - Missing key requirements
+// Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
+'639135a7e705511c8a4a1b78': {
+  neededKeys: [
+    {
+      map: {
+        id: '5714dc692459777137212e12',
+        name: 'Streets of Tarkov',
+      },
+      keys: [
+        {
+          id: '63a39e1d234195315d4020bd',
+          name: 'Primorsky 46-48 skybridge key',
+          shortName: 'Skybridge 46-48',
         },
-        keys: [
+      ],
+    },
+  ],
+  objectives: {
+    '63a7da6f5199ab1f7d4a774a': {
+      requiredKeys: [
+        [
           {
             id: '63a39e1d234195315d4020bd',
             name: 'Primorsky 46-48 skybridge key',
             shortName: 'Skybridge 46-48',
           },
         ],
-      },
-    ], // Was: undefined
-    objectives: {
-      '63a7da6f5199ab1f7d4a774a': {
-        requiredKeys: [
-          [
-            {
-              id: '63a39e1d234195315d4020bd',
-              name: 'Primorsky 46-48 skybridge key',
-              shortName: 'Skybridge 46-48',
-            },
-          ],
-        ], // Was: undefined
+      ],
+    },
+  },
+
   // Drip-Out - Part 2 (USEC) - Objective maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
   // Rogues are only present on Lighthouse (Water Treatment Plant), not Customs or Woods.
