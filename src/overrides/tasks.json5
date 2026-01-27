@@ -396,9 +396,9 @@
   },
   // The Blood of War - Part 1 - Truck #2 Location Change, Truck #4 Missing
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
-  "5ae448f286f77448d73c0131": {
+  '5ae448f286f77448d73c0131': {
     objectives: {
-      "5ae452de86f77450595c4333": {
+      '5ae452de86f77450595c4333': {
         zones: [
           {
             map: {
@@ -438,26 +438,26 @@
     },
     objectivesAdd: [
       {
-        id: "the_blood_of_war_-_part_1_obj04",
-        description: "Mark the fourth fuel tank with an MS2000 Marker on Interchange",
-        type: "mark",
+        id: 'the_blood_of_war_-_part_1_obj04',
+        description: 'Mark the fourth fuel tank with an MS2000 Marker on Interchange',
+        type: 'mark',
         maps: [
           {
-            id: "5714dbc024597771384a510d",
-            name: "Interchange",
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
           },
         ],
         markerItem: {
-          id: "5991b51486f77447b112d44f",
-          name: "MS2000 Marker",
-          shortName: "MS2000",
+          id: '5991b51486f77447b112d44f',
+          name: 'MS2000 Marker',
+          shortName: 'MS2000',
         },
         optional: true,
         zones: [
           {
             map: {
-              id: "5714dbc024597771384a510d",
-              name: "Interchange",
+              id: '5714dbc024597771384a510d',
+              name: 'Interchange',
             },
             outline: [
               {
