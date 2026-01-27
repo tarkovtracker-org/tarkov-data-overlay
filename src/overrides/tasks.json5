@@ -493,4 +493,34 @@
       },
     ],
   },
+  // Drip-Out - Part 2 (USEC) - Objective maps incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
+  // Rogues are only present on Lighthouse (Water Treatment Plant), not Customs or Woods.
+  '6615141bfda04449120269a7': {
+    objectives: {
+      '6615141bfda04449120269a8': {
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ], // Was: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }, { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }, { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' }]
+      },
+    },
+  },
+  // Drip-Out - Part 2 (Bear) - Objective maps incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
+  // Rogues are only present on Lighthouse (Water Treatment Plant), not Customs or Woods.
+  '6613f307fca4f2f386029409': {
+    objectives: {
+      '6615127fd998c5f2aaa4a8a0': {
+        maps: [
+          {
+            id: '5704e4dad2720bb55b8b4567',
+            name: 'Lighthouse',
+          },
+        ], // Was: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }, { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }, { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' }]
+      },
+    },
+  },
 }
