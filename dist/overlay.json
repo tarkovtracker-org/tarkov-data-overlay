@@ -478,6 +478,13 @@
           ]
         }
       }
+    },
+    "67d03be712fb5f8fd2096332": {
+      "objectives": {
+        "67d03be712fb5f8fd2096334": {
+          "description": "Eliminate any target inside The Labyrinth (PvP: 24 kills / PvE: 36 kills)"
+        }
+      }
     }
   },
   "editions": {
@@ -911,7 +918,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-01-27T17:43:55.043Z",
-    "sha256": "25e22c0b95edb1a2a70f2b459c8fc0fd35c576e12e0f4a1eda641ba610ece184"
+    "generated": "2026-01-28T12:49:55.103Z",
+    "sha256": "2512771260ef6172d8ba3148e3c28be6f15066f141a0945a9cd0bf448ac28004"
   }
 }
