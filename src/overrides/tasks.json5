@@ -574,7 +574,7 @@
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
     objectives: {
       '68481881f43abfdda205836f': {
-        maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }], // Was: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }]
+        maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }], // Was: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }]
       },
     },
     objectivesAdd: [
@@ -583,6 +583,7 @@
         description: 'Survive and extract from Interchange',
         type: 'extract',
         maps: [{ id: '5714dbc024597771384a510d', name: 'Interchange' }],
+        exitStatus: ['Survived'],
         count: 1,
       },
     ],
