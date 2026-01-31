@@ -565,4 +565,35 @@
       },
     },
   },
+
+  // New Beginning (Prestige 4) - Reputation reward, wiki link, and objectives incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)
+  // tarkov.dev missing the Interchange extract objective; wiki includes it.
+  // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
+  '68481881f43abfdda2058369': {
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
+    objectives: {
+      '68481881f43abfdda205836f': {
+        maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }], // Was: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }]
+      },
+    },
+    objectivesAdd: [
+      {
+        id: 'new_beginning_4_obj_extract_interchange',
+        description: 'Survive and extract from Interchange',
+        type: 'extract',
+        maps: [{ id: '5714dbc024597771384a510d', name: 'Interchange' }],
+        count: 1,
+      },
+    ],
+    // Was: extract objective missing in API
+    finishRewards: {
+      traderStanding: [
+        {
+          trader: { name: 'Ragman' },
+          standing: 0.1, // Was: 0.01
+        },
+      ],
+    },
+  },
 }
