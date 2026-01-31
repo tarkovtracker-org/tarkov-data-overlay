@@ -565,4 +565,17 @@
       },
     },
   },
+
+  // New Beginning (Prestige 1) - Wiki link and objective description incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
+  // tarkov.dev links to the disambiguation page; should link to the specific Prestige 1 page.
+  // tarkov.dev objective uses Lab -> Streets transit; wiki states surviving and extracting from The Lab instead.
+  '6761f28a022f60bb320f3e95': {
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
+    objectives: {
+      '6848100b00afffa81f09e36b': {
+        description: 'Survive and extract from The Lab', // Was: "Use the transit from The Lab to Streets of Tarkov"
+      },
+    },
+  },
 }
