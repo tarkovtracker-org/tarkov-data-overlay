@@ -723,7 +723,7 @@
       "objectivesAdd": {
         "description": "Objective additions for missing API objectives",
         "items": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "containsAll": {
               "items": {
