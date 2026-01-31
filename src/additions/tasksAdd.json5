@@ -1116,4 +1116,330 @@
       ],
     },
   },
+
+  // New Beginning (Prestige 6)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)
+  new_beginning_prestige_6: {
+    id: 'new_beginning_prestige_6',
+    name: 'New Beginning',
+    normalizedName: 'new-beginning-6',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)',
+    trader: {
+      id: '5ac3b934156ae10c4430e83c',
+      name: 'Ragman',
+    },
+    minPlayerLevel: 55,
+    requiredPrestige: {
+      name: 'Prestige 5',
+      prestigeLevel: 5,
+    },
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    objectives: [
+      {
+        id: 'new_beginning_prestige_6_obj01',
+        description: 'Eliminate 50 PMC operatives',
+        type: 'shoot',
+        optional: false,
+        count: 50,
+        shotType: 'kill',
+        targetNames: ['any PMC operatives'],
+      },
+      {
+        id: 'new_beginning_prestige_6_obj02',
+        description: 'Eliminate 100 Rogues',
+        type: 'shoot',
+        optional: false,
+        count: 100,
+        shotType: 'kill',
+        targetNames: ['Rogue'],
+      },
+      {
+        id: 'new_beginning_prestige_6_obj03',
+        description: 'Locate and neutralize any boss with a headshot',
+        type: 'shoot',
+        optional: false,
+        count: 1,
+        shotType: 'kill',
+        bodyParts: ['head'],
+        targetNames: ['any boss'],
+      },
+      {
+        id: 'new_beginning_prestige_6_obj04',
+        description: 'Eliminate 5 hooded men',
+        type: 'shoot',
+        optional: false,
+        count: 5,
+        shotType: 'kill',
+        targetNames: ['Cultist Priest', 'Cultist Warrior'],
+      },
+      {
+        id: 'new_beginning_prestige_6_obj05',
+        description: 'Use the transit from The Lab to Streets of Tarkov',
+        type: 'extract',
+        maps: [
+          {
+            id: '5b0fc42d86f7744a585f9105',
+            name: 'The Lab',
+          },
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        optional: false,
+        exitStatus: ['ExpBonusmarathon Name'],
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj06',
+        description: 'Use the transit from Streets of Tarkov to Interchange',
+        type: 'extract',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+        ],
+        optional: false,
+        exitStatus: ['ExpBonusmarathon Name'],
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj07',
+        description: 'Use the transit from Interchange to Customs',
+        type: 'extract',
+        maps: [
+          {
+            id: '5714dbc024597771384a510d',
+            name: 'Interchange',
+          },
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        optional: false,
+        exitStatus: ['ExpBonusmarathon Name'],
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj08',
+        description: 'Use the transit from Customs to Reserve',
+        type: 'extract',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        optional: false,
+        exitStatus: ['ExpBonusmarathon Name'],
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj09',
+        description: 'Survive and extract from Reserve',
+        type: 'extract',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        optional: false,
+        exitStatus: ['Survived'],
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj10',
+        description: 'Hand over the found in raid item: BEAR operative figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c652d60d0ac437100fed7',
+            name: 'BEAR operative figurine',
+            shortName: 'BEAR',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj11',
+        description: 'Hand over the found in raid item: Politician Mutkevich figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c66e40b2de553b618d4b8',
+            name: 'Politician Mutkevich figurine',
+            shortName: 'Mutkevich',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj12',
+        description: 'Hand over the found in raid item: Killa figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '66572c82ad599021091c6118',
+            name: 'Killa figurine',
+            shortName: 'Killa',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj13',
+        description: 'Hand over the found in raid item: Reshala figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '66572be36a723f7f005a066e',
+            name: 'Reshala figurine',
+            shortName: 'Reshala',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj14',
+        description: 'Hand over the found in raid item: Ryzhy figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c67782a1356436041c9c5',
+            name: 'Ryzhy figurine',
+            shortName: 'Ryzhy',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj15',
+        description: 'Hand over the found in raid item: Scav figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c673673a43e23e857aebd',
+            name: 'Scav figurine',
+            shortName: 'Scav',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj16',
+        description: 'Hand over the found in raid item: Tagilla figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '66572cbdad599021091c611a',
+            name: 'Tagilla figurine',
+            shortName: 'Tagilla',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj17',
+        description: 'Hand over the found in raid item: USEC operative figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c663a6689c676ce57af85',
+            name: 'USEC operative figurine',
+            shortName: 'USEC',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj18',
+        description: 'Hand over the found in raid item: Cultist figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '655c669103999d3c810c025b',
+            name: 'Cultist figurine',
+            shortName: 'Cultist',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+      {
+        id: 'new_beginning_prestige_6_obj19',
+        description: 'Hand over the found in raid item: Den figurine',
+        type: 'giveItem',
+        items: [
+          {
+            id: '66572b8d80b1cd4b6a67847f',
+            name: 'Den figurine',
+            shortName: 'Den',
+          },
+        ],
+        optional: false,
+        foundInRaid: true,
+        count: 1,
+      },
+    ],
+    experience: 11000,
+    finishRewards: {
+      items: [
+        {
+          count: 3000000,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 3,
+          item: {
+            id: '59faff1d86f7746c51718c9c',
+            name: 'Physical Bitcoin',
+            shortName: '0.2BTC',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '5ac3b934156ae10c4430e83c',
+            name: 'Ragman',
+          },
+          standing: 0.1,
+        },
+      ],
+    },
+  },
 }
