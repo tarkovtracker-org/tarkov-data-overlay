@@ -565,4 +565,11 @@
       },
     },
   },
+
+  // New Beginning (Prestige 2) - Wiki link incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
+  // tarkov.dev links to the disambiguation page; should link to the specific Prestige 2 page.
+  '6761ff17cdc36bd66102e9d0': {
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
+  },
 }
