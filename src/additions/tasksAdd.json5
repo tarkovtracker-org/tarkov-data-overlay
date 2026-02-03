@@ -13,20 +13,6 @@
   //     id: '54cb50c76803fa8b248b4571',
   //     name: 'Prapor',
   //   },
-  //   maps: [
-  //     {
-  //       id: '5704e3c2d2720bac5b8b4567',
-  //       name: 'Woods',
-  //     },
-  //     {
-  //       id: '5704e5fad2720bc05b8b4567',
-  //       name: 'Reserve',
-  //     },
-  //     {
-  //       id: '5714dbc024597771384a510d',
-  //       name: 'Interchange',
-  //     },
-  //   ],
   //   map: null,
   //   kappaRequired: false,
   //   factionName: 'Any',
@@ -258,12 +244,6 @@
   //     id: '58330581ace78e27b8b10cee',
   //     name: 'Skier',
   //   },
-  //   maps: [
-  //     {
-  //       id: '56f40101d2720b2a4d8b45d6',
-  //       name: 'Customs',
-  //     },
-  //   ],
   //   map: {
   //     id: '56f40101d2720b2a4d8b45d6',
   //     name: 'Customs',
@@ -339,12 +319,6 @@
   //     id: '58330581ace78e27b8b10cee',
   //     name: 'Skier',
   //   },
-  //   maps: [
-  //     {
-  //       id: '5704e3c2d2720bac5b8b4567',
-  //       name: 'Woods',
-  //     },
-  //   ],
   //   map: {
   //     id: '5704e3c2d2720bac5b8b4567',
   //     name: 'Woods',
@@ -495,12 +469,6 @@
   //     id: '54cb50c76803fa8b248b4571',
   //     name: 'Prapor',
   //   },
-  //   maps: [
-  //     {
-  //       id: '5704e3c2d2720bac5b8b4567',
-  //       name: 'Woods',
-  //     },
-  //   ],
   //   map: {
   //     id: '5704e3c2d2720bac5b8b4567',
   //     name: 'Woods',
@@ -655,32 +623,6 @@
   //     id: '5ac3b934156ae10c4430e83c',
   //     name: 'Ragman',
   //   },
-  //   maps: [
-  //     {
-  //       id: '56f40101d2720b2a4d8b45d6',
-  //       name: 'Customs',
-  //     },
-  //     {
-  //       id: '5714dbc024597771384a510d',
-  //       name: 'Interchange',
-  //     },
-  //     {
-  //       id: '5704e4dad2720bb55b8b4567',
-  //       name: 'Lighthouse',
-  //     },
-  //     {
-  //       id: '5704e5fad2720bc05b8b4567',
-  //       name: 'Reserve',
-  //     },
-  //     {
-  //       id: '5704e554d2720bac5b8b456e',
-  //       name: 'Shoreline',
-  //     },
-  //     {
-  //       id: '5704e3c2d2720bac5b8b4567',
-  //       name: 'Woods',
-  //     },
-  //   ],
   //   map: null,
   //   kappaRequired: false,
   //   factionName: 'Any',
