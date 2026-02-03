@@ -346,23 +346,6 @@
         ],
         "description": "Primary map for the task"
       },
-      "maps": {
-        "description": "Legacy field kept for compatibility and possible future use. Tracker currently ignores task.maps and uses task.map plus objectives[].maps for filtering/rendering. Prefer setting task.map and objectives[].maps.",
-        "items": {
-          "additionalProperties": false,
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            }
-          },
-          "required": ["id", "name"],
-          "type": "object"
-        },
-        "type": "array"
-      },
       "name": {
         "description": "Task name",
         "type": "string"
