@@ -176,22 +176,13 @@
     map: null, // Was: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" }
     objectives: {
       '63a5cf262964a7488f5243d1': {
-        description: 'Eliminate PMC operatives while using an MP5SD with PRO sight on Streets of Tarkov, Ground Zero or Interchange',
+        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange',
         usingWeapon: [
           {
             id: '59411abb86f77478f702b5d2',
             name: 'HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD',
             shortName: 'MP5 SD',
           },
-        ],
-        usingWeaponMods: [
-          [
-            {
-              id: '61659f79d92c473c770213ee',
-              name: 'Aimpoint PRO reflex sight',
-              shortName: 'PRO',
-            },
-          ],
         ],
         maps: [
           { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
