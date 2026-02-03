@@ -176,19 +176,19 @@
     map: null, // Was: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" }
     objectives: {
       '63a5cf262964a7488f5243d1': {
-        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange',
+        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was: Eliminate PMC operatives while using an SR-2M with a suppressor and KP-SR2 sight on Streets of Tarkov
         usingWeapon: [
           {
             id: '59411abb86f77478f702b5d2',
             name: 'HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD',
             shortName: 'MP5 SD',
           },
-        ],
+        ], // Was: "id": "62e14904c2699c0ec93adc47", "name": "SR-2M Veresk 9x21 submachine gun", "shortName": "SR-2M"
         maps: [
           { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
           { id: '653e6760052c01c1c805532f', name: 'Ground Zero' },
           { id: '5714dbc024597771384a510d', name: 'Interchange' },
-        ],
+        ], // Was: { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }
       },
     },
   },
