@@ -608,36 +608,5 @@
         },
       ],
     },
-  },
-  // New Beginning (Prestige 3) - Reputation reward, wiki link, and objectives incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
-  // tarkov.dev missing the Lab -> Streets transit objective; wiki includes it.
-  // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
-  '6848100b00afffa81f09e365': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
-    objectives: {
-      '6848116061809d65b8503617': {
-        exitStatus: ['Survived'], // Was: ["ExpBonusmarathon Name"]
-      },
-    },
-    objectivesAdd: [
-      {
-        id: 'new_beginning_3_obj_transit_lab_streets',
-        description: 'Use the transit from The Lab to Streets of Tarkov',
-        type: 'extract',
-        maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }],
-        exitStatus: ['ExpBonusmarathon Name'],
-        count: 1,
-      },
-    ],
-    // Was: transit objective missing in API
-    finishRewards: {
-      traderStanding: [
-        {
-          trader: { name: 'Ragman' },
-          standing: 0.1, // Was: 0.01
-        },
-      ],
-    },
   }
 }
