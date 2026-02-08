@@ -639,5 +639,11 @@
         },
       ],
     },
+  },
+  // Operation Aquarius - Part 1 - Kappa requirement incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius_-_Part_1
+  // Wiki task infobox shows reqkappa: No
+  '59689fbd86f7740d137ebfc4': {
+    kappaRequired: false, // Was: true
   }
 }
