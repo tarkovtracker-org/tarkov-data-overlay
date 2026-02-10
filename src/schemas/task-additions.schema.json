@@ -117,8 +117,8 @@
             "items": {
               "properties": {
                 "level": {
-                  "minimum": 1,
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "number"
                 },
                 "name": {
                   "type": "string"
@@ -264,8 +264,8 @@
             "items": {
               "properties": {
                 "level": {
-                  "minimum": 1,
-                  "type": "integer"
+                  "minimum": 0,
+                  "type": "number"
                 },
                 "name": {
                   "type": "string"
