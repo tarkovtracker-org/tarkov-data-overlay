@@ -704,5 +704,15 @@
         distance: 40, // Was: 75
       },
     },
+  },
+  // Connections Up North - PMC kill count requirement incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Connections_Up_North
+  // tarkov.dev currently shows 50 PMC kills; latest update reduces to 20.
+  '6764174c86addd02bc033d68': {
+    objectives: {
+      '676418a60b9bcbe280972288': {
+        count: 20, // Was: 50
+      },
+    },
   }
 }
