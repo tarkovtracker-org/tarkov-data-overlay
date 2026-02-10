@@ -496,6 +496,7 @@
     },
     "6848100b00afffa81f09e365": {
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)",
+      "minPlayerLevel": 47,
       "objectives": {
         "6848116061809d65b8503617": {
           "exitStatus": [
@@ -2163,7 +2164,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-02-10T18:56:13.692Z",
-    "sha256": "e0dd9cbc8374ccbc02996435271c290cb7f0a0c1e3a05b5f5993dc31d1ac6840"
+    "generated": "2026-02-10T18:57:29.762Z",
+    "sha256": "0e2d5db885754654c39e949fa7da50214a22d816231dddf6d635d96daa8d6b05"
   }
 }
