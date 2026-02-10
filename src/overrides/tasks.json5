@@ -586,6 +586,7 @@
   // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
   '6848100b00afffa81f09e365': {
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
+    minPlayerLevel: 47, // Was: 55
     objectives: {
       '6848116061809d65b8503617': {
         exitStatus: ['Survived'], // Was: ["ExpBonusmarathon Name"]
