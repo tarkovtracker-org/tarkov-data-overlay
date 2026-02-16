@@ -156,6 +156,50 @@
             },
             "required": ["id", "name"],
             "type": "object"
+          },
+          "achievement": {
+            "description": "Achievement rewards",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "customization": {
+            "description": "Customization rewards",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "customizationType": {
+                  "type": "string"
+                },
+                "customizationTypeName": {
+                  "type": "string"
+                },
+                "imageLink": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["name"],
+              "type": "object"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -303,6 +347,50 @@
             },
             "required": ["id", "name"],
             "type": "object"
+          },
+          "achievement": {
+            "description": "Achievement rewards",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "customization": {
+            "description": "Customization rewards",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "customizationType": {
+                  "type": "string"
+                },
+                "customizationTypeName": {
+                  "type": "string"
+                },
+                "imageLink": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["name"],
+              "type": "object"
+            },
+            "type": "array"
           }
         },
         "type": "object"

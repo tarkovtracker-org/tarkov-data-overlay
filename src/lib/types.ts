@@ -45,6 +45,22 @@ export interface TaskRewards {
     skill?: { id: string; name: string; imageLink?: string };
   }>;
   traderUnlock?: { id: string; name: string };
+  achievement?: TaskAchievementReward[];
+  customization?: TaskCustomizationReward[];
+}
+
+export interface TaskAchievementReward {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface TaskCustomizationReward {
+  id?: string;
+  name: string;
+  customizationType?: string;
+  customizationTypeName?: string;
+  imageLink?: string | null;
 }
 
 /** Task objective from tarkov.dev API */
