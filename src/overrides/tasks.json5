@@ -747,4 +747,10 @@
   '5c112d7e86f7740d6f647486': {
     experience: 10000, // Was: 17700
   },
+  // Private Club - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
+  // Wiki rewards show +11,000 EXP.
+  '675c3582f6ddc329a90f9c6d': {
+    experience: 11000, // Was: 23000
+  },
 }
