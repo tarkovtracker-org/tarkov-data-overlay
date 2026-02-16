@@ -741,4 +741,10 @@
   '626bd75c71bd851e971b82a5': {
     experience: 7500, // Was: 18000
   },
+  // Scavenger - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  // Wiki rewards show +10,000 EXP.
+  '5c112d7e86f7740d6f647486': {
+    experience: 10000, // Was: 17700
+  },
 }
