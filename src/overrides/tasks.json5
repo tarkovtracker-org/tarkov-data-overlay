@@ -57,7 +57,7 @@
     objectives: {
       '5c1b765d86f77413193fa4f2': {
         count: 10, // Was: 5
-        description: 'Eliminate PMC operatives using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope',
+        description: 'Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope',
         usingWeapon: [
           {
             id: '5df8ce05b11454561e39243b',
@@ -238,22 +238,11 @@
     },
   },
 
-  // Test Drive - Part 5 - Objective description/items and rewards incorrect
+  // Test Drive - Part 5 - Objective description/items and experience incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
   // Recent wiki update (post-1.0); not verified in-game
   '669fa3a40c828825de06d6a1': {
     experience: 23000, // Was: 50000
-    finishRewards: {
-      items: [
-        {
-          item: {
-            id: '5449016a4bdc2d6f028b456f',
-            name: 'Roubles',
-          },
-          count: 500000, // Was: 520000
-        },
-      ],
-    },
     objectives: {
       '66a0f5a7f9eae6761253114c': {
         description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
@@ -283,19 +272,11 @@
     },
   },
 
-  // Test Drive - Part 6 - Experience and reputation incorrect
+  // Test Drive - Part 6 - Experience incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_6
   // Recent wiki update (post-1.0); not verified in-game
   '675c1ff1a757ddd00404f0aa': {
     experience: 32000, // Was: 65000
-    finishRewards: {
-      traderStanding: [
-        {
-          trader: { name: 'Prapor' },
-          standing: 0.02, // Was: 0.03
-        },
-      ],
-    },
   },
 
   // No Swiping - Objective count incorrect
