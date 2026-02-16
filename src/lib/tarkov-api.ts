@@ -111,6 +111,18 @@ const TASKS_QUERY = `
           id
           name
         }
+        achievement {
+          id
+          name
+          description
+        }
+        customization {
+          id
+          name
+          customizationType
+          customizationTypeName
+          imageLink
+        }
       }
       finishRewards {
         items { item { id name shortName } count }
@@ -128,6 +140,18 @@ const TASKS_QUERY = `
         traderUnlock {
           id
           name
+        }
+        achievement {
+          id
+          name
+          description
+        }
+        customization {
+          id
+          name
+          customizationType
+          customizationTypeName
+          imageLink
         }
       }
     }
