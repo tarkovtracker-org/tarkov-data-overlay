@@ -1994,6 +1994,13 @@
           standing: 0.03,
         },
       ],
+      achievement: [
+        {
+          id: '6984ab58ee0ae2c0d5075f33',
+          name: 'Duck Hunt',
+          description: 'Complete the Duck Hunt 2026 event task',
+        },
+      ],
       skillLevelReward: [
         {
           name: 'Perception',
