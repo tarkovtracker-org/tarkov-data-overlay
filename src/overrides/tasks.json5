@@ -735,4 +735,40 @@
       },
     },
   },
+  // Reconnaissance - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reconnaissance
+  // Wiki rewards show +7,500 EXP.
+  '626bd75c71bd851e971b82a5': {
+    experience: 7500, // Was: 18000
+  },
+  // Scavenger - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  // Wiki rewards show +10,000 EXP.
+  '5c112d7e86f7740d6f647486': {
+    experience: 10000, // Was: 17700
+  },
+  // Private Club - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
+  // Wiki rewards show +11,000 EXP.
+  '675c3582f6ddc329a90f9c6d': {
+    experience: 11000, // Was: 23000
+  },
+  // Crisis - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
+  // Wiki rewards show +34,000 EXP.
+  '60e71c48c1bfa3050473b8e5': {
+    experience: 34000, // Was: 97000
+  },
+  // Properties All Around - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Properties_All_Around
+  // Wiki rewards show +6,600 EXP.
+  '6573397ef3f8344c4575cd87': {
+    experience: 6600, // Was: 11600
+  },
+  // Beneath The Streets - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets
+  // Wiki rewards show +24,000 EXP.
+  '66aba85403e0ee3101042877': {
+    experience: 24000, // Was: 46700
+  },
 }
