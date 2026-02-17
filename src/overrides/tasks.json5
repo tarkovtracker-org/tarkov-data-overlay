@@ -752,4 +752,28 @@
   '66aba85403e0ee3101042877': {
     experience: 24000, // Was: 46700
   },
+  // Gendarmerie - District Patrol - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_District_Patrol
+  // Wiki rewards show +8,300 EXP.
+  '64e7b9bffd30422ed03dad38': {
+    experience: 8300, // Was: 25000
+  },
+  // Gendarmerie - Tickets, Please - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Tickets%2C_Please
+  // Wiki rewards show +7,500 EXP.
+  '64e7b9a4aac4cd0a726562cb': {
+    experience: 7500, // Was: 22600
+  },
+  // Gendarmerie - Mall Cop - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Mall_Cop
+  // Wiki rewards show +7,100 EXP.
+  '64e7b99017ab941a6f7bf9d7': {
+    experience: 7100, // Was: 21500
+  },
+  // Debtor - Experience incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
+  // Wiki rewards show +13,200 EXP.
+  '639dbaf17c898a131e1cffff': {
+    experience: 13200, // Was: 26600
+  },
 }
