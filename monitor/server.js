@@ -3,16 +3,12 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
-const dotenv = require("dotenv");
-
-dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const PORT = Number(process.env.PORT) || 3476;
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const MAX_ROWS = Number(process.env.MAX_ROWS) || 250;
 
 const OVERLAY_PATH =
-  process.env.SOURCE_PATH ||
   process.env.TARGET_OVERLAY ||
   path.resolve(__dirname, "../dist/overlay.json");
 const API_POLL_MS = Number(process.env.API_POLL_MS) || 120000;

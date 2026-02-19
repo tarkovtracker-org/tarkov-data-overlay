@@ -21,9 +21,6 @@
   ],
   "author": "Lab",
   "license": "MIT",
-  "dependencies": {
-    "dotenv": "^16.6.1"
-  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "ajv": "^8.12.0",

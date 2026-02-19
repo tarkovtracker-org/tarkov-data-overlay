@@ -27,7 +27,6 @@ npm-debug.log*
 # Environment
 .env
 .env.local
-!monitor/.env
 
 # Test coverage
 coverage/
@@ -35,4 +34,4 @@ coverage/
 # Generated data (wiki cache, API cache, comparison results)
 data/
 
-package-lock.json
+package-lock.
