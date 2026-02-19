@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,9 +36,124 @@ jobs:
 
       - name: Commit dist (main branch only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add dist/
-          git diff --staged --quiet || git commit -m "chore: build overlay [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore: build overlay [skip ci]"
+            git push
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute next tag
+        id: version
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        run: |
+          latest_tag=$(git tag --list 'v*.*' --sort=-v:refname | head -n 1)
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="v1.0"
+          else
+            version="${latest_tag#v}"
+            major="${version%%.*}"
+            minor="${version#*.}"
+            next_tag="v${major}.$((minor + 1))"
+          fi
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build tag message
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        run: |
+          prev_tag="${{ steps.version.outputs.latest_tag }}"
+          if [[ -n "$prev_tag" ]]; then
+            git show "$prev_tag:dist/overlay.json" > /tmp/overlay.prev.json
+          else
+            echo '{}' > /tmp/overlay.prev.json
+          fi
+
+          node <<'NODE'
+          const fs = require('fs');
+
+          const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
+          const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
+
+          const MAX_ITEMS_PER_SECTION = 12;
+          const MAX_SECTIONS = 20;
+
+          const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
+
+          const getDisplayName = (entry) => {
+            if (!entry || typeof entry !== 'object') return null;
+            return (
+              entry.name ||
+              entry.shortName ||
+              entry.title ||
+              entry.key ||
+              entry.traderName ||
+              entry.objective ||
+              null
+            );
+          };
+
+          const sections = Object.keys(current).filter((key) => isObject(current[key])).sort();
+          const lines = [];
+
+          for (const section of sections) {
+            const currentSection = current[section] || {};
+            const previousSection = isObject(previous[section]) ? previous[section] : {};
+            const addedIds = Object.keys(currentSection).filter((id) => !(id in previousSection));
+            if (!addedIds.length) continue;
+
+            const displayed = addedIds.slice(0, MAX_ITEMS_PER_SECTION).map((id) => {
+              const name = getDisplayName(currentSection[id]);
+              return name ? `+${name} (${id})` : `+${id}`;
+            });
+
+            const remaining = addedIds.length - displayed.length;
+            const extra = remaining > 0 ? ` and ${remaining} more` : '';
+            lines.push(`${section}: ${displayed.join(', ')}${extra}`);
+
+            if (lines.length >= MAX_SECTIONS) break;
+          }
+
+          if (!lines.length) {
+            lines.push('No new entries detected in overlay.json');
+          }
+
+          const message = [
+            'Overlay update',
+            '',
+            ...lines,
+          ].join('\n');
+
+          fs.writeFileSync('/tmp/tag-message.txt', message);
+          NODE
+
+      - name: Create and push tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        env:
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          git fetch --tags
+          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEXT_TAG already exists, skipping tag creation"
+          else
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git tag -a "$NEXT_TAG" -F /tmp/tag-message.txt
+            git push origin "$NEXT_TAG"
+          fi
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.next_tag }}
+          body_path: /tmp/tag-message.txt
+          files: dist/overlay.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
