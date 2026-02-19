@@ -33,5 +33,3 @@ coverage/
 
 # Generated data (wiki cache, API cache, comparison results)
 data/
-
-package-lock.
