@@ -1,382 +1,672 @@
 /**
  * Tests for monitor server module
- * Tests the builder functions and endpoint behavior
+ * Tests the actual builder functions and endpoint behavior from monitor/server.js
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import http from 'http';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { createRequire } from 'module';
 
-// Test utilities for evaluating the monitor's core functions
+const require = createRequire(import.meta.url);
 
-describe('Monitor Server - Builder Functions', () => {
-  describe('buildTasksSections Logic', () => {
-    it('should properly structure task override sections with diff, additions, missing, and disabled', () => {
-      // Test case: Verify the logical flow for task overrides
-      // Expected: 4 sections (diff, added, missing, disabled)
-      const expectedSections = ['Task Overrides vs API', 'Added Objectives', 'Tasks Missing From API', 'Disabled Tasks'];
-      expect(expectedSections).toHaveLength(4);
-    });
+// Set test environment before importing server — this prevents auto-start
+// of the HTTP server, overlay watcher, and API polling.
+process.env.NODE_ENV = 'test';
 
-    it('should detect when API value equals override value', () => {
-      // Test case: Compare equal values
-      // Expected: status should be "same" when values match
-      const apiValue = { id: 'test', name: 'Test' };
-      const overrideValue = { id: 'test', name: 'Test' };
-      const areEqual = JSON.stringify(apiValue) === JSON.stringify(overrideValue);
-      expect(areEqual).toBe(true);
-    });
+// Mock fs to prevent actual file operations triggered at import time
+vi.mock('fs', () => ({
+  promises: {
+    readFile: vi.fn(),
+    stat: vi.fn(),
+  },
+  watchFile: vi.fn(),
+  existsSync: vi.fn(() => false),
+  readdirSync: vi.fn(() => []),
+  statSync: vi.fn(() => ({ isDirectory: () => false })),
+  readFile: vi.fn(),
+}));
 
-    it('should detect when API value differs from override value', () => {
-      // Test case: Compare different values
-      // Expected: status should be "override" when values differ
-      const apiValue = 10;
-      const overrideValue = 45;
-      const areDifferent = apiValue !== overrideValue;
-      expect(areDifferent).toBe(true);
-    });
+// Import the real server module (CommonJS)
+const serverModule = require('../monitor/server.js');
 
-    it('should handle missing API tasks by adding to missing section', () => {
-      // Test case: Override exists but API task doesn't
-      // Expected: Row added to "Tasks Missing From API" section
-      const overrideTaskId = 'custom-task-id';
-      const apiTaskIds = ['existing-task-1', 'existing-task-2'];
-      const isMissing = !apiTaskIds.includes(overrideTaskId);
-      expect(isMissing).toBe(true);
-    });
+const {
+  buildTasksSections,
+  buildSummary,
+  buildOverrideSections,
+  buildEditionsSections,
+  buildStoryChapterSections,
+  buildTaskAdditionSections,
+  mergeTaskOverrides,
+  rebuildSummaries,
+  valuesEqual,
+  formatValue,
+  normalizeView,
+  normalizeMode,
+  createSection,
+  pushRow,
+  overlayState,
+  apiState,
+  server,
+  VIEW_CONFIG,
+} = serverModule;
 
-    it('should respect disabled task flag and add to disabled section', () => {
-      // Test case: Task marked as disabled
-      // Expected: Row added to "Disabled Tasks" section
-      const taskOverride = { disabled: true, name: 'Disabled Task' };
-      const isDisabled = taskOverride.disabled === true;
-      expect(isDisabled).toBe(true);
-    });
+// ---------------------------------------------------------------------------
+// Builder function tests — exercise the real functions from server.js
+// ---------------------------------------------------------------------------
 
-    it('should process objectivesAdd array correctly', () => {
-      // Test case: Task has objectivesAdd array
-      // Expected: Each objective added to "Added Objectives" section
-      const objectivesAdd = [
-        { id: 'obj-1', description: 'New objective' },
-        { id: 'obj-2', description: 'Another objective' }
-      ];
-      expect(Array.isArray(objectivesAdd)).toBe(true);
-      expect(objectivesAdd).toHaveLength(2);
-    });
+describe('buildTasksSections', () => {
+  it('returns the four expected sections', () => {
+    const sections = buildTasksSections({}, [], 'regular');
 
-    it('should handle objective field overrides in existing objectives', () => {
-      // Test case: Override specific fields of an objective
-      // Expected: Row for each overridden field with format: Task, objective:id.field, API, Overlay, status
-      const objectiveId = 'objective-123';
-      const field = 'description';
-      const rowKey = `objective:${objectiveId}.${field}`;
-      expect(rowKey).toBe('objective:objective-123.description');
-    });
+    expect(sections).toHaveLength(4);
+    expect(sections[0].title).toBe('Task Overrides vs API');
+    expect(sections[1].title).toBe('Added Objectives');
+    expect(sections[2].title).toBe('Tasks Missing From API');
+    expect(sections[3].title).toBe('Disabled Tasks');
   });
 
-  describe('buildSummary Logic', () => {
-    it('should return error when overlay data is not loaded', () => {
-      // Test case: buildSummary called with no overlay data
-      // Expected: error field set to "Overlay data not loaded"
-      const overlayData = null;
-      const hasError = overlayData === null;
-      expect(hasError).toBe(true);
-    });
+  it('detects field overrides and marks them as "override"', () => {
+    const overrides = {
+      't1': { minPlayerLevel: 45 },
+    };
+    const apiTasks = [
+      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
+    ];
 
-    it('should merge shared and mode-specific task overrides', () => {
-      // Test case: buildSummary for "tasks" view
-      // Expected: Merges overlay.tasks and overlay.modes[mode].tasks
-      const sharedOverrides = { task1: { minPlayerLevel: 10 } };
-      const modeOverrides = { task1: { minPlayerLevel: 20 } };
-      const merged = { ...sharedOverrides, ...modeOverrides };
-      expect(merged.task1.minPlayerLevel).toBe(20);
-    });
+    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
+    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
 
-    it('should handle different view types (tasks, items, hideout, etc)', () => {
-      // Test case: buildSummary for various view types
-      // Expected: Correct builder function selected per view
-      const views = ['tasks', 'tasksAdd', 'items', 'hideout', 'traders', 'editions', 'storyChapters', 'itemsAdd'];
-      expect(views).toHaveLength(8);
-      views.forEach(view => {
-        expect(typeof view).toBe('string');
-        expect(view.length).toBeGreaterThan(0);
-      });
-    });
-
-    it('should include API error state for mode-specific views', () => {
-      // Test case: buildSummary for "tasks" view
-      // Expected: error field includes both overlayState.error and apiState[mode].error
-      const overlayError = null;
-      const apiError = null;
-      const finalError = overlayError || apiError || null;
-      expect(finalError).toBe(null);
-    });
-
-    it('should not include API error state for non-mode views', () => {
-      // Test case: buildSummary for "items" view
-      // Expected: error field only includes overlayState.error
-      const overlayError = null;
-      const finalError = overlayError || null;
-      expect(finalError).toBe(null);
-    });
+    expect(row).toBeDefined();
+    expect(row[2]).toBe('10');       // API value
+    expect(row[3]).toBe('45');       // overlay value
+    expect(row[4]).toBe('override'); // status
   });
 
-  describe('Utility Functions Logic', () => {
-    it('should normalize view names and default unknown views', () => {
-      // Test case: Invalid view name
-      // Expected: Returns DEFAULT_VIEW ("tasks")
-      const inputView = 'unknown-view';
-      const isValid = ['tasks', 'items', 'hideout', 'traders', 'editions', 'storyChapters', 'itemsAdd', 'tasksAdd'].includes(inputView);
-      expect(isValid).toBe(false);
-    });
+  it('marks matching values as "same"', () => {
+    const overrides = {
+      't1': { minPlayerLevel: 10 },
+    };
+    const apiTasks = [
+      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
+    ];
 
-    it('should normalize mode names and default unknown modes', () => {
-      // Test case: Invalid mode name
-      // Expected: Returns DEFAULT_MODE ("regular")
-      const inputMode = 'hardcore';
-      const isValid = inputMode === 'regular' || inputMode === 'pve';
-      expect(isValid).toBe(false);
-    });
+    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
+    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
 
-    it('should format values with truncation for long strings', () => {
-      // Test case: Long JSON string
-      // Expected: Truncated with "…" suffix if length > maxLength
-      const longValue = JSON.stringify({ a: 'x'.repeat(300) });
-      const maxLength = 220;
-      const isTruncated = longValue.length > maxLength;
-      expect(isTruncated).toBe(true);
-    });
+    expect(row).toBeDefined();
+    expect(row[4]).toBe('same');
+  });
 
-    it('should format null and undefined values as strings', () => {
-      // Test case: Special values
-      // Expected: null → "null", undefined → "undefined"
-      const nullFormatted = 'null';
-      const undefinedFormatted = 'undefined';
-      expect(nullFormatted).toBe('null');
-      expect(undefinedFormatted).toBe('undefined');
-    });
+  it('puts unknown task IDs into the missing section', () => {
+    const overrides = {
+      'no-such-task': { name: 'Ghost' },
+    };
 
-    it('should compare values with object key normalization', () => {
-      // Test case: Objects with keys in different order
-      // Expected: Should be considered equal when keys are normalized
-      const obj1Keys = { a: 1, b: 2 };
-      const obj2Keys = { b: 2, a: 1 };
-      
-      // The actual implementation sorts keys before comparing
-      const normalizeAndSort = (obj: any): string => {
-        if (typeof obj !== 'object' || obj === null) return JSON.stringify(obj);
-        const keys = Object.keys(obj).sort();
-        const sorted: any = {};
-        keys.forEach(k => sorted[k] = obj[k]);
-        return JSON.stringify(sorted);
-      };
-      
-      const normalized1 = normalizeAndSort(obj1Keys);
-      const normalized2 = normalizeAndSort(obj2Keys);
-      expect(normalized1).toBe(normalized2);
-    });
+    const [, , missing] = buildTasksSections(overrides, [], 'regular');
 
-    it('should preserve array order in comparison', () => {
-      // Test case: Arrays with different order
-      // Expected: Should be considered different (array order matters)
-      const array1 = [1, 2, 3];
-      const array2 = [3, 2, 1];
-      const json1 = JSON.stringify(array1);
-      const json2 = JSON.stringify(array2);
-      expect(json1 === json2).toBe(false);
-    });
+    expect(missing.rows).toHaveLength(1);
+    expect(missing.rows[0][0]).toBe('Ghost');
+    expect(missing.rows[0][1]).toBe('no-such-task');
+  });
 
-    it('should merge task overrides with objective handling', () => {
-      // Test case: Merge objectives separately from other fields
-      // Expected: objectives and objectivesAdd merged as objects/arrays
-      const base = {
-        task1: {
-          minPlayerLevel: 10,
-          objectives: { obj1: { description: 'Original' } }
-        }
-      };
-      const next = {
-        task1: {
-          minPlayerLevel: 20,
-          objectives: { obj2: { description: 'New' } }
-        }
-      };
-      // Both objectives should be in merged result
-      const merged = {
-        task1: {
-          minPlayerLevel: 20,
-          objectives: {
-            obj1: { description: 'Original' },
-            obj2: { description: 'New' }
-          }
-        }
-      };
-      expect(merged.task1.objectives).toHaveProperty('obj1');
-      expect(merged.task1.objectives).toHaveProperty('obj2');
-    });
+  it('puts disabled tasks into the disabled section', () => {
+    const overrides = {
+      't1': { disabled: true },
+    };
+    const apiTasks = [
+      { id: 't1', name: 'Disabled One', objectives: [] },
+    ];
+
+    const [, , , disabled] = buildTasksSections(overrides, apiTasks, 'regular');
+
+    expect(disabled.rows).toHaveLength(1);
+    expect(disabled.rows[0][0]).toBe('Disabled One');
+  });
+
+  it('adds objectivesAdd entries to the added-objectives section', () => {
+    const overrides = {
+      't1': {
+        objectivesAdd: [
+          { id: 'obj-new', description: 'Plant marker' },
+        ],
+      },
+    };
+    const apiTasks = [
+      { id: 't1', name: 'Task', objectives: [] },
+    ];
+
+    const [, added] = buildTasksSections(overrides, apiTasks, 'regular');
+
+    expect(added.rows).toHaveLength(1);
+    expect(added.rows[0][0]).toBe('Task');
+    expect(added.rows[0][1]).toBe('Plant marker');
+  });
+
+  it('diffs individual objective field overrides', () => {
+    const overrides = {
+      't1': {
+        objectives: {
+          'obj-1': { description: 'Corrected' },
+        },
+      },
+    };
+    const apiTasks = [
+      {
+        id: 't1',
+        name: 'Task',
+        objectives: [{ id: 'obj-1', description: 'Original' }],
+      },
+    ];
+
+    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
+    const row = diff.rows.find((r: string[]) =>
+      r[1] === 'objective:obj-1.description',
+    );
+
+    expect(row).toBeDefined();
+    expect(row[2]).toBe('Original');
+    expect(row[3]).toBe('Corrected');
+    expect(row[4]).toBe('override');
+  });
+
+  it('marks objective ID as missing when API task has no matching objective', () => {
+    const overrides = {
+      't1': {
+        objectives: {
+          'obj-gone': { description: 'Does not exist' },
+        },
+      },
+    };
+    const apiTasks = [
+      { id: 't1', name: 'Task', objectives: [] },
+    ];
+
+    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
+    const row = diff.rows.find((r: string[]) =>
+      r[1] === 'objective:obj-gone',
+    );
+
+    expect(row).toBeDefined();
+    expect(row[2]).toBe('missing');
+    expect(row[4]).toBe('missing');
+  });
+
+  it('skips null overrides', () => {
+    const overrides = {
+      't1': null,
+    };
+
+    const sections = buildTasksSections(overrides, [], 'regular');
+    const totalRows = sections.reduce(
+      (n: number, s: any) => n + s.rows.length,
+      0,
+    );
+
+    expect(totalRows).toBe(0);
   });
 });
 
-describe('Monitor Server - HTTP Endpoints', () => {
-  let testServer;
-  const TEST_PORT = 9998;
+// ---------------------------------------------------------------------------
+// buildSummary — relies on overlayState / apiState singletons
+// ---------------------------------------------------------------------------
 
-  beforeEach(() => {
-    return new Promise<void>((done) => {
-      // Create a mock server that follows the real endpoint patterns
-      testServer = http.createServer((req, res) => {
-        const url = new URL(`http://localhost${req.url}`);
-        const pathname = url.pathname;
+describe('buildSummary', () => {
+  const savedOverlay = { ...overlayState };
+  const savedApi = {
+    regular: { ...apiState.regular },
+    pve: { ...apiState.pve },
+  };
 
-        if (pathname === '/latest') {
-          const view = url.searchParams.get('view') || 'tasks';
-          const mode = url.searchParams.get('mode') || 'regular';
-          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({
-            view,
-            mode,
-            title: 'Task Overrides',
-            sections: [
-              {
-                title: 'Example Section',
-                columns: ['Name', 'Value'],
-                rows: [['Item 1', 'Value 1']],
-                truncated: false,
-              }
-            ],
-            error: null,
-          }));
-          return;
-        }
+  beforeAll(() => {
+    overlayState.data = {
+      tasks: { 't1': { minPlayerLevel: 45 } },
+      items: { 'i1': { name: 'Item' } },
+      hideout: {},
+      traders: {},
+      editions: {},
+      storyChapters: {},
+      itemsAdd: {},
+      tasksAdd: {},
+      modes: {
+        regular: { tasks: {}, tasksAdd: {} },
+        pve: { tasks: {}, tasksAdd: {} },
+      },
+    };
+    overlayState.updatedAt = new Date().toISOString();
+    overlayState.error = null;
 
-        if (pathname === '/events') {
-          const view = url.searchParams.get('view') || 'tasks';
-          const mode = url.searchParams.get('mode') || 'regular';
-          res.writeHead(200, {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-store',
-            'Connection': 'keep-alive',
-          });
-          res.write('event: summary\n');
-          res.write(`data: ${JSON.stringify({
-            view,
-            mode,
-            title: 'Task Overrides',
-            sections: [],
-            error: null,
-          })}\n\n`);
-          res.write(': keep-alive\n\n');
-          setTimeout(() => res.end(), 50);
-          return;
-        }
+    apiState.regular.data = [];
+    apiState.regular.updatedAt = new Date().toISOString();
+    apiState.regular.error = null;
+    apiState.pve.data = [];
+    apiState.pve.updatedAt = new Date().toISOString();
+    apiState.pve.error = null;
+  });
 
-        res.writeHead(404);
-        res.end('Not found');
+  afterAll(() => {
+    Object.assign(overlayState, savedOverlay);
+    Object.assign(apiState.regular, savedApi.regular);
+    Object.assign(apiState.pve, savedApi.pve);
+  });
+
+  it('returns error when overlay is not loaded', () => {
+    const orig = overlayState.data;
+    overlayState.data = null;
+
+    const summary = buildSummary('tasks', 'regular');
+
+    expect(summary.sections).toEqual([]);
+    expect(summary.error).toContain('not loaded');
+
+    overlayState.data = orig;
+  });
+
+  it('builds task summary with 4 sections', () => {
+    const summary = buildSummary('tasks', 'regular');
+
+    expect(summary.sections).toHaveLength(4);
+    expect(summary.error).toBeNull();
+  });
+
+  it('builds items summary', () => {
+    const summary = buildSummary('items', '');
+
+    expect(summary.sections).toHaveLength(1);
+    expect(summary.sections[0].title).toContain('Items');
+  });
+
+  it('returns error for unknown view', () => {
+    const summary = buildSummary('does-not-exist', '');
+
+    expect(summary.error).toBe('Unknown view');
+  });
+
+  it('builds tasksAdd summary', () => {
+    const summary = buildSummary('tasksAdd', 'regular');
+
+    expect(summary.sections).toHaveLength(1);
+    expect(summary.sections[0].title).toContain('Task Additions');
+  });
+
+  it('builds editions summary', () => {
+    const summary = buildSummary('editions', '');
+
+    expect(summary.sections).toHaveLength(1);
+    expect(summary.sections[0].title).toBe('Editions');
+  });
+
+  it('builds storyChapters summary', () => {
+    const summary = buildSummary('storyChapters', '');
+
+    expect(summary.sections).toHaveLength(1);
+    expect(summary.sections[0].title).toBe('Story Chapters');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Other builder helpers
+// ---------------------------------------------------------------------------
+
+describe('buildOverrideSections', () => {
+  it('lists every field for each entity', () => {
+    const sections = buildOverrideSections('Items', {
+      'i1': { name: 'A', price: 100 },
+      'i2': { weight: 2 },
+    });
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0].rows).toHaveLength(3);
+  });
+
+  it('handles empty entities', () => {
+    const sections = buildOverrideSections('Items', { 'i1': {} });
+
+    expect(sections[0].rows).toHaveLength(1);
+    expect(sections[0].rows[0][1]).toBe('(empty)');
+  });
+});
+
+describe('buildEditionsSections', () => {
+  it('renders edition metadata', () => {
+    const sections = buildEditionsSections({
+      std: {
+        id: 'std',
+        title: 'Standard Edition',
+        defaultStashLevel: 1,
+        traderRepBonus: { p: 0.2 },
+      },
+    });
+
+    expect(sections[0].rows).toHaveLength(1);
+    expect(sections[0].rows[0][0]).toBe('Standard Edition');
+    expect(sections[0].rows[0][2]).toBe(1); // stash level
+    expect(sections[0].rows[0][3]).toBe('1 traders'); // rep bonus
+  });
+});
+
+describe('buildStoryChapterSections', () => {
+  it('renders chapter metadata', () => {
+    const sections = buildStoryChapterSections({
+      ch1: {
+        id: 'ch1',
+        name: 'Chapter One',
+        order: 1,
+        objectives: [{ id: 'o1' }, { id: 'o2' }],
+      },
+    });
+
+    expect(sections[0].rows).toHaveLength(1);
+    expect(sections[0].rows[0][0]).toBe('Chapter One');
+    expect(sections[0].rows[0][3]).toBe(2); // 2 objectives
+  });
+});
+
+describe('buildTaskAdditionSections', () => {
+  it('renders task additions with trader and map', () => {
+    const sections = buildTaskAdditionSections(
+      {
+        ct: {
+          id: 'ct',
+          name: 'Custom Task',
+          trader: { name: 'Prapor' },
+          map: { name: 'Customs' },
+          wikiLink: 'https://example.com',
+        },
+      },
+      'regular',
+    );
+
+    expect(sections[0].rows).toHaveLength(1);
+    expect(sections[0].rows[0][0]).toBe('Custom Task');
+    expect(sections[0].rows[0][2]).toBe('Prapor');
+    expect(sections[0].rows[0][3]).toBe('Customs');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Utility functions
+// ---------------------------------------------------------------------------
+
+describe('normalizeView', () => {
+  it('returns known views unchanged', () => {
+    Object.keys(VIEW_CONFIG).forEach((v: string) => {
+      expect(normalizeView(v)).toBe(v);
+    });
+  });
+
+  it('defaults unknown values to "tasks"', () => {
+    expect(normalizeView('garbage')).toBe('tasks');
+    expect(normalizeView(null)).toBe('tasks');
+    expect(normalizeView(undefined)).toBe('tasks');
+  });
+});
+
+describe('normalizeMode', () => {
+  it('returns regular and pve unchanged', () => {
+    expect(normalizeMode('regular')).toBe('regular');
+    expect(normalizeMode('pve')).toBe('pve');
+  });
+
+  it('defaults unknown values to "regular"', () => {
+    expect(normalizeMode('hardcore')).toBe('regular');
+    expect(normalizeMode(null)).toBe('regular');
+  });
+});
+
+describe('formatValue', () => {
+  it('returns strings unchanged', () => {
+    expect(formatValue('hello')).toBe('hello');
+  });
+
+  it('renders null and undefined', () => {
+    expect(formatValue(null)).toBe('null');
+    expect(formatValue(undefined)).toBe('undefined');
+  });
+
+  it('serialises objects', () => {
+    expect(formatValue({ a: 1 })).toBe('{"a":1}');
+  });
+
+  it('truncates long values with ellipsis', () => {
+    const result = formatValue({ a: 'x'.repeat(300) });
+    expect(result.length).toBeLessThanOrEqual(221);
+    expect(result.endsWith('…')).toBe(true);
+  });
+});
+
+describe('valuesEqual', () => {
+  it('considers objects with reordered keys equal', () => {
+    expect(valuesEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true);
+  });
+
+  it('preserves array order', () => {
+    expect(valuesEqual([1, 2], [2, 1])).toBe(false);
+    expect(valuesEqual([1, 2], [1, 2])).toBe(true);
+  });
+
+  it('handles undefined vs undefined', () => {
+    expect(valuesEqual(undefined, undefined)).toBe(true);
+  });
+
+  it('handles undefined vs null', () => {
+    expect(valuesEqual(undefined, null)).toBe(false);
+  });
+});
+
+describe('mergeTaskOverrides', () => {
+  it('mode-specific overrides win', () => {
+    const merged = mergeTaskOverrides(
+      { t1: { minPlayerLevel: 10 } },
+      { t1: { minPlayerLevel: 20 } },
+    );
+    expect(merged.t1.minPlayerLevel).toBe(20);
+  });
+
+  it('merges objectives maps', () => {
+    const merged = mergeTaskOverrides(
+      { t1: { objectives: { o1: { x: 1 } } } },
+      { t1: { objectives: { o2: { y: 2 } } } },
+    );
+    expect(merged.t1.objectives).toHaveProperty('o1');
+    expect(merged.t1.objectives).toHaveProperty('o2');
+  });
+
+  it('concatenates objectivesAdd arrays', () => {
+    const merged = mergeTaskOverrides(
+      { t1: { objectivesAdd: [{ id: 'a' }] } },
+      { t1: { objectivesAdd: [{ id: 'b' }] } },
+    );
+    expect(merged.t1.objectivesAdd).toHaveLength(2);
+  });
+
+  it('preserves tasks only in shared', () => {
+    const merged = mergeTaskOverrides(
+      { t1: { name: 'A' }, t2: { name: 'B' } },
+      { t1: { name: 'C' } },
+    );
+    expect(merged.t2.name).toBe('B');
+  });
+});
+
+describe('createSection / pushRow', () => {
+  it('creates a section with empty rows', () => {
+    const s = createSection('S', ['A', 'B']);
+    expect(s.title).toBe('S');
+    expect(s.columns).toEqual(['A', 'B']);
+    expect(s.rows).toEqual([]);
+    expect(s.truncated).toBe(false);
+  });
+
+  it('truncates at MAX_ROWS (250)', () => {
+    const s = createSection('S', ['A']);
+    for (let i = 0; i < 251; i++) {
+      pushRow(s, [`v${i}`]);
+    }
+    expect(s.rows).toHaveLength(250);
+    expect(s.truncated).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// HTTP integration tests — hit the *real* http.createServer from server.js
+// ---------------------------------------------------------------------------
+
+describe('HTTP Integration — real server', () => {
+  const TEST_PORT = 0; // let the OS pick a free port
+  let baseUrl: string;
+
+  beforeAll(() => {
+    // Populate overlay/api state so endpoints return meaningful data
+    overlayState.data = {
+      tasks: { 't1': { minPlayerLevel: 45 } },
+      items: { 'i1': { name: 'Item' } },
+      hideout: {},
+      traders: {},
+      editions: {},
+      storyChapters: {},
+      itemsAdd: {},
+      tasksAdd: {},
+      modes: {
+        regular: { tasks: {}, tasksAdd: {} },
+        pve: { tasks: {}, tasksAdd: {} },
+      },
+    };
+    overlayState.updatedAt = new Date().toISOString();
+    overlayState.error = null;
+
+    apiState.regular.data = [
+      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
+    ];
+    apiState.regular.updatedAt = new Date().toISOString();
+    apiState.regular.error = null;
+    apiState.pve.data = [];
+    apiState.pve.updatedAt = new Date().toISOString();
+    apiState.pve.error = null;
+
+    // Populate the summaryByKey cache so /latest and /events return real data
+    rebuildSummaries();
+
+    return new Promise<void>((resolve) => {
+      server.listen(TEST_PORT, () => {
+        const addr = server.address();
+        baseUrl = `http://localhost:${addr.port}`;
+        resolve();
       });
-
-      testServer.listen(TEST_PORT, () => done());
     });
   });
 
-  afterEach(() => {
-    return new Promise<void>((done) => {
-      testServer.close(done);
+  afterAll(() => {
+    return new Promise<void>((resolve) => {
+      server.close(() => resolve());
     });
   });
 
-  it('GET /latest should return 200 with JSON content-type', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/latest?view=tasks&mode=regular`);
-    expect(response.status).toBe(200);
-    const contentType = response.headers.get('content-type');
-    expect(contentType).toContain('application/json');
+  // -- /latest ---------------------------------------------------------------
+
+  it('GET /latest returns JSON with full state shape', async () => {
+    const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/json');
+
+    const data = await res.json();
+    expect(data.view).toBe('tasks');
+    expect(data.mode).toBe('regular');
+    expect(data.title).toBe('Task Overrides');
+    expect(data).toHaveProperty('overlay');
+    expect(data).toHaveProperty('api');
+    expect(Array.isArray(data.sections)).toBe(true);
+    expect(data.sections).toHaveLength(4);
   });
 
-  it('GET /latest should include required state fields', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/latest?view=tasks&mode=regular`);
-    const data = await response.json();
-    expect(data).toHaveProperty('view');
-    expect(data).toHaveProperty('mode');
-    expect(data).toHaveProperty('title');
-    expect(data).toHaveProperty('sections');
-    expect(data).toHaveProperty('error');
+  it('GET /latest reflects overlay task overrides in sections', async () => {
+    const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
+    const data = await res.json();
+
+    const diff = data.sections[0];
+    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
+    expect(row).toBeDefined();
+    expect(row[4]).toBe('override');
   });
 
-  it('GET /latest should respect view and mode query parameters', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/latest?view=items&mode=pve`);
-    const data = await response.json();
+  it('GET /latest respects the view parameter', async () => {
+    const res = await fetch(`${baseUrl}/latest?view=items`);
+    const data = await res.json();
+
     expect(data.view).toBe('items');
+    expect(data.mode).toBeNull(); // items is non-mode
+    expect(data.sections[0].title).toContain('Items');
+  });
+
+  it('GET /latest respects the mode parameter', async () => {
+    const res = await fetch(`${baseUrl}/latest?view=tasks&mode=pve`);
+    const data = await res.json();
+
     expect(data.mode).toBe('pve');
   });
 
-  it('GET /events should return 200 with SSE content-type', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=tasks&mode=regular`);
-    expect(response.status).toBe(200);
-    const contentType = response.headers.get('content-type');
-    expect(contentType).toContain('text/event-stream');
+  it('GET /latest defaults unknown view to tasks', async () => {
+    const res = await fetch(`${baseUrl}/latest?view=nope`);
+    const data = await res.json();
+
+    expect(data.view).toBe('tasks');
   });
 
-  it('GET /events should set cache-control to no-store', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=tasks&mode=regular`);
-    expect(response.headers.get('cache-control')).toBe('no-store');
+  // -- /events ---------------------------------------------------------------
+
+  it('GET /events returns SSE headers', async () => {
+    const res = await fetch(`${baseUrl}/events?view=tasks&mode=regular`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/event-stream');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('connection')).toContain('keep-alive');
+
+    // read and discard so the connection closes cleanly
+    const reader = res.body!.getReader();
+    reader.cancel();
   });
 
-  it('GET /events should keep connection alive', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=tasks&mode=regular`);
-    const connection = response.headers.get('connection');
-    expect(connection).toContain('keep-alive');
-  });
+  it('GET /events initial frame is a valid summary', async () => {
+    const res = await fetch(`${baseUrl}/events?view=tasks&mode=regular`);
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
 
-  it('GET /events should send summary event immediately', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=tasks&mode=regular`);
-    const text = await response.text();
+    const { value } = await reader.read();
+    const text = decoder.decode(value);
+
     expect(text).toContain('event: summary');
     expect(text).toContain('data:');
+
+    // Parse the JSON payload embedded after "data: "
+    const dataLine = text
+      .split('\n')
+      .find((l: string) => l.startsWith('data: '));
+    expect(dataLine).toBeDefined();
+    const payload = JSON.parse(dataLine!.replace('data: ', ''));
+    expect(payload.view).toBe('tasks');
+    expect(payload.mode).toBe('regular');
+    expect(Array.isArray(payload.sections)).toBe(true);
+
+    reader.cancel();
   });
 
-  it('GET /events should include view in response data', async () => {
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=items&mode=regular`);
-    const text = await response.text();
+  it('GET /events works for non-mode views', async () => {
+    const res = await fetch(`${baseUrl}/events?view=items`);
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+
+    const { value } = await reader.read();
+    const text = decoder.decode(value);
+
     expect(text).toContain('"view":"items"');
+
+    reader.cancel();
   });
 
-  it('GET /events should not fail on stream disconnect', async () => {
-    // Test that error listener doesn't try to parse empty event.data
-    // The fix guards JSON.parse with: if (event.data) { ... }
-    const response = await fetch(`http://localhost:${TEST_PORT}/events?view=tasks&mode=regular`);
-    expect(response.status).toBe(200);
-    // Just connecting and reading should not throw
-    const text = await response.text();
-    expect(text.length).toBeGreaterThan(0);
-  });
-});
+  // -- error paths -----------------------------------------------------------
 
-describe('Monitor Server - Edge Cases', () => {
-  it('should handle empty overrides object', () => {
-    const overrides = {};
-    expect(Object.keys(overrides)).toHaveLength(0);
-  });
-
-  it('should handle null/undefined values in overrides', () => {
-    const overrides = {
-      'task1': {
-        nullField: null,
-        // undefined fields should be skipped
-      }
-    };
-    expect(overrides.task1.nullField).toBe(null);
-  });
-
-  it('should handle truncation of large result sets', () => {
-    // If MAX_ROWS rows are added, section.truncated should be set
-    const MAX_ROWS = 250;
-    const rows = Array.from({ length: MAX_ROWS + 1 }, (_, i) => [`row${i}`, `value${i}`]);
-    expect(rows.length).toBe(MAX_ROWS + 1);
-  });
-
-  it('should handle objectives with missing API counterparts', () => {
-    // Override references objective ID that doesn't exist in API task
-    const objectiveId = 'obj-not-in-api';
-    const apiObjectives = [{ id: 'obj-1' }, { id: 'obj-2' }];
-    const found = apiObjectives.find(o => o.id === objectiveId);
-    expect(found).toBeUndefined();
+  it('returns 405 for POST requests', async () => {
+    const res = await fetch(`${baseUrl}/latest`, { method: 'POST' });
+    expect(res.status).toBe(405);
   });
 });

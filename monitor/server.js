@@ -944,8 +944,10 @@ function startApiPolling() {
   schedulePoll("pve");
 }
 
-startOverlayWatcher();
-startApiPolling();
+if (process.env.NODE_ENV !== "test") {
+  startOverlayWatcher();
+  startApiPolling();
+}
 
 const server = http.createServer((req, res) => {
   if (!req.url || !req.method) {
@@ -1080,7 +1082,9 @@ server.on("error", (error) => {
   console.error("Failed to start overlay monitor:", error);
 });
 
-startServer(currentPort);
+if (process.env.NODE_ENV !== "test") {
+  startServer(currentPort);
+}
 // Export functions for testing
 if (process.env.NODE_ENV === "test") {
   module.exports = {
@@ -1091,11 +1095,16 @@ if (process.env.NODE_ENV === "test") {
     buildStoryChapterSections,
     buildTaskAdditionSections,
     mergeTaskOverrides,
+    rebuildSummaries,
     valuesEqual,
     formatValue,
     normalizeView,
     normalizeMode,
     createSection,
     pushRow,
+    overlayState,
+    apiState,
+    server,
+    VIEW_CONFIG,
   };
 }
