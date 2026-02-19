@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,9 +36,155 @@ jobs:
 
       - name: Commit dist (main branch only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: commit
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add dist/
-          git diff --staged --quiet || git commit -m "chore: build overlay [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore: build overlay [skip ci]"
+            git push
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute next tag
+        id: version
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        run: |
+          git fetch --tags
+          latest_tag=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+$' | head -n 1)
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="v1.0"
+          else
+            version="${latest_tag#v}"
+            IFS='.' read -r major minor <<< "$version"
+            next_tag="v${major}.$((minor + 1))"
+          fi
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build release notes
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        id: notes
+        run: |
+          latest_tag="${{ steps.version.outputs.latest_tag }}"
+          
+          if [[ -z "$latest_tag" ]]; then
+            echo "Initial release" > /tmp/release-notes.txt
+          else
+            git show "$latest_tag:dist/overlay.json" > /tmp/overlay.prev.json 2>/dev/null || echo '{}' > /tmp/overlay.prev.json
+            
+            cat > /tmp/gen-notes.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
+          const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
+          
+          delete current._meta;
+          delete previous._meta;
+          
+          const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
+          
+          const getFiles = (dir) => {
+            const files = [];
+            const walk = (p) => {
+              if (!fs.existsSync(p)) return;
+              fs.readdirSync(p).forEach(i => {
+                const f = path.join(p, i);
+                if (fs.statSync(f).isDirectory()) walk(f);
+                else if (i.endsWith('.json5') || i.endsWith('.json')) files.push(f);
+              });
+            };
+            walk(dir);
+            return files.sort();
+          };
+          
+          // Map source files to their keys in the built overlay
+          // Note: itemsAdd and tasksAdd are stored under their own keys in overlay.json
+          const map = {
+            'items': 'items', 'itemsAdd': 'itemsAdd',
+            'tasks': 'tasks', 'tasksAdd': 'tasksAdd',
+            'traders': 'traders', 'hideout': 'hideout',
+            'editions': 'editions', 'storyChapters': 'storyChapters'
+          };
+          
+          const lines = [];
+          let hasChanges = false;
+          
+          getFiles('src').forEach(f => {
+            const rel = f.replace(/^src\//, '');
+            const name = path.basename(f, path.extname(f));
+            const section = map[name] || name;
+            const curr = isObject(current[section]) ? current[section] : {};
+            const prev = isObject(previous[section]) ? previous[section] : {};
+            
+            const added = [];
+            const modified = [];
+            const removed = [];
+            
+            Object.keys(curr).sort().forEach(id => {
+              const displayName = curr[id].name || curr[id].shortName || id;
+              if (!(id in prev)) {
+                added.push('  + ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              } else if (JSON.stringify(curr[id]) !== JSON.stringify(prev[id])) {
+                modified.push('  ~ ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              }
+            });
+            
+            Object.keys(prev).sort().forEach(id => {
+              if (!(id in curr)) {
+                const displayName = prev[id].name || prev[id].shortName || id;
+                removed.push('  - ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              }
+            });
+            
+            if (added.length > 0 || modified.length > 0 || removed.length > 0) {
+              lines.push('### ' + rel);
+              added.forEach(a => lines.push(a));
+              modified.forEach(m => lines.push(m));
+              removed.forEach(r => lines.push(r));
+              lines.push('');
+            }
+          });
+          
+          if (!hasChanges) {
+            lines.push('No changes in source files');
+          }
+          
+          fs.writeFileSync('/tmp/release-notes.txt', lines.join('\n'));
+          EOF
+            node /tmp/gen-notes.js
+          fi
+
+      - name: Create and push tag
+        id: tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        env:
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          git fetch --tags
+          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEXT_TAG already exists, skipping tag creation"
+            echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          else
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git tag -a "$NEXT_TAG" -m "Overlay version $NEXT_TAG"
+            git push origin "$NEXT_TAG"
+            echo "tag_created=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.tag.outputs.tag_created == 'true'
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          tag_name: ${{ steps.version.outputs.next_tag }}
+          body_path: /tmp/release-notes.txt
+          files: dist/overlay.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
