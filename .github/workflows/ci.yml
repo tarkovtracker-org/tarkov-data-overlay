@@ -53,6 +53,7 @@ jobs:
         id: version
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
         run: |
+          git fetch --tags
           latest_tag=$(git tag --list 'v*.*' --sort=-v:refname | head -n 1)
           if [[ -z "$latest_tag" ]]; then
             next_tag="v1.0"
@@ -65,95 +66,125 @@ jobs:
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Build tag message
+      - name: Build release notes
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
+        id: notes
         run: |
-          prev_tag="${{ steps.version.outputs.latest_tag }}"
-          if [[ -n "$prev_tag" ]]; then
-            git show "$prev_tag:dist/overlay.json" > /tmp/overlay.prev.json
+          latest_tag="${{ steps.version.outputs.latest_tag }}"
+          
+          if [[ -z "$latest_tag" ]]; then
+            echo "Initial release" > /tmp/release-notes.txt
           else
-            echo '{}' > /tmp/overlay.prev.json
-          fi
-
-          node <<'NODE'
+            git show "$latest_tag:dist/overlay.json" > /tmp/overlay.prev.json 2>/dev/null || echo '{}' > /tmp/overlay.prev.json
+            
+            cat > /tmp/gen-notes.js << 'EOF'
           const fs = require('fs');
-
+          const path = require('path');
           const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
           const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
-
-          const MAX_ITEMS_PER_SECTION = 12;
-          const MAX_SECTIONS = 20;
-
-          const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
-
-          const getDisplayName = (entry) => {
-            if (!entry || typeof entry !== 'object') return null;
-            return (
-              entry.name ||
-              entry.shortName ||
-              entry.title ||
-              entry.key ||
-              entry.traderName ||
-              entry.objective ||
-              null
-            );
+          
+          delete current._meta;
+          delete previous._meta;
+          
+          const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
+          
+          const formatValue = (v) => {
+            if (typeof v === 'string') return v.length > 50 ? v.substring(0, 47) + '...' : v;
+            if (typeof v === 'object') {
+              const str = JSON.stringify(v);
+              return str.length > 50 ? str.substring(0, 47) + '...' : str;
+            }
+            return String(v);
           };
-
-          const sections = Object.keys(current).filter((key) => isObject(current[key])).sort();
+          
+          const getFiles = (dir) => {
+            const files = [];
+            const walk = (p) => {
+              if (!fs.existsSync(p)) return;
+              fs.readdirSync(p).forEach(i => {
+                const f = path.join(p, i);
+                if (fs.statSync(f).isDirectory()) walk(f);
+                else if (i.endsWith('.json5') || i.endsWith('.json')) files.push(f);
+              });
+            };
+            walk(dir);
+            return files.sort();
+          };
+          
+          const map = {
+            'items': 'items', 'itemsAdd': 'items',
+            'tasks': 'tasks', 'tasksAdd': 'tasks',
+            'traders': 'traders', 'hideout': 'hideout',
+            'editions': 'editions', 'storyChapters': 'storyChapters'
+          };
+          
           const lines = [];
-
-          for (const section of sections) {
-            const currentSection = current[section] || {};
-            const previousSection = isObject(previous[section]) ? previous[section] : {};
-            const addedIds = Object.keys(currentSection).filter((id) => !(id in previousSection));
-            if (!addedIds.length) continue;
-
-            const displayed = addedIds.slice(0, MAX_ITEMS_PER_SECTION).map((id) => {
-              const name = getDisplayName(currentSection[id]);
-              return name ? `+${name} (${id})` : `+${id}`;
+          let hasChanges = false;
+          
+          getFiles('src').forEach(f => {
+            const rel = f.replace(/^src\//, '');
+            const name = path.basename(f, path.extname(f));
+            const section = map[name] || name;
+            const curr = isObject(current[section]) ? current[section] : {};
+            const prev = isObject(previous[section]) ? previous[section] : {};
+            
+            const added = [];
+            const modified = [];
+            const removed = [];
+            
+            Object.keys(curr).sort().forEach(id => {
+              const displayName = curr[id].name || curr[id].shortName || id;
+              if (!(id in prev)) {
+                added.push('  + ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              } else if (JSON.stringify(curr[id]) !== JSON.stringify(prev[id])) {
+                modified.push('  ~ ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              }
             });
-
-            const remaining = addedIds.length - displayed.length;
-            const extra = remaining > 0 ? ` and ${remaining} more` : '';
-            lines.push(`${section}: ${displayed.join(', ')}${extra}`);
-
-            if (lines.length >= MAX_SECTIONS) break;
+            
+            Object.keys(prev).sort().forEach(id => {
+              if (!(id in curr)) {
+                const displayName = prev[id].name || prev[id].shortName || id;
+                removed.push('  - ' + displayName + ' (' + id + ')');
+                hasChanges = true;
+              }
+            });
+            
+            if (added.length > 0 || modified.length > 0 || removed.length > 0) {
+              lines.push('### ' + rel);
+              added.forEach(a => lines.push(a));
+              modified.forEach(m => lines.push(m));
+              removed.forEach(r => lines.push(r));
+              lines.push('');
+            }
+          });
+          
+          if (!hasChanges) {
+            lines.push('No changes in source files');
           }
-
-          if (!lines.length) {
-            lines.push('No new entries detected in overlay.json');
-          }
-
-          const message = [
-            'Overlay update',
-            '',
-            ...lines,
-          ].join('\n');
-
-          fs.writeFileSync('/tmp/tag-message.txt', message);
-          NODE
+          
+          fs.writeFileSync('/tmp/release-notes.txt', lines.join('\n'));
+          EOF
+            node /tmp/gen-notes.js
+          fi
 
       - name: Create and push tag
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
         env:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
-          git fetch --tags
-          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
-            echo "Tag $NEXT_TAG already exists, skipping tag creation"
-          else
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git tag -a "$NEXT_TAG" -F /tmp/tag-message.txt
-            git push origin "$NEXT_TAG"
-          fi
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag -a "$NEXT_TAG" -m "Overlay version $NEXT_TAG"
+          git push origin "$NEXT_TAG"
 
       - name: Create Release
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.next_tag }}
-          body_path: /tmp/tag-message.txt
+          body_path: /tmp/release-notes.txt
           files: dist/overlay.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
