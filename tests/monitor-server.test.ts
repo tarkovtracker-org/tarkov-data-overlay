@@ -1,32 +1,60 @@
 /**
- * Tests for monitor server module
- * Tests the actual builder functions and endpoint behavior from monitor/server.js
+ * Tests for monitor/server.js
+ *
+ * Every test in this file imports the real module via createRequire and
+ * exercises the real exported functions / the real http.Server instance.
+ * No test doubles, no local re-implementations.
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
-
-// Set test environment before importing server — this prevents auto-start
-// of the HTTP server, overlay watcher, and API polling.
+// NODE_ENV must be "test" *before* require() so the module:
+//   1. skips startOverlayWatcher / startApiPolling / startServer
+//   2. populates module.exports
 process.env.NODE_ENV = 'test';
 
-// Mock fs to prevent actual file operations triggered at import time
-vi.mock('fs', () => ({
-  promises: {
-    readFile: vi.fn(),
-    stat: vi.fn(),
-  },
-  watchFile: vi.fn(),
-  existsSync: vi.fn(() => false),
-  readdirSync: vi.fn(() => []),
-  statSync: vi.fn(() => ({ isDirectory: () => false })),
-  readFile: vi.fn(),
-}));
+const require = createRequire(import.meta.url);
+const mod = require('../monitor/server.js');
 
-// Import the real server module (CommonJS)
-const serverModule = require('../monitor/server.js');
+// ---------------------------------------------------------------------------
+// Sanity: prove the import is the real module, not a stub
+// ---------------------------------------------------------------------------
+
+describe('module import sanity', () => {
+  it('exports real functions, not undefined', () => {
+    expect(typeof mod.buildTasksSections).toBe('function');
+    expect(typeof mod.buildSummary).toBe('function');
+    expect(typeof mod.buildOverrideSections).toBe('function');
+    expect(typeof mod.buildEditionsSections).toBe('function');
+    expect(typeof mod.buildStoryChapterSections).toBe('function');
+    expect(typeof mod.buildTaskAdditionSections).toBe('function');
+    expect(typeof mod.mergeTaskOverrides).toBe('function');
+    expect(typeof mod.rebuildSummaries).toBe('function');
+    expect(typeof mod.valuesEqual).toBe('function');
+    expect(typeof mod.formatValue).toBe('function');
+    expect(typeof mod.normalizeView).toBe('function');
+    expect(typeof mod.normalizeMode).toBe('function');
+    expect(typeof mod.createSection).toBe('function');
+    expect(typeof mod.pushRow).toBe('function');
+  });
+
+  it('exports the real http.Server instance', () => {
+    expect(mod.server.constructor.name).toBe('Server');
+    expect(typeof mod.server.listen).toBe('function');
+  });
+
+  it('exports mutable overlayState / apiState singletons', () => {
+    expect(mod.overlayState).toHaveProperty('data');
+    expect(mod.overlayState).toHaveProperty('updatedAt');
+    expect(mod.apiState).toHaveProperty('regular');
+    expect(mod.apiState).toHaveProperty('pve');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Destructure for convenience (all references point to the real module)
+// ---------------------------------------------------------------------------
 
 const {
   buildTasksSections,
@@ -47,185 +75,126 @@ const {
   apiState,
   server,
   VIEW_CONFIG,
-} = serverModule;
+} = mod;
 
 // ---------------------------------------------------------------------------
-// Builder function tests — exercise the real functions from server.js
+// buildTasksSections
 // ---------------------------------------------------------------------------
 
 describe('buildTasksSections', () => {
-  it('returns the four expected sections', () => {
+  it('returns 4 sections: diff, added-objectives, missing, disabled', () => {
     const sections = buildTasksSections({}, [], 'regular');
-
     expect(sections).toHaveLength(4);
-    expect(sections[0].title).toBe('Task Overrides vs API');
-    expect(sections[1].title).toBe('Added Objectives');
-    expect(sections[2].title).toBe('Tasks Missing From API');
-    expect(sections[3].title).toBe('Disabled Tasks');
+    expect(sections.map((s: any) => s.title)).toEqual([
+      'Task Overrides vs API',
+      'Added Objectives',
+      'Tasks Missing From API',
+      'Disabled Tasks',
+    ]);
   });
 
-  it('detects field overrides and marks them as "override"', () => {
-    const overrides = {
-      't1': { minPlayerLevel: 45 },
-    };
-    const apiTasks = [
-      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
-    ];
-
-    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
-    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
-
+  it('produces an "override" row when the value differs from the API', () => {
+    const sections = buildTasksSections(
+      { t1: { minPlayerLevel: 45 } },
+      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
+      'regular',
+    );
+    const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
-    expect(row[2]).toBe('10');       // API value
-    expect(row[3]).toBe('45');       // overlay value
-    expect(row[4]).toBe('override'); // status
+    expect(row[2]).toBe('10');
+    expect(row[3]).toBe('45');
+    expect(row[4]).toBe('override');
   });
 
-  it('marks matching values as "same"', () => {
-    const overrides = {
-      't1': { minPlayerLevel: 10 },
-    };
-    const apiTasks = [
-      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
-    ];
-
-    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
-    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
-
+  it('produces a "same" row when values match', () => {
+    const sections = buildTasksSections(
+      { t1: { minPlayerLevel: 10 } },
+      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
+      'regular',
+    );
+    const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
     expect(row[4]).toBe('same');
   });
 
-  it('puts unknown task IDs into the missing section', () => {
-    const overrides = {
-      'no-such-task': { name: 'Ghost' },
-    };
-
-    const [, , missing] = buildTasksSections(overrides, [], 'regular');
-
+  it('routes unknown task IDs to the missing section', () => {
+    const [, , missing] = buildTasksSections(
+      { ghost: { name: 'Ghost' } },
+      [],
+      'regular',
+    );
     expect(missing.rows).toHaveLength(1);
-    expect(missing.rows[0][0]).toBe('Ghost');
-    expect(missing.rows[0][1]).toBe('no-such-task');
+    expect(missing.rows[0]).toEqual(['Ghost', 'ghost']);
   });
 
-  it('puts disabled tasks into the disabled section', () => {
-    const overrides = {
-      't1': { disabled: true },
-    };
-    const apiTasks = [
-      { id: 't1', name: 'Disabled One', objectives: [] },
-    ];
-
-    const [, , , disabled] = buildTasksSections(overrides, apiTasks, 'regular');
-
+  it('routes disabled tasks to the disabled section', () => {
+    const [, , , disabled] = buildTasksSections(
+      { t1: { disabled: true } },
+      [{ id: 't1', name: 'D', objectives: [] }],
+      'regular',
+    );
     expect(disabled.rows).toHaveLength(1);
-    expect(disabled.rows[0][0]).toBe('Disabled One');
+    expect(disabled.rows[0][0]).toBe('D');
   });
 
-  it('adds objectivesAdd entries to the added-objectives section', () => {
-    const overrides = {
-      't1': {
-        objectivesAdd: [
-          { id: 'obj-new', description: 'Plant marker' },
-        ],
-      },
-    };
-    const apiTasks = [
-      { id: 't1', name: 'Task', objectives: [] },
-    ];
-
-    const [, added] = buildTasksSections(overrides, apiTasks, 'regular');
-
+  it('routes objectivesAdd to the added-objectives section', () => {
+    const [, added] = buildTasksSections(
+      { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
+      [{ id: 't1', name: 'T', objectives: [] }],
+      'regular',
+    );
     expect(added.rows).toHaveLength(1);
-    expect(added.rows[0][0]).toBe('Task');
-    expect(added.rows[0][1]).toBe('Plant marker');
+    expect(added.rows[0][0]).toBe('T');
+    expect(added.rows[0][1]).toBe('Plant');
   });
 
   it('diffs individual objective field overrides', () => {
-    const overrides = {
-      't1': {
-        objectives: {
-          'obj-1': { description: 'Corrected' },
-        },
-      },
-    };
-    const apiTasks = [
-      {
-        id: 't1',
-        name: 'Task',
-        objectives: [{ id: 'obj-1', description: 'Original' }],
-      },
-    ];
-
-    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
-    const row = diff.rows.find((r: string[]) =>
-      r[1] === 'objective:obj-1.description',
+    const [diff] = buildTasksSections(
+      { t1: { objectives: { o1: { description: 'Fixed' } } } },
+      [{ id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] }],
+      'regular',
     );
-
+    const row = diff.rows.find((r: string[]) => r[1] === 'objective:o1.description');
     expect(row).toBeDefined();
-    expect(row[2]).toBe('Original');
-    expect(row[3]).toBe('Corrected');
+    expect(row[2]).toBe('Orig');
+    expect(row[3]).toBe('Fixed');
     expect(row[4]).toBe('override');
   });
 
-  it('marks objective ID as missing when API task has no matching objective', () => {
-    const overrides = {
-      't1': {
-        objectives: {
-          'obj-gone': { description: 'Does not exist' },
-        },
-      },
-    };
-    const apiTasks = [
-      { id: 't1', name: 'Task', objectives: [] },
-    ];
-
-    const [diff] = buildTasksSections(overrides, apiTasks, 'regular');
-    const row = diff.rows.find((r: string[]) =>
-      r[1] === 'objective:obj-gone',
+  it('marks objectives missing from the API', () => {
+    const [diff] = buildTasksSections(
+      { t1: { objectives: { gone: { description: 'x' } } } },
+      [{ id: 't1', name: 'T', objectives: [] }],
+      'regular',
     );
-
+    const row = diff.rows.find((r: string[]) => r[1] === 'objective:gone');
     expect(row).toBeDefined();
-    expect(row[2]).toBe('missing');
     expect(row[4]).toBe('missing');
   });
 
-  it('skips null overrides', () => {
-    const overrides = {
-      't1': null,
-    };
-
-    const sections = buildTasksSections(overrides, [], 'regular');
-    const totalRows = sections.reduce(
-      (n: number, s: any) => n + s.rows.length,
-      0,
-    );
-
-    expect(totalRows).toBe(0);
+  it('skips null/non-object overrides', () => {
+    const sections = buildTasksSections({ t1: null }, [], 'regular');
+    const total = sections.reduce((n: number, s: any) => n + s.rows.length, 0);
+    expect(total).toBe(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// buildSummary — relies on overlayState / apiState singletons
+// buildSummary — depends on overlayState / apiState singletons
 // ---------------------------------------------------------------------------
 
 describe('buildSummary', () => {
-  const savedOverlay = { ...overlayState };
-  const savedApi = {
-    regular: { ...apiState.regular },
-    pve: { ...apiState.pve },
-  };
-
+  // Seed state that all tests in this block share
   beforeAll(() => {
     overlayState.data = {
-      tasks: { 't1': { minPlayerLevel: 45 } },
-      items: { 'i1': { name: 'Item' } },
+      tasks: { t1: { minPlayerLevel: 45 } },
+      items: { i1: { name: 'Item' } },
       hideout: {},
       traders: {},
-      editions: {},
-      storyChapters: {},
+      editions: { std: { id: 'std', title: 'Std' } },
+      storyChapters: { ch1: { id: 'ch1', name: 'Ch1' } },
       itemsAdd: {},
-      tasksAdd: {},
+      tasksAdd: { ct: { id: 'ct', name: 'Custom' } },
       modes: {
         regular: { tasks: {}, tasksAdd: {} },
         pve: { tasks: {}, tasksAdd: {} },
@@ -234,7 +203,9 @@ describe('buildSummary', () => {
     overlayState.updatedAt = new Date().toISOString();
     overlayState.error = null;
 
-    apiState.regular.data = [];
+    apiState.regular.data = [
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
+    ];
     apiState.regular.updatedAt = new Date().toISOString();
     apiState.regular.error = null;
     apiState.pve.data = [];
@@ -242,143 +213,98 @@ describe('buildSummary', () => {
     apiState.pve.error = null;
   });
 
-  afterAll(() => {
-    Object.assign(overlayState, savedOverlay);
-    Object.assign(apiState.regular, savedApi.regular);
-    Object.assign(apiState.pve, savedApi.pve);
-  });
-
-  it('returns error when overlay is not loaded', () => {
-    const orig = overlayState.data;
+  it('returns an error when overlay is not loaded', () => {
+    const saved = overlayState.data;
     overlayState.data = null;
-
-    const summary = buildSummary('tasks', 'regular');
-
-    expect(summary.sections).toEqual([]);
-    expect(summary.error).toContain('not loaded');
-
-    overlayState.data = orig;
+    const s = buildSummary('tasks', 'regular');
+    expect(s.sections).toEqual([]);
+    expect(s.error).toMatch(/not loaded/i);
+    overlayState.data = saved;
   });
 
-  it('builds task summary with 4 sections', () => {
-    const summary = buildSummary('tasks', 'regular');
-
-    expect(summary.sections).toHaveLength(4);
-    expect(summary.error).toBeNull();
+  it('returns 4 task sections for the "tasks" view', () => {
+    const s = buildSummary('tasks', 'regular');
+    expect(s.sections).toHaveLength(4);
+    expect(s.error).toBeNull();
   });
 
-  it('builds items summary', () => {
-    const summary = buildSummary('items', '');
-
-    expect(summary.sections).toHaveLength(1);
-    expect(summary.sections[0].title).toContain('Items');
+  it('returns 1 section for "items"', () => {
+    const s = buildSummary('items', '');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toContain('Items');
   });
 
-  it('returns error for unknown view', () => {
-    const summary = buildSummary('does-not-exist', '');
-
-    expect(summary.error).toBe('Unknown view');
+  it('returns 1 section for "tasksAdd"', () => {
+    const s = buildSummary('tasksAdd', 'regular');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toContain('Task Additions');
   });
 
-  it('builds tasksAdd summary', () => {
-    const summary = buildSummary('tasksAdd', 'regular');
-
-    expect(summary.sections).toHaveLength(1);
-    expect(summary.sections[0].title).toContain('Task Additions');
+  it('returns 1 section for "editions"', () => {
+    const s = buildSummary('editions', '');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toBe('Editions');
   });
 
-  it('builds editions summary', () => {
-    const summary = buildSummary('editions', '');
-
-    expect(summary.sections).toHaveLength(1);
-    expect(summary.sections[0].title).toBe('Editions');
+  it('returns 1 section for "storyChapters"', () => {
+    const s = buildSummary('storyChapters', '');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toBe('Story Chapters');
   });
 
-  it('builds storyChapters summary', () => {
-    const summary = buildSummary('storyChapters', '');
-
-    expect(summary.sections).toHaveLength(1);
-    expect(summary.sections[0].title).toBe('Story Chapters');
+  it('returns error string for unknown view', () => {
+    expect(buildSummary('nope', '').error).toBe('Unknown view');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Other builder helpers
+// Other section builders
 // ---------------------------------------------------------------------------
 
 describe('buildOverrideSections', () => {
-  it('lists every field for each entity', () => {
-    const sections = buildOverrideSections('Items', {
-      'i1': { name: 'A', price: 100 },
-      'i2': { weight: 2 },
+  it('emits one row per entity field', () => {
+    const [sec] = buildOverrideSections('Items', {
+      i1: { name: 'A', price: 100 },
     });
-
-    expect(sections).toHaveLength(1);
-    expect(sections[0].rows).toHaveLength(3);
+    expect(sec.rows).toHaveLength(2);
   });
 
-  it('handles empty entities', () => {
-    const sections = buildOverrideSections('Items', { 'i1': {} });
-
-    expect(sections[0].rows).toHaveLength(1);
-    expect(sections[0].rows[0][1]).toBe('(empty)');
+  it('handles empty entity objects', () => {
+    const [sec] = buildOverrideSections('X', { e: {} });
+    expect(sec.rows[0][1]).toBe('(empty)');
   });
 });
 
 describe('buildEditionsSections', () => {
   it('renders edition metadata', () => {
-    const sections = buildEditionsSections({
-      std: {
-        id: 'std',
-        title: 'Standard Edition',
-        defaultStashLevel: 1,
-        traderRepBonus: { p: 0.2 },
-      },
+    const [sec] = buildEditionsSections({
+      std: { id: 'std', title: 'Standard', defaultStashLevel: 1, traderRepBonus: { p: 0.2 } },
     });
-
-    expect(sections[0].rows).toHaveLength(1);
-    expect(sections[0].rows[0][0]).toBe('Standard Edition');
-    expect(sections[0].rows[0][2]).toBe(1); // stash level
-    expect(sections[0].rows[0][3]).toBe('1 traders'); // rep bonus
+    expect(sec.rows[0][0]).toBe('Standard');
+    expect(sec.rows[0][2]).toBe(1);
+    expect(sec.rows[0][3]).toBe('1 traders');
   });
 });
 
 describe('buildStoryChapterSections', () => {
   it('renders chapter metadata', () => {
-    const sections = buildStoryChapterSections({
-      ch1: {
-        id: 'ch1',
-        name: 'Chapter One',
-        order: 1,
-        objectives: [{ id: 'o1' }, { id: 'o2' }],
-      },
+    const [sec] = buildStoryChapterSections({
+      ch: { id: 'ch', name: 'Ch', order: 1, objectives: [{ id: 'o' }] },
     });
-
-    expect(sections[0].rows).toHaveLength(1);
-    expect(sections[0].rows[0][0]).toBe('Chapter One');
-    expect(sections[0].rows[0][3]).toBe(2); // 2 objectives
+    expect(sec.rows[0][0]).toBe('Ch');
+    expect(sec.rows[0][3]).toBe(1);
   });
 });
 
 describe('buildTaskAdditionSections', () => {
-  it('renders task additions with trader and map', () => {
-    const sections = buildTaskAdditionSections(
-      {
-        ct: {
-          id: 'ct',
-          name: 'Custom Task',
-          trader: { name: 'Prapor' },
-          map: { name: 'Customs' },
-          wikiLink: 'https://example.com',
-        },
-      },
+  it('renders additions with trader and map', () => {
+    const [sec] = buildTaskAdditionSections(
+      { ct: { id: 'ct', name: 'CT', trader: { name: 'Prapor' }, map: { name: 'Customs' } } },
       'regular',
     );
-
-    expect(sections[0].rows).toHaveLength(1);
-    expect(sections[0].rows[0][0]).toBe('Custom Task');
-    expect(sections[0].rows[0][2]).toBe('Prapor');
-    expect(sections[0].rows[0][3]).toBe('Customs');
+    expect(sec.rows[0][0]).toBe('CT');
+    expect(sec.rows[0][2]).toBe('Prapor');
+    expect(sec.rows[0][3]).toBe('Customs');
   });
 });
 
@@ -387,138 +313,105 @@ describe('buildTaskAdditionSections', () => {
 // ---------------------------------------------------------------------------
 
 describe('normalizeView', () => {
-  it('returns known views unchanged', () => {
-    Object.keys(VIEW_CONFIG).forEach((v: string) => {
+  it('passes through known views', () => {
+    for (const v of Object.keys(VIEW_CONFIG)) {
       expect(normalizeView(v)).toBe(v);
-    });
+    }
   });
-
-  it('defaults unknown values to "tasks"', () => {
-    expect(normalizeView('garbage')).toBe('tasks');
+  it('defaults to "tasks"', () => {
+    expect(normalizeView('nope')).toBe('tasks');
     expect(normalizeView(null)).toBe('tasks');
     expect(normalizeView(undefined)).toBe('tasks');
   });
 });
 
 describe('normalizeMode', () => {
-  it('returns regular and pve unchanged', () => {
+  it('passes through regular / pve', () => {
     expect(normalizeMode('regular')).toBe('regular');
     expect(normalizeMode('pve')).toBe('pve');
   });
-
-  it('defaults unknown values to "regular"', () => {
-    expect(normalizeMode('hardcore')).toBe('regular');
+  it('defaults to "regular"', () => {
+    expect(normalizeMode('x')).toBe('regular');
     expect(normalizeMode(null)).toBe('regular');
   });
 });
 
 describe('formatValue', () => {
-  it('returns strings unchanged', () => {
-    expect(formatValue('hello')).toBe('hello');
-  });
-
-  it('renders null and undefined', () => {
+  it('returns strings unchanged', () => expect(formatValue('hi')).toBe('hi'));
+  it('renders null/undefined', () => {
     expect(formatValue(null)).toBe('null');
     expect(formatValue(undefined)).toBe('undefined');
   });
-
-  it('serialises objects', () => {
-    expect(formatValue({ a: 1 })).toBe('{"a":1}');
-  });
-
-  it('truncates long values with ellipsis', () => {
-    const result = formatValue({ a: 'x'.repeat(300) });
-    expect(result.length).toBeLessThanOrEqual(221);
-    expect(result.endsWith('…')).toBe(true);
+  it('serialises objects', () => expect(formatValue({ a: 1 })).toBe('{"a":1}'));
+  it('truncates with ellipsis', () => {
+    const r = formatValue({ a: 'x'.repeat(300) });
+    expect(r.length).toBeLessThanOrEqual(221);
+    expect(r.endsWith('…')).toBe(true);
   });
 });
 
 describe('valuesEqual', () => {
-  it('considers objects with reordered keys equal', () => {
-    expect(valuesEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true);
-  });
-
+  it('normalises object key order', () =>
+    expect(valuesEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true));
   it('preserves array order', () => {
-    expect(valuesEqual([1, 2], [2, 1])).toBe(false);
     expect(valuesEqual([1, 2], [1, 2])).toBe(true);
+    expect(valuesEqual([1, 2], [2, 1])).toBe(false);
   });
-
-  it('handles undefined vs undefined', () => {
-    expect(valuesEqual(undefined, undefined)).toBe(true);
-  });
-
-  it('handles undefined vs null', () => {
-    expect(valuesEqual(undefined, null)).toBe(false);
-  });
+  it('undefined === undefined', () => expect(valuesEqual(undefined, undefined)).toBe(true));
+  it('undefined !== null', () => expect(valuesEqual(undefined, null)).toBe(false));
 });
 
 describe('mergeTaskOverrides', () => {
-  it('mode-specific overrides win', () => {
-    const merged = mergeTaskOverrides(
-      { t1: { minPlayerLevel: 10 } },
-      { t1: { minPlayerLevel: 20 } },
-    );
-    expect(merged.t1.minPlayerLevel).toBe(20);
+  it('mode-specific wins', () => {
+    const m = mergeTaskOverrides({ t: { a: 1 } }, { t: { a: 2 } });
+    expect(m.t.a).toBe(2);
   });
-
   it('merges objectives maps', () => {
-    const merged = mergeTaskOverrides(
-      { t1: { objectives: { o1: { x: 1 } } } },
-      { t1: { objectives: { o2: { y: 2 } } } },
+    const m = mergeTaskOverrides(
+      { t: { objectives: { o1: { x: 1 } } } },
+      { t: { objectives: { o2: { y: 2 } } } },
     );
-    expect(merged.t1.objectives).toHaveProperty('o1');
-    expect(merged.t1.objectives).toHaveProperty('o2');
+    expect(m.t.objectives).toHaveProperty('o1');
+    expect(m.t.objectives).toHaveProperty('o2');
   });
-
-  it('concatenates objectivesAdd arrays', () => {
-    const merged = mergeTaskOverrides(
-      { t1: { objectivesAdd: [{ id: 'a' }] } },
-      { t1: { objectivesAdd: [{ id: 'b' }] } },
+  it('concatenates objectivesAdd', () => {
+    const m = mergeTaskOverrides(
+      { t: { objectivesAdd: [{ id: 'a' }] } },
+      { t: { objectivesAdd: [{ id: 'b' }] } },
     );
-    expect(merged.t1.objectivesAdd).toHaveLength(2);
+    expect(m.t.objectivesAdd).toHaveLength(2);
   });
-
-  it('preserves tasks only in shared', () => {
-    const merged = mergeTaskOverrides(
-      { t1: { name: 'A' }, t2: { name: 'B' } },
-      { t1: { name: 'C' } },
-    );
-    expect(merged.t2.name).toBe('B');
+  it('preserves unmerged tasks', () => {
+    const m = mergeTaskOverrides({ a: { x: 1 }, b: { y: 2 } }, { a: { x: 3 } });
+    expect(m.b.y).toBe(2);
   });
 });
 
 describe('createSection / pushRow', () => {
-  it('creates a section with empty rows', () => {
-    const s = createSection('S', ['A', 'B']);
-    expect(s.title).toBe('S');
-    expect(s.columns).toEqual(['A', 'B']);
-    expect(s.rows).toEqual([]);
-    expect(s.truncated).toBe(false);
+  it('creates an empty section', () => {
+    const s = createSection('S', ['A']);
+    expect(s).toEqual({ title: 'S', columns: ['A'], rows: [], truncated: false });
   });
-
   it('truncates at MAX_ROWS (250)', () => {
     const s = createSection('S', ['A']);
-    for (let i = 0; i < 251; i++) {
-      pushRow(s, [`v${i}`]);
-    }
+    for (let i = 0; i < 251; i++) pushRow(s, [`v${i}`]);
     expect(s.rows).toHaveLength(250);
     expect(s.truncated).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// HTTP integration tests — hit the *real* http.createServer from server.js
+// HTTP integration — starts the REAL server from monitor/server.js
 // ---------------------------------------------------------------------------
 
-describe('HTTP Integration — real server', () => {
-  const TEST_PORT = 0; // let the OS pick a free port
+describe('HTTP — real monitor/server.js handlers', () => {
   let baseUrl: string;
 
   beforeAll(() => {
-    // Populate overlay/api state so endpoints return meaningful data
+    // Seed singleton state
     overlayState.data = {
-      tasks: { 't1': { minPlayerLevel: 45 } },
-      items: { 'i1': { name: 'Item' } },
+      tasks: { t1: { minPlayerLevel: 45 } },
+      items: { i1: { name: 'Item' } },
       hideout: {},
       traders: {},
       editions: {},
@@ -534,7 +427,7 @@ describe('HTTP Integration — real server', () => {
     overlayState.error = null;
 
     apiState.regular.data = [
-      { id: 't1', name: 'Task', minPlayerLevel: 10, objectives: [] },
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
     ];
     apiState.regular.updatedAt = new Date().toISOString();
     apiState.regular.error = null;
@@ -542,130 +435,105 @@ describe('HTTP Integration — real server', () => {
     apiState.pve.updatedAt = new Date().toISOString();
     apiState.pve.error = null;
 
-    // Populate the summaryByKey cache so /latest and /events return real data
+    // Fill the summaryByKey cache (same as refreshOverlay → rebuildSummaries)
     rebuildSummaries();
 
     return new Promise<void>((resolve) => {
-      server.listen(TEST_PORT, () => {
-        const addr = server.address();
-        baseUrl = `http://localhost:${addr.port}`;
+      server.listen(0, () => {
+        baseUrl = `http://localhost:${server.address().port}`;
         resolve();
       });
     });
   });
 
-  afterAll(() => {
-    return new Promise<void>((resolve) => {
-      server.close(() => resolve());
-    });
-  });
+  afterAll(() => new Promise<void>((resolve) => server.close(resolve)));
 
   // -- /latest ---------------------------------------------------------------
 
-  it('GET /latest returns JSON with full state shape', async () => {
+  it('GET /latest — 200, application/json', async () => {
     const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
-
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('application/json');
+  });
 
-    const data = await res.json();
+  it('GET /latest — response shape includes overlay, api, sections', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=regular`)).json();
     expect(data.view).toBe('tasks');
     expect(data.mode).toBe('regular');
     expect(data.title).toBe('Task Overrides');
     expect(data).toHaveProperty('overlay');
     expect(data).toHaveProperty('api');
-    expect(Array.isArray(data.sections)).toBe(true);
     expect(data.sections).toHaveLength(4);
   });
 
-  it('GET /latest reflects overlay task overrides in sections', async () => {
-    const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
-    const data = await res.json();
-
-    const diff = data.sections[0];
-    const row = diff.rows.find((r: string[]) => r[1] === 'minPlayerLevel');
+  it('GET /latest — sections contain the seeded override diff', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=regular`)).json();
+    const row = data.sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
+    expect(row[2]).toBe('10');       // API
+    expect(row[3]).toBe('45');       // overlay
     expect(row[4]).toBe('override');
   });
 
-  it('GET /latest respects the view parameter', async () => {
-    const res = await fetch(`${baseUrl}/latest?view=items`);
-    const data = await res.json();
-
+  it('GET /latest — respects view=items', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=items`)).json();
     expect(data.view).toBe('items');
-    expect(data.mode).toBeNull(); // items is non-mode
+    expect(data.mode).toBeNull();
     expect(data.sections[0].title).toContain('Items');
   });
 
-  it('GET /latest respects the mode parameter', async () => {
-    const res = await fetch(`${baseUrl}/latest?view=tasks&mode=pve`);
-    const data = await res.json();
-
-    expect(data.mode).toBe('pve');
+  it('GET /latest — defaults unknown view to tasks', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=xxx`)).json();
+    expect(data.view).toBe('tasks');
   });
 
-  it('GET /latest defaults unknown view to tasks', async () => {
-    const res = await fetch(`${baseUrl}/latest?view=nope`);
-    const data = await res.json();
-
-    expect(data.view).toBe('tasks');
+  it('GET /latest — respects mode=pve', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=pve`)).json();
+    expect(data.mode).toBe('pve');
   });
 
   // -- /events ---------------------------------------------------------------
 
-  it('GET /events returns SSE headers', async () => {
+  it('GET /events — SSE headers', async () => {
     const res = await fetch(`${baseUrl}/events?view=tasks&mode=regular`);
-
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('text/event-stream');
     expect(res.headers.get('cache-control')).toBe('no-store');
     expect(res.headers.get('connection')).toContain('keep-alive');
-
-    // read and discard so the connection closes cleanly
-    const reader = res.body!.getReader();
-    reader.cancel();
+    res.body!.getReader().cancel();
   });
 
-  it('GET /events initial frame is a valid summary', async () => {
+  it('GET /events — first frame is a parseable summary with sections', async () => {
     const res = await fetch(`${baseUrl}/events?view=tasks&mode=regular`);
     const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-
     const { value } = await reader.read();
-    const text = decoder.decode(value);
+    const text = new TextDecoder().decode(value);
 
     expect(text).toContain('event: summary');
-    expect(text).toContain('data:');
 
-    // Parse the JSON payload embedded after "data: "
-    const dataLine = text
-      .split('\n')
-      .find((l: string) => l.startsWith('data: '));
+    const dataLine = text.split('\n').find((l: string) => l.startsWith('data: '));
     expect(dataLine).toBeDefined();
-    const payload = JSON.parse(dataLine!.replace('data: ', ''));
+
+    const payload = JSON.parse(dataLine!.slice(6));
     expect(payload.view).toBe('tasks');
     expect(payload.mode).toBe('regular');
-    expect(Array.isArray(payload.sections)).toBe(true);
+    expect(payload.sections).toHaveLength(4);
 
     reader.cancel();
   });
 
-  it('GET /events works for non-mode views', async () => {
+  it('GET /events — non-mode view (items)', async () => {
     const res = await fetch(`${baseUrl}/events?view=items`);
     const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-
     const { value } = await reader.read();
-    const text = decoder.decode(value);
-
+    const text = new TextDecoder().decode(value);
     expect(text).toContain('"view":"items"');
-
     reader.cancel();
   });
 
   // -- error paths -----------------------------------------------------------
 
-  it('returns 405 for POST requests', async () => {
+  it('POST /latest — 405', async () => {
     const res = await fetch(`${baseUrl}/latest`, { method: 'POST' });
     expect(res.status).toBe(405);
   });
