@@ -111,9 +111,11 @@ jobs:
             return files.sort();
           };
           
+          // Map source files to their keys in the built overlay
+          // Note: itemsAdd and tasksAdd are stored under their own keys in overlay.json
           const map = {
-            'items': 'items', 'itemsAdd': 'items',
-            'tasks': 'tasks', 'tasksAdd': 'tasks',
+            'items': 'items', 'itemsAdd': 'itemsAdd',
+            'tasks': 'tasks', 'tasksAdd': 'tasksAdd',
             'traders': 'traders', 'hideout': 'hideout',
             'editions': 'editions', 'storyChapters': 'storyChapters'
           };
