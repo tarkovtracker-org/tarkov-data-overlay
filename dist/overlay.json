@@ -1413,7 +1413,7 @@
       "id": "the-unheard",
       "name": "The Unheard",
       "normalizedName": "the-unheard",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Unheard_(quest)",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Unheard",
       "order": 4,
       "autoStart": false,
       "chapterRequirements": [],
@@ -1712,7 +1712,7 @@
       "id": "the-labyrinth",
       "name": "The Labyrinth",
       "normalizedName": "the-labyrinth",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(quest)",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)",
       "order": 8,
       "autoStart": false,
       "chapterRequirements": [],
@@ -3171,7 +3171,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-02-19T15:22:15.914Z",
-    "sha256": "8c26f7bbd89adfb95bf77def224afc89f8719715d2c79d1927cb87c630e2e4bb"
+    "generated": "2026-02-20T19:12:56.803Z",
+    "sha256": "3ec81066e375a044e554b02a8004910e797c64a57b6cfbc60c2b7caf216d7779"
   }
 }
