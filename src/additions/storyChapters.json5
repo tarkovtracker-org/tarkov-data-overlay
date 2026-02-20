@@ -316,12 +316,12 @@
   },
 
   // The Unheard
-  // Source: https://escapefromtarkov.fandom.com/wiki/The_Unheard_(quest)
+  // Source: https://escapefromtarkov.fandom.com/wiki/The_Unheard
   'the-unheard': {
     id: 'the-unheard',
     name: 'The Unheard',
     normalizedName: 'the-unheard',
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard_(quest)',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard',
     order: 4,
     autoStart: false,
     chapterRequirements: [],
