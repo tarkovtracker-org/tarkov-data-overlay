@@ -1857,115 +1857,115 @@
         },
         {
           "id": "the-ticket-main-12",
-          "type": "main",
+          "type": "optional",
           "description": "Accept Mr. Kerman's cooperation offer",
           "notes": "Kerman Route — leads to Savior or Fallen ending"
         },
         {
           "id": "the-ticket-main-13",
-          "type": "main",
+          "type": "optional",
           "description": "Refuse Mr. Kerman's cooperation offer",
           "notes": "Refuse Route — leads to Survivor or Debtor ending"
         },
         {
           "id": "the-ticket-main-14",
-          "type": "main",
+          "type": "optional",
           "description": "Obtain the Laboratory master pass",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-15",
-          "type": "main",
+          "type": "optional",
           "description": "Locate the RFID card encryption device",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-16",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Mechanic about the RFID device",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-17",
-          "type": "main",
+          "type": "optional",
           "description": "Wait for Mechanic",
           "notes": "Kerman Route — 24-hour cooldown"
         },
         {
           "id": "the-ticket-main-18",
-          "type": "main",
+          "type": "optional",
           "description": "Hand over 40 Physical Bitcoins to Mechanic",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-19",
-          "type": "main",
+          "type": "optional",
           "description": "Collect the RFID encryption device from Mechanic",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-20",
-          "type": "main",
+          "type": "optional",
           "description": "Use the RFID device to activate Kruglov's keycard",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-21",
-          "type": "main",
+          "type": "optional",
           "description": "Report to Mr. Kerman",
           "notes": "Kerman Route"
         },
         {
           "id": "the-ticket-main-22",
-          "type": "main",
+          "type": "optional",
           "description": "Hand over the TerraGroup evidence to Mr. Kerman",
           "notes": "Savior ending — cooperate fully with Kerman"
         },
         {
           "id": "the-ticket-main-23",
-          "type": "main",
+          "type": "optional",
           "description": "Betray Mr. Kerman and keep the evidence",
           "notes": "Fallen ending — turn against Kerman"
         },
         {
           "id": "the-ticket-main-24",
-          "type": "main",
+          "type": "optional",
           "description": "Use the RFID card at the Terminal intercom on Shoreline",
           "notes": "Refuse Route"
         },
         {
           "id": "the-ticket-main-25",
-          "type": "main",
+          "type": "optional",
           "description": "Pay Prapor to arrange Terminal access",
           "notes": "Survivor ending — pay the ruble cost"
         },
         {
           "id": "the-ticket-main-26",
-          "type": "main",
+          "type": "optional",
           "description": "Seek Lightkeeper for Terminal access",
           "notes": "Debtor ending — work with Lightkeeper instead"
         },
         {
           "id": "the-ticket-main-27",
-          "type": "main",
+          "type": "optional",
           "description": "Complete topographic reconnaissance for Lightkeeper",
           "notes": "Debtor Route"
         },
         {
           "id": "the-ticket-main-28",
-          "type": "main",
+          "type": "optional",
           "description": "Obtain cultist amulets for Lightkeeper",
           "notes": "Debtor Route"
         },
         {
           "id": "the-ticket-main-29",
-          "type": "main",
+          "type": "optional",
           "description": "Deliver items to Lightkeeper",
           "notes": "Debtor Route"
         },
         {
           "id": "the-ticket-main-30",
-          "type": "main",
+          "type": "optional",
           "description": "Receive the Lightkeeper keycard",
           "notes": "Debtor Route"
         },
@@ -2056,13 +2056,13 @@
       "rewards": null,
       "mapUnlocks": [
         {
-          "id": "67b82b69e81eb665e8057777",
+          "id": "65cc8f81a9aac3e77d0cfd3e",
           "name": "Terminal"
         }
       ],
       "traderUnlocks": [
         {
-          "id": "6617beeaa9cfa777ca915b7c",
+          "id": "688246518448b05efd61d461",
           "name": "Mr. Kerman"
         }
       ]
@@ -3434,7 +3434,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-02-24T03:27:00.360Z",
-    "sha256": "df062ae0661a9e1cd6b27fcb3577582cd8acb3e7bb997fad1cd7115a38f75095"
+    "generated": "2026-02-24T04:30:41.811Z",
+    "sha256": "6fc523ff69c172d17252e51d4e0ab5e5a70a8f27f8ff1eead4ac182db59ab1ae"
   }
 }
