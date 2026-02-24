@@ -316,12 +316,12 @@
   },
 
   // The Unheard
-  // Source: https://escapefromtarkov.fandom.com/wiki/The_Unheard_(quest)
+  // Source: https://escapefromtarkov.fandom.com/wiki/The_Unheard
   'the-unheard': {
     id: 'the-unheard',
     name: 'The Unheard',
     normalizedName: 'the-unheard',
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard_(quest)',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard',
     order: 4,
     autoStart: false,
     chapterRequirements: [],
@@ -575,12 +575,12 @@
   },
 
   // The Labyrinth
-  // Source: https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(quest)
+  // Source: https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)
   'the-labyrinth': {
     id: 'the-labyrinth',
     name: 'The Labyrinth',
     normalizedName: 'the-labyrinth',
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(quest)',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)',
     order: 8,
     autoStart: false,
     chapterRequirements: [],

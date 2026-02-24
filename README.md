@@ -23,10 +23,6 @@ Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATIO
 
 See corrections in: https://monitor.nivmizz7.fr
 
-## Current Additions
-
-- **Game Editions**: Standard, Left Behind, Prepare for Escape, Edge of Darkness, The Unheard, Edge of Darkness + Unheard
-
 ## Maintenance
 
 The overlay is regularly validated against the tarkov.dev API to ensure corrections are still needed:

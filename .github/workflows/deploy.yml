@@ -24,10 +24,14 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
             cd ${{ secrets.SSH_PROJECT_PATH }}
             git fetch origin main
+            git checkout main
             git reset --hard origin/main
-            npm ci --production
+            git clean -fd
+            npm ci
+            npm run build
 
             if pm2 describe monitor > /dev/null 2>&1; then
               pm2 restart monitor

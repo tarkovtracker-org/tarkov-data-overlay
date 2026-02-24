@@ -9,27 +9,46 @@
   <body>
     <div class="page">
       <header class="hero">
-        <div>
+        <div class="hero-main">
           <p class="eyebrow">Overlay Monitor</p>
           <h1 id="page-title">Tasks</h1>
           <p id="page-lede" class="lede">Task corrections.</p>
+          <div id="mode-switch" class="mode-switch" aria-label="Game mode selector">
+            <button type="button" data-mode="regular" aria-pressed="true">Regular</button>
+            <button type="button" data-mode="pve" aria-pressed="false">PvE</button>
+          </div>
         </div>
         <div class="meta">
-          <div id="status" class="status">Connecting...</div>
-          <div id="updated" class="updated">Last update: n/a</div>
+          <div class="meta-row">
+            <span class="label">Overlay status</span>
+            <span id="overlay-status" class="status">Connecting...</span>
+          </div>
+          <div class="meta-row">
+            <span class="label">API status</span>
+            <span id="api-status" class="status">Connecting...</span>
+          </div>
+          <div class="meta-row">
+            <span class="label">Overlay build</span>
+            <span id="overlay-build" class="updated">n/a</span>
+          </div>
         </div>
       </header>
 
       <nav id="nav" class="nav">
-        <a href="/tasks" data-type="tasks">Tasks</a>
-        <a href="/hideout" data-type="hideout">Hideout</a>
-        <a href="/items" data-type="items">Items</a>
-        <a href="/traders" data-type="traders">Traders</a>
+        <a href="/tasks" data-view="tasks">Tasks</a>
+        <a href="/tasks-additions" data-view="tasksAdd">Tasks Additions</a>
+        <a href="/items" data-view="items">Items</a>
+        <a href="/hideout" data-view="hideout">Hideout</a>
+        <a href="/traders" data-view="traders">Traders</a>
+        <a href="/editions" data-view="editions">Editions</a>
+        <a href="/story-chapters" data-view="storyChapters">Story Chapters</a>
+        <a href="/items-additions" data-view="itemsAdd">Items Additions</a>
       </nav>
 
       <main>
+        <section id="summary" class="summary"></section>
         <section class="content">
-          <p id="empty" class="empty">No differences detected.</p>
+          <p id="empty" class="empty">No data to display.</p>
           <div id="sections" class="sections"></div>
         </section>
       </main>

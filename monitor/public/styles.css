@@ -30,9 +30,10 @@ body {
 }
 
 .page {
-  max-width: 980px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 20px 80px;
+  padding: 40px 32px 80px;
   animation: fadeUp 0.6s ease both;
   position: relative;
 }
@@ -44,6 +45,12 @@ body {
   gap: 24px;
   align-items: flex-end;
   margin-bottom: 32px;
+}
+
+.hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .nav {
@@ -105,12 +112,28 @@ h1 {
   padding: 16px 20px;
   min-width: 240px;
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
 }
 
 .status {
   font-weight: 600;
   color: var(--accent-2);
-  margin-bottom: 6px;
 }
 
 .updated {
@@ -123,6 +146,63 @@ h1 {
   font-size: 0.8rem;
   margin-top: 6px;
   word-break: break-all;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.mode-switch button {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-switch button:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.mode-switch button.active {
+  color: var(--ink);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(156, 168, 107, 0.35);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.summary-label {
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .content {
@@ -177,9 +257,20 @@ h1 {
   color: #e09a8b;
 }
 
-.badge.changed {
+.badge.changed,
+.badge.override {
   background: rgba(200, 169, 107, 0.2);
   color: #e2c58a;
+}
+
+.badge.same {
+  background: rgba(97, 196, 128, 0.18);
+  color: #a7e0b7;
+}
+
+.badge.missing {
+  background: rgba(194, 104, 88, 0.2);
+  color: #e09a8b;
 }
 
 .value {

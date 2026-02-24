@@ -21,6 +21,9 @@
   ],
   "author": "Lab",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.10.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "ajv": "^8.12.0",

@@ -6,63 +6,81 @@ const { URL } = require("url");
 
 const PORT = Number(process.env.PORT) || 3476;
 const PUBLIC_DIR = path.resolve(__dirname, "public");
-const MAX_ROWS = Number(process.env.MAX_ROWS) || 200;
+const MAX_ROWS = Number(process.env.MAX_ROWS) || 250;
 
-const REMOTE_POLL_MS = Number(process.env.REMOTE_POLL_MS) || 30000;
+const OVERLAY_PATH =
+  process.env.TARGET_OVERLAY ||
+  path.resolve(__dirname, "../dist/overlay.json");
+const API_POLL_MS = Number(process.env.API_POLL_MS) || 120000;
+const OVERLAY_POLL_MS = Number(process.env.OVERLAY_POLL_MS) || 30000;
+
 const REMOTE_FETCH_TIMEOUT_MS =
   Number(process.env.REMOTE_FETCH_TIMEOUT_MS) || 10000;
 const REMOTE_FETCH_MAX_BYTES =
   Number(process.env.REMOTE_FETCH_MAX_BYTES) || 5 * 1024 * 1024;
 
-const SOURCES = {
+const TARKOV_API = "https://api.tarkov.dev/graphql";
+
+const VIEW_CONFIG = {
   tasks: {
-    title: "Tasks",
-    path:
-      process.env.TARGET_TASKS ||
-      path.resolve(__dirname, "../src/overrides/tasks.json5"),
-    parser: parseTasks,
+    title: "Task Overrides",
+    lede: "Corrections from the overlay compared to tarkov.dev.",
+    requiresMode: true,
   },
-  hideout: {
-    title: "Hideout",
-    path:
-      process.env.TARGET_HIDEOUT ||
-      path.resolve(__dirname, "../src/overrides/hideout.json5"),
-    parser: parseGeneric,
+  tasksAdd: {
+    title: "Task Additions",
+    lede: "Tasks added by the overlay that are missing from tarkov.dev.",
+    requiresMode: true,
   },
   items: {
-    title: "Items",
-    path:
-      process.env.TARGET_ITEMS ||
-      path.resolve(__dirname, "../src/overrides/items.json5"),
-    parser: parseGeneric,
+    title: "Item Overrides",
+    lede: "Item corrections included in the overlay build.",
+    requiresMode: false,
+  },
+  hideout: {
+    title: "Hideout Overrides",
+    lede: "Hideout corrections included in the overlay build.",
+    requiresMode: false,
   },
   traders: {
-    title: "Traders",
-    path:
-      process.env.TARGET_TRADERS ||
-      path.resolve(__dirname, "../src/overrides/traders.json5"),
-    parser: parseGeneric,
+    title: "Trader Overrides",
+    lede: "Trader corrections included in the overlay build.",
+    requiresMode: false,
+  },
+  editions: {
+    title: "Editions",
+    lede: "Game editions defined by the overlay.",
+    requiresMode: false,
+  },
+  storyChapters: {
+    title: "Story Chapters",
+    lede: "Storyline chapter additions in the overlay.",
+    requiresMode: false,
+  },
+  itemsAdd: {
+    title: "Item Additions",
+    lede: "Items added by the overlay.",
+    requiresMode: false,
   },
 };
 
-const stateByType = {
-  tasks: { summary: null, updatedAt: null, error: null },
-  hideout: { summary: null, updatedAt: null, error: null },
-  items: { summary: null, updatedAt: null, error: null },
-  traders: { summary: null, updatedAt: null, error: null },
+const DEFAULT_VIEW = "tasks";
+const DEFAULT_MODE = "regular";
+
+const overlayState = { data: null, updatedAt: null, error: null };
+const apiState = {
+  regular: { data: null, updatedAt: null, error: null },
+  pve: { data: null, updatedAt: null, error: null },
 };
+
+const summaryByKey = new Map();
 const readLocks = {
-  tasks: { isReading: false, pendingRead: false },
-  hideout: { isReading: false, pendingRead: false },
-  items: { isReading: false, pendingRead: false },
-  traders: { isReading: false, pendingRead: false },
+  overlay: { isReading: false, pendingRead: false },
+  apiRegular: { isReading: false, pendingRead: false },
+  apiPve: { isReading: false, pendingRead: false },
 };
-const clientsByType = new Map([
-  ["tasks", new Set()],
-  ["hideout", new Set()],
-  ["items", new Set()],
-  ["traders", new Set()],
-]);
+
+const clientsByKey = new Map();
 
 function isRemotePath(targetPath) {
   return /^https?:\/\//i.test(targetPath);
@@ -226,89 +244,9 @@ function serveStatic(res, requestPath) {
     send(res, 200, data, contentType);
   });
 }
-
-function parseTaskName(commentLine) {
-  const text = commentLine.trim();
-  const lower = text.toLowerCase();
-  if (
-    !text ||
-    lower.startsWith("proof:") ||
-    lower.startsWith("verified") ||
-    lower.startsWith("tarkov.dev") ||
-    !text.includes(" - ")
-  ) {
-    return null;
-  }
-  const parts = text.split(" - ").map((part) => part.trim());
-  if (parts.length <= 1) {
-    return text;
-  }
-  return parts.slice(0, -1).join(" - ");
-}
-
-function parseEntityName(commentLine) {
-  const text = commentLine.trim();
-  const lower = text.toLowerCase();
-  if (
-    !text ||
-    lower.startsWith("proof:") ||
-    lower.startsWith("format:") ||
-    lower.startsWith("tarkov.dev") ||
-    lower.startsWith("verified")
-  ) {
-    return null;
-  }
-  if (text.startsWith("[") && text.includes("]")) {
-    return text.slice(1, text.indexOf("]")).trim();
-  }
-  if (text.includes(" - ")) {
-    return text.split(" - ")[0].trim();
-  }
-  return text;
-}
-
-function cleanOldValue(value) {
-  let cleaned = value.trim();
-  const splitIndex = cleaned.search(/\s{2,}\w[\w-]*\s*:/);
-  if (splitIndex > -1) {
-    cleaned = cleaned.slice(0, splitIndex).trim();
-  }
-  if (cleaned.includes("//")) {
-    cleaned = cleaned.split("//")[0].trim();
-  }
-  return cleaned.trim();
-}
-
-function normalizeValue(raw) {
-  let cleaned = raw.trim().replace(/,$/, "");
-  if (
-    (cleaned.startsWith("\"") && cleaned.endsWith("\"")) ||
-    (cleaned.startsWith("'") && cleaned.endsWith("'"))
-  ) {
-    cleaned = cleaned.slice(1, -1);
-  }
-  return cleaned;
-}
-
-function extractFieldMatches(line, field) {
-  const regex = new RegExp(
-    `${field}\\s*:\\s*([^,]+),?\\s*\\/\\/\\s*Was:\\s*([^\\n]+)`,
-    "g",
-  );
-  const matches = [];
-  let match = regex.exec(line);
-  while (match) {
-    matches.push({
-      newValue: normalizeValue(match[1]),
-      oldValue: normalizeValue(cleanOldValue(match[2])),
-    });
-    match = regex.exec(line);
-  }
-  return matches;
-}
-
-function createSection(title, columns) {
+function createSection(title, columns, options = {}) {
   return {
+    ...options,
     title,
     columns,
     rows: [],
@@ -324,367 +262,681 @@ function pushRow(section, row) {
   section.rows.push(row);
 }
 
-function parseGeneric(text, label) {
-  const section = createSection(`${label} Corrections`, [
-    "Entity",
-    "Field",
-    "tarkov.dev",
-    "Correct",
-  ]);
+function getSummaryKey(view, mode) {
+  return `${view}:${mode || ""}`;
+}
 
-  let lastEntityName = null;
-  let currentEntityName = null;
-  let currentEntityId = null;
-
-  const lines = text.split(/\r?\n/);
-  for (const line of lines) {
-    const commentIndex = line.indexOf("//");
-    const comment = commentIndex >= 0 ? line.slice(commentIndex + 2) : "";
-    const code = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
-    const trimmedCode = code.trim();
-
-    if (line.trim().startsWith("//")) {
-      const possibleName = parseEntityName(comment);
-      if (possibleName) {
-        lastEntityName = possibleName;
-      }
-    }
-
-    const idMatch = code.match(/"([a-f0-9]{24})"\s*:\s*{/i);
-    if (idMatch) {
-      currentEntityId = idMatch[1];
-      currentEntityName = lastEntityName || `ID ${currentEntityId}`;
-    }
-
-    if (!trimmedCode || !line.includes("Was:")) {
-      continue;
-    }
-
-    const fieldRegex = /(\w+)\s*:\s*([^,]+),?\s*\/\/\s*Was:\s*([^\n]+)/g;
-    let match = fieldRegex.exec(line);
-    while (match) {
-      const field = match[1];
-      const newValue = normalizeValue(match[2]);
-      const oldValue = normalizeValue(cleanOldValue(match[3]));
-      pushRow(section, [
-        currentEntityName || `ID ${currentEntityId || "?"}`,
-        field,
-        oldValue,
-        newValue,
-      ]);
-      match = fieldRegex.exec(line);
-    }
+function normalizeView(view) {
+  if (view && VIEW_CONFIG[view]) {
+    return view;
   }
-
-  return [section];
+  return DEFAULT_VIEW;
 }
 
-function parseTasks(text) {
-  const experienceSection = createSection("Task Experience Corrections", [
-    "Task",
-    "tarkov.dev",
-    "Correct",
-  ]);
-  const objectiveSection = createSection("Task Objective Count Corrections", [
-    "Task",
-    "tarkov.dev",
-    "Correct",
-  ]);
-  const rewardSection = createSection("Task Reward Corrections", [
-    "Task",
-    "Field",
-    "tarkov.dev",
-    "Correct",
-  ]);
-  const prereqSection = createSection("Task Prerequisite Corrections", [
-    "Task",
-    "Change",
-  ]);
-  const nameLinkSection = createSection("Task Name/Link Corrections", [
-    "Task",
-    "Field",
-    "tarkov.dev",
-    "Correct",
-  ]);
-  const levelSection = createSection("Task Level Requirements Corrections", [
-    "Task",
-    "Field",
-    "tarkov.dev",
-    "Correct",
-  ]);
-
-  let depth = 0;
-  let lastTaskName = null;
-  let currentTaskName = null;
-  let currentTaskId = null;
-  let objectivesDepth = null;
-  let finishRewardsDepth = null;
-  let taskRequirementsDepth = null;
-  let requirementNames = [];
-  let rewardItemName = null;
-
-  const lines = text.split(/\r?\n/);
-  for (const line of lines) {
-    const commentIndex = line.indexOf("//");
-    const comment = commentIndex >= 0 ? line.slice(commentIndex + 2) : "";
-    const code = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
-    const trimmedCode = code.trim();
-
-    if (line.trim().startsWith("//")) {
-      const possibleName = parseTaskName(comment);
-      if (possibleName) {
-        lastTaskName = possibleName;
-      }
-    }
-
-    const idMatch = code.match(/"([a-f0-9]{24})"\s*:\s*{/i);
-    if (idMatch) {
-      currentTaskId = idMatch[1];
-      currentTaskName = lastTaskName || `Task ID ${currentTaskId}`;
-    }
-
-    if (trimmedCode.startsWith("objectives:")) {
-      objectivesDepth = depth;
-    }
-    if (trimmedCode.startsWith("finishRewards:")) {
-      finishRewardsDepth = depth;
-      rewardItemName = null;
-    }
-    if (trimmedCode.startsWith("taskRequirements:")) {
-      taskRequirementsDepth = depth;
-      requirementNames = [];
-    }
-
-    if (finishRewardsDepth !== null && trimmedCode.includes("name:")) {
-      const nameMatch = trimmedCode.match(/name:\s*"([^"]+)"/);
-      if (nameMatch) {
-        rewardItemName = nameMatch[1];
-      }
-    }
-
-    const experienceMatches = extractFieldMatches(line, "experience");
-    experienceMatches.forEach((match) => {
-      pushRow(experienceSection, [
-        currentTaskName || `Task ID ${currentTaskId || "?"}`,
-        match.oldValue,
-        match.newValue,
-      ]);
-    });
-
-    const minLevelMatches = extractFieldMatches(line, "minPlayerLevel");
-    minLevelMatches.forEach((match) => {
-      pushRow(levelSection, [
-        currentTaskName || `Task ID ${currentTaskId || "?"}`,
-        "minPlayerLevel",
-        match.oldValue,
-        match.newValue,
-      ]);
-    });
-
-    const nameMatches = extractFieldMatches(line, "name");
-    nameMatches.forEach((match) => {
-      if (finishRewardsDepth !== null) {
-        return;
-      }
-      pushRow(nameLinkSection, [
-        currentTaskName || `Task ID ${currentTaskId || "?"}`,
-        "name",
-        match.oldValue,
-        match.newValue,
-      ]);
-    });
-
-    const linkMatches = extractFieldMatches(line, "wikiLink");
-    linkMatches.forEach((match) => {
-      pushRow(nameLinkSection, [
-        currentTaskName || `Task ID ${currentTaskId || "?"}`,
-        "wikiLink",
-        match.oldValue,
-        match.newValue,
-      ]);
-    });
-
-    const countMatches = extractFieldMatches(line, "count");
-    if (countMatches.length > 0) {
-      if (objectivesDepth !== null && finishRewardsDepth === null) {
-        countMatches.forEach((match) => {
-          pushRow(objectiveSection, [
-            currentTaskName || `Task ID ${currentTaskId || "?"}`,
-            match.oldValue,
-            match.newValue,
-          ]);
-        });
-      } else if (finishRewardsDepth !== null) {
-        countMatches.forEach((match) => {
-          pushRow(rewardSection, [
-            currentTaskName || `Task ID ${currentTaskId || "?"}`,
-            rewardItemName ? `${rewardItemName} count` : "count",
-            match.oldValue,
-            match.newValue,
-          ]);
-        });
-      }
-    }
-
-    if (taskRequirementsDepth !== null && trimmedCode.includes("name:")) {
-      const reqNameMatch = trimmedCode.match(/name:\s*"([^"]+)"/);
-      if (reqNameMatch) {
-        requirementNames.push(reqNameMatch[1]);
-      }
-    }
-
-    if (
-      taskRequirementsDepth !== null &&
-      trimmedCode.startsWith("],") &&
-      comment.includes("Was:")
-    ) {
-      const oldValue = normalizeValue(cleanOldValue(comment.split("Was:")[1] || ""));
-      const newValue = requirementNames.length
-        ? requirementNames.join(", ")
-        : "[]";
-      const changeText = `taskRequirements changed from ${oldValue} to ${newValue}`;
-      pushRow(prereqSection, [
-        currentTaskName || `Task ID ${currentTaskId || "?"}`,
-        changeText,
-      ]);
-    }
-
-    const delta =
-      (code.match(/{/g) || []).length +
-      (code.match(/\[/g) || []).length -
-      (code.match(/}/g) || []).length -
-      (code.match(/]/g) || []).length;
-    depth += delta;
-
-    if (objectivesDepth !== null && depth <= objectivesDepth) {
-      objectivesDepth = null;
-    }
-    if (finishRewardsDepth !== null && depth <= finishRewardsDepth) {
-      finishRewardsDepth = null;
-      rewardItemName = null;
-    }
-    if (taskRequirementsDepth !== null && depth <= taskRequirementsDepth) {
-      taskRequirementsDepth = null;
-      requirementNames = [];
-    }
+function normalizeMode(mode) {
+  if (mode === "pve" || mode === "regular") {
+    return mode;
   }
-
-  return [
-    experienceSection,
-    objectiveSection,
-    rewardSection,
-    prereqSection,
-    nameLinkSection,
-    levelSection,
-  ];
+  return DEFAULT_MODE;
 }
 
-function getState(type) {
-  return {
-    type,
-    title: SOURCES[type].title,
-    filePath: SOURCES[type].path,
-    updatedAt: stateByType[type].updatedAt,
-    sections: stateByType[type].summary,
-    error: stateByType[type].error,
-  };
-}
-
-function removeClient(type, client) {
-  const clients = clientsByType.get(type);
+function removeClient(key, client) {
+  const clients = clientsByKey.get(key);
   if (!clients) {
     return;
   }
   clients.delete(client);
 }
 
-function writeSse(type, client, message) {
+function writeSse(key, client, message) {
   if (client.destroyed || client.writableEnded) {
-    removeClient(type, client);
+    removeClient(key, client);
     return false;
   }
   try {
     client.write(message);
     return true;
   } catch {
-    removeClient(type, client);
+    removeClient(key, client);
     return false;
   }
 }
 
-function broadcast(type, event, payload) {
+function broadcast(key, event, payload) {
   const message = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
-  const clients = clientsByType.get(type) || new Set();
+  const clients = clientsByKey.get(key) || new Set();
   clients.forEach((client) => {
-    writeSse(type, client, message);
+    writeSse(key, client, message);
   });
 }
 
-async function refreshSnapshot(type) {
-  const lock = readLocks[type];
-  if (!lock) {
-    return;
+function getValueType(value) {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "array";
+  return typeof value;
+}
+
+function normalizeCompareValue(value) {
+  if (Array.isArray(value)) {
+    // Preserve array order so reordering is treated as a real change.
+    return value.map(normalizeCompareValue);
   }
+
+  if (value && typeof value === "object") {
+    const obj = value;
+    const keys = Object.keys(obj).sort();
+    const normalized = {};
+    for (const key of keys) {
+      normalized[key] = normalizeCompareValue(obj[key]);
+    }
+    return normalized;
+  }
+
+  return value;
+}
+
+function valuesEqual(a, b) {
+  if (a === undefined && b === undefined) return true;
+  return (
+    JSON.stringify(normalizeCompareValue(a)) ===
+    JSON.stringify(normalizeCompareValue(b))
+  );
+}
+
+function formatValue(value, maxLength = 220) {
+  if (value === undefined) return "undefined";
+  if (value === null) return "null";
+  if (typeof value === "string") return value;
+  const json = JSON.stringify(value);
+  if (!json) return String(value);
+  if (json.length <= maxLength) return json;
+  return `${json.slice(0, maxLength - 1)}…`;
+}
+
+function mergeTaskOverride(base = {}, next = {}) {
+  const merged = { ...base, ...next };
+  if (base.objectives || next.objectives) {
+    merged.objectives = { ...(base.objectives || {}), ...(next.objectives || {}) };
+  }
+  if (base.objectivesAdd || next.objectivesAdd) {
+    merged.objectivesAdd = [
+      ...(base.objectivesAdd || []),
+      ...(next.objectivesAdd || []),
+    ];
+  }
+  return merged;
+}
+
+function mergeTaskOverrides(shared = {}, modeSpecific = {}) {
+  const merged = { ...shared };
+  for (const [taskId, override] of Object.entries(modeSpecific)) {
+    merged[taskId] = mergeTaskOverride(merged[taskId], override);
+  }
+  return merged;
+}
+
+function buildOverrideSections(title, overrides = {}) {
+  const section = createSection(`${title} Overrides`, ["Entity", "Field", "Overlay"]);
+
+  for (const [entityId, override] of Object.entries(overrides)) {
+    if (!override || typeof override !== "object") {
+      pushRow(section, [entityId, "value", formatValue(override)]);
+      continue;
+    }
+    const entries = Object.entries(override);
+    if (entries.length === 0) {
+      pushRow(section, [entityId, "(empty)", "{}"]); 
+      continue;
+    }
+    for (const [field, value] of entries) {
+      pushRow(section, [entityId, field, formatValue(value)]);
+    }
+  }
+
+  return [section];
+}
+
+function buildEditionsSections(editions = {}) {
+  const section = createSection("Editions", [
+    "Edition",
+    "ID",
+    "Stash",
+    "Rep Bonus",
+    "Exclusive Tasks",
+    "Excluded Tasks",
+  ]);
+
+  for (const [key, edition] of Object.entries(editions)) {
+    if (!edition || typeof edition !== "object") {
+      pushRow(section, [key, key, "-", "-", "-", "-"]); 
+      continue;
+    }
+    const repCount = edition.traderRepBonus
+      ? Object.keys(edition.traderRepBonus).length
+      : 0;
+    const exclusiveCount = Array.isArray(edition.exclusiveTaskIds)
+      ? edition.exclusiveTaskIds.length
+      : 0;
+    const excludedCount = Array.isArray(edition.excludedTaskIds)
+      ? edition.excludedTaskIds.length
+      : 0;
+    pushRow(section, [
+      edition.title || key,
+      edition.id || key,
+      edition.defaultStashLevel ?? "-",
+      repCount ? `${repCount} traders` : "-",
+      exclusiveCount || "-",
+      excludedCount || "-",
+    ]);
+  }
+
+  return [section];
+}
+
+function buildStoryChapterSections(chapters = {}) {
+  const section = createSection("Story Chapters", [
+    "Chapter",
+    "ID",
+    "Order",
+    "Objectives",
+    "Wiki",
+  ]);
+
+  for (const [key, chapter] of Object.entries(chapters)) {
+    if (!chapter || typeof chapter !== "object") {
+      pushRow(section, [key, key, "-", "-", "-"]); 
+      continue;
+    }
+    const objectiveCount = Array.isArray(chapter.objectives)
+      ? chapter.objectives.length
+      : 0;
+    pushRow(section, [
+      chapter.name || key,
+      chapter.id || key,
+      chapter.order ?? "-",
+      objectiveCount,
+      chapter.wikiLink || "-",
+    ]);
+  }
+
+  return [section];
+}
+
+function buildTaskAdditionSections(tasksAdd = {}, mode) {
+  const section = createSection(`Task Additions (${mode})`, [
+    "Task",
+    "ID",
+    "Trader",
+    "Map",
+    "Wiki",
+  ]);
+
+  for (const [taskId, addition] of Object.entries(tasksAdd)) {
+    if (!addition || typeof addition !== "object") {
+      pushRow(section, [taskId, taskId, "-", "-", "-"]); 
+      continue;
+    }
+    const traderName = addition.trader?.name || "-";
+    const mapName = addition.map?.name || "-";
+    pushRow(section, [
+      addition.name || taskId,
+      addition.id || taskId,
+      traderName,
+      mapName,
+      addition.wikiLink || "-",
+    ]);
+  }
+
+  return [section];
+}
+
+function buildTasksSections(overrides = {}, apiTasks = [], mode) {
+  const diffSection = createSection("Task Overrides vs API", [
+    "Task",
+    "Field",
+    "API",
+    "Overlay",
+    "Status",
+  ], { statusColumnIndex: 4 });
+  const objectivesAddSection = createSection("Added Objectives", [
+    "Task",
+    "Objective",
+    "Overlay",
+  ]);
+  const missingSection = createSection("Tasks Missing From API", [
+    "Task",
+    "Task ID",
+  ]);
+  const disabledSection = createSection("Disabled Tasks", [
+    "Task",
+    "Task ID",
+  ]);
+
+  const apiById = new Map(apiTasks.map((task) => [task.id, task]));
+
+  for (const [taskId, override] of Object.entries(overrides)) {
+    if (!override || typeof override !== "object") {
+      continue;
+    }
+    const apiTask = apiById.get(taskId);
+    const taskName = apiTask?.name || override.name || `Task ID ${taskId}`;
+
+    if (!apiTask) {
+      pushRow(missingSection, [taskName, taskId]);
+      continue;
+    }
+
+    if (override.disabled === true) {
+      pushRow(disabledSection, [taskName, taskId]);
+    }
+
+    const { objectives, objectivesAdd, ...topLevel } = override;
+
+    Object.entries(topLevel).forEach(([field, value]) => {
+      if (value === undefined) return;
+      const apiValue = apiTask[field];
+      const status = valuesEqual(apiValue, value) ? "same" : "override";
+      pushRow(diffSection, [
+        taskName,
+        field,
+        formatValue(apiValue),
+        formatValue(value),
+        status,
+      ]);
+    });
+
+    if (objectives && typeof objectives === "object") {
+      for (const [objectiveId, objOverride] of Object.entries(objectives)) {
+        if (!objOverride || typeof objOverride !== "object") continue;
+        const apiObjective = apiTask.objectives?.find(
+          (objective) => objective.id === objectiveId,
+        );
+        if (!apiObjective) {
+          pushRow(diffSection, [
+            taskName,
+            `objective:${objectiveId}`,
+            "missing",
+            formatValue(objOverride),
+            "missing",
+          ]);
+          continue;
+        }
+        for (const [field, value] of Object.entries(objOverride)) {
+          if (value === undefined) continue;
+          const apiValue = apiObjective[field];
+          const status = valuesEqual(apiValue, value) ? "same" : "override";
+          pushRow(diffSection, [
+            taskName,
+            `objective:${objectiveId}.${field}`,
+            formatValue(apiValue),
+            formatValue(value),
+            status,
+          ]);
+        }
+      }
+    }
+
+    if (Array.isArray(objectivesAdd)) {
+      objectivesAdd.forEach((objective) => {
+        const label = objective.description || objective.id || "Added objective";
+        pushRow(objectivesAddSection, [
+          taskName,
+          label,
+          formatValue(objective),
+        ]);
+      });
+    }
+  }
+
+  const sections = [diffSection, objectivesAddSection, missingSection, disabledSection];
+  return sections;
+}
+
+async function loadOverlay() {
+  let raw = "";
+  let updatedAt = null;
+  if (isRemotePath(OVERLAY_PATH)) {
+    const remoteUrl = normalizeRemoteUrl(OVERLAY_PATH);
+    raw = await fetchRemoteText(remoteUrl);
+    updatedAt = new Date().toISOString();
+  } else {
+    const [fileRaw, stats] = await Promise.all([
+      fs.promises.readFile(OVERLAY_PATH, "utf8"),
+      fs.promises.stat(OVERLAY_PATH),
+    ]);
+    raw = fileRaw;
+    updatedAt = stats.mtime.toISOString();
+  }
+  const parsed = JSON.parse(raw);
+  return { data: parsed, updatedAt };
+}
+
+async function refreshOverlay() {
+  const lock = readLocks.overlay;
   if (lock.isReading) {
     lock.pendingRead = true;
     return;
   }
-
   lock.isReading = true;
   try {
-    const target = SOURCES[type];
-    let raw = "";
-    let updatedAt = null;
-
-    if (isRemotePath(target.path)) {
-      const remoteUrl = normalizeRemoteUrl(target.path);
-      raw = await fetchRemoteText(remoteUrl);
-      updatedAt = new Date().toISOString();
-    } else {
-      const [fileRaw, stats] = await Promise.all([
-        fs.promises.readFile(target.path, "utf8"),
-        fs.promises.stat(target.path),
-      ]);
-      raw = fileRaw;
-      updatedAt = stats.mtime.toISOString();
-    }
-    const sections = target.parser(raw, target.title);
-    stateByType[type].summary = sections;
-    stateByType[type].updatedAt = updatedAt;
-    stateByType[type].error = null;
-    broadcast(type, "summary", getState(type));
+    const { data, updatedAt } = await loadOverlay();
+    overlayState.data = data;
+    overlayState.updatedAt = updatedAt;
+    overlayState.error = null;
+    rebuildSummaries();
   } catch (error) {
-    stateByType[type].error = error.message || "Unable to read target file";
-    broadcast(type, "error", getState(type));
+    overlayState.error = error.message || "Unable to read overlay";
+    rebuildSummaries();
   } finally {
     lock.isReading = false;
     if (lock.pendingRead) {
       lock.pendingRead = false;
-      refreshSnapshot(type);
+      refreshOverlay().catch(() => {});
     }
   }
 }
 
-Object.entries(SOURCES).forEach(([type, source]) => {
-  if (isRemotePath(source.path)) {
-    setInterval(() => {
-      refreshSnapshot(type);
-    }, REMOTE_POLL_MS);
-  } else {
-    fs.watchFile(source.path, { interval: 1000 }, (curr, prev) => {
-      if (curr.mtimeMs !== prev.mtimeMs) {
-        refreshSnapshot(type);
+const TASKS_QUERY = `
+  query($gameMode: GameMode) {
+    tasks(lang: en, gameMode: $gameMode) {
+      id
+      name
+      minPlayerLevel
+      wikiLink
+      kappaRequired
+      lightkeeperRequired
+      map { id name }
+      experience
+      taskRequirements { task { id name } status }
+      traderRequirements { trader { id name } value compareMethod }
+      factionName
+      requiredPrestige { id name prestigeLevel }
+      objectives {
+        id
+        type
+        description
+        maps { id name }
+        ... on TaskObjectiveBasic { requiredKeys { id name shortName } }
+        ... on TaskObjectiveMark { markerItem { id name shortName } requiredKeys { id name shortName } }
+        ... on TaskObjectiveExtract { requiredKeys { id name shortName } }
+        ... on TaskObjectiveShoot {
+          count
+          usingWeapon { id name shortName }
+          usingWeaponMods { id name shortName }
+          wearing { id name shortName }
+          notWearing { id name shortName }
+          requiredKeys { id name shortName }
+        }
+        ... on TaskObjectiveItem {
+          count
+          items { id name shortName }
+          foundInRaid
+          requiredKeys { id name shortName }
+        }
+        ... on TaskObjectiveQuestItem {
+          count
+          questItem { id name shortName }
+          requiredKeys { id name shortName }
+        }
+        ... on TaskObjectiveUseItem {
+          count
+          useAny { id name shortName }
+          requiredKeys { id name shortName }
+        }
+        ... on TaskObjectiveBuildItem {
+          item { id name shortName }
+          containsAll { id name shortName }
+        }
       }
-    });
+      startRewards {
+        items { item { id name shortName } count }
+        traderStanding { trader { id name } standing }
+        offerUnlock { id trader { id name } level item { id name shortName } }
+        skillLevelReward { name level skill { id name imageLink } }
+        traderUnlock { id name }
+        achievement { id name description }
+        customization { id name customizationType customizationTypeName imageLink }
+      }
+      finishRewards {
+        items { item { id name shortName } count }
+        traderStanding { trader { id name } standing }
+        offerUnlock { id trader { id name } level item { id name shortName } }
+        skillLevelReward { name level skill { id name imageLink } }
+        traderUnlock { id name }
+        achievement { id name description }
+        customization { id name customizationType customizationTypeName imageLink }
+      }
+    }
   }
-  refreshSnapshot(type);
-});
+`;
 
-function normalizeType(type) {
-  if (type && SOURCES[type]) {
-    return type;
+async function executeQuery(query, variables) {
+  if (typeof fetch !== "function") {
+    throw new Error("Global fetch is not available. Node 20.10.0+ is required");
   }
-  return "tasks";
+  const response = await fetch(TARKOV_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const result = await response.json();
+  if (!result || typeof result !== "object" || Array.isArray(result)) {
+    throw new Error(
+      `Invalid GraphQL response: expected an object, got ${getValueType(result)}`,
+    );
+  }
+  if (result.errors) {
+    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+  }
+  if (!("data" in result)) {
+    throw new Error("Invalid GraphQL response: missing data field");
+  }
+  return result.data;
+}
+
+async function fetchApiTasks(mode) {
+  const variables = mode ? { gameMode: mode } : undefined;
+  const data = await executeQuery(TASKS_QUERY, variables);
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error(
+      `Invalid GraphQL response: expected data to be an object, got ${getValueType(data)}`,
+    );
+  }
+  if (!("tasks" in data)) {
+    throw new Error("Invalid GraphQL response: missing data.tasks");
+  }
+  if (!Array.isArray(data.tasks)) {
+    throw new Error(
+      `Invalid GraphQL response: expected data.tasks array, got ${getValueType(data.tasks)}`,
+    );
+  }
+  return data.tasks;
+}
+
+async function refreshApiTasks(mode) {
+  const lock = mode === "pve" ? readLocks.apiPve : readLocks.apiRegular;
+  if (lock.isReading) {
+    lock.pendingRead = true;
+    return;
+  }
+  lock.isReading = true;
+  try {
+    const tasks = await fetchApiTasks(mode);
+    apiState[mode].data = tasks;
+    apiState[mode].updatedAt = new Date().toISOString();
+    apiState[mode].error = null;
+    rebuildSummaries();
+  } catch (error) {
+    apiState[mode].error = error.message || "Unable to fetch API tasks";
+    rebuildSummaries();
+  } finally {
+    lock.isReading = false;
+    if (lock.pendingRead) {
+      lock.pendingRead = false;
+      refreshApiTasks(mode).catch(() => {});
+    }
+  }
+}
+
+function buildSummary(view, mode) {
+  const overlay = overlayState.data;
+  if (!overlay) {
+    return {
+      sections: [],
+      error: overlayState.error || "Overlay data not loaded",
+    };
+  }
+
+  if (view === "tasks") {
+    const sharedOverrides = overlay.tasks || {};
+    const modeOverrides = overlay.modes?.[mode]?.tasks || {};
+    const mergedOverrides = mergeTaskOverrides(sharedOverrides, modeOverrides);
+    const apiTasks = apiState[mode]?.data || [];
+    return {
+      sections: buildTasksSections(mergedOverrides, apiTasks, mode),
+      error: overlayState.error || apiState[mode]?.error || null,
+    };
+  }
+
+  if (view === "tasksAdd") {
+    const sharedAdditions = overlay.tasksAdd || {};
+    const modeAdditions = overlay.modes?.[mode]?.tasksAdd || {};
+    const mergedAdditions = { ...sharedAdditions, ...modeAdditions };
+    return {
+      sections: buildTaskAdditionSections(mergedAdditions, mode),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "items") {
+    return {
+      sections: buildOverrideSections("Items", overlay.items || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "hideout") {
+    return {
+      sections: buildOverrideSections("Hideout", overlay.hideout || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "traders") {
+    return {
+      sections: buildOverrideSections("Traders", overlay.traders || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "editions") {
+    return {
+      sections: buildEditionsSections(overlay.editions || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "storyChapters") {
+    return {
+      sections: buildStoryChapterSections(overlay.storyChapters || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "itemsAdd") {
+    return {
+      sections: buildOverrideSections("Items Additions", overlay.itemsAdd || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  return { sections: [], error: "Unknown view" };
+}
+
+function rebuildSummaries() {
+  Object.keys(VIEW_CONFIG).forEach((view) => {
+    if (view === "tasks" || view === "tasksAdd") {
+      ["regular", "pve"].forEach((mode) => {
+        const key = getSummaryKey(view, mode);
+        const summary = buildSummary(view, mode);
+        summaryByKey.set(key, summary);
+        broadcast(key, "summary", getState(view, mode));
+      });
+      return;
+    }
+    const key = getSummaryKey(view, "");
+    const summary = buildSummary(view, "");
+    summaryByKey.set(key, summary);
+    broadcast(key, "summary", getState(view, ""));
+  });
+}
+
+function getState(view, mode) {
+  const config = VIEW_CONFIG[view];
+  const key = getSummaryKey(view, config?.requiresMode ? mode : "");
+  const summary = summaryByKey.get(key) || { sections: [], error: null };
+
+  return {
+    view,
+    mode: config?.requiresMode ? mode : null,
+    title: config?.title || view,
+    lede: config?.lede || "",
+    overlay: {
+      path: OVERLAY_PATH,
+      updatedAt: overlayState.updatedAt,
+      meta: overlayState.data?.$meta || null,
+      error: overlayState.error,
+    },
+    api: config?.requiresMode
+      ? {
+          updatedAt: apiState[mode]?.updatedAt || null,
+          error: apiState[mode]?.error || null,
+        }
+      : null,
+    sections: summary.sections,
+    error: summary.error,
+  };
+}
+
+function startOverlayWatcher() {
+  if (isRemotePath(OVERLAY_PATH)) {
+    const poll = () => {
+      refreshOverlay()
+        .catch(() => {})
+        .finally(() => setTimeout(poll, OVERLAY_POLL_MS));
+    };
+    setTimeout(poll, 0);
+    return;
+  }
+
+  fs.watchFile(OVERLAY_PATH, { interval: 1000 }, (curr, prev) => {
+    if (curr.mtimeMs !== prev.mtimeMs) {
+      refreshOverlay().catch(() => {});
+    }
+  });
+  refreshOverlay().catch(() => {});
+}
+
+function startApiPolling() {
+  const schedulePoll = (mode) => {
+    refreshApiTasks(mode)
+      .catch(() => {})
+      .finally(() => setTimeout(() => schedulePoll(mode), API_POLL_MS));
+  };
+  schedulePoll("regular");
+  schedulePoll("pve");
+}
+
+if (process.env.NODE_ENV !== "test") {
+  startOverlayWatcher();
+  startApiPolling();
 }
 
 const server = http.createServer((req, res) => {
@@ -702,24 +954,36 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/latest") {
-    const type = normalizeType(requestUrl.searchParams.get("type"));
+    const view = normalizeView(
+      requestUrl.searchParams.get("view") ||
+        requestUrl.searchParams.get("type"),
+    );
+    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+    const config = VIEW_CONFIG[view];
     send(
       res,
       200,
-      JSON.stringify(getState(type)),
+      JSON.stringify(getState(view, config?.requiresMode ? mode : "")),
       "application/json; charset=utf-8",
     );
     return;
   }
 
   if (pathname === "/events") {
-    const type = normalizeType(requestUrl.searchParams.get("type"));
+    const view = normalizeView(
+      requestUrl.searchParams.get("view") ||
+        requestUrl.searchParams.get("type"),
+    );
+    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+    const config = VIEW_CONFIG[view];
+    const key = getSummaryKey(view, config?.requiresMode ? mode : "");
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-store",
       Connection: "keep-alive",
     });
-    const clients = clientsByType.get(type) || new Set();
+    const clients = clientsByKey.get(key) || new Set();
+    clientsByKey.set(key, clients);
     clients.add(res);
     let closed = false;
     let keepAlive = null;
@@ -731,7 +995,7 @@ const server = http.createServer((req, res) => {
       if (keepAlive) {
         clearInterval(keepAlive);
       }
-      removeClient(type, res);
+      removeClient(key, res);
       req.off("close", cleanup);
       res.off("close", cleanup);
       res.off("finish", cleanup);
@@ -745,9 +1009,9 @@ const server = http.createServer((req, res) => {
 
     if (
       !writeSse(
-        type,
+        key,
         res,
-        `event: summary\ndata: ${JSON.stringify(getState(type))}\n\n`,
+        `event: summary\ndata: ${JSON.stringify(getState(view, config?.requiresMode ? mode : ""))}\n\n`,
       )
     ) {
       cleanup();
@@ -755,7 +1019,7 @@ const server = http.createServer((req, res) => {
     }
 
     keepAlive = setInterval(() => {
-      if (!writeSse(type, res, ": keep-alive\n\n")) {
+      if (!writeSse(key, res, ": keep-alive\n\n")) {
         cleanup();
       }
     }, 15000);
@@ -765,9 +1029,13 @@ const server = http.createServer((req, res) => {
   if (
     pathname === "/" ||
     pathname === "/tasks" ||
+    pathname === "/tasks-additions" ||
     pathname === "/hideout" ||
     pathname === "/items" ||
-    pathname === "/traders"
+    pathname === "/items-additions" ||
+    pathname === "/traders" ||
+    pathname === "/editions" ||
+    pathname === "/story-chapters"
   ) {
     serveStatic(res, "/index.html");
     return;
@@ -804,4 +1072,30 @@ server.on("error", (error) => {
   console.error("Failed to start overlay monitor:", error);
 });
 
-startServer(currentPort);
+if (process.env.NODE_ENV !== "test") {
+  startServer(currentPort);
+}
+// Export functions for testing
+if (process.env.NODE_ENV === "test") {
+  module.exports = {
+    MAX_ROWS,
+    buildTasksSections,
+    buildSummary,
+    buildOverrideSections,
+    buildEditionsSections,
+    buildStoryChapterSections,
+    buildTaskAdditionSections,
+    mergeTaskOverrides,
+    rebuildSummaries,
+    valuesEqual,
+    formatValue,
+    normalizeView,
+    normalizeMode,
+    createSection,
+    pushRow,
+    overlayState,
+    apiState,
+    server,
+    VIEW_CONFIG,
+  };
+}
