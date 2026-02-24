@@ -626,11 +626,243 @@
     order: 9,
     autoStart: false,
     chapterRequirements: [{ id: 'falling-skies', name: 'Falling Skies' }],
-    description: 'Earned automatically after completing Falling Skies',
-    notes: null,
-    objectives: [],
+    description: 'Branches into 4 endings based on player decisions: Savior (help Kerman), Fallen (betray Kerman), Survivor (pay Prapor), Debtor (seek Lightkeeper)',
+    notes: 'Decision points are mutually exclusive. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).',
+    objectives: [
+      // Common Start — everyone does these
+      { id: 'the-ticket-main-1', type: 'main', description: 'Obtain Intelligence Center level 1' },
+      { id: 'the-ticket-main-2', type: 'main', description: 'Talk to Mr. Kerman' },
+      { id: 'the-ticket-main-3', type: 'main', description: 'Wait for Mr. Kerman to reach out' },
+      { id: 'the-ticket-main-4', type: 'main', description: 'Talk to Prapor' },
+      { id: 'the-ticket-main-5', type: 'main', description: 'Talk to Mr. Kerman' },
+      // Case Unlock — everyone does these
+      {
+        id: 'the-ticket-main-6',
+        type: 'main',
+        description: 'Ask Mechanic for help with the armored case',
+      },
+      {
+        id: 'the-ticket-main-7',
+        type: 'main',
+        description: 'Obtain the experimental signal jammer',
+      },
+      {
+        id: 'the-ticket-main-8',
+        type: 'main',
+        description: 'Use the signal jammer to unlock the armored case',
+      },
+      { id: 'the-ticket-main-9', type: 'main', description: 'Unlock the armored case' },
+      {
+        id: 'the-ticket-main-10',
+        type: 'main',
+        description: 'Retrieve the Ticket document from the case',
+      },
+      { id: 'the-ticket-main-11', type: 'main', description: 'Contact Mr. Kerman about the Ticket' },
+      // Decision 1 — Accept or Refuse Kerman's offer (mutually exclusive)
+      {
+        id: 'the-ticket-main-12',
+        type: 'main',
+        description: "Accept Mr. Kerman's cooperation offer",
+        notes: 'Kerman Route — leads to Savior or Fallen ending',
+      },
+      {
+        id: 'the-ticket-main-13',
+        type: 'main',
+        description: "Refuse Mr. Kerman's cooperation offer",
+        notes: 'Refuse Route — leads to Survivor or Debtor ending',
+      },
+      // Kerman/Accept Path (main-14 through main-21)
+      {
+        id: 'the-ticket-main-14',
+        type: 'main',
+        description: 'Obtain the Laboratory master pass',
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-15',
+        type: 'main',
+        description: 'Locate the RFID card encryption device',
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-16',
+        type: 'main',
+        description: 'Talk to Mechanic about the RFID device',
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-17',
+        type: 'main',
+        description: 'Wait for Mechanic',
+        notes: 'Kerman Route — 24-hour cooldown',
+      },
+      {
+        id: 'the-ticket-main-18',
+        type: 'main',
+        description: 'Hand over 40 Physical Bitcoins to Mechanic',
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-19',
+        type: 'main',
+        description: 'Collect the RFID encryption device from Mechanic',
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-20',
+        type: 'main',
+        description: "Use the RFID device to activate Kruglov's keycard",
+        notes: 'Kerman Route',
+      },
+      {
+        id: 'the-ticket-main-21',
+        type: 'main',
+        description: 'Report to Mr. Kerman',
+        notes: 'Kerman Route',
+      },
+      // Decision 2 — Savior vs Fallen (mutually exclusive, Kerman path only)
+      {
+        id: 'the-ticket-main-22',
+        type: 'main',
+        description: 'Hand over the TerraGroup evidence to Mr. Kerman',
+        notes: 'Savior ending — cooperate fully with Kerman',
+      },
+      {
+        id: 'the-ticket-main-23',
+        type: 'main',
+        description: 'Betray Mr. Kerman and keep the evidence',
+        notes: 'Fallen ending — turn against Kerman',
+      },
+      // Refuse Path (main-24)
+      {
+        id: 'the-ticket-main-24',
+        type: 'main',
+        description: 'Use the RFID card at the Terminal intercom on Shoreline',
+        notes: 'Refuse Route',
+      },
+      // Decision 3 — Survivor vs Debtor (mutually exclusive, Refuse path only)
+      {
+        id: 'the-ticket-main-25',
+        type: 'main',
+        description: 'Pay Prapor to arrange Terminal access',
+        notes: 'Survivor ending — pay the ruble cost',
+      },
+      {
+        id: 'the-ticket-main-26',
+        type: 'main',
+        description: 'Seek Lightkeeper for Terminal access',
+        notes: 'Debtor ending — work with Lightkeeper instead',
+      },
+      // Debtor Path (main-27 through main-30)
+      {
+        id: 'the-ticket-main-27',
+        type: 'main',
+        description: 'Complete topographic reconnaissance for Lightkeeper',
+        notes: 'Debtor Route',
+      },
+      {
+        id: 'the-ticket-main-28',
+        type: 'main',
+        description: 'Obtain cultist amulets for Lightkeeper',
+        notes: 'Debtor Route',
+      },
+      {
+        id: 'the-ticket-main-29',
+        type: 'main',
+        description: 'Deliver items to Lightkeeper',
+        notes: 'Debtor Route',
+      },
+      {
+        id: 'the-ticket-main-30',
+        type: 'main',
+        description: 'Receive the Lightkeeper keycard',
+        notes: 'Debtor Route',
+      },
+      // Terminal — all paths converge
+      { id: 'the-ticket-main-31', type: 'main', description: 'Arrive at the port Terminal entrance' },
+      // Optional: Lightkeeper Access (if armored case was given to Prapor in Falling Skies)
+      {
+        id: 'the-ticket-opt-1',
+        type: 'optional',
+        description: "Locate Prapor's camp on Lighthouse",
+        notes: 'Only if armored case was given to Prapor in Falling Skies',
+      },
+      {
+        id: 'the-ticket-opt-2',
+        type: 'optional',
+        description: 'Find clues about their intentions at the camp',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-3',
+        type: 'optional',
+        description: 'Talk to Mr. Kerman about what you found',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-4',
+        type: 'optional',
+        description: 'Gain access to Lightkeeper',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-5',
+        type: 'optional',
+        description: 'Talk to Lightkeeper',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-6',
+        type: 'optional',
+        description: 'Maintain good standing with Lightkeeper',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-7',
+        type: 'optional',
+        description: 'Obtain 3 TerraGroup "Blue Folders" materials',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-8',
+        type: 'optional',
+        description: 'Deliver materials to Lightkeeper',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-9',
+        type: 'optional',
+        description: 'Launch yellow signal flare at ULTRA entrance on Interchange',
+        notes: 'Lightkeeper access chain',
+      },
+      {
+        id: 'the-ticket-opt-10',
+        type: 'optional',
+        description: 'Eliminate 15 targets in a single Interchange raid',
+        notes: 'Lightkeeper access chain',
+      },
+      // Optional: Savior Evidence (cross-chapter items needed for Savior ending)
+      {
+        id: 'the-ticket-opt-11',
+        type: 'optional',
+        description: "Obtain Batya's evidence documents",
+        notes: 'Cross-chapter evidence for Savior ending (from Batya chapter)',
+      },
+      {
+        id: 'the-ticket-opt-12',
+        type: 'optional',
+        description: 'Obtain The Unheard evidence documents',
+        notes: 'Cross-chapter evidence for Savior ending (from The Unheard chapter)',
+      },
+      {
+        id: 'the-ticket-opt-13',
+        type: 'optional',
+        description: 'Collect all required TerraGroup compromise evidence',
+        notes: 'Savior ending requires 8+ evidence documents from multiple chapters',
+      },
+    ],
     rewards: null,
-    mapUnlocks: [],
-    traderUnlocks: [],
+    mapUnlocks: [{ id: '65cc8f81a9aac3e77d0cfd3e', name: 'Terminal' }],
+    traderUnlocks: [{ id: '688246518448b05efd61d461', name: 'Mr. Kerman' }],
   },
 }
