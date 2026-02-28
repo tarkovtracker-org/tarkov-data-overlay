@@ -150,24 +150,6 @@
     },
   },
 
-  // Collector - Missing objective items
-  // Proof: https://media.discordapp.net/attachments/939662655306727525/1454719855935754354/image.png?ex=6956ba31&is=695568b1&hm=4f32259e81560c12ad91ddfab68d5d25325b27218ac782862ad4db2e04813668&=&format=webp&quality=lossless
-  '5c51aac186f77432ea65c552': {
-    objectivesAdd: [
-      {
-        id: 'collector-missing-items-1',
-        description: 'Hand over the found in raid Collector items',
-        items: [
-          { id: '69398e94ca94fd2877039504', name: 'Nut Sack balaclava' },
-          { id: '6937edb912d456a817083e82', name: 'Mazoni golden dumbbell' },
-          { id: '6937ecf8628ee476240c07cb', name: 'Tigzresq splint' },
-          { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat' },
-        ],
-      },
-    ],
-    // Was: objectives missing in API
-  },
-
   // Test Drive - Part 2 - Objective description/maps and experience incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
   // Recent wiki update (post-1.0); not verified in-game
