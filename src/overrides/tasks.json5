@@ -1,26 +1,4 @@
 {
-  // Grenadier - Objective count, task prerequisite, and experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Grenadier
-  // tarkov.dev shows 8 kills, wiki confirms 5 kills
-  // tarkov.dev shows no prerequisites, wiki shows "Previous: Shooting Cans"
-  // tarkov.dev shows 18000 XP, game confirms 12500 XP
-  '5c0d190cd09282029f5390d8': {
-    experience: 12500, // Was: 18000
-    objectives: {
-      '5c1b760686f77412780211a3': {
-        count: 5, // Was: 8
-      },
-    },
-    taskRequirements: [
-      {
-        task: {
-          id: '657315df034d76585f032e01',
-          name: 'Shooting Cans',
-        },
-      },
-    ], // Was: [] (empty)
-  },
-
   // Half Empty - Name and wiki link incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Half_Empty
   // tarkov.dev shows "Half-Empty" with hyphen, should be space
@@ -29,31 +7,21 @@
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Half_Empty', // Was: https://escapefromtarkov.fandom.com/wiki/Half-Empty
   },
 
-  // Sales Night - Objective count missing and description wording incorrect
+  // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
-  // tarkov.dev objective lacks count; wiki specifies 7 extracts on Interchange
+  // API count now correct (7); description still wrong
   '5ae449c386f7744bde357697': {
     objectives: {
       '5bb60cbc88a45011a8235cc5': {
-        count: 7, // Was: undefined
         description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
       },
     },
   },
 
-  // A Shooter Born in Heaven - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Shooter_Born_in_Heaven
-  // Verified in-game: 55000 XP
-  '5c0bde0986f77479cf22c2f8': {
-    experience: 55000, // Was: 12500
-  },
-
-  // Test Drive - Part 1 - Experience and objective count incorrect
+  // Test Drive - Part 1 - Objective count and weapon incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
-  // Verified in-game: 9100 XP, 10 kills required
-  // Recent wiki update (post-1.0); not verified in-game (weapon requirement)
+  // API experience now correct (9100); count and weapon still wrong
   '5c0bd94186f7747a727f09b2': {
-    experience: 9100, // Was: 18200
     objectives: {
       '5c1b765d86f77413193fa4f2': {
         count: 10, // Was: 5
@@ -65,70 +33,6 @@
             shortName: 'SR-25',
           },
         ],
-      },
-    },
-  },
-
-  // Hell on Earth - Part 1 - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
-  // Verified in-game: 2300 XP
-  '666314b0acf8442f8b0531a1': {
-    experience: 2300, // Was: 15600
-  },
-
-  // Hell on Earth - Part 2 - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2
-  // Verified in-game: 16000 XP
-  '666314b2a9290f9e0806cca3': {
-    experience: 16000, // Was: 98000
-  },
-
-  // Pyramid Scheme - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
-  // Verified in-game: 12400 XP
-  '6572e876dc0d635f633a5714': {
-    experience: 12400, // Was: 25500
-  },
-
-  // Athlete - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Athlete
-  // Verified in-game: 3500 XP
-  '5c0d0d5086f774363760aef2': {
-    experience: 3500, // Was: 21900
-  },
-
-  // Dandies - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
-  // Verified in-game: 11000 XP
-  '65734c186dc1e402c80dc19e': {
-    experience: 11000, // Was: 33000
-  },
-
-  // Decontamination Service - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
-  // Verified in-game: 12500 XP
-  '5c0d1c4cd0928202a02a6f5c': {
-    experience: 12500, // Was: 30500
-  },
-
-  // Easy Job - Part 2 - Objective count incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job_-_Part_2
-  // Verified in-game: 10 kills required
-  '6179acbdc760af5ad2053585': {
-    objectives: {
-      '617bd94c5a52d2390a2630c7': {
-        count: 10, // Was: 20
-      },
-    },
-  },
-
-  // Long Road - Objective count incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Road
-  // Verified in-game: 4 extracts required
-  '6193850f60b34236ee0483de': {
-    objectives: {
-      '6193dabd5f6468204470571f': {
-        count: 4, // Was: 8
       },
     },
   },
@@ -150,11 +54,10 @@
     },
   },
 
-  // Test Drive - Part 2 - Objective description/maps and experience incorrect
+  // Test Drive - Part 2 - Objective description/maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
-  // Recent wiki update (post-1.0); not verified in-game
+  // API experience now correct (12000); map/obj still wrong
   '63a5cf262964a7488f5243ce': {
-    experience: 12000, // Was: 28000
     map: null, // Was: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" }
     objectives: {
       '63a5cf262964a7488f5243d1': {
@@ -175,15 +78,13 @@
     },
   },
 
-  // Test Drive - Part 3 - Objective description/maps and experience incorrect
+  // Test Drive - Part 3 - Objective maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_3
-  // Recent wiki update (post-1.0); not verified in-game
+  // API experience and description now correct; map/obj maps still wrong
   '64f5deac39e45b527a7c4232': {
-    experience: 18000, // Was: 35300
     map: null, // Was: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }
     objectives: {
       '64f5deac39e45b527a7c4235': {
-        description: 'Eliminate PMC operatives while using an AK-12 with the proprietary suppressor and PS-320 scope on Lighthouse, Customs, or Reserve',
         maps: [
           { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
           { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
@@ -193,15 +94,13 @@
     },
   },
 
-  // Test Drive - Part 4 - Objective description/maps/items and experience incorrect
+  // Test Drive - Part 4 - Objective maps/items incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
-  // Recent wiki update (post-1.0); not verified in-game
+  // API experience and description now correct; map/obj maps/mods still wrong
   '6574e0dedc0d635f633a5805': {
-    experience: 20000, // Was: 40000
     map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
     objectives: {
       '6574e0dedc0d635f633a5807': {
-        description: 'Eliminate any targets while using an RPDN with EKP-1S-03 sight on Shoreline, Interchange or Woods',
         usingWeaponMods: [
           [
             {
@@ -220,11 +119,10 @@
     },
   },
 
-  // Test Drive - Part 5 - Objective description/items and experience incorrect
+  // Test Drive - Part 5 - Objective description/items incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
-  // Recent wiki update (post-1.0); not verified in-game
+  // API experience now correct (23000); obj still wrong
   '669fa3a40c828825de06d6a1': {
-    experience: 23000, // Was: 50000
     objectives: {
       '66a0f5a7f9eae6761253114c': {
         description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
@@ -252,57 +150,6 @@
         maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
       },
     },
-  },
-
-  // Test Drive - Part 6 - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_6
-  // Recent wiki update (post-1.0); not verified in-game
-  '675c1ff1a757ddd00404f0aa': {
-    experience: 32000, // Was: 65000
-  },
-
-  // No Swiping - Objective count incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
-  // Recent wiki update (post-1.0); 25 kills to 10
-  '658027799634223183395339': {
-    objectives: {
-      '65802779963422318339533c': {
-        count: 10, // Was: 25
-      },
-    },
-  },
-
-  // The Huntsman Path - Relentless - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
-  // User confirmed: level 55 required, not 65
-  '60e71e8ed54b755a3b53eb67': {
-    minPlayerLevel: 55, // Was: 65
-  },
-
-  // Forced Alliance - Task removed from standard gameplay
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Forced_Alliance
-  '67a0966817e34930e500754c': {
-    disabled: true, // Was: undefined
-  },
-
-  // Offensive Reconnaissance - Prerequisite should be Hidden Layer
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Offensive_Reconnaissance
-  '67a0970744893b9f3f0d9b68': {
-    taskRequirements: [
-      {
-        task: {
-          id: '67a096577e86e067eb045733',
-          name: 'Hidden Layer',
-        },
-      },
-    ], // Was: Forced Alliance (67a0966817e34930e500754c)
-  },
-
-  // Escort - Level requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
-  // User confirmed: level 46 required, not 60
-  '60e71b62a0beca400d69efc4': {
-    minPlayerLevel: 46, // Was: 60
   },
 
   // Forester's Duty - objectives description incorrect
@@ -336,11 +183,6 @@
       },
     },
   },
-  // The Guide - incorrect level required (40 -> 32)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
-  '5c0d4e61d09282029f53920e': {
-    minPlayerLevel: 32, // Was: 40
-  },
 
   // To Great Heights! - Part 3 - Inaccurate count and description.
   // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
@@ -352,6 +194,7 @@
       },
     },
   },
+
   // The Blood of War - Part 1 - Truck #2 Location Change, Truck #4 Missing
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
   '5ae448f286f77448d73c0131': {
@@ -451,38 +294,40 @@
       },
     ],
   },
-// Ballet Lover - Missing key requirements
-// Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
-'639135a7e705511c8a4a1b78': {
-  neededKeys: [
-    {
-      map: {
-        id: '5714dc692459777137212e12',
-        name: 'Streets of Tarkov',
-      },
-      keys: [
-        {
-          id: '63a39e1d234195315d4020bd',
-          name: 'Primorsky 46-48 skybridge key',
-          shortName: 'Skybridge 46-48',
+
+  // Ballet Lover - Missing key requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
+  '639135a7e705511c8a4a1b78': {
+    neededKeys: [
+      {
+        map: {
+          id: '5714dc692459777137212e12',
+          name: 'Streets of Tarkov',
         },
-      ],
-    },
-  ],
-  objectives: {
-    '63a7da6f5199ab1f7d4a774a': {
-      requiredKeys: [
-        [
+        keys: [
           {
             id: '63a39e1d234195315d4020bd',
             name: 'Primorsky 46-48 skybridge key',
             shortName: 'Skybridge 46-48',
           },
         ],
-      ],
+      },
+    ],
+    objectives: {
+      '63a7da6f5199ab1f7d4a774a': {
+        requiredKeys: [
+          [
+            {
+              id: '63a39e1d234195315d4020bd',
+              name: 'Primorsky 46-48 skybridge key',
+              shortName: 'Skybridge 46-48',
+            },
+          ],
+        ],
+      },
     },
   },
-},
+
   // Drip-Out - Part 2 (USEC) - Objective maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
   // Rogues are only present on Lighthouse (Water Treatment Plant), not Customs or Woods.
@@ -498,6 +343,7 @@
       },
     },
   },
+
   // Drip-Out - Part 2 (Bear) - Objective maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Drip-Out_-_Part_2
   // Rogues are only present on Lighthouse (Water Treatment Plant), not Customs or Woods.
@@ -513,6 +359,7 @@
       },
     },
   },
+
   // New Beginning (Prestige 1) - Wiki link and objective description incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
   // tarkov.dev links to the disambiguation page; should link to the specific Prestige 1 page.
@@ -526,6 +373,7 @@
       },
     },
   },
+
   // New Beginning (Prestige 2) - Wiki link incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
   // tarkov.dev links to the disambiguation page; should link to the specific Prestige 2 page.
@@ -533,6 +381,7 @@
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
     minPlayerLevel: 47, // Was: 55
   },
+
   // New Beginning (Prestige 3) - Reputation reward, wiki link, and objectives incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
   // tarkov.dev missing the Lab -> Streets transit objective; wiki includes it.
@@ -565,6 +414,7 @@
       ],
     },
   },
+
   // New Beginning (Prestige 4) - Reputation reward, wiki link, and objectives incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)
   // tarkov.dev missing the Interchange extract objective; wiki includes it.
@@ -596,18 +446,6 @@
         },
       ],
     },
-  },
-  // Operation Aquarius - Part 1 - Kappa requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius_-_Part_1
-  // Wiki task infobox shows reqkappa: No
-  '59689fbd86f7740d137ebfc4': {
-    kappaRequired: false, // Was: true
-  },
-  // Operation Aquarius - Part 2 - Kappa requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius_-_Part_2
-  // Wiki task infobox shows reqkappa: No
-  '5968eb3186f7741dde183a4d': {
-    kappaRequired: false, // Was: true
   },
 
   // Setup - Objective wearing gear variants missing
@@ -657,17 +495,18 @@
       },
     },
   },
-  // Hunting Trip - Minimum distance requirement incorrect
+
+  // Hunting Trip - Objective description incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hunting_Trip
-  // tarkov.dev currently shows 75m minimum distance; latest update reduces to 40m.
+  // API distance now correct (40m); description still references 75m
   '5d25e4ca86f77409dd5cdf2c': {
     objectives: {
       '5fd8aa3206fb3a6b8154a2c3': {
         description: 'Locate and neutralize Shturman with a headshot from over 40 meters away while using an M700 sniper rifle with the specified scope', // Was: Locate and neutralize Shturman with a headshot from over 75 meters away while using an M700 sniper rifle with the specified scope
-        distance: 40, // Was: 75
       },
     },
   },
+
   // Connections Up North - PMC kill count requirement incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Connections_Up_North
   // tarkov.dev currently shows 50 PMC kills; latest update reduces to 20.
@@ -678,6 +517,7 @@
       },
     },
   },
+
   // Our Own Land - Objective foundInRaid flag incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
   // Wiki objective text explicitly states "found in raid" dogtags.
@@ -688,80 +528,15 @@
       },
     },
   },
-  // Reconnaissance - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Reconnaissance
-  // Wiki rewards show +7,500 EXP.
-  '626bd75c71bd851e971b82a5': {
-    experience: 7500, // Was: 18000
-  },
-  // Scavenger - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
-  // Wiki rewards show +10,000 EXP.
-  '5c112d7e86f7740d6f647486': {
-    experience: 10000, // Was: 17700
-  },
-  // Private Club - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
-  // Wiki rewards show +11,000 EXP.
-  '675c3582f6ddc329a90f9c6d': {
-    experience: 11000, // Was: 23000
-  },
-  // Crisis - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
-  // Wiki rewards show +34,000 EXP.
-  '60e71c48c1bfa3050473b8e5': {
-    experience: 34000, // Was: 97000
-  },
-  // Properties All Around - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Properties_All_Around
-  // Wiki rewards show +6,600 EXP.
-  '6573397ef3f8344c4575cd87': {
-    experience: 6600, // Was: 11600
-  },
-  // Beneath The Streets - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets
-  // Wiki rewards show +24,000 EXP.
-  '66aba85403e0ee3101042877': {
-    experience: 24000, // Was: 46700
-  },
-  // Gendarmerie - District Patrol - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_District_Patrol
-  // Wiki rewards show +8,300 EXP.
-  '64e7b9bffd30422ed03dad38': {
-    experience: 8300, // Was: 25000
-  },
-  // Gendarmerie - Tickets, Please - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Tickets%2C_Please
-  // Wiki rewards show +7,500 EXP.
-  '64e7b9a4aac4cd0a726562cb': {
-    experience: 7500, // Was: 22600
-  },
-  // Gendarmerie - Mall Cop - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Mall_Cop
-  // Wiki rewards show +7,100 EXP.
-  '64e7b99017ab941a6f7bf9d7': {
-    experience: 7100, // Was: 21500
-  },
-  // Debtor - Experience incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
-  // Wiki rewards show +13,200 EXP.
-  '639dbaf17c898a131e1cffff': {
-    experience: 13200, // Was: 26600
-  },
-  // Hidden Level - Map say 'Any' when it should say 'Shoreline'
+
+  // Hidden Layer - One objective map still shows 'Any' when it should say 'Shoreline'
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hidden_Layer
-  // After Labrys update
+  // After Labrys update; 2 of 3 objectives now fixed in API
   '67a096577e86e067eb045733': {
     objectives: {
-      '67a0bf7103442ae640dba835': {
-        maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Shoreline' }],
-      },
-      '67dbdd4d6a2e4b8e002b647d': {
-        maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Shoreline' }],
-      },
       '67dbdd819d8208bb2082480e': {
         maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Shoreline' }],
-      }
+      },
     },
-  }
+  },
 }
