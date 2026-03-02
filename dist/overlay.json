@@ -731,6 +731,11 @@
           "description": "Hand over the cash to Therapist"
         },
         {
+          "id": "tour-opt-1",
+          "type": "optional",
+          "description": "Collect the required 250,000 Roubles"
+        },
+        {
           "id": "tour-main-5",
           "type": "main",
           "description": "Talk to Ragman"
@@ -761,6 +766,11 @@
           "description": "Hand over any 5 found in raid Building materials items to Skier"
         },
         {
+          "id": "tour-opt-2",
+          "type": "optional",
+          "description": "Find any 5 items in raid from the Building materials category"
+        },
+        {
           "id": "tour-main-11",
           "type": "main",
           "description": "Talk to Mechanic"
@@ -774,6 +784,11 @@
           "id": "tour-main-13",
           "type": "main",
           "description": "Hand over any 2 found in raid weapons to Mechanic"
+        },
+        {
+          "id": "tour-opt-3",
+          "type": "optional",
+          "description": "Find any 2 weapons in raid"
         },
         {
           "id": "tour-main-14",
@@ -821,6 +836,11 @@
           "description": "Hand over 20,000 Dollars to Mechanic"
         },
         {
+          "id": "tour-opt-4",
+          "type": "optional",
+          "description": "Collect the required 20,000 Dollars"
+        },
+        {
           "id": "tour-main-23",
           "type": "main",
           "description": "Ensure access to Reserve"
@@ -829,6 +849,11 @@
           "id": "tour-main-24",
           "type": "main",
           "description": "Hand over 5 PMC dogtags to Prapor"
+        },
+        {
+          "id": "tour-opt-5",
+          "type": "optional",
+          "description": "Find 5 PMC dogtags in raid"
         },
         {
           "id": "tour-main-25",
@@ -846,44 +871,9 @@
           "description": "Access the secret TerraGroup facility"
         },
         {
-          "id": "tour-main-28",
-          "type": "main",
-          "description": "Locate the escape path through the drainage system in The Lab"
-        },
-        {
-          "id": "tour-main-29",
-          "type": "main",
-          "description": "Search the server room in The Lab"
-        },
-        {
-          "id": "tour-main-30",
-          "type": "main",
-          "description": "Search the top management offices in The Lab"
-        },
-        {
-          "id": "tour-opt-1",
+          "id": "tour-opt-8",
           "type": "optional",
-          "description": "Collect the required 250,000 Roubles"
-        },
-        {
-          "id": "tour-opt-2",
-          "type": "optional",
-          "description": "Find any 5 items in raid from the Building materials category"
-        },
-        {
-          "id": "tour-opt-3",
-          "type": "optional",
-          "description": "Find any 2 weapons in raid"
-        },
-        {
-          "id": "tour-opt-4",
-          "type": "optional",
-          "description": "Collect the required 20,000 Dollars"
-        },
-        {
-          "id": "tour-opt-5",
-          "type": "optional",
-          "description": "Find 5 PMC dogtags in raid"
+          "description": "Obtain a keycard or access codes to enter the facility"
         },
         {
           "id": "tour-opt-6",
@@ -896,9 +886,19 @@
           "description": "Locate the entrance to the facility on Streets of Tarkov"
         },
         {
-          "id": "tour-opt-8",
-          "type": "optional",
-          "description": "Obtain a keycard or access codes to enter the facility"
+          "id": "tour-main-30",
+          "type": "main",
+          "description": "Search the top management offices in The Lab"
+        },
+        {
+          "id": "tour-main-29",
+          "type": "main",
+          "description": "Search the server room in The Lab"
+        },
+        {
+          "id": "tour-main-28",
+          "type": "main",
+          "description": "Locate the escape path through the drainage system in The Lab"
         }
       ],
       "rewards": {
@@ -3264,7 +3264,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-03-01T08:32:43.731Z",
-    "sha256": "40c99d193818af39988cb2fd099ab95f7c991968078db67d8a9dde1675080794"
+    "generated": "2026-03-02T02:04:47.724Z",
+    "sha256": "f28b6ad46f1f151bdd5d304a9a207c75084cc3387df73934bc2f90fd569c41f0"
   }
 }
