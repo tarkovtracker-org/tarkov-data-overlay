@@ -51,4 +51,4 @@ Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
 
 ## License
 
-MIT
+See [LICENSE.md]().
