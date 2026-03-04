@@ -28,11 +28,37 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Compute next tag
+        id: version
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git fetch --tags
+          latest_tag=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+$' | head -n 1)
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="v1.0"
+          else
+            version="${latest_tag#v}"
+            IFS='.' read -r major minor <<< "$version"
+            next_tag="v${major}.$((minor + 1))"
+          fi
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+
       - name: Validate source files
         run: npm run validate
 
-      - name: Build overlay
-        run: npm run build
+      - name: Build overlay (repo version)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          OVERLAY_VERSION: ${{ steps.version.outputs.next_tag }}
+        run: |
+          export OVERLAY_VERSION="${OVERLAY_VERSION#v}"
+          npm run build
+
+      - name: Build overlay (default)
+        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
+        run: |
+          npm run build
 
       - name: Commit dist (main branch only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -48,22 +74,6 @@ jobs:
             git push
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Compute next tag
-        id: version
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
-        run: |
-          git fetch --tags
-          latest_tag=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+$' | head -n 1)
-          if [[ -z "$latest_tag" ]]; then
-            next_tag="v1.0"
-          else
-            version="${latest_tag#v}"
-            IFS='.' read -r major minor <<< "$version"
-            next_tag="v${major}.$((minor + 1))"
-          fi
-          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
-          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
       - name: Build release notes
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
