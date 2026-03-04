@@ -80,6 +80,8 @@ function generateSha256(content: string): string {
 function build(): void {
   console.log('Building overlay...\n');
 
+  const version = process.env.OVERLAY_VERSION || getPackageVersion(rootDir);
+
   // Load all source files
   const data = loadSourceFiles();
 
@@ -87,7 +89,7 @@ function build(): void {
   const output: OverlayOutput = {
     ...data,
     $meta: {
-      version: getPackageVersion(rootDir),
+      version,
       generated: new Date().toISOString(),
     },
   };
