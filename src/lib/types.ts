@@ -236,16 +236,38 @@ export interface ValidationDetail {
 }
 
 /** Individual objective within a story chapter */
+export type StoryEndingId = 'savior' | 'survivor' | 'fallen' | 'debtor';
+
+export interface StoryObjectiveUnlock {
+  type: 'achievement' | 'barter' | 'map' | 'quest' | 'trader' | 'other';
+  id?: string;
+  name: string;
+  note?: string;
+}
+
 export interface StoryObjective {
   id: string;
   type: 'main' | 'optional';
   description: string;
-  notes?: string;
+  notes?: string | null;
+  mutuallyExclusiveWith?: string[];
+  endingId?: StoryEndingId;
+  unlocks?: StoryObjectiveUnlock[];
 }
 
 /** Reward summary for a story chapter */
 export interface StoryRewards {
   description: string;
+}
+
+export interface StoryChapterActivationLocation {
+  map: string;
+  detail: string;
+}
+
+export interface StoryChapterActivation {
+  summary: string;
+  locations?: StoryChapterActivationLocation[];
 }
 
 /** Story chapter structure for additions */
@@ -257,12 +279,13 @@ export interface StoryChapter {
   order: number;
   autoStart?: boolean;
   chapterRequirements?: Array<{ id: string; name: string }>;
+  activation?: StoryChapterActivation;
   mapUnlocks?: Array<{ id: string; name: string }>;
   traderUnlocks?: Array<{ id: string; name: string }>;
-  description?: string;
-  notes?: string;
+  description?: string | null;
+  notes?: string | null;
   objectives?: StoryObjective[];
-  rewards?: StoryRewards;
+  rewards?: StoryRewards | null;
 }
 
 /** Supported game modes for mode-specific overrides */

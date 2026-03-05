@@ -52,6 +52,31 @@
           "additionalProperties": false
         }
       },
+      "activation": {
+        "description": "How this chapter is activated in-world",
+        "type": "object",
+        "required": ["summary"],
+        "properties": {
+          "summary": {
+            "description": "Short activation summary",
+            "type": "string"
+          },
+          "locations": {
+            "description": "Optional map/location hints for activation",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["map", "detail"],
+              "properties": {
+                "map": { "type": "string" },
+                "detail": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "mapUnlocks": {
         "description": "Maps unlocked by completing this chapter (tarkov.dev map IDs)",
         "type": "array",
@@ -108,7 +133,35 @@
             },
             "notes": {
               "description": "Optional guidance or tips for this objective",
-              "type": "string"
+              "type": ["string", "null"]
+            },
+            "mutuallyExclusiveWith": {
+              "description": "Objective IDs that are mutually exclusive with this objective",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "endingId": {
+              "description": "Canonical ending this objective is tied to",
+              "type": "string",
+              "enum": ["savior", "survivor", "fallen", "debtor"]
+            },
+            "unlocks": {
+              "description": "Unlocks tied to objective completion",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["type", "name"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["achievement", "barter", "map", "quest", "trader", "other"]
+                  },
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "note": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
             }
           },
           "additionalProperties": false
