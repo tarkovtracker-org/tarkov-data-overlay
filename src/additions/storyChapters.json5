@@ -1,4 +1,7 @@
 {
+  // Story objectives can now carry task-style marker data for TarkovTracker map rendering:
+  // maps, zones, possibleLocations, requiredKeys, item/items/markerItem/questItem, count, foundInRaid.
+  // See docs/MASTER_SAMPLES.md for a copy-paste example.
   // Tour
   // The introductory story chapter, automatically available on game start.
   // Source: https://escapefromtarkov.fandom.com/wiki/Tour

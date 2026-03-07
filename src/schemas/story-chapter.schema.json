@@ -131,6 +131,19 @@
               "description": "Human-readable objective text",
               "type": "string"
             },
+            "maps": {
+              "description": "Task-style map references for storyline objective filtering and map display",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
             "notes": {
               "description": "Optional guidance or tips for this objective",
               "type": ["string", "null"]
@@ -139,6 +152,161 @@
               "description": "Objective IDs that are mutually exclusive with this objective",
               "type": "array",
               "items": { "type": "string" }
+            },
+            "count": {
+              "description": "Item or action count for the objective",
+              "type": "integer",
+              "minimum": 1
+            },
+            "foundInRaid": {
+              "description": "Whether any item hand-in must be found in raid",
+              "type": "boolean"
+            },
+            "item": {
+              "description": "Primary item for a hand-in or collection objective",
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "items": {
+              "description": "Accepted items for a hand-in or collection objective",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "markerItem": {
+              "description": "Marker or tool item needed to complete the objective on-map",
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "questItem": {
+              "description": "Quest item tied to a map pickup objective",
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "shortName": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "requiredKeys": {
+              "description": "Task-style key groups required to access the objective location",
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "name"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "shortName": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "zones": {
+              "description": "Task-style objective zones with outlines or center points for map markers",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "required": ["id", "name"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" }
+                    },
+                    "additionalProperties": false
+                  },
+                  "outline": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["x", "z"],
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "position": {
+                    "type": "object",
+                    "required": ["x", "z"],
+                    "properties": {
+                      "x": { "type": "number" },
+                      "y": { "type": "number" },
+                      "z": { "type": "number" }
+                    },
+                    "additionalProperties": false
+                  },
+                  "top": { "type": "number" },
+                  "bottom": { "type": "number" }
+                },
+                "required": ["map"],
+                "additionalProperties": false,
+                "anyOf": [
+                  { "required": ["outline"] },
+                  { "required": ["position"] }
+                ]
+              }
+            },
+            "possibleLocations": {
+              "description": "Task-style point clusters for pickup, visit, or use-objective markers",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["map", "positions"],
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "required": ["id", "name"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" }
+                    },
+                    "additionalProperties": false
+                  },
+                  "positions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["x", "z"],
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
             },
             "endingId": {
               "description": "Canonical ending this objective is tied to",

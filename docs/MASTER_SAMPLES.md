@@ -446,3 +446,107 @@ Notes:
   },
 }
 ```
+
+## Story Chapters
+
+Notes:
+- Keep `type` as `main` or `optional`. Story objectives do not use task objective action types there.
+- For map markers and key hints, use the same field names as task objectives: `maps`, `zones`, `possibleLocations`, `requiredKeys`.
+- For Needed Items and marker/tool display, use task-style item refs: `item`, `items`, `markerItem`, `questItem`, `count`, `foundInRaid`.
+
+### Story Chapter (map-ready objective fields)
+
+```json5
+{
+  // Sample Story Chapter - map-ready objectives
+  story_chapter_key_1: {
+    id: "story_chapter_key_1", // Required
+    name: "Sample Story Chapter", // Required
+    normalizedName: "sample-story-chapter", // Required
+    wikiLink: "https://escapefromtarkov.fandom.com/wiki/Sample_Story_Chapter", // Required
+    order: 10, // Required
+    autoStart: false, // Optional
+    chapterRequirements: [{ id: "tour", name: "Tour" }], // Optional
+    description: "Example chapter that shows how to wire story objectives for map display.", // Optional
+    notes: "Use the task-style marker fields below when a story objective should appear on the map.", // Optional
+    objectives: [
+      {
+        id: "story-chapter-key-1-main-1", // Required
+        type: "main", // Required | "main" | "optional"
+        description: "Locate the bunker terminal on Reserve", // Required
+        maps: [{ id: "5704e5fad2720bc05b8b4567", name: "Reserve" }], // Optional | UI (logic)
+        zones: [
+          {
+            map: { id: "5704e5fad2720bc05b8b4567", name: "Reserve" }, // Required when entry exists
+            outline: [
+              { x: 118.2, z: -34.6 },
+              { x: 123.8, z: -34.6 },
+              { x: 123.8, z: -28.1 },
+              { x: 118.2, z: -28.1 },
+            ], // Optional | UI (logic); polygon marker
+            position: { x: 121.0, z: -31.4 }, // Optional | UI (logic); point fallback / center
+          },
+        ], // Optional | UI (logic)
+        requiredKeys: [
+          [
+            {
+              id: "60a24479c8b4573c74fae13b",
+              name: "RB-KSM key",
+              shortName: "RB-KSM",
+            },
+          ],
+        ], // Optional | UI
+      },
+      {
+        id: "story-chapter-key-1-main-2",
+        type: "main",
+        description: "Locate and obtain the relay logs on Lighthouse",
+        maps: [{ id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }],
+        questItem: {
+          id: "story-quest-item-id-1",
+          name: "Relay logs",
+          shortName: "Logs",
+        }, // Optional | UI
+        possibleLocations: [
+          {
+            map: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
+            positions: [{ x: 245.9, z: -130.1 }],
+          },
+        ], // Optional | UI (logic)
+      },
+      {
+        id: "story-chapter-key-1-main-3",
+        type: "main",
+        description: "Hand over 2 found in raid Power filters",
+        item: {
+          id: "5d1b2ffd86f77425243e8d17",
+          name: "Power filter",
+          shortName: "PFilter",
+        }, // Optional | UI
+        count: 2, // Optional | UI
+        foundInRaid: true, // Optional | UI
+      },
+      {
+        id: "story-chapter-key-1-opt-1",
+        type: "optional",
+        description: "Mark the relay van with an MS2000 Marker",
+        maps: [{ id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }],
+        markerItem: {
+          id: "5991b51486f77447b112d44f",
+          name: "MS2000 Marker",
+          shortName: "MS2000",
+        }, // Optional | UI
+        zones: [
+          {
+            map: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
+            position: { x: 312.4, z: 48.6 },
+          },
+        ],
+      },
+    ],
+    rewards: {
+      description: "Unlocks the next story chapter and a trader contact.",
+    }, // Optional
+  },
+}
+```

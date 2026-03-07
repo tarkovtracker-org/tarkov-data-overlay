@@ -245,6 +245,36 @@ export interface StoryObjectiveUnlock {
   note?: string;
 }
 
+export interface StoryObjectiveMapRef {
+  id: string;
+  name: string;
+}
+
+export interface StoryObjectiveItemRef {
+  id: string;
+  name: string;
+  shortName?: string;
+}
+
+export interface StoryObjectiveMapPosition {
+  x: number;
+  y?: number;
+  z: number;
+}
+
+export interface StoryObjectiveZone {
+  map: StoryObjectiveMapRef;
+  outline?: StoryObjectiveMapPosition[];
+  position?: StoryObjectiveMapPosition;
+  top?: number;
+  bottom?: number;
+}
+
+export interface StoryObjectiveLocation {
+  map: StoryObjectiveMapRef;
+  positions: StoryObjectiveMapPosition[];
+}
+
 export interface StoryObjective {
   id: string;
   type: 'main' | 'optional';
@@ -253,6 +283,16 @@ export interface StoryObjective {
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;
   unlocks?: StoryObjectiveUnlock[];
+  maps?: StoryObjectiveMapRef[];
+  count?: number;
+  foundInRaid?: boolean;
+  item?: StoryObjectiveItemRef;
+  items?: StoryObjectiveItemRef[];
+  markerItem?: StoryObjectiveItemRef;
+  questItem?: StoryObjectiveItemRef;
+  requiredKeys?: StoryObjectiveItemRef[][];
+  zones?: StoryObjectiveZone[];
+  possibleLocations?: StoryObjectiveLocation[];
 }
 
 /** Reward summary for a story chapter */
