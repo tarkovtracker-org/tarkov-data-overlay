@@ -3071,6 +3071,102 @@
           }
         ]
       }
+    },
+    "thirty_pieces_of_silver": {
+      "id": "thirty_pieces_of_silver",
+      "name": "Thirty Pieces of Silver",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Thirty_Pieces_of_Silver",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "startRewards": {
+        "items": [
+          {
+            "count": 1,
+            "item": {
+              "id": "674078c4a9c9adf0450d59f9",
+              "name": "Opened case",
+              "shortName": "Case"
+            }
+          }
+        ]
+      },
+      "objectives": [
+        {
+          "id": "thirty_pieces_of_silver_obj01",
+          "description": "Eliminate smugglers",
+          "type": "shoot",
+          "optional": false,
+          "count": 25,
+          "shotType": "kill",
+          "targetNames": [
+            "Smuggler"
+          ]
+        },
+        {
+          "id": "thirty_pieces_of_silver_obj02",
+          "description": "Find and hand over boxes with contraband",
+          "type": "giveItem",
+          "optional": false,
+          "count": 3,
+          "items": [
+            {
+              "id": "67408903268737ef6908d432",
+              "name": "Contraband box",
+              "shortName": "Contraband"
+            }
+          ]
+        },
+        {
+          "id": "thirty_pieces_of_silver_obj03",
+          "description": "Find and hand over sealed smugglers' weapon cases",
+          "type": "giveItem",
+          "optional": false,
+          "count": 3
+        }
+      ],
+      "experience": 15000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1637,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "65290f395ae2ae97b80fdf2d",
+              "name": "SIG MCX-SPEAR 6.8x51 assault rifle",
+              "shortName": "SPEAR 6.8"
+            }
+          },
+          {
+            "count": 6,
+            "item": {
+              "id": "65293c7a17e14363030ad308",
+              "name": "AR-10 7.62x51 Lancer L7AWM 25-round magazine",
+              "shortName": "L7AWM"
+            }
+          },
+          {
+            "count": 6,
+            "item": {
+              "id": "67600a516f01341c9106ab4c",
+              "name": "6.8x51mm SIG Hybrid ammo pack (20 pcs)",
+              "shortName": "Hybrid"
+            }
+          }
+        ]
+      }
     }
   },
   "modes": {
@@ -3087,8 +3183,8 @@
     }
   },
   "$meta": {
-    "version": "1.15",
-    "generated": "2026-03-12T17:31:57.589Z",
-    "sha256": "da37645e4c939baad86e2742258c4173627b9ada237f77b5687aca4386d76aa3"
+    "version": "1.0.0",
+    "generated": "2026-03-12T21:24:13.078Z",
+    "sha256": "c791037e032c0d10cee9e81b52c3cc44ea266dba8792d03310f8e025a196c402"
   }
 }
