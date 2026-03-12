@@ -1393,12 +1393,19 @@
         ],
         optional: false,
       },
+      {
+        id: 'bulldogs_under_the_rug_obj03',
+        description: "Obtain the evidence of the smugglers' ties to Edward",
+        type: 'findQuestItem',
+        optional: false,
+        count: 1,
+      },
     ],
     experience: 10000,
     finishRewards: {
       items: [
         {
-          count: 738,
+          count: 700,
           item: {
             id: '5696686a4bdc2da3298b456a',
             name: 'Dollars',
