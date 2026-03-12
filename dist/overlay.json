@@ -2989,6 +2989,81 @@
           }
         ]
       }
+    },
+    "bulldogs_under_the_rug": {
+      "id": "bulldogs_under_the_rug",
+      "name": "Bulldogs Under The Rug",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Bulldogs_Under_The_Rug",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "bulldogs_under_the_rug_obj01",
+          "description": "Eliminate a smuggler on any location",
+          "type": "shoot",
+          "optional": false,
+          "count": 1,
+          "shotType": "kill",
+          "targetNames": [
+            "Smuggler"
+          ]
+        },
+        {
+          "id": "bulldogs_under_the_rug_obj02",
+          "description": "Locate the smugglers' camp on Shoreline",
+          "type": "visit",
+          "maps": [
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Shoreline"
+            }
+          ],
+          "optional": false
+        }
+      ],
+      "experience": 10000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 738,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "6165ac306ef05c2ce828ef74",
+              "name": "FN SCAR-H 7.62x51 assault rifle (FDE)",
+              "shortName": "Mk 17"
+            }
+          },
+          {
+            "count": 6,
+            "item": {
+              "id": "6183d53f1cb55961fa0fdcda",
+              "name": "FN SCAR-H 7.62x51 20-round magazine (FDE)",
+              "shortName": "Mk17"
+            }
+          },
+          {
+            "count": 8,
+            "item": {
+              "id": "6769b8e3c1a1466c850658a8",
+              "name": "7.62x51mm M80A1 ammo pack (20 pcs)",
+              "shortName": "M80A1"
+            }
+          }
+        ]
+      }
     }
   },
   "modes": {
@@ -3005,8 +3080,8 @@
     }
   },
   "$meta": {
-    "version": "1.13",
-    "generated": "2026-03-07T21:28:41.380Z",
-    "sha256": "10c317b357cafe145126487f15adbb39d0b709a539946b36a9e1e0e61134dd10"
+    "version": "1.0.0",
+    "generated": "2026-03-12T20:27:59.362Z",
+    "sha256": "0947dea9587b8d0499e0bb682de0491bfd52b31655d85ae9dccec4c0bfa52463"
   }
 }
