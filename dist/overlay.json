@@ -3087,8 +3087,8 @@
     }
   },
   "$meta": {
-    "version": "1.0.0",
-    "generated": "2026-03-12T20:48:14.263Z",
-    "sha256": "412c58f35d04ea16a7b4110b920d37f7e7add4270e1a0148e33d82da9a7c3b87"
+    "version": "1.15",
+    "generated": "2026-03-12T17:31:57.589Z",
+    "sha256": "da37645e4c939baad86e2742258c4173627b9ada237f77b5687aca4386d76aa3"
   }
 }
