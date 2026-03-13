@@ -3159,8 +3159,8 @@
     }
   },
   "$meta": {
-    "version": "1.0.0",
-    "generated": "2026-03-13T15:43:56.197Z",
-    "sha256": "ed13a93d7bc727d9490f29e38a8ba2d100255907d91add6d3f36aa2047f43d6f"
+    "version": "1.18",
+    "generated": "2026-03-13T15:44:23.415Z",
+    "sha256": "32e70aecf93ab042f096254386faf354d318ed05072c73a916ac744d946d305e"
   }
 }
