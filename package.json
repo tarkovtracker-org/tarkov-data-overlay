@@ -26,11 +26,11 @@
     "node": ">=20.10.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "ajv": "^8.12.0",
+    "@types/node": "^20.19.37",
+    "ajv": "^8.18.0",
     "json5": "^2.2.3",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.0",
-    "vitest": "^4.0.16"
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   }
 }
