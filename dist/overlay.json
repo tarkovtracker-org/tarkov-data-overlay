@@ -2978,6 +2978,14 @@
       "kappaRequired": false,
       "lightkeeperRequired": false,
       "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5a27b75b86f7742e97191958",
+            "name": "Fishing Gear"
+          }
+        }
+      ],
       "objectives": [
         {
           "id": "bulldogs_under_the_rug_obj01",
@@ -2992,7 +3000,7 @@
         },
         {
           "id": "bulldogs_under_the_rug_obj02",
-          "description": "Locate the smugglers' camp on Shoreline",
+          "description": "Locate the smuggler's camp on Shoreline",
           "type": "visit",
           "maps": [
             {
@@ -3048,6 +3056,78 @@
         ]
       }
     },
+    "accept_delivery": {
+      "id": "accept_delivery",
+      "name": "Accept Delivery",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Accept_Delivery",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "bulldogs_under_the_rug",
+            "name": "Bulldogs Under The Rug"
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "accept_delivery_obj01",
+          "description": "Obtain and hand over the locked smugglers' case",
+          "type": "giveItem",
+          "optional": false,
+          "count": 1,
+          "items": [
+            {
+              "id": "6740987b89d5e1ddc603f4f0",
+              "name": "Locked case",
+              "shortName": "Locked case"
+            }
+          ]
+        },
+        {
+          "id": "accept_delivery_obj02",
+          "description": "Obtain and hand over the key to the locked case",
+          "type": "giveItem",
+          "optional": false,
+          "count": 1,
+          "items": [
+            {
+              "id": "67449b6c89d5e1ddc603f504",
+              "name": "Case key",
+              "shortName": "Case key"
+            }
+          ]
+        }
+      ],
+      "experience": 11500,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1100,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          },
+          {
+            "count": 3,
+            "item": {
+              "id": "5c12613b86f7743bbe2c3f76",
+              "name": "Intelligence folder",
+              "shortName": "Intelligence"
+            }
+          }
+        ]
+      }
+    },
     "thirty_pieces_of_silver": {
       "id": "thirty_pieces_of_silver",
       "name": "Thirty Pieces of Silver",
@@ -3060,18 +3140,14 @@
       "kappaRequired": false,
       "lightkeeperRequired": false,
       "factionName": "Any",
-      "startRewards": {
-        "items": [
-          {
-            "count": 1,
-            "item": {
-              "id": "674078c4a9c9adf0450d59f9",
-              "name": "Opened case",
-              "shortName": "Case"
-            }
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "accept_delivery",
+            "name": "Accept Delivery"
           }
-        ]
-      },
+        }
+      ],
       "objectives": [
         {
           "id": "thirty_pieces_of_silver_obj01",
@@ -3086,7 +3162,7 @@
         },
         {
           "id": "thirty_pieces_of_silver_obj02",
-          "description": "Find and hand over boxes with contraband",
+          "description": "Obtain and hand over contraband boxes",
           "type": "giveItem",
           "optional": false,
           "count": 3,
@@ -3100,7 +3176,7 @@
         },
         {
           "id": "thirty_pieces_of_silver_obj03",
-          "description": "Find and hand over sealed smugglers' weapon cases",
+          "description": "Obtain and hand over locked smugglers' weapon cases",
           "type": "giveItem",
           "optional": false,
           "count": 3
@@ -3110,7 +3186,7 @@
       "finishRewards": {
         "items": [
           {
-            "count": 1637,
+            "count": 1400,
             "item": {
               "id": "5696686a4bdc2da3298b456a",
               "name": "Dollars",
@@ -3134,7 +3210,7 @@
             }
           },
           {
-            "count": 6,
+            "count": 10,
             "item": {
               "id": "67600a516f01341c9106ab4c",
               "name": "6.8x51mm SIG Hybrid ammo pack (20 pcs)",
@@ -3160,7 +3236,7 @@
   },
   "$meta": {
     "version": "1.18",
-    "generated": "2026-03-13T15:44:23.415Z",
-    "sha256": "32e70aecf93ab042f096254386faf354d318ed05072c73a916ac744d946d305e"
+    "generated": "2026-03-13T15:59:24.759Z",
+    "sha256": "ebae1c6e1d07d27e2cb6f2b9587ef0005c70a539a0e6bef20502f8810413f6c1"
   }
 }
