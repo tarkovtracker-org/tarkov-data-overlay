@@ -16,7 +16,7 @@ import {
   initializeValidators,
   validateFile,
   validateSourceFiles,
-} from '../scripts/validate.ts';
+} from '../scripts/validate.js';
 
 describe('scripts/validate helpers', () => {
   it('initializes validators for configured schema patterns', () => {
@@ -72,6 +72,22 @@ describe('scripts/validate helpers', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
     const filePath = join(tempDir, 'tasks.json5');
     writeFileSync(filePath, '[1]', 'utf-8');
+
+    try {
+      const result = validateFile(filePath, 'temp/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('must be object'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not treat empty arrays as valid empty objects', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(filePath, '[]', 'utf-8');
 
     try {
       const result = validateFile(filePath, 'temp/tasks.json5', validators);

@@ -8,6 +8,7 @@
     "build": "tsx scripts/build.ts",
     "check-overrides": "tsx scripts/check-overrides.ts",
     "monitor": "node monitor/server.js",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },

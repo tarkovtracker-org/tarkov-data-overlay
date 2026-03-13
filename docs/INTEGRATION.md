@@ -41,8 +41,20 @@ async function fetchOverlay() {
       "name": "Missing in Action",
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Missing_in_Action",
       "trader": { "id": "...", "name": "Prapor" },
-      "maps": [{ "id": "...", "name": "Woods" }],
+      "map": { "id": "...", "name": "Woods" },
       "objectives": [{ "id": "...", "description": "Stash ..." }]
+    }
+  },
+  "itemsAdd": {
+    "<added-item-id>": {
+      "id": "<added-item-id>",
+      "name": "Event Item"
+    }
+  },
+  "storyChapters": {
+    "<chapter-id>": {
+      "id": "<chapter-id>",
+      "name": "Tour"
     }
   },
   "modes": {
@@ -206,7 +218,7 @@ const editions = overlay.editions;
 
 // Use directly - no merging needed
 const unheardEdition = editions?.unheard;
-console.log(unheardEdition?.stashLevel); // 5
+console.log(unheardEdition?.defaultStashLevel); // 5
 ```
 
 ### Task Additions (Event-Only / Missing from API)
@@ -300,7 +312,9 @@ interface Overlay {
   tasksAdd?: Record<string, TaskAddition>;
   modes?: Partial<Record<GameMode, ModeOverlay>>;
   items?: Record<string, ItemOverride>;
+  itemsAdd?: Record<string, ItemAddition>;
   editions?: Record<string, Edition>;
+  storyChapters?: Record<string, StoryChapter>;
   $meta: {
     version: string;
     generated: string;
@@ -332,7 +346,6 @@ interface TaskAddition {
   wikiLink: string;
   trader: { id?: string; name: string };
   map?: { id: string; name: string } | null;
-  maps?: Array<{ id: string; name: string }>;
   objectives: TaskObjectiveAdd[];
   // ... other fields
 }
@@ -365,9 +378,24 @@ interface ObjectiveAdd {
 
 interface Edition {
   id: string;
+  value: number;
   title: string;
-  stashLevel: number;
-  cultistCircleLevel: number;
+  defaultStashLevel: number;
+  defaultCultistCircleLevel: number;
   traderRepBonus: Record<string, number>;
+  exclusiveTaskIds?: string[];
+  excludedTaskIds?: string[];
+}
+
+interface ItemAddition {
+  id: string;
+  name: string;
+  shortName?: string;
+}
+
+interface StoryChapter {
+  id: string;
+  name: string;
+  normalizedName: string;
 }
 ```

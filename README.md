@@ -19,9 +19,13 @@ https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/over
 
 Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATION.md) for details.
 
-## Current Corrections
+## Monitor
 
-See corrections in: https://monitor.nivmizz7.fr
+Browse the hosted monitor at [monitor.nivmizz7.fr](https://monitor.nivmizz7.fr), or run it locally with:
+
+```bash
+npm run monitor
+```
 
 ## Maintenance
 
@@ -38,6 +42,14 @@ This command compares all overrides against current API data and reports:
 
 Run this periodically to keep the overlay lean and accurate.
 
+For local checks:
+
+```bash
+npm run validate
+npm run typecheck
+npm test
+```
+
 ## Contributing
 
 Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
@@ -51,4 +63,4 @@ Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
 
 ## License
 
-See [LICENSE.md]().
+See [LICENSE](LICENSE).

@@ -312,30 +312,6 @@
         }
       }
     },
-    "6615141bfda04449120269a7": {
-      "objectives": {
-        "6615141bfda04449120269a8": {
-          "maps": [
-            {
-              "id": "5704e4dad2720bb55b8b4567",
-              "name": "Lighthouse"
-            }
-          ]
-        }
-      }
-    },
-    "6613f307fca4f2f386029409": {
-      "objectives": {
-        "6615127fd998c5f2aaa4a8a0": {
-          "maps": [
-            {
-              "id": "5704e4dad2720bb55b8b4567",
-              "name": "Lighthouse"
-            }
-          ]
-        }
-      }
-    },
     "6761f28a022f60bb320f3e95": {
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)",
       "minPlayerLevel": 47,
@@ -3183,8 +3159,8 @@
     }
   },
   "$meta": {
-    "version": "1.16",
-    "generated": "2026-03-12T18:29:37.906Z",
-    "sha256": "eec86070125aaec803dfef595fac53d7a99a1a43e2ef95526e432e15782302ba"
+    "version": "1.0.0",
+    "generated": "2026-03-13T15:38:15.095Z",
+    "sha256": "6cf955a1d14f60a6417f10b4ea8c995dd16d34309c80fa9d5175fff047169b5a"
   }
 }

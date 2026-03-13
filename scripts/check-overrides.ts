@@ -180,6 +180,10 @@ function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function getPrestigeLevel(task: { requiredPrestige?: { prestigeLevel: number } | null }): number {
+  return task.requiredPrestige?.prestigeLevel ?? 0;
+}
+
 function buildApiIndexes(apiTasks: TaskData[]) {
   const byWikiLink = new Map<string, TaskData>();
   const byName = new Map<string, TaskData[]>();
@@ -219,6 +223,43 @@ export function checkTaskAdditions(
 
     const nameKey = normalizeName(addition.name);
     const nameMatches = byName.get(nameKey) ?? [];
+    const additionPrestigeLevel = addition.requiredPrestige?.prestigeLevel;
+
+    if (additionPrestigeLevel !== undefined && nameMatches.length > 0) {
+      const prestigeMatches = nameMatches.filter(
+        (task) => getPrestigeLevel(task) === additionPrestigeLevel
+      );
+
+      if (prestigeMatches.length === 1) {
+        return {
+          key,
+          name: addition.name,
+          status: 'CHECK',
+          message: `Matched API task '${prestigeMatches[0].name}' (${prestigeMatches[0].id}) by name and requiredPrestige=${additionPrestigeLevel} - NEEDS REVIEW`,
+        };
+      }
+
+      if (prestigeMatches.length > 1) {
+        const ids = prestigeMatches.map((task) => task.id).join(', ');
+        return {
+          key,
+          name: addition.name,
+          status: 'CHECK',
+          message: `Multiple API tasks share this name and requiredPrestige=${additionPrestigeLevel} (${ids}) - NEEDS REVIEW`,
+        };
+      }
+
+      const availablePrestigeLevels = [...new Set(nameMatches.map((task) => getPrestigeLevel(task)))]
+        .sort((a, b) => a - b)
+        .join(', ');
+      return {
+        key,
+        name: addition.name,
+        status: 'MISSING',
+        message: `API tasks share this name, but none match requiredPrestige=${additionPrestigeLevel} (available: ${availablePrestigeLevels}) - STILL NEEDED`,
+      };
+    }
+
     if (nameMatches.length === 1) {
       return {
         key,

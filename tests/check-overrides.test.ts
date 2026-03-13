@@ -7,7 +7,7 @@ import {
   normalizeWikiLink,
   checkTaskAdditions,
   checkEditionTaskReferences,
-} from '../scripts/check-overrides.ts';
+} from '../scripts/check-overrides.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
 
 function createTaskAddition(overrides: Partial<TaskAddition> = {}): TaskAddition {
@@ -104,6 +104,65 @@ describe('checkTaskAdditions', () => {
     expect(results[0]?.message).toContain('by name only');
     expect(results[1]?.status).toBe('CHECK');
     expect(results[1]?.message).toContain('Multiple API tasks share this name');
+  });
+
+  it('marks prestige-based additions as missing when API only has other prestige tiers', () => {
+    const additions = {
+      prestigeMissing: createTaskAddition({
+        name: 'New Beginning',
+        wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)',
+        requiredPrestige: { name: 'Prestige 4', prestigeLevel: 4 },
+      }),
+    };
+    const apiTasks = [
+      createApiTask({
+        id: 'api-p0',
+        name: 'New Beginning',
+        requiredPrestige: undefined,
+      }),
+      createApiTask({
+        id: 'api-p1',
+        name: 'New Beginning',
+        requiredPrestige: { name: 'Prestige 1', prestigeLevel: 1 },
+      }),
+      createApiTask({
+        id: 'api-p2',
+        name: 'New Beginning',
+        requiredPrestige: { name: 'Prestige 2', prestigeLevel: 2 },
+      }),
+      createApiTask({
+        id: 'api-p3',
+        name: 'New Beginning',
+        requiredPrestige: { name: 'Prestige 3', prestigeLevel: 3 },
+      }),
+    ];
+
+    const [result] = checkTaskAdditions(additions, apiTasks);
+
+    expect(result?.status).toBe('MISSING');
+    expect(result?.message).toContain('none match requiredPrestige=4');
+  });
+
+  it('marks prestige-based additions for review when API has the same prestige tier', () => {
+    const additions = {
+      prestigeMatch: createTaskAddition({
+        name: 'New Beginning',
+        wikiLink: 'https://example.com/wiki/new-beginning-alt',
+        requiredPrestige: { name: 'Prestige 4', prestigeLevel: 4 },
+      }),
+    };
+    const apiTasks = [
+      createApiTask({
+        id: 'api-p4',
+        name: 'New Beginning',
+        requiredPrestige: { name: 'Prestige 4', prestigeLevel: 4 },
+      }),
+    ];
+
+    const [result] = checkTaskAdditions(additions, apiTasks);
+
+    expect(result?.status).toBe('CHECK');
+    expect(result?.message).toContain('requiredPrestige=4');
   });
 
   it('marks additions as missing when no wiki or name match exists', () => {

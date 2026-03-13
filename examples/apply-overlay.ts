@@ -52,8 +52,9 @@ interface TaskOverride {
 interface Edition {
   id: string;
   title: string;
-  stashLevel: number;
-  cultistCircleLevel: number;
+  value: number;
+  defaultStashLevel: number;
+  defaultCultistCircleLevel: number;
   traderRepBonus: Record<string, number>;
 }
 
@@ -207,7 +208,7 @@ async function main() {
   if (overlay.editions) {
     console.log('\nEditions available:');
     for (const edition of Object.values(overlay.editions)) {
-      console.log(`  ${edition.title} (Stash Level ${edition.stashLevel})`);
+      console.log(`  ${edition.title} (Stash Level ${edition.defaultStashLevel})`);
     }
   }
 }

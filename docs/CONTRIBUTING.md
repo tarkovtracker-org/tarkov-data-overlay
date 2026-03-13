@@ -18,11 +18,11 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities not present in tarkov.dev (tasksAdd, editions).
+- `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
 - `dist/overlay.json`: Generated output from `npm run build`.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
-  appear under `tasksAdd`/`editions` in the output.
+  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`).
 
 ---
 
@@ -74,6 +74,8 @@ Edit the appropriate file in `src/overrides/`:
 
 - New tasks not in the API → `src/additions/tasksAdd.json5`
 - New editions → `src/additions/editions.json5`
+- New story chapters → `src/additions/storyChapters.json5`
+- New items → `src/additions/itemsAdd.json5`
 
 ### 2. Create a Stable ID
 
@@ -210,6 +212,9 @@ npm install
 
 # Validate your changes
 npm run validate
+
+# Type-check scripts and tests
+npm run typecheck
 
 # Build the overlay locally
 npm run build

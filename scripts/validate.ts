@@ -66,8 +66,9 @@ export function validateFile(
   try {
     const data = loadJson5File(filePath);
 
-    // Skip empty objects - they're valid by convention
-    if (Object.keys(data).length === 0) {
+    // Skip empty plain objects - they're valid by convention.
+    // Arrays/primitives/null should still be validated against schema.
+    if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0) {
       return { file: displayPath, valid: true };
     }
 

@@ -24,7 +24,7 @@ function buildOverlayFixture(): OverlayOutput {
       ...loadAllJson5FromDir(join(srcDir, 'additions', 'modes', mode), false),
     } as NonNullable<OverlayOutput['modes']>[typeof mode];
 
-    if (Object.keys(modeData).length > 0) {
+    if (modeData && Object.keys(modeData).length > 0) {
       modes[mode] = modeData;
     }
   }
