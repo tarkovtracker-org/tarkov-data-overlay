@@ -507,4 +507,11 @@
       },
     },
   },
+
+  // Immunity - wikiLink points to the skill page instead of the quest page
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)
+  // tarkov.dev currently returns the Immunity skill page instead of the quest page.
+  '6663148ca9290f9e0806cca1': {
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
+  },
 }

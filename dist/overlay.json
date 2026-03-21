@@ -560,6 +560,9 @@
           ]
         }
       }
+    },
+    "6663148ca9290f9e0806cca1": {
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)"
     }
   },
   "editions": {
@@ -3236,7 +3239,7 @@
   },
   "$meta": {
     "version": "1.19",
-    "generated": "2026-03-13T16:00:20.944Z",
-    "sha256": "8b678a889d1521475b7ffed226985f54493474a82edcc59e1351b9768575a440"
+    "generated": "2026-03-21T21:38:28.266Z",
+    "sha256": "e871ac88c0e41275e2965ed21c0b8129194d7e97ee8ce4d5fcf0809db321bfec"
   }
 }
