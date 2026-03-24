@@ -8,4 +8,11 @@
       },
     },
   },
+
+  // Easy Money - Part 1 - bad required level
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_1
+  // level; 3 -> 10
+  '6834145ebc1f443d7603c8a7': {
+    minPlayerLevel: 10, // Was: 3
+  },
 }
