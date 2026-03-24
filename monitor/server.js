@@ -81,6 +81,33 @@ const readLocks = {
 };
 
 const clientsByKey = new Map();
+let overlayFsWatcher = null;
+
+function parseIsoDate(value) {
+  if (!value) {
+    return 0;
+  }
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+async function refreshOverlayIfStale() {
+  if (isRemotePath(OVERLAY_PATH)) {
+    return;
+  }
+
+  try {
+    const stats = await fs.promises.stat(OVERLAY_PATH);
+    const currentMtimeMs = stats.mtimeMs;
+    const loadedMtimeMs = parseIsoDate(overlayState.updatedAt);
+
+    if (!overlayState.data || currentMtimeMs > loadedMtimeMs) {
+      await refreshOverlay();
+    }
+  } catch (error) {
+    overlayState.error = error.message || "Unable to read overlay";
+  }
+}
 
 function isRemotePath(targetPath) {
   return /^https?:\/\//i.test(targetPath);
@@ -916,6 +943,24 @@ function startOverlayWatcher() {
     return;
   }
 
+  const overlayDir = path.dirname(OVERLAY_PATH);
+  const overlayFile = path.basename(OVERLAY_PATH);
+  try {
+    overlayFsWatcher = fs.watch(overlayDir, (eventType, filename) => {
+      const isOverlayFile =
+        typeof filename === "string" ? filename === overlayFile : true;
+      if (!isOverlayFile) {
+        return;
+      }
+      if (eventType === "rename" || eventType === "change") {
+        refreshOverlay().catch(() => {});
+      }
+    });
+    overlayFsWatcher.on("error", () => {});
+  } catch {
+    // fs.watch may fail on some filesystems; watchFile below remains as fallback.
+  }
+
   fs.watchFile(OVERLAY_PATH, { interval: 1000 }, (curr, prev) => {
     if (curr.mtimeMs !== prev.mtimeMs) {
       refreshOverlay().catch(() => {});
@@ -960,12 +1005,16 @@ const server = http.createServer((req, res) => {
     );
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
     const config = VIEW_CONFIG[view];
-    send(
-      res,
-      200,
-      JSON.stringify(getState(view, config?.requiresMode ? mode : "")),
-      "application/json; charset=utf-8",
-    );
+    refreshOverlayIfStale()
+      .catch(() => {})
+      .finally(() => {
+        send(
+          res,
+          200,
+          JSON.stringify(getState(view, config?.requiresMode ? mode : "")),
+          "application/json; charset=utf-8",
+        );
+      });
     return;
   }
 
@@ -977,52 +1026,56 @@ const server = http.createServer((req, res) => {
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
     const config = VIEW_CONFIG[view];
     const key = getSummaryKey(view, config?.requiresMode ? mode : "");
-    res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-store",
-      Connection: "keep-alive",
-    });
-    const clients = clientsByKey.get(key) || new Set();
-    clientsByKey.set(key, clients);
-    clients.add(res);
-    let closed = false;
-    let keepAlive = null;
-    const cleanup = () => {
-      if (closed) {
-        return;
-      }
-      closed = true;
-      if (keepAlive) {
-        clearInterval(keepAlive);
-      }
-      removeClient(key, res);
-      req.off("close", cleanup);
-      res.off("close", cleanup);
-      res.off("finish", cleanup);
-      res.off("error", cleanup);
-    };
+    refreshOverlayIfStale()
+      .catch(() => {})
+      .finally(() => {
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-store",
+          Connection: "keep-alive",
+        });
+        const clients = clientsByKey.get(key) || new Set();
+        clientsByKey.set(key, clients);
+        clients.add(res);
+        let closed = false;
+        let keepAlive = null;
+        const cleanup = () => {
+          if (closed) {
+            return;
+          }
+          closed = true;
+          if (keepAlive) {
+            clearInterval(keepAlive);
+          }
+          removeClient(key, res);
+          req.off("close", cleanup);
+          res.off("close", cleanup);
+          res.off("finish", cleanup);
+          res.off("error", cleanup);
+        };
 
-    req.on("close", cleanup);
-    res.on("close", cleanup);
-    res.on("finish", cleanup);
-    res.on("error", cleanup);
+        req.on("close", cleanup);
+        res.on("close", cleanup);
+        res.on("finish", cleanup);
+        res.on("error", cleanup);
 
-    if (
-      !writeSse(
-        key,
-        res,
-        `event: summary\ndata: ${JSON.stringify(getState(view, config?.requiresMode ? mode : ""))}\n\n`,
-      )
-    ) {
-      cleanup();
-      return;
-    }
+        if (
+          !writeSse(
+            key,
+            res,
+            `event: summary\ndata: ${JSON.stringify(getState(view, config?.requiresMode ? mode : ""))}\n\n`,
+          )
+        ) {
+          cleanup();
+          return;
+        }
 
-    keepAlive = setInterval(() => {
-      if (!writeSse(key, res, ": keep-alive\n\n")) {
-        cleanup();
-      }
-    }, 15000);
+        keepAlive = setInterval(() => {
+          if (!writeSse(key, res, ": keep-alive\n\n")) {
+            cleanup();
+          }
+        }, 15000);
+      });
     return;
   }
 
