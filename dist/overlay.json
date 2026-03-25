@@ -3195,6 +3195,7 @@
         "67d03be712fb5f8fd2096332": {
           "objectives": {
             "67d03be712fb5f8fd2096334": {
+              "description": "Eliminate PMC operatives inside The Labyrinth",
               "count": 24
             }
           }
@@ -3203,8 +3204,8 @@
     }
   },
   "$meta": {
-    "version": "1.22",
-    "generated": "2026-03-25T10:13:44.855Z",
-    "sha256": "03a269b065bb1a7020edd3ccfec332f173fde0062cdbf61d4b5604396a94fcd8"
+    "version": "1.23",
+    "generated": "2026-03-25T16:46:52.909Z",
+    "sha256": "49d076a59ce9b3848c128542654f130cb3f0f3895b52414e3ca619f186fff604"
   }
 }
