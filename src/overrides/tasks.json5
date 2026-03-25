@@ -78,22 +78,6 @@
     },
   },
 
-  // Test Drive - Part 3 - Objective maps incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_3
-  // API experience and description now correct; map/obj maps still wrong
-  '64f5deac39e45b527a7c4232': {
-    map: null, // Was: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }
-    objectives: {
-      '64f5deac39e45b527a7c4235': {
-        maps: [
-          { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
-          { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
-          { id: '5704e5fad2720bc05b8b4567', name: 'Reserve' },
-        ],
-      },
-    },
-  },
-
   // Test Drive - Part 4 - Objective maps/items incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
   // API experience and description now correct; map/obj maps/mods still wrong
@@ -460,28 +444,6 @@
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
         ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
-      },
-    },
-  },
-
-  // Hunting Trip - Objective description incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Hunting_Trip
-  // API distance now correct (40m); description still references 75m
-  '5d25e4ca86f77409dd5cdf2c': {
-    objectives: {
-      '5fd8aa3206fb3a6b8154a2c3': {
-        description: 'Locate and neutralize Shturman with a headshot from over 40 meters away while using an M700 sniper rifle with the specified scope', // Was: Locate and neutralize Shturman with a headshot from over 75 meters away while using an M700 sniper rifle with the specified scope
-      },
-    },
-  },
-
-  // Connections Up North - PMC kill count requirement incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Connections_Up_North
-  // tarkov.dev currently shows 50 PMC kills; latest update reduces to 20.
-  '6764174c86addd02bc033d68': {
-    objectives: {
-      '676418a60b9bcbe280972288': {
-        count: 20, // Was: 50
       },
     },
   },
