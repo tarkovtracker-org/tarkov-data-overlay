@@ -68,27 +68,6 @@
         }
       }
     },
-    "64f5deac39e45b527a7c4232": {
-      "map": null,
-      "objectives": {
-        "64f5deac39e45b527a7c4235": {
-          "maps": [
-            {
-              "id": "5704e4dad2720bb55b8b4567",
-              "name": "Lighthouse"
-            },
-            {
-              "id": "56f40101d2720b2a4d8b45d6",
-              "name": "Customs"
-            },
-            {
-              "id": "5704e5fad2720bc05b8b4567",
-              "name": "Reserve"
-            }
-          ]
-        }
-      }
-    },
     "6574e0dedc0d635f633a5805": {
       "map": null,
       "objectives": {
@@ -525,20 +504,6 @@
               }
             ]
           ]
-        }
-      }
-    },
-    "5d25e4ca86f77409dd5cdf2c": {
-      "objectives": {
-        "5fd8aa3206fb3a6b8154a2c3": {
-          "description": "Locate and neutralize Shturman with a headshot from over 40 meters away while using an M700 sniper rifle with the specified scope"
-        }
-      }
-    },
-    "6764174c86addd02bc033d68": {
-      "objectives": {
-        "676418a60b9bcbe280972288": {
-          "count": 20
         }
       }
     },
@@ -3238,8 +3203,8 @@
     }
   },
   "$meta": {
-    "version": "1.21",
-    "generated": "2026-03-24T16:31:46.655Z",
-    "sha256": "012d3631c0f7e6768e52586b816b8ccdcefcc8a1befce0a1991c33e752d3e748"
+    "version": "1.22",
+    "generated": "2026-03-25T10:13:44.855Z",
+    "sha256": "03a269b065bb1a7020edd3ccfec332f173fde0062cdbf61d4b5604396a94fcd8"
   }
 }
