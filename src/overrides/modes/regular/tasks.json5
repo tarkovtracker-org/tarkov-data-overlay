@@ -1,9 +1,11 @@
 {
   // Vacate the Premises - PvP has 24 kills (differs from PvE's 36)
+  // Change the objective
   // Proof: https://escapefromtarkov.fandom.com/wiki/Vacate_the_Premises
   '67d03be712fb5f8fd2096332': {
     objectives: {
       '67d03be712fb5f8fd2096334': {
+        description: 'Eliminate PMC operatives inside The Labyrinth', // Was: "Eliminate any target inside The Labyrinth"
         count: 24,
       },
     },
