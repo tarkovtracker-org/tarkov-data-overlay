@@ -2960,8 +2960,8 @@
     }
   },
   "$meta": {
-    "version": "1.25",
-    "generated": "2026-04-02T05:22:25.576Z",
-    "sha256": "9161fe5a4153e068fa1d75792bfc16b210c1c3b794ddf6c49f20bb5dfc6fb63e"
+    "version": "1.0.0",
+    "generated": "2026-04-09T18:43:12.983Z",
+    "sha256": "c8696ccdb8ce9c1ce7391879ee43b054c956c6cad640fb3a2d01c112629d3187"
   }
 }

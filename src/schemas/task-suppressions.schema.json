@@ -1,0 +1,75 @@
+{
+  "$id": "task-suppressions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": {
+    "additionalProperties": false,
+    "properties": {
+      "disabled": {
+        "type": "boolean"
+      },
+      "experience": {
+        "type": "boolean"
+      },
+      "factionName": {
+        "type": "boolean"
+      },
+      "finishRewards": {
+        "type": "boolean"
+      },
+      "kappaRequired": {
+        "type": "boolean"
+      },
+      "lightkeeperRequired": {
+        "type": "boolean"
+      },
+      "map": {
+        "type": "boolean"
+      },
+      "minPlayerLevel": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "boolean"
+      },
+      "objectives": {
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "fields": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        },
+        "type": "object"
+      },
+      "requiredPrestige": {
+        "type": "boolean"
+      },
+      "startRewards": {
+        "type": "boolean"
+      },
+      "taskRequirements": {
+        "type": "boolean"
+      },
+      "traderRequirements": {
+        "type": "boolean"
+      },
+      "wikiLink": {
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  },
+  "type": "object"
+}
