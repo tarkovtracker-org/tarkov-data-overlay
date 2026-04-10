@@ -2933,6 +2933,299 @@
           }
         ]
       }
+    },
+    "casus_belli": {
+      "id": "casus_belli",
+      "name": "Casus belli",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Casus_belli",
+      "trader": {
+        "id": "6617beeaa9cfa777ca915b7c",
+        "name": "Ref"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "objectives": [
+        {
+          "id": "casus_belli_obj01",
+          "description": "Eliminate 5 pillagers",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            },
+            {
+              "id": "5714dbc024597771384a510d",
+              "name": "Interchange"
+            },
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            },
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Shoreline"
+            },
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Lighthouse"
+            }
+          ],
+          "count": 5,
+          "shotType": "kill",
+          "targetNames": [
+            "Pillager"
+          ],
+          "optional": false
+        },
+        {
+          "id": "casus_belli_obj02",
+          "description": "Hand over 3 found in raid painted CQCM masks",
+          "type": "giveItem",
+          "items": [
+            {
+              "id": "67a4b71ad3228756b6088ee2",
+              "name": "Atomic Defense CQCM ballistic mask (Smile)",
+              "shortName": "Smile"
+            },
+            {
+              "id": "67a5c5b6dfdf568c9009af66",
+              "name": "Atomic Defense CQCM ballistic mask (Stop Me)",
+              "shortName": "Stop Me"
+            },
+            {
+              "id": "67a5c5df782ce4655104db14",
+              "name": "Atomic Defense CQCM ballistic mask (Scars)",
+              "shortName": "Scars"
+            },
+            {
+              "id": "67a5c5f37f52620c5b05b4d6",
+              "name": "Atomic Defense CQCM ballistic mask (Target)",
+              "shortName": "Target"
+            },
+            {
+              "id": "67a5c6068fcd9fb73f0752cf",
+              "name": "Atomic Defense CQCM ballistic mask (Skull)",
+              "shortName": "Skull"
+            },
+            {
+              "id": "67a5c61c7f52620c5b05b4d8",
+              "name": "Atomic Defense CQCM ballistic mask (Demon)",
+              "shortName": "Demon"
+            },
+            {
+              "id": "67a5c657782ce4655104db16",
+              "name": "Atomic Defense CQCM ballistic mask (El Día de Muertos)",
+              "shortName": "Muertos"
+            },
+            {
+              "id": "688b3bfa1ed594eccd0c45ee",
+              "name": "Atomic Defense CQCM ballistic mask (Ping)",
+              "shortName": "Ping"
+            },
+            {
+              "id": "68a9a04373d52d47830759c7",
+              "name": "Atomic Defense CQCM ballistic mask (Loui Peeton)",
+              "shortName": "Loui Peeton"
+            },
+            {
+              "id": "68a9a0b01696fb8c1e0ee9cc",
+              "name": "Atomic Defense CQCM ballistic mask (Toxic)",
+              "shortName": "Toxic"
+            },
+            {
+              "id": "68a9a1223e1ee5a70504c126",
+              "name": "Atomic Defense CQCM ballistic mask (Crash Tested)",
+              "shortName": "Crash Tested"
+            },
+            {
+              "id": "68a9a15d73d52d47830759c9",
+              "name": "Atomic Defense CQCM ballistic mask (Demonic Face)",
+              "shortName": "Demonic"
+            },
+            {
+              "id": "68d54d0525ac8590a8075ac3",
+              "name": "Atomic Defense CQCM ballistic mask (Loui Peeton)",
+              "shortName": "LP"
+            },
+            {
+              "id": "6936ff8734029a096c06f95a",
+              "name": "Atomic Defense CQCM ballistic mask (Blasted Ice)",
+              "shortName": "Blasted Ice"
+            }
+          ],
+          "foundInRaid": true,
+          "count": 3,
+          "optional": false
+        }
+      ],
+      "experience": 10000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 50,
+            "item": {
+              "id": "5d235b4d86f7742e017bc88a",
+              "name": "GP coin",
+              "shortName": "GP"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "5fbcc1d9016cce60e8341ab3",
+              "name": "SIG MCX .300 Blackout assault rifle",
+              "shortName": "MCX"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "544a378f4bdc2d30388b4567",
+              "name": "AR-15 5.56x45 Magpul PMAG 40 GEN M3 STANAG 40-round magazine",
+              "shortName": "GEN M3"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "657023bebfc87b3a34093207",
+              "name": ".300 Blackout BCP FMJ ammo pack (50 pcs)",
+              "shortName": "FMJ"
+            }
+          }
+        ]
+      }
+    },
+    "backup_plan": {
+      "id": "backup_plan",
+      "name": "Backup Plan",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Backup_Plan",
+      "trader": {
+        "id": "6617beeaa9cfa777ca915b7c",
+        "name": "Ref"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "factionName": "Any",
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "casus_belli",
+            "name": "Casus belli"
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "backup_plan_obj01",
+          "description": "Stash the Grizzly medkit in the large barn at the old sawmill on Woods",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            }
+          ],
+          "items": [
+            {
+              "id": "590c657e86f77412b013051d",
+              "name": "Grizzly medical kit",
+              "shortName": "Grizzly"
+            }
+          ],
+          "count": 1,
+          "optional": false
+        },
+        {
+          "id": "backup_plan_obj02",
+          "description": "Transit from Woods to Customs",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "5704e3c2d2720bac5b8b4567",
+              "name": "Woods"
+            },
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "exitStatus": [
+            "ExpBonusmarathon Name"
+          ],
+          "count": 1,
+          "optional": false
+        },
+        {
+          "id": "backup_plan_obj03",
+          "description": "Eliminate any 6 targets on Customs",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "count": 6,
+          "shotType": "kill",
+          "optional": false
+        },
+        {
+          "id": "backup_plan_obj04",
+          "description": "Survive and extract from Customs",
+          "type": "extract",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "exitStatus": [
+            "Survived"
+          ],
+          "count": 1,
+          "optional": false
+        }
+      ],
+      "experience": 12000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 50,
+            "item": {
+              "id": "5d235b4d86f7742e017bc88a",
+              "name": "GP coin",
+              "shortName": "GP"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "606587252535c57a13424cfd",
+              "name": "CMMG Mk47 Mutant 7.62x39 assault rifle",
+              "shortName": "Mk47"
+            }
+          },
+          {
+            "count": 3,
+            "item": {
+              "id": "59d6272486f77466146386ff",
+              "name": "AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine",
+              "shortName": "GEN M3"
+            }
+          },
+          {
+            "count": 7,
+            "item": {
+              "id": "64acea09c4eda9354b0226ad",
+              "name": "7.62x39mm T-45M1 gzh ammo pack (20 pcs)",
+              "shortName": "T-45M1"
+            }
+          }
+        ]
+      }
     }
   },
   "modes": {
@@ -2960,8 +3253,8 @@
     }
   },
   "$meta": {
-    "version": "1.26",
-    "generated": "2026-04-10T19:20:28.012Z",
-    "sha256": "228c6fed2217e8b8840bcacb571efef5b6befcfee0003a403336d94679527789"
+    "version": "1.27",
+    "generated": "2026-04-10T19:21:06.355Z",
+    "sha256": "49c5f2486d44ea10b35149e259d08b9e1366fea9faa2d0ed41ba0306d94a25b0"
   }
 }
