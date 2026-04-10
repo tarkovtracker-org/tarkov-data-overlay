@@ -6,7 +6,7 @@
  */
 
 import Ajv from 'ajv';
-import { join, basename } from 'path';
+import { join } from 'path';
 import { pathToFileURL } from 'url';
 import {
   getProjectPaths,
@@ -29,10 +29,16 @@ type ValidatorCache = Map<string, ReturnType<Ajv['compile']>>;
 export function initializeValidators(): ValidatorCache {
   const ajv = new Ajv({ allErrors: true, strict: false });
   const cache: ValidatorCache = new Map();
+  const schemaCache = new Map<string, ReturnType<Ajv['compile']>>();
 
   for (const config of SCHEMA_CONFIGS) {
-    const schema = loadJsonFile(join(schemasDir, config.schemaFile));
-    cache.set(config.pattern, ajv.compile(schema as object));
+    let validator = schemaCache.get(config.schemaFile);
+    if (!validator) {
+      const schema = loadJsonFile(join(schemasDir, config.schemaFile));
+      validator = ajv.compile(schema as object);
+      schemaCache.set(config.schemaFile, validator);
+    }
+    cache.set(config.pattern, validator);
   }
 
   return cache;
@@ -42,11 +48,11 @@ export function initializeValidators(): ValidatorCache {
  * Get the validator for a given filename
  */
 export function getValidator(
-  filename: string,
+  relativePath: string,
   validators: ValidatorCache
 ): ReturnType<Ajv['compile']> | null {
   for (const [pattern, validator] of validators) {
-    if (filename === pattern) {
+    if (relativePath === pattern) {
       return validator;
     }
   }
@@ -61,8 +67,6 @@ export function validateFile(
   displayPath: string,
   validators: ValidatorCache
 ): SchemaValidationResult {
-  const filename = basename(filePath);
-
   try {
     const data = loadJson5File(filePath);
 
@@ -72,7 +76,7 @@ export function validateFile(
       return { file: displayPath, valid: true };
     }
 
-    const validator = getValidator(filename, validators);
+    const validator = getValidator(displayPath, validators);
 
     // No schema for this file type - consider valid
     if (!validator) {
@@ -114,6 +118,11 @@ export function validateSourceFiles(): SchemaValidationResult[] {
     const filePath = join(additionsDir, file);
     results.push(validateFile(filePath, `additions/${file}`, validators));
   }
+
+  const suppressionsFile = join(srcDir, 'suppressions', 'tasks.json5');
+  results.push(
+    validateFile(suppressionsFile, 'suppressions/tasks.json5', validators)
+  );
 
   // Validate mode-specific overrides
   for (const mode of SUPPORTED_GAME_MODES) {

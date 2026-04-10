@@ -369,7 +369,7 @@ export interface SchemaValidationResult {
 
 /** Schema configuration for validation */
 export interface SchemaConfig {
-  /** File name pattern to match (e.g., "tasks.json5") */
+  /** Relative file path to match from src/ (e.g., "overrides/tasks.json5") */
   pattern: string;
   /** Path to schema file relative to schemas directory */
   schemaFile: string;
@@ -377,9 +377,12 @@ export interface SchemaConfig {
 
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
-  { pattern: "tasks.json5", schemaFile: "task-override.schema.json" },
-  { pattern: "tasksAdd.json5", schemaFile: "task-additions.schema.json" },
-  { pattern: "editions.json5", schemaFile: "edition.schema.json" },
-  { pattern: "storyChapters.json5", schemaFile: "story-chapter.schema.json" },
-  { pattern: "itemsAdd.json5", schemaFile: "item-additions.schema.json" },
+  { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'additions/tasksAdd.json5', schemaFile: 'task-additions.schema.json' },
+  { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
+  { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
+  { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
+  { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
 ];

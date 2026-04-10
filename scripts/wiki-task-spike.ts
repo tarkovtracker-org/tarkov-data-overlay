@@ -168,6 +168,13 @@ const TASKS_OVERLAY_FILE = path.join(
   'tasks.json5'
 );
 
+const TASKS_SUPPRESSIONS_FILE = path.join(
+  process.cwd(),
+  'src',
+  'suppressions',
+  'tasks.json5'
+);
+
 // Suppressions file for discrepancies where wiki is wrong and API is correct
 const WIKI_INCORRECT_FILE = path.join(
   process.cwd(),
@@ -408,6 +415,51 @@ type SuppressedFieldsResult = {
   wikiIncorrectCount: number;
   wikiIncorrectKeys: Set<string>; // Track wiki-incorrect separately to check for stale entries
 };
+
+type TaskSuppressionEntry = {
+  objectives?: Record<string, true | { fields?: Record<string, boolean> }>;
+  [field: string]: unknown;
+};
+
+function loadTaskSuppressions(): Map<string, TaskSuppressionEntry> {
+  const suppressions = new Map<string, TaskSuppressionEntry>();
+
+  if (!fs.existsSync(TASKS_SUPPRESSIONS_FILE)) return suppressions;
+
+  try {
+    const content = fs.readFileSync(TASKS_SUPPRESSIONS_FILE, 'utf-8');
+    const parsed = JSON5.parse(content) as Record<string, TaskSuppressionEntry>;
+
+    for (const [taskId, entry] of Object.entries(parsed)) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+      suppressions.set(taskId, entry);
+    }
+  } catch (error) {
+    console.warn('Warning: Could not load task suppressions file:', error);
+  }
+
+  return suppressions;
+}
+
+function isTaskFieldSuppressed(
+  taskSuppressions: Map<string, TaskSuppressionEntry>,
+  taskId: string,
+  field: string
+): boolean {
+  const entry = taskSuppressions.get(taskId);
+  if (!entry) return false;
+  return entry[field] === true;
+}
+
+function isObjectiveSuppressed(
+  taskSuppressions: Map<string, TaskSuppressionEntry>,
+  taskId: string,
+  objectiveId: string
+): boolean {
+  const entry = taskSuppressions.get(taskId);
+  if (!entry?.objectives) return false;
+  return entry.objectives[objectiveId] === true;
+}
 
 /**
  * Load suppressed fields from both:
@@ -2264,7 +2316,8 @@ function compareTasks(
   wiki: WikiTaskData,
   mapAliasMap: Map<string, string>,
   verbose = true,
-  nextTaskMap?: Map<string, string[]>
+  nextTaskMap?: Map<string, string[]>,
+  taskSuppressions?: Map<string, TaskSuppressionEntry>
 ): Discrepancy[] {
   const discrepancies: Discrepancy[] = [];
   const taskId = apiTask.id;
@@ -2504,6 +2557,9 @@ function compareTasks(
   }
 
   for (const apiObj of unmatchedApi) {
+    if (taskSuppressions && isObjectiveSuppressed(taskSuppressions, taskId, apiObj.id)) {
+      continue;
+    }
     const desc = apiObj.description ?? apiObj.id;
     discrepancies.push({
       taskId,
@@ -2539,6 +2595,10 @@ function compareTasks(
   }
 
   for (const { api: apiObj, wiki: wikiObj, matchType } of matchedObjectives) {
+    if (taskSuppressions && isObjectiveSuppressed(taskSuppressions, taskId, apiObj.id)) {
+      continue;
+    }
+
     const apiDesc = normalizeWhitespace(apiObj.description ?? '');
     const wikiDesc = normalizeWhitespace(wikiObj.text);
     const objectiveLabel = apiObj.description ?? wikiObj.text ?? apiObj.id;
@@ -3022,6 +3082,7 @@ async function runSingleTask(
 ): Promise<void> {
   const requirementOverrides = loadTaskRequirementOverrides();
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
+  const taskSuppressions = loadTaskSuppressions();
   const task = resolveTask(tasks, options);
   if (!task) {
     printError(
@@ -3065,7 +3126,7 @@ async function runSingleTask(
     wikiResponse.lastRevision
   );
   printWikiData(wikiData);
-  compareTasks(task, wikiData, mapAliasMap, true, nextTaskMap);
+  compareTasks(task, wikiData, mapAliasMap, true, nextTaskMap, taskSuppressions);
 }
 
 async function runBulkMode(
@@ -3081,10 +3142,14 @@ async function runBulkMode(
   // Load suppressed fields (overlay corrections + wiki-incorrect suppressions)
   const { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys } =
     loadSuppressedFields();
+  const taskSuppressions = loadTaskSuppressions();
   if (overlayCount > 0 || wikiIncorrectCount > 0) {
     printProgress(
       `Loaded ${overlayCount} overlay correction(s), ${wikiIncorrectCount} wiki-incorrect suppression(s)`
     );
+  }
+  if (taskSuppressions.size > 0) {
+    printProgress(`Loaded ${taskSuppressions.size} task suppression entries`);
   }
   const requirementOverrides = loadTaskRequirementOverrides();
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
@@ -3136,7 +3201,8 @@ async function runBulkMode(
         wikiData,
         mapAliasMap,
         false,
-        nextTaskMap
+        nextTaskMap,
+        taskSuppressions
       );
       allDiscrepancies.push(...discrepancies);
     } catch (error) {
@@ -3168,13 +3234,18 @@ async function runBulkMode(
   // Filter out suppressed discrepancies (overlay corrections + wiki-incorrect)
   const newDiscrepancies = allDiscrepancies.filter((d) => {
     const key = `${d.taskId}:${d.field}`;
-    return !suppressed.has(key);
+    return (
+      !suppressed.has(key) &&
+      !isTaskFieldSuppressed(taskSuppressions, d.taskId, d.field)
+    );
   });
   const filteredCount = allDiscrepancies.length - newDiscrepancies.length;
 
   if (filteredCount > 0) {
     console.log(
-      `${dim(`Suppressed (overlay + wiki-incorrect): ${filteredCount}`)}`
+      `${dim(
+        `Suppressed (overlay + wiki-incorrect + task suppressions): ${filteredCount}`
+      )}`
     );
   }
   console.log(

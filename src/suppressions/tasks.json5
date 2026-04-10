@@ -1,0 +1,10 @@
+{
+  // Escort - duplicate objective removed from wiki discrepancy reports
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  // Objective suppressed: 65e09b343458a36a766837c7 (duplicate of 65e19abadf39d26751b3bb1e)
+  '60e71b62a0beca400d69efc4': {
+    objectives: {
+      '65e09b343458a36a766837c7': true,
+    },
+  },
+}
