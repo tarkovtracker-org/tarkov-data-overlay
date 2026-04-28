@@ -93,6 +93,10 @@ describe('tarkov-api', () => {
     await expect(fetchTasks()).resolves.toEqual([{ id: 'task-1', name: 'Task 1' }]);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    const firstRequest = fetchMock.mock.calls[0][1] as { body?: string };
+    const firstPayload = JSON.parse(String(firstRequest.body)) as { query: string };
+    expect(firstPayload.query).toContain('usingWeapon { id name shortName }');
+
     const retryRequest = fetchMock.mock.calls[1][1] as { body?: string };
     const retryPayload = JSON.parse(String(retryRequest.body)) as { query: string };
     expect(retryPayload.query).not.toContain('usingWeapon { id name shortName }');
