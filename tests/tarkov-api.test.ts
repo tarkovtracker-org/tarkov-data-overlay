@@ -66,6 +66,39 @@ describe('tarkov-api', () => {
     await expect(fetchTasks()).rejects.toThrow('GraphQL errors');
   });
 
+  it('fetchTasks retries without usingWeapon when upstream has a broken item reference', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          errors: [
+            {
+              message: 'No item found with id undefined',
+              path: ['tasks', 218, 'objectives', 0, 'usingWeapon', 0],
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ data: { tasks: [{ id: 'task-1', name: 'Task 1' }] } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).resolves.toEqual([{ id: 'task-1', name: 'Task 1' }]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const retryRequest = fetchMock.mock.calls[1][1] as { body?: string };
+    const retryPayload = JSON.parse(String(retryRequest.body)) as { query: string };
+    expect(retryPayload.query).not.toContain('usingWeapon { id name shortName }');
+    expect(retryPayload.query).toContain('usingWeaponMods { id name shortName }');
+  });
+
   it('fetchTasks sends pve gameMode variables when requested', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

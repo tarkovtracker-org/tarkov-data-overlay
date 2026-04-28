@@ -1,11 +1,1 @@
-{
-  // Against the Conscience - Bad trader
-  // Change the objective
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Against_the_Conscience_-_Part_1
-  '6834233fecd5cf3a440d855b': {
-    trader: {
-      id: '579dc571d53a0658a154fbec', // Was: 6617beeaa9cfa777ca915b7c
-      name: 'Fence', // Was: Ref
-    },
-  },
-}
+{}

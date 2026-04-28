@@ -164,6 +164,19 @@ const TASKS_QUERY = `
   }
 `;
 
+const TASKS_QUERY_WITHOUT_USING_WEAPON = TASKS_QUERY.replace(
+  /\n\s+usingWeapon \{ id name shortName \}/,
+  ""
+);
+
+function isMissingUsingWeaponItemError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("No item found with id undefined") &&
+    message.includes("usingWeapon")
+  );
+}
+
 /**
  * Execute a GraphQL query against the tarkov.dev API
  */
@@ -204,7 +217,17 @@ async function executeQuery<T>(query: string, variables?: Record<string, unknown
  */
 export async function fetchTasks(gameMode?: 'regular' | 'pve'): Promise<TaskData[]> {
   const variables = gameMode ? { gameMode } : undefined;
-  const data = await executeQuery<unknown>(TASKS_QUERY, variables);
+  let data: unknown;
+
+  try {
+    data = await executeQuery<unknown>(TASKS_QUERY, variables);
+  } catch (error) {
+    if (!isMissingUsingWeaponItemError(error)) throw error;
+    data = await executeQuery<unknown>(
+      TASKS_QUERY_WITHOUT_USING_WEAPON,
+      variables
+    );
+  }
 
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error(
