@@ -217,7 +217,7 @@ function isMissingUsingWeaponItemError(error: unknown): boolean {
   const graphQLErrors = getGraphQLErrorsFromMessage(message);
 
   if (graphQLErrors) {
-    return graphQLErrors.some((entry) => {
+    return graphQLErrors.length > 0 && graphQLErrors.every((entry) => {
       if (!entry || typeof entry !== "object") return false;
       const graphQLError = entry as { message?: unknown; path?: unknown };
       return (
