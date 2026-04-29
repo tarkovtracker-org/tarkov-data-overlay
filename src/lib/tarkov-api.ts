@@ -183,6 +183,13 @@ const TASKS_QUERY_WITHOUT_USING_WEAPON = buildTasksQuery(
   TASK_OBJECTIVE_SHOOT_WITHOUT_USING_WEAPON
 );
 
+class GraphQLRequestError extends Error {
+  constructor(readonly graphQLErrors: unknown[]) {
+    super(`GraphQL errors: ${JSON.stringify(graphQLErrors)}`);
+    this.name = "GraphQLRequestError";
+  }
+}
+
 const MISSING_ITEM_MESSAGE_PATTERN = /no\s+item|not\s+found|undefined/i;
 
 function getGraphQLErrorsFromMessage(message: string): unknown[] | undefined {
@@ -212,9 +219,23 @@ function hasMissingItemMessage(message: unknown): boolean {
   return MISSING_ITEM_MESSAGE_PATTERN.test(String(message ?? ""));
 }
 
+function getGraphQLErrorsFromError(
+  error: unknown,
+  message: string
+): unknown[] | undefined {
+  if (error instanceof GraphQLRequestError) return error.graphQLErrors;
+
+  if (error && typeof error === "object" && "graphQLErrors" in error) {
+    const graphQLErrors = (error as { graphQLErrors?: unknown }).graphQLErrors;
+    if (Array.isArray(graphQLErrors)) return graphQLErrors;
+  }
+
+  return getGraphQLErrorsFromMessage(message);
+}
+
 function isMissingUsingWeaponItemError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  const graphQLErrors = getGraphQLErrorsFromMessage(message);
+  const graphQLErrors = getGraphQLErrorsFromError(error, message);
 
   if (graphQLErrors) {
     return graphQLErrors.length > 0 && graphQLErrors.every((entry) => {
@@ -254,8 +275,12 @@ async function executeQuery<T>(query: string, variables?: Record<string, unknown
     );
   }
 
-  if (result.errors) {
-    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+  if ("errors" in result) {
+    const errors = (result as { errors?: unknown }).errors;
+    if (Array.isArray(errors)) {
+      throw new GraphQLRequestError(errors);
+    }
+    throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`);
   }
 
   if (!("data" in result)) {
