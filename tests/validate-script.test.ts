@@ -58,7 +58,7 @@ describe('scripts/validate helpers', () => {
     writeFileSync(filePath, '{ invalid: }', 'utf-8');
 
     try {
-      const result = validateFile(filePath, 'temp/tasks.json5', validators);
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
 
       expect(result.valid).toBe(false);
       expect(result.errors?.[0]).toContain("Failed to parse JSON5 file");
@@ -75,7 +75,7 @@ describe('scripts/validate helpers', () => {
     writeFileSync(filePath, '[1]', 'utf-8');
 
     try {
-      const result = validateFile(filePath, 'temp/tasks.json5', validators);
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
 
       expect(result.valid).toBe(false);
       expect(result.errors?.some((error) => error.includes('must be object'))).toBe(true);
@@ -91,7 +91,7 @@ describe('scripts/validate helpers', () => {
     writeFileSync(filePath, '[]', 'utf-8');
 
     try {
-      const result = validateFile(filePath, 'temp/tasks.json5', validators);
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
 
       expect(result.valid).toBe(false);
       expect(result.errors?.some((error) => error.includes('must be object'))).toBe(true);

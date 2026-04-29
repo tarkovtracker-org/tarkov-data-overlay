@@ -66,6 +66,104 @@ describe('tarkov-api', () => {
     await expect(fetchTasks()).rejects.toThrow('GraphQL errors');
   });
 
+  it('fetchTasks retries without usingWeapon when upstream has a broken item reference', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          errors: [
+            {
+              message: 'No item found with id undefined',
+              path: ['tasks', 218, 'objectives', 0, 'usingWeapon', 0],
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ data: { tasks: [{ id: 'task-1', name: 'Task 1' }] } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).resolves.toEqual([{ id: 'task-1', name: 'Task 1' }]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const firstRequest = fetchMock.mock.calls[0][1] as { body?: string };
+    const firstPayload = JSON.parse(String(firstRequest.body)) as { query: string };
+    expect(firstPayload.query).toContain('usingWeapon { id name shortName }');
+
+    const retryRequest = fetchMock.mock.calls[1][1] as { body?: string };
+    const retryPayload = JSON.parse(String(retryRequest.body)) as { query: string };
+    expect(retryPayload.query).not.toContain('usingWeapon { id name shortName }');
+    expect(retryPayload.query).toContain('usingWeaponMods { id name shortName }');
+  });
+
+  it('fetchTasks retries without usingWeapon when the upstream missing-item wording changes', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          errors: [
+            {
+              message: 'Item not found for id 660bbc47c38b837877075e47',
+              path: ['tasks', 218, 'objectives', 0, 'usingWeapon', 0],
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ data: { tasks: [{ id: 'task-1', name: 'Task 1' }] } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).resolves.toEqual([{ id: 'task-1', name: 'Task 1' }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    const firstRequest = fetchMock.mock.calls[0][1] as { body?: string };
+    const firstPayload = JSON.parse(String(firstRequest.body)) as { query: string };
+    expect(firstPayload.query).toContain('usingWeapon { id name shortName }');
+
+    const retryRequest = fetchMock.mock.calls[1][1] as { body?: string };
+    const retryPayload = JSON.parse(String(retryRequest.body)) as { query: string };
+    expect(retryPayload.query).not.toContain('usingWeapon { id name shortName }');
+    expect(retryPayload.query).toContain('usingWeaponMods { id name shortName }');
+  });
+
+  it('fetchTasks does not retry when a usingWeapon error is mixed with other GraphQL errors', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: async () => ({
+        errors: [
+          {
+            message: 'Item not found for id 660bbc47c38b837877075e47',
+            path: ['tasks', 218, 'objectives', 0, 'usingWeapon', 0],
+          },
+          {
+            message: 'Unrelated backend failure',
+            path: ['tasks', 10, 'objectives', 0, 'description'],
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).rejects.toThrow('GraphQL errors');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('fetchTasks sends pve gameMode variables when requested', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
