@@ -10,10 +10,19 @@ on:
 permissions: {}
 
 jobs:
+  deploy-disabled:
+    name: Deploy Disabled
+    runs-on: ubuntu-latest
+    if: ${{ vars.DEPLOY_HOST_ENABLED != 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
+
+    steps:
+      - name: Skip offline deploy host
+        run: echo "Deploy host is disabled. Set repository variable DEPLOY_HOST_ENABLED=true to re-enable SSH deploys."
+
   sync-and-reload:
     name: Sync & Reload
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ vars.DEPLOY_HOST_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
 
     steps:
       - name: Sync repository and restart monitor
