@@ -103,6 +103,34 @@ describe('tarkov-api', () => {
     expect(retryPayload.query).toContain('usingWeaponMods { id name shortName }');
   });
 
+  it('fetchTasks retries without usingWeapon when the upstream missing-item wording changes', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({
+          errors: [
+            {
+              message: 'Item not found for id 660bbc47c38b837877075e47',
+              path: ['tasks', 218, 'objectives', 0, 'usingWeapon', 0],
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ data: { tasks: [{ id: 'task-1', name: 'Task 1' }] } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).resolves.toEqual([{ id: 'task-1', name: 'Task 1' }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('fetchTasks sends pve gameMode variables when requested', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

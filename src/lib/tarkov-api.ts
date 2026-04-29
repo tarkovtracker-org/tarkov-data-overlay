@@ -183,12 +183,51 @@ const TASKS_QUERY_WITHOUT_USING_WEAPON = buildTasksQuery(
   TASK_OBJECTIVE_SHOOT_WITHOUT_USING_WEAPON
 );
 
+const MISSING_ITEM_MESSAGE_PATTERN = /no\s+item|not\s+found|undefined/i;
+
+function getGraphQLErrorsFromMessage(message: string): unknown[] | undefined {
+  const prefix = "GraphQL errors: ";
+  const json = message.startsWith(prefix) ? message.slice(prefix.length) : message;
+
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    if (Array.isArray(parsed)) return parsed;
+
+    if (parsed && typeof parsed === "object" && "errors" in parsed) {
+      const errors = (parsed as { errors?: unknown }).errors;
+      if (Array.isArray(errors)) return errors;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function hasUsingWeaponPath(path: unknown): boolean {
+  return Array.isArray(path) && path.includes("usingWeapon");
+}
+
+function hasMissingItemMessage(message: unknown): boolean {
+  return MISSING_ITEM_MESSAGE_PATTERN.test(String(message ?? ""));
+}
+
 function isMissingUsingWeaponItemError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return (
-    message.includes("No item found with id undefined") &&
-    message.includes("usingWeapon")
-  );
+  const graphQLErrors = getGraphQLErrorsFromMessage(message);
+
+  if (graphQLErrors) {
+    return graphQLErrors.some((entry) => {
+      if (!entry || typeof entry !== "object") return false;
+      const graphQLError = entry as { message?: unknown; path?: unknown };
+      return (
+        hasUsingWeaponPath(graphQLError.path) &&
+        hasMissingItemMessage(graphQLError.message)
+      );
+    });
+  }
+
+  return message.includes("usingWeapon") && MISSING_ITEM_MESSAGE_PATTERN.test(message);
 }
 
 /**
