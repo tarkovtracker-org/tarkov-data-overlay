@@ -3240,21 +3240,11 @@
           }
         }
       }
-    },
-    "pve": {
-      "tasks": {
-        "6834233fecd5cf3a440d855b": {
-          "trader": {
-            "id": "579dc571d53a0658a154fbec",
-            "name": "Fence"
-          }
-        }
-      }
     }
   },
   "$meta": {
-    "version": "1.27",
-    "generated": "2026-04-10T19:21:06.355Z",
-    "sha256": "49c5f2486d44ea10b35149e259d08b9e1366fea9faa2d0ed41ba0306d94a25b0"
+    "version": "1.28",
+    "generated": "2026-04-29T21:47:20.706Z",
+    "sha256": "3e74c89981c7f0185a235609a511e0544ad96f73730debeeecc22dbbba47e971"
   }
 }
