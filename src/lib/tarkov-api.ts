@@ -16,9 +16,28 @@ function getValueType(value: unknown): string {
 }
 
 /**
- * GraphQL query for fetching all tasks with their details
+ * GraphQL query fragments for fetching all tasks with their details.
+ * Keep the main and fallback queries identical except for usingWeapon.
  */
-const TASKS_QUERY = `
+const TASK_OBJECTIVE_SHOOT_WITH_USING_WEAPON = `
+          count
+          usingWeapon { id name shortName }
+          usingWeaponMods { id name shortName }
+          wearing { id name shortName }
+          notWearing { id name shortName }
+          requiredKeys { id name shortName }
+`;
+
+const TASK_OBJECTIVE_SHOOT_WITHOUT_USING_WEAPON = `
+          count
+          usingWeaponMods { id name shortName }
+          wearing { id name shortName }
+          notWearing { id name shortName }
+          requiredKeys { id name shortName }
+`;
+
+function buildTasksQuery(taskObjectiveShootFields: string): string {
+  return `
   query($gameMode: GameMode) {
     tasks(lang: en, gameMode: $gameMode) {
       id
@@ -71,13 +90,7 @@ const TASKS_QUERY = `
         ... on TaskObjectiveExtract {
           requiredKeys { id name shortName }
         }
-        ... on TaskObjectiveShoot {
-          count
-          usingWeapon { id name shortName }
-          usingWeaponMods { id name shortName }
-          wearing { id name shortName }
-          notWearing { id name shortName }
-          requiredKeys { id name shortName }
+        ... on TaskObjectiveShoot {${taskObjectiveShootFields}
         }
         ... on TaskObjectiveItem {
           count
@@ -163,6 +176,80 @@ const TASKS_QUERY = `
     }
   }
 `;
+}
+
+const TASKS_QUERY = buildTasksQuery(TASK_OBJECTIVE_SHOOT_WITH_USING_WEAPON);
+const TASKS_QUERY_WITHOUT_USING_WEAPON = buildTasksQuery(
+  TASK_OBJECTIVE_SHOOT_WITHOUT_USING_WEAPON
+);
+
+class GraphQLRequestError extends Error {
+  constructor(readonly graphQLErrors: unknown[]) {
+    super(`GraphQL errors: ${JSON.stringify(graphQLErrors)}`);
+    this.name = "GraphQLRequestError";
+  }
+}
+
+const MISSING_ITEM_MESSAGE_PATTERN = /no\s+item|not\s+found|undefined/i;
+
+function getGraphQLErrorsFromMessage(message: string): unknown[] | undefined {
+  const prefix = "GraphQL errors: ";
+  const json = message.startsWith(prefix) ? message.slice(prefix.length) : message;
+
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    if (Array.isArray(parsed)) return parsed;
+
+    if (parsed && typeof parsed === "object" && "errors" in parsed) {
+      const errors = (parsed as { errors?: unknown }).errors;
+      if (Array.isArray(errors)) return errors;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function hasUsingWeaponPath(path: unknown): boolean {
+  return Array.isArray(path) && path.includes("usingWeapon");
+}
+
+function hasMissingItemMessage(message: unknown): boolean {
+  return MISSING_ITEM_MESSAGE_PATTERN.test(String(message ?? ""));
+}
+
+function getGraphQLErrorsFromError(
+  error: unknown,
+  message: string
+): unknown[] | undefined {
+  if (error instanceof GraphQLRequestError) return error.graphQLErrors;
+
+  if (error && typeof error === "object" && "graphQLErrors" in error) {
+    const graphQLErrors = (error as { graphQLErrors?: unknown }).graphQLErrors;
+    if (Array.isArray(graphQLErrors)) return graphQLErrors;
+  }
+
+  return getGraphQLErrorsFromMessage(message);
+}
+
+function isMissingUsingWeaponItemError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  const graphQLErrors = getGraphQLErrorsFromError(error, message);
+
+  if (graphQLErrors) {
+    return graphQLErrors.length > 0 && graphQLErrors.every((entry) => {
+      if (!entry || typeof entry !== "object") return false;
+      const graphQLError = entry as { message?: unknown; path?: unknown };
+      return (
+        hasUsingWeaponPath(graphQLError.path) &&
+        hasMissingItemMessage(graphQLError.message)
+      );
+    });
+  }
+
+  return message.includes("usingWeapon") && MISSING_ITEM_MESSAGE_PATTERN.test(message);
+}
 
 /**
  * Execute a GraphQL query against the tarkov.dev API
@@ -188,8 +275,12 @@ async function executeQuery<T>(query: string, variables?: Record<string, unknown
     );
   }
 
-  if (result.errors) {
-    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+  if ("errors" in result) {
+    const errors = (result as { errors?: unknown }).errors;
+    if (Array.isArray(errors)) {
+      throw new GraphQLRequestError(errors);
+    }
+    throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`);
   }
 
   if (!("data" in result)) {
@@ -204,7 +295,17 @@ async function executeQuery<T>(query: string, variables?: Record<string, unknown
  */
 export async function fetchTasks(gameMode?: 'regular' | 'pve'): Promise<TaskData[]> {
   const variables = gameMode ? { gameMode } : undefined;
-  const data = await executeQuery<unknown>(TASKS_QUERY, variables);
+  let data: unknown;
+
+  try {
+    data = await executeQuery<unknown>(TASKS_QUERY, variables);
+  } catch (error) {
+    if (!isMissingUsingWeaponItemError(error)) throw error;
+    data = await executeQuery<unknown>(
+      TASKS_QUERY_WITHOUT_USING_WEAPON,
+      variables
+    );
+  }
 
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error(
