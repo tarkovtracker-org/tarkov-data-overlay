@@ -159,6 +159,7 @@ const CACHE_DIR = path.join(process.cwd(), 'data', 'cache');
 const WIKI_CACHE_DIR = path.join(CACHE_DIR, 'wiki');
 const RESULTS_DIR = path.join(process.cwd(), 'data', 'results');
 const API_CACHE_FILE = path.join(CACHE_DIR, 'tarkov-api-tasks.json');
+const SAFE_CACHE_FILE_STEM = /^[A-Za-z0-9_-]{1,128}$/;
 
 // Overlay file for filtering already-addressed discrepancies
 const TASKS_OVERLAY_FILE = path.join(
@@ -317,6 +318,13 @@ function ensureDir(dir: string): void {
   }
 }
 
+function assertSafeCacheFileStem(value: string): string {
+  if (!SAFE_CACHE_FILE_STEM.test(value)) {
+    throw new Error(`Unsafe cache file name: ${value}`);
+  }
+  return value;
+}
+
 function getTimestamp(): string {
   const now = new Date();
   return now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
@@ -365,6 +373,7 @@ function saveApiCache(
     },
     tasks,
   };
+  // codeql[js/http-to-file-access]: The API response is intentionally cached as JSON to a fixed file under data/cache.
   fs.writeFileSync(API_CACHE_FILE, JSON.stringify(cache, null, 2));
 }
 
@@ -380,7 +389,7 @@ type WikiCache = {
 };
 
 function getWikiCachePath(taskId: string): string {
-  return path.join(WIKI_CACHE_DIR, `${taskId}.json`);
+  return path.join(WIKI_CACHE_DIR, `${assertSafeCacheFileStem(taskId)}.json`);
 }
 
 function loadWikiCache(taskId: string): WikiCache | null {
@@ -406,6 +415,7 @@ function saveWikiCache(
     wikitext,
     lastRevision,
   };
+  // codeql[js/http-to-file-access]: Wiki pages are cached as JSON under data/cache/wiki with a validated task-id filename.
   fs.writeFileSync(getWikiCachePath(taskId), JSON.stringify(cache, null, 2));
 }
 
@@ -1007,12 +1017,30 @@ function extractSectionLines(wikitext: string, heading: string): string[] {
 }
 
 function stripWikiMarkup(value: string): string {
-  return value
-    .replace(/<[^>]+>/g, '')
+  return removeHtmlTags(value)
     .replace(/''+/g, '')
     .replace(/\[\[(?:[^|\]]*\|)?([^\]]+)\]\]/g, '$1')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function removeHtmlTags(value: string): string {
+  let result = '';
+  let inTag = false;
+
+  for (const char of value) {
+    if (char === '<') {
+      inTag = true;
+      continue;
+    }
+    if (char === '>') {
+      inTag = false;
+      continue;
+    }
+    if (!inTag) result += char;
+  }
+
+  return result;
 }
 
 function normalizeWhitespace(value: string): string {
