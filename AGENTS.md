@@ -24,3 +24,13 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 - Edit the correct JSON5 file in `src/overrides/` or `src/additions/`.
 - Provide proof (wiki link, screenshot, or patch notes).
 - Run `npm run validate` and `npm run build` before submitting.
+
+## Fetching Wiki Data
+The EFT Fandom wiki serves rendered HTML page paths (`https://escapefromtarkov.fandom.com/wiki/...`) behind a Cloudflare managed challenge. Non-browser clients (curl, agent fetch tools, scripts) get `HTTP 403` with a `cf-mitigated: challenge` header instead of content, regardless of User-Agent. Do not scrape `/wiki/` HTML.
+
+Use the MediaWiki API instead — it is not challenged and returns full content (no User-Agent required):
+- Wikitext: `https://escapefromtarkov.fandom.com/api.php?action=parse&page=<Title>&prop=wikitext&format=json`
+- Rendered HTML fragment: `...&prop=text`
+- Plain-text extract: `action=query&prop=extracts&...`
+
+`scripts/wiki-task-spike.ts` already uses `api.php` (`WIKI_API`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
