@@ -2950,8 +2950,8 @@
     }
   },
   "$meta": {
-    "version": "1.33",
-    "generated": "2026-06-08T00:33:31.414Z",
-    "sha256": "d7002ce7ceca29ac9606d0cf2be82578916b9589fad305c88b0c292db7883744"
+    "version": "1.34",
+    "generated": "2026-06-08T01:20:45.715Z",
+    "sha256": "d1cc6a49bc803a45418bcae7dfdf74df7e6438e89c282d4bc002eeb4d8a27303"
   }
 }
