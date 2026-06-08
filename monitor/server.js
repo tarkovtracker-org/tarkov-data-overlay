@@ -19,7 +19,7 @@ const REMOTE_FETCH_TIMEOUT_MS =
 const REMOTE_FETCH_MAX_BYTES =
   Number(process.env.REMOTE_FETCH_MAX_BYTES) || 5 * 1024 * 1024;
 
-const TARKOV_API = "https://api.tarkov.dev/graphql";
+const TARKOV_JSON_BASE = "https://json.tarkov.dev";
 
 const VIEW_CONFIG = {
   tasks: {
@@ -663,128 +663,332 @@ async function refreshOverlay() {
   }
 }
 
-const TASKS_QUERY = `
-  query($gameMode: GameMode) {
-    tasks(lang: en, gameMode: $gameMode) {
-      id
-      name
-      minPlayerLevel
-      wikiLink
-      kappaRequired
-      lightkeeperRequired
-      map { id name }
-      experience
-      taskRequirements { task { id name } status }
-      traderRequirements { trader { id name } value compareMethod }
-      factionName
-      requiredPrestige { id name prestigeLevel }
-      objectives {
-        id
-        type
-        description
-        maps { id name }
-        ... on TaskObjectiveBasic { requiredKeys { id name shortName } }
-        ... on TaskObjectiveMark { markerItem { id name shortName } requiredKeys { id name shortName } }
-        ... on TaskObjectiveExtract { requiredKeys { id name shortName } }
-        ... on TaskObjectiveShoot {
-          count
-          usingWeapon { id name shortName }
-          usingWeaponMods { id name shortName }
-          wearing { id name shortName }
-          notWearing { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveItem {
-          count
-          items { id name shortName }
-          foundInRaid
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveQuestItem {
-          count
-          questItem { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveUseItem {
-          count
-          useAny { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveBuildItem {
-          item { id name shortName }
-          containsAll { id name shortName }
-        }
-      }
-      startRewards {
-        items { item { id name shortName } count }
-        traderStanding { trader { id name } standing }
-        offerUnlock { id trader { id name } level item { id name shortName } }
-        skillLevelReward { name level skill { id name imageLink } }
-        traderUnlock { id name }
-        achievement { id name description }
-        customization { id name customizationType customizationTypeName imageLink }
-      }
-      finishRewards {
-        items { item { id name shortName } count }
-        traderStanding { trader { id name } standing }
-        offerUnlock { id trader { id name } level item { id name shortName } }
-        skillLevelReward { name level skill { id name imageLink } }
-        traderUnlock { id name }
-        achievement { id name description }
-        customization { id name customizationType customizationTypeName imageLink }
-      }
-    }
-  }
-`;
+// Tarkov task data is served as static per-mode JSON files at json.tarkov.dev.
+// The payloads use id-keyed objects, string-id references between entities, and
+// translation placeholders resolved via sibling `_en` endpoints. fetchApiTasks
+// fetches the relevant endpoints, resolves references and english translations,
+// and returns the same TaskData[] shape the summaries already consume. This
+// mirrors src/lib/tarkov-api.ts (the monitor is standalone CommonJS and cannot
+// import the ESM/TS adapter without a build step).
 
-async function executeQuery(query, variables) {
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const MAX_RETRIES = 3;
+const MAX_BACKOFF_MS = 5000;
+const envelopeCache = new Map();
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function stringId(value) {
+  if (typeof value === "string") return value;
+  if (isRecord(value) && typeof value.id === "string") return value.id;
+  return undefined;
+}
+
+function compact(value) {
+  const result = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry !== undefined) result[key] = entry;
+  }
+  return result;
+}
+
+function toLookup(value) {
+  const map = new Map();
+  const records = Array.isArray(value)
+    ? value
+    : isRecord(value)
+      ? Object.values(value)
+      : [];
+  for (const entry of records) {
+    if (isRecord(entry) && typeof entry.id === "string") map.set(entry.id, entry);
+  }
+  return map;
+}
+
+function translate(map, key) {
+  if (typeof key !== "string" || UNSAFE_KEYS.has(key)) return undefined;
+  const value = map[key];
+  return typeof value === "string" ? value : key;
+}
+
+function validateEnvelope(payload, path) {
+  if (!isRecord(payload) || !("data" in payload) || payload.data == null) {
+    const error = new Error(
+      `Invalid json.tarkov.dev response for ${path}: missing data`,
+    );
+    error.fatal = true;
+    throw error;
+  }
+  if (payload.translations !== undefined && !Array.isArray(payload.translations)) {
+    const error = new Error(
+      `Invalid json.tarkov.dev response for ${path}: translations is not an array`,
+    );
+    error.fatal = true;
+    throw error;
+  }
+  return payload;
+}
+
+async function fetchEnvelopeOnce(path) {
   if (typeof fetch !== "function") {
     throw new Error("Global fetch is not available. Node 20.10.0+ is required");
   }
-  const response = await fetch(TARKOV_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
+  let lastError = null;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
+    try {
+      const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error(
+          `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`,
+        );
+      }
+      return validateEnvelope(await response.json(), path);
+    } catch (error) {
+      if (error && error.fatal) throw error;
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt === MAX_RETRIES) break;
+      await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
+    }
+  }
+  throw lastError || new Error(`Failed to fetch ${path}`);
+}
+
+function fetchEnvelope(path) {
+  const existing = envelopeCache.get(path);
+  if (existing) return existing;
+  const promise = fetchEnvelopeOnce(path).catch((error) => {
+    envelopeCache.delete(path);
+    throw error;
   });
+  envelopeCache.set(path, promise);
+  return promise;
+}
 
-  if (!response.ok) {
-    throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`,
-    );
-  }
+async function fetchTranslations(mode, endpoint) {
+  const envelope = await fetchEnvelope(`${mode}/${endpoint}_en`);
+  return isRecord(envelope.data) ? envelope.data : {};
+}
 
-  const result = await response.json();
-  if (!result || typeof result !== "object" || Array.isArray(result)) {
-    throw new Error(
-      `Invalid GraphQL response: expected an object, got ${getValueType(result)}`,
-    );
-  }
-  if (result.errors) {
-    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
-  }
-  if (!("data" in result)) {
-    throw new Error("Invalid GraphQL response: missing data field");
-  }
-  return result.data;
+function resolveItemRef(value, ctx) {
+  const id = stringId(value);
+  const inline = isRecord(value) ? value : undefined;
+  const raw =
+    (id ? ctx.itemsById.get(id) || ctx.questItemsById.get(id) : undefined) || inline;
+  if (!id && !raw) return undefined;
+  const name =
+    translate(ctx.itemsEn, raw && raw.name) ||
+    (inline && typeof inline.name === "string" ? inline.name : undefined);
+  const shortName =
+    translate(ctx.itemsEn, raw && raw.shortName) ||
+    (inline && typeof inline.shortName === "string" ? inline.shortName : undefined);
+  return compact({ id: id || "", name, shortName });
+}
+
+function resolveItemRefs(value, ctx) {
+  if (!Array.isArray(value)) return undefined;
+  return value.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
+}
+
+function resolveItemRefMatrix(value, ctx) {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .map((group) => {
+      const list = Array.isArray(group) ? group : [group];
+      return list.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
+    })
+    .filter((group) => group.length > 0);
+}
+
+function resolveMapRef(value, ctx) {
+  const id = stringId(value);
+  if (!id) return undefined;
+  const raw = ctx.mapsById.get(id);
+  return compact({ id, name: translate(ctx.mapsEn, raw && raw.name) });
+}
+
+function resolveMapRefs(value, ctx) {
+  if (!Array.isArray(value)) return undefined;
+  return value.map((entry) => resolveMapRef(entry, ctx)).filter(Boolean);
+}
+
+function resolveTraderRef(value, ctx) {
+  const id = stringId(value);
+  if (!id) return undefined;
+  const raw = ctx.tradersById.get(id);
+  return compact({ id, name: translate(ctx.tradersEn, raw && raw.name) });
+}
+
+function resolveTaskRef(value, ctx) {
+  const id = stringId(value);
+  if (!id) return undefined;
+  const raw = ctx.tasksById.get(id);
+  return compact({ id, name: translate(ctx.tasksEn, raw && raw.name) });
+}
+
+function resolveRequiredPrestige(value, ctx) {
+  const id = stringId(value);
+  if (!id) return undefined;
+  const raw = ctx.prestigeById.get(id);
+  if (!raw) return undefined;
+  return {
+    id,
+    name: translate(ctx.tasksEn, raw.name) || id,
+    prestigeLevel: typeof raw.prestigeLevel === "number" ? raw.prestigeLevel : 0,
+  };
+}
+
+function resolveZone(value, ctx) {
+  if (!isRecord(value)) return value;
+  return compact({ ...value, map: resolveMapRef(value.map, ctx) });
+}
+
+function adaptObjective(raw, ctx) {
+  return compact({
+    ...raw,
+    id: stringId(raw) || "",
+    description: translate(ctx.tasksEn, raw.description),
+    maps: resolveMapRefs(raw.maps, ctx),
+    items: resolveItemRefs(raw.items, ctx),
+    item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
+    markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
+    questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
+    useAny: resolveItemRefs(raw.useAny, ctx),
+    containsAll: resolveItemRefs(raw.containsAll, ctx),
+    usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
+    usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
+    requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
+    wearing: resolveItemRefMatrix(raw.wearing, ctx),
+    notWearing: resolveItemRefs(raw.notWearing, ctx),
+    zones: Array.isArray(raw.zones)
+      ? raw.zones.map((zone) => resolveZone(zone, ctx))
+      : undefined,
+    possibleLocations: Array.isArray(raw.possibleLocations)
+      ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
+      : undefined,
+  });
+}
+
+function adaptReward(raw, ctx) {
+  if (!isRecord(raw)) return undefined;
+  return compact({
+    ...raw,
+    items: Array.isArray(raw.items)
+      ? raw.items
+          .filter(isRecord)
+          .map((entry) => compact({ ...entry, item: resolveItemRef(entry.item, ctx) }))
+      : undefined,
+    traderStanding: Array.isArray(raw.traderStanding)
+      ? raw.traderStanding
+          .filter(isRecord)
+          .map((entry) => compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) }))
+      : undefined,
+    offerUnlock: Array.isArray(raw.offerUnlock)
+      ? raw.offerUnlock.filter(isRecord).map((entry) =>
+          compact({
+            ...entry,
+            trader: resolveTraderRef(entry.trader, ctx),
+            item: resolveItemRef(entry.item, ctx),
+          }),
+        )
+      : undefined,
+  });
+}
+
+function adaptTaskRequirement(raw, ctx) {
+  if (!isRecord(raw)) return raw;
+  return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) });
+}
+
+function adaptTraderRequirement(raw, ctx) {
+  if (!isRecord(raw)) return raw;
+  return compact({ ...raw, trader: resolveTraderRef(raw.trader, ctx) });
+}
+
+function adaptTask(raw, ctx) {
+  const id = stringId(raw) || "";
+  return compact({
+    id,
+    name: translate(ctx.tasksEn, raw.name) || id,
+    minPlayerLevel: typeof raw.minPlayerLevel === "number" ? raw.minPlayerLevel : undefined,
+    wikiLink: typeof raw.wikiLink === "string" ? raw.wikiLink : undefined,
+    map: raw.map === null ? null : resolveMapRef(raw.map, ctx),
+    kappaRequired: typeof raw.kappaRequired === "boolean" ? raw.kappaRequired : undefined,
+    lightkeeperRequired:
+      typeof raw.lightkeeperRequired === "boolean" ? raw.lightkeeperRequired : undefined,
+    factionName: typeof raw.factionName === "string" ? raw.factionName : undefined,
+    requiredPrestige: resolveRequiredPrestige(raw.requiredPrestige, ctx),
+    experience: typeof raw.experience === "number" ? raw.experience : undefined,
+    taskRequirements: Array.isArray(raw.taskRequirements)
+      ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
+      : undefined,
+    traderRequirements: Array.isArray(raw.traderRequirements)
+      ? raw.traderRequirements.map((req) => adaptTraderRequirement(req, ctx))
+      : undefined,
+    objectives: Array.isArray(raw.objectives)
+      ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
+      : undefined,
+    startRewards: adaptReward(raw.startRewards, ctx),
+    finishRewards: adaptReward(raw.finishRewards, ctx),
+  });
+}
+
+async function buildTaskContext(mode, tasksData) {
+  const [
+    itemsEnvelope,
+    mapsEnvelope,
+    tradersEnvelope,
+    itemsEn,
+    tasksEn,
+    mapsEn,
+    tradersEn,
+  ] = await Promise.all([
+    fetchEnvelope(`${mode}/items`),
+    fetchEnvelope(`${mode}/maps`),
+    fetchEnvelope(`${mode}/traders`),
+    fetchTranslations(mode, "items"),
+    fetchTranslations(mode, "tasks"),
+    fetchTranslations(mode, "maps"),
+    fetchTranslations(mode, "traders"),
+  ]);
+
+  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
+  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
+
+  return {
+    itemsById: toLookup(itemsData.items),
+    questItemsById: toLookup(tasksData.questItems),
+    tasksById: toLookup(tasksData.tasks),
+    mapsById: toLookup(mapsData.maps),
+    tradersById: toLookup(tradersEnvelope.data),
+    prestigeById: toLookup(tasksData.prestige),
+    itemsEn,
+    tasksEn,
+    mapsEn,
+    tradersEn,
+  };
 }
 
 async function fetchApiTasks(mode) {
-  const variables = mode ? { gameMode: mode } : undefined;
-  const data = await executeQuery(TASKS_QUERY, variables);
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
+  const gameMode = mode || "regular";
+  const tasksEnvelope = await fetchEnvelope(`${gameMode}/tasks`);
+  const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
+  if (!tasksData || !isRecord(tasksData.tasks)) {
     throw new Error(
-      `Invalid GraphQL response: expected data to be an object, got ${getValueType(data)}`,
+      `Invalid json.tarkov.dev response for ${gameMode}/tasks: expected data.tasks object, got ${getValueType(
+        tasksData && tasksData.tasks,
+      )}`,
     );
   }
-  if (!("tasks" in data)) {
-    throw new Error("Invalid GraphQL response: missing data.tasks");
-  }
-  if (!Array.isArray(data.tasks)) {
-    throw new Error(
-      `Invalid GraphQL response: expected data.tasks array, got ${getValueType(data.tasks)}`,
-    );
-  }
-  return data.tasks;
+  const ctx = await buildTaskContext(gameMode, tasksData);
+  return Object.values(tasksData.tasks)
+    .filter(isRecord)
+    .map((task) => adaptTask(task, ctx));
 }
 
 async function refreshApiTasks(mode) {
