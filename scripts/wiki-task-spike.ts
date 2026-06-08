@@ -10,6 +10,7 @@ import * as path from 'node:path';
 import JSON5 from 'json5';
 
 import {
+  fetchTasks,
   findTaskById,
   printHeader,
   printProgress,
@@ -148,7 +149,6 @@ function getPriority(field: string): Priority {
 
 const DEFAULT_TASK_NAME = 'Grenadier';
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
-const TARKOV_API = 'https://api.tarkov.dev/graphql';
 const RATE_LIMIT_MS = 500;
 
 // Tarkov 1.0 launch date - wiki edits after this are more trustworthy
@@ -184,99 +184,10 @@ const WIKI_INCORRECT_FILE = path.join(
   'wiki-incorrect.json5'
 );
 
-const EXTENDED_TASKS_QUERY = `
-  query($gameMode: GameMode) {
-    tasks(lang: en, gameMode: $gameMode) {
-      id
-      name
-      minPlayerLevel
-      wikiLink
-      map { id name }
-      experience
-      taskRequirements {
-        task { id name }
-        status
-      }
-      objectives {
-        id
-        type
-        description
-        maps { id name }
-        ... on TaskObjectiveBasic {
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveMark {
-          markerItem { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveExtract {
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveShoot {
-          count
-          usingWeapon { id name shortName }
-          usingWeaponMods { id name shortName }
-          wearing { id name shortName }
-          notWearing { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveItem {
-          count
-          items { id name shortName }
-          foundInRaid
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveQuestItem {
-          count
-          questItem { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveUseItem {
-          count
-          useAny { id name shortName }
-          requiredKeys { id name shortName }
-        }
-        ... on TaskObjectiveBuildItem {
-          item { id name shortName }
-          containsAll { id name shortName }
-        }
-      }
-      finishRewards {
-        traderStanding { trader { name } standing }
-        items { item { name } count }
-      }
-    }
-  }
-`;
-
 type GameMode = 'regular' | 'pve';
 
 async function fetchTasksForMode(mode: GameMode): Promise<ExtendedTaskData[]> {
-  const response = await fetch(TARKOV_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: EXTENDED_TASKS_QUERY,
-      variables: { gameMode: mode },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
-  }
-
-  const result = (await response.json()) as {
-    data?: { tasks: ExtendedTaskData[] };
-    errors?: Array<{ message: string }>;
-  };
-
-  if (result.errors) {
-    throw new Error(
-      `GraphQL errors: ${result.errors.map((e) => e.message).join(', ')}`
-    );
-  }
-
-  const tasks = result.data?.tasks ?? [];
+  const tasks = await fetchTasks(mode);
   // Tag each task with its game mode
   return tasks.map((t) => ({ ...t, gameModes: [mode] }));
 }

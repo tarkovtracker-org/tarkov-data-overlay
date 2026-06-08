@@ -34,7 +34,7 @@ Get the tarkov.dev ID for the entity you're correcting:
 
 - **Tasks**: Visit `https://tarkov.dev/task/[task-name]` and find the ID in the URL or page
 - **Items**: Visit `https://tarkov.dev/item/[item-name]`
-- Or query the API directly
+- Or look it up in the json.tarkov.dev data (e.g. `https://json.tarkov.dev/regular/tasks`)
 
 ### 2. Gather Proof
 

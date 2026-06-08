@@ -28,7 +28,7 @@ npx vitest run tests/file-loader.test.ts  # Run a single test file
 ### Shared Library (src/lib/)
 Scripts share utilities via `src/lib/index.ts`:
 - `file-loader.ts` - JSON5/JSON loading, project paths, directory scanning
-- `tarkov-api.ts` - GraphQL client for tarkov.dev API queries
+- `tarkov-api.ts` - json.tarkov.dev adapter that fetches the static per-mode JSON endpoints (tasks/items/maps/traders plus `_en` translations) and adapts them into the `TaskData[]` shape
 - `task-validator.ts` - Override validation logic against API data
 - `terminal.ts` - Console output formatting (colors, icons, progress)
 - `types.ts` - Shared TypeScript interfaces and schema configs
