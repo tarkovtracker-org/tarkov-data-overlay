@@ -674,7 +674,7 @@ async function refreshOverlay() {
 const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const MAX_RETRIES = 3;
 const MAX_BACKOFF_MS = 5000;
-const envelopeCache = new Map();
+const TARKOV_JSON_TIMEOUT_MS = 30000;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -689,8 +689,11 @@ function stringId(value) {
 }
 
 function compact(value) {
-  const result = {};
+  // Null-prototype result so untrusted keys (e.g. `__proto__` from remote JSON)
+  // cannot pollute Object.prototype.
+  const result = Object.create(null);
   for (const [key, entry] of Object.entries(value)) {
+    if (UNSAFE_KEYS.has(key)) continue;
     if (entry !== undefined) result[key] = entry;
   }
   return result;
@@ -739,9 +742,12 @@ async function fetchEnvelopeOnce(path) {
   }
   let lastError = null;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TARKOV_JSON_TIMEOUT_MS);
     try {
       const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
         headers: { Accept: "application/json" },
+        signal: controller.signal,
       });
       if (!response.ok) {
         throw new Error(
@@ -754,24 +760,28 @@ async function fetchEnvelopeOnce(path) {
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt === MAX_RETRIES) break;
       await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
+    } finally {
+      clearTimeout(timer);
     }
   }
   throw lastError || new Error(`Failed to fetch ${path}`);
 }
 
-function fetchEnvelope(path) {
-  const existing = envelopeCache.get(path);
+// Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
+// within one refresh are deduped, while each poll cycle fetches fresh data.
+function fetchEnvelope(cache, path) {
+  const existing = cache.get(path);
   if (existing) return existing;
   const promise = fetchEnvelopeOnce(path).catch((error) => {
-    envelopeCache.delete(path);
+    cache.delete(path);
     throw error;
   });
-  envelopeCache.set(path, promise);
+  cache.set(path, promise);
   return promise;
 }
 
-async function fetchTranslations(mode, endpoint) {
-  const envelope = await fetchEnvelope(`${mode}/${endpoint}_en`);
+async function fetchTranslations(cache, mode, endpoint) {
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`);
   return isRecord(envelope.data) ? envelope.data : {};
 }
 
@@ -938,7 +948,7 @@ function adaptTask(raw, ctx) {
   });
 }
 
-async function buildTaskContext(mode, tasksData) {
+async function buildTaskContext(cache, mode, tasksData) {
   const [
     itemsEnvelope,
     mapsEnvelope,
@@ -948,13 +958,13 @@ async function buildTaskContext(mode, tasksData) {
     mapsEn,
     tradersEn,
   ] = await Promise.all([
-    fetchEnvelope(`${mode}/items`),
-    fetchEnvelope(`${mode}/maps`),
-    fetchEnvelope(`${mode}/traders`),
-    fetchTranslations(mode, "items"),
-    fetchTranslations(mode, "tasks"),
-    fetchTranslations(mode, "maps"),
-    fetchTranslations(mode, "traders"),
+    fetchEnvelope(cache, `${mode}/items`),
+    fetchEnvelope(cache, `${mode}/maps`),
+    fetchEnvelope(cache, `${mode}/traders`),
+    fetchTranslations(cache, mode, "items"),
+    fetchTranslations(cache, mode, "tasks"),
+    fetchTranslations(cache, mode, "maps"),
+    fetchTranslations(cache, mode, "traders"),
   ]);
 
   const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
@@ -976,7 +986,10 @@ async function buildTaskContext(mode, tasksData) {
 
 async function fetchApiTasks(mode) {
   const gameMode = mode || "regular";
-  const tasksEnvelope = await fetchEnvelope(`${gameMode}/tasks`);
+  // Per-call cache: dedupe concurrent endpoint reads within this refresh while
+  // ensuring each poll cycle fetches fresh data from json.tarkov.dev.
+  const cache = new Map();
+  const tasksEnvelope = await fetchEnvelope(cache, `${gameMode}/tasks`);
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   if (!tasksData || !isRecord(tasksData.tasks)) {
     throw new Error(
@@ -985,7 +998,7 @@ async function fetchApiTasks(mode) {
       )}`,
     );
   }
-  const ctx = await buildTaskContext(gameMode, tasksData);
+  const ctx = await buildTaskContext(cache, gameMode, tasksData);
   return Object.values(tasksData.tasks)
     .filter(isRecord)
     .map((task) => adaptTask(task, ctx));
