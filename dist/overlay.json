@@ -1,9 +1,5 @@
 {
   "tasks": {
-    "6740a2c17e3818d5bb0648b6": {
-      "name": "Half Empty",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Half_Empty"
-    },
     "5ae449c386f7744bde357697": {
       "objectives": {
         "5bb60cbc88a45011a8235cc5": {
@@ -192,7 +188,7 @@
       ]
     },
     "6761f28a022f60bb320f3e95": {
-      "minPlayerLevel": 47,
+      "minPlayerLevel": 25,
       "objectives": {
         "6848100b00afffa81f09e36b": {
           "description": "Survive and extract from The Lab"
@@ -200,10 +196,10 @@
       }
     },
     "6761ff17cdc36bd66102e9d0": {
-      "minPlayerLevel": 47
+      "minPlayerLevel": 30
     },
     "6848100b00afffa81f09e365": {
-      "minPlayerLevel": 47,
+      "minPlayerLevel": 35,
       "objectives": {
         "6848116061809d65b8503617": {
           "exitStatus": [
@@ -244,7 +240,7 @@
       }
     },
     "68481881f43abfdda2058369": {
-      "minPlayerLevel": 47,
+      "minPlayerLevel": 40,
       "objectives": {
         "68481881f43abfdda205836f": {
           "maps": [
@@ -2847,7 +2843,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-06-08T14:43:32.246Z",
-    "sha256": "4d05a59a92a26dec3f9b50a7f21aab08b143e42bc5fb7c621672eba324a9aeb6"
+    "generated": "2026-06-08T15:04:10.128Z",
+    "sha256": "f6755447f9ba6080a1eec0169dd7d6fe64194026f3477183488ee18425fcec93"
   }
 }

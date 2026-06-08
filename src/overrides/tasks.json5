@@ -1,12 +1,4 @@
 {
-  // Half Empty - Name and wiki link incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Half_Empty
-  // tarkov.dev shows "Half-Empty" with hyphen, should be space
-  '6740a2c17e3818d5bb0648b6': {
-    name: 'Half Empty', // Was: "Half-Empty"
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Half_Empty', // Was: https://escapefromtarkov.fandom.com/wiki/Half-Empty
-  },
-
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
@@ -218,9 +210,10 @@
 
   // New Beginning (Prestige 1) - Level requirement and objective description incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
+  // tarkov.dev shows minPlayerLevel 55; wiki confirms 25.
   // tarkov.dev objective uses Lab -> Streets transit; wiki states surviving and extracting from The Lab instead.
   '6761f28a022f60bb320f3e95': {
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 25, // Was: 55
     objectives: {
       '6848100b00afffa81f09e36b': {
         description: 'Survive and extract from The Lab', // Was: "Use the transit from The Lab to Streets of Tarkov"
@@ -230,9 +223,9 @@
 
   // New Beginning (Prestige 2) - Level requirement incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
-  // tarkov.dev shows minPlayerLevel 55; wiki confirms 47.
+  // tarkov.dev shows minPlayerLevel 55; wiki confirms 30.
   '6761ff17cdc36bd66102e9d0': {
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 30, // Was: 55
   },
 
   // New Beginning (Prestige 3) - Reputation reward and objectives incorrect
@@ -240,7 +233,7 @@
   // tarkov.dev missing the Lab -> Streets transit objective; wiki includes it.
   // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
   '6848100b00afffa81f09e365': {
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 35, // Was: 55
     objectives: {
       '6848116061809d65b8503617': {
         exitStatus: ['Survived'], // Was: ["ExpBonusmarathon Name"]
@@ -272,7 +265,7 @@
   // tarkov.dev missing the Interchange extract objective; wiki includes it.
   // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
   '68481881f43abfdda2058369': {
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 40, // Was: 55
     objectives: {
       '68481881f43abfdda205836f': {
         maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }], // Was: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }]
