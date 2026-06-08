@@ -14,29 +14,8 @@
     "5c0bd94186f7747a727f09b2": {
       "objectives": {
         "5c1b765d86f77413193fa4f2": {
-          "count": 10,
-          "description": "Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope",
-          "usingWeapon": [
-            {
-              "id": "5df8ce05b11454561e39243b",
-              "name": "Knight's Armament Company SR-25 7.62x51 marksman rifle",
-              "shortName": "SR-25"
-            }
-          ]
+          "description": "Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope"
         }
-      }
-    },
-    "66058cc72cee99303f1ba069": {
-      "finishRewards": {
-        "items": [
-          {
-            "item": {
-              "id": "5449016a4bdc2d6f028b456f",
-              "name": "Roubles"
-            },
-            "count": 2500000
-          }
-        ]
       }
     },
     "63a5cf262964a7488f5243ce": {
@@ -69,60 +48,12 @@
       }
     },
     "6574e0dedc0d635f633a5805": {
-      "map": null,
-      "objectives": {
-        "6574e0dedc0d635f633a5807": {
-          "usingWeaponMods": [
-            [
-              {
-                "id": "6544d4187c5457729210d277",
-                "name": "Axion Kobra EKP-1S-03 reflex sight (Dovetail)",
-                "shortName": "EKP-1S-03"
-              }
-            ]
-          ],
-          "maps": [
-            {
-              "id": "5704e554d2720bac5b8b456e",
-              "name": "Shoreline"
-            },
-            {
-              "id": "5714dbc024597771384a510d",
-              "name": "Interchange"
-            },
-            {
-              "id": "5704e3c2d2720bac5b8b4567",
-              "name": "Woods"
-            }
-          ]
-        }
-      }
+      "map": null
     },
     "669fa3a40c828825de06d6a1": {
       "objectives": {
         "66a0f5a7f9eae6761253114c": {
           "description": "Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
-          "usingWeapon": [
-            {
-              "id": "62e14904c2699c0ec93adc47",
-              "name": "SR-2M Veresk 9x21 submachine gun",
-              "shortName": "SR-2M"
-            }
-          ],
-          "usingWeaponMods": [
-            [
-              {
-                "id": "62e2a7138e1ac9380579c122",
-                "name": "SR-2M 9x21 SV-1381 sound suppressor",
-                "shortName": "SV-1381"
-              },
-              {
-                "id": "62ff9920fe938a24c90c10d2",
-                "name": "SR-2M KP-SR2 reflex sight",
-                "shortName": "KP-SR2"
-              }
-            ]
-          ],
           "maps": [
             {
               "id": "55f2d3fd4bdc2d5f408b4567",
@@ -159,7 +90,6 @@
     "66058cc5bb83da7ba474aba9": {
       "objectives": {
         "662ba61d3ed61b6b78187b71": {
-          "description": "Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena",
           "count": 2
         }
       }
@@ -261,38 +191,7 @@
         }
       ]
     },
-    "639135a7e705511c8a4a1b78": {
-      "neededKeys": [
-        {
-          "map": {
-            "id": "5714dc692459777137212e12",
-            "name": "Streets of Tarkov"
-          },
-          "keys": [
-            {
-              "id": "63a39e1d234195315d4020bd",
-              "name": "Primorsky 46-48 skybridge key",
-              "shortName": "Skybridge 46-48"
-            }
-          ]
-        }
-      ],
-      "objectives": {
-        "63a7da6f5199ab1f7d4a774a": {
-          "requiredKeys": [
-            [
-              {
-                "id": "63a39e1d234195315d4020bd",
-                "name": "Primorsky 46-48 skybridge key",
-                "shortName": "Skybridge 46-48"
-              }
-            ]
-          ]
-        }
-      }
-    },
     "6761f28a022f60bb320f3e95": {
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)",
       "minPlayerLevel": 47,
       "objectives": {
         "6848100b00afffa81f09e36b": {
@@ -301,11 +200,9 @@
       }
     },
     "6761ff17cdc36bd66102e9d0": {
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)",
       "minPlayerLevel": 47
     },
     "6848100b00afffa81f09e365": {
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)",
       "minPlayerLevel": 47,
       "objectives": {
         "6848116061809d65b8503617": {
@@ -347,7 +244,6 @@
       }
     },
     "68481881f43abfdda2058369": {
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)",
       "minPlayerLevel": 47,
       "objectives": {
         "68481881f43abfdda205836f": {
@@ -2950,8 +2846,8 @@
     }
   },
   "$meta": {
-    "version": "1.33",
-    "generated": "2026-06-08T00:33:31.414Z",
-    "sha256": "d7002ce7ceca29ac9606d0cf2be82578916b9589fad305c88b0c292db7883744"
+    "version": "1.0.0",
+    "generated": "2026-06-08T14:43:32.246Z",
+    "sha256": "4d05a59a92a26dec3f9b50a7f21aab08b143e42bc5fb7c621672eba324a9aeb6"
   }
 }
