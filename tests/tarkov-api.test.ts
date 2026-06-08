@@ -162,6 +162,21 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(byId.nomap.map).toBeNull();
   });
 
+  it('omits map when the field is absent (not forced to null)', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: { tasks: { t1: { id: 't1', name: 't1 name' } } },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'T1' } },
+      })
+    );
+
+    const tasks = await fetchTasks();
+
+    expect('map' in tasks[0]).toBe(false);
+  });
+
   it('resolves trader refs in requirements and reward standings', async () => {
     mockEndpoints(
       baseRoutes('regular', {

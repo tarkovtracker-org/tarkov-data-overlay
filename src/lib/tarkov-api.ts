@@ -343,7 +343,7 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     name: translate(ctx.tasksEn, raw.name) ?? id,
     minPlayerLevel: typeof raw.minPlayerLevel === 'number' ? raw.minPlayerLevel : undefined,
     wikiLink: typeof raw.wikiLink === 'string' ? raw.wikiLink : undefined,
-    map: raw.map == null ? null : resolveMapRef(raw.map, ctx),
+    map: raw.map === null ? null : resolveMapRef(raw.map, ctx),
     kappaRequired: typeof raw.kappaRequired === 'boolean' ? raw.kappaRequired : undefined,
     lightkeeperRequired:
       typeof raw.lightkeeperRequired === 'boolean' ? raw.lightkeeperRequired : undefined,
