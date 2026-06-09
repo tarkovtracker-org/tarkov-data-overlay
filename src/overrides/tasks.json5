@@ -54,6 +54,66 @@
     },
   },
 
+  // Collector - Required item list changed
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/222
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  // Wiki lists 41 required Collector items; tarkov.dev still includes five removed items
+  // and is missing three new streamer items.
+  '5c51aac186f77432ea65c552': {
+    objectives: {
+      '5c52da1086f7742fbb42a814': {
+        items: [], // Was: Old firesteel
+      },
+      '5c51bf9a86f77478bf5632aa': {
+        items: [], // Was: Golden rooster figurine
+      },
+      '5c51c04286f77478be4009f5': {
+        items: [], // Was: Jar of DevilDog mayo
+      },
+      '5c51c23a86f77478bb033466': {
+        items: [], // Was: Can of sprats
+      },
+      '5c51c25c86f77478bf5632af': {
+        items: [], // Was: Kotton beanie
+      },
+    },
+    objectivesAdd: [
+      {
+        id: 'collector_desmondpilak_cd',
+        description: 'Hand over the found in raid item: DesmondPilak CD',
+        items: [
+          {
+            id: '69f9d547b98cc4120608692a',
+            name: 'DesmondPilak CD',
+            shortName: 'Desmond',
+          },
+        ],
+      },
+      {
+        id: 'collector_dunduk_floppy_disk',
+        description: 'Hand over the found in raid item: Dunduk floppy disk',
+        items: [
+          {
+            id: '69f9d60b5de6674f08060f2a',
+            name: 'Dunduk floppy disk',
+            shortName: 'Dunduk',
+          },
+        ],
+      },
+      {
+        id: 'collector_sheefgg_piggy_bank',
+        description: 'Hand over the found in raid item: SheefGG piggy bank',
+        items: [
+          {
+            id: '69f9d319c906cd16da03b374',
+            name: 'SheefGG piggy bank',
+            shortName: 'SheefGG',
+          },
+        ],
+      },
+    ],
+  },
+
   // Test Drive - Part 2 - Objective description/maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
   // API experience now correct (12000); map/obj still wrong

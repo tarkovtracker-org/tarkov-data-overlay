@@ -39,6 +39,60 @@
         ]
       }
     },
+    "5c51aac186f77432ea65c552": {
+      "objectives": {
+        "5c52da1086f7742fbb42a814": {
+          "items": []
+        },
+        "5c51bf9a86f77478bf5632aa": {
+          "items": []
+        },
+        "5c51c04286f77478be4009f5": {
+          "items": []
+        },
+        "5c51c23a86f77478bb033466": {
+          "items": []
+        },
+        "5c51c25c86f77478bf5632af": {
+          "items": []
+        }
+      },
+      "objectivesAdd": [
+        {
+          "id": "collector_desmondpilak_cd",
+          "description": "Hand over the found in raid item: DesmondPilak CD",
+          "items": [
+            {
+              "id": "69f9d547b98cc4120608692a",
+              "name": "DesmondPilak CD",
+              "shortName": "Desmond"
+            }
+          ]
+        },
+        {
+          "id": "collector_dunduk_floppy_disk",
+          "description": "Hand over the found in raid item: Dunduk floppy disk",
+          "items": [
+            {
+              "id": "69f9d60b5de6674f08060f2a",
+              "name": "Dunduk floppy disk",
+              "shortName": "Dunduk"
+            }
+          ]
+        },
+        {
+          "id": "collector_sheefgg_piggy_bank",
+          "description": "Hand over the found in raid item: SheefGG piggy bank",
+          "items": [
+            {
+              "id": "69f9d319c906cd16da03b374",
+              "name": "SheefGG piggy bank",
+              "shortName": "SheefGG"
+            }
+          ]
+        }
+      ]
+    },
     "63a5cf262964a7488f5243ce": {
       "map": null,
       "objectives": {
@@ -2951,7 +3005,7 @@
   },
   "$meta": {
     "version": "1.34",
-    "generated": "2026-06-08T01:20:45.715Z",
-    "sha256": "d1cc6a49bc803a45418bcae7dfdf74df7e6438e89c282d4bc002eeb4d8a27303"
+    "generated": "2026-06-09T10:24:00.685Z",
+    "sha256": "d9b9793946e4c9c5bba94fae54ab5da42a26b0b25fca924ce70d440f61970fd5"
   }
 }
