@@ -80,7 +80,8 @@
     objectivesAdd: [
       {
         id: 'collector_desmondpilak_cd',
-        description: 'Hand over the found in raid item: DesmondPilak CD',
+        description: 'Hand over the found in raid item: DesmondPilak CD', // Was: missing from tarkov.dev Collector objectives
+        foundInRaid: true,
         items: [
           {
             id: '69f9d547b98cc4120608692a',
@@ -91,7 +92,8 @@
       },
       {
         id: 'collector_dunduk_floppy_disk',
-        description: 'Hand over the found in raid item: Dunduk floppy disk',
+        description: 'Hand over the found in raid item: Dunduk floppy disk', // Was: missing from tarkov.dev Collector objectives
+        foundInRaid: true,
         items: [
           {
             id: '69f9d60b5de6674f08060f2a',
@@ -102,7 +104,8 @@
       },
       {
         id: 'collector_sheefgg_piggy_bank',
-        description: 'Hand over the found in raid item: SheefGG piggy bank',
+        description: 'Hand over the found in raid item: SheefGG piggy bank', // Was: missing from tarkov.dev Collector objectives
+        foundInRaid: true,
         items: [
           {
             id: '69f9d319c906cd16da03b374',

@@ -61,6 +61,7 @@
         {
           "id": "collector_desmondpilak_cd",
           "description": "Hand over the found in raid item: DesmondPilak CD",
+          "foundInRaid": true,
           "items": [
             {
               "id": "69f9d547b98cc4120608692a",
@@ -72,6 +73,7 @@
         {
           "id": "collector_dunduk_floppy_disk",
           "description": "Hand over the found in raid item: Dunduk floppy disk",
+          "foundInRaid": true,
           "items": [
             {
               "id": "69f9d60b5de6674f08060f2a",
@@ -83,6 +85,7 @@
         {
           "id": "collector_sheefgg_piggy_bank",
           "description": "Hand over the found in raid item: SheefGG piggy bank",
+          "foundInRaid": true,
           "items": [
             {
               "id": "69f9d319c906cd16da03b374",
@@ -3005,7 +3008,7 @@
   },
   "$meta": {
     "version": "1.34",
-    "generated": "2026-06-09T10:24:00.685Z",
-    "sha256": "d9b9793946e4c9c5bba94fae54ab5da42a26b0b25fca924ce70d440f61970fd5"
+    "generated": "2026-06-09T10:36:08.400Z",
+    "sha256": "856dda020e240cbeba3a395b33e9b1e0911dc22ebea8b51444f57f034e20a06c"
   }
 }
