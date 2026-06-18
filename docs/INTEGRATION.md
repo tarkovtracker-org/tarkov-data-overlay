@@ -249,13 +249,18 @@ const OVERLAY_URL = 'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-o
 type GameMode = 'regular' | 'pve';
 
 async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
-  const get = async (path: string) => {
+  const get = async (path: string): Promise<Record<string, unknown>> => {
     const response = await fetch(`${TARKOV_JSON_BASE}/${gameMode}/${path}`, {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
-    const { data } = await response.json();
-    return data ?? {};
+    const payload = (await response.json()) as { data?: Record<string, unknown> };
+    // Translation endpoints (*_en) may be empty; core endpoints must carry data.
+    if (payload.data === undefined) {
+      if (path.endsWith('_en')) return {};
+      throw new Error(`tarkov.dev response for "${path}" had no "data" field`);
+    }
+    return payload.data;
   };
 
   const [tasksData, mapsData, tasksEn, mapsEn] = await Promise.all([
@@ -265,17 +270,18 @@ async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
     get('maps_en'),
   ]);
 
-  const maps = mapsData.maps ?? {};
-  const translate = (map: Record<string, string>, key: unknown) =>
-    typeof key === 'string' ? (map[key] ?? key) : undefined;
+  const maps = (mapsData.maps ?? {}) as Record<string, { name?: string }>;
+  const tasks = (tasksData.tasks ?? {}) as Record<string, Record<string, unknown>>;
+  const translate = (map: Record<string, string>, key: unknown): string =>
+    typeof key === 'string' ? (map[key] ?? key) : '';
 
-  return Object.values(tasksData.tasks ?? {}).map((raw: any) => ({
+  return Object.values(tasks).map((raw) => ({
     ...raw,
-    name: translate(tasksEn, raw.name),
+    name: translate(tasksEn as Record<string, string>, raw.name),
     map: typeof raw.map === 'string'
-      ? { id: raw.map, name: translate(mapsEn, maps[raw.map]?.name) }
+      ? { id: raw.map, name: translate(mapsEn as Record<string, string>, maps[raw.map]?.name) }
       : raw.map,
-  })) as Task[];
+  })) as unknown as Task[];
 }
 
 async function fetchOverlay(): Promise<Overlay> {

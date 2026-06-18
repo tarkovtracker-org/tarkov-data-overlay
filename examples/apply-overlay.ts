@@ -95,9 +95,13 @@ async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<
     }
     const payload = (await response.json()) as { data?: Record<string, unknown> };
     if (payload.data === undefined) {
-      console.warn(`tarkov.dev response for "${path}" had no "data" field; using empty object`);
+      // Translation endpoints (*_en) may legitimately be empty; the core
+      // tasks/items/maps endpoints carry the data this example depends on, so
+      // a missing `data` there is a contract failure rather than empty content.
+      if (path.endsWith('_en')) return {};
+      throw new Error(`tarkov.dev response for "${path}" had no "data" field`);
     }
-    return payload.data ?? {};
+    return payload.data;
   };
 
   const [tasksData, itemsData, mapsData, tasksEn, itemsEn, mapsEn] = await Promise.all([
@@ -116,14 +120,20 @@ async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<
   const translate = (map: Record<string, string>, key: unknown): string =>
     typeof key === 'string' ? (map[key] ?? key) : '';
 
+  // Return undefined for unresolved references so dangling ids are dropped by
+  // the `.filter(Boolean)` paths below instead of surfacing blank names.
   const resolveMap = (id: unknown): TarkovMap | undefined => {
     if (typeof id !== 'string') return undefined;
-    return { id, name: translate(mapsEn as Record<string, string>, maps[id]?.name) };
+    const nameKey = maps[id]?.name;
+    if (typeof nameKey !== 'string') return undefined;
+    return { id, name: translate(mapsEn as Record<string, string>, nameKey) };
   };
 
   const resolveItem = (id: unknown): { id: string; name: string } | undefined => {
     if (typeof id !== 'string') return undefined;
-    return { id, name: translate(itemsEn as Record<string, string>, items[id]?.name) };
+    const nameKey = items[id]?.name;
+    if (typeof nameKey !== 'string') return undefined;
+    return { id, name: translate(itemsEn as Record<string, string>, nameKey) };
   };
 
   return Object.values(tasks).map((raw) => ({
@@ -132,19 +142,21 @@ async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<
     minPlayerLevel: typeof raw.minPlayerLevel === 'number' ? raw.minPlayerLevel : 0,
     map: resolveMap(raw.map),
     objectives: Array.isArray(raw.objectives)
-      ? raw.objectives.map((o: Record<string, unknown>) => ({
-          id: String(o.id ?? ''),
-          description: translate(tasksEn as Record<string, string>, o.description),
-          count: typeof o.count === 'number' ? o.count : undefined,
-          maps: Array.isArray(o.maps)
-            ? o.maps.map(resolveMap).filter((m): m is TarkovMap => Boolean(m))
-            : undefined,
-          items: Array.isArray(o.items)
-            ? o.items
-                .map(resolveItem)
-                .filter((i): i is { id: string; name: string } => Boolean(i))
-            : undefined,
-        }))
+      ? raw.objectives
+          .filter((o): o is Record<string, unknown> => typeof o === 'object' && o !== null)
+          .map((o) => ({
+            id: String(o.id ?? ''),
+            description: translate(tasksEn as Record<string, string>, o.description),
+            count: typeof o.count === 'number' ? o.count : undefined,
+            maps: Array.isArray(o.maps)
+              ? o.maps.map(resolveMap).filter((m): m is TarkovMap => Boolean(m))
+              : undefined,
+            items: Array.isArray(o.items)
+              ? o.items
+                  .map(resolveItem)
+                  .filter((i): i is { id: string; name: string } => Boolean(i))
+              : undefined,
+          }))
       : [],
   }));
 }
