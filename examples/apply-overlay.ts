@@ -93,13 +93,15 @@ async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<
     if (!response.ok) {
       throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
     }
-    const payload = (await response.json()) as { data?: Record<string, unknown> };
-    if (payload.data === undefined) {
+    const payload = (await response.json()) as { data?: unknown };
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null && !Array.isArray(value);
+    if (!isRecord(payload.data)) {
       // Translation endpoints (*_en) may legitimately be empty; the core
       // tasks/items/maps endpoints carry the data this example depends on, so
-      // a missing `data` there is a contract failure rather than empty content.
+      // missing or non-object `data` there is a contract failure, not content.
       if (path.endsWith('_en')) return {};
-      throw new Error(`tarkov.dev response for "${path}" had no "data" field`);
+      throw new Error(`tarkov.dev response for "${path}" had no "data" object`);
     }
     return payload.data;
   };
