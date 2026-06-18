@@ -254,15 +254,16 @@ async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
-    const payload = (await response.json()) as { data?: unknown };
+    const payload = await response.json();
     const isRecord = (value: unknown): value is Record<string, unknown> =>
       typeof value === 'object' && value !== null && !Array.isArray(value);
     // Translation endpoints (*_en) may be empty; core endpoints must carry data.
-    if (!isRecord(payload.data)) {
+    const data = isRecord(payload) ? payload.data : undefined;
+    if (!isRecord(data)) {
       if (path.endsWith('_en')) return {};
       throw new Error(`tarkov.dev response for "${path}" had no "data" object`);
     }
-    return payload.data;
+    return data;
   };
 
   const [tasksData, mapsData, tasksEn, mapsEn] = await Promise.all([
