@@ -21,7 +21,7 @@ import {
   icons,
 } from '../src/lib/index.js';
 
-import type { TaskData, TaskRequirement } from '../src/lib/types.js';
+import type { TaskData, TaskRequirement, GameMode } from '../src/lib/types.js';
 
 /** Extended task data with rewards for comparison */
 type ExtendedTaskData = TaskData & {
@@ -183,8 +183,6 @@ const WIKI_INCORRECT_FILE = path.join(
   'suppressions',
   'wiki-incorrect.json5'
 );
-
-type GameMode = 'regular' | 'pve';
 
 async function fetchTasksForMode(mode: GameMode): Promise<ExtendedTaskData[]> {
   const tasks = await fetchTasks(mode);

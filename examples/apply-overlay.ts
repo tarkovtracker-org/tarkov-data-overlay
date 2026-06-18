@@ -94,6 +94,9 @@ async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<
       throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
     }
     const payload = (await response.json()) as { data?: Record<string, unknown> };
+    if (payload.data === undefined) {
+      console.warn(`tarkov.dev response for "${path}" had no "data" field; using empty object`);
+    }
     return payload.data ?? {};
   };
 
