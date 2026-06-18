@@ -182,7 +182,7 @@ Some corrections differ by game mode. The overlay stores these under
 
 - Apply shared data first (`tasks`, `tasksAdd`)
 - Then apply mode-specific data (`modes[gameMode].tasks`, `modes[gameMode].tasksAdd`)
-- Use the same `gameMode` value for both tarkov.dev API query and overlay merge
+- Use the same `gameMode` value for both the tarkov.dev data fetch and overlay merge
 
 ```typescript
 type GameMode = 'regular' | 'pve';
@@ -238,30 +238,53 @@ const allTasks = [...tasksFromApi, ...addedTasks];
 ```typescript
 import type { Task, Overlay } from './types';
 
-const TARKOV_DEV_API = 'https://api.tarkov.dev/graphql';
+// The legacy api.tarkov.dev/graphql endpoint has been superseded by static
+// per-mode JSON files at json.tarkov.dev. Each endpoint returns
+// `{ data, translations }`; entity references are plain id strings and english
+// strings resolve through a sibling `_en` endpoint. This example resolves only
+// the task name + map; a full consumer resolves items/traders/prestige/rewards
+// the same way (see src/lib/tarkov-api.ts for the complete adapter).
+const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const OVERLAY_URL = 'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
 type GameMode = 'regular' | 'pve';
 
 async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
-  // Fetch from tarkov.dev
-  const response = await fetch(TARKOV_DEV_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: `query($gameMode: GameMode) {
-        tasks(lang: en, gameMode: $gameMode) {
-          id
-          name
-          minPlayerLevel
-          map { id name }
-          objectives { id count ... on TaskObjectiveItem { items { id name } } }
-        }
-      }`,
-      variables: { gameMode },
-    })
-  });
-  const { data } = await response.json();
-  return data.tasks;
+  const get = async (path: string): Promise<Record<string, unknown>> => {
+    const response = await fetch(`${TARKOV_JSON_BASE}/${gameMode}/${path}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
+    const payload = await response.json();
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null && !Array.isArray(value);
+    // Translation endpoints (*_en) may be empty; core endpoints must carry data.
+    const data = isRecord(payload) ? payload.data : undefined;
+    if (!isRecord(data)) {
+      if (path.endsWith('_en')) return {};
+      throw new Error(`tarkov.dev response for "${path}" had no "data" object`);
+    }
+    return data;
+  };
+
+  const [tasksData, mapsData, tasksEn, mapsEn] = await Promise.all([
+    get('tasks'),
+    get('maps'),
+    get('tasks_en'),
+    get('maps_en'),
+  ]);
+
+  const maps = (mapsData.maps ?? {}) as Record<string, { name?: string }>;
+  const tasks = (tasksData.tasks ?? {}) as Record<string, Record<string, unknown>>;
+  const translate = (map: Record<string, string>, key: unknown): string =>
+    typeof key === 'string' ? (map[key] ?? key) : '';
+
+  return Object.values(tasks).map((raw) => ({
+    ...raw,
+    name: translate(tasksEn as Record<string, string>, raw.name),
+    map: typeof raw.map === 'string'
+      ? { id: raw.map, name: translate(mapsEn as Record<string, string>, maps[raw.map]?.name) }
+      : raw.map,
+  })) as unknown as Task[];
 }
 
 async function fetchOverlay(): Promise<Overlay> {

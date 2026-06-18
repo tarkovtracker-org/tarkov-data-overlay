@@ -70,40 +70,98 @@ interface Overlay {
 }
 
 // Configuration
-const TARKOV_DEV_API = 'https://api.tarkov.dev/graphql';
+const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const OVERLAY_URL =
   'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
+type GameMode = 'regular' | 'pve';
 
 /**
- * Fetch tasks from tarkov.dev GraphQL API
+ * Fetch tasks from the json.tarkov.dev static endpoints.
+ *
+ * The legacy api.tarkov.dev/graphql endpoint has been superseded by static
+ * per-mode JSON files. Each endpoint returns `{ data, translations }` where
+ * entity references are plain id strings and english strings resolve through a
+ * sibling `_en` endpoint. This example resolves only the fields it displays
+ * (task name, map name, objective item names); a full consumer would resolve
+ * traders, prestige, rewards, etc. the same way (see src/lib/tarkov-api.ts).
  */
-async function fetchTasksFromTarkovDev(): Promise<Task[]> {
-  const query = `
-    query {
-      tasks(lang: en) {
-        id
-        name
-        minPlayerLevel
-        map { id name }
-        objectives {
-          id
-          description
-          ... on TaskObjectiveItem { count items { id name } }
-          ... on TaskObjectiveShoot { count }
-          maps { id name }
-        }
-      }
+async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<Task[]> {
+  const get = async (path: string): Promise<Record<string, unknown>> => {
+    const response = await fetch(`${TARKOV_JSON_BASE}/${gameMode}/${path}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) {
+      throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
     }
-  `;
+    const payload = await response.json();
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null && !Array.isArray(value);
+    const data = isRecord(payload) ? payload.data : undefined;
+    if (!isRecord(data)) {
+      // Translation endpoints (*_en) may legitimately be empty; the core
+      // tasks/items/maps endpoints carry the data this example depends on, so
+      // missing or non-object `data` there is a contract failure, not content.
+      if (path.endsWith('_en')) return {};
+      throw new Error(`tarkov.dev response for "${path}" had no "data" object`);
+    }
+    return data;
+  };
 
-  const response = await fetch(TARKOV_DEV_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
-  });
+  const [tasksData, itemsData, mapsData, tasksEn, itemsEn, mapsEn] = await Promise.all([
+    get('tasks'),
+    get('items'),
+    get('maps'),
+    get('tasks_en'),
+    get('items_en'),
+    get('maps_en'),
+  ]);
 
-  const { data } = await response.json();
-  return data.tasks;
+  const items = (itemsData.items ?? {}) as Record<string, { name?: string }>;
+  const maps = (mapsData.maps ?? {}) as Record<string, { name?: string }>;
+  const tasks = (tasksData.tasks ?? {}) as Record<string, Record<string, unknown>>;
+
+  const translate = (map: Record<string, string>, key: unknown): string =>
+    typeof key === 'string' ? (map[key] ?? key) : '';
+
+  // Return undefined for unresolved references so dangling ids are dropped by
+  // the `.filter(Boolean)` paths below instead of surfacing blank names.
+  const resolveMap = (id: unknown): TarkovMap | undefined => {
+    if (typeof id !== 'string') return undefined;
+    const nameKey = maps[id]?.name;
+    if (typeof nameKey !== 'string') return undefined;
+    return { id, name: translate(mapsEn as Record<string, string>, nameKey) };
+  };
+
+  const resolveItem = (id: unknown): { id: string; name: string } | undefined => {
+    if (typeof id !== 'string') return undefined;
+    const nameKey = items[id]?.name;
+    if (typeof nameKey !== 'string') return undefined;
+    return { id, name: translate(itemsEn as Record<string, string>, nameKey) };
+  };
+
+  return Object.values(tasks).map((raw) => ({
+    id: String(raw.id ?? ''),
+    name: translate(tasksEn as Record<string, string>, raw.name),
+    minPlayerLevel: typeof raw.minPlayerLevel === 'number' ? raw.minPlayerLevel : 0,
+    map: resolveMap(raw.map),
+    objectives: Array.isArray(raw.objectives)
+      ? raw.objectives
+          .filter((o): o is Record<string, unknown> => typeof o === 'object' && o !== null)
+          .map((o) => ({
+            id: String(o.id ?? ''),
+            description: translate(tasksEn as Record<string, string>, o.description),
+            count: typeof o.count === 'number' ? o.count : undefined,
+            maps: Array.isArray(o.maps)
+              ? o.maps.map(resolveMap).filter((m): m is TarkovMap => Boolean(m))
+              : undefined,
+            items: Array.isArray(o.items)
+              ? o.items
+                  .map(resolveItem)
+                  .filter((i): i is { id: string; name: string } => Boolean(i))
+              : undefined,
+          }))
+      : [],
+  }));
 }
 
 /**

@@ -1,12 +1,4 @@
 {
-  // Half Empty - Name and wiki link incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Half_Empty
-  // tarkov.dev shows "Half-Empty" with hyphen, should be space
-  '6740a2c17e3818d5bb0648b6': {
-    name: 'Half Empty', // Was: "Half-Empty"
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Half_Empty', // Was: https://escapefromtarkov.fandom.com/wiki/Half-Empty
-  },
-
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
@@ -18,39 +10,14 @@
     },
   },
 
-  // Test Drive - Part 1 - Objective count and weapon incorrect
+  // Test Drive - Part 1 - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
-  // API experience now correct (9100); count and weapon still wrong
+  // API count (10) and usingWeapon now correct; description wording still differs
   '5c0bd94186f7747a727f09b2': {
     objectives: {
       '5c1b765d86f77413193fa4f2': {
-        count: 10, // Was: 5
-        description: 'Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope',
-        usingWeapon: [
-          {
-            id: '5df8ce05b11454561e39243b',
-            name: "Knight's Armament Company SR-25 7.62x51 marksman rifle",
-            shortName: 'SR-25',
-          },
-        ],
+        description: 'Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope', // Was: "Eliminate PMC operatives using an SR-25 rifle with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope"
       },
-    },
-  },
-
-  // To Great Heights! - Part 4 [PVP ZONE] - Money reward incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_4
-  // Verified in-game: 2,500,000 Roubles
-  '66058cc72cee99303f1ba069': {
-    finishRewards: {
-      items: [
-        {
-          item: {
-            id: '5449016a4bdc2d6f028b456f',
-            name: 'Roubles',
-          },
-          count: 2500000, // Was: 1000002
-        },
-      ],
     },
   },
 
@@ -83,24 +50,8 @@
   // API experience and description now correct; map/obj maps/mods still wrong
   '6574e0dedc0d635f633a5805': {
     map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
-    objectives: {
-      '6574e0dedc0d635f633a5807': {
-        usingWeaponMods: [
-          [
-            {
-              id: '6544d4187c5457729210d277',
-              name: 'Axion Kobra EKP-1S-03 reflex sight (Dovetail)',
-              shortName: 'EKP-1S-03',
-            },
-          ],
-        ],
-        maps: [
-          { id: '5704e554d2720bac5b8b456e', name: 'Shoreline' },
-          { id: '5714dbc024597771384a510d', name: 'Interchange' },
-          { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
-        ],
-      },
-    },
+    // Objective usingWeaponMods and maps now correct in API; only the top-level
+    // map clear (multi-map objective) remains needed.
   },
 
   // Test Drive - Part 5 - Objective description/items incorrect
@@ -110,28 +61,7 @@
     objectives: {
       '66a0f5a7f9eae6761253114c': {
         description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
-        usingWeapon: [
-          {
-            id: '62e14904c2699c0ec93adc47',
-            name: 'SR-2M Veresk 9x21 submachine gun',
-            shortName: 'SR-2M',
-          },
-        ],
-        usingWeaponMods: [
-          [
-            {
-              id: '62e2a7138e1ac9380579c122',
-              name: 'SR-2M 9x21 SV-1381 sound suppressor',
-              shortName: 'SV-1381',
-            },
-            {
-              id: '62ff9920fe938a24c90c10d2',
-              name: 'SR-2M KP-SR2 reflex sight',
-              shortName: 'KP-SR2',
-            },
-          ],
-        ],
-        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
+        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: also lists Night Factory
       },
     },
   },
@@ -173,7 +103,6 @@
   '66058cc5bb83da7ba474aba9': {
     objectives: {
       '662ba61d3ed61b6b78187b71': {
-        description: 'Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena', // Was: Win a match while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
         count: 2, // Was: 1
       },
     },
@@ -279,46 +208,12 @@
     ],
   },
 
-  // Ballet Lover - Missing key requirements
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
-  '639135a7e705511c8a4a1b78': {
-    neededKeys: [
-      {
-        map: {
-          id: '5714dc692459777137212e12',
-          name: 'Streets of Tarkov',
-        },
-        keys: [
-          {
-            id: '63a39e1d234195315d4020bd',
-            name: 'Primorsky 46-48 skybridge key',
-            shortName: 'Skybridge 46-48',
-          },
-        ],
-      },
-    ],
-    objectives: {
-      '63a7da6f5199ab1f7d4a774a': {
-        requiredKeys: [
-          [
-            {
-              id: '63a39e1d234195315d4020bd',
-              name: 'Primorsky 46-48 skybridge key',
-              shortName: 'Skybridge 46-48',
-            },
-          ],
-        ],
-      },
-    },
-  },
-
-  // New Beginning (Prestige 1) - Wiki link and objective description incorrect
+  // New Beginning (Prestige 1) - Level requirement and objective description incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  // tarkov.dev links to the disambiguation page; should link to the specific Prestige 1 page.
+  // tarkov.dev shows minPlayerLevel 55; wiki confirms 25.
   // tarkov.dev objective uses Lab -> Streets transit; wiki states surviving and extracting from The Lab instead.
   '6761f28a022f60bb320f3e95': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 25, // Was: 55
     objectives: {
       '6848100b00afffa81f09e36b': {
         description: 'Survive and extract from The Lab', // Was: "Use the transit from The Lab to Streets of Tarkov"
@@ -326,21 +221,19 @@
     },
   },
 
-  // New Beginning (Prestige 2) - Wiki link incorrect
+  // New Beginning (Prestige 2) - Level requirement incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
-  // tarkov.dev links to the disambiguation page; should link to the specific Prestige 2 page.
+  // tarkov.dev shows minPlayerLevel 55; wiki confirms 30.
   '6761ff17cdc36bd66102e9d0': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 30, // Was: 55
   },
 
-  // New Beginning (Prestige 3) - Reputation reward, wiki link, and objectives incorrect
+  // New Beginning (Prestige 3) - Reputation reward and objectives incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
   // tarkov.dev missing the Lab -> Streets transit objective; wiki includes it.
   // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
   '6848100b00afffa81f09e365': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 35, // Was: 55
     objectives: {
       '6848116061809d65b8503617': {
         exitStatus: ['Survived'], // Was: ["ExpBonusmarathon Name"]
@@ -367,13 +260,12 @@
     },
   },
 
-  // New Beginning (Prestige 4) - Reputation reward, wiki link, and objectives incorrect
+  // New Beginning (Prestige 4) - Reputation reward and objectives incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)
   // tarkov.dev missing the Interchange extract objective; wiki includes it.
   // tarkov.dev shows +0.01 Ragman rep, wiki shows +0.1.
   '68481881f43abfdda2058369': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)', // Was: https://escapefromtarkov.fandom.com/wiki/New_Beginning
-    minPlayerLevel: 47, // Was: 55
+    minPlayerLevel: 40, // Was: 55
     objectives: {
       '68481881f43abfdda205836f': {
         maps: [{ id: '5b0fc42d86f7744a585f9105', name: 'The Lab' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }], // Was: [{ id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }, { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }]
