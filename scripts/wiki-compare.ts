@@ -1,12 +1,18 @@
 #!/usr/bin/env tsx
 /**
- * Spike: compare a single task between tarkov.dev and the wiki.
+ * Compare tasks between tarkov.dev and the EFT wiki.
  *
- * Goal: validate wiki extraction feasibility for tasks.
+ * Research/comparison tool: surfaces discrepancies (level, objectives,
+ * rewards, prerequisites, maps) for a single task or in bulk, filtered
+ * against existing overlay corrections and suppressions.
+ *
+ * Pure comparison/normalization helpers are exported for tests; the CLI
+ * entry point only runs when this file is executed directly.
  */
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import JSON5 from 'json5';
 
 import {
@@ -704,7 +710,7 @@ function parseArgs(argv: string[]): CliOptions & { help?: boolean } {
 
 function printUsage(): void {
   console.log('Usage:');
-  console.log('  tsx scripts/wiki-task-spike.ts [options] [taskName]');
+  console.log('  tsx scripts/wiki-compare.ts [options] [taskName]');
   console.log();
   console.log('Options:');
   console.log('  --all, -a          Compare all tasks (bulk mode)');
@@ -725,16 +731,16 @@ function printUsage(): void {
   console.log('  --help, -h         Show this help');
   console.log();
   console.log('Examples:');
-  console.log('  tsx scripts/wiki-task-spike.ts Grenadier');
-  console.log('  tsx scripts/wiki-task-spike.ts --all --cache');
+  console.log('  tsx scripts/wiki-compare.ts Grenadier');
+  console.log('  tsx scripts/wiki-compare.ts --all --cache');
   console.log(
-    '  tsx scripts/wiki-task-spike.ts --all --cache --group-by=priority'
+    '  tsx scripts/wiki-compare.ts --all --cache --group-by=priority'
   );
-  console.log('  tsx scripts/wiki-task-spike.ts --all --refresh --output');
+  console.log('  tsx scripts/wiki-compare.ts --all --refresh --output');
   console.log(
-    '  tsx scripts/wiki-task-spike.ts --all --output data/results/pve-comparison.json'
+    '  tsx scripts/wiki-compare.ts --all --output data/results/pve-comparison.json'
   );
-  console.log('  tsx scripts/wiki-task-spike.ts --all --gameMode=pve --cache');
+  console.log('  tsx scripts/wiki-compare.ts --all --gameMode=pve --cache');
   console.log();
 }
 
@@ -3498,7 +3504,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  printHeader('WIKI TASK SPIKE');
+  printHeader('WIKI TASK COMPARE');
 
   const gameMode = options.gameMode ?? 'both';
   const modeLabel =
@@ -3537,7 +3543,33 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error) => {
-  printError('Wiki spike failed:', error as Error);
-  process.exit(1);
-});
+function isDirectExecution(): boolean {
+  const entryFile = process.argv[1];
+  if (!entryFile) return false;
+  return import.meta.url === pathToFileURL(entryFile).href;
+}
+
+if (isDirectExecution()) {
+  main().catch((error) => {
+    printError('Wiki compare failed:', error as Error);
+    process.exit(1);
+  });
+}
+
+export {
+  compareTasks,
+  getPriority,
+  parseWikiTask,
+  normalizeObjectiveText,
+  normalizeItemName,
+  normalizeMapName,
+  itemsMatch,
+  buildMapAliasMap,
+};
+export type {
+  Discrepancy,
+  Priority,
+  WikiTaskData,
+  WikiObjective,
+  ExtendedTaskData,
+};

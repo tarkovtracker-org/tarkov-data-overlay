@@ -33,4 +33,4 @@ Use the MediaWiki API instead — it is not challenged and returns full content 
 - Rendered HTML fragment: `...&prop=text`
 - Plain-text extract: `action=query&prop=extracts&...`
 
-`scripts/wiki-task-spike.ts` already uses `api.php` (`WIKI_API`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
+`scripts/wiki-compare.ts` (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
