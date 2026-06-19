@@ -51,12 +51,7 @@ export function getValidator(
   relativePath: string,
   validators: ValidatorCache
 ): ReturnType<Ajv['compile']> | null {
-  for (const [pattern, validator] of validators) {
-    if (relativePath === pattern) {
-      return validator;
-    }
-  }
-  return null;
+  return validators.get(relativePath) ?? null;
 }
 
 /**

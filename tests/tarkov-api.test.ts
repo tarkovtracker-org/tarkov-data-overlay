@@ -3,7 +3,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { __clearTarkovApiCache, fetchTasks, findTaskById, type TaskData } from '../src/lib/index.js';
+import { fetchTasks, findTaskById, type TaskData } from '../src/lib/index.js';
 
 type Routes = Record<string, unknown>;
 
@@ -50,7 +50,6 @@ function baseRoutes(mode: string, overrides: Routes = {}): Routes {
 
 describe('tarkov-api (json.tarkov.dev adapter)', () => {
   afterEach(() => {
-    __clearTarkovApiCache();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -293,7 +292,26 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(requested.every((url) => !url.includes('/regular/'))).toBe(true);
   });
 
-  it('memoizes endpoint fetches across calls within a process', async () => {
+  it('fetches each endpoint exactly once per call', async () => {
+    const fetchMock = mockEndpoints(baseRoutes('regular'));
+
+    await fetchTasks();
+
+    // Sanity: each endpoint requested by buildContext is hit at most once.
+    // (The dedup branch in fetchEnvelope is defensive — production code paths
+    // request each path once today, but the per-call cache stays correct if
+    // that ever changes.)
+    const callsByUrl = new Map<string, number>();
+    for (const call of fetchMock.mock.calls) {
+      const url = String(call[0]);
+      callsByUrl.set(url, (callsByUrl.get(url) ?? 0) + 1);
+    }
+    for (const [url, count] of callsByUrl) {
+      expect(count, url).toBe(1);
+    }
+  });
+
+  it('refetches on subsequent calls (no cross-call memo)', async () => {
     const fetchMock = mockEndpoints(baseRoutes('regular'));
 
     await fetchTasks();
@@ -302,7 +320,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const tasksCalls = fetchMock.mock.calls.filter(
       (call) => String(call[0]) === 'https://json.tarkov.dev/regular/tasks'
     );
-    expect(tasksCalls).toHaveLength(1);
+    expect(tasksCalls).toHaveLength(2);
   });
 
   it('throws when an endpoint returns a non-ok response', async () => {
