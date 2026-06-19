@@ -67,22 +67,19 @@ type EditionData = {
 };
 
 /**
- * Load mode-specific task overrides from source file
+ * Load mode-specific JSON5 file from src/, returning {} when missing.
  */
-function loadModeTaskOverrides(mode: GameMode): Record<string, TaskOverride> {
-  const filePath = join(srcDir, 'overrides', 'modes', mode, 'tasks.json5');
+function loadModeFile<T>(relPath: string): Record<string, T> {
+  const filePath = join(srcDir, relPath);
   if (!existsSync(filePath)) return {};
-  return loadJson5File<Record<string, TaskOverride>>(filePath);
+  return loadJson5File<Record<string, T>>(filePath);
 }
 
-/**
- * Load mode-specific task additions from source file
- */
-function loadModeTaskAdditions(mode: GameMode): Record<string, TaskAddition> {
-  const filePath = join(srcDir, 'additions', 'modes', mode, 'tasksAdd.json5');
-  if (!existsSync(filePath)) return {};
-  return loadJson5File<Record<string, TaskAddition>>(filePath);
-}
+const loadModeTaskOverrides = (mode: GameMode) =>
+  loadModeFile<TaskOverride>(join('overrides', 'modes', mode, 'tasks.json5'));
+
+const loadModeTaskAdditions = (mode: GameMode) =>
+  loadModeFile<TaskAddition>(join('additions', 'modes', mode, 'tasksAdd.json5'));
 
 /**
  * Load edition additions from source file
@@ -92,51 +89,26 @@ function loadEditions(): Record<string, EditionData> {
   return loadJson5File<Record<string, EditionData>>(filePath);
 }
 
-/**
- * Get status icon based on validation result status
- */
-function getStatusIcon(status: ValidationResult['status']): string {
-  switch (status) {
-    case 'NEEDED':
-      return icons.warning;
-    case 'FIXED':
-      return icons.success;
-    case 'REMOVED_FROM_API':
-      return icons.trash;
-    default:
-      return icons.error;
-  }
-}
+const STATUS_ICONS: Record<ValidationResult['status'], string> = {
+  NEEDED: icons.warning,
+  FIXED: icons.success,
+  REMOVED_FROM_API: icons.trash,
+  NOT_FOUND: icons.error,
+};
 
-/**
- * Get detail icon based on validation detail status
- */
-function getDetailIcon(status: ValidationDetail['status']): string {
-  switch (status) {
-    case 'needed':
-    case 'check':
-      return icons.warning;
-    case 'fixed':
-      return icons.success;
-    default:
-      return icons.info;
-  }
-}
+const DETAIL_ICONS: Record<ValidationDetail['status'], string> = {
+  needed: icons.warning,
+  check: icons.warning,
+  fixed: icons.success,
+  info: icons.info,
+};
 
-/**
- * Get detail color based on validation detail status
- */
-function getDetailColor(status: ValidationDetail['status']): string {
-  switch (status) {
-    case 'needed':
-    case 'check':
-      return colors.yellow;
-    case 'fixed':
-      return colors.green;
-    default:
-      return colors.cyan;
-  }
-}
+const DETAIL_COLORS: Record<ValidationDetail['status'], string> = {
+  needed: colors.yellow,
+  check: colors.yellow,
+  fixed: colors.green,
+  info: colors.cyan,
+};
 
 export type AdditionStatus = 'RESOLVED' | 'MISSING' | 'CHECK';
 
@@ -340,12 +312,12 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
 
   // Print details for each task
   for (const result of results) {
-    const icon = getStatusIcon(result.status);
+    const icon = STATUS_ICONS[result.status];
     console.log(`${icon} ${bold(result.name)} ${dim(`(${result.id})`)}`);
 
     for (const detail of result.details) {
-      const detailIcon = getDetailIcon(detail.status);
-      const color = getDetailColor(detail.status);
+      const detailIcon = DETAIL_ICONS[detail.status];
+      const color = DETAIL_COLORS[detail.status];
       console.log(`   ${detailIcon} ${color}${detail.message}${colors.reset}`);
     }
     console.log();
@@ -418,27 +390,17 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
   }
 }
 
-function getAdditionIcon(status: AdditionStatus): string {
-  switch (status) {
-    case 'RESOLVED':
-      return icons.success;
-    case 'CHECK':
-      return icons.warning;
-    default:
-      return icons.warning;
-  }
-}
+const ADDITION_ICONS: Record<AdditionStatus, string> = {
+  RESOLVED: icons.success,
+  CHECK: icons.warning,
+  MISSING: icons.warning,
+};
 
-function getAdditionColor(status: AdditionStatus): string {
-  switch (status) {
-    case 'RESOLVED':
-      return colors.green;
-    case 'CHECK':
-      return colors.yellow;
-    default:
-      return colors.yellow;
-  }
-}
+const ADDITION_COLORS: Record<AdditionStatus, string> = {
+  RESOLVED: colors.green,
+  CHECK: colors.yellow,
+  MISSING: colors.yellow,
+};
 
 function printAdditionResults(results: AdditionResult[], titlePrefix?: string): void {
   const checkTitle = titlePrefix ? `${titlePrefix} ADDITIONS CHECK` : 'ADDITIONS CHECK';
@@ -449,8 +411,8 @@ function printAdditionResults(results: AdditionResult[], titlePrefix?: string): 
   printHeader(checkTitle);
 
   for (const result of results) {
-    const icon = getAdditionIcon(result.status);
-    const color = getAdditionColor(result.status);
+    const icon = ADDITION_ICONS[result.status];
+    const color = ADDITION_COLORS[result.status];
     console.log(`${icon} ${bold(result.name)} ${dim(`(${result.key})`)}`);
     console.log(`   ${color}${result.message}${colors.reset}`);
     console.log();

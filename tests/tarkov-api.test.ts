@@ -3,7 +3,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { __clearTarkovApiCache, fetchTasks, findTaskById, type TaskData } from '../src/lib/index.js';
+import { fetchTasks, findTaskById, type TaskData } from '../src/lib/index.js';
 
 type Routes = Record<string, unknown>;
 
@@ -50,7 +50,6 @@ function baseRoutes(mode: string, overrides: Routes = {}): Routes {
 
 describe('tarkov-api (json.tarkov.dev adapter)', () => {
   afterEach(() => {
-    __clearTarkovApiCache();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -293,7 +292,20 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(requested.every((url) => !url.includes('/regular/'))).toBe(true);
   });
 
-  it('memoizes endpoint fetches across calls within a process', async () => {
+  it('dedupes endpoint fetches within a single call', async () => {
+    const fetchMock = mockEndpoints(baseRoutes('regular'));
+
+    await fetchTasks();
+
+    // Each unique endpoint should be fetched at most once per fetchTasks call,
+    // even though buildContext requests items + items_en concurrently.
+    const itemsEnCalls = fetchMock.mock.calls.filter(
+      (call) => String(call[0]) === 'https://json.tarkov.dev/regular/items_en'
+    );
+    expect(itemsEnCalls).toHaveLength(1);
+  });
+
+  it('refetches on subsequent calls (no cross-call memo)', async () => {
     const fetchMock = mockEndpoints(baseRoutes('regular'));
 
     await fetchTasks();
@@ -302,7 +314,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const tasksCalls = fetchMock.mock.calls.filter(
       (call) => String(call[0]) === 'https://json.tarkov.dev/regular/tasks'
     );
-    expect(tasksCalls).toHaveLength(1);
+    expect(tasksCalls).toHaveLength(2);
   });
 
   it('throws when an endpoint returns a non-ok response', async () => {

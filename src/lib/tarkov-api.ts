@@ -17,9 +17,9 @@
  * error to recover from.
  *
  * Note: resolving objective/reward item names requires the `items` payload,
- * which is large. Results are memoized per endpoint path for the life of the
- * process so a single run that fetches `regular` then `pve` only downloads each
- * file once.
+ * which is large. Endpoint reads are deduped within a single `fetchTasks` call
+ * so concurrent reads (items + items_en + tasks_en) only download each file
+ * once. Across calls the cache is not shared, mirroring the monitor's pattern.
  */
 
 import type {
@@ -106,7 +106,8 @@ function translate(map: TranslationMap, key: unknown): string | undefined {
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const inFlight = new Map<string, Promise<Envelope>>();
+/** Per-call endpoint cache. Dedupes concurrent reads within one fetchTasks call. */
+type EndpointCache = Map<string, Promise<Envelope>>;
 
 /** Thrown for malformed payloads; not worth retrying since a retry won't fix shape. */
 class EnvelopeValidationError extends Error {}
@@ -150,21 +151,25 @@ async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
   throw lastError ?? new Error(`Failed to fetch ${path}`);
 }
 
-/** Fetch an endpoint envelope, memoized per path for the life of the process. */
-function fetchEnvelope(path: string): Promise<Envelope> {
-  const existing = inFlight.get(path);
+/** Fetch an endpoint envelope, deduping concurrent reads within one call. */
+function fetchEnvelope(cache: EndpointCache, path: string): Promise<Envelope> {
+  const existing = cache.get(path);
   if (existing) return existing;
   const promise = fetchEnvelopeOnce(path).catch((error) => {
-    inFlight.delete(path);
+    cache.delete(path);
     throw error;
   });
-  inFlight.set(path, promise);
+  cache.set(path, promise);
   return promise;
 }
 
 /** Fetch an `_en` endpoint and return its flat translation map. */
-async function fetchTranslations(mode: GameMode, endpoint: string): Promise<TranslationMap> {
-  const envelope = await fetchEnvelope(`${mode}/${endpoint}_en`);
+async function fetchTranslations(
+  cache: EndpointCache,
+  mode: GameMode,
+  endpoint: string
+): Promise<TranslationMap> {
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`);
   return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
 }
 
@@ -364,16 +369,20 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   }) as unknown as TaskData;
 }
 
-async function buildContext(mode: GameMode, tasksData: JsonRecord): Promise<Context> {
+async function buildContext(
+  cache: EndpointCache,
+  mode: GameMode,
+  tasksData: JsonRecord
+): Promise<Context> {
   const [itemsEnvelope, mapsEnvelope, tradersEnvelope, itemsEn, tasksEn, mapsEn, tradersEn] =
     await Promise.all([
-      fetchEnvelope(`${mode}/items`),
-      fetchEnvelope(`${mode}/maps`),
-      fetchEnvelope(`${mode}/traders`),
-      fetchTranslations(mode, 'items'),
-      fetchTranslations(mode, 'tasks'),
-      fetchTranslations(mode, 'maps'),
-      fetchTranslations(mode, 'traders'),
+      fetchEnvelope(cache, `${mode}/items`),
+      fetchEnvelope(cache, `${mode}/maps`),
+      fetchEnvelope(cache, `${mode}/traders`),
+      fetchTranslations(cache, mode, 'items'),
+      fetchTranslations(cache, mode, 'tasks'),
+      fetchTranslations(cache, mode, 'maps'),
+      fetchTranslations(cache, mode, 'traders'),
     ]);
 
   const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
@@ -399,8 +408,9 @@ async function buildContext(mode: GameMode, tasksData: JsonRecord): Promise<Cont
  */
 export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
   const mode: GameMode = gameMode ?? 'regular';
+  const cache: EndpointCache = new Map();
 
-  const tasksEnvelope = await fetchEnvelope(`${mode}/tasks`);
+  const tasksEnvelope = await fetchEnvelope(cache, `${mode}/tasks`);
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   if (!tasksData || !isRecord(tasksData.tasks)) {
     throw new Error(
@@ -410,7 +420,7 @@ export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
     );
   }
 
-  const ctx = await buildContext(mode, tasksData);
+  const ctx = await buildContext(cache, mode, tasksData);
 
   return Object.values(tasksData.tasks)
     .filter(isRecord)
@@ -424,10 +434,4 @@ export function findTaskById(tasks: TaskData[], taskId: string): TaskData | unde
   return tasks.find((t) => t.id === taskId);
 }
 
-/**
- * Clear the per-process endpoint memo cache. Intended for tests that stub
- * `fetch` and need each case to fetch fresh data.
- */
-export function __clearTarkovApiCache(): void {
-  inFlight.clear();
-}
+
