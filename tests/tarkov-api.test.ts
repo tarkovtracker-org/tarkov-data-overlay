@@ -292,17 +292,23 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(requested.every((url) => !url.includes('/regular/'))).toBe(true);
   });
 
-  it('dedupes endpoint fetches within a single call', async () => {
+  it('fetches each endpoint exactly once per call', async () => {
     const fetchMock = mockEndpoints(baseRoutes('regular'));
 
     await fetchTasks();
 
-    // Each unique endpoint should be fetched at most once per fetchTasks call,
-    // even though buildContext requests items + items_en concurrently.
-    const itemsEnCalls = fetchMock.mock.calls.filter(
-      (call) => String(call[0]) === 'https://json.tarkov.dev/regular/items_en'
-    );
-    expect(itemsEnCalls).toHaveLength(1);
+    // Sanity: each endpoint requested by buildContext is hit at most once.
+    // (The dedup branch in fetchEnvelope is defensive — production code paths
+    // request each path once today, but the per-call cache stays correct if
+    // that ever changes.)
+    const callsByUrl = new Map<string, number>();
+    for (const call of fetchMock.mock.calls) {
+      const url = String(call[0]);
+      callsByUrl.set(url, (callsByUrl.get(url) ?? 0) + 1);
+    }
+    for (const [url, count] of callsByUrl) {
+      expect(count, url).toBe(1);
+    }
   });
 
   it('refetches on subsequent calls (no cross-call memo)', async () => {
