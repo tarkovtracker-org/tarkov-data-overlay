@@ -188,18 +188,13 @@
       ]
     },
     "6761f28a022f60bb320f3e95": {
-      "minPlayerLevel": 25,
       "objectives": {
         "6848100b00afffa81f09e36b": {
           "description": "Survive and extract from The Lab"
         }
       }
     },
-    "6761ff17cdc36bd66102e9d0": {
-      "minPlayerLevel": 30
-    },
     "6848100b00afffa81f09e365": {
-      "minPlayerLevel": 35,
       "objectives": {
         "6848116061809d65b8503617": {
           "exitStatus": [
@@ -207,27 +202,6 @@
           ]
         }
       },
-      "objectivesAdd": [
-        {
-          "id": "new_beginning_3_obj_transit_lab_streets",
-          "description": "Use the transit from The Lab to Streets of Tarkov",
-          "type": "extract",
-          "maps": [
-            {
-              "id": "5b0fc42d86f7744a585f9105",
-              "name": "The Lab"
-            },
-            {
-              "id": "5714dc692459777137212e12",
-              "name": "Streets of Tarkov"
-            }
-          ],
-          "exitStatus": [
-            "ExpBonusmarathon Name"
-          ],
-          "count": 1
-        }
-      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -240,38 +214,6 @@
       }
     },
     "68481881f43abfdda2058369": {
-      "minPlayerLevel": 40,
-      "objectives": {
-        "68481881f43abfdda205836f": {
-          "maps": [
-            {
-              "id": "5b0fc42d86f7744a585f9105",
-              "name": "The Lab"
-            },
-            {
-              "id": "5714dc692459777137212e12",
-              "name": "Streets of Tarkov"
-            }
-          ]
-        }
-      },
-      "objectivesAdd": [
-        {
-          "id": "new_beginning_4_obj_extract_interchange",
-          "description": "Survive and extract from Interchange",
-          "type": "extract",
-          "maps": [
-            {
-              "id": "5714dbc024597771384a510d",
-              "name": "Interchange"
-            }
-          ],
-          "exitStatus": [
-            "Survived"
-          ],
-          "count": 1
-        }
-      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -2842,8 +2784,8 @@
     }
   },
   "$meta": {
-    "version": "1.37",
-    "generated": "2026-06-20T15:48:04.811Z",
-    "sha256": "939f980dbf1f0c45e6ed02be8adc3b941e6bf6b01ad01272b0e147aa4361f4a5"
+    "version": "1.38",
+    "generated": "2026-06-20T19:17:42.951Z",
+    "sha256": "f4ec66951f0a39b2847c36240266c11438ba8dc58dc0f20486ce49cb1207b4c3"
   }
 }
