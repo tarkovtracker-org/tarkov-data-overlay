@@ -738,7 +738,7 @@ function validateEnvelope(payload, path) {
 
 async function fetchEnvelopeOnce(path) {
   if (typeof fetch !== "function") {
-    throw new Error("Global fetch is not available. Node 20.10.0+ is required");
+    throw new Error("Global fetch is not available. Node 22.0.0+ is required");
   }
   let lastError = null;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
