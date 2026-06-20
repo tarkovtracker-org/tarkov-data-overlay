@@ -24,7 +24,7 @@
   "author": "Lab",
   "license": "MIT",
   "engines": {
-    "node": ">=20.10.0"
+    "node": ">=22.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.37",
