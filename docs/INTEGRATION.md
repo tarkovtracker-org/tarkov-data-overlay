@@ -336,6 +336,8 @@ interface Overlay {
   modes?: Partial<Record<GameMode, ModeOverlay>>;
   items?: Record<string, ItemOverride>;
   itemsAdd?: Record<string, ItemAddition>;
+  traders?: Record<string, TraderOverride>;
+  hideout?: Record<string, HideoutOverride>;
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
   $meta: {
@@ -399,6 +401,21 @@ interface ObjectiveAdd {
 
 // Note: objectivesAdd allows name-only items; objective patches should include IDs.
 
+interface ItemOverride {
+  // Corrected fields keyed by tarkov.dev item properties
+  [fieldName: string]: any;
+}
+
+interface TraderOverride {
+  // Corrected fields keyed by tarkov.dev trader properties
+  [fieldName: string]: any;
+}
+
+interface HideoutOverride {
+  // Corrected fields keyed by tarkov.dev hideout properties
+  [fieldName: string]: any;
+}
+
 interface Edition {
   id: string;
   value: number;
@@ -414,6 +431,7 @@ interface ItemAddition {
   id: string;
   name: string;
   shortName?: string;
+  description?: string;
 }
 
 interface StoryChapter {

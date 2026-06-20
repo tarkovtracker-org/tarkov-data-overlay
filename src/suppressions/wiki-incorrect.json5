@@ -5,6 +5,6 @@
   // Format: taskId -> array of field names that have been verified as correct in API
   // Each entry should include a comment with the verification source and date.
   //
-  // Run `npx tsx scripts/wiki-task-spike.ts --all --cache` to check for stale entries.
+  // Run `npx tsx scripts/wiki-compare.ts --all --cache` to check for stale entries.
   // Stale entries (wiki now matches API) will be flagged for removal.
 }

@@ -550,3 +550,105 @@ Notes:
   },
 }
 ```
+
+---
+
+## Editions
+
+Comprehensive sample for `src/additions/editions.json5` custom game edition definitions (data not provided by the tarkov.dev API).
+
+### Edition Addition (all fields)
+
+```json5
+{
+  // Sample Edition - Addition (all fields)
+  // Source: Battlestate Games preorder options
+  edition_key_1: {
+    id: "edition_key_1", // Required | UI (logic); should match key
+    value: 5, // Required | UI (logic); numeric value used by TarkovTracker (1-10)
+    title: "Sample Edition Title", // Required | UI
+    defaultStashLevel: 4, // Required | UI (logic); level of stash starting point (1-5)
+    defaultCultistCircleLevel: 0, // Required | UI (logic); starting Cultist Circle level (0-3)
+    traderRepBonus: {
+      prapor: 0.2,
+      therapist: 0.2,
+      fence: 0.2,
+      skier: 0.2,
+      peacekeeper: 0.2,
+      mechanic: 0.2,
+      ragman: 0.2,
+      jaeger: 0.2,
+    }, // Required | UI (logic); starting reputation bonus per trader
+    exclusiveTaskIds: [
+      "exclusive-task-id-1",
+    ], // Optional | UI (logic); task IDs that only players with this edition can accept
+    excludedTaskIds: [
+      "excluded-task-id-1",
+    ], // Optional | UI (logic); task IDs that are bypassed/unnecessary for this edition
+  },
+}
+```
+
+---
+
+## Items
+
+Examples for adding new items or correcting existing ones.
+
+### Item Addition (`src/additions/itemsAdd.json5`)
+
+```json5
+{
+  // Sample Item - Addition (all fields)
+  // Proof: [link]
+  "item_id_1": {
+    id: "item_id_1", // Required | UI (logic); should match key
+    name: "Sample Item Name", // Required | UI
+    shortName: "Sample Short", // Optional | UI
+    description: "Sample item description.", // Optional | UI
+  },
+}
+```
+
+### Item Override (`src/overrides/items.json5`)
+
+```json5
+{
+  // Sample Item - Override
+  // Proof: [link]
+  "5449016a4bdc2d6f028b456f": {
+    name: "Corrected Item Name", // Optional | UI; Was: Incorrect Item Name
+    shortName: "Corrected ShortName", // Optional | UI; Was: Incorrect ShortName
+  },
+}
+```
+
+---
+
+## Trader & Hideout Corrections
+
+General overrides for trader and hideout entities.
+
+### Trader Override (`src/overrides/traders.json5`)
+
+```json5
+{
+  // Sample Trader - Override
+  // Proof: [link]
+  "54cbdb844bdc2d8e2d8b4567": {
+    name: "Corrected Trader Name", // Optional | UI; Was: Incorrect Trader Name
+  },
+}
+```
+
+### Hideout Override (`src/overrides/hideout.json5`)
+
+```json5
+{
+  // Sample Hideout Station - Override
+  // Proof: [link]
+  "5d40407c86f774318526545a": {
+    name: "Corrected Station Name", // Optional | UI; Was: Incorrect Station Name
+  },
+}
+```
