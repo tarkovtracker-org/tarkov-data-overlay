@@ -555,7 +555,7 @@ Notes:
 
 ## Editions
 
-Comprehensive sample for `src/additions/editions.json5` corrections and custom game edition definitions.
+Comprehensive sample for `src/additions/editions.json5` custom game edition definitions (data not provided by the tarkov.dev API).
 
 ### Edition Addition (all fields)
 
@@ -565,7 +565,7 @@ Comprehensive sample for `src/additions/editions.json5` corrections and custom g
   // Source: Battlestate Games preorder options
   edition_key_1: {
     id: "edition_key_1", // Required | UI (logic); should match key
-    value: 5, // Required | UI (logic); numeric value used by TarkovTracker (1-10+)
+    value: 5, // Required | UI (logic); numeric value used by TarkovTracker (1-10)
     title: "Sample Edition Title", // Required | UI
     defaultStashLevel: 4, // Required | UI (logic); level of stash starting point (1-5)
     defaultCultistCircleLevel: 0, // Required | UI (logic); starting Cultist Circle level (0-3)
@@ -652,4 +652,3 @@ General overrides for trader and hideout entities.
   },
 }
 ```
-
