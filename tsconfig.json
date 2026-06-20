@@ -10,7 +10,9 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsc.tsbuildinfo"
   },
   "include": ["examples/**/*", "scripts/**/*", "src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
