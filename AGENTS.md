@@ -1,7 +1,26 @@
 # Repository Guidelines
 
+## Project Overview
+Community-maintained data overlay for tarkov.dev API corrections and additions. Provides a JSON overlay file that consumers merge with tarkov.dev API responses to fix incorrect data or add missing data types (like game editions).
+
 ## Project Structure & Module Organization
 `src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The `data/` directory is used for local cache/results from validation tooling.
+
+## Architecture
+### Shared Library (src/lib/)
+Scripts share utilities via `src/lib/index.ts`:
+- `file-loader.ts` - JSON5/JSON loading, project paths, directory scanning
+- `tarkov-api.ts` - json.tarkov.dev adapter that fetches the static per-mode JSON endpoints (tasks/items/maps/traders plus `_en` translations) and adapts them into the `TaskData[]` shape
+- `task-validator.ts` - Override validation logic against API data
+- `terminal.ts` - Console output formatting (colors, icons, progress)
+- `types.ts` - Shared TypeScript interfaces and schema configs
+
+### Build Pipeline
+1. `scripts/validate.ts` - Validates JSON5 source files against schemas using AJV
+2. `scripts/build.ts` - Compiles JSON5 sources into single `dist/overlay.json` with metadata
+
+### Output Structure
+The built `dist/overlay.json` contains entity sections keyed by tarkov.dev IDs (tasks, items, etc.) plus a `$meta` object with version, generated timestamp, and SHA256 hash.
 
 ## Build, Test, and Development Commands
 - `npm install` installs dependencies.
@@ -12,7 +31,7 @@
 - Example single test: `npx vitest run tests/file-loader.test.ts`.
 
 ## Coding Style & Naming Conventions
-TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "module"`). Data files are JSON5 and may include comments. Use tarkov.dev entity IDs as keys and camelCase field names. Every correction must include: entity name comment, proof link, and inline “Was:” value. For nested patches (like task objectives), use ID-keyed objects rather than arrays.
+TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "module"`). Data files are JSON5 and may include comments. Use tarkov.dev entity IDs as keys and field names that match the tarkov.dev API exactly (camelCase). Every correction must include: entity name comment, proof link, and inline “Was:” value. For nested patches (like task objectives), use ID-keyed objects rather than arrays. Empty override files are valid and skipped during build. When adding a new entity type, add its schema to `SCHEMA_CONFIGS` in `src/lib/types.ts`.
 
 ## Testing Guidelines
 Vitest is the only test framework. Tests should be named `*.test.ts` under `tests/`. There is no explicit coverage gate, but add or update tests when you change shared library behavior or validation logic.
