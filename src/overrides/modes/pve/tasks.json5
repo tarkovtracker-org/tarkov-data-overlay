@@ -1,1 +1,12 @@
-{}
+{
+  // To Great Heights! - Part 5 [PVE ZONE] - objective text duplicates Part 6's
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_5
+  // tarkov.dev returns Part 6's "Win two matches in a row" objective for Part 5.
+  '68342265a8d674b5740b31f0': {
+    objectives: {
+      '68342265a8d674b5740b31f3': {
+        description: 'Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena', // Was: "Win two matches in a row in TeamFight, BlastGang, or CheckPoint mode in Arena"
+      },
+    },
+  },
+}
