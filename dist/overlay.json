@@ -2779,13 +2779,31 @@
               "count": 24
             }
           }
+        },
+        "66058cc9ae4719735349b9ea": {
+          "objectives": {
+            "662ba87106e44407b79e9ab2": {
+              "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
+            }
+          }
+        }
+      }
+    },
+    "pve": {
+      "tasks": {
+        "68342265a8d674b5740b31f0": {
+          "objectives": {
+            "68342265a8d674b5740b31f3": {
+              "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
+            }
+          }
         }
       }
     }
   },
   "$meta": {
-    "version": "1.42",
-    "generated": "2026-06-23T09:08:58.923Z",
-    "sha256": "2b77cfbb09f93cf3c04df97a631b4f755744664b6ef7d77b0d980b3a695f69e6"
+    "version": "1.43",
+    "generated": "2026-06-29T21:42:35.342Z",
+    "sha256": "5508985e7e9c0ab1e0eab80a81b2149c71dfd7e04889ffe27e59839ca0798bb3"
   }
 }
