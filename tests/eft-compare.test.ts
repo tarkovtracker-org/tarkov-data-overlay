@@ -121,7 +121,11 @@ describe('crossCheckOverrides', () => {
       },
     };
     const entries = crossCheckOverrides(overrides, eft);
-    expect(entries.every((e) => e.verdict === 'MATCHES_REFERENCE')).toBe(true);
+    // Both a description and a count entry must be emitted, and both must match
+    // (asserting the count guards against this passing vacuously on []).
+    expect(entries).toHaveLength(2);
+    expect(entries.map((e) => e.field).sort()).toEqual(['count', 'description']);
+    expect(entries.map((e) => e.verdict)).toEqual(['MATCHES_REFERENCE', 'MATCHES_REFERENCE']);
   });
 
   it('reports NO_REFERENCE_DATA when the reference has no value for the objective', () => {
