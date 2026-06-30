@@ -340,6 +340,25 @@ export interface ModeOverlay {
   tasksAdd?: Record<string, TaskAddition>;
 }
 
+/** Correction to a single condition within a prestige level's requirements */
+export interface PrestigeConditionOverride {
+  type?: string;
+  /** Corrected task reference for a taskStatus condition (tarkov.dev task id or overlay tasksAdd id) */
+  task?: string;
+  status?: string[];
+  playerLevel?: number;
+  skill?: string;
+  level?: number;
+}
+
+/** Correction to a single prestige level, keyed by tarkov.dev prestige id */
+export interface PrestigeOverride {
+  prestigeLevel?: number;
+  name?: string;
+  /** Per-condition patches keyed by the prestige condition id */
+  conditions?: Record<string, PrestigeConditionOverride>;
+}
+
 /** Built overlay output structure */
 export interface OverlayOutput {
   tasks?: Record<string, TaskOverride>;
@@ -349,6 +368,7 @@ export interface OverlayOutput {
   hideout?: Record<string, unknown>;
   editions?: Record<string, unknown>;
   storyChapters?: Record<string, StoryChapter>;
+  prestige?: Record<string, PrestigeOverride>;
   modes?: Partial<Record<GameMode, ModeOverlay>>;
   $meta: OverlayMeta;
 }
@@ -384,5 +404,6 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
+  { pattern: 'overrides/prestige.json5', schemaFile: 'prestige-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
 ];

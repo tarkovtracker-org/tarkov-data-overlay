@@ -35,6 +35,9 @@
     "itemsAdd": {
       "$ref": "item-additions.schema.json"
     },
+    "prestige": {
+      "$ref": "prestige-override.schema.json"
+    },
     "storyChapters": {
       "$ref": "story-chapter.schema.json"
     },

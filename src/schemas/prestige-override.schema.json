@@ -1,0 +1,67 @@
+{
+  "$id": "prestige-override.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Prestige Override",
+  "description": "Schema for correcting tarkov.dev prestige-level data. Keyed by tarkov.dev prestige ID. Each entry patches fields on the matching item of the API `prestige` array; `conditions` is an ID-keyed object of per-condition patches (e.g. fixing a `taskStatus` condition that points at the wrong storyline quest).",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "prestigeLevel": {
+        "description": "Prestige level this entry corresponds to (documentation/sanity aid; must match the API value)",
+        "type": "integer",
+        "minimum": 1
+      },
+      "name": {
+        "description": "Corrected display name for the prestige level",
+        "type": "string"
+      },
+      "conditions": {
+        "description": "Per-condition corrections, keyed by the tarkov.dev condition ID found in the prestige item's `conditions` array",
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "description": "Condition type (e.g. taskStatus, playerLevel, skill, hideoutStation, haveItem)",
+              "type": "string"
+            },
+            "task": {
+              "description": "Corrected task reference for a taskStatus condition (tarkov.dev task ID, or an overlay tasksAdd id like new_beginning_prestige_5)",
+              "type": "string"
+            },
+            "status": {
+              "description": "Corrected status array for a taskStatus condition",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "playerLevel": {
+              "description": "Corrected player level for a playerLevel condition",
+              "type": "integer",
+              "minimum": 1
+            },
+            "skill": {
+              "description": "Skill name for a skill condition",
+              "type": "string"
+            },
+            "level": {
+              "description": "Corrected level for a skill condition",
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "anyOf": [
+      { "required": ["conditions"] },
+      { "required": ["name"] },
+      { "required": ["prestigeLevel"] }
+    ]
+  }
+}
