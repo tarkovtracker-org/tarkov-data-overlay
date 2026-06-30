@@ -54,8 +54,10 @@ interface Row {
   api: number | undefined;
   eft: number;
   wiki: number | undefined;
-  /** which source(s) the wiki value agrees with */
-  wikiAgreesWith: 'eft' | 'api' | 'both' | 'neither' | 'no-wiki-value';
+  /** which source(s) the wiki value agrees with. 'fetch-failed' means the wiki
+   * request itself failed (timeout/HTTP error) - distinct from 'no-wiki-value',
+   * where the page loaded but didn't carry the field. */
+  wikiAgreesWith: 'eft' | 'api' | 'both' | 'neither' | 'no-wiki-value' | 'fetch-failed';
 }
 
 function sleep(ms: number): Promise<void> {
@@ -145,6 +147,17 @@ function agreement(
   return 'neither';
 }
 
+/** Final wiki verdict for a row: a failed fetch is its own state, kept distinct
+ * from a page that loaded but lacked the field ('no-wiki-value'). */
+export function classifyWiki(
+  api: number | undefined,
+  eft: number,
+  wiki: number | undefined,
+  fetchFailed: boolean,
+): Row['wikiAgreesWith'] {
+  return fetchFailed ? 'fetch-failed' : agreement(api, eft, wiki);
+}
+
 interface Options {
   eftDir: string;
   mode: GameMode;
@@ -178,6 +191,8 @@ function colorFor(verdict: Row['wikiAgreesWith']): string {
       return colors.red;
     case 'both':
       return colors.cyan;
+    case 'fetch-failed':
+      return colors.red;
     default:
       return colors.yellow;
   }
@@ -193,7 +208,11 @@ function printReport(rows: Row[]): void {
     console.log(bold(`\n${field} (${items.length})`));
     for (const r of items) {
       const wikiStr =
-        r.wiki === undefined ? dim('(no wiki value)') : `${colorFor(r.wikiAgreesWith)}${r.wiki}${colors.reset}`;
+        r.wikiAgreesWith === 'fetch-failed'
+          ? `${colors.red}(fetch failed)${colors.reset}`
+          : r.wiki === undefined
+            ? dim('(no wiki value)')
+            : `${colorFor(r.wikiAgreesWith)}${r.wiki}${colors.reset}`;
       console.log(
         `  ${icons.warning} ${r.taskName} ${dim(`(${r.taskId})`)}\n` +
           `     api: ${colors.red}${r.api}${colors.reset}  ` +
@@ -211,6 +230,7 @@ function printReport(rows: Row[]): void {
   console.log(`  Wiki agrees with both:       ${tally('both')} ${dim('(api==eft, not a real conflict)')}`);
   console.log(`  Wiki agrees with neither:    ${tally('neither')}`);
   console.log(`  No usable wiki value:        ${tally('no-wiki-value')}`);
+  console.log(`  Wiki fetch failed:           ${tally('fetch-failed')}`);
   console.log();
 }
 
@@ -243,6 +263,7 @@ async function main(): Promise<void> {
     // One wiki page per task (a task may have both fields discrepant); cache by id.
     const mapAliasMap = buildMapAliasMap([]);
     const wikitextCache = new Map<string, string | undefined>();
+    const fetchFailed = new Set<string>(); // task ids whose wiki request failed
     const rows: Row[] = [];
 
     for (const d of discrepancies) {
@@ -252,13 +273,16 @@ async function main(): Promise<void> {
         try {
           wikitextCache.set(d.task.id, await fetchWikitext(title));
         } catch (err) {
-          // A failed fetch is not the same as "wiki has no value"; record it as
-          // a miss for this page and keep going rather than aborting the run.
+          // A failed fetch is NOT "wiki has no value" - track it separately so
+          // the report/JSON don't conflate a timeout/HTTP error with a page
+          // that genuinely lacks the field. Keep going rather than aborting.
           printError(`  wiki fetch failed for ${title}`, err as Error);
           wikitextCache.set(d.task.id, undefined);
+          fetchFailed.add(d.task.id);
         }
         await sleep(RATE_LIMIT_MS);
       }
+      const failed = fetchFailed.has(d.task.id);
       const wikitext = wikitextCache.get(d.task.id);
       let wiki: number | undefined;
       if (wikitext) {
@@ -272,7 +296,7 @@ async function main(): Promise<void> {
         api: d.api,
         eft: d.eft,
         wiki,
-        wikiAgreesWith: agreement(d.api, d.eft, wiki),
+        wikiAgreesWith: classifyWiki(d.api, d.eft, wiki, failed),
       });
     }
 
