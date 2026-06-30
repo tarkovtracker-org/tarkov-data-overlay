@@ -2797,13 +2797,82 @@
               "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
             }
           }
+        },
+        "608974d01a66564e74191fc0": {
+          "minPlayerLevel": 15
+        },
+        "64f3176921045e77405d63b5": {
+          "experience": 7500
+        },
+        "5eda19f0edce541157209cee": {
+          "experience": 9800
+        },
+        "5c0bbaa886f7746941031d82": {
+          "minPlayerLevel": 19
+        },
+        "5b4795fb86f7745876267770": {
+          "minPlayerLevel": 23
+        },
+        "6179b5eabca27a099552e052": {
+          "experience": 11000
+        },
+        "65733403eefc2c312a759ddb": {
+          "minPlayerLevel": 23
+        },
+        "6179ac7511973d018217d0b9": {
+          "minPlayerLevel": 17
+        },
+        "6834158f2f0e2a7eb90b62c8": {
+          "experience": 2900
+        },
+        "6179b3a12153c15e937d52bc": {
+          "experience": 8500
+        },
+        "5d25e4b786f77408251c4bfc": {
+          "minPlayerLevel": 25
+        },
+        "5ae3280386f7742a41359364": {
+          "minPlayerLevel": 27
+        },
+        "608974af4b05530f55550c21": {
+          "minPlayerLevel": 15
+        },
+        "639136f086e646067c176a8b": {
+          "experience": 7700
+        },
+        "60896bca6ee58f38c417d4f2": {
+          "experience": 10300
+        },
+        "5c12452c86f7744b83469073": {
+          "experience": 12000
+        },
+        "608a768d82e40b3c727fd17d": {
+          "minPlayerLevel": 10
+        },
+        "5c0be13186f7746f016734aa": {
+          "minPlayerLevel": 27
+        },
+        "5c112d7e86f7740d6f647486": {
+          "minPlayerLevel": 25
+        },
+        "6089732b59b92115597ad789": {
+          "minPlayerLevel": 13
+        },
+        "5b47876e86f7744d1c353205": {
+          "minPlayerLevel": 23
+        },
+        "5edab4b1218d181e29451435": {
+          "experience": 12100
+        },
+        "59ca2eb686f77445a80ed049": {
+          "minPlayerLevel": 16
         }
       }
     }
   },
   "$meta": {
-    "version": "1.43",
-    "generated": "2026-06-29T21:42:35.342Z",
-    "sha256": "5508985e7e9c0ab1e0eab80a81b2149c71dfd7e04889ffe27e59839ca0798bb3"
+    "version": "1.44",
+    "generated": "2026-06-30T02:01:15.348Z",
+    "sha256": "da7dc1417aa28c5e85e429508eba85b53323117d4158e89df14c68867a101070"
   }
 }
