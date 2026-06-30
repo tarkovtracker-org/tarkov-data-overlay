@@ -1,4 +1,30 @@
 {
+  "prestige": {
+    "68d3ddb4fc101237e601d774": {
+      "prestigeLevel": 5,
+      "conditions": {
+        "68d3ddb415034199b86b8d68": {
+          "type": "taskStatus",
+          "task": "new_beginning_prestige_5",
+          "status": [
+            "complete"
+          ]
+        }
+      }
+    },
+    "68d3e6f46a7ba36646713fa6": {
+      "prestigeLevel": 6,
+      "conditions": {
+        "68d3e6f40b976d94f72dde5e": {
+          "type": "taskStatus",
+          "task": "new_beginning_prestige_6",
+          "status": [
+            "complete"
+          ]
+        }
+      }
+    }
+  },
   "tasks": {
     "5ae449c386f7744bde357697": {
       "objectives": {
@@ -2871,8 +2897,8 @@
     }
   },
   "$meta": {
-    "version": "1.46",
-    "generated": "2026-06-30T20:14:06.260Z",
-    "sha256": "150395b7ee9e0b52a65c18589775b172c9caa1b896161d5e9aef11351b9d5284"
+    "version": "1.47",
+    "generated": "2026-06-30T21:41:52.486Z",
+    "sha256": "3a6f754e553541e89986c2cf9db8a3c914d3cbc9b08e9359f10ebc2fe3fdd75e"
   }
 }
