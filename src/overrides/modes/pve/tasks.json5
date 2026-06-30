@@ -9,4 +9,143 @@
       },
     },
   },
+
+  // A Fuel Matter - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
+  // Confirmed in-game (PVE)
+  '608974d01a66564e74191fc0': {
+    minPlayerLevel: 15, // Was: 17 (tarkov.dev mirrors regular-mode value)
+  },
+  // Ambulances Again - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ambulances_Again
+  // Confirmed in-game (PVE)
+  '64f3176921045e77405d63b5': {
+    experience: 7500, // Was: 12000 (tarkov.dev mirrors regular-mode value)
+  },
+  // Anesthesia - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Anesthesia
+  // Confirmed in-game (PVE)
+  '5eda19f0edce541157209cee': {
+    experience: 9800, // Was: 18100 (tarkov.dev mirrors regular-mode value)
+  },
+  // Bullshit - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bullshit
+  // Confirmed in-game (PVE)
+  '5c0bbaa886f7746941031d82': {
+    minPlayerLevel: 19, // Was: 25 (tarkov.dev mirrors regular-mode value)
+  },
+  // Chumming - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chumming
+  // Confirmed in-game (PVE)
+  '5b4795fb86f7745876267770': {
+    minPlayerLevel: 23, // Was: 24 (tarkov.dev mirrors regular-mode value)
+  },
+  // Counteraction - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
+  // Confirmed in-game (PVE)
+  '6179b5eabca27a099552e052': {
+    experience: 11000, // Was: 22000 (tarkov.dev mirrors regular-mode value)
+  },
+  // Developer's Secrets - Part 1 - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Developer's_Secrets_-_Part_1
+  // Confirmed in-game (PVE)
+  '65733403eefc2c312a759ddb': {
+    minPlayerLevel: 23, // Was: 25 (tarkov.dev mirrors regular-mode value)
+  },
+  // Easy Job - Part 1 - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job_-_Part_1
+  // Confirmed in-game (PVE)
+  '6179ac7511973d018217d0b9': {
+    minPlayerLevel: 17, // Was: 18 (tarkov.dev mirrors regular-mode value)
+  },
+  // Easy Money - Part 2 [PVE ZONE] - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_2
+  // Confirmed in-game (PVE)
+  '6834158f2f0e2a7eb90b62c8': {
+    experience: 2900, // Was: 4200 (tarkov.dev mirrors regular-mode value)
+  },
+  // Energy Crisis - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
+  // Confirmed in-game (PVE)
+  '6179b3a12153c15e937d52bc': {
+    experience: 8500, // Was: 13000 (tarkov.dev mirrors regular-mode value)
+  },
+  // Fishing Place - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Place
+  // Confirmed in-game (PVE)
+  '5d25e4b786f77408251c4bfc': {
+    minPlayerLevel: 25, // Was: 28 (tarkov.dev mirrors regular-mode value)
+  },
+  // Gunsmith - Part 15 - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Part_15
+  // Confirmed in-game (PVE)
+  '5ae3280386f7742a41359364': {
+    minPlayerLevel: 27, // Was: 29 (tarkov.dev mirrors regular-mode value)
+  },
+  // Inventory Check - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Check
+  // Confirmed in-game (PVE)
+  '608974af4b05530f55550c21': {
+    minPlayerLevel: 15, // Was: 17 (tarkov.dev mirrors regular-mode value)
+  },
+  // Kings of the Rooftops - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops
+  // Confirmed in-game (PVE)
+  '639136f086e646067c176a8b': {
+    experience: 7700, // Was: 14700 (tarkov.dev mirrors regular-mode value)
+  },
+  // No Place for Renegades - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades
+  // Confirmed in-game (PVE)
+  '60896bca6ee58f38c417d4f2': {
+    experience: 10300, // Was: 15300 (tarkov.dev mirrors regular-mode value)
+  },
+  // Perfect Mediator - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
+  // Confirmed in-game (PVE)
+  '5c12452c86f7744b83469073': {
+    experience: 12000, // Was: 20900 (tarkov.dev mirrors regular-mode value)
+  },
+  // Pest Control - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pest_Control
+  // Confirmed in-game (PVE)
+  '608a768d82e40b3c727fd17d': {
+    minPlayerLevel: 10, // Was: 20 (tarkov.dev mirrors regular-mode value)
+  },
+  // Psycho Sniper - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
+  // Confirmed in-game (PVE)
+  '5c0be13186f7746f016734aa': {
+    minPlayerLevel: 27, // Was: 35 (tarkov.dev mirrors regular-mode value)
+  },
+  // Scavenger - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  // Confirmed in-game (PVE)
+  '5c112d7e86f7740d6f647486': {
+    minPlayerLevel: 25, // Was: 29 (tarkov.dev mirrors regular-mode value)
+  },
+  // Surplus Goods - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surplus_Goods
+  // Confirmed in-game (PVE)
+  '6089732b59b92115597ad789': {
+    minPlayerLevel: 13, // Was: 14 (tarkov.dev mirrors regular-mode value)
+  },
+  // The Blood of War - Part 2 - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_2
+  // Confirmed in-game (PVE)
+  '5b47876e86f7744d1c353205': {
+    minPlayerLevel: 23, // Was: 25 (tarkov.dev mirrors regular-mode value)
+  },
+  // The Huntsman Path - Sadist - PVE experience reward differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
+  // Confirmed in-game (PVE)
+  '5edab4b1218d181e29451435': {
+    experience: 12100, // Was: 16300 (tarkov.dev mirrors regular-mode value)
+  },
+  // The Punisher - Part 6 - PVE minimum player level differs from regular mode
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_6
+  // Confirmed in-game (PVE)
+  '59ca2eb686f77445a80ed049': {
+    minPlayerLevel: 16, // Was: 21 (tarkov.dev mirrors regular-mode value)
+  },
 }
