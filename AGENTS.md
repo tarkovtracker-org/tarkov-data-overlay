@@ -37,6 +37,24 @@ The built `dist/overlay.json` contains entity sections keyed by tarkov.dev IDs (
 - `npm test` runs the Vitest suite; `npm run test:watch` keeps it running.
 - Example single test: `npx vitest run tests/file-loader.test.ts`.
 
+### Reference cross-check tooling (local-only)
+
+The `eft:*` scripts cross-check the overlay against a local quest reference file,
+the authority for numeric quest fields (experience, minPlayerLevel, objective
+counts). The reference file lives in `eft/` and all derived output in `data/` —
+both gitignored. Never commit reference files or anything derived from them; PRs
+carry only the resulting JSON5 corrections plus proof links.
+
+- `npm run eft:normalize` distills a raw reference file into a clean
+  tarkov.dev-shaped `data/eft/quests.<mode>.json`.
+- `npm run eft:compare` lists where the reference disagrees with the live API.
+- `npm run eft:audit` is the three-way `reference -> API -> overrides` check.
+  Per field it reports GAP (API wrong, no override — add one), STALE (API fixed
+  upstream, override redundant — remove it), CONFLICT (override disagrees with
+  the reference — fix it), or OK (override correct and still needed). The
+  reference is mode-specific; the audit auto-detects its mode and refuses a
+  mismatched `--mode` to avoid false positives.
+
 ## Coding Style & Naming Conventions
 
 TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "module"`). Data files are JSON5 and may include comments. Use tarkov.dev entity IDs as keys and field names that match the tarkov.dev API exactly (camelCase). Every correction must include: entity name comment, proof link, and inline “Was:” value. For nested patches (like task objectives), use ID-keyed objects rather than arrays. Empty override files are valid and skipped during build. When adding a new entity type, add its schema to `SCHEMA_CONFIGS` in `src/lib/types.ts`.

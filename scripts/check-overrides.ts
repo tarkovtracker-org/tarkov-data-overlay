@@ -40,8 +40,13 @@ import {
   type ValidationResult,
   type ValidationDetail,
 } from '../src/lib/index.js';
+import {
+  loadEftTasks,
+  crossCheckOverrides,
+  type CrossCheckEntry,
+} from './eft-compare.js';
 
-const { srcDir } = getProjectPaths();
+const { srcDir, rootDir } = getProjectPaths();
 
 /**
  * Load task overrides from source file
@@ -498,6 +503,67 @@ function printEditionReferenceResults(missing: EditionTaskReference[]): void {
 }
 
 /**
+ * Cross-check objective overrides against the local quest reference file
+ * (authoritative source). The API-only validator can only say "override differs
+ * from API", which it treats as "still needed" - it cannot tell when the
+ * override itself is wrong. The reference file adjudicates that. No-ops cleanly
+ * when no reference file is present in `eft/`.
+ */
+function printReferenceCrossCheck(
+  groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>
+): void {
+  const eftTasks = loadEftTasks(join(rootDir, 'eft'));
+  if (!eftTasks) return; // no reference file available; skip silently
+
+  printHeader('REFERENCE CROSS-CHECK');
+
+  const conflicts: CrossCheckEntry[] = [];
+  const unverifiable: CrossCheckEntry[] = [];
+  let confirmed = 0;
+
+  for (const { overrides } of groups) {
+    for (const entry of crossCheckOverrides(overrides, eftTasks)) {
+      if (entry.verdict === 'CONFLICTS_REFERENCE') conflicts.push(entry);
+      else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
+      else confirmed += 1;
+    }
+  }
+
+  console.log(
+    formatCountLabel(
+      `${icons.error} Overrides that CONFLICT with the reference (likely wrong)`,
+      conflicts.length,
+      'red'
+    )
+  );
+  for (const c of conflicts) {
+    console.log(`  - ${c.taskId} / ${c.objectiveId} (${c.field})`);
+    console.log(`      override: ${colors.red}${c.override}${colors.reset}`);
+    console.log(`      reference: ${colors.green}${c.reference}${colors.reset}`);
+  }
+  if (conflicts.length === 0) console.log(`  ${dim('None')}`);
+  console.log();
+
+  console.log(
+    formatCountLabel(
+      `${icons.success} Overrides confirmed by the reference`,
+      confirmed,
+      'green'
+    )
+  );
+  console.log();
+
+  console.log(
+    formatCountLabel(
+      `${icons.info} Objective overrides the reference can't adjudicate`,
+      unverifiable.length,
+      'cyan'
+    )
+  );
+  console.log();
+}
+
+/**
  * Main validation function
  */
 async function main(): Promise<void> {
@@ -525,6 +591,11 @@ async function main(): Promise<void> {
 
     printResults(results);
 
+    // Collect every override group for the reference cross-check below.
+    const crossCheckGroups: Array<{ label: string; overrides: Record<string, TaskOverride> }> = [
+      { label: 'base', overrides },
+    ];
+
     printProgress('Checking additions against API...\n');
     const additionResults = checkTaskAdditions(additions, apiTasks);
     printAdditionResults(additionResults);
@@ -536,6 +607,10 @@ async function main(): Promise<void> {
       const modeOverrideCount = Object.keys(modeOverrides).length;
       const modeAdditionCount = Object.keys(modeAdditions).length;
       if (modeOverrideCount === 0 && modeAdditionCount === 0) continue;
+
+      if (modeOverrideCount > 0) {
+        crossCheckGroups.push({ label: mode, overrides: modeOverrides });
+      }
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
       const modeApiTasks = await fetchTasks(mode);
@@ -560,6 +635,8 @@ async function main(): Promise<void> {
     printProgress('Checking edition exclusions against API...\n');
     const missingEditionRefs = checkEditionTaskReferences(editions, apiTasks);
     printEditionReferenceResults(missingEditionRefs);
+
+    printReferenceCrossCheck(crossCheckGroups);
 
     process.exit(0);
   } catch (error) {
