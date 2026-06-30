@@ -33,10 +33,12 @@
  *   tsx scripts/eft-audit.ts [eftDir] [--mode pve|regular] [--json out.json]
  *   npm run eft:audit
  *
- * Exit code is 0 always (report tool); use --json for machine-readable output.
+ * Exit codes: 0 when the audit ran (regardless of how many rows it found);
+ * 1 only when it could not run (no reference file, or a mode mismatch). Use
+ * --json for machine-readable output.
  */
 
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { isAbsolute, join } from 'path';
 import { pathToFileURL } from 'url';
 
@@ -74,13 +76,14 @@ interface Row {
 
 const { srcDir } = getProjectPaths();
 
-/** Load a JSON5 override map, tolerating an absent/empty file. */
+/** Load a JSON5 override map, tolerating an absent file. A missing file is a
+ * legitimately empty override set; any other error (malformed JSON5, no read
+ * permission, etc.) is real and must surface rather than be silently treated
+ * as "no overrides", which would produce a bogus audit. */
 function loadOverrideFile(relPath: string): Record<string, TaskOverride> {
-  try {
-    return loadJson5File<Record<string, TaskOverride>>(join(srcDir, relPath));
-  } catch {
-    return {};
-  }
+  const abs = join(srcDir, relPath);
+  if (!existsSync(abs)) return {};
+  return loadJson5File<Record<string, TaskOverride>>(abs);
 }
 
 /**

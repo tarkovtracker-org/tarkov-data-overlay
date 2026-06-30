@@ -281,10 +281,10 @@ function compare(
  */
 function normalizeDescription(value: string): string {
   return value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ') // fold all punctuation/symbols to a space
     .replace(/\s+/g, ' ')
-    .replace(/[. ]+$/g, '')
-    .trim()
-    .toLowerCase();
+    .trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -468,6 +468,18 @@ async function main(): Promise<void> {
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
     const refFile = findReferenceFile(opts.eftDir);
+
+    // The reference file is mode-specific. Comparing it against a different
+    // tarkov.dev mode yields false discrepancies, so refuse a mismatch (same
+    // guard the audit uses).
+    const refMode = detectReferenceMode(opts.eftDir);
+    if (refMode && refMode !== opts.mode) {
+      throw new Error(
+        `The reference file in ${opts.eftDir} is a ${refMode} file, but --mode is ${opts.mode}. ` +
+          `Re-run with --mode ${refMode}, or supply a ${opts.mode} reference file.`,
+      );
+    }
+
     const eftTasks = parseEftTasks(readQuestArray(refFile));
     printSuccess(`Parsed ${eftTasks.size} quests from reference file`);
 

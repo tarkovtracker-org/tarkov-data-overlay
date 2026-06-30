@@ -359,8 +359,11 @@ function parseArgs(argv: string[]): Options {
   let langs: string[] = [];
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--out') outDir = argv[(i += 1)];
-    else if (arg === '--lang') {
+    if (arg === '--out') {
+      const value = argv[(i += 1)];
+      if (value === undefined) throw new Error('--out requires a directory path');
+      outDir = value;
+    } else if (arg === '--lang') {
       langs = (argv[(i += 1)] ?? '')
         .split(',')
         .map((s) => s.trim())

@@ -517,31 +517,51 @@ function printReferenceCrossCheck(
 
   printHeader('REFERENCE CROSS-CHECK');
 
-  const conflicts: CrossCheckEntry[] = [];
+  const countConflicts: CrossCheckEntry[] = [];
+  const descConflicts: CrossCheckEntry[] = [];
   const unverifiable: CrossCheckEntry[] = [];
   let confirmed = 0;
 
   for (const { overrides } of groups) {
     for (const entry of crossCheckOverrides(overrides, eftTasks)) {
-      if (entry.verdict === 'CONFLICTS_REFERENCE') conflicts.push(entry);
-      else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
+      if (entry.verdict === 'CONFLICTS_REFERENCE') {
+        (entry.field === 'count' ? countConflicts : descConflicts).push(entry);
+      } else if (entry.verdict === 'NO_REFERENCE_DATA') unverifiable.push(entry);
       else confirmed += 1;
     }
   }
 
-  console.log(
-    formatCountLabel(
-      `${icons.error} Overrides that CONFLICT with the reference (likely wrong)`,
-      conflicts.length,
-      'red'
-    )
-  );
-  for (const c of conflicts) {
+  const printConflict = (c: CrossCheckEntry): void => {
     console.log(`  - ${c.taskId} / ${c.objectiveId} (${c.field})`);
     console.log(`      override: ${colors.red}${c.override}${colors.reset}`);
     console.log(`      reference: ${colors.green}${c.reference}${colors.reset}`);
-  }
-  if (conflicts.length === 0) console.log(`  ${dim('None')}`);
+  };
+
+  // Numeric (count) overrides are an exact signal: disagreeing with the
+  // reference almost always means the override is wrong.
+  console.log(
+    formatCountLabel(
+      `${icons.error} Count overrides that CONFLICT with the reference (likely wrong)`,
+      countConflicts.length,
+      'red'
+    )
+  );
+  countConflicts.forEach(printConflict);
+  if (countConflicts.length === 0) console.log(`  ${dim('None')}`);
+  console.log();
+
+  // Description wording is intentionally rephrased by tarkov.dev and by some
+  // overrides (e.g. fixing a localization bug), so a text mismatch is not by
+  // itself proof the override is wrong - flag it for review, don't condemn it.
+  console.log(
+    formatCountLabel(
+      `${icons.warning} Description overrides that differ from the reference (review - wording may intentionally differ)`,
+      descConflicts.length,
+      'yellow'
+    )
+  );
+  descConflicts.forEach(printConflict);
+  if (descConflicts.length === 0) console.log(`  ${dim('None')}`);
   console.log();
 
   console.log(

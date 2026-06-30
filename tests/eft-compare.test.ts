@@ -109,12 +109,14 @@ describe('crossCheckOverrides', () => {
     expect(count.reference).toBe('7');
   });
 
-  it('marks overrides that equal the client as MATCHES_REFERENCE (ignoring punctuation/case)', () => {
+  it('marks overrides equal to the reference as MATCHES_REFERENCE (folding internal punctuation/case)', () => {
     const eft = parseEftTasks(enrichedQuests as never);
     const overrides = {
       [TASK]: {
         objectives: {
-          [OBJ]: { description: 'survive and extract from interchange.', count: 7 },
+          // Internal commas/colons + trailing period vs the reference
+          // "Survive and extract from Interchange"; only punctuation/case differ.
+          [OBJ]: { description: 'Survive, and extract: from Interchange.', count: 7 },
         },
       },
     };
@@ -122,7 +124,7 @@ describe('crossCheckOverrides', () => {
     expect(entries.every((e) => e.verdict === 'MATCHES_REFERENCE')).toBe(true);
   });
 
-  it('reports NO_REFERENCE_DATA when the client has no value for the objective', () => {
+  it('reports NO_REFERENCE_DATA when the reference has no value for the objective', () => {
     const eft = parseEftTasks(enrichedQuests as never);
     const overrides = {
       [TASK]: { objectives: { ['666733e7430c8972d6a5f438']: { description: 'anything' } } },
