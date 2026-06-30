@@ -190,7 +190,7 @@ interface Discrepancy {
   field: string;
   /** what tarkov.dev currently has */
   api: string;
-  /** what the reference file says (source of truth) */
+  /** what the reference file says (authoritative) */
   eft: string;
 }
 
