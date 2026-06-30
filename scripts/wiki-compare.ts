@@ -288,7 +288,8 @@ function saveApiCache(
     },
     tasks,
   };
-  // codeql[js/http-to-file-access]: The API response is intentionally cached as JSON to a fixed file under data/cache.
+  // Safe write: API response intentionally cached as JSON to a fixed,
+  // gitignored path under data/cache (local-only research CLI, not in CI).
   fs.writeFileSync(API_CACHE_FILE, JSON.stringify(cache, null, 2));
 }
 
@@ -330,7 +331,8 @@ function saveWikiCache(
     wikitext,
     lastRevision,
   };
-  // codeql[js/http-to-file-access]: Wiki pages are cached as JSON under data/cache/wiki with a validated task-id filename.
+  // Safe write: wiki page cached as JSON under data/cache/wiki; filename is a
+  // regex-validated task id (assertSafeCacheFileStem), so no path traversal.
   fs.writeFileSync(getWikiCachePath(taskId), JSON.stringify(cache, null, 2));
 }
 
