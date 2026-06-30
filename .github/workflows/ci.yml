@@ -117,7 +117,8 @@ jobs:
             'items': 'items', 'itemsAdd': 'itemsAdd',
             'tasks': 'tasks', 'tasksAdd': 'tasksAdd',
             'traders': 'traders', 'hideout': 'hideout',
-            'editions': 'editions', 'storyChapters': 'storyChapters'
+            'editions': 'editions', 'storyChapters': 'storyChapters',
+            'prestige': 'prestige'
           };
           
           const lines = [];

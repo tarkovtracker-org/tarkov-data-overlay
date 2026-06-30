@@ -91,6 +91,7 @@ describe('overlay.schema.json', () => {
     const referencedSchemas = [
       'edition.schema.json',
       'item-additions.schema.json',
+      'prestige-override.schema.json',
       'task-override.schema.json',
       'task-additions.schema.json',
       'story-chapter.schema.json',

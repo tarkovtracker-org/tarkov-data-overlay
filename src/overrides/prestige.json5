@@ -1,0 +1,45 @@
+{
+  // Prestige-level requirement corrections.
+  //
+  // The built `prestige` section is keyed by tarkov.dev prestige ID. Each entry
+  // patches the matching item of the API `prestige` array; `conditions` is keyed
+  // by the tarkov.dev condition ID inside that prestige item's `conditions` array.
+  //
+  // Why this exists: tarkov.dev does not carry the New Beginning (Prestige 5) or
+  // (Prestige 6) quests, so the live `prestige` array points the Prestige 5 and
+  // Prestige 6 `taskStatus` requirement at Collector (5c51aac186f77432ea65c552)
+  // as a stand-in. The overlay supplies the missing quests via tasksAdd
+  // (new_beginning_prestige_5 / new_beginning_prestige_6); these corrections
+  // repoint the prestige requirement at them so consumers stop showing Collector
+  // as the Prestige 5/6 storyline requirement (issue #207).
+  //
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Prestige
+  //   Prestige 5 requires "New Beginning (Prestige 5)"
+  //   Prestige 6 requires "New Beginning (Prestige 6)"
+
+  // Prestige 5
+  '68d3ddb4fc101237e601d774': {
+    prestigeLevel: 5,
+    conditions: {
+      // taskStatus requirement: should be New Beginning (Prestige 5), not Collector
+      '68d3ddb415034199b86b8d68': {
+        type: 'taskStatus',
+        task: 'new_beginning_prestige_5', // Was: 5c51aac186f77432ea65c552 (Collector)
+        status: ['complete'],
+      },
+    },
+  },
+
+  // Prestige 6
+  '68d3e6f46a7ba36646713fa6': {
+    prestigeLevel: 6,
+    conditions: {
+      // taskStatus requirement: should be New Beginning (Prestige 6), not Collector
+      '68d3e6f40b976d94f72dde5e': {
+        type: 'taskStatus',
+        task: 'new_beginning_prestige_6', // Was: 5c51aac186f77432ea65c552 (Collector)
+        status: ['complete'],
+      },
+    },
+  },
+}

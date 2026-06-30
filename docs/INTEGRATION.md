@@ -57,6 +57,18 @@ async function fetchOverlay() {
       "name": "Tour"
     }
   },
+  "prestige": {
+    "<prestige-id>": {
+      "prestigeLevel": 5,
+      "conditions": {
+        "<condition-id>": {
+          "type": "taskStatus",
+          "task": "new_beginning_prestige_5",
+          "status": ["complete"]
+        }
+      }
+    }
+  },
   "modes": {
     "regular": {
       "tasks": {
@@ -208,6 +220,47 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
 
 ---
 
+## Applying Prestige Corrections
+
+tarkov.dev exposes prestige levels as a `prestige` array, each item shaped like
+`{ id, prestigeLevel, conditions: [{ id, type, ... }] }`. Some of these are
+wrong: because tarkov.dev does not carry the New Beginning (Prestige 5) and
+(Prestige 6) quests, its Prestige 5/6 `taskStatus` condition points at Collector
+(`5c51aac186f77432ea65c552`) as a stand-in. The matching quests are provided in
+`tasksAdd` (`new_beginning_prestige_5` / `new_beginning_prestige_6`).
+
+The overlay's `prestige` section is keyed by prestige ID. Each entry patches the
+matching prestige item; `conditions` is keyed by the condition ID inside that
+item's `conditions` array. Apply it by merging top-level fields, then patching
+conditions by ID:
+
+```typescript
+type PrestigeCondition = { id: string; type: string; task?: string; status?: string[]; [k: string]: unknown };
+type Prestige = { id: string; prestigeLevel: number; conditions: PrestigeCondition[]; [k: string]: unknown };
+
+function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
+  const override = overlay.prestige?.[base.id];
+  if (!override) return base;
+
+  const { conditions: condPatches, ...topLevel } = override;
+  const result: Prestige = { ...base, ...topLevel };
+
+  if (condPatches) {
+    result.conditions = base.conditions.map((cond) => {
+      const patch = condPatches[cond.id];
+      return patch ? { ...cond, ...patch } : cond;
+    });
+  }
+  return result;
+}
+```
+
+The corrected `task` may be an overlay `tasksAdd` id (e.g.
+`new_beginning_prestige_5`) rather than a tarkov.dev task id, so resolve prestige
+task references against the merged task list (`tasksFromApi` + `tasksAdd`).
+
+---
+
 ## Using Additions (New Data)
 
 For data not in tarkov.dev (like game editions):
@@ -340,6 +393,7 @@ interface Overlay {
   hideout?: Record<string, HideoutOverride>;
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
+  prestige?: Record<string, PrestigeOverride>;
   $meta: {
     version: string;
     generated: string;
@@ -438,5 +492,19 @@ interface StoryChapter {
   id: string;
   name: string;
   normalizedName: string;
+}
+
+interface PrestigeOverride {
+  prestigeLevel?: number;
+  name?: string;
+  // Per-condition patches keyed by the prestige condition id
+  conditions?: Record<string, {
+    type?: string;
+    task?: string;      // corrected taskStatus target (tarkov.dev or tasksAdd id)
+    status?: string[];
+    playerLevel?: number;
+    skill?: string;
+    level?: number;
+  }>;
 }
 ```
