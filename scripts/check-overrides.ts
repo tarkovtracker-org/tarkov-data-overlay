@@ -42,6 +42,7 @@ import {
 } from '../src/lib/index.js';
 import {
   loadEftTasks,
+  detectReferenceMode,
   crossCheckOverrides,
   type CrossCheckEntry,
 } from './eft-compare.js';
@@ -512,17 +513,34 @@ function printEditionReferenceResults(missing: EditionTaskReference[]): void {
 function printReferenceCrossCheck(
   groups: Array<{ label: string; overrides: Record<string, TaskOverride> }>
 ): void {
-  const eftTasks = loadEftTasks(join(rootDir, 'eft'));
+  const eftDir = join(rootDir, 'eft');
+  const eftTasks = loadEftTasks(eftDir);
   if (!eftTasks) return; // no reference file available; skip silently
 
   printHeader('REFERENCE CROSS-CHECK');
+
+  // The reference file is mode-specific. 'base' overrides are mode-agnostic and
+  // always comparable; a mode-specific group is only valid to cross-check when
+  // it matches the reference's mode, otherwise it produces false conflicts.
+  const refMode = detectReferenceMode(eftDir);
+  const applicable = groups.filter((g) => g.label === 'base' || g.label === refMode);
+  const skipped = groups.filter((g) => !applicable.includes(g));
+  if (refMode) {
+    console.log(dim(`  (reference mode: ${refMode})`));
+    for (const g of skipped) {
+      console.log(dim(`  (skipping ${g.label} overrides: reference is ${refMode})`));
+    }
+  } else {
+    console.log(dim('  (reference mode unknown; checking base overrides only)'));
+  }
+  console.log();
 
   const countConflicts: CrossCheckEntry[] = [];
   const descConflicts: CrossCheckEntry[] = [];
   const unverifiable: CrossCheckEntry[] = [];
   let confirmed = 0;
 
-  for (const { overrides } of groups) {
+  for (const { overrides } of applicable) {
     for (const entry of crossCheckOverrides(overrides, eftTasks)) {
       if (entry.verdict === 'CONFLICTS_REFERENCE') {
         (entry.field === 'count' ? countConflicts : descConflicts).push(entry);

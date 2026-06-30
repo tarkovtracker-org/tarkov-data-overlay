@@ -48,6 +48,9 @@ carry only the resulting JSON5 corrections plus proof links.
 - `npm run eft:normalize` distills a raw reference file into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
 - `npm run eft:compare` lists where the reference disagrees with the live API.
+- `npm run eft:wiki` cross-references those reference-vs-API discrepancies
+  against the EFT wiki, showing whether the wiki backs the reference, the API,
+  or neither (minPlayerLevel and experience only).
 - `npm run eft:audit` is the three-way `reference -> API -> overrides` check.
   Per field it reports GAP (API wrong, no override — add one), STALE (API fixed
   upstream, override redundant — remove it), CONFLICT (override disagrees with

@@ -319,11 +319,16 @@ function collectLanguages(rawQuests: Record<string, unknown>[]): string[] {
 export function normalizeQuestData(file: string, langs: string[] = []): NormalizedOutput {
   const { quests: rawQuests, url, appVersion, capturedAt } = readEnvelope(file);
 
-  // 'all' expands to every language the reference carries (minus English, the base).
+  // 'all' expands to every language the reference carries (minus English, the
+  // base). For an explicit list, accept either the source code (e.g. `ge`) or
+  // its BCP47 form (e.g. `de`) and resolve both to the source key we read from.
   const available = collectLanguages(rawQuests).filter((lg) => lg !== 'en');
   const requested = langs.includes('all')
     ? available
-    : langs.filter((lg) => lg !== 'en' && available.includes(lg));
+    : available.filter((src) => {
+        const bcp = toBcp47(src);
+        return langs.some((req) => req !== 'en' && (req === src || toBcp47(req) === bcp));
+      });
 
   const quests: Record<string, CleanQuest> = {};
   for (const raw of rawQuests) {
@@ -361,7 +366,9 @@ function parseArgs(argv: string[]): Options {
     const arg = argv[i];
     if (arg === '--out') {
       const value = argv[(i += 1)];
-      if (value === undefined) throw new Error('--out requires a directory path');
+      if (value === undefined || value.startsWith('--')) {
+        throw new Error('--out requires a directory path');
+      }
       outDir = value;
     } else if (arg === '--lang') {
       langs = (argv[(i += 1)] ?? '')

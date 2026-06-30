@@ -125,6 +125,14 @@ describe('eft-normalize --lang', () => {
     expect(out.$meta.languages).toEqual(['de', 'ru']);
   });
 
+  it('accepts BCP47 codes and resolves them to the source key (de -> ge)', () => {
+    const out = normalizeQuestData(file, ['de']);
+    const quest = out.quests['60e71dc0a94be721b065bbfc'];
+    // fixture carries `ge`; requesting `de` must still pick it up
+    expect(out.$meta.languages).toEqual(['de']);
+    expect(quest.nameLocale).toEqual({ de: 'Lange Leine' });
+  });
+
   it('ignores requested languages the reference does not carry', () => {
     const out = normalizeQuestData(file, ['ru', 'kr']);
     const quest = out.quests['60e71dc0a94be721b065bbfc'];

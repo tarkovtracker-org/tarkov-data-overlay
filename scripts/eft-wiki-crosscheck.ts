@@ -38,11 +38,12 @@ import {
   type GameMode,
   type TaskData,
 } from '../src/lib/index.js';
-import { loadEftTasks, type EftTask } from './eft-compare.js';
+import { loadEftTasks, detectReferenceMode, type EftTask } from './eft-compare.js';
 import { parseWikiTask, buildMapAliasMap } from './wiki-compare.js';
 
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
 const RATE_LIMIT_MS = 500;
+const FETCH_TIMEOUT_MS = 15000;
 
 type Field = 'minPlayerLevel' | 'experience';
 
@@ -77,8 +78,20 @@ async function fetchWikitext(title: string): Promise<string | undefined> {
     prop: 'wikitext',
     format: 'json',
   });
-  const res = await fetch(`${WIKI_API}?${params.toString()}`);
-  if (!res.ok) return undefined;
+  // Bound the request so a hung connection can't stall the whole run.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${WIKI_API}?${params.toString()}`, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+  // A non-OK HTTP status is a fetch failure, not a "page has no wikitext";
+  // surface it so the caller can tell the two apart.
+  if (!res.ok) {
+    throw new Error(`wiki request for "${title}" failed: HTTP ${res.status}`);
+  }
   const data = (await res.json()) as {
     parse?: { wikitext?: { '*': string } };
     error?: unknown;
@@ -208,6 +221,16 @@ async function main(): Promise<void> {
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
     const eftTasks = loadEftTasks(opts.eftDir);
     if (!eftTasks) throw new Error(`No quest reference file found in ${opts.eftDir}`);
+
+    // The reference file is mode-specific; refuse a mismatch (same guard the
+    // audit and compare use) so wiki rows aren't built from cross-mode data.
+    const refMode = detectReferenceMode(opts.eftDir);
+    if (refMode && refMode !== opts.mode) {
+      throw new Error(
+        `The reference file in ${opts.eftDir} is a ${refMode} file, but --mode is ${opts.mode}. ` +
+          `Re-run with --mode ${refMode}, or supply a ${opts.mode} reference file.`,
+      );
+    }
     printSuccess(`Parsed ${eftTasks.size} quests from reference file`);
 
     printProgress(`Fetching ${opts.mode} tasks from tarkov.dev...`);
@@ -226,7 +249,14 @@ async function main(): Promise<void> {
       const title = wikiTitleFor(d.task);
       if (!wikitextCache.has(d.task.id)) {
         printProgress(`Fetching wiki: ${title}...`);
-        wikitextCache.set(d.task.id, await fetchWikitext(title));
+        try {
+          wikitextCache.set(d.task.id, await fetchWikitext(title));
+        } catch (err) {
+          // A failed fetch is not the same as "wiki has no value"; record it as
+          // a miss for this page and keep going rather than aborting the run.
+          printError(`  wiki fetch failed for ${title}`, err as Error);
+          wikitextCache.set(d.task.id, undefined);
+        }
         await sleep(RATE_LIMIT_MS);
       }
       const wikitext = wikitextCache.get(d.task.id);
