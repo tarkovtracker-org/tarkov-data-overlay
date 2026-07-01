@@ -279,6 +279,8 @@ export interface StoryObjective {
   id: string;
   type: 'main' | 'optional';
   description: string;
+  /** EFT sub-quest id backing this objective (source traceability) */
+  sourceQuestId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;
@@ -317,6 +319,8 @@ export interface StoryChapter {
   normalizedName: string;
   wikiLink: string;
   order: number;
+  /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
+  chapterQuestId: string;
   autoStart?: boolean;
   chapterRequirements?: Array<{ id: string; name: string }>;
   activation?: StoryChapterActivation;

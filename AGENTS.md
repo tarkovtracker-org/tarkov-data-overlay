@@ -57,6 +57,14 @@ carry only the resulting JSON5 corrections plus proof links.
   the reference — fix it), or OK (override correct and still needed). The
   reference is mode-specific; the audit auto-detects its mode and refuses a
   mismatched `--mode` to avoid false positives.
+- `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
+  reference. Story quests are entirely absent from tarkov.dev, so unlike the
+  numeric `eft:*` tools this one produces committed additions, not a gitignored
+  diff. It takes objective text/order/ids from the local reference for structure
+  and the optional/required flags plus proof from the EFT wiki, merges curated
+  chapter metadata from `scripts/story-chapter-meta.json`, and preserves The
+  Ticket's branching. The reference itself stays gitignored; only the generated
+  JSON5 is committed.
 
 ## Coding Style & Naming Conventions
 

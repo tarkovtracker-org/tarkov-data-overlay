@@ -11,6 +11,7 @@
     "eft:audit": "tsx scripts/eft-audit.ts",
     "eft:wiki": "tsx scripts/eft-wiki-crosscheck.ts",
     "eft:normalize": "tsx scripts/eft-normalize.ts",
+    "eft:story": "mkdir -p data/eft && python3 scripts/eft-story-wiki.py && python3 scripts/eft-story-generate.py > data/eft/story-final.json && node scripts/eft-story-write.cjs",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
     "typecheck": "tsc --noEmit",
