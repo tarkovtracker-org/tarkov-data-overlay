@@ -37,7 +37,8 @@
       },
       "chapterQuestId": {
         "description": "tarkov.dev/EFT story quest id this chapter maps to (the narrator-trader Completion quest). Traceability to the source game data.",
-        "type": "string"
+        "type": "string",
+        "pattern": "^[0-9a-f]{24}$"
       },
       "autoStart": {
         "description": "Whether the chapter starts automatically (true) or must be discovered in-world (false)",
@@ -128,11 +129,13 @@
             },
             "sourceQuestId": {
               "description": "EFT sub-quest id backing this objective (traceability to source game data)",
-              "type": "string"
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
             },
             "sourceObjectiveId": {
               "description": "EFT condition id backing this objective (traceability to source game data)",
-              "type": "string"
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
             },
             "type": {
               "description": "Whether the objective is required or bonus",

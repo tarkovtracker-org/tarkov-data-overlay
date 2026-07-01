@@ -8,7 +8,7 @@ Sources (by authority):
   and source ids. A chapter is a named storyline quest on the narrator trader
   (67f7af56c117b6140af2a607); its objective conditions are ordered sub-quest refs
   whose own conditions carry the text.
-- EFT wiki (/tmp/wiki-objectives.json via scripts/eft-story-wiki.py): the
+- EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.py): the
   player-facing optional/required distinction, matched by fuzzy text.
 - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
   activation/requirements the reference lacks, plus The Ticket's branching
@@ -24,7 +24,7 @@ from pathlib import Path
 
 REF = Path("eft/quest-list.json")
 META = Path("scripts/story-chapter-meta.json")
-WIKI = Path("/tmp/wiki-objectives.json")
+WIKI = Path("data/eft/story-wiki-objectives.json")
 NARRATOR_TRADER = "67f7af56c117b6140af2a607"
 ID_RE = re.compile(r"[0-9a-fA-F]{24}")
 MATCH_THRESHOLD = 0.6
@@ -59,7 +59,11 @@ def norm(text):
 
 
 def match_optional(text, wiki_objs):
-    """Return (optional, ratio) for the best wiki match, or (False, 0)."""
+    """Return (optional, best_ratio) for the closest wiki match.
+
+    When the best match is below MATCH_THRESHOLD the objective is treated as
+    required, returning (False, best_ratio) so the caller can log match quality.
+    """
     nt = norm(text)
     best_ratio, best = 0.0, None
     for w in wiki_objs:
@@ -90,7 +94,7 @@ def main():
     curated = json.loads(META.read_text())
     wiki = json.loads(WIKI.read_text()) if WIKI.exists() else {}
     if not wiki:
-        print("warning: /tmp/wiki-objectives.json missing; run scripts/eft-story-wiki.py "
+        print("warning: data/eft/story-wiki-objectives.json missing; run scripts/eft-story-wiki.py "
               "first (all objectives will be 'main')", file=sys.stderr)
 
     def en(q):
@@ -114,7 +118,10 @@ def main():
             sub_id = bare(sub["_id"])
             se = en(sub)
             for o in sub.get("conditions", {}).get("AvailableForFinish", []) or []:
-                text = (se.get(o["id"]) or "").strip()
+                obj_id = o.get("id")
+                if not obj_id:
+                    continue  # skip conditions without an id
+                text = (se.get(obj_id) or "").strip()
                 if not text:
                     continue
                 optional, ratio = match_optional(text, wiki_objs)
@@ -131,7 +138,7 @@ def main():
                     "type": "optional" if optional else "main",
                     "description": text,
                     "sourceQuestId": sub_id,
-                    "sourceObjectiveId": o["id"],
+                    "sourceObjectiveId": obj_id,
                 })
         stats[chapter_id] = {"objectives": len(objs), "matched": matched,
                              "optional": opt_n, "wiki": len(wiki_objs)}

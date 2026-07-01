@@ -4,12 +4,14 @@ Fetch story-chapter Objectives sections from the EFT wiki (MediaWiki api.php)
 and parse each line into {text, optional}. Used to overlay player-facing
 optional/required flags onto the story-chapter objective text.
 
-Writes /tmp/wiki-objectives.json: { chapterId: [ {text, optional}, ... ] }
+Writes data/eft/story-wiki-objectives.json: { chapterId: [ {text, optional}, ... ] }
+(derived output, gitignored). Exits non-zero if any chapter fails to parse.
 """
 import json
 import re
 import sys
 import urllib.request
+from pathlib import Path
 
 WIKI_API = "https://escapefromtarkov.fandom.com/api.php"
 
@@ -69,19 +71,34 @@ def parse_objectives(wikitext):
 
 
 def main():
+    out_dir = Path("data/eft")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "story-wiki-objectives.json"
+
     result = {}
+    failures = []
     for cid, title in PAGES.items():
         try:
             wt = fetch_wikitext(title)
             objs = parse_objectives(wt)
+            if not objs:
+                raise RuntimeError("no objectives parsed from Objectives section")
             result[cid] = objs
             n_opt = sum(1 for o in objs if o["optional"])
             print(f"  {cid:22s} {len(objs):3d} objectives ({n_opt} optional)", file=sys.stderr)
         except Exception as e:  # noqa: BLE001
             print(f"  {cid:22s} FAILED: {e}", file=sys.stderr)
-            result[cid] = []
-    json.dump(result, open("/tmp/wiki-objectives.json", "w"), indent=2, ensure_ascii=False)
-    print("wrote /tmp/wiki-objectives.json", file=sys.stderr)
+            failures.append(cid)
+
+    with out_path.open("w") as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
+    print(f"wrote {out_path}", file=sys.stderr)
+
+    if failures:
+        # Fail loud: an empty/partial wiki set silently mislabels optionals
+        # downstream, so do not let the pipeline continue on a clean exit.
+        print(f"error: {len(failures)} chapter(s) failed: {', '.join(failures)}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -41,12 +41,14 @@ describe('story chapters (EFT-sourced)', () => {
     }
   });
 
-  it('keeps EFT-sourced objectives traceable and uniquely keyed', () => {
+  it('keeps EFT-sourced objectives traceable and globally uniquely keyed', () => {
+    const seen = new Map<string, string>();
     for (const [cid, ch] of Object.entries(chapters)) {
-      const ids = new Set<string>();
       for (const obj of ch.objectives ?? []) {
-        expect(ids.has(obj.id), `${cid} duplicate objective id ${obj.id}`).toBe(false);
-        ids.add(obj.id);
+        expect(seen.has(obj.id), `duplicate objective id ${obj.id} (${seen.get(obj.id)} & ${cid})`).toBe(
+          false
+        );
+        seen.set(obj.id, cid);
         expect(['main', 'optional']).toContain(obj.type);
         // The Ticket keeps curated branching objectives (no source ids); every
         // other chapter is generated straight from the quest reference.

@@ -5,9 +5,9 @@
   // EFT wiki (objective text + optional/required flags). Chapters are the storyline
   // narrator-trader quests; objectives are the ordered sub-quest references. Optional
   // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements
-  // are curated (scripts/story-chapter-meta.json). Each objective records
-  // sourceQuestId/sourceObjectiveId for traceability. The Ticket keeps its curated
-  // branching (endings + mutual exclusion). Regenerate with `npm run eft:story`.
+  // are curated (scripts/story-chapter-meta.json). Generated objectives record
+  // sourceQuestId/sourceObjectiveId for traceability (The Ticket keeps its curated
+  // branching objectives, which omit those fields). Regenerate with `npm run eft:story`.
   // The storyline is shared between PVP and PVE.
   //
   // Objectives can carry task-style marker data (maps, zones, possibleLocations,
