@@ -1,0 +1,534 @@
+{
+  "tour": {
+    "id": "tour",
+    "name": "Tour",
+    "normalizedName": "tour",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Tour",
+    "order": 1,
+    "autoStart": true,
+    "chapterRequirements": [],
+    "activation": null,
+    "description": "Starting quest - automatically unlocked at the beginning of the storyline",
+    "notes": null,
+    "rewards": {
+      "description": "Unlocks achievement Pathfinder, traders (Skier, Mechanic, Prapor, Peacekeeper), and direct access to all locations"
+    },
+    "mapUnlocks": [
+      {
+        "id": "5714dc692459777137212e12",
+        "name": "Streets of Tarkov"
+      },
+      {
+        "id": "5714dbc024597771384a510d",
+        "name": "Interchange"
+      },
+      {
+        "id": "56f40101d2720b2a4d8b45d6",
+        "name": "Customs"
+      },
+      {
+        "id": "55f2d3fd4bdc2d5f408b4567",
+        "name": "Factory"
+      },
+      {
+        "id": "5704e3c2d2720bac5b8b4567",
+        "name": "Woods"
+      },
+      {
+        "id": "5704e554d2720bac5b8b456e",
+        "name": "Shoreline"
+      },
+      {
+        "id": "5704e5fad2720bc05b8b4567",
+        "name": "Reserve"
+      },
+      {
+        "id": "5b0fc42d86f7744a585f9105",
+        "name": "The Lab"
+      },
+      {
+        "id": "5704e4dad2720bb55b8b4567",
+        "name": "Lighthouse"
+      }
+    ],
+    "traderUnlocks": [
+      {
+        "id": "5ac3b934156ae10c4430e83c",
+        "name": "Ragman"
+      },
+      {
+        "id": "58330581ace78e27b8b10cee",
+        "name": "Skier"
+      },
+      {
+        "id": "54cb50c76803fa8b248b4571",
+        "name": "Prapor"
+      },
+      {
+        "id": "5a7c2eca46aef81a7ca2145d",
+        "name": "Mechanic"
+      },
+      {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      }
+    ]
+  },
+  "falling-skies": {
+    "id": "falling-skies",
+    "name": "Falling Skies",
+    "normalizedName": "falling-skies",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Falling_Skies",
+    "order": 2,
+    "autoStart": false,
+    "chapterRequirements": [
+      {
+        "id": "tour",
+        "name": "Tour"
+      }
+    ],
+    "activation": {
+      "summary": "Ask Mechanic about the downed plane while progressing through Tour."
+    },
+    "description": "Investigate the crashed aircraft operation and decide what to do with the armored case.",
+    "notes": "Keeping the armored case results in -0.3 Prapor reputation and changes The Ticket routes.",
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "batya": {
+    "id": "batya",
+    "name": "Batya",
+    "normalizedName": "batya",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Batya",
+    "order": 3,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Visit one of the marked BEAR trace locations on Customs, Reserve, Shoreline, or Woods."
+    },
+    "description": "Investigate the Bogatyr BEAR squad, recover their trail, and coordinate with Lightkeeper and Voevoda.",
+    "notes": null,
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "the-unheard": {
+    "id": "the-unheard",
+    "name": "The Unheard",
+    "normalizedName": "the-unheard",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Unheard",
+    "order": 4,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Pick up and read the Purification note in one of the TerraGroup locations on Streets or Ground Zero."
+    },
+    "description": "Trace The Unheard's Blue Ice protocol through TerraGroup records, A.P.'s network, and encrypted data.",
+    "notes": null,
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "blue-fire": {
+    "id": "blue-fire",
+    "name": "Blue Fire",
+    "normalizedName": "blue-fire",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Blue_Fire",
+    "order": 5,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Pick up and read an EMERCOM leaflet or Item 1156 note from Woods, Interchange, or The Labyrinth."
+    },
+    "description": "Investigate the EMP incident, secure Item 1156 intel, and follow the Rus Post lead chain.",
+    "notes": "Planting the hacking device takes 60 seconds.",
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "they-are-already-here": {
+    "id": "they-are-already-here",
+    "name": "They Are Already Here",
+    "normalizedName": "they-are-already-here",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/They_Are_Already_Here",
+    "order": 6,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Pick up and read the Note about the Eye of the World from Customs, Reserve, Woods, or Shoreline."
+    },
+    "description": "Follow the Eye of the World trail through cultist sites, Sordi infrastructure, and ARRS Station 14-4 KORD.",
+    "notes": null,
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "accidental-witness": {
+    "id": "accidental-witness",
+    "name": "Accidental Witness",
+    "normalizedName": "accidental-witness",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Accidental_Witness",
+    "order": 7,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Locate the scribbled-over car in the Customs dormitory courtyard."
+    },
+    "description": "Track Kozlov's evidence chain through Dorms, Streets, and Reshala's stash network.",
+    "notes": null,
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  },
+  "the-labyrinth": {
+    "id": "the-labyrinth",
+    "name": "The Labyrinth",
+    "normalizedName": "the-labyrinth",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)",
+    "order": 8,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Locate the Labyrinth transit in the Shoreline resort west wing basement with the Knossos key."
+    },
+    "description": "Investigate the underground Labyrinth incident, recover scientist data, and trace the missing BEAR squad.",
+    "notes": "Extremely dangerous area with traps, poison hazards, and miniboss encounters.",
+    "rewards": null,
+    "mapUnlocks": [
+      {
+        "id": "6733700029c367a3d40b02af",
+        "name": "The Labyrinth"
+      }
+    ],
+    "traderUnlocks": []
+  },
+  "the-ticket": {
+    "id": "the-ticket",
+    "name": "The Ticket",
+    "normalizedName": "the-ticket",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Ticket",
+    "order": 9,
+    "autoStart": false,
+    "chapterRequirements": [
+      {
+        "id": "falling-skies",
+        "name": "Falling Skies"
+      }
+    ],
+    "activation": {
+      "summary": "Continue from Falling Skies after obtaining the armored case and start the Mr. Kerman terminal chain."
+    },
+    "description": "Branches into 4 endings based on player decisions: Savior (help Kerman), Fallen (betray Kerman), Survivor (pay Prapor), Debtor (seek Lightkeeper)",
+    "notes": "Decision points are mutually exclusive. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).",
+    "rewards": null,
+    "mapUnlocks": [
+      {
+        "id": "65cc8f81a9aac3e77d0cfd3e",
+        "name": "Terminal"
+      }
+    ],
+    "traderUnlocks": [
+      {
+        "id": "688246518448b05efd61d461",
+        "name": "Mr. Kerman"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "the-ticket-main-1",
+        "type": "main",
+        "description": "Obtain Intelligence Center level 1"
+      },
+      {
+        "id": "the-ticket-main-2",
+        "type": "main",
+        "description": "Talk to Mr. Kerman"
+      },
+      {
+        "id": "the-ticket-main-3",
+        "type": "main",
+        "description": "Wait for Mr. Kerman to reach out"
+      },
+      {
+        "id": "the-ticket-main-4",
+        "type": "main",
+        "description": "Talk to Prapor"
+      },
+      {
+        "id": "the-ticket-main-5",
+        "type": "main",
+        "description": "Talk to Mr. Kerman"
+      },
+      {
+        "id": "the-ticket-main-6",
+        "type": "main",
+        "description": "Ask Mechanic for help with the armored case"
+      },
+      {
+        "id": "the-ticket-main-7",
+        "type": "main",
+        "description": "Obtain the experimental signal jammer"
+      },
+      {
+        "id": "the-ticket-main-8",
+        "type": "main",
+        "description": "Use the signal jammer to unlock the armored case"
+      },
+      {
+        "id": "the-ticket-main-9",
+        "type": "main",
+        "description": "Unlock the armored case"
+      },
+      {
+        "id": "the-ticket-main-10",
+        "type": "main",
+        "description": "Retrieve the Ticket document from the case"
+      },
+      {
+        "id": "the-ticket-main-11",
+        "type": "main",
+        "description": "Contact Mr. Kerman about the Ticket"
+      },
+      {
+        "id": "the-ticket-main-12",
+        "type": "main",
+        "description": "Accept Mr. Kerman's cooperation offer",
+        "notes": "Kerman Route — leads to Savior or Fallen ending",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-13"
+        ]
+      },
+      {
+        "id": "the-ticket-main-13",
+        "type": "main",
+        "description": "Refuse Mr. Kerman's cooperation offer",
+        "notes": "Refuse Route — leads to Survivor or Debtor ending",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-12"
+        ]
+      },
+      {
+        "id": "the-ticket-main-14",
+        "type": "main",
+        "description": "Obtain the Laboratory master pass",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-15",
+        "type": "main",
+        "description": "Locate the RFID card encryption device",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-16",
+        "type": "main",
+        "description": "Talk to Mechanic about the RFID device",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-17",
+        "type": "main",
+        "description": "Wait for Mechanic",
+        "notes": "Kerman Route — 24-hour cooldown"
+      },
+      {
+        "id": "the-ticket-main-18",
+        "type": "main",
+        "description": "Hand over 40 Physical Bitcoins to Mechanic",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-19",
+        "type": "main",
+        "description": "Collect the RFID encryption device from Mechanic",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-20",
+        "type": "main",
+        "description": "Use the RFID device to activate Kruglov's keycard",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-21",
+        "type": "main",
+        "description": "Report to Mr. Kerman",
+        "notes": "Kerman Route"
+      },
+      {
+        "id": "the-ticket-main-22",
+        "type": "main",
+        "description": "Hand over the TerraGroup evidence to Mr. Kerman",
+        "notes": "Savior ending — cooperate fully with Kerman",
+        "endingId": "savior",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-23"
+        ]
+      },
+      {
+        "id": "the-ticket-main-23",
+        "type": "main",
+        "description": "Betray Mr. Kerman and keep the evidence",
+        "notes": "Fallen ending — turn against Kerman",
+        "endingId": "fallen",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-22"
+        ]
+      },
+      {
+        "id": "the-ticket-main-24",
+        "type": "main",
+        "description": "Use the RFID card at the Terminal intercom on Shoreline",
+        "notes": "Refuse Route"
+      },
+      {
+        "id": "the-ticket-main-25",
+        "type": "main",
+        "description": "Pay Prapor to arrange Terminal access",
+        "notes": "Survivor ending — pay the ruble cost",
+        "endingId": "survivor",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-26"
+        ]
+      },
+      {
+        "id": "the-ticket-main-26",
+        "type": "main",
+        "description": "Seek Lightkeeper for Terminal access",
+        "notes": "Debtor ending — work with Lightkeeper instead",
+        "endingId": "debtor",
+        "mutuallyExclusiveWith": [
+          "the-ticket-main-25"
+        ]
+      },
+      {
+        "id": "the-ticket-main-27",
+        "type": "main",
+        "description": "Complete topographic reconnaissance for Lightkeeper",
+        "notes": "Debtor Route"
+      },
+      {
+        "id": "the-ticket-main-28",
+        "type": "main",
+        "description": "Obtain cultist amulets for Lightkeeper",
+        "notes": "Debtor Route"
+      },
+      {
+        "id": "the-ticket-main-29",
+        "type": "main",
+        "description": "Deliver items to Lightkeeper",
+        "notes": "Debtor Route"
+      },
+      {
+        "id": "the-ticket-main-30",
+        "type": "main",
+        "description": "Receive the Lightkeeper keycard",
+        "notes": "Debtor Route"
+      },
+      {
+        "id": "the-ticket-main-31",
+        "type": "main",
+        "description": "Arrive at the port Terminal entrance"
+      },
+      {
+        "id": "the-ticket-opt-1",
+        "type": "optional",
+        "description": "Locate Prapor's camp on Lighthouse",
+        "notes": "Only if armored case was given to Prapor in Falling Skies"
+      },
+      {
+        "id": "the-ticket-opt-2",
+        "type": "optional",
+        "description": "Find clues about their intentions at the camp",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-3",
+        "type": "optional",
+        "description": "Talk to Mr. Kerman about what you found",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-4",
+        "type": "optional",
+        "description": "Gain access to Lightkeeper",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-5",
+        "type": "optional",
+        "description": "Talk to Lightkeeper",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-6",
+        "type": "optional",
+        "description": "Maintain good standing with Lightkeeper",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-7",
+        "type": "optional",
+        "description": "Obtain 3 TerraGroup \"Blue Folders\" materials",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-8",
+        "type": "optional",
+        "description": "Deliver materials to Lightkeeper",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-9",
+        "type": "optional",
+        "description": "Launch yellow signal flare at ULTRA entrance on Interchange",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-10",
+        "type": "optional",
+        "description": "Eliminate 15 targets in a single Interchange raid",
+        "notes": "Lightkeeper access chain"
+      },
+      {
+        "id": "the-ticket-opt-11",
+        "type": "optional",
+        "description": "Obtain Batya's evidence documents",
+        "notes": "Cross-chapter evidence for Savior ending (from Batya chapter)",
+        "endingId": "savior"
+      },
+      {
+        "id": "the-ticket-opt-12",
+        "type": "optional",
+        "description": "Obtain The Unheard evidence documents",
+        "notes": "Cross-chapter evidence for Savior ending (from The Unheard chapter)",
+        "endingId": "savior"
+      },
+      {
+        "id": "the-ticket-opt-13",
+        "type": "optional",
+        "description": "Collect all required TerraGroup compromise evidence",
+        "notes": "Savior ending requires 8+ evidence documents from multiple chapters",
+        "endingId": "savior"
+      }
+    ]
+  },
+  "boreas": {
+    "id": "boreas",
+    "name": "Boreas",
+    "normalizedName": "boreas",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Boreas",
+    "order": 10,
+    "autoStart": false,
+    "chapterRequirements": [],
+    "activation": {
+      "summary": "Ask Mechanic about the connection between TerraGroup and Paradigm Shipping, then follow the lead to the nuclear icebreaker \"Boreas\"."
+    },
+    "description": "Investigate Paradigm Shipping's icebreaker \"Boreas\", board it, and recover the hard drives from compartment C-1 for Mechanic.",
+    "notes": null,
+    "rewards": null,
+    "mapUnlocks": [],
+    "traderUnlocks": []
+  }
+}

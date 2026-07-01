@@ -35,6 +35,10 @@
         "type": "integer",
         "minimum": 1
       },
+      "chapterQuestId": {
+        "description": "tarkov.dev/EFT story quest id this chapter maps to (the narrator-trader Completion quest). Traceability to the source game data.",
+        "type": "string"
+      },
       "autoStart": {
         "description": "Whether the chapter starts automatically (true) or must be discovered in-world (false)",
         "type": "boolean"
@@ -120,6 +124,14 @@
           "properties": {
             "id": {
               "description": "Globally unique objective ID ({chapter}-{main|opt}-{n})",
+              "type": "string"
+            },
+            "sourceQuestId": {
+              "description": "EFT sub-quest id backing this objective (traceability to source game data)",
+              "type": "string"
+            },
+            "sourceObjectiveId": {
+              "description": "EFT condition id backing this objective (traceability to source game data)",
               "type": "string"
             },
             "type": {
