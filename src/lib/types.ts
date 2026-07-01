@@ -320,7 +320,7 @@ export interface StoryChapter {
   wikiLink: string;
   order: number;
   /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
-  chapterQuestId?: string;
+  chapterQuestId: string;
   autoStart?: boolean;
   chapterRequirements?: Array<{ id: string; name: string }>;
   activation?: StoryChapterActivation;
