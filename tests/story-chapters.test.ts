@@ -51,12 +51,12 @@ describe('story chapters (EFT-sourced)', () => {
         seen.set(obj.id, cid);
         expect(['main', 'optional']).toContain(obj.type);
         // The Ticket keeps curated branching objectives (no source ids); every
-        // other chapter is generated straight from the quest reference.
+        // other chapter is generated straight from the quest reference, where the
+        // objective id IS the stable source objective id (24-hex) plus a
+        // sourceQuestId linking it to its sub-quest.
         if (cid !== 'the-ticket') {
+          expect(obj.id, `${cid} objective id`).toMatch(/^[0-9a-f]{24}$/);
           expect(obj.sourceQuestId, `${cid}/${obj.id} sourceQuestId`).toMatch(/^[0-9a-f]{24}$/);
-          expect(obj.sourceObjectiveId, `${cid}/${obj.id} sourceObjectiveId`).toMatch(
-            /^[0-9a-f]{24}$/
-          );
         }
       }
     }

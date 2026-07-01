@@ -124,16 +124,11 @@
           "required": ["id", "type", "description"],
           "properties": {
             "id": {
-              "description": "Globally unique objective ID ({chapter}-{main|opt}-{n})",
+              "description": "Objective ID. Generated chapters use the stable source objective id (24-hex); curated chapters (The Ticket) use {chapter}-{main|opt}-{n}.",
               "type": "string"
             },
             "sourceQuestId": {
               "description": "EFT sub-quest id backing this objective (traceability to source game data)",
-              "type": "string",
-              "pattern": "^[0-9a-f]{24}$"
-            },
-            "sourceObjectiveId": {
-              "description": "EFT condition id backing this objective (traceability to source game data)",
               "type": "string",
               "pattern": "^[0-9a-f]{24}$"
             },

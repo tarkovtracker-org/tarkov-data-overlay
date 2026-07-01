@@ -281,8 +281,6 @@ export interface StoryObjective {
   description: string;
   /** EFT sub-quest id backing this objective (source traceability) */
   sourceQuestId?: string;
-  /** EFT condition id backing this objective (source traceability) */
-  sourceObjectiveId?: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;

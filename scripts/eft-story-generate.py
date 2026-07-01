@@ -5,9 +5,11 @@ optional/required flags.
 
 Sources (by authority):
 - Local quest reference (eft/quest-list.json): objective existence, text, order,
-  and source ids. A chapter is a named storyline quest on the narrator trader
+  and stable ids. A chapter is a named storyline quest on the narrator trader
   (67f7af56c117b6140af2a607); its objective conditions are ordered sub-quest refs
-  whose own conditions carry the text.
+  whose own conditions carry the text. The objective condition id is used as the
+  stable objective id so consumers that persist completion per id are not broken
+  by wording/order changes on regeneration.
 - EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.py): the
   player-facing optional/required distinction, matched by fuzzy text.
 - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
@@ -130,16 +132,17 @@ def main():
                     matched += 1
                 if optional:
                     opt_n += 1
-                    oid = f"{chapter_id}-opt-{opt_n}"
                 else:
                     main_n += 1
-                    oid = f"{chapter_id}-main-{main_n}"
+                # Use the real source objective id as the stable id. Positional
+                # ids ({chapter}-main-n) shift whenever wording/order changes,
+                # which silently corrupts consumers that persist completion per
+                # objective id. The source id is unique and stable across regens.
                 objs.append({
-                    "id": oid,
+                    "id": obj_id,
                     "type": "optional" if optional else "main",
                     "description": text,
                     "sourceQuestId": sub_id,
-                    "sourceObjectiveId": obj_id,
                 })
         stats[chapter_id] = {"objectives": len(objs), "matched": matched,
                              "optional": opt_n, "wiki": len(wiki_objs)}
