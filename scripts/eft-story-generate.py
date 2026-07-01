@@ -179,8 +179,10 @@ def main():
               f"wiki={s['wiki']}", file=sys.stderr)
         # A chapter that no longer matches the wiki means wording drift has
         # degraded optional/required accuracy; fail generation so it is caught
-        # now rather than shipped silently. Current chapters match >=86%.
-        if s["objectives"] and pct < MIN_MATCH_PCT:
+        # now rather than shipped silently. Zero resolvable objectives (e.g. a
+        # broken CHAPTER_QUEST_ID mapping) is an even harder failure. Current
+        # expanded chapters match >=86%. (The Ticket is preserved, not in stats.)
+        if s["objectives"] == 0 or pct < MIN_MATCH_PCT:
             low.append((cid, pct))
 
     if low:
