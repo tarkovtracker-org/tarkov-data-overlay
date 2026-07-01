@@ -28,6 +28,7 @@ WIKI = Path("data/eft/story-wiki-objectives.json")
 NARRATOR_TRADER = "67f7af56c117b6140af2a607"
 ID_RE = re.compile(r"[0-9a-fA-F]{24}")
 MATCH_THRESHOLD = 0.6
+MIN_MATCH_PCT = 75  # fail generation if a chapter's wiki match drops below this
 
 CHAPTER_QUEST_ID = {
     "tour": "68cbd33676fe74b1e80bfd91",
@@ -171,10 +172,21 @@ def main():
         out[chapter_id] = chapter
 
     print("chapter match stats (eft objs / wiki-matched / optional):", file=sys.stderr)
+    low = []
     for cid, s in stats.items():
         pct = 100 * s["matched"] // max(s["objectives"], 1)
         print(f"  {cid:22s} objs={s['objectives']:3d} matched={pct:3d}% optional={s['optional']:2d} "
               f"wiki={s['wiki']}", file=sys.stderr)
+        # A chapter that no longer matches the wiki means wording drift has
+        # degraded optional/required accuracy; fail generation so it is caught
+        # now rather than shipped silently. Current chapters match >=86%.
+        if s["objectives"] and pct < MIN_MATCH_PCT:
+            low.append((cid, pct))
+
+    if low:
+        detail = ", ".join(f"{cid} ({pct}%)" for cid, pct in low)
+        print(f"error: wiki match below {MIN_MATCH_PCT}% for: {detail}", file=sys.stderr)
+        sys.exit(1)
 
     json.dump(out, sys.stdout, indent=2, ensure_ascii=False)
 
