@@ -2,7 +2,7 @@
   "$id": "prestige-override.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Prestige Override",
-  "description": "Schema for correcting tarkov.dev prestige-level data. Keyed by tarkov.dev prestige ID. Each entry patches fields on the matching item of the API `prestige` array; `conditions` is an ID-keyed object of per-condition patches (e.g. fixing a `taskStatus` condition that points at the wrong storyline quest).",
+  "description": "Schema for correcting tarkov.dev prestige-level data. Keyed by tarkov.dev prestige ID. Each entry patches fields on the matching item of the API `prestige` array; `conditions` is an ID-keyed object of per-condition patches or overlay-only synthetic conditions, and `storyRequirements` is the authoritative list of story-chapter requirements shown in-game.",
   "type": "object",
   "additionalProperties": {
     "type": "object",
@@ -18,7 +18,7 @@
         "type": "string"
       },
       "conditions": {
-        "description": "Per-condition corrections, keyed by the tarkov.dev condition ID found in the prestige item's `conditions` array",
+        "description": "Per-condition corrections, keyed by condition ID. Keys matching tarkov.dev condition IDs patch existing conditions; overlay-only keys are synthetic conditions consumers should append.",
         "type": "object",
         "additionalProperties": {
           "type": "object",
@@ -56,12 +56,52 @@
             }
           }
         }
+      },
+      "storyRequirements": {
+        "description": "Authoritative story-chapter requirements shown by the in-game prestige screen. Empty array means no story requirement.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "storyChapter", "name", "status"],
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "storyObjectiveStatus" } } },
+              "then": { "required": ["objective"] }
+            }
+          ],
+          "properties": {
+            "type": {
+              "description": "Whether the prestige requires a whole story chapter or one objective inside it",
+              "enum": ["storyChapterStatus", "storyObjectiveStatus"]
+            },
+            "storyChapter": {
+              "description": "storyChapters id, e.g. tour or the-ticket",
+              "type": "string"
+            },
+            "objective": {
+              "description": "Objective id inside the story chapter when type is storyObjectiveStatus",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name shown by the in-game prestige screen",
+              "type": "string"
+            },
+            "status": {
+              "description": "Required status for the story chapter/objective",
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          }
+        }
       }
     },
     "anyOf": [
       { "required": ["conditions"] },
       { "required": ["name"] },
-      { "required": ["prestigeLevel"] }
+      { "required": ["prestigeLevel"] },
+      { "required": ["storyRequirements"] }
     ]
   }
 }

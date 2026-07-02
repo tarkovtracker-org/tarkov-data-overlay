@@ -66,7 +66,15 @@ async function fetchOverlay() {
           "task": "new_beginning_prestige_5",
           "status": ["complete"]
         }
-      }
+      },
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "tour",
+          "name": "Tour",
+          "status": ["complete"]
+        }
+      ]
     }
   },
   "modes": {
@@ -223,16 +231,25 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
 ## Applying Prestige Corrections
 
 tarkov.dev exposes prestige levels as a `prestige` array, each item shaped like
-`{ id, prestigeLevel, conditions: [{ id, type, ... }] }`. Some of these are
-wrong: because tarkov.dev does not carry the New Beginning (Prestige 5) and
-(Prestige 6) quests, its Prestige 5/6 `taskStatus` condition points at Collector
-(`5c51aac186f77432ea65c552`) as a stand-in. The matching quests are provided in
-`tasksAdd` (`new_beginning_prestige_5` / `new_beginning_prestige_6`).
+`{ id, prestigeLevel, conditions: [{ id, type, ... }] }`. It currently misses two
+kinds of in-game requirements:
+
+- the story-chapter requirements shown on the in-game prestige screen (`Tour`,
+  `Falling Skies`, `The Ticket`, etc.)
+- the New Beginning (Prestige 5/6) quests; its Prestige 5/6 `taskStatus`
+  condition points at Collector (`5c51aac186f77432ea65c552`) only, but the game
+  requires both Collector and the matching New Beginning quest
+
+The missing quests are provided in `tasksAdd` (`new_beginning_prestige_5` /
+`new_beginning_prestige_6`). The story requirements are provided as an
+authoritative `storyRequirements` array; an empty array means there are no
+story requirements for that prestige level.
 
 The overlay's `prestige` section is keyed by prestige ID. Each entry patches the
-matching prestige item; `conditions` is keyed by the condition ID inside that
-item's `conditions` array. Apply it by merging top-level fields, then patching
-conditions by ID:
+matching prestige item; `conditions` is keyed by condition ID. Keys matching
+upstream condition IDs patch existing conditions, while overlay-only keys are
+synthetic conditions to append. Apply it by merging top-level fields, then
+patching/appending conditions by ID:
 
 ```typescript
 type PrestigeCondition = { id: string; type: string; task?: string; status?: string[]; [k: string]: unknown };
@@ -246,18 +263,25 @@ function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
   const result: Prestige = { ...base, ...topLevel };
 
   if (condPatches) {
+    const remaining = new Map(Object.entries(condPatches));
     result.conditions = base.conditions.map((cond) => {
-      const patch = condPatches[cond.id];
+      const patch = remaining.get(cond.id);
+      remaining.delete(cond.id);
       return patch ? { ...cond, ...patch } : cond;
     });
+    result.conditions.push(
+      ...Array.from(remaining, ([id, patch]) => ({ id, ...patch }))
+    );
   }
   return result;
 }
 ```
 
-The corrected `task` may be an overlay `tasksAdd` id (e.g.
+The corrected or appended `task` may be an overlay `tasksAdd` id (e.g.
 `new_beginning_prestige_5`) rather than a tarkov.dev task id, so resolve prestige
-task references against the merged task list (`tasksFromApi` + `tasksAdd`).
+task references against the merged task list (`tasksFromApi` + `tasksAdd`). Use
+`storyRequirements` as the source of truth for story-chapter requirements instead
+of inferring them from chapter ordering.
 
 ---
 
@@ -497,14 +521,22 @@ interface StoryChapter {
 interface PrestigeOverride {
   prestigeLevel?: number;
   name?: string;
-  // Per-condition patches keyed by the prestige condition id
+  // Per-condition patches keyed by condition id; overlay-only ids are appended
   conditions?: Record<string, {
     type?: string;
-    task?: string;      // corrected taskStatus target (tarkov.dev or tasksAdd id)
+    task?: string;      // corrected/appended taskStatus target (tarkov.dev or tasksAdd id)
     status?: string[];
     playerLevel?: number;
     skill?: string;
     level?: number;
+  }>;
+  // Authoritative in-game story requirements; [] means none
+  storyRequirements?: Array<{
+    type: 'storyChapterStatus' | 'storyObjectiveStatus';
+    storyChapter: string; // storyChapters id
+    objective?: string;   // objective id for storyObjectiveStatus
+    name: string;
+    status: string[];
   }>;
 }
 ```

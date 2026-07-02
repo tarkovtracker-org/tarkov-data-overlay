@@ -1,28 +1,125 @@
 {
   "prestige": {
+    "672df12f97f0469cea52f55e": {
+      "prestigeLevel": 1,
+      "storyRequirements": []
+    },
+    "672df4281ab8d9c8849a0c88": {
+      "prestigeLevel": 2,
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "tour",
+          "name": "Tour",
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "683da91d6f472cfa738c52f2": {
+      "prestigeLevel": 3,
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "tour",
+          "name": "Tour",
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "falling-skies",
+          "name": "Falling Skies",
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "6842f121000d98ce33b9a60f": {
+      "prestigeLevel": 4,
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "tour",
+          "name": "Tour",
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "type": "storyObjectiveStatus",
+          "storyChapter": "the-ticket",
+          "objective": "the-ticket-main-10",
+          "name": "Obtain the Ticket from Tarkov",
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
     "68d3ddb4fc101237e601d774": {
       "prestigeLevel": 5,
       "conditions": {
-        "68d3ddb415034199b86b8d68": {
+        "overlay_new_beginning_prestige_5": {
           "type": "taskStatus",
           "task": "new_beginning_prestige_5",
           "status": [
             "complete"
           ]
         }
-      }
+      },
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "tour",
+          "name": "Tour",
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "they-are-already-here",
+          "name": "They Are Already Here",
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "type": "storyObjectiveStatus",
+          "storyChapter": "the-ticket",
+          "objective": "the-ticket-main-10",
+          "name": "Obtain the Ticket from Tarkov",
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     },
     "68d3e6f46a7ba36646713fa6": {
       "prestigeLevel": 6,
       "conditions": {
-        "68d3e6f40b976d94f72dde5e": {
+        "overlay_new_beginning_prestige_6": {
           "type": "taskStatus",
           "task": "new_beginning_prestige_6",
           "status": [
             "complete"
           ]
         }
-      }
+      },
+      "storyRequirements": [
+        {
+          "type": "storyChapterStatus",
+          "storyChapter": "the-ticket",
+          "name": "The Ticket",
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     }
   },
   "tasks": {
@@ -3885,7 +3982,7 @@
   },
   "$meta": {
     "version": "1.48",
-    "generated": "2026-07-01T11:53:27.114Z",
-    "sha256": "fe91f38c006c84d1dc80e2141639ac70998738bcd6ea3c000171b46fb52d7bf3"
+    "generated": "2026-07-02T09:06:13.906Z",
+    "sha256": "ebb2d9bb253d66b1eab36ed0a566cdcd76e5605973a37582856acf02deb8c520"
   }
 }
