@@ -1,10 +1,10 @@
 /**
  * Tests for the prestige override capability (issue #207)
  *
- * tarkov.dev does not carry New Beginning (Prestige 5/6), so its `prestige`
- * array points the Prestige 5/6 taskStatus requirement at Collector
- * (5c51aac186f77432ea65c552). The overlay supplies the missing quests via
- * tasksAdd and repoints the prestige requirement at them.
+ * tarkov.dev omits the story-chapter requirements shown in the in-game prestige
+ * screen. It also omits New Beginning (Prestige 5/6), so its Prestige 5/6
+ * task condition only points at Collector. The overlay provides an authoritative
+ * storyRequirements list and appends the missing New Beginning task conditions.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -17,12 +17,26 @@ import {
 } from '../src/lib/index.js';
 import { initializeValidators, getValidator } from '../scripts/validate.js';
 
-const COLLECTOR_ID = '5c51aac186f77432ea65c552';
+const P5_COLLECTOR_CONDITION_ID = '68d3ddb415034199b86b8d68';
+const P6_COLLECTOR_CONDITION_ID = '68d3e6f40b976d94f72dde5e';
+
+const PRESTIGE_IDS = {
+  p1: '672df12f97f0469cea52f55e',
+  p2: '672df4281ab8d9c8849a0c88',
+  p3: '683da91d6f472cfa738c52f2',
+  p4: '6842f121000d98ce33b9a60f',
+  p5: '68d3ddb4fc101237e601d774',
+  p6: '68d3e6f46a7ba36646713fa6',
+} as const;
 
 function loadPrestigeOverride(): Record<string, any> {
   const { srcDir } = getProjectPaths();
   const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
   return (overrides.prestige ?? {}) as Record<string, any>;
+}
+
+function storyNames(entry: any): string[] {
+  return (entry.storyRequirements ?? []).map((req: any) => req.name);
 }
 
 describe('prestige override (issue #207)', () => {
@@ -31,26 +45,41 @@ describe('prestige override (issue #207)', () => {
     expect(getValidator('overrides/prestige.json5', validators)).not.toBeNull();
   });
 
-  it('repoints Prestige 5 and 6 storyline requirement off Collector', () => {
+  it('records the in-game story requirements for each prestige level', () => {
     const prestige = loadPrestigeOverride();
 
-    const p5 = prestige['68d3ddb4fc101237e601d774'];
-    const p6 = prestige['68d3e6f46a7ba36646713fa6'];
-    expect(p5?.prestigeLevel).toBe(5);
-    expect(p6?.prestigeLevel).toBe(6);
-
-    const p5cond = p5.conditions['68d3ddb415034199b86b8d68'];
-    const p6cond = p6.conditions['68d3e6f40b976d94f72dde5e'];
-
-    // Corrected to the overlay-added New Beginning quests...
-    expect(p5cond.task).toBe('new_beginning_prestige_5');
-    expect(p6cond.task).toBe('new_beginning_prestige_6');
-    // ...and no longer the Collector stand-in.
-    expect(p5cond.task).not.toBe(COLLECTOR_ID);
-    expect(p6cond.task).not.toBe(COLLECTOR_ID);
+    expect(storyNames(prestige[PRESTIGE_IDS.p1])).toEqual([]);
+    expect(storyNames(prestige[PRESTIGE_IDS.p2])).toEqual(['Tour']);
+    expect(storyNames(prestige[PRESTIGE_IDS.p3])).toEqual(['Tour', 'Falling Skies']);
+    expect(storyNames(prestige[PRESTIGE_IDS.p4])).toEqual([
+      'Tour',
+      'Obtain the Ticket from Tarkov',
+    ]);
+    expect(storyNames(prestige[PRESTIGE_IDS.p5])).toEqual([
+      'Tour',
+      'They Are Already Here',
+      'Obtain the Ticket from Tarkov',
+    ]);
+    expect(storyNames(prestige[PRESTIGE_IDS.p6])).toEqual(['The Ticket']);
   });
 
-  it('points each prestige condition at a quest the overlay actually provides', () => {
+  it('appends Prestige 5 and 6 New Beginning without replacing Collector', () => {
+    const prestige = loadPrestigeOverride();
+
+    const p5Conditions = prestige[PRESTIGE_IDS.p5].conditions;
+    const p6Conditions = prestige[PRESTIGE_IDS.p6].conditions;
+
+    expect(p5Conditions[P5_COLLECTOR_CONDITION_ID]).toBeUndefined();
+    expect(p6Conditions[P6_COLLECTOR_CONDITION_ID]).toBeUndefined();
+    expect(p5Conditions.overlay_new_beginning_prestige_5.task).toBe(
+      'new_beginning_prestige_5'
+    );
+    expect(p6Conditions.overlay_new_beginning_prestige_6.task).toBe(
+      'new_beginning_prestige_6'
+    );
+  });
+
+  it('points synthetic task conditions at quests the overlay actually provides', () => {
     const { srcDir } = getProjectPaths();
     const prestige = loadPrestigeOverride();
     const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
@@ -65,7 +94,26 @@ describe('prestige override (issue #207)', () => {
     }
   });
 
-  it('rejects an unknown field via the prestige schema', () => {
+  it('points story requirements at known story chapters and objectives', () => {
+    const { srcDir } = getProjectPaths();
+    const prestige = loadPrestigeOverride();
+    const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
+    const storyChapters = (additions.storyChapters ?? {}) as Record<string, any>;
+
+    for (const entry of Object.values(prestige)) {
+      for (const req of entry.storyRequirements ?? []) {
+        const chapter = storyChapters[req.storyChapter];
+        expect(chapter).toBeDefined();
+        if (req.objective) {
+          expect(chapter.objectives.some((objective: any) => objective.id === req.objective)).toBe(
+            true
+          );
+        }
+      }
+    }
+  });
+
+  it('rejects unknown fields via the prestige schema', () => {
     const { schemasDir } = getProjectPaths();
     const ajv = new Ajv({ allErrors: true, strict: false });
     const schema = loadJsonFile(join(schemasDir, 'prestige-override.schema.json'));
@@ -73,7 +121,18 @@ describe('prestige override (issue #207)', () => {
 
     expect(validate({ abc: { bogusField: true } })).toBe(false);
     expect(
-      validate({ abc: { conditions: { def: { task: 'new_beginning_prestige_5' } } } })
+      validate({
+        abc: {
+          storyRequirements: [
+            {
+              type: 'storyChapterStatus',
+              storyChapter: 'tour',
+              name: 'Tour',
+              status: ['complete'],
+            },
+          ],
+        },
+      })
     ).toBe(true);
   });
 });
