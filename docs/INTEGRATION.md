@@ -531,12 +531,20 @@ interface PrestigeOverride {
     level?: number;
   }>;
   // Authoritative in-game story requirements; [] means none
-  storyRequirements?: Array<{
-    type: 'storyChapterStatus' | 'storyObjectiveStatus';
-    storyChapter: string; // storyChapters id
-    objective?: string;   // objective id for storyObjectiveStatus
-    name: string;
-    status: string[];
-  }>;
+  storyRequirements?: Array<
+    | {
+        type: 'storyChapterStatus';
+        storyChapter: string; // storyChapters id
+        name: string;
+        status: string[];
+      }
+    | {
+        type: 'storyObjectiveStatus';
+        storyChapter: string; // storyChapters id
+        objective: string;    // objective id for storyObjectiveStatus
+        name: string;
+        status: string[];
+      }
+  >;
 }
 ```

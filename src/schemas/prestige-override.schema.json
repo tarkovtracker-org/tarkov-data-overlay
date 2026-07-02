@@ -68,11 +68,16 @@
             {
               "if": { "properties": { "type": { "const": "storyObjectiveStatus" } } },
               "then": { "required": ["objective"] }
+            },
+            {
+              "if": { "properties": { "type": { "const": "storyChapterStatus" } } },
+              "then": { "not": { "required": ["objective"] } }
             }
           ],
           "properties": {
             "type": {
               "description": "Whether the prestige requires a whole story chapter or one objective inside it",
+              "type": "string",
               "enum": ["storyChapterStatus", "storyObjectiveStatus"]
             },
             "storyChapter": {

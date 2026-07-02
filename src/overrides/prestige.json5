@@ -14,6 +14,7 @@
   // Beginning quest. The overlay supplies the missing New Beginning quests via
   // tasksAdd and appends those missing taskStatus conditions here (issue #207).
   //
+  // File-level proof links are supplemental; each correction below has its own Proof comment.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/207
   // Proof: https://escapefromtarkov.fandom.com/wiki/Prestige
 
@@ -21,6 +22,7 @@
   '672df12f97f0469cea52f55e': {
     prestigeLevel: 1,
     // Was: tracker inferred Tour; in-game shows no story-chapter requirement.
+    // Proof for this Prestige 1 storyRequirements correction: https://github.com/user-attachments/assets/d82f1be3-eb8e-4b32-a929-a05bbd03b136
     storyRequirements: [],
   },
 
@@ -28,6 +30,7 @@
   '672df4281ab8d9c8849a0c88': {
     prestigeLevel: 2,
     // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 2 storyRequirements correction: https://github.com/user-attachments/assets/2d995517-ae95-4e2d-900e-b3de4d500ca1
     storyRequirements: [
       {
         type: 'storyChapterStatus',
@@ -42,6 +45,7 @@
   '683da91d6f472cfa738c52f2': {
     prestigeLevel: 3,
     // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 3 storyRequirements correction: https://github.com/user-attachments/assets/36887c5c-a963-4b01-919a-099b3ab344bd
     storyRequirements: [
       {
         type: 'storyChapterStatus',
@@ -62,6 +66,7 @@
   '6842f121000d98ce33b9a60f': {
     prestigeLevel: 4,
     // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 4 storyRequirements correction: https://github.com/user-attachments/assets/048d8790-e56d-4b4a-af3e-0d620e7c2e89
     storyRequirements: [
       {
         type: 'storyChapterStatus',
@@ -86,6 +91,7 @@
       // Additional taskStatus requirement: New Beginning (Prestige 5). Upstream
       // already has Collector (68d3ddb415034199b86b8d68), which should remain.
       // Was: missing from tarkov.dev because the task itself is absent upstream.
+      // Proof for this Prestige 5 synthetic condition: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
       overlay_new_beginning_prestige_5: {
         type: 'taskStatus',
         task: 'new_beginning_prestige_5',
@@ -93,6 +99,7 @@
       },
     },
     // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 5 storyRequirements correction: https://github.com/user-attachments/assets/4f2a01ef-420f-4455-b70e-58671404538a
     storyRequirements: [
       {
         type: 'storyChapterStatus',
@@ -123,6 +130,7 @@
       // Additional taskStatus requirement: New Beginning (Prestige 6). Upstream
       // already has Collector (68d3e6f40b976d94f72dde5e), which should remain.
       // Was: missing from tarkov.dev because the task itself is absent upstream.
+      // Proof for this Prestige 6 synthetic condition: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)
       overlay_new_beginning_prestige_6: {
         type: 'taskStatus',
         task: 'new_beginning_prestige_6',
@@ -130,6 +138,7 @@
       },
     },
     // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 6 storyRequirements correction: https://github.com/user-attachments/assets/3aa46ef0-b98c-492a-96c3-1b2c90665f2d
     storyRequirements: [
       {
         type: 'storyChapterStatus',

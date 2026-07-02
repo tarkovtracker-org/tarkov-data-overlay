@@ -4,7 +4,7 @@
  * tarkov.dev omits the story-chapter requirements shown in the in-game prestige
  * screen. It also omits New Beginning (Prestige 5/6), so its Prestige 5/6
  * task condition only points at Collector. The overlay provides an authoritative
- * storyRequirements list and appends the missing New Beginning task conditions.
+ * storyRequirements list and synthetic New Beginning task conditions.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -14,6 +14,8 @@ import {
   getProjectPaths,
   loadAllJson5FromDir,
   loadJsonFile,
+  type PrestigeOverride,
+  type StoryChapter,
 } from '../src/lib/index.js';
 import { initializeValidators, getValidator } from '../scripts/validate.js';
 
@@ -29,14 +31,15 @@ const PRESTIGE_IDS = {
   p6: '68d3e6f46a7ba36646713fa6',
 } as const;
 
-function loadPrestigeOverride(): Record<string, any> {
+function loadPrestigeOverride(): Record<string, PrestigeOverride> {
   const { srcDir } = getProjectPaths();
   const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
-  return (overrides.prestige ?? {}) as Record<string, any>;
+  return (overrides.prestige ?? {}) as Record<string, PrestigeOverride>;
 }
 
-function storyNames(entry: any): string[] {
-  return (entry.storyRequirements ?? []).map((req: any) => req.name);
+function storyNames(entry: PrestigeOverride | undefined): string[] {
+  expect(entry).toBeDefined();
+  return (entry?.storyRequirements ?? []).map((req) => req.name);
 }
 
 describe('prestige override (issue #207)', () => {
@@ -63,11 +66,15 @@ describe('prestige override (issue #207)', () => {
     expect(storyNames(prestige[PRESTIGE_IDS.p6])).toEqual(['The Ticket']);
   });
 
-  it('appends Prestige 5 and 6 New Beginning without replacing Collector', () => {
+  it('uses synthetic Prestige 5 and 6 New Beginning condition keys instead of patching Collector', () => {
     const prestige = loadPrestigeOverride();
 
-    const p5Conditions = prestige[PRESTIGE_IDS.p5].conditions;
-    const p6Conditions = prestige[PRESTIGE_IDS.p6].conditions;
+    const p5Entry = prestige[PRESTIGE_IDS.p5];
+    const p6Entry = prestige[PRESTIGE_IDS.p6];
+    expect(p5Entry).toBeDefined();
+    expect(p6Entry).toBeDefined();
+    const p5Conditions = p5Entry?.conditions ?? {};
+    const p6Conditions = p6Entry?.conditions ?? {};
 
     expect(p5Conditions[P5_COLLECTOR_CONDITION_ID]).toBeUndefined();
     expect(p6Conditions[P6_COLLECTOR_CONDITION_ID]).toBeUndefined();
@@ -98,14 +105,14 @@ describe('prestige override (issue #207)', () => {
     const { srcDir } = getProjectPaths();
     const prestige = loadPrestigeOverride();
     const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
-    const storyChapters = (additions.storyChapters ?? {}) as Record<string, any>;
+    const storyChapters = (additions.storyChapters ?? {}) as Record<string, StoryChapter>;
 
     for (const entry of Object.values(prestige)) {
       for (const req of entry.storyRequirements ?? []) {
         const chapter = storyChapters[req.storyChapter];
         expect(chapter).toBeDefined();
-        if (req.objective) {
-          expect(chapter.objectives.some((objective: any) => objective.id === req.objective)).toBe(
+        if (req.type === 'storyObjectiveStatus') {
+          expect(chapter.objectives?.some((objective) => objective.id === req.objective)).toBe(
             true
           );
         }
@@ -134,5 +141,34 @@ describe('prestige override (issue #207)', () => {
         },
       })
     ).toBe(true);
+    expect(
+      validate({
+        abc: {
+          storyRequirements: [
+            {
+              type: 'storyObjectiveStatus',
+              storyChapter: 'the-ticket',
+              name: 'Obtain the Ticket from Tarkov',
+              status: ['complete'],
+            },
+          ],
+        },
+      })
+    ).toBe(false);
+    expect(
+      validate({
+        abc: {
+          storyRequirements: [
+            {
+              type: 'storyChapterStatus',
+              storyChapter: 'tour',
+              objective: 'the-ticket-main-10',
+              name: 'Tour',
+              status: ['complete'],
+            },
+          ],
+        },
+      })
+    ).toBe(false);
   });
 });

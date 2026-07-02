@@ -356,16 +356,27 @@ export interface PrestigeConditionOverride {
 }
 
 /** Storyline requirement shown by the in-game prestige screen */
-export interface PrestigeStoryRequirement {
-  type: 'storyChapterStatus' | 'storyObjectiveStatus';
-  /** Story chapter id from storyChapters, e.g. tour */
-  storyChapter: string;
-  /** Objective id inside the story chapter when only one objective is required */
-  objective?: string;
-  /** Display name from the in-game prestige screen */
-  name: string;
-  status: string[];
-}
+export type PrestigeStoryRequirement =
+  | {
+      type: 'storyChapterStatus';
+      /** Story chapter id from storyChapters, e.g. tour */
+      storyChapter: string;
+      /** Display name from the in-game prestige screen */
+      name: string;
+      /** Required status for the story chapter */
+      status: string[];
+    }
+  | {
+      type: 'storyObjectiveStatus';
+      /** Story chapter id from storyChapters, e.g. the-ticket */
+      storyChapter: string;
+      /** Objective id inside the story chapter when only one objective is required */
+      objective: string;
+      /** Display name from the in-game prestige screen */
+      name: string;
+      /** Required status for the story objective */
+      status: string[];
+    };
 
 /** Correction to a single prestige level, keyed by tarkov.dev prestige id */
 export interface PrestigeOverride {
