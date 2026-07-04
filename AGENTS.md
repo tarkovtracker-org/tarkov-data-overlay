@@ -13,6 +13,7 @@ Community-maintained data overlay for tarkov.dev API corrections and additions. 
 ### Shared Library (src/lib/)
 
 Scripts share utilities via `src/lib/index.ts`:
+
 - `file-loader.ts` - JSON5/JSON loading, project paths, directory scanning
 - `tarkov-api.ts` - json.tarkov.dev adapter that fetches the static per-mode JSON endpoints (tasks/items/maps/traders plus `_en` translations) and adapts them into the `TaskData[]` shape
 - `task-validator.ts` - Override validation logic against API data
@@ -89,6 +90,7 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 The EFT Fandom wiki serves rendered HTML page paths (`https://escapefromtarkov.fandom.com/wiki/...`) behind a Cloudflare managed challenge. Non-browser clients (curl, agent fetch tools, scripts) get `HTTP 403` with a `cf-mitigated: challenge` header instead of content, regardless of User-Agent. Do not scrape `/wiki/` HTML.
 
 Use the MediaWiki API instead — it is not challenged and returns full content (no User-Agent required):
+
 - Wikitext: `https://escapefromtarkov.fandom.com/api.php?action=parse&page=<Title>&prop=wikitext&format=json`
 - Rendered HTML fragment: `...&prop=text`
 - Plain-text extract: `action=query&prop=extracts&...`
