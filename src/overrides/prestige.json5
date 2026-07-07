@@ -3,43 +3,149 @@
   //
   // The built `prestige` section is keyed by tarkov.dev prestige ID. Each entry
   // patches the matching item of the API `prestige` array; `conditions` is keyed
-  // by the tarkov.dev condition ID inside that prestige item's `conditions` array.
+  // by condition ID. Keys matching upstream condition IDs patch existing
+  // conditions, while overlay-only keys are synthetic conditions consumers should
+  // append.
   //
-  // Why this exists: tarkov.dev does not carry the New Beginning (Prestige 5) or
-  // (Prestige 6) quests, so the live `prestige` array points the Prestige 5 and
-  // Prestige 6 `taskStatus` requirement at Collector (5c51aac186f77432ea65c552)
-  // as a stand-in. The overlay supplies the missing quests via tasksAdd
-  // (new_beginning_prestige_5 / new_beginning_prestige_6); these corrections
-  // repoint the prestige requirement at them so consumers stop showing Collector
-  // as the Prestige 5/6 storyline requirement (issue #207).
+  // Why this exists: tarkov.dev does not expose the story-chapter requirements
+  // shown by the in-game prestige screen, and it also lacks the New Beginning
+  // (Prestige 5) and (Prestige 6) tasks. Its Prestige 5/6 task condition points
+  // at Collector only, but in-game requires both Collector and the matching New
+  // Beginning quest. The overlay supplies the missing New Beginning quests via
+  // tasksAdd and appends those missing taskStatus conditions here (issue #207).
   //
+  // File-level proof links are supplemental; each correction below has its own Proof comment.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/207
   // Proof: https://escapefromtarkov.fandom.com/wiki/Prestige
-  //   Prestige 5 requires "New Beginning (Prestige 5)"
-  //   Prestige 6 requires "New Beginning (Prestige 6)"
+
+  // Prestige 1
+  '672df12f97f0469cea52f55e': {
+    prestigeLevel: 1,
+    // Was: tracker inferred Tour; in-game shows no story-chapter requirement.
+    // Proof for this Prestige 1 storyRequirements correction: https://github.com/user-attachments/assets/d82f1be3-eb8e-4b32-a929-a05bbd03b136
+    storyRequirements: [],
+  },
+
+  // Prestige 2
+  '672df4281ab8d9c8849a0c88': {
+    prestigeLevel: 2,
+    // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 2 storyRequirements correction: https://github.com/user-attachments/assets/2d995517-ae95-4e2d-900e-b3de4d500ca1
+    storyRequirements: [
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'tour',
+        name: 'Tour',
+        status: ['complete'],
+      },
+    ],
+  },
+
+  // Prestige 3
+  '683da91d6f472cfa738c52f2': {
+    prestigeLevel: 3,
+    // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 3 storyRequirements correction: https://github.com/user-attachments/assets/36887c5c-a963-4b01-919a-099b3ab344bd
+    storyRequirements: [
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'tour',
+        name: 'Tour',
+        status: ['complete'],
+      },
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'falling-skies',
+        name: 'Falling Skies',
+        status: ['complete'],
+      },
+    ],
+  },
+
+  // Prestige 4
+  '6842f121000d98ce33b9a60f': {
+    prestigeLevel: 4,
+    // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 4 storyRequirements correction: https://github.com/user-attachments/assets/048d8790-e56d-4b4a-af3e-0d620e7c2e89
+    storyRequirements: [
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'tour',
+        name: 'Tour',
+        status: ['complete'],
+      },
+      {
+        type: 'storyObjectiveStatus',
+        storyChapter: 'the-ticket',
+        objective: 'the-ticket-main-10',
+        name: 'Obtain the Ticket from Tarkov',
+        status: ['complete'],
+      },
+    ],
+  },
 
   // Prestige 5
   '68d3ddb4fc101237e601d774': {
     prestigeLevel: 5,
     conditions: {
-      // taskStatus requirement: should be New Beginning (Prestige 5), not Collector
-      '68d3ddb415034199b86b8d68': {
+      // Additional taskStatus requirement: New Beginning (Prestige 5). Upstream
+      // already has Collector (68d3ddb415034199b86b8d68), which should remain.
+      // Was: missing from tarkov.dev because the task itself is absent upstream.
+      // Proof for this Prestige 5 synthetic condition: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
+      overlay_new_beginning_prestige_5: {
         type: 'taskStatus',
-        task: 'new_beginning_prestige_5', // Was: 5c51aac186f77432ea65c552 (Collector)
+        task: 'new_beginning_prestige_5',
         status: ['complete'],
       },
     },
+    // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 5 storyRequirements correction: https://github.com/user-attachments/assets/4f2a01ef-420f-4455-b70e-58671404538a
+    storyRequirements: [
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'tour',
+        name: 'Tour',
+        status: ['complete'],
+      },
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'they-are-already-here',
+        name: 'They Are Already Here',
+        status: ['complete'],
+      },
+      {
+        type: 'storyObjectiveStatus',
+        storyChapter: 'the-ticket',
+        objective: 'the-ticket-main-10',
+        name: 'Obtain the Ticket from Tarkov',
+        status: ['complete'],
+      },
+    ],
   },
 
   // Prestige 6
   '68d3e6f46a7ba36646713fa6': {
     prestigeLevel: 6,
     conditions: {
-      // taskStatus requirement: should be New Beginning (Prestige 6), not Collector
-      '68d3e6f40b976d94f72dde5e': {
+      // Additional taskStatus requirement: New Beginning (Prestige 6). Upstream
+      // already has Collector (68d3e6f40b976d94f72dde5e), which should remain.
+      // Was: missing from tarkov.dev because the task itself is absent upstream.
+      // Proof for this Prestige 6 synthetic condition: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)
+      overlay_new_beginning_prestige_6: {
         type: 'taskStatus',
-        task: 'new_beginning_prestige_6', // Was: 5c51aac186f77432ea65c552 (Collector)
+        task: 'new_beginning_prestige_6',
         status: ['complete'],
       },
     },
+    // Was: story requirements missing from tarkov.dev.
+    // Proof for this Prestige 6 storyRequirements correction: https://github.com/user-attachments/assets/3aa46ef0-b98c-492a-96c3-1b2c90665f2d
+    storyRequirements: [
+      {
+        type: 'storyChapterStatus',
+        storyChapter: 'the-ticket',
+        name: 'The Ticket',
+        status: ['complete'],
+      },
+    ],
   },
 }
