@@ -161,8 +161,8 @@
         ],
       },
       '6926fcc872a6499d1fa29327': {
-        // Fourth fuel tank - upstream objective has no zone data. Was: []
-        zones: [
+        // Fourth fuel tank - upstream objective ships with no zone data
+        zones: [ // Was: []
           {
             map: {
               id: '5714dbc024597771384a510d',
