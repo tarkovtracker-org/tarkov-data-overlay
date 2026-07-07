@@ -251,25 +251,8 @@
               }
             }
           ]
-        }
-      },
-      "objectivesAdd": [
-        {
-          "id": "the_blood_of_war_-_part_1_obj04",
-          "description": "Mark the fourth fuel tank with an MS2000 Marker on Interchange",
-          "type": "mark",
-          "maps": [
-            {
-              "id": "5714dbc024597771384a510d",
-              "name": "Interchange"
-            }
-          ],
-          "markerItem": {
-            "id": "5991b51486f77447b112d44f",
-            "name": "MS2000 Marker",
-            "shortName": "MS2000"
-          },
-          "optional": true,
+        },
+        "6926fcc872a6499d1fa29327": {
           "zones": [
             {
               "map": {
@@ -308,7 +291,7 @@
             }
           ]
         }
-      ]
+      }
     },
     "6761f28a022f60bb320f3e95": {
       "objectives": {
@@ -3981,8 +3964,8 @@
     }
   },
   "$meta": {
-    "version": "1.49",
-    "generated": "2026-07-07T01:23:04.805Z",
-    "sha256": "d247e5639d50c2b165d9253f993ebc1193d127d539ff9a28e64d8164193bb824"
+    "version": "1.50",
+    "generated": "2026-07-07T02:18:48.691Z",
+    "sha256": "5e24b37fb87614e5528daeb41c04f5d6ce983e950700346b57db0f15a5714233"
   }
 }
