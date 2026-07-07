@@ -116,7 +116,10 @@
     },
   },
 
-  // The Blood of War - Part 1 - Truck #2 Location Change, Truck #4 Missing
+  // The Blood of War - Part 1 - Truck #2 location change; truck #4 objective missing zone data
+  // tarkov.dev now ships the fourth-tank objective (6926fcc872a6499d1fa29327) as a required
+  // objective, so the former overlay-added optional objective was removed (issue #246);
+  // its zone data is patched onto the real objective below, which upstream ships with empty zones.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
   '5ae448f286f77448d73c0131': {
     objectives: {
@@ -157,24 +160,8 @@
           },
         ],
       },
-    },
-    objectivesAdd: [
-      {
-        id: 'the_blood_of_war_-_part_1_obj04',
-        description: 'Mark the fourth fuel tank with an MS2000 Marker on Interchange',
-        type: 'mark',
-        maps: [
-          {
-            id: '5714dbc024597771384a510d',
-            name: 'Interchange',
-          },
-        ],
-        markerItem: {
-          id: '5991b51486f77447b112d44f',
-          name: 'MS2000 Marker',
-          shortName: 'MS2000',
-        },
-        optional: true,
+      '6926fcc872a6499d1fa29327': {
+        // Fourth fuel tank - upstream objective has no zone data. Was: []
         zones: [
           {
             map: {
@@ -213,7 +200,7 @@
           },
         ],
       },
-    ],
+    },
   },
 
   // New Beginning (Prestige 1) - Objective description incorrect
