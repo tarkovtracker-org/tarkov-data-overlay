@@ -38,7 +38,8 @@
           },
           "wikiLink": {
             "description": "Corrected wiki link URL for this locale",
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           }
         },
         "type": "object"
@@ -112,7 +113,8 @@
           },
           "wikiLink": {
             "description": "Corrected wiki link URL for this locale",
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           }
         },
         "type": "object"

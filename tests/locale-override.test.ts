@@ -23,6 +23,18 @@ const { srcDir, schemasDir } = getProjectPaths();
 
 function compileLocaleSchema() {
   const ajv = new Ajv({ allErrors: true, strict: false });
+  ajv.addFormat('uri', {
+    type: 'string',
+    validate: (value: string) => {
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  });
   const schema = loadJsonFile(join(schemasDir, 'locale-override.schema.json'));
   return ajv.compile(schema as object);
 }
@@ -97,6 +109,13 @@ describe('locale-override.schema.json', () => {
     expect(validate({ tasks: { 'task-id-1': { minPlayerLevel: 10 } } })).toBe(false);
     expect(validate({ items: { 'item-id-1': { basePrice: 100 } } })).toBe(false);
     expect(validate({ prestige: { 'prestige-id-1': { prestigeLevel: 2 } } })).toBe(false);
+  });
+
+  it('rejects malformed wikiLink values', () => {
+    const validate = compileLocaleSchema();
+
+    expect(validate({ tasks: { 'task-id-1': { wikiLink: 'not a uri' } } })).toBe(false);
+    expect(validate({ items: { 'item-id-1': { wikiLink: '/relative/path' } } })).toBe(false);
   });
 
   it('rejects unknown fields on objective patches', () => {
