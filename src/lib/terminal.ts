@@ -100,3 +100,24 @@ export function printListItem(text: string, indent = 2): void {
 export function formatCountLabel(label: string, count: number, color: keyof typeof colors): string {
   return `${colors[color]}${colors.bright}${label} (${count}):${colors.reset}`;
 }
+
+/**
+ * Print a "label (count):" header followed by one line per item, or a dim
+ * "None" placeholder when the list is empty. This is the standard summary
+ * section shape used by the maintenance reports.
+ */
+export function printCountSection(
+  label: string,
+  color: keyof typeof colors,
+  items: string[]
+): void {
+  console.log(formatCountLabel(label, items.length, color));
+  if (items.length > 0) {
+    for (const item of items) {
+      console.log(`  - ${item}`);
+    }
+  } else {
+    console.log(`  ${dim('None')}`);
+  }
+  console.log();
+}

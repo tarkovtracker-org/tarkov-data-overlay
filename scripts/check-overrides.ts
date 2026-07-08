@@ -16,9 +16,9 @@
 
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { pathToFileURL } from 'url';
 import {
   getProjectPaths,
+  isDirectExecution,
   loadJson5File,
   colors,
   icons,
@@ -29,6 +29,7 @@ import {
   printSuccess,
   printError,
   formatCountLabel,
+  printCountSection,
   fetchTasks,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
@@ -333,57 +334,15 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
   printHeader(options.titlePrefix ? `${options.titlePrefix} SUMMARY` : 'SUMMARY');
 
   const { stillNeeded, fixed, removedFromApi } = categorizeResults(results);
+  const line = (r: ValidationResult) => `${r.name} (${r.id})`;
 
-  // Still needed
-  console.log(
-    formatCountLabel(
-      `${icons.success} Still need overrides`,
-      stillNeeded.length,
-      'green'
-    )
+  printCountSection(`${icons.success} Still need overrides`, 'green', stillNeeded.map(line));
+  printCountSection(`${icons.sync} Fixed in API, can remove`, 'yellow', fixed.map(line));
+  printCountSection(
+    `${icons.trash} Removed from API, delete from overlay`,
+    'red',
+    removedFromApi.map(line)
   );
-  if (stillNeeded.length > 0) {
-    for (const r of stillNeeded) {
-      console.log(`  - ${r.name} (${r.id})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
-
-  // Fixed in API
-  console.log(
-    formatCountLabel(
-      `${icons.sync} Fixed in API, can remove`,
-      fixed.length,
-      'yellow'
-    )
-  );
-  if (fixed.length > 0) {
-    for (const r of fixed) {
-      console.log(`  - ${r.name} (${r.id})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
-
-  // Removed from API
-  console.log(
-    formatCountLabel(
-      `${icons.trash} Removed from API, delete from overlay`,
-      removedFromApi.length,
-      'red'
-    )
-  );
-  if (removedFromApi.length > 0) {
-    for (const r of removedFromApi) {
-      console.log(`  - ${r.name} (${r.id})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
 
   // Print recommendation
   const obsoleteCount = fixed.length + removedFromApi.length;
@@ -424,59 +383,22 @@ function printAdditionResults(results: AdditionResult[], titlePrefix?: string): 
     console.log();
   }
 
-  const resolved = results.filter((r) => r.status === 'RESOLVED');
-  const missing = results.filter((r) => r.status === 'MISSING');
-  const review = results.filter((r) => r.status === 'CHECK');
+  const byStatus = (status: AdditionStatus) =>
+    results.filter((r) => r.status === status).map((r) => `${r.name} (${r.key})`);
 
   printHeader(summaryTitle);
 
-  console.log(
-    formatCountLabel(
-      `${icons.success} Resolved in API (remove from tasksAdd)`,
-      resolved.length,
-      'green'
-    )
+  printCountSection(
+    `${icons.success} Resolved in API (remove from tasksAdd)`,
+    'green',
+    byStatus('RESOLVED')
   );
-  if (resolved.length > 0) {
-    for (const r of resolved) {
-      console.log(`  - ${r.name} (${r.key})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
-
-  console.log(
-    formatCountLabel(
-      `${icons.warning} Still missing from API`,
-      missing.length,
-      'yellow'
-    )
+  printCountSection(`${icons.warning} Still missing from API`, 'yellow', byStatus('MISSING'));
+  printCountSection(
+    `${icons.sync} Needs review (name-only matches)`,
+    'yellow',
+    byStatus('CHECK')
   );
-  if (missing.length > 0) {
-    for (const r of missing) {
-      console.log(`  - ${r.name} (${r.key})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
-
-  console.log(
-    formatCountLabel(
-      `${icons.sync} Needs review (name-only matches)`,
-      review.length,
-      'yellow'
-    )
-  );
-  if (review.length > 0) {
-    for (const r of review) {
-      console.log(`  - ${r.name} (${r.key})`);
-    }
-  } else {
-    console.log(`  ${dim('None')}`);
-  }
-  console.log();
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
@@ -602,9 +524,30 @@ function printReferenceCrossCheck(
 }
 
 /**
+ * Fetch tasks once per game mode. The base pass and the mode loop both need
+ * regular-mode data; without memoization the (large) regular-mode payloads
+ * would be downloaded twice in a single run.
+ */
+function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
+  const cache = new Map<GameMode, Promise<TaskData[]>>();
+  return (mode: GameMode = 'regular') => {
+    let tasks = cache.get(mode);
+    if (!tasks) {
+      tasks = fetchTasks(mode).catch((error) => {
+        cache.delete(mode);
+        throw error;
+      });
+      cache.set(mode, tasks);
+    }
+    return tasks;
+  };
+}
+
+/**
  * Main validation function
  */
 async function main(): Promise<void> {
+  const getTasksForMode = createTaskFetcher();
   try {
     printProgress('Loading task overrides...');
     const overrides = loadTaskOverrides();
@@ -621,7 +564,7 @@ async function main(): Promise<void> {
     );
 
     printProgress('Fetching current data from tarkov.dev API...');
-    const apiTasks = await fetchTasks();
+    const apiTasks = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
     printProgress('Validating overrides...\n');
@@ -651,7 +594,7 @@ async function main(): Promise<void> {
       }
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const modeApiTasks = await fetchTasks(mode);
+      const modeApiTasks = await getTasksForMode(mode);
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       if (modeOverrideCount > 0) {
@@ -683,12 +626,6 @@ async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main();
 }

@@ -3,6 +3,7 @@
  */
 
 export * from './file-loader.js';
+export * from './script-utils.js';
 export * from './terminal.js';
 export * from './types.js';
 export * from './tarkov-api.js';

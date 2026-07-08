@@ -30,8 +30,8 @@
 
 import { readFileSync, readdirSync, writeFileSync } from 'fs';
 import { join, isAbsolute } from 'path';
-import { pathToFileURL } from 'url';
 import {
+  isDirectExecution,
   fetchTasks,
   findTaskById,
   printHeader,
@@ -115,7 +115,7 @@ function asNumber(value: unknown): number | undefined {
 /** Locate the quest reference file inside the eft directory. Prefers the
  * enriched ("rollinglatest.modified") variant since it additionally carries
  * `localization.en` objective text. */
-function findReferenceFile(eftDir: string): string {
+export function findReferenceFile(eftDir: string): string {
   const candidates = readdirSync(eftDir).filter(
     (f) => /quest[_-]list/i.test(f) && f.endsWith('.json'),
   );
@@ -380,18 +380,25 @@ export function crossCheckOverrides(
 // CLI
 // ---------------------------------------------------------------------------
 
-interface Options {
+/** Options shared by the eft:* CLI tools. */
+export interface ModeCliOptions {
   eftDir: string;
   mode: GameMode;
   jsonOut?: string;
-  descriptions: boolean;
+  /** Boolean flags (from `booleanFlags`) present on the CLI. */
+  flags: Set<string>;
 }
 
-function parseArgs(argv: string[]): Options {
+/**
+ * Parse the common `[eftDir] [--mode pve|regular] [--json out.json]` CLI shape
+ * shared by eft:compare / eft:audit / eft:wiki. Extra boolean flags can be
+ * declared via `booleanFlags` and are surfaced in `flags`.
+ */
+export function parseModeArgs(argv: string[], booleanFlags: string[] = []): ModeCliOptions {
   let eftDir = 'eft';
   let mode: GameMode = 'pve';
   let jsonOut: string | undefined;
-  let descriptions = false;
+  const flags = new Set<string>();
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -403,8 +410,8 @@ function parseArgs(argv: string[]): Options {
       mode = value;
     } else if (arg === '--json') {
       jsonOut = argv[(i += 1)];
-    } else if (arg === '--descriptions') {
-      descriptions = true;
+    } else if (booleanFlags.includes(arg)) {
+      flags.add(arg);
     } else if (!arg.startsWith('--')) {
       eftDir = arg;
     }
@@ -414,8 +421,26 @@ function parseArgs(argv: string[]): Options {
     eftDir: isAbsolute(eftDir) ? eftDir : join(process.cwd(), eftDir),
     mode,
     jsonOut,
-    descriptions,
+    flags,
   };
+}
+
+/**
+ * Detect the reference file's mode and refuse a mismatch with the requested
+ * mode: comparing a mode-specific reference against a different tarkov.dev
+ * mode produces false discrepancies. Returns the detected mode (null when
+ * undetectable, in which case the caller's `--mode` is trusted).
+ */
+export function requireMatchingReferenceMode(eftDir: string, mode: GameMode): GameMode | null {
+  const refMode = detectReferenceMode(eftDir);
+  if (refMode && refMode !== mode) {
+    throw new Error(
+      `The reference file in ${eftDir} is a ${refMode} file, but --mode is ${mode}. ` +
+        `Comparing across modes yields false positives. Re-run with --mode ${refMode}, ` +
+        `or supply a ${mode} reference file.`,
+    );
+  }
+  return refMode;
 }
 
 function printReport(discrepancies: Discrepancy[], matched: number, apiMissing: number): void {
@@ -464,21 +489,13 @@ function printReport(discrepancies: Discrepancy[], matched: number, apiMissing: 
 
 async function main(): Promise<void> {
   try {
-    const opts = parseArgs(process.argv.slice(2));
+    const opts = parseModeArgs(process.argv.slice(2), ['--descriptions']);
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
     const refFile = findReferenceFile(opts.eftDir);
 
-    // The reference file is mode-specific. Comparing it against a different
-    // tarkov.dev mode yields false discrepancies, so refuse a mismatch (same
-    // guard the audit uses).
-    const refMode = detectReferenceMode(opts.eftDir);
-    if (refMode && refMode !== opts.mode) {
-      throw new Error(
-        `The reference file in ${opts.eftDir} is a ${refMode} file, but --mode is ${opts.mode}. ` +
-          `Re-run with --mode ${refMode}, or supply a ${opts.mode} reference file.`,
-      );
-    }
+    // The reference file is mode-specific; refuse a mismatch.
+    requireMatchingReferenceMode(opts.eftDir, opts.mode);
 
     const eftTasks = parseEftTasks(readQuestArray(refFile));
     printSuccess(`Parsed ${eftTasks.size} quests from reference file`);
@@ -488,7 +505,7 @@ async function main(): Promise<void> {
     printSuccess(`Fetched ${apiTasks.length} ${opts.mode} tasks from API\n`);
 
     const { discrepancies, matched, apiMissing } = compare(eftTasks, apiTasks, {
-      descriptions: opts.descriptions,
+      descriptions: opts.flags.has('--descriptions'),
     });
     printReport(discrepancies, matched, apiMissing);
 
@@ -504,13 +521,7 @@ async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main();
 }
 
@@ -530,6 +541,17 @@ export function loadEftTasks(eftDir: string): Map<string, EftTask> | null {
 }
 
 /**
+ * Infer the game mode from a reference file's captured request URL
+ * (`gw-pve` / `gw-pvp` gateway hosts). Null when the URL is inconclusive.
+ */
+export function modeFromRequestUrl(url: string | undefined): GameMode | null {
+  if (!url) return null;
+  if (url.includes('gw-pve')) return 'pve';
+  if (url.includes('gw-pvp')) return 'regular';
+  return null;
+}
+
+/**
  * Detect which game mode a reference file represents from its request URL
  * metadata. Returns null when no reference file is present or the mode can't be
  * determined, so callers can decide how strict to be.
@@ -542,10 +564,7 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
     return null;
   }
   const raw = JSON.parse(readFileSync(refFile, 'utf-8')) as any;
-  const url: string = raw?.request?.url ?? '';
-  if (url.includes('gw-pve')) return 'pve';
-  if (url.includes('gw-pvp')) return 'regular';
-  return null;
+  return modeFromRequestUrl(raw?.request?.url);
 }
 
 export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };
