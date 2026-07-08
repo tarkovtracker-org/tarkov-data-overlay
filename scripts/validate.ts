@@ -46,12 +46,23 @@ export function initializeValidators(): ValidatorCache {
 
 /**
  * Get the validator for a given filename
+ *
+ * Matches exact patterns first, then directory wildcards like
+ * `overrides/locales/*.json5` (used for per-locale files whose names are
+ * not known ahead of time).
  */
 export function getValidator(
   relativePath: string,
   validators: ValidatorCache
 ): ReturnType<Ajv['compile']> | null {
-  return validators.get(relativePath) ?? null;
+  const exact = validators.get(relativePath);
+  if (exact) return exact;
+
+  const separatorIndex = relativePath.lastIndexOf('/');
+  if (separatorIndex === -1) return null;
+
+  const wildcardPattern = `${relativePath.slice(0, separatorIndex)}/*.json5`;
+  return validators.get(wildcardPattern) ?? null;
 }
 
 /**
@@ -112,6 +123,13 @@ export function validateSourceFiles(): SchemaValidationResult[] {
   for (const file of listJson5Files(additionsDir)) {
     const filePath = join(additionsDir, file);
     results.push(validateFile(filePath, `additions/${file}`, validators));
+  }
+
+  // Validate per-locale overrides (one file per locale, filename = locale code)
+  const localesDir = join(srcDir, 'overrides', 'locales');
+  for (const file of listJson5Files(localesDir)) {
+    const filePath = join(localesDir, file);
+    results.push(validateFile(filePath, `overrides/locales/${file}`, validators));
   }
 
   const suppressionsFile = join(srcDir, 'suppressions', 'tasks.json5');

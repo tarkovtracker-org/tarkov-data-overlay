@@ -100,6 +100,22 @@ async function fetchOverlay() {
       }
     }
   },
+  "locales": {
+    "en": {
+      "tasks": {
+        "<task-id>": {
+          "name": "New Beginning",
+          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)",
+          "objectives": {
+            "<objective-id>": { "description": "Eliminate 50 Scavs" }
+          }
+        }
+      },
+      "items": {
+        "<item-id>": { "name": "Corrected English Item Name" }
+      }
+    }
+  },
   "editions": {
     "standard": { "id": "standard", "title": "Standard Edition", ... },
     "unheard": { "id": "unheard", "title": "The Unheard Edition", ... }
@@ -225,6 +241,75 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
   ];
 }
 ```
+
+---
+
+## Applying Locale Overrides
+
+Sometimes a specific tarkov.dev locale bundle is broken — for example, the
+English bundle currently returns the German string "Neuanfang" for the New
+Beginning prestige quest names. The overlay's `locales` section carries
+fixes for exactly these cases, keyed by locale code
+(`locales[localeCode][entityType][entityId][fieldName]`).
+
+Locale overrides are different from data overrides:
+
+- A regular override (e.g. `tasks[id].name`) says "the canonical value is X
+  regardless of locale".
+- A locale override (e.g. `locales.en.tasks[id].name`) says "the `en` bundle
+  specifically should show X" — other locale bundles may already be correct.
+
+Rules for applying them:
+
+- Apply locale overrides **after** data overrides; they take precedence for
+  locale-sensitive fields (`name`, `shortName`, `description`, `wikiLink`,
+  objective `description`) when rendering that locale.
+- Only apply the section matching your active locale. If you render `de`,
+  ignore `locales.en` entirely.
+- Locale overrides are **not** mode-specific — locale bundles are shared
+  across `regular` and `pve`, so apply them in both modes.
+- Entries are sparse: only fields broken in that locale bundle are present.
+
+```typescript
+function applyLocaleOverlay(
+  task: Task, // task with data overrides already applied
+  overlay: Overlay,
+  locale: string // active rendering locale, e.g. 'en'
+): Task {
+  const patch = overlay.locales?.[locale]?.tasks?.[task.id];
+  if (!patch) return task;
+
+  const result = { ...task };
+
+  // Apply top-level locale-sensitive fields (name, wikiLink)
+  for (const [key, value] of Object.entries(patch)) {
+    if (key === 'objectives') continue; // Handle separately
+    (result as any)[key] = value;
+  }
+
+  // Apply ID-keyed objective description patches
+  if (patch.objectives) {
+    result.objectives = (task.objectives ?? []).map(obj => {
+      const objPatch = patch.objectives?.[obj.id];
+      return objPatch ? { ...obj, ...objPatch } : obj;
+    });
+  }
+
+  return result;
+}
+
+// Merge order: base -> data overrides -> mode overrides -> locale overrides
+const task = applyLocaleOverlay(
+  applyTaskOverlayForMode(baseTask, overlay, gameMode),
+  overlay,
+  activeLocale
+);
+```
+
+The same pattern applies to the other entity types under `locales`
+(`items`, `traders`, `maps`, `prestige`, `storyChapters`): shallow-merge the
+patch over the entity, handling ID-keyed `objectives` patches separately
+where present.
 
 ---
 
@@ -418,6 +503,8 @@ interface Overlay {
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
   prestige?: Record<string, PrestigeOverride>;
+  // Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...)
+  locales?: Record<string, LocaleOverlay>;
   $meta: {
     version: string;
     generated: string;
@@ -430,6 +517,30 @@ type GameMode = 'regular' | 'pve';
 interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
+}
+
+// Sparse fixes for one broken locale bundle; apply after data overrides,
+// only when rendering the matching locale.
+interface LocaleOverlay {
+  tasks?: Record<string, {
+    name?: string;
+    wikiLink?: string;
+    objectives?: Record<string, { description?: string }>;
+  }>;
+  items?: Record<string, {
+    name?: string;
+    shortName?: string;
+    description?: string;
+    wikiLink?: string;
+  }>;
+  traders?: Record<string, { name?: string; description?: string }>;
+  maps?: Record<string, { name?: string; description?: string }>;
+  prestige?: Record<string, { name?: string }>;
+  storyChapters?: Record<string, {
+    name?: string;
+    description?: string;
+    objectives?: Record<string, { description?: string }>;
+  }>;
 }
 
 interface TaskOverride {

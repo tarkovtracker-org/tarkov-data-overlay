@@ -33,6 +33,9 @@ describe('scripts/validate helpers', () => {
     const expectedFiles = [
       ...listJson5Files(join(srcDir, 'overrides')).map((file) => `overrides/${file}`),
       ...listJson5Files(join(srcDir, 'additions')).map((file) => `additions/${file}`),
+      ...listJson5Files(join(srcDir, 'overrides', 'locales')).map(
+        (file) => `overrides/locales/${file}`
+      ),
       'suppressions/tasks.json5',
       ...['regular', 'pve'].flatMap((mode) => [
         ...listJson5Files(join(srcDir, 'overrides', 'modes', mode)).map(

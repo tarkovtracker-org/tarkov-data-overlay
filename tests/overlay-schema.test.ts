@@ -42,6 +42,11 @@ function buildOverlayFixture(): OverlayOutput {
     output.modes = modes;
   }
 
+  const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));
+  if (Object.keys(locales).length > 0) {
+    output.locales = locales;
+  }
+
   return output;
 }
 
@@ -95,6 +100,7 @@ describe('overlay.schema.json', () => {
       'task-override.schema.json',
       'task-additions.schema.json',
       'story-chapter.schema.json',
+      'locale-override.schema.json',
     ];
 
     for (const schemaFile of referencedSchemas) {
