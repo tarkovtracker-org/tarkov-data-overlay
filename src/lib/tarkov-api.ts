@@ -43,8 +43,8 @@ type Envelope = {
   translations?: string[];
 };
 
-/** Flat translation map: key -> english string. */
-type TranslationMap = Record<string, string>;
+/** Flat translation map: key -> translated string for one locale. */
+export type TranslationMap = Record<string, string>;
 
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -163,13 +163,14 @@ function fetchEnvelope(cache: EndpointCache, path: string): Promise<Envelope> {
   return promise;
 }
 
-/** Fetch an `_en` endpoint and return its flat translation map. */
+/** Fetch an `_<locale>` endpoint and return its flat translation map. */
 async function fetchTranslations(
   cache: EndpointCache,
   mode: GameMode,
-  endpoint: string
+  endpoint: string,
+  locale = 'en'
 ): Promise<TranslationMap> {
-  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`);
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`);
   return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
 }
 
@@ -425,6 +426,79 @@ export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
   return Object.values(tasksData.tasks)
     .filter(isRecord)
     .map((task) => adaptTask(task, ctx));
+}
+
+/**
+ * Raw per-locale bundle used by the locale-override validator.
+ *
+ * Unlike `fetchTasks`, this deliberately does NOT adapt or translate the core
+ * records: the core endpoints store translation keys as field values (e.g.
+ * `task.name === "<id> name"`), and the validator resolves those keys against
+ * the `_<locale>` translation map itself so it can distinguish "bundle fixed
+ * upstream" from "translation key missing".
+ */
+export interface LocaleBundle {
+  /** Locale code the translation maps were fetched for (en, de, fr, ...) */
+  locale: string;
+  tasksById: Map<string, Record<string, unknown>>;
+  itemsById: Map<string, Record<string, unknown>>;
+  tradersById: Map<string, Record<string, unknown>>;
+  mapsById: Map<string, Record<string, unknown>>;
+  /** Prestige records live in the tasks payload's `prestige` array */
+  prestigeById: Map<string, Record<string, unknown>>;
+  tasksLocale: TranslationMap;
+  itemsLocale: TranslationMap;
+  tradersLocale: TranslationMap;
+  mapsLocale: TranslationMap;
+}
+
+/**
+ * Fetch the core entity endpoints plus the `_<locale>` translation maps for a
+ * game mode, returning the raw lookups the locale-override validator needs.
+ */
+export async function fetchLocaleBundle(
+  gameMode?: GameMode,
+  locale = 'en'
+): Promise<LocaleBundle> {
+  const mode: GameMode = gameMode ?? 'regular';
+  const cache: EndpointCache = new Map();
+
+  const [
+    tasksEnvelope,
+    itemsEnvelope,
+    mapsEnvelope,
+    tradersEnvelope,
+    tasksLocale,
+    itemsLocale,
+    mapsLocale,
+    tradersLocale,
+  ] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/tasks`),
+    fetchEnvelope(cache, `${mode}/items`),
+    fetchEnvelope(cache, `${mode}/maps`),
+    fetchEnvelope(cache, `${mode}/traders`),
+    fetchTranslations(cache, mode, 'tasks', locale),
+    fetchTranslations(cache, mode, 'items', locale),
+    fetchTranslations(cache, mode, 'maps', locale),
+    fetchTranslations(cache, mode, 'traders', locale),
+  ]);
+
+  const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : {};
+  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
+  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
+
+  return {
+    locale,
+    tasksById: toLookup(tasksData.tasks),
+    itemsById: toLookup(itemsData.items),
+    mapsById: toLookup(mapsData.maps),
+    tradersById: toLookup(tradersEnvelope.data),
+    prestigeById: toLookup(tasksData.prestige),
+    tasksLocale,
+    itemsLocale,
+    mapsLocale,
+    tradersLocale,
+  };
 }
 
 /**
