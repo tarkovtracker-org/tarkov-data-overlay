@@ -15,10 +15,13 @@ Community-maintained data overlay for tarkov.dev API corrections and additions. 
 Scripts share utilities via `src/lib/index.ts`:
 
 - `file-loader.ts` - JSON5/JSON loading, project paths, directory scanning
+- `script-utils.ts` - CLI entry-point detection (`isDirectExecution`) and `sleep`
 - `tarkov-api.ts` - json.tarkov.dev adapter that fetches the static per-mode JSON endpoints (tasks/items/maps/traders plus `_en` translations) and adapts them into the `TaskData[]` shape
 - `task-validator.ts` - Override validation logic against API data
-- `terminal.ts` - Console output formatting (colors, icons, progress)
+- `terminal.ts` - Console output formatting (colors, icons, progress, summary sections)
 - `types.ts` - Shared TypeScript interfaces and schema configs
+
+The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry point re-exporting the public/test API, with the implementation in `scripts/wiki-compare/` (`types`, `cache`, `overlay`, `normalize`, `api`, `wiki`, `compare`, `cli`). Shared eft-reference parsing (`findReferenceFile`, `parseEftTasks`, `detectReferenceMode`, `parseModeArgs`, `requireMatchingReferenceMode`) lives in `scripts/eft-compare.ts` and is imported by the other `eft:*` scripts.
 
 ### Build Pipeline
 
@@ -35,7 +38,9 @@ The built `dist/overlay.json` contains entity sections keyed by tarkov.dev IDs (
 - `npm run validate` validates JSON5 sources against schemas (run before opening a PR).
 - `npm run build` generates `dist/overlay.json` from sources.
 - `npm run check-overrides` compares overrides to the live tarkov.dev API.
-- `npm test` runs the Vitest suite; `npm run test:watch` keeps it running.
+- `npm run typecheck` runs `tsc --noEmit` (also run in CI).
+- `npm test` runs the Vitest suite (also run in CI); `npm run test:watch` keeps it running.
+- `npm run format` / `npm run format:check` run Prettier over the TypeScript sources.
 - Example single test: `npx vitest run tests/file-loader.test.ts`.
 
 ### Reference cross-check tooling (local-only)
@@ -65,7 +70,10 @@ carry only the resulting JSON5 corrections plus proof links.
   and the optional/required flags plus proof from the EFT wiki, merges curated
   chapter metadata from `scripts/story-chapter-meta.json`, and preserves The
   Ticket's branching. The reference itself stays gitignored; only the generated
-  JSON5 is committed.
+  JSON5 is committed. The pipeline is pure TypeScript
+  (`eft-story-wiki.ts` -> `eft-story-generate.ts` -> `eft-story-write.ts`);
+  fuzzy optional-matching uses a faithful difflib `SequenceMatcher.ratio()`
+  port in `scripts/lib/sequence-matcher.ts`.
 
 ## Coding Style & Naming Conventions
 
@@ -95,4 +103,4 @@ Use the MediaWiki API instead — it is not challenged and returns full content 
 - Rendered HTML fragment: `...&prop=text`
 - Plain-text extract: `action=query&prop=extracts&...`
 
-`scripts/wiki-compare.ts` (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
+The wiki-compare tool (run via `npm run wiki:compare`) already uses `api.php` (`WIKI_API` in `scripts/wiki-compare/types.ts`); follow that pattern for any new wiki access. The `{{Historical content}}` / `{{Event content}}` templates at the top of a page's wikitext indicate expired/event content (verify before adding or for removing stale event additions).
