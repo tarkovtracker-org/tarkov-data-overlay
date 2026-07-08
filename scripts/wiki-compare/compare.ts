@@ -82,6 +82,11 @@ export function compareTasks(
 
   if (verbose) printHeader('COMPARISON');
 
+  const isSuppressedObjectiveField = (objectiveId: string, field: string): boolean =>
+    taskSuppressions
+      ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field)
+      : false;
+
   // minPlayerLevel
   if (wiki.minPlayerLevel !== undefined) {
     if (apiTask.minPlayerLevel !== wiki.minPlayerLevel) {
@@ -301,7 +306,7 @@ export function compareTasks(
   }
 
   for (const apiObj of unmatchedApi) {
-    if (taskSuppressions && isObjectiveSuppressed(taskSuppressions, taskId, apiObj.id)) {
+    if (isSuppressedObjectiveField(apiObj.id, 'objectives.description')) {
       continue;
     }
     const desc = apiObj.description ?? apiObj.id;
@@ -421,22 +426,24 @@ export function compareTasks(
       normalizedApiKey !== normalizedWikiKey &&
       !itemsMatchForDescription
     ) {
-      discrepancies.push({
-        taskId,
-        taskName,
-        field: 'objectives.description',
-        apiValue: apiDescForCompare,
-        wikiValue: wikiDescForCompare,
-        priority: getPriority('objectives.description'),
-        trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
-      });
-      if (verbose)
-        console.log(
-          `${icons.warning} objective text differs: API="${apiDescForCompare}", Wiki="${wikiDescForCompare}"`
-        );
+      if (!isSuppressedObjectiveField(apiObj.id, 'objectives.description')) {
+        discrepancies.push({
+          taskId,
+          taskName,
+          field: 'objectives.description',
+          apiValue: apiDescForCompare,
+          wikiValue: wikiDescForCompare,
+          priority: getPriority('objectives.description'),
+          trustsWiki: true,
+          wikiLastEdit,
+          wikiEditDaysAgo,
+          wikiEditedPost1_0,
+        });
+        if (verbose)
+          console.log(
+            `${icons.warning} objective text differs: API="${apiDescForCompare}", Wiki="${wikiDescForCompare}"`
+          );
+      }
     }
 
     if (apiCount !== undefined && wikiCount !== undefined) {
@@ -445,22 +452,24 @@ export function compareTasks(
         (apiCount === wikiObj.count || apiCount === wikiObj.pveCount);
 
       if (!matchesPveVariant && apiCount !== wikiCount) {
-        discrepancies.push({
-          taskId,
-          taskName,
-          field: 'objectives.count',
-          apiValue: `${apiCount} (${objectiveLabel})`,
-          wikiValue: `${wikiCount} (${wikiObj.text})`,
-          priority: getPriority('objectives.count'),
-          trustsWiki: true,
-          wikiLastEdit,
-          wikiEditDaysAgo,
-          wikiEditedPost1_0,
-        });
-        if (verbose)
-          console.log(
-            `${icons.warning} objective count: API=${apiCount}, Wiki=${wikiCount} (${objectiveLabel})`
-          );
+        if (!isSuppressedObjectiveField(apiObj.id, 'objectives.count')) {
+          discrepancies.push({
+            taskId,
+            taskName,
+            field: 'objectives.count',
+            apiValue: `${apiCount} (${objectiveLabel})`,
+            wikiValue: `${wikiCount} (${wikiObj.text})`,
+            priority: getPriority('objectives.count'),
+            trustsWiki: true,
+            wikiLastEdit,
+            wikiEditDaysAgo,
+            wikiEditedPost1_0,
+          });
+          if (verbose)
+            console.log(
+              `${icons.warning} objective count: API=${apiCount}, Wiki=${wikiCount} (${objectiveLabel})`
+            );
+        }
       } else if (verbose) {
         console.log(`${icons.success} objective count matches (${apiCount})`);
       }
@@ -490,24 +499,26 @@ export function compareTasks(
         !allowTransitSuperset &&
         !skipMapCompare
       ) {
-        discrepancies.push({
-          taskId,
-          taskName,
-          field: 'objectives.maps',
-          apiValue: `${apiMapNames.join(', ') || 'none'} (${objectiveLabel})`,
-          wikiValue: `${wikiMapNames.join(', ') || 'none'} (${wikiObj.text})`,
-          priority: getPriority('objectives.maps'),
-          trustsWiki: true,
-          wikiLastEdit,
-          wikiEditDaysAgo,
-          wikiEditedPost1_0,
-        });
-        if (verbose)
-          console.log(
-            `${icons.warning} objective maps differ: API=${
-              apiMapNames.join(', ') || 'none'
-            }, Wiki=${wikiMapNames.join(', ') || 'none'}`
-          );
+        if (!isSuppressedObjectiveField(apiObj.id, 'objectives.maps')) {
+          discrepancies.push({
+            taskId,
+            taskName,
+            field: 'objectives.maps',
+            apiValue: `${apiMapNames.join(', ') || 'none'} (${objectiveLabel})`,
+            wikiValue: `${wikiMapNames.join(', ') || 'none'} (${wikiObj.text})`,
+            priority: getPriority('objectives.maps'),
+            trustsWiki: true,
+            wikiLastEdit,
+            wikiEditDaysAgo,
+            wikiEditedPost1_0,
+          });
+          if (verbose)
+            console.log(
+              `${icons.warning} objective maps differ: API=${
+                apiMapNames.join(', ') || 'none'
+              }, Wiki=${wikiMapNames.join(', ') || 'none'}`
+            );
+        }
       }
     } else if (verbose && apiMapNames.length > 0) {
       console.log(
@@ -594,26 +605,28 @@ export function compareTasks(
             `${icons.info} objective items: handover matches quest item, skipping strict compare`
           );
       } else if (!itemsMatch(apiItemRefs, wikiItemsForCompare, taskName)) {
-        discrepancies.push({
-          taskId,
-          taskName,
-          field: 'objectives.items',
-          apiValue: `${apiItems.join(', ') || 'none'} (${objectiveLabel})`,
-          wikiValue: `${wikiItemsForCompare.join(', ') || 'none'} (${
-            wikiObj.text
-          })`,
-          priority: getPriority('objectives.items'),
-          trustsWiki: true,
-          wikiLastEdit,
-          wikiEditDaysAgo,
-          wikiEditedPost1_0,
-        });
-        if (verbose)
-          console.log(
-            `${icons.warning} objective items differ: API=${
-              apiItems.join(', ') || 'none'
-            }, Wiki=${wikiItems.join(', ') || 'none'}`
-          );
+        if (!isSuppressedObjectiveField(apiObj.id, 'objectives.items')) {
+          discrepancies.push({
+            taskId,
+            taskName,
+            field: 'objectives.items',
+            apiValue: `${apiItems.join(', ') || 'none'} (${objectiveLabel})`,
+            wikiValue: `${wikiItemsForCompare.join(', ') || 'none'} (${
+              wikiObj.text
+            })`,
+            priority: getPriority('objectives.items'),
+            trustsWiki: true,
+            wikiLastEdit,
+            wikiEditDaysAgo,
+            wikiEditedPost1_0,
+          });
+          if (verbose)
+            console.log(
+              `${icons.warning} objective items differ: API=${
+                apiItems.join(', ') || 'none'
+              }, Wiki=${wikiItems.join(', ') || 'none'}`
+            );
+        }
       }
     }
   }

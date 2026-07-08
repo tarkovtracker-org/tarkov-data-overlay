@@ -43,8 +43,12 @@ export type SuppressedFieldsResult = {
   wikiIncorrectKeys: Set<string>; // Track wiki-incorrect separately to check for stale entries
 };
 
+export type ObjectiveSuppressionValue =
+  | true
+  | { fields?: Record<string, boolean> };
+
 export type TaskSuppressionEntry = {
-  objectives?: Record<string, true | { fields?: Record<string, boolean> }>;
+  objectives?: Record<string, ObjectiveSuppressionValue>;
   [field: string]: unknown;
 };
 
@@ -81,11 +85,19 @@ export function isTaskFieldSuppressed(
 export function isObjectiveSuppressed(
   taskSuppressions: Map<string, TaskSuppressionEntry>,
   taskId: string,
-  objectiveId: string
+  objectiveId: string,
+  field?: string
 ): boolean {
   const entry = taskSuppressions.get(taskId);
-  if (!entry?.objectives) return false;
-  return entry.objectives[objectiveId] === true;
+  const suppression = entry?.objectives?.[objectiveId];
+  if (suppression === true) return true;
+  if (!field || !suppression || typeof suppression !== 'object') return false;
+
+  const fields = suppression.fields ?? {};
+  const shortField = field.startsWith('objectives.')
+    ? field.slice('objectives.'.length)
+    : field;
+  return fields[field] === true || fields[shortField] === true;
 }
 
 /**
