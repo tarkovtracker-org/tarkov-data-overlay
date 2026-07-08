@@ -44,6 +44,12 @@ jobs:
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
       - name: Validate source files
         run: npm run validate
 
@@ -92,8 +98,8 @@ jobs:
           const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
           const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
           
-          delete current._meta;
-          delete previous._meta;
+          delete current.$meta;
+          delete previous.$meta;
           
           const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
           

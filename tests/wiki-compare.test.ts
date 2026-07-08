@@ -8,6 +8,11 @@ import {
   type ExtendedTaskData,
   type WikiTaskData,
 } from '../scripts/wiki-compare.js';
+import {
+  isObjectiveSuppressed,
+  isTaskFieldSuppressed,
+  type TaskSuppressionEntry,
+} from '../scripts/wiki-compare/overlay.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
 
@@ -64,6 +69,34 @@ describe('normalizers', () => {
   });
 });
 
+describe('task suppressions', () => {
+  const suppressions = new Map<string, TaskSuppressionEntry>([
+    [
+      'task-1',
+      {
+        minPlayerLevel: true,
+        objectives: {
+          o1: { fields: { count: true } },
+          o2: { fields: { 'objectives.maps': true } },
+          o3: true,
+        },
+      },
+    ],
+  ]);
+
+  it('supports task-level boolean suppressions', () => {
+    expect(isTaskFieldSuppressed(suppressions, 'task-1', 'minPlayerLevel')).toBe(true);
+    expect(isTaskFieldSuppressed(suppressions, 'task-1', 'experience')).toBe(false);
+  });
+
+  it('supports both objective boolean and nested fields suppressions', () => {
+    expect(isObjectiveSuppressed(suppressions, 'task-1', 'o1', 'objectives.count')).toBe(true);
+    expect(isObjectiveSuppressed(suppressions, 'task-1', 'o2', 'objectives.maps')).toBe(true);
+    expect(isObjectiveSuppressed(suppressions, 'task-1', 'o1', 'objectives.items')).toBe(false);
+    expect(isObjectiveSuppressed(suppressions, 'task-1', 'o3', 'objectives.items')).toBe(true);
+  });
+});
+
 describe('compareTasks', () => {
   const baseApi: ExtendedTaskData = {
     id: 'task-1',
@@ -103,6 +136,20 @@ describe('compareTasks', () => {
     });
     const result = compareTasks(baseApi, wiki, EMPTY_ALIASES, false);
     expect(result.some((d) => d.field === 'objectives.count')).toBe(true);
+  });
+
+  it('honors nested objective field suppressions', () => {
+    const wiki = makeWiki({
+      minPlayerLevel: 10,
+      objectives: [{ text: 'Eliminate 8 Scavs on Customs', count: 8, maps: ['Customs'] }],
+    });
+    const suppressions = new Map<string, TaskSuppressionEntry>([
+      ['task-1', { objectives: { o1: { fields: { count: true } } } }],
+    ]);
+
+    const result = compareTasks(baseApi, wiki, EMPTY_ALIASES, false, undefined, suppressions);
+
+    expect(result.some((d) => d.field === 'objectives.count')).toBe(false);
   });
 
   it('does not print when verbose is false', () => {
