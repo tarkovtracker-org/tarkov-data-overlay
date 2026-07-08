@@ -66,8 +66,10 @@ it is typechecked, testable with Vitest, and drops the python3 dependency.
 
 - [x] E1. `scripts/wiki-compare.ts` is 3,577 lines. Split into
       `scripts/wiki-compare/` modules: `types.ts`, `cache.ts`,
-      `suppressions.ts`, `normalize.ts` (text/alias/item/map matching),
-      `wiki.ts` (fetch/parse), `compare.ts`, `cli.ts` (args/runners/main),
+      `overlay.ts` (overlay/suppression loading),
+      `normalize.ts` (text/alias/item/map matching),
+      `api.ts` (tarkov.dev task fetching/resolution),
+      `wiki.ts` (wiki fetch/parse), `compare.ts`, `cli.ts` (args/runners/main),
       with `scripts/wiki-compare.ts` kept as a thin entry that re-exports the
       existing public/test API unchanged.
 - [x] E2. Full suite green after split (typecheck + 202 tests), no behavior
