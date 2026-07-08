@@ -28,10 +28,11 @@
  * (the source's `ge`->`de`, `ch`->`zh`, etc). English is always the base.
  */
 
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, isAbsolute } from 'path';
-import { pathToFileURL } from 'url';
-import { printProgress, printSuccess, printError } from '../src/lib/index.js';
+import { findReferenceFile, modeFromRequestUrl } from './eft-compare.js';
+import {
+  isDirectExecution, printProgress, printSuccess, printError } from '../src/lib/index.js';
 
 /** Quest prereq status codes. */
 const STATUS_NAMES: Record<number, string> = {
@@ -285,23 +286,8 @@ function compactRef(ref: CleanRef): CleanRef {
   return out;
 }
 
-/** Locate the quest reference file, preferring the enriched variant. */
-function findReferenceFile(eftDir: string): string {
-  const candidates = readdirSync(eftDir).filter(
-    (f) => /quest[_-]list/i.test(f) && f.endsWith('.json'),
-  );
-  if (candidates.length === 0) {
-    throw new Error(`No quest reference file found in ${eftDir}`);
-  }
-  const enriched = candidates.find((f) => f.includes('rollinglatest.modified'));
-  return join(eftDir, enriched ?? candidates[0]);
-}
-
 function detectMode(url?: string): 'pve' | 'regular' | 'unknown' {
-  if (!url) return 'unknown';
-  if (url.includes('gw-pve')) return 'pve';
-  if (url.includes('gw-pvp')) return 'regular';
-  return 'unknown';
+  return modeFromRequestUrl(url) ?? 'unknown';
 }
 
 /** Collect the set of language codes present across all quests. */
@@ -407,13 +393,7 @@ async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main();
 }
 

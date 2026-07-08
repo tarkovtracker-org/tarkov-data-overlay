@@ -39,10 +39,10 @@
  */
 
 import { existsSync, writeFileSync } from 'fs';
-import { isAbsolute, join } from 'path';
-import { pathToFileURL } from 'url';
+import { join } from 'path';
 
 import {
+  isDirectExecution,
   fetchTasks,
   findTaskById,
   loadJson5File,
@@ -59,7 +59,12 @@ import {
   type TaskData,
   type TaskOverride,
 } from '../src/lib/index.js';
-import { loadEftTasks, detectReferenceMode, type EftTask } from './eft-compare.js';
+import {
+  loadEftTasks,
+  parseModeArgs,
+  requireMatchingReferenceMode,
+  type EftTask,
+} from './eft-compare.js';
 
 type Verdict = 'GAP' | 'STALE' | 'CONFLICT' | 'OK';
 type Field = 'experience' | 'minPlayerLevel' | `objective[${string}].count`;
@@ -186,32 +191,6 @@ function buildRows(
   return rows;
 }
 
-interface Options {
-  eftDir: string;
-  mode: GameMode;
-  jsonOut?: string;
-}
-
-function parseArgs(argv: string[]): Options {
-  let eftDir = 'eft';
-  let mode: GameMode = 'pve';
-  let jsonOut: string | undefined;
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg === '--mode') {
-      const v = argv[(i += 1)];
-      if (v !== 'pve' && v !== 'regular') {
-        throw new Error(`--mode must be 'pve' or 'regular', got '${v}'`);
-      }
-      mode = v;
-    } else if (arg === '--json') {
-      jsonOut = argv[(i += 1)];
-    } else if (!arg.startsWith('--')) {
-      eftDir = arg;
-    }
-  }
-  return { eftDir: isAbsolute(eftDir) ? eftDir : join(process.cwd(), eftDir), mode, jsonOut };
-}
 
 const VERDICT_META: Record<Verdict, { icon: string; color: string; blurb: string }> = {
   GAP: { icon: icons.error, color: colors.red, blurb: 'API wrong, NO override - add one' },
@@ -258,7 +237,7 @@ function printReport(rows: Row[], mode: GameMode): void {
 
 async function main(): Promise<void> {
   try {
-    const opts = parseArgs(process.argv.slice(2));
+    const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Loading quest reference file from ${opts.eftDir}...`);
     const eftTasks = loadEftTasks(opts.eftDir);
@@ -271,22 +250,9 @@ async function main(): Promise<void> {
     }
     printSuccess(`Loaded ${eftTasks.size} quests from the reference file`);
 
-    // The reference file is mode-specific. Auditing it against a different
-    // tarkov.dev mode produces false GAP/CONFLICT rows (e.g. a PVE reference's
-    // lower XP looks like a "gap" against regular-mode values). Refuse the
-    // mismatch rather than emit misleading results.
-    const refMode = detectReferenceMode(opts.eftDir);
-    if (refMode && refMode !== opts.mode) {
-      printError(
-        'Reference/mode mismatch',
-        new Error(
-          `The reference file in ${opts.eftDir} is a ${refMode} file, but --mode is ${opts.mode}. ` +
-            `Auditing across modes yields false positives. Re-run with --mode ${refMode}, ` +
-            `or supply a ${opts.mode} reference file.`,
-        ),
-      );
-      process.exit(1);
-    }
+    // The reference file is mode-specific; auditing across modes yields
+    // false GAP/CONFLICT rows, so refuse a mismatch.
+    const refMode = requireMatchingReferenceMode(opts.eftDir, opts.mode);
     if (!refMode) {
       console.log(
         dim(`  (could not detect reference mode; trusting --mode ${opts.mode})`),
@@ -315,13 +281,7 @@ async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main();
 }
 

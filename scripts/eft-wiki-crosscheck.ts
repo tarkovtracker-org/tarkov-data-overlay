@@ -21,10 +21,10 @@
  */
 
 import { writeFileSync } from 'fs';
-import { isAbsolute, join } from 'path';
-import { pathToFileURL } from 'url';
 
 import {
+  isDirectExecution,
+  sleep,
   fetchTasks,
   findTaskById,
   printHeader,
@@ -35,10 +35,14 @@ import {
   dim,
   colors,
   icons,
-  type GameMode,
   type TaskData,
 } from '../src/lib/index.js';
-import { loadEftTasks, detectReferenceMode, type EftTask } from './eft-compare.js';
+import {
+  loadEftTasks,
+  parseModeArgs,
+  requireMatchingReferenceMode,
+  type EftTask,
+} from './eft-compare.js';
 import { parseWikiTask, buildMapAliasMap } from './wiki-compare.js';
 
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
@@ -58,10 +62,6 @@ interface Row {
    * request itself failed (timeout/HTTP error) - distinct from 'no-wiki-value',
    * where the page loaded but didn't carry the field. */
   wikiAgreesWith: 'eft' | 'api' | 'both' | 'neither' | 'no-wiki-value' | 'fetch-failed';
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** tarkov.dev wikiLink -> wiki page title. */
@@ -158,30 +158,6 @@ export function classifyWiki(
   return fetchFailed ? 'fetch-failed' : agreement(api, eft, wiki);
 }
 
-interface Options {
-  eftDir: string;
-  mode: GameMode;
-  jsonOut?: string;
-}
-
-function parseArgs(argv: string[]): Options {
-  let eftDir = 'eft';
-  let mode: GameMode = 'pve';
-  let jsonOut: string | undefined;
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg === '--mode') {
-      const v = argv[(i += 1)];
-      if (v !== 'pve' && v !== 'regular') throw new Error(`--mode must be 'pve' or 'regular'`);
-      mode = v;
-    } else if (arg === '--json') {
-      jsonOut = argv[(i += 1)];
-    } else if (!arg.startsWith('--')) {
-      eftDir = arg;
-    }
-  }
-  return { eftDir: isAbsolute(eftDir) ? eftDir : join(process.cwd(), eftDir), mode, jsonOut };
-}
 
 function colorFor(verdict: Row['wikiAgreesWith']): string {
   switch (verdict) {
@@ -236,21 +212,15 @@ function printReport(rows: Row[]): void {
 
 async function main(): Promise<void> {
   try {
-    const opts = parseArgs(process.argv.slice(2));
+    const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
     const eftTasks = loadEftTasks(opts.eftDir);
     if (!eftTasks) throw new Error(`No quest reference file found in ${opts.eftDir}`);
 
-    // The reference file is mode-specific; refuse a mismatch (same guard the
-    // audit and compare use) so wiki rows aren't built from cross-mode data.
-    const refMode = detectReferenceMode(opts.eftDir);
-    if (refMode && refMode !== opts.mode) {
-      throw new Error(
-        `The reference file in ${opts.eftDir} is a ${refMode} file, but --mode is ${opts.mode}. ` +
-          `Re-run with --mode ${refMode}, or supply a ${opts.mode} reference file.`,
-      );
-    }
+    // The reference file is mode-specific; refuse a mismatch so wiki rows
+    // aren't built from cross-mode data.
+    requireMatchingReferenceMode(opts.eftDir, opts.mode);
     printSuccess(`Parsed ${eftTasks.size} quests from reference file`);
 
     printProgress(`Fetching ${opts.mode} tasks from tarkov.dev...`);
@@ -314,12 +284,6 @@ async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main();
 }

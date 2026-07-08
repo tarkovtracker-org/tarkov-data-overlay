@@ -11,10 +11,12 @@
     "eft:audit": "tsx scripts/eft-audit.ts",
     "eft:wiki": "tsx scripts/eft-wiki-crosscheck.ts",
     "eft:normalize": "tsx scripts/eft-normalize.ts",
-    "eft:story": "mkdir -p data/eft && python3 scripts/eft-story-wiki.py && python3 scripts/eft-story-generate.py > data/eft/story-final.json && node scripts/eft-story-write.cjs",
+    "eft:story": "mkdir -p data/eft && tsx scripts/eft-story-wiki.ts && tsx scripts/eft-story-generate.ts > data/eft/story-final.json && tsx scripts/eft-story-write.ts",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
     "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"{scripts,src/lib,tests,examples}/**/*.ts\"",
+    "format:check": "prettier --check \"{scripts,src/lib,tests,examples}/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -32,9 +34,10 @@
     "node": ">=22.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.43",
+    "@types/node": "^24.0.0",
     "ajv": "^8.18.0",
     "json5": "^2.2.3",
+    "prettier": "^3.6.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"

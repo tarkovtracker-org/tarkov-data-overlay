@@ -8,8 +8,8 @@
 import Ajv from 'ajv';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { pathToFileURL } from 'url';
 import {
+  isDirectExecution,
   getProjectPaths,
   loadJson5File,
   loadJsonFile,
@@ -362,13 +362,7 @@ export async function main(): Promise<void> {
   }
 }
 
-function isDirectExecution(): boolean {
-  const entryFile = process.argv[1];
-  if (!entryFile) return false;
-  return import.meta.url === pathToFileURL(entryFile).href;
-}
-
-if (isDirectExecution()) {
+if (isDirectExecution(import.meta.url)) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);
