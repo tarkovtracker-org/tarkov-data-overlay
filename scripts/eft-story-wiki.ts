@@ -41,6 +41,9 @@ export async function fetchWikitext(title: string): Promise<string> {
   const url = `${WIKI_API}?action=parse&page=${title}&prop=wikitext&format=json`;
   const response = await fetch(url, {
     headers: { 'User-Agent': 'tarkov-data-overlay story extractor' },
+    // Match the original Python port's urlopen(req, timeout=30) so a hung
+    // wiki request fails loudly instead of blocking the pipeline forever.
+    signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok) {
     throw new Error(`${title}: HTTP ${response.status}`);
