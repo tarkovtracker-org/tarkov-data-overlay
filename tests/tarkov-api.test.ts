@@ -3,7 +3,12 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchTasks, findTaskById, type TaskData } from '../src/lib/index.js';
+import {
+  fetchTasks,
+  fetchLocaleBundle,
+  findTaskById,
+  type TaskData,
+} from '../src/lib/index.js';
 
 type Routes = Record<string, unknown>;
 
@@ -358,6 +363,57 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     await expect(fetchTasks()).rejects.toThrow(
       'Invalid json.tarkov.dev response for regular/tasks: expected data.tasks object'
     );
+  });
+
+  it('fetchLocaleBundle fetches the requested locale endpoints and builds raw lookups', async () => {
+    const fetchMock = mockEndpoints({
+      'regular/tasks': {
+        data: {
+          tasks: { t1: { id: 't1', name: 't1 name', wikiLink: 'https://wiki/T1' } },
+          prestige: [{ id: 'p1', name: 'p1 name', prestigeLevel: 1 }],
+        },
+      },
+      'regular/items': { data: { items: { i1: { id: 'i1', name: 'i1 Name' } } } },
+      'regular/maps': { data: { maps: { m1: { id: 'm1', name: 'm1 Name' } } } },
+      'regular/traders': { data: { tr1: { id: 'tr1', name: 'tr1 Nickname' } } },
+      'regular/tasks_de': { data: { 't1 name': 'Neuanfang' } },
+      'regular/items_de': { data: { 'i1 Name': 'Rubel' } },
+      'regular/maps_de': { data: {} },
+      'regular/traders_de': { data: {} },
+    });
+
+    const bundle = await fetchLocaleBundle('regular', 'de');
+
+    expect(bundle.locale).toBe('de');
+    // Core records stay raw (translation keys as field values, wikiLink inline)
+    expect(bundle.tasksById.get('t1')).toEqual({
+      id: 't1',
+      name: 't1 name',
+      wikiLink: 'https://wiki/T1',
+    });
+    expect(bundle.prestigeById.get('p1')?.prestigeLevel).toBe(1);
+    expect(bundle.itemsById.get('i1')?.name).toBe('i1 Name');
+    expect(bundle.mapsById.has('m1')).toBe(true);
+    expect(bundle.tradersById.has('tr1')).toBe(true);
+    // Locale maps come from the _<locale> endpoints
+    expect(bundle.tasksLocale['t1 name']).toBe('Neuanfang');
+    expect(bundle.itemsLocale['i1 Name']).toBe('Rubel');
+
+    const requested = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(requested).toContain('https://json.tarkov.dev/regular/tasks_de');
+    expect(requested).toContain('https://json.tarkov.dev/regular/items_de');
+    expect(requested.every((url) => !url.endsWith('_en'))).toBe(true);
+  });
+
+  it('fetchLocaleBundle defaults to regular mode and the en locale', async () => {
+    const fetchMock = mockEndpoints(baseRoutes('regular'));
+
+    const bundle = await fetchLocaleBundle();
+
+    expect(bundle.locale).toBe('en');
+    const requested = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(requested).toContain('https://json.tarkov.dev/regular/tasks_en');
+    expect(requested.every((url) => !url.includes('/pve/'))).toBe(true);
   });
 
   it('findTaskById returns matching task', () => {

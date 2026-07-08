@@ -20,6 +20,7 @@ import { pathToFileURL } from 'url';
 import {
   getProjectPaths,
   loadJson5File,
+  loadAllJson5FromDir,
   colors,
   icons,
   bold,
@@ -30,8 +31,10 @@ import {
   printError,
   formatCountLabel,
   fetchTasks,
+  fetchLocaleBundle,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
+  validateLocaleOverrides,
   categorizeResults,
   type TaskOverride,
   type TaskAddition,
@@ -39,6 +42,9 @@ import {
   type GameMode,
   type ValidationResult,
   type ValidationDetail,
+  type LocaleOverlay,
+  type LocaleValidationResult,
+  type LocaleVerdict,
 } from '../src/lib/index.js';
 import {
   loadEftTasks,
@@ -503,6 +509,90 @@ function printEditionReferenceResults(missing: EditionTaskReference[]): void {
   console.log();
 }
 
+const LOCALE_VERDICT_ORDER: LocaleVerdict[] = ['STALE', 'REMOVED', 'NEEDED', 'UNVERIFIABLE'];
+
+const LOCALE_VERDICT_META: Record<
+  LocaleVerdict,
+  { icon: string; color: keyof typeof colors; label: string }
+> = {
+  STALE: {
+    icon: icons.sync,
+    color: 'yellow',
+    label: 'Bundle fixed upstream, can remove',
+  },
+  REMOVED: {
+    icon: icons.trash,
+    color: 'red',
+    label: 'Entity removed from API, delete from overlay',
+  },
+  NEEDED: {
+    icon: icons.success,
+    color: 'green',
+    label: 'Bundle still broken, override required',
+  },
+  UNVERIFIABLE: {
+    icon: icons.info,
+    color: 'cyan',
+    label: 'Overlay-authored (storyChapters), cannot verify',
+  },
+};
+
+export function printLocaleResults(locale: string, results: LocaleValidationResult[]): void {
+  printHeader(`LOCALE OVERRIDES CHECK (${locale})`);
+
+  for (const verdict of LOCALE_VERDICT_ORDER) {
+    const subset = results.filter((r) => r.verdict === verdict);
+    const meta = LOCALE_VERDICT_META[verdict];
+    console.log(formatCountLabel(`${meta.icon} ${meta.label}`, subset.length, meta.color));
+    for (const r of subset) {
+      console.log(`  - ${r.entityType}/${r.entityId} ${bold(r.field)}`);
+      if (r.overrideValue !== undefined) {
+        console.log(`      override: ${r.overrideValue}`);
+        console.log(`      bundle:   ${r.bundleValue ?? dim('(not found)')}`);
+      }
+      console.log(`      ${dim(r.message)}`);
+    }
+    if (subset.length === 0) console.log(`  ${dim('None')}`);
+    console.log();
+  }
+
+  const obsolete = results.filter(
+    (r) => r.verdict === 'STALE' || r.verdict === 'REMOVED'
+  ).length;
+  if (obsolete > 0) {
+    console.log(`${icons.lightbulb} ${bold('RECOMMENDATION:')}`);
+    console.log(
+      `   Update src/overrides/locales/${locale}.json5 to remove ${obsolete} obsolete patch(es)`
+    );
+    console.log();
+  }
+}
+
+/**
+ * Check every locale override file against the live tarkov.dev bundle for the
+ * same locale. Locale bundles are shared across game modes, so 'regular' is
+ * fetched once per locale.
+ */
+async function checkLocaleOverrides(): Promise<void> {
+  const localesDir = join(srcDir, 'overrides', 'locales');
+  const localeOverrides = loadAllJson5FromDir(localesDir);
+  const locales = Object.keys(localeOverrides).sort();
+  if (locales.length === 0) return;
+
+  for (const locale of locales) {
+    printProgress(`Fetching ${locale} locale bundle from tarkov.dev...`);
+    const bundle = await fetchLocaleBundle('regular', locale);
+    printSuccess(`Fetched ${locale} bundle\n`);
+
+    const results = validateLocaleOverrides(
+      locale,
+      localeOverrides[locale] as LocaleOverlay,
+      bundle
+    );
+    printLocaleResults(locale, results);
+  }
+}
+
 /**
  * Cross-check objective overrides against the local quest reference file
  * (authoritative source). The API-only validator can only say "override differs
@@ -675,6 +765,9 @@ async function main(): Promise<void> {
     printEditionReferenceResults(missingEditionRefs);
 
     printReferenceCrossCheck(crossCheckGroups);
+
+    printProgress('Checking locale overrides against tarkov.dev bundles...\n');
+    await checkLocaleOverrides();
 
     process.exit(0);
   } catch (error) {
