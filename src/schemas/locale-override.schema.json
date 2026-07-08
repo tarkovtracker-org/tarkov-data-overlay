@@ -1,0 +1,146 @@
+{
+  "$id": "locale-override.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "definitions": {
+    "objectiveLocalePatches": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected objective description for this locale",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "description": "ID-keyed objective patches for locale-sensitive objective text",
+      "type": "object"
+    }
+  },
+  "description": "Schema for a single locale's corrections (src/overrides/locales/<locale>.json5). The file name determines the locale code (e.g. en.json5 -> en). Locale overrides patch broken translation bundles only; they are not data corrections and apply only when the consumer renders the matching locale.",
+  "properties": {
+    "items": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected item description for this locale",
+            "type": "string"
+          },
+          "name": {
+            "description": "Corrected item name for this locale",
+            "type": "string"
+          },
+          "shortName": {
+            "description": "Corrected item short name for this locale",
+            "type": "string"
+          },
+          "wikiLink": {
+            "description": "Corrected wiki link URL for this locale",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Item locale patches keyed by tarkov.dev item ID",
+      "type": "object"
+    },
+    "maps": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected map description for this locale",
+            "type": "string"
+          },
+          "name": {
+            "description": "Corrected map name for this locale",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Map locale patches keyed by tarkov.dev map ID",
+      "type": "object"
+    },
+    "prestige": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Corrected prestige name for this locale",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Prestige locale patches keyed by tarkov.dev prestige ID",
+      "type": "object"
+    },
+    "storyChapters": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected story chapter description for this locale",
+            "type": "string"
+          },
+          "name": {
+            "description": "Corrected story chapter name for this locale",
+            "type": "string"
+          },
+          "objectives": {
+            "$ref": "#/definitions/objectiveLocalePatches"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Story chapter locale patches keyed by overlay storyChapters ID",
+      "type": "object"
+    },
+    "tasks": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Corrected task name for this locale",
+            "type": "string"
+          },
+          "objectives": {
+            "$ref": "#/definitions/objectiveLocalePatches"
+          },
+          "wikiLink": {
+            "description": "Corrected wiki link URL for this locale",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Task locale patches keyed by tarkov.dev task ID",
+      "type": "object"
+    },
+    "traders": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Corrected trader description for this locale",
+            "type": "string"
+          },
+          "name": {
+            "description": "Corrected trader name for this locale",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "description": "Trader locale patches keyed by tarkov.dev trader ID",
+      "type": "object"
+    }
+  },
+  "title": "Locale Override",
+  "type": "object"
+}

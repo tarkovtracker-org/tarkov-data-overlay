@@ -51,6 +51,16 @@
       "description": "Trader corrections",
       "type": "object"
     },
+    "locales": {
+      "additionalProperties": {
+        "$ref": "locale-override.schema.json"
+      },
+      "description": "Per-locale corrections for broken translation bundles, keyed by tarkov.dev locale code (en, de, fr, ...). Applied after data overrides, only when rendering the matching locale.",
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$"
+      },
+      "type": "object"
+    },
     "modes": {
       "description": "Game-mode-specific overrides applied on top of shared corrections",
       "type": "object",

@@ -12,9 +12,11 @@ import {
   SCHEMA_CONFIGS,
 } from '../src/lib/index.js';
 import {
+  buildLocalLocaleEntityIdIndex,
   getValidator,
   initializeValidators,
   validateFile,
+  validateLocaleEntityIds,
   validateSourceFiles,
 } from '../scripts/validate.js';
 
@@ -28,11 +30,14 @@ describe('scripts/validate helpers', () => {
     expect(getValidator('unknown.json5', validators)).toBeNull();
   });
 
-  it('validates all source files used by overlay data', () => {
+  it('validates all source files used by overlay data', async () => {
     const { srcDir } = getProjectPaths();
     const expectedFiles = [
       ...listJson5Files(join(srcDir, 'overrides')).map((file) => `overrides/${file}`),
       ...listJson5Files(join(srcDir, 'additions')).map((file) => `additions/${file}`),
+      ...listJson5Files(join(srcDir, 'overrides', 'locales')).map(
+        (file) => `overrides/locales/${file}`
+      ),
       'suppressions/tasks.json5',
       ...['regular', 'pve'].flatMap((mode) => [
         ...listJson5Files(join(srcDir, 'overrides', 'modes', mode)).map(
@@ -44,7 +49,7 @@ describe('scripts/validate helpers', () => {
       ]),
     ].sort();
 
-    const results = validateSourceFiles();
+    const results = await validateSourceFiles();
     const files = results.map((result) => result.file).sort();
 
     expect(files).toEqual(expectedFiles);
@@ -79,6 +84,25 @@ describe('scripts/validate helpers', () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors?.some((error) => error.includes('must be object'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects locale patches for unknown local entity IDs', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-locale-'));
+    const filePath = join(tempDir, 'en.json5');
+    writeFileSync(filePath, '{ tasks: { missing: { name: "Ghost" } } }', 'utf-8');
+
+    try {
+      const result = validateLocaleEntityIds(
+        filePath,
+        'overrides/locales/en.json5',
+        buildLocalLocaleEntityIdIndex()
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.[0]).toContain('/tasks/missing');
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

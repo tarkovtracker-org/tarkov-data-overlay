@@ -58,6 +58,12 @@ function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
     output.modes = modes;
   }
 
+  // Load per-locale corrections (one file per locale, filename = locale code)
+  const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));
+  if (Object.keys(locales).length > 0) {
+    output.locales = locales;
+  }
+
   return output;
 }
 
@@ -107,7 +113,7 @@ function build(): void {
 
   // Summary
   const entityCounts = Object.entries(data)
-    .filter(([key]) => key !== 'modes')
+    .filter(([key]) => key !== 'modes' && key !== 'locales')
     .map(([key, value]) => `${key}: ${Object.keys(value as object).length}`)
     .join(', ');
 
@@ -122,10 +128,24 @@ function build(): void {
         .join(', ')
     : undefined;
 
+  const localeCounts = data.locales
+    ? Object.entries(data.locales)
+        .map(([locale, localeData]) => {
+          const inner = Object.entries(localeData as Record<string, Record<string, unknown>>)
+            .map(([k, v]) => `${k}: ${Object.keys(v).length}`)
+            .join(', ');
+          return `${locale}(${inner})`;
+        })
+        .join(', ')
+    : undefined;
+
   console.log('✅ Built overlay.json');
   console.log(`   Entities: ${entityCounts}`);
   if (modeCounts) {
     console.log(`   Modes: ${modeCounts}`);
+  }
+  if (localeCounts) {
+    console.log(`   Locales: ${localeCounts}`);
   }
   console.log(`   Version: ${output.$meta.version}`);
   console.log(`   Generated: ${output.$meta.generated}`);

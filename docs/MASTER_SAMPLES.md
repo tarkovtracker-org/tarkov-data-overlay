@@ -553,6 +553,80 @@ Notes:
 
 ---
 
+## Locale Overrides
+
+Fixes for broken tarkov.dev locale bundles, in `src/overrides/locales/<locale>.json5` (filename = locale code, e.g. `en.json5`). Only create a file for a locale that actually has corrections, and only include the fields broken in that bundle — do not duplicate data corrections here. Unlike a regular override (canonical value for all locales), a locale override applies only when the consumer renders that locale. Locale overrides are never mode-specific (locale bundles are shared across `regular`/`pve`).
+
+### Locale Override (`src/overrides/locales/en.json5`)
+
+```json5
+{
+  // English (en) locale corrections.
+  tasks: {
+    // Sample Task - Locale Override (all fields)
+    // Proof: [link]
+    "task-id-1": {
+      name: "Correct English Task Name", // Optional | UI; Was: Wrong-language string in the en bundle
+      wikiLink: "https://escapefromtarkov.fandom.com/wiki/Correct_English_Task_Name", // Optional | UI; Was: link to wrong-language wiki page
+      objectives: {
+        // ID-keyed objective patches, mirroring task override objectives
+        "objective-id-1": {
+          description: "Correct English objective description.", // Optional | UI; Was: wrong-language string in the en bundle
+        },
+      },
+    },
+  },
+  items: {
+    // Sample Item - Locale Override (all fields)
+    // Proof: [link]
+    "item-id-1": {
+      name: "Correct English Item Name", // Optional | UI; Was: wrong-language string in the en bundle
+      shortName: "Correct Short", // Optional | UI; Was: wrong-language string in the en bundle
+      description: "Correct English item description.", // Optional | UI; Was: wrong-language string in the en bundle
+      wikiLink: "https://escapefromtarkov.fandom.com/wiki/Correct_English_Item_Name", // Optional | UI; Was: link to wrong-language wiki page
+    },
+  },
+  traders: {
+    // Sample Trader - Locale Override (all fields)
+    // Proof: [link]
+    "trader-id-1": {
+      name: "Correct English Trader Name", // Optional | UI; Was: wrong-language string in the en bundle
+      description: "Correct English trader description.", // Optional | UI; Was: wrong-language string in the en bundle
+    },
+  },
+  maps: {
+    // Sample Map - Locale Override (all fields)
+    // Proof: [link]
+    "map-id-1": {
+      name: "Correct English Map Name", // Optional | UI; Was: wrong-language string in the en bundle
+      description: "Correct English map description.", // Optional | UI; Was: wrong-language string in the en bundle
+    },
+  },
+  prestige: {
+    // Sample Prestige - Locale Override (all fields)
+    // Proof: [link]
+    "prestige-id-1": {
+      name: "Correct English Prestige Name", // Optional | UI; Was: wrong-language string in the en bundle
+    },
+  },
+  storyChapters: {
+    // Sample Story Chapter - Locale Override (all fields)
+    // Proof: [link]
+    "story-chapter-id-1": {
+      name: "Correct English Chapter Name", // Optional | UI; Was: wrong-language string
+      description: "Correct English chapter description.", // Optional | UI; Was: wrong-language string
+      objectives: {
+        "story-chapter-id-1-main-1": {
+          description: "Correct English objective description.", // Optional | UI; Was: wrong-language string
+        },
+      },
+    },
+  },
+}
+```
+
+---
+
 ## Editions
 
 Comprehensive sample for `src/additions/editions.json5` custom game edition definitions (data not provided by the tarkov.dev API).

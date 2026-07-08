@@ -344,6 +344,67 @@ export interface ModeOverlay {
   tasksAdd?: Record<string, TaskAddition>;
 }
 
+/** Locale patch for a single objective's locale-sensitive text */
+export interface ObjectiveLocaleOverride {
+  description?: string;
+}
+
+/** Locale patch for a single task's locale-sensitive fields */
+export interface TaskLocaleOverride {
+  name?: string;
+  wikiLink?: string;
+  /** ID-keyed objective locale patches */
+  objectives?: Record<string, ObjectiveLocaleOverride>;
+}
+
+/** Locale patch for a single item's locale-sensitive fields */
+export interface ItemLocaleOverride {
+  name?: string;
+  shortName?: string;
+  description?: string;
+  wikiLink?: string;
+}
+
+/** Locale patch for a single trader's locale-sensitive fields */
+export interface TraderLocaleOverride {
+  name?: string;
+  description?: string;
+}
+
+/** Locale patch for a single map's locale-sensitive fields */
+export interface MapLocaleOverride {
+  name?: string;
+  description?: string;
+}
+
+/** Locale patch for a single prestige level's locale-sensitive fields */
+export interface PrestigeLocaleOverride {
+  name?: string;
+}
+
+/** Locale patch for a single story chapter's locale-sensitive fields */
+export interface StoryChapterLocaleOverride {
+  name?: string;
+  description?: string;
+  /** ID-keyed objective locale patches */
+  objectives?: Record<string, ObjectiveLocaleOverride>;
+}
+
+/**
+ * Corrections for a single broken locale bundle, keyed by entity type then
+ * entity ID. Distinct from data overrides: these apply only when the consumer
+ * renders the matching locale. Not mode-specific (locale bundles are shared
+ * across game modes).
+ */
+export interface LocaleOverlay {
+  tasks?: Record<string, TaskLocaleOverride>;
+  items?: Record<string, ItemLocaleOverride>;
+  traders?: Record<string, TraderLocaleOverride>;
+  maps?: Record<string, MapLocaleOverride>;
+  prestige?: Record<string, PrestigeLocaleOverride>;
+  storyChapters?: Record<string, StoryChapterLocaleOverride>;
+}
+
 /** Correction to a single condition within a prestige level's requirements */
 export interface PrestigeConditionOverride {
   type?: string;
@@ -399,6 +460,8 @@ export interface OverlayOutput {
   storyChapters?: Record<string, StoryChapter>;
   prestige?: Record<string, PrestigeOverride>;
   modes?: Partial<Record<GameMode, ModeOverlay>>;
+  /** Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...) */
+  locales?: Record<string, LocaleOverlay>;
   $meta: OverlayMeta;
 }
 
@@ -434,5 +497,6 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
   { pattern: 'overrides/prestige.json5', schemaFile: 'prestige-override.schema.json' },
+  { pattern: 'overrides/locales/*.json5', schemaFile: 'locale-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
 ];
