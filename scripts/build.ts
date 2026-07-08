@@ -27,15 +27,9 @@ function loadModeFiles(): Partial<Record<string, Record<string, Record<string, u
   for (const mode of SUPPORTED_GAME_MODES) {
     const modeData: Record<string, Record<string, unknown>> = {};
 
-    const overridesDir = join(srcDir, 'overrides', 'modes', mode);
-    if (existsSync(overridesDir)) {
-      Object.assign(modeData, loadAllJson5FromDir(overridesDir));
-    }
-
-    const additionsDir = join(srcDir, 'additions', 'modes', mode);
-    if (existsSync(additionsDir)) {
-      Object.assign(modeData, loadAllJson5FromDir(additionsDir, false));
-    }
+    // loadAllJson5FromDir no-ops on missing directories (listJson5Files returns []).
+    Object.assign(modeData, loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', mode)));
+    Object.assign(modeData, loadAllJson5FromDir(join(srcDir, 'additions', 'modes', mode), false));
 
     if (Object.keys(modeData).length > 0) {
       modes[mode] = modeData;

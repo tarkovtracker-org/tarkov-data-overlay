@@ -223,7 +223,7 @@ const validateMap: FieldValidator = (override, apiTask) => {
     field: 'map',
     status: isMatch ? 'fixed' : 'needed',
     message: isMatch
-      ? `${'map'}: ${formatValue(apiValue)} - FIXED IN API`
+      ? `map: ${formatValue(apiValue)} - FIXED IN API`
       : `map: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - STILL NEEDED`,
   };
 };
