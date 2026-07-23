@@ -3865,6 +3865,9 @@
   "modes": {
     "regular": {
       "tasks": {
+        "6752f6d83038f7df520c83e8": {
+          "minPlayerLevel": 20
+        },
         "67d03be712fb5f8fd2096332": {
           "objectives": {
             "67d03be712fb5f8fd2096334": {
@@ -3987,7 +3990,7 @@
   },
   "$meta": {
     "version": "1.53",
-    "generated": "2026-07-08T11:51:35.287Z",
-    "sha256": "fec8fff91d5e82461967e490ee25a0ed2318b2ac829e9d5ccc2d527c9eaa62b9"
+    "generated": "2026-07-23T00:38:42.643Z",
+    "sha256": "7e1a98a8131b81c19294a04198092f236731297df789603d31f473716cfd561c"
   }
 }

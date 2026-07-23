@@ -1,4 +1,11 @@
 {
+  // A Helping Hand - PvP starts at character level 20
+  // Proof: https://x.com/tarkov/status/1879463301949559292
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
+  '6752f6d83038f7df520c83e8': {
+    minPlayerLevel: 20, // Was: 0 (tarkov.dev mirrors PvE data)
+  },
+
   // Vacate the Premises - PvP has 24 kills (differs from PvE's 36)
   // Change the objective
   // Proof: https://escapefromtarkov.fandom.com/wiki/Vacate_the_Premises
