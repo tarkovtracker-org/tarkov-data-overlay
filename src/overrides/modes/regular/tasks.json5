@@ -50,12 +50,18 @@
   },
 
   // Counteraction - PvP awards 22,000 EXP (PvE awards 11,000)
+  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
+  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
+  // (edited 2025-03-28). Re-verify against a PvP client capture.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
   '6179b5eabca27a099552e052': {
     experience: 22000, // Was: 11000 (tarkov.dev mirrors PvE data)
   },
 
   // Energy Crisis - PvP awards 13,000 EXP (PvE awards 8,500)
+  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
+  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
+  // (edited 2025-04-14). Re-verify against a PvP client capture.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
   '6179b3a12153c15e937d52bc': {
     experience: 13000, // Was: 8500 (tarkov.dev mirrors PvE data)
@@ -74,6 +80,9 @@
   },
 
   // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
+  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
+  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
+  // (edited 2025-10-12). Re-verify against a PvP client capture.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
   '5edab4b1218d181e29451435': {
     experience: 16300, // Was: 12100 (tarkov.dev mirrors PvE data)
