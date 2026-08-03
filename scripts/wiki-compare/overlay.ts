@@ -75,7 +75,14 @@ export const DIVERGENCES_FILE = path.join(
  * Delegates to the shared registry loader so parsing/typing stays in one place.
  */
 export function loadDivergentFieldKeys(): Set<string> {
-  return divergentFieldKeys(loadDivergenceRegistry(DIVERGENCES_FILE));
+  // wiki-compare is a diagnostics tool, so a malformed registry must not abort
+  // the whole run (unlike check-overrides/validate, which should fail loudly).
+  try {
+    return divergentFieldKeys(loadDivergenceRegistry(DIVERGENCES_FILE));
+  } catch (error) {
+    console.warn('Warning: Could not load divergence registry:', error);
+    return new Set<string>();
+  }
 }
 
 export const TASKS_SUPPRESSIONS_FILE = path.join(

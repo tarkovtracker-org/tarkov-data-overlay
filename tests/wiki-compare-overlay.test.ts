@@ -119,6 +119,18 @@ describe('shared compare helpers', () => {
     ).toBe(false);
   });
 
+  it('subset matching finds an assignment that requires reshuffling (augmenting path)', () => {
+    // {a:1} and {b:2} both also match {a:1,b:2}; only a reshuffle yields a full
+    // distinct assignment: {a:1}->[1], {b:2}->[2], {a:1,b:2}->[0].
+    expect(
+      compareSubset(
+        [{ a: 1 }, { b: 2 }, { a: 1, b: 2 }],
+        [{ a: 1, b: 2 }, { a: 1 }, { b: 2 }],
+        { arrayMode: 'subset' }
+      )
+    ).toBe(true);
+  });
+
   it('treats reordered mixed-type arrays as equal (type-tagged sort keys)', () => {
     expect(valuesEqual([1, '1', true], [true, '1', 1])).toBe(true);
     // The number 1 and the string '1' must remain distinguishable.

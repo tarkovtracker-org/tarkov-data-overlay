@@ -86,26 +86,42 @@ export function compareSubset(
       return valuesEqual(overrideValue, apiValue);
     }
     if (overrideValue.length === 0) return true;
+    // More override entries than api entries can never map to distinct targets.
+    if (overrideValue.length > apiValue.length) return false;
 
     // Each override entry must map to a DISTINCT api entry. Greedy first-match
-    // can fail when candidates overlap (e.g. override [A, AB] against api
-    // [AB, A]: greedy binds A->AB then can't place AB). Backtracking finds any
-    // valid assignment if one exists.
-    const apiUsed = new Array<boolean>(apiValue.length).fill(false);
-    const assign = (entryIndex: number): boolean => {
-      if (entryIndex === overrideValue.length) return true;
-      for (let i = 0; i < apiValue.length; i += 1) {
-        if (apiUsed[i]) continue;
-        if (compareSubset(overrideValue[entryIndex], apiValue[i], options)) {
-          apiUsed[i] = true;
-          if (assign(entryIndex + 1)) return true;
-          apiUsed[i] = false;
+    // can fail when candidates overlap; naive backtracking is factorial. Use
+    // Kuhn's algorithm (augmenting paths) for maximum bipartite matching, which
+    // is polynomial O(V*E) and keeps strict validation predictable.
+    const candidates: number[][] = overrideValue.map((entry) => {
+      const matches: number[] = [];
+      for (let j = 0; j < apiValue.length; j += 1) {
+        if (compareSubset(entry, apiValue[j], options)) matches.push(j);
+      }
+      return matches;
+    });
+    // An entry with no candidate can never be matched - fail fast.
+    if (candidates.some((c) => c.length === 0)) return false;
+
+    const apiMatchedBy = new Array<number>(apiValue.length).fill(-1);
+    const augment = (entryIndex: number, seen: boolean[]): boolean => {
+      for (const j of candidates[entryIndex]) {
+        if (seen[j]) continue;
+        seen[j] = true;
+        if (apiMatchedBy[j] === -1 || augment(apiMatchedBy[j], seen)) {
+          apiMatchedBy[j] = entryIndex;
+          return true;
         }
       }
       return false;
     };
 
-    return assign(0);
+    for (let i = 0; i < overrideValue.length; i += 1) {
+      const seen = new Array<boolean>(apiValue.length).fill(false);
+      if (!augment(i, seen)) return false;
+    }
+
+    return true;
   }
 
   if (!apiValue || typeof apiValue !== 'object' || Array.isArray(apiValue)) return false;
