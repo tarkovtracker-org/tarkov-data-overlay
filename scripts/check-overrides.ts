@@ -15,7 +15,7 @@
  */
 
 import { join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import {
   getProjectPaths,
   isDirectExecution,
@@ -33,9 +33,17 @@ import {
   printCountSection,
   fetchTasks,
   fetchLocaleBundle,
+  fetchRawEntities,
   SUPPORTED_GAME_MODES,
   validateAllOverrides,
   validateLocaleOverrides,
+  validateDivergences,
+  categorizeDivergenceResults,
+  validateEntityOverrides,
+  validateEntityAdditions,
+  categorizeEntityResults,
+  checkStoryChapterIntegrity,
+  checkTaskSuppressionStaleness,
   categorizeResults,
   type TaskOverride,
   type TaskAddition,
@@ -46,11 +54,19 @@ import {
   type LocaleOverlay,
   type LocaleValidationResult,
   type LocaleVerdict,
+  type TaskDivergence,
+  type DivergenceResult,
+  type EntityValidationResult,
+  type EntityValidatorConfig,
+  type StoryChapterIssue,
+  type SuppressionStaleness,
 } from '../src/lib/index.js';
 import {
   loadEftTasks,
   detectReferenceMode,
   crossCheckOverrides,
+  findReferenceFile,
+  readQuestArray,
   type CrossCheckEntry,
 } from './eft-compare.js';
 
@@ -101,6 +117,77 @@ function loadEditions(): Record<string, EditionData> {
   const filePath = join(srcDir, 'additions', 'editions.json5');
   return loadJson5File<Record<string, EditionData>>(filePath);
 }
+
+/**
+ * Load an optional src/ JSON5 file, returning {} when it does not exist.
+ *
+ * Several override files ship as comment-only templates, so a missing or empty
+ * file is normal and must not be treated as an error.
+ */
+function loadOptional<T = unknown>(...segments: string[]): Record<string, T> {
+  const filePath = join(srcDir, ...segments);
+  if (!existsSync(filePath)) return {};
+  return loadJson5File<Record<string, T>>(filePath);
+}
+
+/** Load the mode-divergence registry (tooling-only; never built into dist). */
+const loadDivergences = () =>
+  loadOptional<TaskDivergence>('divergences', 'tasks.json5');
+
+/** Entity types checked generically, with their API endpoint and field semantics. */
+type EntityCheckSpec = {
+  label: string;
+  /** Path under src/ */
+  segments: string[];
+  /** Endpoint path segment on json.tarkov.dev */
+  endpoint: string;
+  /** Key inside the response `data` holding the collection, if nested */
+  collectionKey?: string;
+  config?: EntityValidatorConfig;
+};
+
+const ENTITY_OVERRIDE_SPECS: EntityCheckSpec[] = [
+  {
+    label: 'prestige',
+    segments: ['overrides', 'prestige.json5'],
+    endpoint: 'tasks',
+    collectionKey: 'prestige',
+    config: {
+      // prestigeLevel identifies which prestige tier the entry patches.
+      identityFields: ['prestigeLevel'],
+      // tarkov.dev does not expose in-game story-chapter requirements at all.
+      additiveFields: ['storyRequirements'],
+      // conditions are keyed by condition ID; overlay_* keys are synthetic.
+      keyedFields: ['conditions'],
+    },
+  },
+  {
+    label: 'items',
+    segments: ['overrides', 'items.json5'],
+    endpoint: 'items',
+    collectionKey: 'items',
+  },
+  {
+    label: 'traders',
+    segments: ['overrides', 'traders.json5'],
+    endpoint: 'traders',
+  },
+  {
+    label: 'hideout',
+    segments: ['overrides', 'hideout.json5'],
+    endpoint: 'hideout',
+    collectionKey: 'hideoutStations',
+  },
+];
+
+const ENTITY_ADDITION_SPECS: EntityCheckSpec[] = [
+  {
+    label: 'itemsAdd',
+    segments: ['additions', 'itemsAdd.json5'],
+    endpoint: 'items',
+    collectionKey: 'items',
+  },
+];
 
 const STATUS_ICONS: Record<ValidationResult['status'], string> = {
   NEEDED: icons.warning,
@@ -614,6 +701,334 @@ function printReferenceCrossCheck(
 }
 
 /**
+ * Report base-override verdicts across every game mode.
+ *
+ * Base overrides are mode-agnostic: `docs/INTEGRATION.md` applies them to both
+ * modes before mode-specific ones. Validating them against regular alone can
+ * therefore hide two failure shapes - an override that is stale in regular but
+ * load-bearing in PvE, and one that is quietly wrong in the mode we never
+ * checked. Only overrides stale in EVERY mode are safe to retire.
+ */
+function printBaseCrossModeSummary(
+  resultsByMode: Partial<Record<GameMode, ValidationResult[]>>
+): { staleEverywhere: string[]; verdictDiffers: string[] } {
+  const modes = Object.keys(resultsByMode) as GameMode[];
+  printHeader('BASE OVERRIDES ACROSS ALL MODES');
+  console.log(dim(`  (base overrides apply to every mode: ${modes.join(', ')})`));
+  console.log();
+
+  const byTask = new Map<string, Partial<Record<GameMode, ValidationResult>>>();
+  for (const mode of modes) {
+    for (const result of resultsByMode[mode] ?? []) {
+      const entry = byTask.get(result.id) ?? {};
+      entry[mode] = result;
+      byTask.set(result.id, entry);
+    }
+  }
+
+  const staleEverywhere: string[] = [];
+  const verdictDiffers: string[] = [];
+
+  for (const [taskId, perMode] of byTask) {
+    const present = modes.filter((mode) => perMode[mode]);
+    // A task missing from one mode's data is mode-exclusive, not a disagreement.
+    const comparable = present.filter(
+      (mode) => perMode[mode]!.status !== 'REMOVED_FROM_API'
+    );
+    if (comparable.length === 0) continue;
+
+    const name = perMode[comparable[0]]!.name;
+    const needed = comparable.filter((mode) => perMode[mode]!.stillNeeded);
+
+    if (needed.length === 0) {
+      staleEverywhere.push(
+        `${name} (${taskId}) - redundant in ${comparable.join(' + ')}`
+      );
+    } else if (needed.length < comparable.length) {
+      const idle = comparable.filter((mode) => !perMode[mode]!.stillNeeded);
+      verdictDiffers.push(
+        `${name} (${taskId}) - needed in ${needed.join(' + ')}, redundant in ${idle.join(' + ')}`
+      );
+    }
+  }
+
+  printCountSection(
+    `${icons.warning} Base overrides redundant in EVERY mode (safe to retire)`,
+    'yellow',
+    staleEverywhere
+  );
+  printCountSection(
+    `${icons.info} Base overrides whose verdict DIFFERS by mode (keep; consider moving to a mode file)`,
+    'cyan',
+    verdictDiffers
+  );
+
+  return { staleEverywhere, verdictDiffers };
+}
+
+/**
+ * Report the mode-divergence registry against both modes.
+ *
+ * This is the check that catches a mirror-direction flip. `OVERRIDE_MISSING`
+ * means consumers of that mode are being served a value we know is wrong.
+ * `OVERRIDE_REDUNDANT` entries are deliberate guards and are reported for
+ * visibility only - retiring them is what let the last regression through.
+ */
+function printDivergenceReport(results: DivergenceResult[]): { actionable: number } {
+  printHeader('MODE-DIVERGENCE REGISTRY');
+
+  if (results.length === 0) {
+    console.log(dim('  No divergences registered.'));
+    console.log();
+    return { actionable: 0 };
+  }
+
+  const grouped = categorizeDivergenceResults(results);
+  const describe = (r: DivergenceResult): string =>
+    `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}: expected ${formatDivergenceValue(
+      r.expected
+    )}, upstream ${formatDivergenceValue(r.upstream)}${
+      r.override === undefined
+        ? ''
+        : `, override ${formatDivergenceValue(r.override)}`
+    }${r.confidence === 'high' ? '' : ` [${r.confidence} confidence]`}`;
+
+  printCountSection(
+    `${icons.error} Wrong data being served - no override corrects upstream (ADD an override)`,
+    'red',
+    grouped.missing.map((r) => `${describe(r)}\n      proof: ${r.proof}`)
+  );
+  printCountSection(
+    `${icons.error} Override present but disagrees with the recorded truth (FIX the override)`,
+    'red',
+    grouped.wrong.map((r) => `${describe(r)}\n      proof: ${r.proof}`)
+  );
+
+  // Mirroring is the upstream root cause: identical values in both modes for a
+  // field we know differs. Surface it so it can be reported upstream.
+  const mirroredFields = new Map<string, DivergenceResult>();
+  for (const r of grouped.mirrored) mirroredFields.set(`${r.taskId}:${r.field}`, r);
+  printCountSection(
+    `${icons.warning} Upstream is MIRRORING one mode into the other (report to tarkov.dev)`,
+    'yellow',
+    Array.from(mirroredFields.values()).map(
+      (r) =>
+        `${r.taskName} (${r.taskId}) ${r.field}: tarkov.dev serves the same value in both modes`
+    )
+  );
+
+  printCountSection(
+    `${icons.success} Overrides doing necessary work`,
+    'green',
+    grouped.active.map(describe)
+  );
+  printCountSection(
+    `${icons.info} Redundant guards - upstream currently correct, KEEP for flip protection`,
+    'cyan',
+    grouped.redundant.map(describe)
+  );
+  printCountSection(
+    `${icons.success} Upstream already correct, no override needed`,
+    'green',
+    grouped.upstreamCorrect.map(
+      (r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field} = ${formatDivergenceValue(r.upstream)}`
+    )
+  );
+
+  if (grouped.notInMode.length > 0) {
+    printCountSection(
+      `${icons.info} Registered field not applicable (task absent from that mode)`,
+      'cyan',
+      grouped.notInMode.map((r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}`)
+    );
+  }
+
+  return { actionable: grouped.missing.length + grouped.wrong.length };
+}
+
+function formatDivergenceValue(value: unknown): string {
+  if (value === undefined) return 'absent';
+  if (value === null) return 'null';
+  return typeof value === 'string' ? `'${value}'` : String(value);
+}
+
+/**
+ * Report generic entity override/addition results (prestige, items, traders,
+ * hideout, itemsAdd).
+ */
+function printEntityResults(
+  label: string,
+  filePath: string,
+  results: EntityValidationResult[]
+): { errors: number } {
+  printHeader(`${label.toUpperCase()} OVERLAY CHECK`);
+  console.log(dim(`  (${filePath})`));
+  console.log();
+
+  if (results.length === 0) {
+    console.log(dim('  Nothing to verify (file empty or comment-only).'));
+    console.log();
+    return { errors: 0 };
+  }
+
+  const grouped = categorizeEntityResults(results);
+  const lines = (list: EntityValidationResult[]) =>
+    list.flatMap((r) => [r.id, ...r.details.map((d) => `   ${d.message}`)]);
+
+  printCountSection(
+    `${icons.error} Entries whose ID is missing upstream (verify the ID)`,
+    'red',
+    grouped.removedFromApi.map((r) => r.id)
+  );
+  printCountSection(
+    `${icons.warning} Still needed`,
+    'yellow',
+    lines(grouped.stillNeeded)
+  );
+  printCountSection(
+    `${icons.success} Fixed upstream - safe to retire`,
+    'green',
+    lines(grouped.fixed)
+  );
+
+  const identityErrors = results.flatMap((r) =>
+    r.details.filter((d) => d.status === 'error').map((d) => `${r.id}: ${d.message}`)
+  );
+  if (identityErrors.length > 0) {
+    printCountSection(
+      `${icons.error} Identity/consistency problems`,
+      'red',
+      identityErrors
+    );
+  }
+
+  return { errors: grouped.removedFromApi.length + identityErrors.length };
+}
+
+/** Report story-chapter referential integrity problems. */
+function printStoryChapterIssues(
+  issues: StoryChapterIssue[],
+  questRefsChecked: boolean
+): { errors: number } {
+  printHeader('STORY CHAPTER INTEGRITY');
+  console.log(
+    dim('  (overlay-authored; cannot be verified upstream, so references are checked instead)')
+  );
+  if (!questRefsChecked) {
+    console.log(
+      dim(
+        '  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)'
+      )
+    );
+  }
+  console.log();
+
+  printCountSection(
+    `${icons.error} Referential integrity problems`,
+    'red',
+    issues.map((i) => `${i.chapterId} [${i.kind}]: ${i.message}`)
+  );
+
+  return { errors: issues.length };
+}
+
+/**
+ * Quest IDs from the local EFT reference, or null when no reference is present.
+ *
+ * Story-chapter quests are absent from tarkov.dev, so this is the only source
+ * that can resolve them. Two reference payloads are needed:
+ *
+ * - `quest_list` carries ordinary trader quests, which is what story-chapter
+ *   objectives point at via `sourceQuestId`.
+ * - `quest_getMainQuestsList` carries the story chapters themselves, which is
+ *   what `chapterQuestId` points at. Chapter IDs are NOT in `quest_list`, so
+ *   without this file every chapter would look unresolvable.
+ */
+function loadReferenceQuestIds(): Set<string> | null {
+  const eftDir = join(rootDir, 'eft');
+  if (!existsSync(eftDir)) return null;
+
+  const ids = new Set<string>();
+
+  try {
+    for (const quest of readQuestArray(findReferenceFile(eftDir))) {
+      const rawId = (quest as { _id?: unknown })._id;
+      if (typeof rawId === 'string') {
+        const bare = rawId.replace(/[^0-9a-f]/gi, '');
+        if (bare) ids.add(bare);
+      }
+    }
+  } catch {
+    // No quest_list reference, or an unexpected shape.
+  }
+
+  for (const chapterId of loadReferenceChapterIds(eftDir)) ids.add(chapterId);
+
+  return ids.size > 0 ? ids : null;
+}
+
+/** Story chapter IDs from a `quest_getMainQuestsList` capture, if present. */
+function loadReferenceChapterIds(eftDir: string): string[] {
+  let files: string[];
+  try {
+    files = readdirSync(eftDir);
+  } catch {
+    return [];
+  }
+
+  const mainQuestFile = files.find(
+    (file) => /getmainquestslist/i.test(file) && file.endsWith('.json')
+  );
+  if (!mainQuestFile) return [];
+
+  try {
+    const raw = JSON.parse(readFileSync(join(eftDir, mainQuestFile), 'utf-8')) as unknown;
+    const envelope = raw as {
+      response?: { decoded_response?: unknown };
+      data?: unknown;
+    };
+    const decoded = (envelope.response?.decoded_response ?? raw) as { data?: unknown };
+    const data = (decoded.data ?? decoded) as { chapters?: unknown };
+    if (!Array.isArray(data.chapters)) return [];
+
+    return data.chapters
+      .map((chapter) =>
+        chapter && typeof chapter === 'object'
+          ? (chapter as Record<string, unknown>).ChapterId
+          : undefined
+      )
+      .filter((id): id is string => typeof id === 'string');
+  } catch {
+    return [];
+  }
+}
+
+/** Report suppressions that no longer suppress anything. */
+function printSuppressionResults(results: SuppressionStaleness[]): { stale: number } {
+  printHeader('SUPPRESSION STALENESS');
+
+  const stale = results.filter((r) => r.stale);
+  const live = results.filter((r) => !r.stale);
+
+  printCountSection(
+    `${icons.warning} Stale suppressions - upstream quirk is gone, remove these`,
+    'yellow',
+    stale.map((r) =>
+      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
+    )
+  );
+  printCountSection(
+    `${icons.success} Suppressions still relevant`,
+    'green',
+    live.map((r) =>
+      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
+    )
+  );
+
+  return { stale: stale.length };
+}
+
+/**
  * Fetch tasks once per game mode. The base pass and the mode loop both need
  * regular-mode data; without memoization the (large) regular-mode payloads
  * would be downloaded twice in a single run.
@@ -637,7 +1052,11 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
  * Main validation function
  */
 async function main(): Promise<void> {
+  const strict = process.argv.includes('--strict');
   const getTasksForMode = createTaskFetcher();
+  /** Problems that mean data is being served wrong or the overlay is inconsistent. */
+  let actionable = 0;
+
   try {
     printProgress('Loading task overrides...');
     const overrides = loadTaskOverrides();
@@ -671,23 +1090,28 @@ async function main(): Promise<void> {
     const additionResults = checkTaskAdditions(additions, apiTasks);
     printAdditionResults(additionResults);
 
+    // Per-mode API data and overrides, reused by the divergence and
+    // cross-mode passes so nothing is fetched twice.
+    const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
+    const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
+
     // Validate mode-specific overrides and additions
     for (const mode of SUPPORTED_GAME_MODES) {
       const modeOverrides = loadModeTaskOverrides(mode);
       const modeAdditions = loadModeTaskAdditions(mode);
-      const modeOverrideCount = Object.keys(modeOverrides).length;
-      const modeAdditionCount = Object.keys(modeAdditions).length;
-      if (modeOverrideCount === 0 && modeAdditionCount === 0) continue;
-
-      if (modeOverrideCount > 0) {
-        crossCheckGroups.push({ label: mode, overrides: modeOverrides });
-      }
+      modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
       const modeApiTasks = await getTasksForMode(mode);
+      apiTasksByMode[mode] = modeApiTasks;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
+      const modeOverrideCount = Object.keys(modeOverrides).length;
+      const modeAdditionCount = Object.keys(modeAdditions).length;
+
       if (modeOverrideCount > 0) {
+        crossCheckGroups.push({ label: mode, overrides: modeOverrides });
+
         printProgress(`Validating ${mode} mode overrides...\n`);
         const modeResults = validateAllOverrides(modeOverrides, modeApiTasks);
         printResults(modeResults, {
@@ -703,14 +1127,114 @@ async function main(): Promise<void> {
       }
     }
 
+    // Base overrides apply to every mode, so validate them against every mode.
+    const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
+    for (const mode of SUPPORTED_GAME_MODES) {
+      const modeApiTasks = apiTasksByMode[mode];
+      if (!modeApiTasks) continue;
+      baseResultsByMode[mode] = validateAllOverrides(overrides, modeApiTasks);
+    }
+    printBaseCrossModeSummary(baseResultsByMode);
+
     printProgress('Checking edition exclusions against API...\n');
     const missingEditionRefs = checkEditionTaskReferences(editions, apiTasks);
     printEditionReferenceResults(missingEditionRefs);
+
+    // Mode-divergence registry: the check that detects a mirror-direction flip.
+    const divergences = loadDivergences();
+    const divergenceResults = validateDivergences(divergences, overrides, {
+      regular: apiTasksByMode.regular
+        ? {
+            apiTasks: apiTasksByMode.regular,
+            modeOverrides: modeOverridesByMode.regular ?? {},
+          }
+        : undefined,
+      pve: apiTasksByMode.pve
+        ? { apiTasks: apiTasksByMode.pve, modeOverrides: modeOverridesByMode.pve ?? {} }
+        : undefined,
+    });
+    actionable += printDivergenceReport(divergenceResults).actionable;
+
+    // Entity types that previously had no validator at all.
+    for (const spec of ENTITY_OVERRIDE_SPECS) {
+      const entityOverrides = loadOptional(...spec.segments);
+      const relPath = `src/${spec.segments.join('/')}`;
+      if (Object.keys(entityOverrides).length === 0) {
+        actionable += printEntityResults(spec.label, relPath, []).errors;
+        continue;
+      }
+      printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
+      const apiEntities = await fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+      printSuccess(`Fetched ${apiEntities.size} ${spec.label} record(s)\n`);
+      const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
+      actionable += printEntityResults(spec.label, relPath, entityResults).errors;
+    }
+
+    for (const spec of ENTITY_ADDITION_SPECS) {
+      const entityAdditions = loadOptional(...spec.segments);
+      const relPath = `src/${spec.segments.join('/')}`;
+      if (Object.keys(entityAdditions).length === 0) {
+        printEntityResults(spec.label, relPath, []);
+        continue;
+      }
+      printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
+      const apiEntities = await fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+      printSuccess(`Fetched ${apiEntities.size} record(s)\n`);
+      printEntityResults(spec.label, relPath, validateEntityAdditions(entityAdditions, apiEntities));
+    }
+
+    // Story chapters: overlay-authored, so check references rather than values.
+    const storyChapters = loadOptional('additions', 'storyChapters.json5');
+    if (Object.keys(storyChapters).length > 0) {
+      // Story quests are NOT in the tarkov.dev task list, so their IDs can only
+      // be resolved against the local EFT reference. Without it, only internal
+      // consistency is checkable.
+      const referenceQuestIds = loadReferenceQuestIds();
+      let knownQuestIds: Set<string> | undefined;
+
+      if (referenceQuestIds) {
+        knownQuestIds = new Set(referenceQuestIds);
+        for (const mode of SUPPORTED_GAME_MODES) {
+          for (const task of apiTasksByMode[mode] ?? []) knownQuestIds.add(task.id);
+        }
+        for (const [key, addition] of Object.entries(additions)) {
+          knownQuestIds.add(key);
+          const id = (addition as { id?: unknown }).id;
+          if (typeof id === 'string') knownQuestIds.add(id);
+        }
+        for (const mode of SUPPORTED_GAME_MODES) {
+          for (const [key, addition] of Object.entries(loadModeTaskAdditions(mode))) {
+            knownQuestIds.add(key);
+            const id = (addition as { id?: unknown }).id;
+            if (typeof id === 'string') knownQuestIds.add(id);
+          }
+        }
+      }
+
+      actionable += printStoryChapterIssues(
+        checkStoryChapterIntegrity(storyChapters, knownQuestIds),
+        knownQuestIds !== undefined
+      ).errors;
+    }
+
+    // Suppressions hide real upstream quirks; a dead one hides future problems.
+    const suppressions = loadOptional('suppressions', 'tasks.json5');
+    if (Object.keys(suppressions).length > 0) {
+      printSuppressionResults(checkTaskSuppressionStaleness(suppressions, apiTasks));
+    }
 
     printReferenceCrossCheck(crossCheckGroups);
 
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     await checkLocaleOverrides();
+
+    if (strict && actionable > 0) {
+      printError(
+        `\n${icons.error} ${actionable} actionable problem(s) found (--strict). ` +
+          'Data is being served incorrectly or the overlay is inconsistent.'
+      );
+      process.exit(2);
+    }
 
     process.exit(0);
   } catch (error) {

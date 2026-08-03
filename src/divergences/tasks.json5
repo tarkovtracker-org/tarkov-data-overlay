@@ -1,0 +1,261 @@
+{
+  // MODE-DIVERGENCE REGISTRY - tooling only, NOT built into dist/overlay.json
+  //
+  // WHY THIS FILE EXISTS
+  // tarkov.dev derives one game mode's numbers from the other for some tasks,
+  // and the direction it mirrors can flip. Overrides that only pin the mode
+  // that happens to be broken today silently become both redundant AND
+  // insufficient when the mirror reverses - which is exactly what happened to
+  // the PvE experience overrides (see git history for src/overrides/modes/pve).
+  //
+  // This registry records the TRUE value for BOTH modes so a flip in either
+  // direction is detectable. `npm run check-overrides` compares the effective
+  // merged value per mode against these entries and reports which overrides are
+  // currently load-bearing versus currently redundant. Redundant entries are
+  // reported as intentional guards - never as "delete this".
+  //
+  // Values recorded here are never deleted when upstream agrees. That deletion
+  // policy is what allowed the regression to go unnoticed.
+  //
+  // SOURCES OF TRUTH
+  //   pve      -> `eft-reference`: local EFT client_quest_list capture in eft/
+  //               (authoritative; see AGENTS.md). PvE is the only mode our
+  //               captures cover.
+  //   regular  -> `wiki`: the EFT wiki documents PvP/regular values. No PvP
+  //               client capture is available, so the wiki is the best witness.
+  //
+  // STATUS
+  //   divergent      - the two modes genuinely differ in-game; both values pinned
+  //   converged      - modes currently share one value; kept as history so a
+  //                    future divergence is detectable
+  //   mode-exclusive - task only exists in one mode; no cross-mode comparison
+
+  // ---------------------------------------------------------------------------
+  // DIVERGENT - upstream currently mirrors the PvE value into regular, so
+  // regular-mode consumers get PvE experience. Regular overrides are required.
+  // ---------------------------------------------------------------------------
+
+  // Anesthesia
+  '5eda19f0edce541157209cee': {
+    name: 'Anesthesia',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Anesthesia',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 18100,
+        pve: 9800,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // Counteraction
+  '6179b5eabca27a099552e052': {
+    name: 'Counteraction',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Counteraction',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 22000,
+        pve: 11000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // Energy Crisis
+  '6179b3a12153c15e937d52bc': {
+    name: 'Energy Crisis',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Energy_Crisis',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 13000,
+        pve: 8500,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // No Place for Renegades
+  '60896bca6ee58f38c417d4f2': {
+    name: 'No Place for Renegades',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 15300,
+        pve: 10300,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // Perfect Mediator
+  '5c12452c86f7744b83469073': {
+    name: 'Perfect Mediator',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 20900,
+        pve: 12000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // The Huntsman Path - Sadist
+  '5edab4b1218d181e29451435': {
+    name: 'The Huntsman Path - Sadist',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 16300,
+        pve: 12100,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Wiki value matches the regular figure recorded when the PvE override was authored.',
+      },
+    },
+  },
+
+  // Kings of the Rooftops
+  '639136f086e646067c176a8b': {
+    name: 'Kings of the Rooftops',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 10000,
+        pve: 7700,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note:
+          'MEDIUM CONFIDENCE: the wiki (10000) is the only PvP witness and it disagrees with the 14700 regular figure recorded when the PvE override was authored, so the wiki itself changed. 10000 is used because upstream currently serves the mirrored PvE value (7700), which is certainly wrong for regular. Re-verify against a PvP client capture when one is available.',
+      },
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // CONVERGED - EFT reference, wiki and upstream all agree on a single value in
+  // both modes. No override is needed in either mode. Recorded so that a future
+  // re-divergence is detectable rather than silent.
+  // ---------------------------------------------------------------------------
+
+  // A Fuel Matter
+  '608974d01a66564e74191fc0': {
+    name: 'A Fuel Matter',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter',
+    status: 'converged',
+    fields: {
+      minPlayerLevel: {
+        regular: 15,
+        pve: 15,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement.',
+      },
+    },
+  },
+
+  // Inventory Check
+  '608974af4b05530f55550c21': {
+    name: 'Inventory Check',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Inventory_Check',
+    status: 'converged',
+    fields: {
+      minPlayerLevel: {
+        regular: 15,
+        pve: 15,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+      },
+    },
+  },
+
+  // Psycho Sniper
+  '5c0be13186f7746f016734aa': {
+    name: 'Psycho Sniper',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper',
+    status: 'converged',
+    fields: {
+      minPlayerLevel: {
+        regular: 27,
+        pve: 27,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Previously diverged (regular 35 / PvE 27); BSG lowered the regular requirement.',
+      },
+    },
+  },
+
+  // Ambulances Again
+  '64f3176921045e77405d63b5': {
+    name: 'Ambulances Again',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Ambulances_Again',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 7500,
+        pve: 7500,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+        note: 'Previously diverged (regular 12000 / PvE 7500); wiki now agrees on 7500 for both.',
+      },
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // MODE-EXCLUSIVE - task exists in only one mode, so no mirror can occur.
+  // ---------------------------------------------------------------------------
+
+  // Easy Money - Part 2
+  '6834158f2f0e2a7eb90b62c8': {
+    name: 'Easy Money - Part 2',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_2',
+    status: 'mode-exclusive',
+    note: 'PvE-only task; absent from the regular-mode task list entirely.',
+    fields: {
+      experience: {
+        pve: 2900,
+        confidence: 'high',
+        pveSource: 'eft-reference',
+        verified: '2026-08-03',
+      },
+    },
+  },
+}

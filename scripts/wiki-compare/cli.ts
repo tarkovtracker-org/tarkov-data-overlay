@@ -36,6 +36,7 @@ import {
   buildNextTaskMap,
   isTaskFieldSuppressed,
   loadSuppressedFields,
+  loadDivergentFieldKeys,
   loadTaskRequirementOverrides,
   loadTaskSuppressions,
 } from './overlay.js';
@@ -372,6 +373,27 @@ export async function runBulkMode(
     );
   });
   const filteredCount = allDiscrepancies.length - newDiscrepancies.length;
+
+  // A discrepancy on a registered mode-divergent field indicates upstream mode
+  // mirroring, so it outranks its normal field-based priority.
+  const divergentKeys = loadDivergentFieldKeys();
+  let elevatedCount = 0;
+  for (const discrepancy of newDiscrepancies) {
+    if (
+      discrepancy.priority !== 'high' &&
+      divergentKeys.has(`${discrepancy.taskId}:${discrepancy.field}`)
+    ) {
+      discrepancy.priority = 'high';
+      elevatedCount += 1;
+    }
+  }
+  if (elevatedCount > 0) {
+    console.log(
+      dim(
+        `Elevated to high priority (registered mode divergence): ${elevatedCount}`
+      )
+    );
+  }
 
   if (filteredCount > 0) {
     console.log(

@@ -404,6 +404,31 @@ async function buildContext(
 }
 
 /**
+ * Fetch a raw entity collection for a game mode, keyed by id.
+ *
+ * Unlike `fetchTasks` this performs no adaptation or translation: it is used by
+ * the override checkers for entity types that only need presence/field
+ * comparison (prestige, items, traders, hideout). Text fields in the result are
+ * still translation KEYS, not resolved strings.
+ *
+ * @param mode - game mode to fetch
+ * @param endpoint - endpoint path segment, e.g. 'items' or 'hideout'
+ * @param collectionKey - key inside `data` holding the collection. Some
+ *   endpoints (traders) put the collection directly in `data`; omit for those.
+ */
+export async function fetchRawEntities(
+  mode: GameMode,
+  endpoint: string,
+  collectionKey?: string
+): Promise<Map<string, Record<string, unknown>>> {
+  const cache: EndpointCache = new Map();
+  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
+  const data = isRecord(envelope.data) ? envelope.data : {};
+  const collection = collectionKey ? data[collectionKey] : data;
+  return toLookup(collection);
+}
+
+/**
  * Fetch all tasks for a game mode from json.tarkov.dev and adapt them into
  * the `TaskData[]` shape used by the override validator.
  */

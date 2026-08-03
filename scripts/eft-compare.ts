@@ -537,7 +537,17 @@ export function loadEftTasks(eftDir: string): Map<string, EftTask> | null {
   } catch {
     return null;
   }
-  return parseEftTasks(readQuestArray(refFile));
+
+  // The reference is an optional local-only input, so a present-but-unusable
+  // file (broken symlink, truncated download, unexpected shape) must degrade to
+  // "no reference" rather than aborting the whole maintenance run.
+  try {
+    return parseEftTasks(readQuestArray(refFile));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(`Warning: ignoring unusable quest reference '${refFile}': ${reason}`);
+    return null;
+  }
 }
 
 /**
@@ -563,8 +573,13 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
   } catch {
     return null;
   }
-  const raw = JSON.parse(readFileSync(refFile, 'utf-8')) as any;
-  return modeFromRequestUrl(raw?.request?.url);
+  try {
+    const raw = JSON.parse(readFileSync(refFile, 'utf-8')) as any;
+    return modeFromRequestUrl(raw?.request?.url);
+  } catch {
+    // Unusable reference: treat the mode as indeterminate rather than throwing.
+    return null;
+  }
 }
 
 export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };
