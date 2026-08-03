@@ -28,4 +28,65 @@
       },
     },
   },
+
+  // ---------------------------------------------------------------------------
+  // Regular-mode experience: tarkov.dev now mirrors the PvE value into regular.
+  //
+  // These previously only needed a PvE override because upstream mirrored the
+  // REGULAR value into PvE. Upstream then fixed PvE by serving the PvE value in
+  // BOTH modes, which corrected PvE and broke regular. The PvE overrides are
+  // kept as guards (see src/overrides/modes/pve/tasks.json5) and both true
+  // values are recorded in src/divergences/tasks.json5 so a future flip in
+  // either direction is detected instead of silently shipping wrong data.
+  //
+  // PvE values verified against a local EFT client capture (2026-06-30);
+  // regular values verified against the wiki, which documents PvP.
+  // ---------------------------------------------------------------------------
+
+  // Anesthesia - PvP awards 18,100 EXP (PvE awards 9,800)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Anesthesia
+  '5eda19f0edce541157209cee': {
+    experience: 18100, // Was: 9800 (tarkov.dev mirrors PvE data)
+  },
+
+  // Counteraction - PvP awards 22,000 EXP (PvE awards 11,000)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
+  '6179b5eabca27a099552e052': {
+    experience: 22000, // Was: 11000 (tarkov.dev mirrors PvE data)
+  },
+
+  // Energy Crisis - PvP awards 13,000 EXP (PvE awards 8,500)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
+  '6179b3a12153c15e937d52bc': {
+    experience: 13000, // Was: 8500 (tarkov.dev mirrors PvE data)
+  },
+
+  // No Place for Renegades - PvP awards 15,300 EXP (PvE awards 10,300)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades
+  '60896bca6ee58f38c417d4f2': {
+    experience: 15300, // Was: 10300 (tarkov.dev mirrors PvE data)
+  },
+
+  // Perfect Mediator - PvP awards 20,900 EXP (PvE awards 12,000)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
+  '5c12452c86f7744b83469073': {
+    experience: 20900, // Was: 12000 (tarkov.dev mirrors PvE data)
+  },
+
+  // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
+  '5edab4b1218d181e29451435': {
+    experience: 16300, // Was: 12100 (tarkov.dev mirrors PvE data)
+  },
+
+  // Kings of the Rooftops - PvP awards 10,000 EXP (PvE awards 7,700)
+  // MEDIUM CONFIDENCE: the wiki is the only PvP witness and it now reads 10,000
+  // where 14,700 was recorded when the PvE override was authored, so the wiki
+  // itself changed. 10,000 is applied because upstream currently serves the
+  // mirrored PvE value (7,700), which is certainly wrong for regular.
+  // Re-verify against a PvP client capture when one is available.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops
+  '639136f086e646067c176a8b': {
+    experience: 10000, // Was: 7700 (tarkov.dev mirrors PvE data)
+  },
 }

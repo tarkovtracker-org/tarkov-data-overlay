@@ -130,13 +130,6 @@
         }
       }
     },
-    "5c0bd94186f7747a727f09b2": {
-      "objectives": {
-        "5c1b765d86f77413193fa4f2": {
-          "description": "Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope"
-        }
-      }
-    },
     "63a5cf262964a7488f5243ce": {
       "map": null,
       "objectives": {
@@ -165,9 +158,6 @@
           ]
         }
       }
-    },
-    "6574e0dedc0d635f633a5805": {
-      "map": null
     },
     "669fa3a40c828825de06d6a1": {
       "objectives": {
@@ -290,13 +280,6 @@
               "bottom": 21.35
             }
           ]
-        }
-      }
-    },
-    "6761f28a022f60bb320f3e95": {
-      "objectives": {
-        "6848100b00afffa81f09e36b": {
-          "description": "Survive and extract from The Lab"
         }
       }
     },
@@ -3882,6 +3865,27 @@
               "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
             }
           }
+        },
+        "5eda19f0edce541157209cee": {
+          "experience": 18100
+        },
+        "6179b5eabca27a099552e052": {
+          "experience": 22000
+        },
+        "6179b3a12153c15e937d52bc": {
+          "experience": 13000
+        },
+        "60896bca6ee58f38c417d4f2": {
+          "experience": 15300
+        },
+        "5c12452c86f7744b83469073": {
+          "experience": 20900
+        },
+        "5edab4b1218d181e29451435": {
+          "experience": 16300
+        },
+        "639136f086e646067c176a8b": {
+          "experience": 10000
         }
       }
     },
@@ -3894,23 +3898,11 @@
             }
           }
         },
-        "608974d01a66564e74191fc0": {
-          "minPlayerLevel": 15
-        },
-        "64f3176921045e77405d63b5": {
-          "experience": 7500
-        },
-        "5eda19f0edce541157209cee": {
-          "experience": 9800
-        },
         "5c0bbaa886f7746941031d82": {
           "minPlayerLevel": 19
         },
         "5b4795fb86f7745876267770": {
           "minPlayerLevel": 23
-        },
-        "6179b5eabca27a099552e052": {
-          "experience": 11000
         },
         "65733403eefc2c312a759ddb": {
           "minPlayerLevel": 23
@@ -3918,35 +3910,14 @@
         "6179ac7511973d018217d0b9": {
           "minPlayerLevel": 17
         },
-        "6834158f2f0e2a7eb90b62c8": {
-          "experience": 2900
-        },
-        "6179b3a12153c15e937d52bc": {
-          "experience": 8500
-        },
         "5d25e4b786f77408251c4bfc": {
           "minPlayerLevel": 25
         },
         "5ae3280386f7742a41359364": {
           "minPlayerLevel": 27
         },
-        "608974af4b05530f55550c21": {
-          "minPlayerLevel": 15
-        },
-        "639136f086e646067c176a8b": {
-          "experience": 7700
-        },
-        "60896bca6ee58f38c417d4f2": {
-          "experience": 10300
-        },
-        "5c12452c86f7744b83469073": {
-          "experience": 12000
-        },
         "608a768d82e40b3c727fd17d": {
           "minPlayerLevel": 10
-        },
-        "5c0be13186f7746f016734aa": {
-          "minPlayerLevel": 27
         },
         "5c112d7e86f7740d6f647486": {
           "minPlayerLevel": 25
@@ -3956,9 +3927,6 @@
         },
         "5b47876e86f7744d1c353205": {
           "minPlayerLevel": 23
-        },
-        "5edab4b1218d181e29451435": {
-          "experience": 12100
         },
         "59ca2eb686f77445a80ed049": {
           "minPlayerLevel": 16
@@ -3989,8 +3957,8 @@
     }
   },
   "$meta": {
-    "version": "1.54",
-    "generated": "2026-07-23T02:01:54.776Z",
-    "sha256": "08478cab66936fd8d1c344b0a7093234376ac09d842e46558b99620895f5b9e7"
+    "version": "1.0.0",
+    "generated": "2026-08-03T21:56:57.671Z",
+    "sha256": "62b6b29a36223f8bcd0b57fec73eb04e647c76a880da48e798ae2b225d3c16aa"
   }
 }
