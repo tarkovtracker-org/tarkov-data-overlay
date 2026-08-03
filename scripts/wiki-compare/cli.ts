@@ -213,7 +213,7 @@ export async function runSingleTask(
   mapAliasMap: Map<string, string>,
   options: CliOptions
 ): Promise<void> {
-  const requirementOverrides = loadTaskRequirementOverrides();
+  const requirementOverrides = loadTaskRequirementOverrides(options.gameMode ?? 'both');
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
   const taskSuppressions = loadTaskSuppressions();
   const task = resolveTask(tasks, options);
@@ -272,9 +272,11 @@ export async function runBulkMode(
     `Found ${tasksWithWiki.length}/${tasks.length} tasks with wiki links`
   );
 
-  // Load suppressed fields (overlay corrections + wiki-incorrect suppressions)
+  // Load suppressed fields (overlay corrections + wiki-incorrect suppressions).
+  // Scope to the active game mode so a PvE-only correction does not mask a
+  // genuine regular-mode divergence (and vice versa).
   const { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys } =
-    loadSuppressedFields();
+    loadSuppressedFields(options.gameMode ?? 'both');
   const taskSuppressions = loadTaskSuppressions();
   if (overlayCount > 0 || wikiIncorrectCount > 0) {
     printProgress(
@@ -284,7 +286,7 @@ export async function runBulkMode(
   if (taskSuppressions.size > 0) {
     printProgress(`Loaded ${taskSuppressions.size} task suppression entries`);
   }
-  const requirementOverrides = loadTaskRequirementOverrides();
+  const requirementOverrides = loadTaskRequirementOverrides(options.gameMode ?? 'both');
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
 
   const allDiscrepancies: Discrepancy[] = [];

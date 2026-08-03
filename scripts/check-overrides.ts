@@ -39,6 +39,7 @@ import {
   validateLocaleOverrides,
   validateDivergences,
   categorizeDivergenceResults,
+  loadDivergenceRegistry,
   validateEntityOverrides,
   validateEntityAdditions,
   categorizeEntityResults,
@@ -132,7 +133,7 @@ function loadOptional<T = unknown>(...segments: string[]): Record<string, T> {
 
 /** Load the mode-divergence registry (tooling-only; never built into dist). */
 const loadDivergences = () =>
-  loadOptional<TaskDivergence>('divergences', 'tasks.json5');
+  loadDivergenceRegistry(join(srcDir, 'divergences', 'tasks.json5'));
 
 /** Entity types checked generically, with their API endpoint and field semantics. */
 type EntityCheckSpec = {
@@ -176,7 +177,8 @@ const ENTITY_OVERRIDE_SPECS: EntityCheckSpec[] = [
     label: 'hideout',
     segments: ['overrides', 'hideout.json5'],
     endpoint: 'hideout',
-    collectionKey: 'hideoutStations',
+    // The hideout endpoint keys stations directly under `data`, with no
+    // wrapping collection key.
   },
 ];
 
@@ -891,9 +893,14 @@ function printEntityResults(
     lines(grouped.fixed)
   );
 
-  const identityErrors = results.flatMap((r) =>
-    r.details.filter((d) => d.status === 'error').map((d) => `${r.id}: ${d.message}`)
-  );
+  // REMOVED_FROM_API results carry their own 'error' detail and are already
+  // printed and counted via grouped.removedFromApi above, so exclude them here
+  // to avoid double-reporting (and inflating the --strict actionable count).
+  const identityErrors = results
+    .filter((r) => r.status !== 'REMOVED_FROM_API')
+    .flatMap((r) =>
+      r.details.filter((d) => d.status === 'error').map((d) => `${r.id}: ${d.message}`)
+    );
   if (identityErrors.length > 0) {
     printCountSection(
       `${icons.error} Identity/consistency problems`,
@@ -954,7 +961,10 @@ function loadReferenceQuestIds(): Set<string> | null {
     for (const quest of readQuestArray(findReferenceFile(eftDir))) {
       const rawId = (quest as { _id?: unknown })._id;
       if (typeof rawId === 'string') {
-        const bare = rawId.replace(/[^0-9a-f]/gi, '');
+        // EFT reference _id values are wrapped, e.g. "[60e71dc0...] Long Line".
+        // Extract the first 24-hex token so hex letters in the quest name
+        // (the 'e' in "Line") don't corrupt the id. Mirrors eft-compare bareId.
+        const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
         if (bare) ids.add(bare);
       }
     }
@@ -1156,6 +1166,20 @@ async function main(): Promise<void> {
     actionable += printDivergenceReport(divergenceResults).actionable;
 
     // Entity types that previously had no validator at all.
+    // Entity types that previously had no validator at all. Memoize by
+    // endpoint so specs that share one (e.g. items overrides and itemsAdd both
+    // read `items`) fetch it only once.
+    const entityCache = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
+    const getEntities = (spec: EntityCheckSpec) => {
+      const key = `regular/${spec.endpoint}`;
+      let pending = entityCache.get(key);
+      if (!pending) {
+        pending = fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+        entityCache.set(key, pending);
+      }
+      return pending;
+    };
+
     for (const spec of ENTITY_OVERRIDE_SPECS) {
       const entityOverrides = loadOptional(...spec.segments);
       const relPath = `src/${spec.segments.join('/')}`;
@@ -1164,7 +1188,7 @@ async function main(): Promise<void> {
         continue;
       }
       printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
-      const apiEntities = await fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+      const apiEntities = await getEntities(spec);
       printSuccess(`Fetched ${apiEntities.size} ${spec.label} record(s)\n`);
       const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
       actionable += printEntityResults(spec.label, relPath, entityResults).errors;
@@ -1178,7 +1202,7 @@ async function main(): Promise<void> {
         continue;
       }
       printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
-      const apiEntities = await fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+      const apiEntities = await getEntities(spec);
       printSuccess(`Fetched ${apiEntities.size} record(s)\n`);
       printEntityResults(spec.label, relPath, validateEntityAdditions(entityAdditions, apiEntities));
     }
@@ -1220,7 +1244,19 @@ async function main(): Promise<void> {
     // Suppressions hide real upstream quirks; a dead one hides future problems.
     const suppressions = loadOptional('suppressions', 'tasks.json5');
     if (Object.keys(suppressions).length > 0) {
-      printSuppressionResults(checkTaskSuppressionStaleness(suppressions, apiTasks));
+      // A suppression may target a mode-exclusive task (e.g. a PvE-only quest),
+      // so resolve IDs against every mode rather than regular alone - otherwise
+      // a live suppression would be reported as stale.
+      const allModeTasks = new Map<string, TaskData>();
+      for (const task of apiTasks) allModeTasks.set(task.id, task);
+      for (const mode of SUPPORTED_GAME_MODES) {
+        for (const task of apiTasksByMode[mode] ?? []) allModeTasks.set(task.id, task);
+      }
+      // A stale suppression is a dead overlay entry (overlay inconsistency), so
+      // it counts toward the --strict gate alongside the other checks.
+      actionable += printSuppressionResults(
+        checkTaskSuppressionStaleness(suppressions, [...allModeTasks.values()])
+      ).stale;
     }
 
     printReferenceCrossCheck(crossCheckGroups);

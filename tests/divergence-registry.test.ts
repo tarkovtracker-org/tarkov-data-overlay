@@ -97,6 +97,10 @@ describe('divergence registry', () => {
       for (const [taskId, entry] of entries) {
         if (entry.status !== 'converged') continue;
         for (const [field, def] of Object.entries(entry.fields)) {
+          // Both must be present, otherwise `undefined === undefined` would let
+          // a half-populated converged entry pass silently.
+          expect(def.regular, `${taskId}.${field}.regular`).toBeDefined();
+          expect(def.pve, `${taskId}.${field}.pve`).toBeDefined();
           expect(def.regular, `${taskId}.${field}`).toBe(def.pve);
         }
       }

@@ -95,7 +95,13 @@ export function validateEntityOverrides(
 
       // Identity fields must agree with upstream but are not corrections.
       if (identity.has(field)) {
-        if (apiValue !== undefined && !compareSubset(overrideValue, apiValue)) {
+        if (apiValue === undefined) {
+          details.push({
+            field,
+            status: 'error',
+            message: `${field}: identity field absent from API - entity shape changed or the ID is wrong`,
+          });
+        } else if (!compareSubset(overrideValue, apiValue)) {
           details.push({
             field,
             status: 'error',

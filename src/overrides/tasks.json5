@@ -10,13 +10,15 @@
     },
   },
 
-  // Test Drive - Part 1 - Objective description wording incorrect
+  // Test Drive - Part 1 - Objective description wording (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
-  // API count (10) and usingWeapon now correct; description wording still differs
   //
   // PARKED 2026-08-03: tarkov.dev now returns this exact description in BOTH
-  // regular and pve, so the override is redundant. Kept commented rather than
-  // deleted so the corrected wording is not lost if upstream regresses.
+  // regular and pve (check-overrides reports it "redundant in EVERY mode"), so
+  // the override is redundant. This is a wording fix, not a mode divergence, so
+  // it is not in the divergence registry; commenting it out is documentation
+  // only - a regression would be re-detected by the reference cross-check and
+  // wiki-compare (both compare objective text against authoritative sources).
   // '5c0bd94186f7747a727f09b2': {
   //   objectives: {
   //     '5c1b765d86f77413193fa4f2': {
@@ -49,19 +51,18 @@
     },
   },
 
-  // Test Drive - Part 4 - Objective maps/items incorrect
+  // Test Drive - Part 4 - top-level map (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
-  // API experience and description now correct; map/obj maps/mods still wrong
   //
-  // PARKED 2026-08-03: tarkov.dev now returns map: null in BOTH regular and
-  // pve, so the only remaining field is redundant and the entry is empty.
-  // Kept commented rather than deleted: this is a multi-map objective task, so
-  // if upstream re-populates the top-level map the explicit clear is needed
-  // again (check-overrides will report it).
+  // PARKED 2026-08-03: tarkov.dev now returns map: null in BOTH regular and pve
+  // (check-overrides reports it "redundant in EVERY mode"), so the only field
+  // was redundant and the entry became empty. This is an upstream catch-up, not
+  // a mode divergence, so it is not in the divergence registry; commenting it
+  // out is documentation only. Because this is a multi-map objective task, if
+  // upstream re-populates the top-level map the reference cross-check / the
+  // validateMap check will flag that the explicit `map: null` clear is needed.
   // '6574e0dedc0d635f633a5805': {
   //   map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
-  //   // Objective usingWeaponMods and maps now correct in API; only the top-level
-  //   // map clear (multi-map objective) remains needed.
   // },
 
   // Test Drive - Part 5 - Objective description/items incorrect

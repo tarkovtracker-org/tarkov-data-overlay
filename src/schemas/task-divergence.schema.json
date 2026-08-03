@@ -32,6 +32,10 @@
             }
           },
           "required": ["confidence", "verified"],
+          "anyOf": [
+            { "required": ["regular"] },
+            { "required": ["pve"] }
+          ],
           "type": "object"
         },
         "minProperties": 1,

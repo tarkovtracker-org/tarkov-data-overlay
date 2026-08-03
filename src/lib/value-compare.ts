@@ -17,13 +17,21 @@ export type CompareOptions = {
 };
 
 function sortKey(value: unknown): string {
-  if (value === undefined) return 'undefined';
-  if (value === null) return 'null';
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
+  // Prefix with a type tag so distinct types never collide (e.g. the number 1
+  // and the string '1'), which would otherwise make the sort unstable and let
+  // valuesEqual report a false mismatch for mixed-type arrays.
+  if (value === undefined) return 'u';
+  if (value === null) return 'z';
+  if (typeof value === 'string') return `s:${value}`;
+  if (typeof value === 'number') return `n:${value}`;
+  if (typeof value === 'boolean') return `b:${value}`;
   const json = JSON.stringify(value);
-  return json ?? String(value);
+  return `o:${json ?? String(value)}`;
+}
+
+/** Deterministic, locale-independent string order (UTF-16 code units). */
+function compareStrings(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /** Recursively sort arrays and object keys so comparison ignores ordering. */
@@ -32,13 +40,13 @@ export function normalizeValue(value: unknown): unknown {
     const normalized = value.map(normalizeValue);
     return normalized
       .map((item) => ({ key: sortKey(item), value: item }))
-      .sort((a, b) => a.key.localeCompare(b.key))
+      .sort((a, b) => compareStrings(a.key, b.key))
       .map((item) => item.value);
   }
 
   if (value && typeof value === 'object') {
     const obj = value as Record<string, unknown>;
-    const keys = Object.keys(obj).sort();
+    const keys = Object.keys(obj).sort(compareStrings);
     const normalized: Record<string, unknown> = {};
     for (const key of keys) {
       normalized[key] = normalizeValue(obj[key]);
@@ -79,21 +87,25 @@ export function compareSubset(
     }
     if (overrideValue.length === 0) return true;
 
-    const usedApiIndexes = new Set<number>();
-    for (const overrideEntry of overrideValue) {
-      let matched = false;
+    // Each override entry must map to a DISTINCT api entry. Greedy first-match
+    // can fail when candidates overlap (e.g. override [A, AB] against api
+    // [AB, A]: greedy binds A->AB then can't place AB). Backtracking finds any
+    // valid assignment if one exists.
+    const apiUsed = new Array<boolean>(apiValue.length).fill(false);
+    const assign = (entryIndex: number): boolean => {
+      if (entryIndex === overrideValue.length) return true;
       for (let i = 0; i < apiValue.length; i += 1) {
-        if (usedApiIndexes.has(i)) continue;
-        if (compareSubset(overrideEntry, apiValue[i], options)) {
-          usedApiIndexes.add(i);
-          matched = true;
-          break;
+        if (apiUsed[i]) continue;
+        if (compareSubset(overrideValue[entryIndex], apiValue[i], options)) {
+          apiUsed[i] = true;
+          if (assign(entryIndex + 1)) return true;
+          apiUsed[i] = false;
         }
       }
-      if (!matched) return false;
-    }
+      return false;
+    };
 
-    return true;
+    return assign(0);
   }
 
   if (!apiValue || typeof apiValue !== 'object' || Array.isArray(apiValue)) return false;

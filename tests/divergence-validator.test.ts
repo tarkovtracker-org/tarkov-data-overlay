@@ -184,6 +184,36 @@ describe('validateDivergences', () => {
     expect(results[0].confidence).toBe('medium');
     expect(results[0].proof).toContain('escapefromtarkov.fandom.com');
   });
+
+  it('reports UPSTREAM_CORRECT in both modes for a converged entry', () => {
+    // A converged field holds the same value for both modes and upstream serves
+    // it, so no override is needed and nothing should read as mirrored.
+    const converged: Record<string, TaskDivergence> = {
+      '608974d01a66564e74191fc0': {
+        name: 'A Fuel Matter',
+        proof: 'https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter',
+        status: 'converged',
+        fields: {
+          minPlayerLevel: { regular: 15, pve: 15, confidence: 'high', verified: '2026-08-03' },
+        },
+      },
+    };
+    const withLevel = (level: number): DivergenceModeContext => ({
+      apiTasks: [
+        { id: '608974d01a66564e74191fc0', name: 'A Fuel Matter', minPlayerLevel: level, objectives: [] } as unknown as TaskData,
+      ],
+      modeOverrides: {},
+    });
+
+    const results = validateDivergences(converged, {}, {
+      regular: withLevel(15),
+      pve: withLevel(15),
+    });
+
+    expect(results).toHaveLength(2);
+    expect(results.every((r) => r.verdict === 'UPSTREAM_CORRECT')).toBe(true);
+    expect(results.some((r) => r.mirrored)).toBe(false);
+  });
 });
 
 describe('categorizeDivergenceResults', () => {

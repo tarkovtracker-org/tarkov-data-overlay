@@ -78,6 +78,18 @@ describe('validateEntityOverrides', () => {
       expect(results[0].details[0].status).toBe('error');
       expect(results[0].stillNeeded).toBe(true);
     });
+
+    it('errors when an identity field is absent upstream', () => {
+      const results = validateEntityOverrides(
+        { a: { prestigeLevel: 1 } },
+        apiMap({ a: { name: 'present but no prestigeLevel' } }),
+        { identityFields: ['prestigeLevel'] }
+      );
+
+      expect(results[0].details[0].status).toBe('error');
+      expect(results[0].details[0].message).toContain('absent from API');
+      expect(results[0].stillNeeded).toBe(true);
+    });
   });
 
   describe('additive fields', () => {
@@ -237,6 +249,17 @@ describe('checkTaskSuppressionStaleness', () => {
     );
 
     expect(results[0].stale).toBe(true);
+  });
+
+  it('marks a task-level suppression (no objectives) for manual review, not stale', () => {
+    const results = checkTaskSuppressionStaleness(
+      { t1: { experience: true } },
+      [task]
+    );
+
+    expect(results[0].stale).toBe(false);
+    expect(results[0].objectiveId).toBeUndefined();
+    expect(results[0].message).toContain('verify manually');
   });
 });
 

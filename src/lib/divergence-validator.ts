@@ -23,7 +23,35 @@ import type {
   TaskDivergence,
   TaskOverride,
 } from './types.js';
+import { existsSync } from 'fs';
+import { loadJson5File } from './file-loader.js';
 import { valuesEqual } from './value-compare.js';
+
+/**
+ * Load and parse the mode-divergence registry (src/divergences/tasks.json5).
+ * Returns {} when the file is absent, so callers can treat it as optional.
+ */
+export function loadDivergenceRegistry(filePath: string): Record<string, TaskDivergence> {
+  if (!existsSync(filePath)) return {};
+  const parsed = loadJson5File<Record<string, TaskDivergence>>(filePath);
+  return parsed && typeof parsed === 'object' ? parsed : {};
+}
+
+/**
+ * `taskId:field` keys for fields the registry marks genuinely divergent.
+ * Used to raise the priority of matching wiki/API discrepancies, since a
+ * mismatch on a divergent field is evidence of upstream mode mirroring.
+ */
+export function divergentFieldKeys(registry: Record<string, TaskDivergence>): Set<string> {
+  const keys = new Set<string>();
+  for (const [taskId, entry] of Object.entries(registry)) {
+    if (!entry || entry.status !== 'divergent' || !entry.fields) continue;
+    for (const field of Object.keys(entry.fields)) {
+      keys.add(`${taskId}:${field}`);
+    }
+  }
+  return keys;
+}
 
 /** Per-mode inputs needed to adjudicate a registered field */
 export interface DivergenceModeContext {
