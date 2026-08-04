@@ -304,6 +304,14 @@ export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
     validateFile(suppressionsFile, 'suppressions/tasks.json5', validators)
   );
 
+  // Validate the mode-divergence registry (tooling-only; never built into dist)
+  const divergencesFile = join(srcDir, 'divergences', 'tasks.json5');
+  if (existsSync(divergencesFile)) {
+    results.push(
+      validateFile(divergencesFile, 'divergences/tasks.json5', validators)
+    );
+  }
+
   // Validate mode-specific overrides
   for (const mode of SUPPORTED_GAME_MODES) {
     const modeOverridesDir = join(srcDir, 'overrides', 'modes', mode);

@@ -39,6 +39,7 @@ describe('scripts/validate helpers', () => {
         (file) => `overrides/locales/${file}`
       ),
       'suppressions/tasks.json5',
+      'divergences/tasks.json5',
       ...['regular', 'pve'].flatMap((mode) => [
         ...listJson5Files(join(srcDir, 'overrides', 'modes', mode)).map(
           (file) => `overrides/modes/${mode}/${file}`

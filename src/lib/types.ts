@@ -487,6 +487,78 @@ export interface SchemaConfig {
   schemaFile: string;
 }
 
+// ---------------------------------------------------------------------------
+// Mode-divergence registry (src/divergences/tasks.json5)
+// ---------------------------------------------------------------------------
+
+/** How much we trust the recorded per-mode values */
+export type DivergenceConfidence = 'high' | 'medium' | 'low';
+
+/** Where a recorded per-mode value came from */
+export type DivergenceSource = 'wiki' | 'eft-reference' | 'tarkov.dev' | 'in-game';
+
+/**
+ * Whether the two modes genuinely differ, currently agree, or the task only
+ * exists in one mode.
+ */
+export type DivergenceStatus = 'divergent' | 'converged' | 'mode-exclusive';
+
+/** Recorded true values for a single field across both game modes */
+export interface DivergenceField {
+  /** True regular/PvP value. Omitted when the task does not exist in regular. */
+  regular?: number | string | boolean | null;
+  /** True PvE value. Omitted when the task does not exist in PvE. */
+  pve?: number | string | boolean | null;
+  confidence: DivergenceConfidence;
+  regularSource?: DivergenceSource;
+  pveSource?: DivergenceSource;
+  /** ISO date (YYYY-MM-DD) the values were last verified */
+  verified: string;
+  note?: string;
+}
+
+/** A registry entry: one task, one or more divergent fields */
+export interface TaskDivergence {
+  name: string;
+  proof: string;
+  status: DivergenceStatus;
+  note?: string;
+  fields: Record<string, DivergenceField>;
+}
+
+/** Per-mode verdict for one registered field */
+export type DivergenceVerdict =
+  /** Upstream already serves the true value; no override needed */
+  | 'UPSTREAM_CORRECT'
+  /** Override supplies the true value and upstream does not - load-bearing */
+  | 'OVERRIDE_ACTIVE'
+  /** Override matches the true value but upstream does too - intentional guard */
+  | 'OVERRIDE_REDUNDANT'
+  /** Upstream is wrong and no override corrects it - data is being served wrong */
+  | 'OVERRIDE_MISSING'
+  /** An override exists but supplies a value that is not the recorded truth */
+  | 'OVERRIDE_WRONG'
+  /** Task absent from this mode's API data */
+  | 'NOT_IN_MODE';
+
+/** Result of checking one registered field in one mode */
+export interface DivergenceResult {
+  taskId: string;
+  taskName: string;
+  field: string;
+  mode: GameMode;
+  verdict: DivergenceVerdict;
+  expected: unknown;
+  upstream: unknown;
+  /** Value the override supplies, or undefined when no override covers it */
+  override: unknown;
+  confidence: DivergenceConfidence;
+  proof: string;
+  /** True when upstream serves an identical value in both modes but the
+   * registry says they should differ - i.e. upstream is mirroring. */
+  mirrored: boolean;
+}
+
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
@@ -499,4 +571,5 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'overrides/prestige.json5', schemaFile: 'prestige-override.schema.json' },
   { pattern: 'overrides/locales/*.json5', schemaFile: 'locale-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
+  { pattern: 'divergences/tasks.json5', schemaFile: 'task-divergence.schema.json' },
 ];

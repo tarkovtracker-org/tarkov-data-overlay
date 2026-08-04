@@ -8,10 +8,15 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import JSON5 from 'json5';
-import type { TaskRequirement } from '../../src/lib/types.js';
+import type { TaskRequirement, GameMode } from '../../src/lib/types.js';
+import { SUPPORTED_GAME_MODES } from '../../src/lib/types.js';
+import { loadDivergenceRegistry, divergentFieldKeys } from '../../src/lib/index.js';
 import {
   ExtendedTaskData,
 } from './types.js';
+
+/** Which override files apply when comparing a given game mode. */
+export type SuppressionScope = GameMode | 'both';
 
 // Overlay file for filtering already-addressed discrepancies
 export const TASKS_OVERLAY_FILE = path.join(
@@ -20,6 +25,65 @@ export const TASKS_OVERLAY_FILE = path.join(
   'overrides',
   'tasks.json5'
 );
+
+/**
+ * Task-override files that apply to a comparison in `scope`.
+ *
+ * Base overrides apply to every mode. Mode-specific overrides apply only to
+ * their mode - so a regular-mode comparison must NOT load the PvE file, or a
+ * PvE-only correction would suppress (mask) a genuine regular-mode divergence.
+ * `'both'` loads everything, for the merged overview run.
+ */
+export function taskOverlayFiles(scope: SuppressionScope = 'both'): string[] {
+  const files = [TASKS_OVERLAY_FILE];
+  const modes = scope === 'both' ? SUPPORTED_GAME_MODES : [scope];
+  for (const mode of modes) {
+    files.push(
+      path.join(process.cwd(), 'src', 'overrides', 'modes', mode, 'tasks.json5')
+    );
+  }
+  return files.filter((file) => fs.existsSync(file));
+}
+
+/** Parse a task-override file, returning {} when missing or malformed. */
+function readOverlayFile(file: string): Record<string, Record<string, unknown>> {
+  try {
+    const content = fs.readFileSync(file, 'utf-8');
+    const parsed = JSON5.parse(content) as Record<string, Record<string, unknown>>;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (error) {
+    console.warn(`Warning: Could not load overlay file ${file}:`, error);
+    return {};
+  }
+}
+
+export const DIVERGENCES_FILE = path.join(
+  process.cwd(),
+  'src',
+  'divergences',
+  'tasks.json5'
+);
+
+/**
+ * `taskId:field` keys for fields recorded as genuinely mode-divergent.
+ *
+ * `getPriority` ranks `experience` as low because XP is not needed to track
+ * progression. That is fine in general, but for a registered divergence a
+ * wrong value is evidence of upstream mode mirroring - the exact defect class
+ * that previously went unnoticed - so those discrepancies get elevated.
+ *
+ * Delegates to the shared registry loader so parsing/typing stays in one place.
+ */
+export function loadDivergentFieldKeys(): Set<string> {
+  // wiki-compare is a diagnostics tool, so a malformed registry must not abort
+  // the whole run (unlike check-overrides/validate, which should fail loudly).
+  try {
+    return divergentFieldKeys(loadDivergenceRegistry(DIVERGENCES_FILE));
+  } catch (error) {
+    console.warn('Warning: Could not load divergence registry:', error);
+    return new Set<string>();
+  }
+}
 
 export const TASKS_SUPPRESSIONS_FILE = path.join(
   process.cwd(),
@@ -107,23 +171,19 @@ export function isObjectiveSuppressed(
  *
  * Returns a Set of "taskId:field" keys to exclude from results
  */
-export function loadSuppressedFields(): SuppressedFieldsResult {
+export function loadSuppressedFields(scope: SuppressionScope = 'both'): SuppressedFieldsResult {
   const suppressed = new Set<string>();
   const wikiIncorrectKeys = new Set<string>();
   let overlayCount = 0;
   let wikiIncorrectCount = 0;
 
-  // Load overlay file (corrections where API was wrong)
-  if (fs.existsSync(TASKS_OVERLAY_FILE)) {
-    try {
-      const content = fs.readFileSync(TASKS_OVERLAY_FILE, 'utf-8');
-      const overlay = JSON5.parse(content) as Record<
-        string,
-        Record<string, unknown>
-      >;
+  // Load overlay files (corrections where API was wrong), base + in-scope modes.
+  for (const overlayFile of taskOverlayFiles(scope)) {
+    const overlay = readOverlayFile(overlayFile);
 
-      for (const [taskId, fields] of Object.entries(overlay)) {
-        for (const field of Object.keys(fields)) {
+    for (const [taskId, fields] of Object.entries(overlay)) {
+      if (!fields || typeof fields !== 'object') continue;
+      for (const field of Object.keys(fields)) {
           const beforeSize = suppressed.size;
 
           // Map overlay field names to discrepancy field names
@@ -229,10 +289,7 @@ export function loadSuppressedFields(): SuppressedFieldsResult {
           suppressed.add(`${taskId}:${field}`);
 
           overlayCount += suppressed.size - beforeSize;
-        }
       }
-    } catch (error) {
-      console.warn('Warning: Could not load overlay file:', error);
     }
   }
 
@@ -258,17 +315,14 @@ export function loadSuppressedFields(): SuppressedFieldsResult {
   return { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys };
 }
 
-export function loadTaskRequirementOverrides(): Map<string, TaskRequirement[]> {
+export function loadTaskRequirementOverrides(
+  scope: SuppressionScope = 'both'
+): Map<string, TaskRequirement[]> {
   const overrides = new Map<string, TaskRequirement[]>();
 
-  if (!fs.existsSync(TASKS_OVERLAY_FILE)) return overrides;
-
-  try {
-    const content = fs.readFileSync(TASKS_OVERLAY_FILE, 'utf-8');
-    const overlay = JSON5.parse(content) as Record<
-      string,
-      Record<string, unknown>
-    >;
+  // Later files win, matching the documented base -> mode merge precedence.
+  for (const overlayFile of taskOverlayFiles(scope)) {
+    const overlay = readOverlayFile(overlayFile);
 
     for (const [taskId, fields] of Object.entries(overlay)) {
       if (!fields || typeof fields !== 'object') continue;
@@ -277,8 +331,6 @@ export function loadTaskRequirementOverrides(): Map<string, TaskRequirement[]> {
         overrides.set(taskId, reqs as TaskRequirement[]);
       }
     }
-  } catch (error) {
-    console.warn('Warning: Could not load task requirement overrides:', error);
   }
 
   return overrides;

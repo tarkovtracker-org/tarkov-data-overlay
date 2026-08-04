@@ -36,6 +36,7 @@ import {
   buildNextTaskMap,
   isTaskFieldSuppressed,
   loadSuppressedFields,
+  loadDivergentFieldKeys,
   loadTaskRequirementOverrides,
   loadTaskSuppressions,
 } from './overlay.js';
@@ -212,7 +213,7 @@ export async function runSingleTask(
   mapAliasMap: Map<string, string>,
   options: CliOptions
 ): Promise<void> {
-  const requirementOverrides = loadTaskRequirementOverrides();
+  const requirementOverrides = loadTaskRequirementOverrides(options.gameMode ?? 'both');
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
   const taskSuppressions = loadTaskSuppressions();
   const task = resolveTask(tasks, options);
@@ -271,9 +272,11 @@ export async function runBulkMode(
     `Found ${tasksWithWiki.length}/${tasks.length} tasks with wiki links`
   );
 
-  // Load suppressed fields (overlay corrections + wiki-incorrect suppressions)
+  // Load suppressed fields (overlay corrections + wiki-incorrect suppressions).
+  // Scope to the active game mode so a PvE-only correction does not mask a
+  // genuine regular-mode divergence (and vice versa).
   const { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys } =
-    loadSuppressedFields();
+    loadSuppressedFields(options.gameMode ?? 'both');
   const taskSuppressions = loadTaskSuppressions();
   if (overlayCount > 0 || wikiIncorrectCount > 0) {
     printProgress(
@@ -283,7 +286,7 @@ export async function runBulkMode(
   if (taskSuppressions.size > 0) {
     printProgress(`Loaded ${taskSuppressions.size} task suppression entries`);
   }
-  const requirementOverrides = loadTaskRequirementOverrides();
+  const requirementOverrides = loadTaskRequirementOverrides(options.gameMode ?? 'both');
   const nextTaskMap = buildNextTaskMap(tasks, requirementOverrides);
 
   const allDiscrepancies: Discrepancy[] = [];
@@ -372,6 +375,27 @@ export async function runBulkMode(
     );
   });
   const filteredCount = allDiscrepancies.length - newDiscrepancies.length;
+
+  // A discrepancy on a registered mode-divergent field indicates upstream mode
+  // mirroring, so it outranks its normal field-based priority.
+  const divergentKeys = loadDivergentFieldKeys();
+  let elevatedCount = 0;
+  for (const discrepancy of newDiscrepancies) {
+    if (
+      discrepancy.priority !== 'high' &&
+      divergentKeys.has(`${discrepancy.taskId}:${discrepancy.field}`)
+    ) {
+      discrepancy.priority = 'high';
+      elevatedCount += 1;
+    }
+  }
+  if (elevatedCount > 0) {
+    console.log(
+      dim(
+        `Elevated to high priority (registered mode divergence): ${elevatedCount}`
+      )
+    );
+  }
 
   if (filteredCount > 0) {
     console.log(

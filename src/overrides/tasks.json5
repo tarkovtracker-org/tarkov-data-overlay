@@ -10,16 +10,22 @@
     },
   },
 
-  // Test Drive - Part 1 - Objective description wording incorrect
+  // Test Drive - Part 1 - Objective description wording (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
-  // API count (10) and usingWeapon now correct; description wording still differs
-  '5c0bd94186f7747a727f09b2': {
-    objectives: {
-      '5c1b765d86f77413193fa4f2': {
-        description: 'Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope', // Was: "Eliminate PMC operatives using an SR-25 rifle with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope"
-      },
-    },
-  },
+  //
+  // PARKED 2026-08-03: tarkov.dev now returns this exact description in BOTH
+  // regular and pve (check-overrides reports it "redundant in EVERY mode"), so
+  // the override is redundant. This is a wording fix, not a mode divergence, so
+  // it is not in the divergence registry; commenting it out is documentation
+  // only - a regression would be re-detected by the reference cross-check and
+  // wiki-compare (both compare objective text against authoritative sources).
+  // '5c0bd94186f7747a727f09b2': {
+  //   objectives: {
+  //     '5c1b765d86f77413193fa4f2': {
+  //       description: 'Eliminate PMCs using an SR-25 with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope', // Was: "Eliminate PMC operatives using an SR-25 rifle with Hybrid 46 suppressor and Schmidt & Bender PM II 1-8x24 scope"
+  //     },
+  //   },
+  // },
 
   // Test Drive - Part 2 - Objective description/maps incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
@@ -45,14 +51,19 @@
     },
   },
 
-  // Test Drive - Part 4 - Objective maps/items incorrect
+  // Test Drive - Part 4 - top-level map (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
-  // API experience and description now correct; map/obj maps/mods still wrong
-  '6574e0dedc0d635f633a5805': {
-    map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
-    // Objective usingWeaponMods and maps now correct in API; only the top-level
-    // map clear (multi-map objective) remains needed.
-  },
+  //
+  // PARKED 2026-08-03: tarkov.dev now returns map: null in BOTH regular and pve
+  // (check-overrides reports it "redundant in EVERY mode"), so the only field
+  // was redundant and the entry became empty. This is an upstream catch-up, not
+  // a mode divergence, so it is not in the divergence registry; commenting it
+  // out is documentation only. Because this is a multi-map objective task, if
+  // upstream re-populates the top-level map the reference cross-check / the
+  // validateMap check will flag that the explicit `map: null` clear is needed.
+  // '6574e0dedc0d635f633a5805': {
+  //   map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
+  // },
 
   // Test Drive - Part 5 - Objective description/items incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
@@ -203,16 +214,25 @@
     },
   },
 
-  // New Beginning (Prestige 1) - Objective description incorrect
+  // New Beginning (Prestige 1)
+  //
+  // REMOVED 2026-08-03: this override was a no-op targeting the wrong task's
+  // objective. Objective 6848100b00afffa81f09e36b does not exist on Prestige 1
+  // (6761f28a022f60bb320f3e95) - it belongs to Prestige 3
+  // (6848100b00afffa81f09e365), where upstream reads exactly the "Was:" text
+  // the comment recorded ("Use the transit from The Lab to Streets of Tarkov"),
+  // confirming the ID was copied from Prestige 3.
+  //
+  // The override's intent is already satisfied: Prestige 1's own equivalent
+  // objective (6761f9d718fa62aac3264ff2) already reads "Survive and extract
+  // from The Lab" upstream.
+  //
+  // It was NOT retargeted to Prestige 3 because Prestige 3's wording is correct.
+  // Upstream shows a deliberate escalating chain: P1/P2 extract from The Lab;
+  // P3 transits Lab -> Streets then extracts from Streets; P4 adds Streets ->
+  // Interchange then extracts from Interchange.
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  // tarkov.dev objective uses Lab -> Streets transit; wiki states surviving and extracting from The Lab instead.
-  '6761f28a022f60bb320f3e95': {
-    objectives: {
-      '6848100b00afffa81f09e36b': {
-        description: 'Survive and extract from The Lab', // Was: "Use the transit from The Lab to Streets of Tarkov"
-      },
-    },
-  },
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
 
   // New Beginning (Prestige 3) - Reputation reward and objective exit status incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
