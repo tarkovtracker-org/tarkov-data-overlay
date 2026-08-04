@@ -5,18 +5,11 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import {
-  fetchTasks,
-  findTaskById,
-} from '../../src/lib/index.js';
-import type { TaskData, GameMode } from '../../src/lib/types.js';
-import {
-  CliOptions,
-  DEFAULT_TASK_NAME,
-  ExtendedTaskData,
-} from './types.js';
+import { fetchTasks, findTaskById } from '../../src/lib/index.js';
+import type { TaskData } from '../../src/lib/types.js';
+import { CliOptions, DEFAULT_TASK_NAME, ExtendedTaskData } from './types.js';
 
-export async function fetchTasksForMode(mode: GameMode): Promise<ExtendedTaskData[]> {
+export async function fetchTasksForMode(mode: 'regular' | 'pve'): Promise<ExtendedTaskData[]> {
   const tasks = await fetchTasks(mode);
   // Tag each task with its game mode
   return tasks.map((t) => ({ ...t, gameModes: [mode] }));
@@ -73,10 +66,7 @@ export function normalizeTaskName(value: string): string {
   );
 }
 
-export function resolveTask(
-  tasks: TaskData[],
-  options: CliOptions
-): TaskData | undefined {
+export function resolveTask(tasks: TaskData[], options: CliOptions): TaskData | undefined {
   if (options.id) {
     return findTaskById(tasks, options.id);
   }

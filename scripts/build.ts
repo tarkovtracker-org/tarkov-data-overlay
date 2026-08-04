@@ -21,7 +21,8 @@ const { rootDir, srcDir, distDir } = getProjectPaths();
 /**
  * Load mode-specific override and addition files
  */
-function loadModeFiles(): Partial<Record<string, Record<string, Record<string, unknown>>>> | undefined {
+function loadModeFiles():
+  Partial<Record<string, Record<string, Record<string, unknown>>>> | undefined {
   const modes: Record<string, Record<string, Record<string, unknown>>> = {};
 
   for (const mode of SUPPORTED_GAME_MODES) {

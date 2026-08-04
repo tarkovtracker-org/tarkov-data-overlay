@@ -1,0 +1,23 @@
+{
+  // Seasonal-mode (pvp-season) task corrections.
+  //
+  // `pvp-season` is BSG's Seasonal Character mode (EFT patch 1.1.0.0): separate
+  // servers, independent of the PvP Zone and PvE Zone profiles, with progression
+  // reset every 4-6 months.
+  //
+  // tarkov.dev serves this mode upstream (json.tarkov.dev/pvp-season/*, listed
+  // in /endpoints as gameMode "pvp-season"), so entries here work exactly like
+  // src/overrides/modes/{regular,pve}/tasks.json5: an object keyed by tarkov.dev
+  // task id, each value a TaskOverride that corrects a wrong pvp-season value.
+  // They shallow-merge over the shared src/overrides/tasks.json5 for consumers
+  // fetching the pvp-season mode. Every correction must carry an entity-name
+  // comment, a proof link, and an inline "Was:" note.
+  //
+  // Seasonal-only mechanics tarkov.dev does not model at all (e.g. seasonal
+  // perks - there is no pvp-season/seasonal-perks endpoint) are NOT task
+  // overrides; they live in dedicated additions such as
+  // src/additions/seasonalPerks.json5.
+  //
+  // Empty for now: no proof-backed pvp-season task corrections recorded yet.
+  // An empty object is valid and is skipped by the build.
+}

@@ -18,7 +18,7 @@ import type {
   DivergenceField,
   DivergenceResult,
   DivergenceVerdict,
-  GameMode,
+  DivergenceMode,
   TaskData,
   TaskDivergence,
   TaskOverride,
@@ -83,11 +83,7 @@ export function effectiveOverrideValue(
   return undefined;
 }
 
-function verdictFor(
-  expected: unknown,
-  upstream: unknown,
-  override: unknown
-): DivergenceVerdict {
+function verdictFor(expected: unknown, upstream: unknown, override: unknown): DivergenceVerdict {
   const actual = override !== undefined ? override : upstream;
 
   if (valuesEqual(actual, expected)) {
@@ -111,7 +107,7 @@ function isMirrored(
   taskId: string,
   field: string,
   fieldDef: DivergenceField,
-  contexts: Partial<Record<GameMode, DivergenceModeContext>>
+  contexts: Partial<Record<DivergenceMode, DivergenceModeContext>>
 ): boolean {
   if (fieldDef.regular === undefined || fieldDef.pve === undefined) return false;
   if (valuesEqual(fieldDef.regular, fieldDef.pve)) return false;
@@ -133,7 +129,7 @@ function isMirrored(
 export function validateDivergences(
   registry: Record<string, TaskDivergence>,
   baseOverrides: Record<string, TaskOverride>,
-  contexts: Partial<Record<GameMode, DivergenceModeContext>>
+  contexts: Partial<Record<DivergenceMode, DivergenceModeContext>>
 ): DivergenceResult[] {
   const results: DivergenceResult[] = [];
 
@@ -141,7 +137,7 @@ export function validateDivergences(
     for (const [field, fieldDef] of Object.entries(entry.fields)) {
       const mirrored = isMirrored(taskId, field, fieldDef, contexts);
 
-      for (const mode of Object.keys(contexts) as GameMode[]) {
+      for (const mode of Object.keys(contexts) as DivergenceMode[]) {
         const context = contexts[mode];
         if (!context) continue;
 

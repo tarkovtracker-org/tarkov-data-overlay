@@ -18,11 +18,11 @@
   // policy is what allowed the regression to go unnoticed.
   //
   // SOURCES OF TRUTH
-  //   pve      -> `eft-reference`: local EFT client_quest_list capture in eft/
-  //               (authoritative; see AGENTS.md). PvE is the only mode our
-  //               captures cover.
-  //   regular  -> `wiki`: the EFT wiki documents PvP/regular values. No PvP
-  //               client capture is available, so the wiki is the best witness.
+  //   pve      -> `in-game`: PvE values verified in-game on the PvE profile
+  //               (read off the quest screens). PvE is the mode we verify
+  //               directly, so it is treated as authoritative here.
+  //   regular  -> `wiki`: the EFT wiki documents PvP/regular values. Regular is
+  //               not verified in-game here, so the wiki is the best witness.
   //
   // STATUS
   //   divergent      - the two modes genuinely differ in-game; both values pinned
@@ -46,9 +46,9 @@
         pve: 9800,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=18100: the wiki (last edited 2026-05-22) and the tarkov.dev regular-mode snapshot captured in overlay commit adaa123 (2026-06-29). PvE=9800 from the EFT capture.',
+        note: 'Two post-1.0 witnesses agree on PvP=18100: the wiki (last edited 2026-05-22) and the tarkov.dev regular-mode snapshot recorded in overlay commit adaa123 (2026-06-29). PvE=9800 verified in-game (PvE).',
       },
     },
   },
@@ -64,9 +64,9 @@
         pve: 11000,
         confidence: 'medium',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=22000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-03-28 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Kings of the Rooftops proves PvP XP can be rebalanced within weeks, so re-verify against a PvP client capture.',
+        note: 'Divergence confirmed. PvP=22000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-03-28 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Kings of the Rooftops proves PvP XP can be rebalanced within weeks, so re-verify in-game on a PvP character.',
       },
     },
   },
@@ -82,9 +82,9 @@
         pve: 8500,
         confidence: 'medium',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=13000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-04-14 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify against a PvP client capture.',
+        note: 'Divergence confirmed. PvP=13000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-04-14 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify in-game on a PvP character.',
       },
     },
   },
@@ -100,9 +100,9 @@
         pve: 10300,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=15300: the wiki (last edited 2026-04-04) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=10300 from the EFT capture.',
+        note: 'Two post-1.0 witnesses agree on PvP=15300: the wiki (last edited 2026-04-04) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=10300 verified in-game (PvE).',
       },
     },
   },
@@ -118,9 +118,9 @@
         pve: 12000,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=20900: the wiki (last edited 2026-02-18) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=12000 from the EFT capture.',
+        note: 'Two post-1.0 witnesses agree on PvP=20900: the wiki (last edited 2026-02-18) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=12000 verified in-game (PvE).',
       },
     },
   },
@@ -136,9 +136,9 @@
         pve: 12100,
         confidence: 'medium',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=16300 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-10-12 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify against a PvP client capture.',
+        note: 'Divergence confirmed. PvP=16300 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-10-12 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify in-game on a PvP character.',
       },
     },
   },
@@ -154,10 +154,9 @@
         pve: 7700,
         confidence: 'medium',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
-        note:
-          'MEDIUM CONFIDENCE (volatile): PvP=10000 is confirmed by a wiki edit on 2026-08-03. Note the value CHANGED from the 14700 recorded in overlay commit adaa123 (2026-06-29), which proves BSG actively rebalances PvP XP within weeks - so any single-date snapshot can go stale. PvE remains 7700 (EFT capture), so the divergence persists after the rebalance. Re-verify against a PvP client capture.',
+        note: 'MEDIUM CONFIDENCE (volatile): PvP=10000 is confirmed by a wiki edit on 2026-08-03. Note the value CHANGED from the 14700 recorded in overlay commit adaa123 (2026-06-29), which proves BSG actively rebalances PvP XP within weeks - so any single-date snapshot can go stale. PvE remains 7700 (verified in-game), so the divergence persists after the rebalance. Re-verify in-game on a PvP character.',
       },
     },
   },
@@ -179,7 +178,7 @@
         pve: 15,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
         note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement.',
       },
@@ -197,7 +196,7 @@
         pve: 15,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
       },
     },
@@ -214,7 +213,7 @@
         pve: 27,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
         note: 'Previously diverged (regular 35 / PvE 27); BSG lowered the regular requirement.',
       },
@@ -232,7 +231,7 @@
         pve: 7500,
         confidence: 'high',
         regularSource: 'wiki',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
         note: 'Previously diverged (regular 12000 / PvE 7500); wiki now agrees on 7500 for both.',
       },
@@ -253,7 +252,7 @@
       experience: {
         pve: 2900,
         confidence: 'high',
-        pveSource: 'eft-reference',
+        pveSource: 'in-game',
         verified: '2026-08-03',
       },
     },

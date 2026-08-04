@@ -1,0 +1,1116 @@
+{
+  // Seasonal perks - BSG "Seasonal Character" mechanic (EFT patch 1.1.0.0).
+  //
+  // NOT SERVED BY TARKOV.DEV. tarkov.dev does serve the pvp-season game mode
+  // (json.tarkov.dev/pvp-season/*), but it has no seasonal-perks endpoint and no
+  // perk type, so seasonal perks are absent upstream. They ship here as an
+  // overlay addition keyed by the perk id, mirroring how editions.json5 carries
+  // data tarkov.dev omits.
+  //
+  // Source: verified in-game (Seasonal Character perk selection screen).
+  // Proof: EFT patch 1.1.0.0 notes (Seasonal Character), 2026-08-03.
+  //   https://steamdb.info/patchnotes/24536010/
+  // Verified in-game: 2026-08-03.
+  //
+  // Fields: id, type (tier: common|personal), name, description, points
+  // (perk-point value shown on the selection screen; null = none),
+  // mutuallyExclusiveSeasonalPerkIds, and effects[] (structured form of the
+  // perk's in-game description; each effect has an effectId plus its values).
+  //
+  // effects[].itemFilter matches tarkov.dev's served ItemFilters shape:
+  // allowedCategories / allowedItems / excludedCategories / excludedItems, each
+  // an array of tarkov.dev ids (item template ids for items, item-category node
+  // ids for categories). Ids only - names resolve through tarkov.dev's locale
+  // system, exactly as tarkov.dev serves item slot/grid filters.
+
+  // ===========================================================================
+  // COMMON PERKS (6)
+  // ===========================================================================
+  // No Insurance
+  '69c41a19cd28c936320a7523': {
+    id: '69c41a19cd28c936320a7523',
+    type: 'common',
+    name: 'No Insurance',
+    description: '• Cannot insure items before raid',
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        effectId: 'insurance_disabled',
+      },
+    ],
+  },
+  // Handyman
+  '69c41a86383fc5c9ad03f3d5': {
+    id: '69c41a86383fc5c9ad03f3d5',
+    type: 'common',
+    name: 'Handyman',
+    description: '• Item crafting time is reduced by 50%\n• Crafting skill starts at level 51',
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        skillIds: ['Crafting'],
+        intValue: 51,
+        effectId: 'skill_level_preset',
+      },
+      {
+        multiplicator: 0.87,
+        effectId: 'craft_time_multiplicator',
+      },
+    ],
+  },
+  // Seasoned PMCs
+  '69c41adf883efd5e3b09ccae': {
+    id: '69c41adf883efd5e3b09ccae',
+    type: 'common',
+    name: 'Seasoned PMCs',
+    description: '• Your character gains 25% more experience',
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        multiplicator: 1.25,
+        effectId: 'pmc_experience_multiplicator',
+      },
+    ],
+  },
+  // Armor Shortage
+  '69ce5d9296f3b267fa08f137': {
+    id: '69ce5d9296f3b267fa08f137',
+    type: 'common',
+    name: 'Armor Shortage',
+    description: '• Traders across Tarkov are experiencing an armor shortage',
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [],
+  },
+  // Black Division
+  '69ce5e104e0a1c7ca20781c9': {
+    id: '69ce5e104e0a1c7ca20781c9',
+    type: 'common',
+    name: 'Black Division',
+    description: '• Black Division operatives can be encountered on specific locations',
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [],
+  },
+  // No FiR for Hideout
+  '69ce5eb3e4b79de94a0d78c8': {
+    id: '69ce5eb3e4b79de94a0d78c8',
+    type: 'common',
+    name: 'No FiR for Hideout',
+    description: "• Hideout zones don't require the Found in Raid status",
+    points: null,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        mode: 'not_require',
+        effectId: 'hideout_fir',
+      },
+    ],
+  },
+
+  // ===========================================================================
+  // PERSONAL PERKS (33)
+  // ===========================================================================
+  // Hemophilia  (points: 2)
+  '69c3cd003ffdba4e68086bd7': {
+    id: '69c3cd003ffdba4e68086bd7',
+    type: 'personal',
+    name: 'Hemophilia',
+    description: '• Bleeding chance is increased by 25%',
+    points: 2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c4116a383fc5c9ad03f3d1'],
+    effects: [
+      {
+        multiplicator: 1.25,
+        effectId: 'bleeding_chance_multiplicator',
+      },
+    ],
+  },
+  // Osteoporosis  (points: 3)
+  '69c3cddcfb79911cf20022d6': {
+    id: '69c3cddcfb79911cf20022d6',
+    type: 'personal',
+    name: 'Osteoporosis',
+    description: '• Limb fracture chance is increased by 25%\n• Falling from heights deals 20% more damage',
+    points: 3,
+    mutuallyExclusiveSeasonalPerkIds: ['69c41632d7a7b2ca660e0c59'],
+    effects: [
+      {
+        multiplicator: 1.25,
+        effectId: 'fracture_chance_multiplicator',
+      },
+      {
+        multiplicator: 1.2,
+        effectId: 'fall_damage_multiplicator',
+      },
+    ],
+  },
+  // Well That Hurt!  (points: 2)
+  '69c3d036042c81ad9209eeae': {
+    id: '69c3d036042c81ad9209eeae',
+    type: 'personal',
+    name: 'Well That Hurt!',
+    description: '• All medkit uses consume 25% more resource',
+    points: 2,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: [],
+          allowedItems: [
+            '590c657e86f77412b013051d',
+            '60098ad7c2240c0fe85c570a',
+            '590c661e86f7741e566b646a',
+            '590c678286f77426c9660122',
+            '5755356824597772cb798962',
+            '544fb45d4bdc2dee738b4568',
+          ],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        multiplicator: 1.25,
+        effectId: 'item_resource_drain_multiplicator',
+      },
+    ],
+  },
+  // Incompetent  (points: 10)
+  '69c3d21749d7d7c520026425': {
+    id: '69c3d21749d7d7c520026425',
+    type: 'personal',
+    name: 'Incompetent',
+    description: '• All character skills are leveled 25% slower (Excluding Bolt-action Rifles)\n• All character skills can only be increased up to level 30 (Excluding Crafting)',
+    points: 10,
+    mutuallyExclusiveSeasonalPerkIds: ['69ce64064e0a1c7ca20781d3', '6a578102e7737aa469066518'],
+    effects: [
+      {
+        skillIds: [
+          'AimDrills',
+          'Assault',
+          'AttachedLauncher',
+          'Attention',
+          'Charisma',
+          'CovertMovement',
+          'Crafting',
+          'DMR',
+          'Endurance',
+          'HMG',
+          'Health',
+          'HeavyVests',
+          'HideoutManagement',
+          'Immunity',
+          'Intellect',
+          'LMG',
+          'Launcher',
+          'LightVests',
+          'MagDrills',
+          'Melee',
+          'Metabolism',
+          'Perception',
+          'Pistol',
+          'Revolver',
+          'SMG',
+          'Search',
+          'Shotgun',
+          'Strength',
+          'StressResistance',
+          'Surgery',
+          'Throwing',
+          'TroubleShooting',
+          'Vitality',
+          'WeaponTreatment',
+        ],
+        multiplicator: 0.75,
+        effectId: 'skill_experience_multiplicator',
+      },
+      {
+        skillIds: [
+          'AimDrills',
+          'Assault',
+          'AttachedLauncher',
+          'Attention',
+          'Charisma',
+          'CovertMovement',
+          'DMR',
+          'Endurance',
+          'HMG',
+          'Health',
+          'HeavyVests',
+          'HideoutManagement',
+          'Immunity',
+          'Intellect',
+          'LMG',
+          'Launcher',
+          'LightVests',
+          'MagDrills',
+          'Melee',
+          'Metabolism',
+          'Perception',
+          'Pistol',
+          'Revolver',
+          'SMG',
+          'Search',
+          'Shotgun',
+          'Sniper',
+          'Strength',
+          'StressResistance',
+          'Surgery',
+          'Throwing',
+          'TroubleShooting',
+          'Vitality',
+          'WeaponTreatment',
+        ],
+        intValue: 30,
+        effectId: 'skill_max_level_cap',
+      },
+    ],
+  },
+  // Polydipsia  (points: 2)
+  '69c3d2acfe3c5632e4045fe8': {
+    id: '69c3d2acfe3c5632e4045fe8',
+    type: 'personal',
+    name: 'Polydipsia',
+    description: '• Hydration is consumed 15% faster',
+    points: 2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c411d8883efd5e3b09ccab'],
+    effects: [
+      {
+        multiplicator: 1.2,
+        effectId: 'hydration_drain_multiplicator',
+      },
+    ],
+  },
+  // Chronic Fatigue Syndrome  (points: 2)
+  '69c3d35feaf97663fb0bb367': {
+    id: '69c3d35feaf97663fb0bb367',
+    type: 'personal',
+    name: 'Chronic Fatigue Syndrome',
+    description: '• Energy is consumed 20% faster',
+    points: 2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c412519b5263783d0fe520', '69c40c0f5e9ce5a8970f6be9'],
+    effects: [
+      {
+        multiplicator: 1.2,
+        effectId: 'energy_drain_multiplicator',
+      },
+    ],
+  },
+  // Personality Vacuum  (points: 2)
+  '69c3d43030f896ebef0ed357': {
+    id: '69c3d43030f896ebef0ed357',
+    type: 'personal',
+    name: 'Personality Vacuum',
+    description: '• Charisma skill cannot be increased\n• All trader items cost 20% more',
+    points: 2,
+    mutuallyExclusiveSeasonalPerkIds: ['69ce62886e199f4bbe0ab19b'],
+    effects: [
+      {
+        skillIds: ['Charisma'],
+        effectId: 'skill_not_growing',
+      },
+      {
+        traderIds: [
+          '5ac3b934156ae10c4430e83c',
+          '58330581ace78e27b8b10cee',
+          '5c0647fdd443bc2504c2d371',
+          '5a7c2eca46aef81a7ca2145d',
+          '5935c25fb3acc3127c3d8cd9',
+          '579dc571d53a0658a154fbec',
+          '54cb50c76803fa8b248b4571',
+          '54cb57776803fa99248b456e',
+        ],
+        tradeAction: 'buy',
+        multiplicator: 1.2,
+        effectId: 'trader_prices_by_trader_multiplicator',
+      },
+    ],
+  },
+  // Dr. Jekyll  (points: 1)
+  '69c3d4e949d7d7c52002642a': {
+    id: '69c3d4e949d7d7c52002642a',
+    type: 'personal',
+    name: 'Dr. Jekyll',
+    description: '• After gaining the Fresh Wound status, it cannot be removed until the end of the raid',
+    points: 1,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        effectId: 'fresh_wounds_until_raid_end',
+      },
+    ],
+  },
+  // Allergic  (points: 3)
+  '69c3d6a9af28f094100fe128': {
+    id: '69c3d6a9af28f094100fe128',
+    type: 'personal',
+    name: 'Allergic',
+    description: '• Become allergic to 3 random items from the Provisions or Medication category',
+    points: 3,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: [
+            '5448f3a14bdc2d27728b4569',
+            '5448f3a64bdc2d60728b456a',
+            '543be6674bdc2df1348b4569',
+          ],
+          allowedItems: [],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        randomSlotCount: 3,
+        appliedRandomEffectCount: 1,
+        subEffects: {
+          pain: {
+            enabled: true,
+            durationSeconds: 30,
+          },
+          tremor: {
+            enabled: true,
+            durationSeconds: 20,
+          },
+          tunnelVision: {
+            enabled: true,
+            durationSeconds: 20,
+          },
+          onPainkillers: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          healthRegeneration: {
+            enabled: true,
+            amount: -3,
+            durationSeconds: 30,
+          },
+          hydrationRecovery: {
+            enabled: true,
+            amount: -3,
+            durationSeconds: 30,
+          },
+          energyRecovery: {
+            enabled: true,
+            amount: -3,
+            durationSeconds: 30,
+          },
+        },
+        effectId: 'allergy',
+      },
+    ],
+  },
+  // Broken Secure Container  (points: 6)
+  '69c3da13eaf97663fb0bb36d': {
+    id: '69c3da13eaf97663fb0bb36d',
+    type: 'personal',
+    name: 'Broken Secure Container',
+    description: '• Secure container can only be filled with cash, keys, dogtags, special equipment, certain containers and Battle Pass documents',
+    points: 6,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: [
+            '543be5e94bdc2df1348b4568',
+            '5447e0e74bdc2d3c308b4567',
+            '567849dd4bdc2d150f8b456e',
+            '543be5dd4bdc2deb348b4569',
+          ],
+          allowedItems: [
+            '68fb41120760c7891606613c',
+            '6662e9aca7e0b43baa3d5f74',
+            '68fb412b0760c7891606613e',
+            '6662e9cda7e0b43baa3d5f76',
+            '68fb4143a854bc7ae80fad3e',
+            '6662e9f37fa79a6d83730fa0',
+            '68fb4157b280c103230e3b3c',
+            '6662ea05f6259762c56f3189',
+            '59f32bb586f774757e1e8442',
+            '68f15e26f1aa7e100a0ca208',
+            '675dc9d37ae1a8792107ca96',
+            '675dcb0545b1a2d108011b2b',
+            '684180bc51bf8645f7067bc8',
+            '68f0f63c645c14a02104142a',
+            '68f0f60a121d878a2303eedb',
+            '684181208d035f60230f63f9',
+            '68f15cf222c8979ee308f495',
+            '68df991142e96f583d042b8a',
+            '68df9908972cf1e1ec07256a',
+            '68df991dbeba86572e097ceb',
+            '68df9927a38a5e37d80df6c9',
+            '68f153aa7da590b6df0515da',
+            '68f15e53103c5d9d4f022c78',
+            '6764207f2fa5e32733055c4a',
+            '6764202ae307804338014c1a',
+            '68418091b5b0c9e4c60f0e7a',
+            '684180ee9b6d80d840042e8a',
+            '68f0f64f183146ea530330aa',
+            '68f0f662859ebec8d501b76a',
+            '68f15dbab2b53abd200b9378',
+            '68df99a614ca2428b2017cd8',
+            '68df99975d4e135b130392ca',
+            '68df99b2f716906506098308',
+            '68df99c05d4e135b130392cc',
+            '5b9b9020e7ef6f5716480215',
+            '60b0f6c058e0b0481a09ad11',
+            '59fafd4b86f7745ca07e1232',
+            '62a09d3bcf4a99369e262447',
+            '6937eccbfd921faceb0dfecd',
+            '5783c43d2459774bbe137486',
+            '5c093e3486f77430cb02e593',
+            '6a354a30652075cf460944c6',
+            '6a354a9a9cd7a91b45027a89',
+            '6a354abe73339990030ca469',
+            '6a354aa56632508bd10476dc',
+            '6a3549435288a3fe6e085224',
+            '6a3548e72a963bcdd8098649',
+            '6a354a6f8d465a55c70065c8',
+            '6a354a7e6632508bd10476d8',
+            '6a354a6240e6797a930312e5',
+            '6a354a077e4ccdbe95005266',
+            '59f32c3b86f77472a31742f0',
+            '6a461aed7391ab085a093760',
+            '6a461bf82b2264dbe10d0ee6',
+            '6a461c41ec88c6b9a509fb17',
+            '6a31807f17005505b70d5827',
+            '6a3182dc6cd8de21cf0a3a7d',
+            '6a31830dde69ceafd805afa0',
+            '6a317b9692cfdcddcb02a58e',
+            '6a3181f178450ec91c0ea1aa',
+            '6a31824878450ec91c0ea1ae',
+            '6a31828557705071410ca00e',
+            '6a3182b72fd891345e047eef',
+            '6937ecc3dbdccab44605fcf0',
+            '697883474afb9f7de10380ba',
+          ],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        effectId: 'pouch_item_filter_restrict',
+      },
+    ],
+  },
+  // No Flea Market  (points: 10)
+  '69c3da8fc0e4deb02605f3c9': {
+    id: '69c3da8fc0e4deb02605f3c9',
+    type: 'personal',
+    name: 'No Flea Market',
+    description: '• Trading with players on the Flea Market is disabled',
+    points: 10,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        effectId: 'flea_market_npc_only',
+      },
+    ],
+  },
+  // Marathon Runner  (points: -3)
+  '69c3e8d8af28f094100fe130': {
+    id: '69c3e8d8af28f094100fe130',
+    type: 'personal',
+    name: 'Marathon Runner',
+    description: '• Arm and leg stamina is consumed 20% slower',
+    points: -3,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3ce913ffdba4e68086bdb', '69c41111cd28c936320a7520'],
+    effects: [
+      {
+        bodyPartTypes: ['arms', 'legs'],
+        multiplicator: 0.8,
+        effectId: 'stamina_consumption_body_parts_multiplicator',
+      },
+    ],
+  },
+  // Bushborne  (points: -5)
+  '69c405a9d7a7b2ca660e0c56': {
+    id: '69c405a9d7a7b2ca660e0c56',
+    type: 'personal',
+    name: 'Bushborne',
+    description: '• Walking in vegetation generates 75% less noise and movement slowdown',
+    points: -5,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        multiplicatorPrimary: 0.25,
+        multiplicatorSecondary: 0.25,
+        effectId: 'bush_interaction_multiplicators',
+      },
+    ],
+  },
+  // Juice Time  (points: -2)
+  '69c406731d8aec4a2b0551bd': {
+    id: '69c406731d8aec4a2b0551bd',
+    type: 'personal',
+    name: 'Juice Time',
+    description: '• Consuming a juice drink grants the Painkiller effect for 60 seconds',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: [],
+          allowedItems: [
+            '57513f07245977207e26a311',
+            '57513f9324597720a7128161',
+            '57513fcc24597720a31c09a6',
+            '544fb62a4bdc2dfb738b4568',
+          ],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        randomSlotCount: 4,
+        appliedRandomEffectCount: 1,
+        subEffects: {
+          pain: {
+            enabled: false,
+            durationSeconds: 30,
+          },
+          tremor: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          tunnelVision: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          onPainkillers: {
+            enabled: true,
+            durationSeconds: 60,
+          },
+          healthRegeneration: {
+            enabled: false,
+            amount: 1,
+            durationSeconds: 5,
+          },
+          hydrationRecovery: {
+            enabled: false,
+            amount: 0,
+            durationSeconds: 0,
+          },
+          energyRecovery: {
+            enabled: false,
+            amount: 0,
+            durationSeconds: 0,
+          },
+        },
+        effectId: 'allergy',
+      },
+    ],
+  },
+  // Street Tax  (points: -1)
+  '69c40cb782362c4aff041510': {
+    id: '69c40cb782362c4aff041510',
+    type: 'personal',
+    name: 'Street Tax',
+    description: '• Once per week, some Scavs pay you protection money',
+    points: -1,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        periodUnixSeconds: 604800,
+        mailTemplateId: '69ce6b95603956f0c0030557',
+        effectId: 'scheduled_mail',
+      },
+    ],
+  },
+  // The Tarkov Shooter  (points: -2)
+  '69c40e131f8903ce7a06984c': {
+    id: '69c40e131f8903ce7a06984c',
+    type: 'personal',
+    name: 'The Tarkov Shooter',
+    description: '• Bolt-action Rifles skill leveling speed is increased by 100%\n• Bolt-action Rifles skill starts at level 25',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: ['69ce64064e0a1c7ca20781d3'],
+    effects: [
+      {
+        skillIds: ['Sniper'],
+        intValue: 25,
+        effectId: 'skill_level_preset',
+      },
+      {
+        skillIds: ['Sniper'],
+        multiplicator: 2.0,
+        effectId: 'skill_experience_multiplicator',
+      },
+    ],
+  },
+  // Diet  (points: -2)
+  '69c40f9f9b5263783d0fe51d': {
+    id: '69c40f9f9b5263783d0fe51d',
+    type: 'personal',
+    name: 'Diet',
+    description: '• All provisions consume 50% less resource',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: ['543be6674bdc2df1348b4569'],
+          allowedItems: [],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        multiplicator: 0.5,
+        effectId: 'item_resource_drain_multiplicator',
+      },
+    ],
+  },
+  // Thrombophilia  (points: -2)
+  '69c4116a383fc5c9ad03f3d1': {
+    id: '69c4116a383fc5c9ad03f3d1',
+    type: 'personal',
+    name: 'Thrombophilia',
+    description: '• Bleeding chance is decreased by 25%',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3cd003ffdba4e68086bd7'],
+    effects: [
+      {
+        multiplicator: 0.75,
+        effectId: 'bleeding_chance_multiplicator',
+      },
+    ],
+  },
+  // Hypodipsia  (points: -2)
+  '69c411d8883efd5e3b09ccab': {
+    id: '69c411d8883efd5e3b09ccab',
+    type: 'personal',
+    name: 'Hypodipsia',
+    description: '• Hydration is consumed 20% slower',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3d2acfe3c5632e4045fe8'],
+    effects: [
+      {
+        multiplicator: 0.8,
+        effectId: 'hydration_drain_multiplicator',
+      },
+    ],
+  },
+  // Polyphagia  (points: -2)
+  '69c412519b5263783d0fe520': {
+    id: '69c412519b5263783d0fe520',
+    type: 'personal',
+    name: 'Polyphagia',
+    description: '• Energy is consumed 20% slower',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3d35feaf97663fb0bb367', '69c40c0f5e9ce5a8970f6be9'],
+    effects: [
+      {
+        multiplicator: 0.8,
+        effectId: 'energy_drain_multiplicator',
+      },
+    ],
+  },
+  // Sturdy Bones  (points: -3)
+  '69c41632d7a7b2ca660e0c59': {
+    id: '69c41632d7a7b2ca660e0c59',
+    type: 'personal',
+    name: 'Sturdy Bones',
+    description: '• Limb fracture chance is decreased by 25%\n• Falling from heights deals 20% less damage',
+    points: -3,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3cddcfb79911cf20022d6'],
+    effects: [
+      {
+        multiplicator: 0.75,
+        effectId: 'fracture_chance_multiplicator',
+      },
+      {
+        multiplicator: 0.8,
+        effectId: 'fall_damage_multiplicator',
+      },
+    ],
+  },
+  // Third Leg  (points: 1)
+  '69ce62886e199f4bbe0ab19b': {
+    id: '69ce62886e199f4bbe0ab19b',
+    type: 'personal',
+    name: 'Third Leg',
+    description: '• Movement speed is decreased by 1%\n• Buying items at Therapist is 5% cheaper',
+    points: 1,
+    mutuallyExclusiveSeasonalPerkIds: ['69c41111cd28c936320a7520', '69c3d43030f896ebef0ed357'],
+    effects: [
+      {
+        multiplicator: 0.99,
+        effectId: 'sprint_speed_multiplicator',
+      },
+      {
+        traderIds: ['54cb57776803fa99248b456e'],
+        tradeAction: 'buy',
+        multiplicator: 0.95,
+        effectId: 'trader_prices_by_trader_multiplicator',
+      },
+    ],
+  },
+  // Average  (points: -12)
+  '69ce64064e0a1c7ca20781d3': {
+    id: '69ce64064e0a1c7ca20781d3',
+    type: 'personal',
+    name: 'Average',
+    description: '• All character skills are set to level 25 but cannot be leveled further (Excluding Crafting skill)',
+    points: -12,
+    mutuallyExclusiveSeasonalPerkIds: [
+      '69c40e131f8903ce7a06984c',
+      '69c410831f8903ce7a06984f',
+      '69c3d21749d7d7c520026425',
+      '6a578102e7737aa469066518',
+    ],
+    effects: [
+      {
+        skillIds: [
+          'AimDrills',
+          'Assault',
+          'AttachedLauncher',
+          'Attention',
+          'Charisma',
+          'CovertMovement',
+          'Crafting',
+          'DMR',
+          'Endurance',
+          'HMG',
+          'Health',
+          'HeavyVests',
+          'HideoutManagement',
+          'Immunity',
+          'Intellect',
+          'LMG',
+          'Launcher',
+          'LightVests',
+          'MagDrills',
+          'Melee',
+          'Metabolism',
+          'Perception',
+          'Pistol',
+          'Revolver',
+          'SMG',
+          'Search',
+          'Shotgun',
+          'Sniper',
+          'Strength',
+          'StressResistance',
+          'Surgery',
+          'Throwing',
+          'TroubleShooting',
+          'Vitality',
+          'WeaponTreatment',
+        ],
+        effectId: 'skill_not_growing',
+      },
+      {
+        skillIds: [
+          'AdvancedModding',
+          'AimDrills',
+          'Assault',
+          'AttachedLauncher',
+          'Attention',
+          'Auctions',
+          'Barter',
+          'BearAksystems',
+          'BearAssaultoperations',
+          'BearAuthority',
+          'BearHeavycaliber',
+          'BearRawpower',
+          'BotReload',
+          'BotSound',
+          'Charisma',
+          'Cleanoperations',
+          'CovertMovement',
+          'DMR',
+          'Endurance',
+          'FieldMedicine',
+          'FirstAid',
+          'Freetrading',
+          'HMG',
+          'Health',
+          'HeavyVests',
+          'HideoutManagement',
+          'Immunity',
+          'Intellect',
+          'LMG',
+          'Launcher',
+          'LightVests',
+          'Lockpicking',
+          'MagDrills',
+          'Melee',
+          'Memory',
+          'Metabolism',
+          'NightOps',
+          'Perception',
+          'Pistol',
+          'ProneMovement',
+          'RecoilControl',
+          'Revolver',
+          'SMG',
+          'Search',
+          'Shadowconnections',
+          'Shotgun',
+          'SilentOps',
+          'Sniper',
+          'Sniping',
+          'Strength',
+          'StressResistance',
+          'Surgery',
+          'Taskperformance',
+          'Throwing',
+          'TroubleShooting',
+          'UsecArsystems',
+          'UsecDeepweaponmodding',
+          'UsecLongrangeoptics',
+          'UsecNegotiations',
+          'UsecTactics',
+          'Vitality',
+          'WeaponModding',
+          'WeaponTreatment',
+        ],
+        intValue: 25,
+        effectId: 'skill_level_preset',
+      },
+    ],
+  },
+  // Kappa Protocol  (points: -12)
+  '69ce64fe6e199f4bbe0ab1a1': {
+    id: '69ce64fe6e199f4bbe0ab1a1',
+    type: 'personal',
+    name: 'Kappa Protocol',
+    description: '• Immediately receive Secure container Kappa',
+    points: -12,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        periodUnixSeconds: 31556926,
+        mailTemplateId: '69ce6921603956f0c003054c',
+        effectId: 'scheduled_mail',
+      },
+    ],
+  },
+  // Prodigy  (points: -5)
+  '6a578102e7737aa469066518': {
+    id: '6a578102e7737aa469066518',
+    type: 'personal',
+    name: 'Prodigy',
+    description: '• Skill experience gain is increased by 30%',
+    points: -5,
+    mutuallyExclusiveSeasonalPerkIds: ['69ce64064e0a1c7ca20781d3', '69c3d21749d7d7c520026425'],
+    effects: [
+      {
+        skillIds: [
+          'AimDrills',
+          'Assault',
+          'AttachedLauncher',
+          'Attention',
+          'Charisma',
+          'CovertMovement',
+          'Crafting',
+          'DMR',
+          'Endurance',
+          'HMG',
+          'Health',
+          'HeavyVests',
+          'HideoutManagement',
+          'Immunity',
+          'Intellect',
+          'LMG',
+          'Launcher',
+          'LightVests',
+          'MagDrills',
+          'Melee',
+          'Metabolism',
+          'Perception',
+          'Pistol',
+          'Revolver',
+          'SMG',
+          'Search',
+          'Shotgun',
+          'Sniper',
+          'Strength',
+          'StressResistance',
+          'Surgery',
+          'Throwing',
+          'TroubleShooting',
+          'Vitality',
+          'WeaponTreatment',
+        ],
+        multiplicator: 1.3,
+        effectId: 'skill_experience_multiplicator',
+      },
+    ],
+  },
+  // Lucky  (points: -1)
+  '6a5789f713792e2c7c0d2a5b': {
+    id: '6a5789f713792e2c7c0d2a5b',
+    type: 'personal',
+    name: 'Lucky',
+    description: '• Audentes fortuna iuvat!',
+    points: -1,
+    mutuallyExclusiveSeasonalPerkIds: ['6a578ac032cea863f505beed'],
+    effects: [
+      {
+        effectId: 'lucky',
+      },
+    ],
+  },
+  // Unlucky  (points: 1)
+  '6a578ac032cea863f505beed': {
+    id: '6a578ac032cea863f505beed',
+    type: 'personal',
+    name: 'Unlucky',
+    description: '• Your bad luck can sometimes have dire consequences',
+    points: 1,
+    mutuallyExclusiveSeasonalPerkIds: ['6a5789f713792e2c7c0d2a5b'],
+    effects: [
+      {
+        effectId: 'unlucky',
+      },
+    ],
+  },
+  // Exhaustion  (points: 5)
+  '69c3ce913ffdba4e68086bdb': {
+    id: '69c3ce913ffdba4e68086bdb',
+    type: 'personal',
+    name: 'Exhaustion',
+    description: '• Arm and leg stamina recovers 20% slower\n• Arm and leg stamina is reduced by 10',
+    points: 5,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3e8d8af28f094100fe130', '69c40c0f5e9ce5a8970f6be9'],
+    effects: [
+      {
+        bodyPartTypes: ['arms', 'legs'],
+        multiplicator: 0.8,
+        effectId: 'stamina_restore_body_parts_multiplicator',
+      },
+      {
+        bodyPartTypes: ['arms', 'legs'],
+        intValue: -10,
+        effectId: 'stamina_scale_body_parts',
+      },
+    ],
+  },
+  // Safecracker  (points: -5)
+  '69c405332f253132020be099': {
+    id: '69c405332f253132020be099',
+    type: 'personal',
+    name: 'Safecracker',
+    description: '• Mechanical keys have a 25% chance not to lose durability when used',
+    points: -5,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        keyTypes: ['mechanical'],
+        multiplicator: 0.25,
+        effectId: 'key_durability_multiplicator',
+      },
+    ],
+  },
+  // Sailor's Nostalgia  (points: -2)
+  '69c40ae21d8aec4a2b0551c2': {
+    id: '69c40ae21d8aec4a2b0551c2',
+    type: 'personal',
+    name: "Sailor's Nostalgia",
+    description: '• Consuming canned fish grants the Health Regeneration (+2) effect for 30 seconds',
+    points: -2,
+    mutuallyExclusiveSeasonalPerkIds: [],
+    effects: [
+      {
+        itemFilter: {
+          allowedCategories: [],
+          allowedItems: [
+            '57347d5f245977448b40fa81',
+            '57347d9c245977448b40fa85',
+            '5673de654bdc2d180f8b456d',
+            '5bc9c29cd4351e003562b8a3',
+          ],
+          excludedCategories: [],
+          excludedItems: [],
+        },
+        randomSlotCount: 4,
+        appliedRandomEffectCount: 1,
+        subEffects: {
+          pain: {
+            enabled: false,
+            durationSeconds: 30,
+          },
+          tremor: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          tunnelVision: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          onPainkillers: {
+            enabled: false,
+            durationSeconds: 0,
+          },
+          healthRegeneration: {
+            enabled: true,
+            amount: 2,
+            durationSeconds: 30,
+          },
+          hydrationRecovery: {
+            enabled: false,
+            amount: 0,
+            durationSeconds: 0,
+          },
+          energyRecovery: {
+            enabled: false,
+            amount: 0,
+            durationSeconds: 0,
+          },
+        },
+        effectId: 'allergy',
+      },
+    ],
+  },
+  // Youth  (points: -5)
+  '69c40c0f5e9ce5a8970f6be9': {
+    id: '69c40c0f5e9ce5a8970f6be9',
+    type: 'personal',
+    name: 'Youth',
+    description: '• Energy is consumed 20% slower\n• Arm and leg stamina is increased by 10',
+    points: -5,
+    mutuallyExclusiveSeasonalPerkIds: [
+      '69c3ce913ffdba4e68086bdb',
+      '69c3d35feaf97663fb0bb367',
+      '69c412519b5263783d0fe520',
+    ],
+    effects: [
+      {
+        bodyPartTypes: ['arms', 'legs'],
+        intValue: 10,
+        effectId: 'stamina_scale_body_parts',
+      },
+      {
+        multiplicator: 0.8,
+        effectId: 'energy_drain_multiplicator',
+      },
+    ],
+  },
+  // Hercules  (points: -5)
+  '69c410831f8903ce7a06984f': {
+    id: '69c410831f8903ce7a06984f',
+    type: 'personal',
+    name: 'Hercules',
+    description: '• Strength and Endurance skills start at level 15',
+    points: -5,
+    mutuallyExclusiveSeasonalPerkIds: ['69ce64064e0a1c7ca20781d3'],
+    effects: [
+      {
+        skillIds: ['Strength', 'Endurance'],
+        intValue: 15,
+        effectId: 'skill_level_preset',
+      },
+    ],
+  },
+  // Sprinter  (points: -3)
+  '69c41111cd28c936320a7520': {
+    id: '69c41111cd28c936320a7520',
+    type: 'personal',
+    name: 'Sprinter',
+    description: '• Running speed is increased by 5%',
+    points: -3,
+    mutuallyExclusiveSeasonalPerkIds: ['69c3e8d8af28f094100fe130', '69ce62886e199f4bbe0ab19b'],
+    effects: [
+      {
+        multiplicator: 1.05,
+        effectId: 'sprint_speed_multiplicator',
+      },
+    ],
+  },
+}

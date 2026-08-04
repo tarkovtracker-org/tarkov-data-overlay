@@ -12,7 +12,7 @@ import { existsSync } from 'fs';
 import {
   getProjectPaths,
   loadJson5File,
-  SUPPORTED_GAME_MODES,
+  DIVERGENCE_MODES,
   type TaskDivergence,
 } from '../src/lib/index.js';
 
@@ -62,7 +62,7 @@ describe('divergence registry', () => {
 
   it('only uses supported game modes as value keys', () => {
     const allowed = new Set<string>([
-      ...SUPPORTED_GAME_MODES,
+      ...DIVERGENCE_MODES,
       'confidence',
       'regularSource',
       'pveSource',
@@ -86,9 +86,7 @@ describe('divergence registry', () => {
         for (const [field, def] of Object.entries(entry.fields)) {
           expect(def.regular, `${taskId}.${field}.regular`).toBeDefined();
           expect(def.pve, `${taskId}.${field}.pve`).toBeDefined();
-          expect(def.regular, `${taskId}.${field} should differ across modes`).not.toBe(
-            def.pve
-          );
+          expect(def.regular, `${taskId}.${field} should differ across modes`).not.toBe(def.pve);
         }
       }
     });
@@ -110,7 +108,7 @@ describe('divergence registry', () => {
       for (const [taskId, entry] of entries) {
         if (entry.status !== 'mode-exclusive') continue;
         for (const [field, def] of Object.entries(entry.fields)) {
-          const present = SUPPORTED_GAME_MODES.filter((mode) => mode in def);
+          const present = DIVERGENCE_MODES.filter((mode) => mode in def);
           expect(present, `${taskId}.${field}`).toHaveLength(1);
         }
       }

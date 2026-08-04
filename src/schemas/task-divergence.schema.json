@@ -18,13 +18,13 @@
               "type": ["number", "string", "boolean", "null"]
             },
             "pveSource": {
-              "enum": ["wiki", "eft-reference", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game"]
             },
             "regular": {
               "type": ["number", "string", "boolean", "null"]
             },
             "regularSource": {
-              "enum": ["wiki", "eft-reference", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game"]
             },
             "verified": {
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
@@ -32,10 +32,7 @@
             }
           },
           "required": ["confidence", "verified"],
-          "anyOf": [
-            { "required": ["regular"] },
-            { "required": ["pve"] }
-          ],
+          "anyOf": [{ "required": ["regular"] }, { "required": ["pve"] }],
           "type": "object"
         },
         "minProperties": 1,

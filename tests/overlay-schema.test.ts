@@ -9,6 +9,7 @@ import {
   getProjectPaths,
   loadAllJson5FromDir,
   loadJsonFile,
+  SUPPORTED_GAME_MODES,
   type OverlayOutput,
 } from '../src/lib/index.js';
 
@@ -18,7 +19,7 @@ function buildOverlayFixture(): OverlayOutput {
   const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
   const modes: NonNullable<OverlayOutput['modes']> = {};
 
-  for (const mode of ['regular', 'pve'] as const) {
+  for (const mode of SUPPORTED_GAME_MODES) {
     const modeData = {
       ...loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', mode)),
       ...loadAllJson5FromDir(join(srcDir, 'additions', 'modes', mode), false),
@@ -53,9 +54,9 @@ function buildOverlayFixture(): OverlayOutput {
 describe('overlay.schema.json', () => {
   it('includes storyChapters in root properties', () => {
     const { schemasDir } = getProjectPaths();
-    const rootSchema = loadJsonFile(
-      join(schemasDir, 'overlay.schema.json')
-    ) as { properties?: Record<string, unknown> };
+    const rootSchema = loadJsonFile(join(schemasDir, 'overlay.schema.json')) as {
+      properties?: Record<string, unknown>;
+    };
 
     expect(rootSchema.properties).toHaveProperty('storyChapters');
   });
@@ -101,6 +102,8 @@ describe('overlay.schema.json', () => {
       'task-additions.schema.json',
       'story-chapter.schema.json',
       'locale-override.schema.json',
+      'seasonal-perk.schema.json',
+      'craft-additions.schema.json',
     ];
 
     for (const schemaFile of referencedSchemas) {

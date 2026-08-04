@@ -1,0 +1,73 @@
+{
+  "$id": "craft-additions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Craft Additions",
+  "description": "Schema for hideout crafts missing from the tarkov.dev API, keyed by the craft id. Shaped like a tarkov.dev craft (station/level/duration/requiredItems/productItem with tarkov.dev entity ids) so consumers can merge them into the crafts list and tarkov.dev can adopt them directly.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "station", "level", "duration", "requiredItems", "productItem"],
+    "properties": {
+      "id": {
+        "description": "Craft id (matches the object key; tarkov.dev/BSG recipe id).",
+        "type": "string"
+      },
+      "station": {
+        "description": "tarkov.dev hideout station id the craft runs in.",
+        "type": "string"
+      },
+      "level": {
+        "description": "Required station level.",
+        "type": "integer",
+        "minimum": 1
+      },
+      "taskUnlock": {
+        "description": "Id of the task that unlocks this craft (tarkov.dev task id). null on quest-gated crafts whose unlocking task id is not yet known; omit entirely when the craft has no task unlock.",
+        "type": ["string", "null"]
+      },
+      "duration": {
+        "description": "Production time in seconds.",
+        "type": "integer",
+        "minimum": 0
+      },
+      "requiredItems": {
+        "description": "Input items (attributes.tool=true marks a returned tool).",
+        "type": "array",
+        "items": { "$ref": "#/definitions/craftItem" }
+      },
+      "requiredQuestItems": {
+        "type": "array",
+        "items": { "type": "object" }
+      },
+      "gameEditions": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "productItem": {
+        "description": "The item produced by the craft.",
+        "$ref": "#/definitions/craftItem"
+      }
+    }
+  },
+  "definitions": {
+    "craftItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item", "count"],
+      "properties": {
+        "item": {
+          "description": "tarkov.dev item id.",
+          "type": "string"
+        },
+        "count": {
+          "type": "number",
+          "minimum": 0
+        },
+        "attributes": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

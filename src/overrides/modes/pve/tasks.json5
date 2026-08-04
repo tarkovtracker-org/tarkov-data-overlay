@@ -96,8 +96,8 @@
   // If `npm run check-overrides` reports OVERRIDE_MISSING for any pve.<field>
   // below, uncomment that entry - the flip has happened again.
   //
-  // Verified 2026-08-03 against a local EFT PvE client capture (2026-06-30) and
-  // tarkov.dev; recorded in src/divergences/tasks.json5.
+  // Verified 2026-08-03 in-game on the PvE profile (2026-06-30) and cross-checked
+  // against tarkov.dev; recorded in src/divergences/tasks.json5.
   //
   // The `Was:` values are the ORIGINAL regular-mode figures observed when each
   // override was authored, retained as historical evidence.

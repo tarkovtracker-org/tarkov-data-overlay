@@ -28,13 +28,19 @@ import type {
   TaskObjective,
   TaskRewards,
   TaskRequirement,
+  GameMode,
 } from './types.js';
 
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const DEFAULT_MAX_RETRIES = 3;
 const MAX_BACKOFF_MS = 5000;
-
-type GameMode = 'regular' | 'pve';
+/**
+ * Identify the overlay to json.tarkov.dev. A descriptive UA is required in
+ * practice: Cloudflare challenges browser-mimicking UAs (e.g. "Mozilla/5.0")
+ * from non-browser clients with HTTP 403, while a named client UA passes.
+ */
+const USER_AGENT =
+  'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -68,9 +74,7 @@ function stringId(value: unknown): string | undefined {
  * Remove undefined values so adapted objects compare cleanly against overrides.
  */
 function compact<T extends JsonRecord>(value: T): T {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, entry]) => entry !== undefined)
-  ) as T;
+  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined)) as T;
 }
 
 /**
@@ -79,11 +83,7 @@ function compact<T extends JsonRecord>(value: T): T {
  */
 function toLookup(value: unknown): Map<string, JsonRecord> {
   const entries: Array<readonly [string, JsonRecord]> = [];
-  const records = Array.isArray(value)
-    ? value
-    : isRecord(value)
-      ? Object.values(value)
-      : [];
+  const records = Array.isArray(value) ? value : isRecord(value) ? Object.values(value) : [];
   for (const entry of records) {
     if (!isRecord(entry)) continue;
     const id = typeof entry.id === 'string' ? entry.id : undefined;
@@ -114,9 +114,7 @@ class EnvelopeValidationError extends Error {}
 
 function validateEnvelope(payload: unknown, path: string): Envelope {
   if (!isRecord(payload) || !('data' in payload) || payload.data == null) {
-    throw new EnvelopeValidationError(
-      `Invalid json.tarkov.dev response for ${path}: missing data`
-    );
+    throw new EnvelopeValidationError(`Invalid json.tarkov.dev response for ${path}: missing data`);
   }
   if (payload.translations !== undefined && !Array.isArray(payload.translations)) {
     throw new EnvelopeValidationError(
@@ -131,7 +129,7 @@ async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
   for (let attempt = 1; attempt <= DEFAULT_MAX_RETRIES; attempt += 1) {
     try {
       const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
       });
       if (!response.ok) {
         throw new Error(
@@ -195,7 +193,7 @@ type Context = {
 function resolveItemRef(value: unknown, ctx: Context): TaskItemRef | undefined {
   const id = stringId(value);
   const inline = isRecord(value) ? value : undefined;
-  const raw = (id ? ctx.itemsById.get(id) ?? ctx.questItemsById.get(id) : undefined) ?? inline;
+  const raw = (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
   if (!id && !raw) return undefined;
   const name =
     translate(ctx.itemsEn, raw?.name) ??
@@ -225,10 +223,7 @@ function resolveItemRefMatrix(value: unknown, ctx: Context): TaskItemRef[][] | u
     .filter((group) => group.length > 0);
 }
 
-function resolveMapRef(
-  value: unknown,
-  ctx: Context
-): { id: string; name: string } | undefined {
+function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
   if (!id) return undefined;
   const raw = ctx.mapsById.get(id);
@@ -236,7 +231,10 @@ function resolveMapRef(
   return compact({ id, name }) as { id: string; name: string };
 }
 
-function resolveMapRefs(value: unknown, ctx: Context): Array<{ id: string; name: string }> | undefined {
+function resolveMapRefs(
+  value: unknown,
+  ctx: Context
+): Array<{ id: string; name: string }> | undefined {
   if (!Array.isArray(value)) return undefined;
   return value
     .map((entry) => resolveMapRef(entry, ctx))
@@ -311,14 +309,14 @@ function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
   return compact({
     ...raw,
     items: Array.isArray(raw.items)
-      ? raw.items.filter(isRecord).map((entry) =>
-          compact({ ...entry, item: resolveItemRef(entry.item, ctx) })
-        )
+      ? raw.items
+          .filter(isRecord)
+          .map((entry) => compact({ ...entry, item: resolveItemRef(entry.item, ctx) }))
       : undefined,
     traderStanding: Array.isArray(raw.traderStanding)
-      ? raw.traderStanding.filter(isRecord).map((entry) =>
-          compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) })
-        )
+      ? raw.traderStanding
+          .filter(isRecord)
+          .map((entry) => compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) }))
       : undefined,
     offerUnlock: Array.isArray(raw.offerUnlock)
       ? raw.offerUnlock.filter(isRecord).map((entry) =>
@@ -481,10 +479,7 @@ export interface LocaleBundle {
  * Fetch the core entity endpoints plus the `_<locale>` translation maps for a
  * game mode, returning the raw lookups the locale-override validator needs.
  */
-export async function fetchLocaleBundle(
-  gameMode?: GameMode,
-  locale = 'en'
-): Promise<LocaleBundle> {
+export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Promise<LocaleBundle> {
   const mode: GameMode = gameMode ?? 'regular';
   const cache: EndpointCache = new Map();
 
@@ -532,5 +527,3 @@ export async function fetchLocaleBundle(
 export function findTaskById(tasks: TaskData[], taskId: string): TaskData | undefined {
   return tasks.find((t) => t.id === taskId);
 }
-
-
