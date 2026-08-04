@@ -326,7 +326,29 @@ perks do not exist upstream to resolve against.
 ## Applying Added Crafts
 
 `craftsAdd` supplies hideout crafts missing from tarkov.dev, keyed by craft id,
-in tarkov.dev's **static-JSON** craft shape (all tarkov.dev ids). Merge by id:
+in tarkov.dev's **static-JSON** craft shape (all tarkov.dev ids):
+
+```typescript
+interface Craft {
+  id: string;
+  station: string; // tarkov.dev HideoutStation id
+  level: number;
+  duration: number; // production time in seconds
+  requiredItems: Array<{
+    item: string; // tarkov.dev item id
+    count: number;
+    attributes?: { tool?: boolean };
+  }>;
+  productItem: { item: string; count: number; attributes?: Record<string, unknown> };
+  requiredQuestItems?: string[];
+  gameEditions?: string[];
+  // Present (as null) on quest-gated crafts whose unlocking task id is unknown;
+  // omitted on crafts with no task unlock, matching tarkov.dev.
+  taskUnlock?: string | null;
+}
+```
+
+Merge by id:
 
 ```typescript
 const byId = new Map(tarkovDevCrafts.map((c) => [c.id, c]));
@@ -618,6 +640,9 @@ interface Overlay {
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
   prestige?: Record<string, PrestigeOverride>;
+  // Seasonal (pvp-season) data tarkov.dev does not serve; see the sections above.
+  seasonalPerks?: Record<string, SeasonalPerk>;
+  craftsAdd?: Record<string, Craft>;
   // Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...)
   locales?: Record<string, LocaleOverlay>;
   $meta: {
@@ -627,7 +652,7 @@ interface Overlay {
   };
 }
 
-type GameMode = 'regular' | 'pve';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;

@@ -39,7 +39,7 @@ const MAX_BACKOFF_MS = 5000;
  * practice: Cloudflare challenges browser-mimicking UAs (e.g. "Mozilla/5.0")
  * from non-browser clients with HTTP 403, while a named client UA passes.
  */
-const USER_AGENT =
+export const USER_AGENT =
   'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)';
 
 type JsonRecord = Record<string, unknown>;

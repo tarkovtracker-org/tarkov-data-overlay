@@ -14,8 +14,18 @@
   //
   // Fields: id, type (tier: common|personal), name, description, points
   // (perk-point value shown on the selection screen; null = none),
-  // mutuallyExclusiveSeasonalPerkIds, and effects[] (structured form of the
-  // perk's in-game description; each effect has an effectId plus its values).
+  // mutuallyExclusiveSeasonalPerkIds, and effects[] (the raw in-game effect
+  // values as the game stores them; each effect has an effectId plus its values).
+  //
+  // description vs effects: `description` is the verbatim in-game display text;
+  // `effects[]` are the raw values the game actually applies. Where the two
+  // disagree - e.g. Handyman's text says crafting time "-50%" while
+  // craft_time_multiplicator is 0.87, Polydipsia's text says "15% faster" while
+  // hydration_drain_multiplicator is 1.2 (20%), and Average's text and
+  // skill_level_preset exclude Crafting while its skill_not_growing list still
+  // includes it - the mismatch is faithful to how the game itself presents the
+  // perk: BSG's display strings and underlying values are not always consistent.
+  // Both sides are captured as-is; do NOT "reconcile" them to make them agree.
   //
   // effects[].itemFilter matches tarkov.dev's served ItemFilters shape:
   // allowedCategories / allowedItems / excludedCategories / excludedItems, each
@@ -41,6 +51,8 @@
     ],
   },
   // Handyman
+  // NB: in-game text says crafting time "-50%", but the game's raw
+  // craft_time_multiplicator is 0.87 (~13%). Both kept as the game presents them.
   '69c41a86383fc5c9ad03f3d5': {
     id: '69c41a86383fc5c9ad03f3d5',
     type: 'common',
@@ -268,6 +280,8 @@
     ],
   },
   // Polydipsia  (points: 2)
+  // NB: in-game text says "15% faster", but the raw hydration_drain_multiplicator
+  // is 1.2 (20%). Both kept as the game presents them (cf. Hypodipsia 0.8 / "20% slower").
   '69c3d2acfe3c5632e4045fe8': {
     id: '69c3d2acfe3c5632e4045fe8',
     type: 'personal',
@@ -741,6 +755,8 @@
     ],
   },
   // Average  (points: -12)
+  // NB: the in-game text and skill_level_preset exclude Crafting, but the game's
+  // skill_not_growing list still includes it. Kept as the game presents it.
   '69ce64064e0a1c7ca20781d3': {
     id: '69ce64064e0a1c7ca20781d3',
     type: 'personal',

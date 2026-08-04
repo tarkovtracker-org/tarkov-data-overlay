@@ -9,12 +9,24 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import JSON5 from 'json5';
 import type { TaskRequirement, GameMode } from '../../src/lib/types.js';
-import { SUPPORTED_GAME_MODES } from '../../src/lib/types.js';
 import { loadDivergenceRegistry, divergentFieldKeys } from '../../src/lib/index.js';
 import { ExtendedTaskData } from './types.js';
 
 /** Which override files apply when comparing a given game mode. */
 export type SuppressionScope = GameMode | 'both';
+
+/**
+ * Game modes the wiki comparison covers.
+ *
+ * The wiki-compare CLI only fetches `regular` and `pve` (see
+ * `scripts/wiki-compare/api.ts`) and its suppression keys are not
+ * mode-qualified, so the `'both'` scope must load only these two modes'
+ * overrides. Including `pvp-season` here would let a seasonal override for a
+ * shared task field silently mask a genuine `regular`/`pve` discrepancy.
+ * `pvp-season` overrides stay reachable only through an explicit `pvp-season`
+ * scope, reserved for a future seasonal comparison mode.
+ */
+const WIKI_COMPARE_MODES: readonly GameMode[] = ['regular', 'pve'];
 
 // Overlay file for filtering already-addressed discrepancies
 export const TASKS_OVERLAY_FILE = path.join(process.cwd(), 'src', 'overrides', 'tasks.json5');
@@ -25,11 +37,12 @@ export const TASKS_OVERLAY_FILE = path.join(process.cwd(), 'src', 'overrides', '
  * Base overrides apply to every mode. Mode-specific overrides apply only to
  * their mode - so a regular-mode comparison must NOT load the PvE file, or a
  * PvE-only correction would suppress (mask) a genuine regular-mode divergence.
- * `'both'` loads everything, for the merged overview run.
+ * `'both'` loads the base plus the wiki-comparable modes (`regular`/`pve`), for
+ * the merged overview run.
  */
 export function taskOverlayFiles(scope: SuppressionScope = 'both'): string[] {
   const files = [TASKS_OVERLAY_FILE];
-  const modes = scope === 'both' ? SUPPORTED_GAME_MODES : [scope];
+  const modes = scope === 'both' ? WIKI_COMPARE_MODES : [scope];
   for (const mode of modes) {
     files.push(path.join(process.cwd(), 'src', 'overrides', 'modes', mode, 'tasks.json5'));
   }
