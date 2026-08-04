@@ -4,11 +4,7 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import {
-  printHeader,
-  printSuccess,
-  icons,
-} from '../../src/lib/index.js';
+import { printHeader, printSuccess, icons } from '../../src/lib/index.js';
 import {
   ApiObjective,
   Discrepancy,
@@ -18,10 +14,7 @@ import {
   WikiTaskData,
   getPriority,
 } from './types.js';
-import {
-  TaskSuppressionEntry,
-  isObjectiveSuppressed,
-} from './overlay.js';
+import { TaskSuppressionEntry, isObjectiveSuppressed } from './overlay.js';
 import {
   ObjectiveItemRef,
   aliasSetIntersects,
@@ -48,12 +41,8 @@ import {
   toNormalizedSet,
   uniqueList,
 } from './normalize.js';
-import {
-  normalizeTaskName,
-} from './api.js';
-import {
-  extractCount,
-} from './wiki.js';
+import { normalizeTaskName } from './api.js';
+import { extractCount } from './wiki.js';
 
 export function compareTasks(
   apiTask: ExtendedTaskData,
@@ -74,18 +63,14 @@ export function compareTasks(
   if (wiki.lastRevision?.timestamp) {
     const revDate = new Date(wiki.lastRevision.timestamp);
     wikiLastEdit = revDate.toISOString().split('T')[0];
-    wikiEditDaysAgo = Math.floor(
-      (Date.now() - revDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    wikiEditDaysAgo = Math.floor((Date.now() - revDate.getTime()) / (1000 * 60 * 60 * 24));
     wikiEditedPost1_0 = revDate >= TARKOV_1_0_LAUNCH;
   }
 
   if (verbose) printHeader('COMPARISON');
 
   const isSuppressedObjectiveField = (objectiveId: string, field: string): boolean =>
-    taskSuppressions
-      ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field)
-      : false;
+    taskSuppressions ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field) : false;
   const pushObjectiveDiscrepancy = (
     objectiveId: string,
     field: string,
@@ -129,27 +114,20 @@ export function compareTasks(
           `${icons.warning} minPlayerLevel: API=${apiTask.minPlayerLevel}, Wiki=${wiki.minPlayerLevel}`
         );
     } else if (verbose) {
-      console.log(
-        `${icons.success} minPlayerLevel matches (${apiTask.minPlayerLevel})`
-      );
+      console.log(`${icons.success} minPlayerLevel matches (${apiTask.minPlayerLevel})`);
     }
   }
 
-  const isPveTask =
-    apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
+  const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
 
   // Task-level map/location
   const apiMapName = apiTask.map?.name;
-  const wikiObjectiveMaps = uniqueList(
-    wiki.objectives.flatMap((obj) => obj.maps ?? [])
-  );
+  const wikiObjectiveMaps = uniqueList(wiki.objectives.flatMap((obj) => obj.maps ?? []));
   const wikiTaskMaps = wiki.maps.length > 0 ? wiki.maps : wikiObjectiveMaps;
   const wikiTaskMapSet = toNormalizedSet(wikiTaskMaps, normalizeMapName);
 
   if (wikiTaskMapSet.size > 0) {
-    const apiMapSet = apiMapName
-      ? new Set([normalizeMapName(apiMapName)])
-      : new Set<string>();
+    const apiMapSet = apiMapName ? new Set([normalizeMapName(apiMapName)]) : new Set<string>();
     const mapsMatch = apiMapName ? setsEqual(apiMapSet, wikiTaskMapSet) : false;
 
     if (!mapsMatch) {
@@ -175,19 +153,14 @@ export function compareTasks(
       console.log(`${icons.success} map matches (${apiMapName})`);
     }
   } else if (verbose && apiMapName) {
-    console.log(
-      `${icons.info} map in API: ${apiMapName}, Wiki=none (not specified)`
-    );
+    console.log(`${icons.info} map in API: ${apiMapName}, Wiki=none (not specified)`);
   }
 
   // Objective matching by normalized description
   const wikiCandidates = wiki.objectives.map((wikiObj, index) => ({
     wiki: wikiObj,
     index,
-    textKey: stripMapAliases(
-      normalizeObjectiveMatchKey(wikiObj.text),
-      mapAliasMap
-    ),
+    textKey: stripMapAliases(normalizeObjectiveMatchKey(wikiObj.text), mapAliasMap),
     verb: getObjectiveVerbKey(wikiObj.text),
     items: uniqueList(wikiObj.items ?? []),
   }));
@@ -214,8 +187,7 @@ export function compareTasks(
     const apiVerb = getObjectiveVerbKey(apiObj.description ?? '');
     const apiItemRefs = collectObjectiveItems(apiObj);
     const apiFoundInRaid =
-      apiObj.foundInRaid === true ||
-      /found in raid/i.test(apiObj.description ?? '');
+      apiObj.foundInRaid === true || /found in raid/i.test(apiObj.description ?? '');
 
     let matched = false;
 
@@ -242,9 +214,7 @@ export function compareTasks(
           if (!c.textKey || c.textKey.length === 0) return false;
           const wikiTokens = c.textKey.split(' ').filter(Boolean);
           if (wikiTokens.length < 4) return false;
-          return (
-            c.textKey.includes(apiTextKey) || apiTextKey.includes(c.textKey)
-          );
+          return c.textKey.includes(apiTextKey) || apiTextKey.includes(c.textKey);
         });
 
         if (substringMatches.length === 1) {
@@ -292,10 +262,7 @@ export function compareTasks(
   }
 
   const apiFoundInRaidItemSets = (apiTask.objectives ?? [])
-    .filter(
-      (obj) =>
-        obj.foundInRaid === true || /found in raid/i.test(obj.description ?? '')
-    )
+    .filter((obj) => obj.foundInRaid === true || /found in raid/i.test(obj.description ?? ''))
     .map((obj) => buildAliasSet(collectObjectiveItems(obj)));
 
   const unmatchedWiki: WikiObjective[] = [];
@@ -344,8 +311,7 @@ export function compareTasks(
       wikiEditDaysAgo,
       wikiEditedPost1_0,
     });
-    if (verbose)
-      console.log(`${icons.warning} objective missing in wiki: ${desc}`);
+    if (verbose) console.log(`${icons.warning} objective missing in wiki: ${desc}`);
   }
 
   for (const wikiObj of unmatchedWiki) {
@@ -361,8 +327,7 @@ export function compareTasks(
       wikiEditDaysAgo,
       wikiEditedPost1_0,
     });
-    if (verbose)
-      console.log(`${icons.warning} objective missing in API: ${wikiObj.text}`);
+    if (verbose) console.log(`${icons.warning} objective missing in API: ${wikiObj.text}`);
   }
 
   for (const { api: apiObj, wiki: wikiObj, matchType } of matchedObjectives) {
@@ -378,17 +343,13 @@ export function compareTasks(
     const apiItems = uniqueList(apiItemRefs.map((item) => item.name));
     const wikiItems = uniqueList(wikiObj.items ?? []);
     const apiRequiredKeys = buildAliasSet(
-      Array.isArray(apiObj.requiredKeys)
-        ? (apiObj.requiredKeys.flat() as ObjectiveItemRef[])
-        : [],
+      Array.isArray(apiObj.requiredKeys) ? (apiObj.requiredKeys.flat() as ObjectiveItemRef[]) : [],
       taskName
     );
     const matchingRequiredItems =
       apiRequiredKeys.size > 0
         ? wiki.relatedRequiredItems.filter((item) =>
-            normalizeWikiItemAliases(item, taskName).some((alias) =>
-              apiRequiredKeys.has(alias)
-            )
+            normalizeWikiItemAliases(item, taskName).some((alias) => apiRequiredKeys.has(alias))
           )
         : [];
     const apiHasQuestItem = Boolean(apiObj.questItem);
@@ -405,12 +366,9 @@ export function compareTasks(
       itemsMatch(apiItemRefs, wikiItemsForCompare, taskName);
 
     const apiCount =
-      apiObj.count ??
-      extractCount(apiObj.description ?? '', collectObjectiveItemNames(apiObj));
+      apiObj.count ?? extractCount(apiObj.description ?? '', collectObjectiveItemNames(apiObj));
     const wikiCount =
-      isPveTask && wikiObj.pveCount !== undefined
-        ? wikiObj.pveCount
-        : wikiObj.count;
+      isPveTask && wikiObj.pveCount !== undefined ? wikiObj.pveCount : wikiObj.count;
     const shouldStripCounts = apiObj.count !== undefined;
     const apiDescStripped = shouldStripCounts
       ? normalizeWhitespace(stripCountPhrases(apiDesc))
@@ -418,19 +376,11 @@ export function compareTasks(
     const wikiDescStripped = shouldStripCounts
       ? normalizeWhitespace(stripCountPhrases(wikiDesc))
       : wikiDesc;
-    const apiDescForCompare =
-      apiDescStripped.length > 0 ? apiDescStripped : apiDesc;
-    const wikiDescForCompare =
-      wikiDescStripped.length > 0 ? wikiDescStripped : wikiDesc;
+    const apiDescForCompare = apiDescStripped.length > 0 ? apiDescStripped : apiDesc;
+    const wikiDescForCompare = wikiDescStripped.length > 0 ? wikiDescStripped : wikiDesc;
 
-    const normalizedApi = stripMapAliases(
-      normalizeObjectiveText(apiDescForCompare),
-      mapAliasMap
-    );
-    const normalizedWiki = stripMapAliases(
-      normalizeObjectiveText(wikiDescForCompare),
-      mapAliasMap
-    );
+    const normalizedApi = stripMapAliases(normalizeObjectiveText(apiDescForCompare), mapAliasMap);
+    const normalizedWiki = stripMapAliases(normalizeObjectiveText(wikiDescForCompare), mapAliasMap);
     const normalizedApiKey = stripMapAliases(
       normalizeObjectiveMatchKey(apiDescForCompare),
       mapAliasMap
@@ -489,22 +439,15 @@ export function compareTasks(
     if (wikiMapNames.length > 0) {
       const apiSet = toNormalizedSet(apiMapNames, normalizeMapName);
       const wikiSet = toNormalizedSet(wikiMapNames, normalizeMapName);
-      const descForTransit = `${apiObj.description ?? ''} ${
-        wikiObj.text ?? ''
-      }`;
-      const isTransitObjective =
-        /\btransit\b|\btransfer\b|\bpassage\b|\bleading to\b/i.test(
-          descForTransit
-        );
+      const descForTransit = `${apiObj.description ?? ''} ${wikiObj.text ?? ''}`;
+      const isTransitObjective = /\btransit\b|\btransfer\b|\bpassage\b|\bleading to\b/i.test(
+        descForTransit
+      );
       const allowTransitSuperset =
         isTransitObjective && apiSet.size > 0 && isSubset(apiSet, wikiSet);
       const skipMapCompare = apiVerb === 'hand_over' && apiSet.size === 0;
 
-      if (
-        !setsEqual(apiSet, wikiSet) &&
-        !allowTransitSuperset &&
-        !skipMapCompare
-      ) {
+      if (!setsEqual(apiSet, wikiSet) && !allowTransitSuperset && !skipMapCompare) {
         pushObjectiveDiscrepancy(
           apiObj.id,
           'objectives.maps',
@@ -520,22 +463,17 @@ export function compareTasks(
       }
     } else if (verbose && apiMapNames.length > 0) {
       console.log(
-        `${icons.info} objective maps: API=${apiMapNames.join(
-          ', '
-        )}, Wiki=none (not specified)`
+        `${icons.info} objective maps: API=${apiMapNames.join(', ')}, Wiki=none (not specified)`
       );
     }
 
     if (apiItemRefs.length > 0 || wikiItemsForCompare.length > 0) {
       const apiDescText = apiObj.description ?? '';
       const isSkillObjective =
-        /\bskill level\b/i.test(apiDescText) ||
-        /\bskill level\b/i.test(wikiObj.text ?? '');
+        /\bskill level\b/i.test(apiDescText) || /\bskill level\b/i.test(wikiObj.text ?? '');
       if (isSkillObjective) {
         if (verbose)
-          console.log(
-            `${icons.info} objective items: skill requirement, skipping item compare`
-          );
+          console.log(`${icons.info} objective items: skill requirement, skipping item compare`);
         continue;
       }
       const usesRelatedItems =
@@ -568,9 +506,7 @@ export function compareTasks(
         continue;
       }
       const apiAnyItem =
-        /\bany\b/i.test(apiDescText) &&
-        apiItemRefs.length >= 8 &&
-        wikiItemsForCompare.length === 0;
+        /\bany\b/i.test(apiDescText) && apiItemRefs.length >= 8 && wikiItemsForCompare.length === 0;
       const categoryRequirement =
         objectiveHasCategoryItemRequirement(apiDescText) ||
         objectiveHasCategoryItemRequirement(wikiObj.text ?? '');
@@ -578,9 +514,9 @@ export function compareTasks(
         apiItemRefs.length === 0 &&
         apiVerb === 'hand_over' &&
         wikiItemsForCompare.length > 0 &&
-        Array.from(
-          toNormalizedSet(wikiItemsForCompare, normalizeItemName)
-        ).every((item) => apiQuestItemSet.has(item));
+        Array.from(toNormalizedSet(wikiItemsForCompare, normalizeItemName)).every((item) =>
+          apiQuestItemSet.has(item)
+        );
 
       if (categoryRequirement && wikiItemsForCompare.length === 0) {
         if (verbose)
@@ -625,10 +561,7 @@ export function compareTasks(
       .map((req) => req.task?.name)
       .filter((n): n is string => Boolean(n));
     const apiSet = toNormalizedSet(apiReqNames, normalizeTaskName);
-    const wikiSet = toNormalizedSet(
-      wiki.previousTasks ?? [],
-      normalizeTaskName
-    );
+    const wikiSet = toNormalizedSet(wiki.previousTasks ?? [], normalizeTaskName);
 
     if (apiSet.size > 0 || wikiSet.size > 0) {
       if (!setsEqual(apiSet, wikiSet)) {
@@ -645,22 +578,12 @@ export function compareTasks(
           wikiEditedPost1_0,
         });
         if (verbose) {
-          const missing = wiki.previousTasks.filter(
-            (t) => !apiSet.has(normalizeTaskName(t))
-          );
-          const extra = apiReqNames.filter(
-            (t) => !wikiSet.has(normalizeTaskName(t))
-          );
+          const missing = wiki.previousTasks.filter((t) => !apiSet.has(normalizeTaskName(t)));
+          const extra = apiReqNames.filter((t) => !wikiSet.has(normalizeTaskName(t)));
           if (missing.length > 0)
-            console.log(
-              `${icons.warning} prerequisites missing in API: ${missing.join(
-                ', '
-              )}`
-            );
+            console.log(`${icons.warning} prerequisites missing in API: ${missing.join(', ')}`);
           if (extra.length > 0)
-            console.log(
-              `${icons.warning} prerequisites extra in API: ${extra.join(', ')}`
-            );
+            console.log(`${icons.warning} prerequisites extra in API: ${extra.join(', ')}`);
         }
       } else if (verbose) {
         console.log(`${icons.success} prerequisites match`);
@@ -689,22 +612,12 @@ export function compareTasks(
           wikiEditedPost1_0,
         });
         if (verbose) {
-          const missing = wiki.nextTasks.filter(
-            (t) => !apiSet.has(normalizeTaskName(t))
-          );
-          const extra = apiNextNames.filter(
-            (t) => !wikiSet.has(normalizeTaskName(t))
-          );
+          const missing = wiki.nextTasks.filter((t) => !apiSet.has(normalizeTaskName(t)));
+          const extra = apiNextNames.filter((t) => !wikiSet.has(normalizeTaskName(t)));
           if (missing.length > 0)
-            console.log(
-              `${icons.warning} next tasks missing in API: ${missing.join(
-                ', '
-              )}`
-            );
+            console.log(`${icons.warning} next tasks missing in API: ${missing.join(', ')}`);
           if (extra.length > 0)
-            console.log(
-              `${icons.warning} next tasks extra in API: ${extra.join(', ')}`
-            );
+            console.log(`${icons.warning} next tasks extra in API: ${extra.join(', ')}`);
         }
       } else if (verbose) {
         console.log(`${icons.success} next tasks match`);
@@ -732,17 +645,12 @@ export function compareTasks(
           `${icons.warning} experience: API=${apiTask.experience}, Wiki=${wiki.rewards.xp}`
         );
     } else if (verbose) {
-      console.log(
-        `${icons.success} experience matches (${apiTask.experience})`
-      );
+      console.log(`${icons.success} experience matches (${apiTask.experience})`);
     }
   }
 
   // Reputation (per trader)
-  if (
-    wiki.rewards.reputations.length > 0 &&
-    apiTask.finishRewards?.traderStanding
-  ) {
+  if (wiki.rewards.reputations.length > 0 && apiTask.finishRewards?.traderStanding) {
     for (const wikiRep of wiki.rewards.reputations) {
       // Find matching trader in API data (case-insensitive)
       const apiTraderRep = apiTask.finishRewards.traderStanding.find(
@@ -769,23 +677,17 @@ export function compareTasks(
             );
           }
         } else if (verbose) {
-          console.log(
-            `${icons.success} ${wikiRep.trader} rep matches (${apiTraderRep.standing})`
-          );
+          console.log(`${icons.success} ${wikiRep.trader} rep matches (${apiTraderRep.standing})`);
         }
       } else if (verbose) {
-        console.log(
-          `${icons.info} ${wikiRep.trader} rep: Wiki=${wikiRep.value}, not found in API`
-        );
+        console.log(`${icons.info} ${wikiRep.trader} rep: Wiki=${wikiRep.value}, not found in API`);
       }
     }
   }
 
   // Money (Roubles)
   if (wiki.rewards.money !== undefined && apiTask.finishRewards?.items) {
-    const apiMoney = apiTask.finishRewards.items.find(
-      (i) => i.item.name === 'Roubles'
-    )?.count;
+    const apiMoney = apiTask.finishRewards.items.find((i) => i.item.name === 'Roubles')?.count;
     if (apiMoney !== undefined && apiMoney !== wiki.rewards.money) {
       discrepancies.push({
         taskId,
@@ -800,9 +702,7 @@ export function compareTasks(
         wikiEditedPost1_0,
       });
       if (verbose)
-        console.log(
-          `${icons.warning} money: API=${apiMoney}, Wiki=${wiki.rewards.money}`
-        );
+        console.log(`${icons.warning} money: API=${apiMoney}, Wiki=${wiki.rewards.money}`);
     } else if (verbose && apiMoney !== undefined) {
       console.log(`${icons.success} money matches (${apiMoney})`);
     }

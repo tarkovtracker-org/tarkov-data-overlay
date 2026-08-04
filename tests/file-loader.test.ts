@@ -56,9 +56,7 @@ describe('loadJson5File', () => {
     writeFileSync(filePath, '{ invalid: }', 'utf-8');
 
     try {
-      expect(() => loadJson5File(filePath)).toThrow(
-        `Failed to parse JSON5 file '${filePath}':`
-      );
+      expect(() => loadJson5File(filePath)).toThrow(`Failed to parse JSON5 file '${filePath}':`);
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

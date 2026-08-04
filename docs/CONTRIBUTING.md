@@ -192,10 +192,7 @@ If tarkov.dev is missing the objective entirely, add it using `objectivesAdd`:
       {
         id: 'objective-id-here',
         description: 'Find in raid',
-        items: [
-          { name: 'Item Name 1' },
-          { name: 'Item Name 2', id: 'item-id-2' },
-        ],
+        items: [{ name: 'Item Name 1' }, { name: 'Item Name 2', id: 'item-id-2' }],
       },
     ],
   },

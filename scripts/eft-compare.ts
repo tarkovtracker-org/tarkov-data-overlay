@@ -117,7 +117,7 @@ function asNumber(value: unknown): number | undefined {
  * `localization.en` objective text. */
 export function findReferenceFile(eftDir: string): string {
   const candidates = readdirSync(eftDir).filter(
-    (f) => /quest[_-]list/i.test(f) && f.endsWith('.json'),
+    (f) => /quest[_-]list/i.test(f) && f.endsWith('.json')
   );
   if (candidates.length === 0) {
     throw new Error(`No quest reference file found in ${eftDir}`);
@@ -197,7 +197,7 @@ interface Discrepancy {
 function compare(
   eftTasks: Map<string, EftTask>,
   apiTasks: TaskData[],
-  options: { descriptions?: boolean } = {},
+  options: { descriptions?: boolean } = {}
 ): {
   discrepancies: Discrepancy[];
   matched: number;
@@ -216,7 +216,11 @@ function compare(
     matched += 1;
     const name = api.name;
 
-    if (eft.experience !== undefined && api.experience !== undefined && eft.experience !== api.experience) {
+    if (
+      eft.experience !== undefined &&
+      api.experience !== undefined &&
+      eft.experience !== api.experience
+    ) {
       discrepancies.push({
         taskId: eft.id,
         taskName: name,
@@ -328,7 +332,7 @@ interface OverrideLike {
  */
 export function crossCheckOverrides(
   overrides: Record<string, OverrideLike>,
-  eftTasks: Map<string, EftTask>,
+  eftTasks: Map<string, EftTask>
 ): CrossCheckEntry[] {
   const entries: CrossCheckEntry[] = [];
 
@@ -437,7 +441,7 @@ export function requireMatchingReferenceMode(eftDir: string, mode: GameMode): Ga
     throw new Error(
       `The reference file in ${eftDir} is a ${refMode} file, but --mode is ${mode}. ` +
         `Comparing across modes yields false positives. Re-run with --mode ${refMode}, ` +
-        `or supply a ${mode} reference file.`,
+        `or supply a ${mode} reference file.`
     );
   }
   return refMode;
@@ -467,14 +471,14 @@ function printReport(discrepancies: Discrepancy[], matched: number, apiMissing: 
         console.log(
           `  ${icons.warning} ${d.taskName} ${dim(`(${d.taskId})`)} ${dim(objId)}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}\n` +
-            `     eft: ${colors.green}${d.eft}${colors.reset}`,
+            `     eft: ${colors.green}${d.eft}${colors.reset}`
         );
       } else {
         console.log(
           `  ${icons.warning} ${d.taskName} ${dim(`(${d.taskId})`)}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}  ` +
             `eft: ${colors.green}${d.eft}${colors.reset}` +
-            (isCount(d) ? `  ${dim(d.field)}` : ''),
+            (isCount(d) ? `  ${dim(d.field)}` : '')
         );
       }
     }

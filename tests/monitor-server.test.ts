@@ -98,7 +98,7 @@ describe('buildTasksSections', () => {
     const sections = buildTasksSections(
       { t1: { minPlayerLevel: 45 } },
       [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular',
+      'regular'
     );
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
@@ -111,7 +111,7 @@ describe('buildTasksSections', () => {
     const sections = buildTasksSections(
       { t1: { minPlayerLevel: 10 } },
       [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular',
+      'regular'
     );
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
@@ -119,11 +119,7 @@ describe('buildTasksSections', () => {
   });
 
   it('routes unknown task IDs to the missing section', () => {
-    const [, , missing] = buildTasksSections(
-      { ghost: { name: 'Ghost' } },
-      [],
-      'regular',
-    );
+    const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, [], 'regular');
     expect(missing.rows).toHaveLength(1);
     expect(missing.rows[0]).toEqual(['Ghost', 'ghost']);
   });
@@ -132,7 +128,7 @@ describe('buildTasksSections', () => {
     const [, , , disabled] = buildTasksSections(
       { t1: { disabled: true } },
       [{ id: 't1', name: 'D', objectives: [] }],
-      'regular',
+      'regular'
     );
     expect(disabled.rows).toHaveLength(1);
     expect(disabled.rows[0][0]).toBe('D');
@@ -142,7 +138,7 @@ describe('buildTasksSections', () => {
     const [, added] = buildTasksSections(
       { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
       [{ id: 't1', name: 'T', objectives: [] }],
-      'regular',
+      'regular'
     );
     expect(added.rows).toHaveLength(1);
     expect(added.rows[0][0]).toBe('T');
@@ -153,7 +149,7 @@ describe('buildTasksSections', () => {
     const [diff] = buildTasksSections(
       { t1: { objectives: { o1: { description: 'Fixed' } } } },
       [{ id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] }],
-      'regular',
+      'regular'
     );
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:o1.description');
     expect(row).toBeDefined();
@@ -166,7 +162,7 @@ describe('buildTasksSections', () => {
     const [diff] = buildTasksSections(
       { t1: { objectives: { gone: { description: 'x' } } } },
       [{ id: 't1', name: 'T', objectives: [] }],
-      'regular',
+      'regular'
     );
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:gone');
     expect(row).toBeDefined();
@@ -204,9 +200,7 @@ describe('buildSummary', () => {
     overlayState.updatedAt = new Date().toISOString();
     overlayState.error = null;
 
-    apiState.regular.data = [
-      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
-    ];
+    apiState.regular.data = [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }];
     apiState.regular.updatedAt = new Date().toISOString();
     apiState.regular.error = null;
     apiState.pve.data = [];
@@ -304,7 +298,7 @@ describe('buildTaskAdditionSections', () => {
   it('renders additions with trader and map', () => {
     const [sec] = buildTaskAdditionSections(
       { ct: { id: 'ct', name: 'CT', trader: { name: 'Prapor' }, map: { name: 'Customs' } } },
-      'regular',
+      'regular'
     );
     expect(sec.rows[0][0]).toBe('CT');
     expect(sec.rows[0][2]).toBe('Prapor');
@@ -373,7 +367,7 @@ describe('mergeTaskOverrides', () => {
   it('merges objectives maps', () => {
     const m = mergeTaskOverrides(
       { t: { objectives: { o1: { x: 1 } } } },
-      { t: { objectives: { o2: { y: 2 } } } },
+      { t: { objectives: { o2: { y: 2 } } } }
     );
     expect(m.t.objectives).toHaveProperty('o1');
     expect(m.t.objectives).toHaveProperty('o2');
@@ -381,7 +375,7 @@ describe('mergeTaskOverrides', () => {
   it('concatenates objectivesAdd', () => {
     const m = mergeTaskOverrides(
       { t: { objectivesAdd: [{ id: 'a' }] } },
-      { t: { objectivesAdd: [{ id: 'b' }] } },
+      { t: { objectivesAdd: [{ id: 'b' }] } }
     );
     expect(m.t.objectivesAdd).toHaveLength(2);
   });
@@ -430,9 +424,7 @@ describe('HTTP — real monitor/server.js handlers', () => {
     overlayState.updatedAt = new Date().toISOString();
     overlayState.error = null;
 
-    apiState.regular.data = [
-      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
-    ];
+    apiState.regular.data = [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }];
     apiState.regular.updatedAt = new Date().toISOString();
     apiState.regular.error = null;
     apiState.pve.data = [];
@@ -490,8 +482,8 @@ describe('HTTP — real monitor/server.js handlers', () => {
     const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=regular`)).json();
     const row = data.sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
-    expect(row[2]).toBe('10');       // API
-    expect(row[3]).toBe('45');       // overlay
+    expect(row[2]).toBe('10'); // API
+    expect(row[3]).toBe('45'); // overlay
     expect(row[4]).toBe('override');
   });
 

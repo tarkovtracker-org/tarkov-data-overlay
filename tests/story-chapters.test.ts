@@ -8,11 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { join } from 'path';
-import {
-  getProjectPaths,
-  loadAllJson5FromDir,
-  type StoryChapter,
-} from '../src/lib/index.js';
+import { getProjectPaths, loadAllJson5FromDir, type StoryChapter } from '../src/lib/index.js';
 
 function loadStoryChapters(): Record<string, StoryChapter> {
   const { srcDir } = getProjectPaths();
@@ -45,9 +41,10 @@ describe('story chapters (EFT-sourced)', () => {
     const seen = new Map<string, string>();
     for (const [cid, ch] of Object.entries(chapters)) {
       for (const obj of ch.objectives ?? []) {
-        expect(seen.has(obj.id), `duplicate objective id ${obj.id} (${seen.get(obj.id)} & ${cid})`).toBe(
-          false
-        );
+        expect(
+          seen.has(obj.id),
+          `duplicate objective id ${obj.id} (${seen.get(obj.id)} & ${cid})`
+        ).toBe(false);
         seen.set(obj.id, cid);
         expect(['main', 'optional']).toContain(obj.type);
         // The Ticket keeps curated branching objectives (no source ids); every

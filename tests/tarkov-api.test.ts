@@ -3,12 +3,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  fetchTasks,
-  fetchLocaleBundle,
-  findTaskById,
-  type TaskData,
-} from '../src/lib/index.js';
+import { fetchTasks, fetchLocaleBundle, findTaskById, type TaskData } from '../src/lib/index.js';
 
 type Routes = Record<string, unknown>;
 
@@ -202,8 +197,10 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
         'regular/tasks_en': { data: { 't1 name': 'T1' } },
         'regular/traders': { data: { tr1: { id: 'tr1', name: 'tr1 name' } } },
         'regular/traders_en': { data: { 'tr1 name': 'Prapor' } },
-        'regular/items': { data: { items: { i1: { id: 'i1', name: 'i1 name', shortName: 'i1s' } } } },
-        'regular/items_en': { data: { 'i1 name': 'Bandage', 'i1s': 'Band' } },
+        'regular/items': {
+          data: { items: { i1: { id: 'i1', name: 'i1 name', shortName: 'i1s' } } },
+        },
+        'regular/items_en': { data: { 'i1 name': 'Bandage', i1s: 'Band' } },
       })
     );
 

@@ -5,11 +5,7 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import {
-  ApiObjective,
-  ExtendedTaskData,
-  WikiLink,
-} from './types.js';
+import { ApiObjective, ExtendedTaskData, WikiLink } from './types.js';
 
 export function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -17,10 +13,7 @@ export function escapeRegExp(value: string): string {
 
 export function extractSectionLines(wikitext: string, heading: string): string[] {
   const lines = wikitext.split('\n');
-  const headingRegex = new RegExp(
-    `^==\\s*${escapeRegExp(heading)}\\s*==\\s*$`,
-    'i'
-  );
+  const headingRegex = new RegExp(`^==\\s*${escapeRegExp(heading)}\\s*==\\s*$`, 'i');
   const startIndex = lines.findIndex((line) => headingRegex.test(line.trim()));
   if (startIndex === -1) return [];
 
@@ -89,10 +82,7 @@ export function normalizeCyrillic(value: string): string {
 }
 
 export function normalizeObjectiveText(value: string): string {
-  const normalizedTimes = normalizeCyrillic(value).replace(
-    /\b0(\d):(\d{2})\b/g,
-    '$1:$2'
-  );
+  const normalizedTimes = normalizeCyrillic(value).replace(/\b0(\d):(\d{2})\b/g, '$1:$2');
   return normalizeWhitespace(
     stripWikiMarkup(normalizedTimes)
       .toLowerCase()
@@ -107,10 +97,7 @@ export function normalizeObjectiveText(value: string): string {
       .replace(/\bone of\b/g, ' ')
       .replace(/\b(the|a|an|any|all)\b/g, ' ')
       .replace(/\bskill level of \d+\b/g, 'skill level')
-      .replace(
-        /\brequired\s+\d+\s+([a-z]+)\s+skill\s+level\b/g,
-        'required $1 skill level'
-      )
+      .replace(/\brequired\s+\d+\s+([a-z]+)\s+skill\s+level\b/g, 'required $1 skill level')
       .replace(/\blocate and check\b/g, 'locate')
       .replace(/\blocate and obtain\b/g, 'obtain')
       .replace(/\blocate and mark\b/g, 'mark')
@@ -122,10 +109,7 @@ export function normalizeObjectiveText(value: string): string {
       .replace(/\bfind\b/g, 'locate')
       .replace(/\bwhile using\b/g, 'using')
       .replace(/\bwith\b/g, 'using')
-      .replace(
-        /\b([a-z]{2,4}\s?\d{1,3}[a-z0-9]*)\s+series\s+assault\s+rifle\b/g,
-        '$1'
-      )
+      .replace(/\b([a-z]{2,4}\s?\d{1,3}[a-z0-9]*)\s+series\s+assault\s+rifle\b/g, '$1')
       .replace(/\bbunkhouses\b/g, 'bunkhouse')
       .replace(/\band\b/g, ' ')
       .replace(/\bthat\b/g, ' ')
@@ -209,10 +193,7 @@ export function stripCountPhrases(value: string): string {
     .replace(/\bwin\b\s+\d+\s+out\s+of\s+\d+\b/gi, 'win')
     .replace(/\b\d+\s+times?\b/gi, '')
     .replace(/\b\d+\s+of\b/gi, '')
-    .replace(
-      new RegExp(`\\b\\d+\\b\\s+((?:[a-z]+\\s+){0,2}${countWords})\\b`, 'gi'),
-      '$1'
-    )
+    .replace(new RegExp(`\\b\\d+\\b\\s+((?:[a-z]+\\s+){0,2}${countWords})\\b`, 'gi'), '$1')
     .replace(new RegExp(`\\b${countWords}\\b\\s*\\d+\\b`, 'gi'), '$1')
     .replace(new RegExp(`\\b(item|items)\\b\\s*:\\s*\\d+\\b`, 'gi'), '$1:')
     .replace(
@@ -249,9 +230,7 @@ export function singularizeCountWords(value: string): string {
 }
 
 export function normalizeObjectiveMatchKey(value: string): string {
-  return singularizeCountWords(
-    normalizeObjectiveText(stripCountPhrases(value))
-  );
+  return singularizeCountWords(normalizeObjectiveText(stripCountPhrases(value)));
 }
 
 export function normalizeMapName(value: string): string {
@@ -385,10 +364,7 @@ export function filterWikiItems(items: string[]): string[] {
   return items.filter((item) => !isExcludedWikiItem(item));
 }
 
-export function selectWikiItemLabel(
-  link: WikiLink,
-  mapAliasMap: Map<string, string>
-): string {
+export function selectWikiItemLabel(link: WikiLink, mapAliasMap: Map<string, string>): string {
   const target = link.target;
   const display = link.display?.trim();
   if (!display) return target;
@@ -407,9 +383,7 @@ export function selectWikiItemLabel(
     normalizedDisplay.includes(normalizedTarget) ||
     normalizedTarget.includes(normalizedDisplay)
   ) {
-    return normalizedDisplay.length >= normalizedTarget.length
-      ? display
-      : target;
+    return normalizedDisplay.length >= normalizedTarget.length ? display : target;
   }
 
   return target;
@@ -469,9 +443,7 @@ export function normalizeItemAliasesWithContext(
   if (suffix.length === 0) return aliases;
 
   if (suffix.includes(contextKey)) {
-    const stripped = normalizeItemName(
-      item.name.replace(/\s*\([^)]+\)\s*$/, '')
-    );
+    const stripped = normalizeItemName(item.name.replace(/\s*\([^)]+\)\s*$/, ''));
     if (stripped.length > 0) aliases.push(stripped);
   }
 
@@ -500,14 +472,10 @@ export function normalizeWikiItemAliases(item: string, context?: string): string
   return uniqueList(aliases);
 }
 
-export function buildAliasSet(
-  items: ObjectiveItemRef[],
-  context?: string
-): Set<string> {
+export function buildAliasSet(items: ObjectiveItemRef[], context?: string): Set<string> {
   const aliasSet = new Set<string>();
   for (const item of items) {
-    for (const alias of normalizeItemAliasesWithContext(item, context))
-      aliasSet.add(alias);
+    for (const alias of normalizeItemAliasesWithContext(item, context)) aliasSet.add(alias);
   }
   return aliasSet;
 }
@@ -526,10 +494,7 @@ export function hasItemIntersection(
   return false;
 }
 
-export function aliasSetIntersects(
-  aliasSet: Set<string>,
-  wikiItems: string[]
-): boolean {
+export function aliasSetIntersects(aliasSet: Set<string>, wikiItems: string[]): boolean {
   if (aliasSet.size === 0 || wikiItems.length === 0) return false;
   for (const item of wikiItems) {
     if (aliasSet.has(normalizeItemName(item))) return true;
@@ -545,9 +510,7 @@ export function itemsMatch(
   if (apiItems.length === 0 && wikiItems.length === 0) return true;
   if (apiItems.length === 0 || wikiItems.length === 0) return false;
 
-  const wikiAliases = wikiItems.map((item) =>
-    normalizeWikiItemAliases(item, context)
-  );
+  const wikiAliases = wikiItems.map((item) => normalizeWikiItemAliases(item, context));
   const matchedWikiIndexes = new Set<number>();
 
   for (const apiItem of apiItems) {
@@ -618,9 +581,7 @@ export function extractWikiLinkData(line: string): WikiLink[] {
     if (target && !/^(File|Category):/i.test(target)) {
       const cleanedTarget = stripWikiMarkup(target.split('#')[0]);
       const displayRaw = match[2]?.trim();
-      const cleanedDisplay = displayRaw
-        ? stripWikiMarkup(displayRaw.split('#')[0])
-        : undefined;
+      const cleanedDisplay = displayRaw ? stripWikiMarkup(displayRaw.split('#')[0]) : undefined;
       results.push({ target: cleanedTarget, display: cleanedDisplay });
     }
     match = regex.exec(line);
@@ -649,18 +610,12 @@ export function isExcludedMapMention(text: string, mapName: string): boolean {
   return false;
 }
 
-export function extractMapsFromText(
-  text: string,
-  aliasMap: Map<string, string>
-): string[] {
+export function extractMapsFromText(text: string, aliasMap: Map<string, string>): string[] {
   const results = new Set<string>();
   for (const [alias, canonical] of aliasMap.entries()) {
     if (isExcludedMapMention(text, alias)) continue;
     if (alias === 'lab' || alias === 'the lab') {
-      const pattern = new RegExp(
-        `\\b${escapeRegExp(alias)}\\b(?!\\s+scientist)`,
-        'i'
-      );
+      const pattern = new RegExp(`\\b${escapeRegExp(alias)}\\b(?!\\s+scientist)`, 'i');
       if (pattern.test(text)) results.add(canonical);
       continue;
     }
@@ -776,9 +731,7 @@ export const COVERAGE_STOP_WORDS = new Set([
 ]);
 
 export function extractCoverageTokens(value: string): string[] {
-  return extractItemTokens(value).filter(
-    (token) => !COVERAGE_STOP_WORDS.has(token)
-  );
+  return extractItemTokens(value).filter((token) => !COVERAGE_STOP_WORDS.has(token));
 }
 
 export function objectiveMentionsItem(
@@ -787,10 +740,7 @@ export function objectiveMentionsItem(
   mapAliasMap: Map<string, string>
 ): boolean {
   if (!text.trim()) return false;
-  const normalizedText = stripMapAliases(
-    normalizeObjectiveText(text),
-    mapAliasMap
-  );
+  const normalizedText = stripMapAliases(normalizeObjectiveText(text), mapAliasMap);
   if (!normalizedText) return false;
 
   const tokens = extractItemTokens(itemName);
@@ -805,10 +755,7 @@ export function objectiveTextCoversApiItems(
   mapAliasMap: Map<string, string>
 ): boolean {
   if (!text.trim() || itemRefs.length === 0) return false;
-  const normalizedText = stripMapAliases(
-    normalizeObjectiveText(text),
-    mapAliasMap
-  );
+  const normalizedText = stripMapAliases(normalizeObjectiveText(text), mapAliasMap);
   if (!normalizedText) return false;
 
   const itemNames = itemRefs
@@ -859,17 +806,12 @@ export function isSubset(subset: Set<string>, superset: Set<string>): boolean {
 export function collectObjectiveItems(objective: ApiObjective): ObjectiveItemRef[] {
   const items = new Map<string, ObjectiveItemRef>();
 
-  const addItemRef = (item?: {
-    id?: string;
-    name?: string;
-    shortName?: string;
-  }): void => {
+  const addItemRef = (item?: { id?: string; name?: string; shortName?: string }): void => {
     if (!item?.name || item.name.trim().length === 0) return;
     const key = item.id ?? normalizeItemName(item.name);
     const existing = items.get(key);
     if (existing) {
-      if (!existing.shortName && item.shortName)
-        existing.shortName = item.shortName;
+      if (!existing.shortName && item.shortName) existing.shortName = item.shortName;
       return;
     }
     items.set(key, {
@@ -879,9 +821,7 @@ export function collectObjectiveItems(objective: ApiObjective): ObjectiveItemRef
     });
   };
 
-  const addItems = (
-    list?: Array<{ id?: string; name?: string; shortName?: string }>
-  ): void => {
+  const addItems = (list?: Array<{ id?: string; name?: string; shortName?: string }>): void => {
     for (const item of list ?? []) addItemRef(item);
   };
 
@@ -900,15 +840,9 @@ export function collectObjectiveItems(objective: ApiObjective): ObjectiveItemRef
   ): void => {
     if (!value) return;
     if (Array.isArray(value) && value.length > 0 && Array.isArray(value[0])) {
-      addItemGroups(
-        value as Array<
-          Array<{ id?: string; name?: string; shortName?: string }>
-        >
-      );
+      addItemGroups(value as Array<Array<{ id?: string; name?: string; shortName?: string }>>);
     } else {
-      addItems(
-        value as Array<{ id?: string; name?: string; shortName?: string }>
-      );
+      addItems(value as Array<{ id?: string; name?: string; shortName?: string }>);
     }
   };
 

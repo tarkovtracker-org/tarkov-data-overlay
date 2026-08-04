@@ -32,14 +32,20 @@ const FIXTURE = {
               },
             ],
             AvailableForFinish: [
-              { id: '60e73ee8b567ff641b129570', conditionType: 'CounterCreator', value: 20, isNecessary: false },
+              {
+                id: '60e73ee8b567ff641b129570',
+                conditionType: 'CounterCreator',
+                value: 20,
+                isNecessary: false,
+              },
               { id: 'aaaaaaaaaaaaaaaaaaaaaaaa', conditionType: 'Bonus', value: 1 },
             ],
           },
           localization: {
             en: {
               '60e71dc0a94be721b065bbfc name': 'Long Line',
-              '60e73ee8b567ff641b129570': 'Eliminate PMC operatives inside the ULTRA mall on Interchange',
+              '60e73ee8b567ff641b129570':
+                'Eliminate PMC operatives inside the ULTRA mall on Interchange',
             },
             ru: {
               '60e71dc0a94be721b065bbfc name': 'Длинная очередь',

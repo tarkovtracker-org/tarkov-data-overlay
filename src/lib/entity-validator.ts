@@ -141,9 +141,7 @@ export function validateEntityOverrides(
         >;
         const apiKeyedIds = new Set(collectKeyedIds(apiValue));
 
-        for (const [subKey, subValue] of Object.entries(
-          overrideValue as Record<string, unknown>
-        )) {
+        for (const [subKey, subValue] of Object.entries(overrideValue as Record<string, unknown>)) {
           if (!apiKeyedIds.has(subKey)) {
             details.push({
               field: `${field}:${subKey}`,
@@ -211,7 +209,8 @@ function collectKeyedIds(apiValue: unknown): string[] {
 function findKeyedEntry(apiValue: unknown, key: string): unknown {
   if (Array.isArray(apiValue)) {
     return apiValue.find(
-      (entry) => !!entry && typeof entry === 'object' && (entry as Record<string, unknown>).id === key
+      (entry) =>
+        !!entry && typeof entry === 'object' && (entry as Record<string, unknown>).id === key
     );
   }
   if (apiValue && typeof apiValue === 'object') {

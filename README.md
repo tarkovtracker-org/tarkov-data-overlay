@@ -36,9 +36,10 @@ npm run check-overrides
 ```
 
 This command compares all overrides against current API data and reports:
+
 - ✅ Overrides that are still needed
 - 🔄 Corrections that have been fixed upstream (can be removed)
-- 🗑️  Tasks that have been removed from the API (can be deleted)
+- 🗑️ Tasks that have been removed from the API (can be deleted)
 
 Run this periodically to keep the overlay lean and accurate.
 

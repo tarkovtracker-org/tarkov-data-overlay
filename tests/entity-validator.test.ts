@@ -94,11 +94,9 @@ describe('validateEntityOverrides', () => {
 
   describe('additive fields', () => {
     it('stays needed while the field is absent upstream', () => {
-      const results = validateEntityOverrides(
-        { a: { storyRequirements: [] } },
-        apiMap({ a: {} }),
-        { additiveFields: ['storyRequirements'] }
-      );
+      const results = validateEntityOverrides({ a: { storyRequirements: [] } }, apiMap({ a: {} }), {
+        additiveFields: ['storyRequirements'],
+      });
 
       expect(results[0].details[0].status).toBe('needed');
       expect(results[0].details[0].message).toContain('absent from API');
@@ -142,10 +140,7 @@ describe('validateEntityOverrides', () => {
 
 describe('validateEntityAdditions', () => {
   it('stays needed while the entity is missing upstream', () => {
-    const results = validateEntityAdditions(
-      { new_thing: { id: 'new_thing' } },
-      apiMap({})
-    );
+    const results = validateEntityAdditions({ new_thing: { id: 'new_thing' } }, apiMap({}));
 
     expect(results[0].stillNeeded).toBe(true);
   });
@@ -162,7 +157,12 @@ describe('validateEntityAdditions', () => {
 
 describe('checkStoryChapterIntegrity', () => {
   const chapters = {
-    tour: { id: 'tour', order: 1, chapterQuestId: 'q1', objectives: [{ id: 'o1', sourceQuestId: 'q2' }] },
+    tour: {
+      id: 'tour',
+      order: 1,
+      chapterQuestId: 'q1',
+      objectives: [{ id: 'o1', sourceQuestId: 'q2' }],
+    },
   };
 
   it('skips quest resolution when no reference is available', () => {
@@ -225,37 +225,27 @@ describe('checkTaskSuppressionStaleness', () => {
   } as unknown as TaskData;
 
   it('keeps a suppression whose objective still exists upstream', () => {
-    const results = checkTaskSuppressionStaleness(
-      { t1: { objectives: { dup1: true } } },
-      [task]
-    );
+    const results = checkTaskSuppressionStaleness({ t1: { objectives: { dup1: true } } }, [task]);
 
     expect(results[0].stale).toBe(false);
   });
 
   it('flags a suppression whose objective is gone upstream', () => {
-    const results = checkTaskSuppressionStaleness(
-      { t1: { objectives: { vanished: true } } },
-      [task]
-    );
+    const results = checkTaskSuppressionStaleness({ t1: { objectives: { vanished: true } } }, [
+      task,
+    ]);
 
     expect(results[0].stale).toBe(true);
   });
 
   it('flags a suppression for a task removed upstream', () => {
-    const results = checkTaskSuppressionStaleness(
-      { gone: { objectives: { x: true } } },
-      [task]
-    );
+    const results = checkTaskSuppressionStaleness({ gone: { objectives: { x: true } } }, [task]);
 
     expect(results[0].stale).toBe(true);
   });
 
   it('marks a task-level suppression (no objectives) for manual review, not stale', () => {
-    const results = checkTaskSuppressionStaleness(
-      { t1: { experience: true } },
-      [task]
-    );
+    const results = checkTaskSuppressionStaleness({ t1: { experience: true } }, [task]);
 
     expect(results[0].stale).toBe(false);
     expect(results[0].objectiveId).toBeUndefined();

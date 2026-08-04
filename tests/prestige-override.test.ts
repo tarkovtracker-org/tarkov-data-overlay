@@ -78,12 +78,8 @@ describe('prestige override (issue #207)', () => {
 
     expect(p5Conditions[P5_COLLECTOR_CONDITION_ID]).toBeUndefined();
     expect(p6Conditions[P6_COLLECTOR_CONDITION_ID]).toBeUndefined();
-    expect(p5Conditions.overlay_new_beginning_prestige_5.task).toBe(
-      'new_beginning_prestige_5'
-    );
-    expect(p6Conditions.overlay_new_beginning_prestige_6.task).toBe(
-      'new_beginning_prestige_6'
-    );
+    expect(p5Conditions.overlay_new_beginning_prestige_5.task).toBe('new_beginning_prestige_5');
+    expect(p6Conditions.overlay_new_beginning_prestige_6.task).toBe('new_beginning_prestige_6');
   });
 
   it('points synthetic task conditions at quests the overlay actually provides', () => {

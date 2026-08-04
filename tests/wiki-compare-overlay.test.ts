@@ -95,9 +95,7 @@ describe('shared compare helpers', () => {
 
   it('matches arrays as a subset only when asked', () => {
     expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }])).toBe(false);
-    expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }], { arrayMode: 'subset' })).toBe(
-      true
-    );
+    expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }], { arrayMode: 'subset' })).toBe(true);
   });
 
   it('subset matching backtracks past a bad greedy pick (overlapping candidates)', () => {
@@ -105,29 +103,21 @@ describe('shared compare helpers', () => {
     // first-match binds {a:1}->{a:1,b:2}, then {a:1,b:2} can't match {a:1}.
     // A correct distinct assignment exists, so this must be true.
     expect(
-      compareSubset(
-        [{ a: 1 }, { a: 1, b: 2 }],
-        [{ a: 1, b: 2 }, { a: 1 }],
-        { arrayMode: 'subset' }
-      )
+      compareSubset([{ a: 1 }, { a: 1, b: 2 }], [{ a: 1, b: 2 }, { a: 1 }], { arrayMode: 'subset' })
     ).toBe(true);
   });
 
   it('subset matching rejects when no distinct assignment exists', () => {
-    expect(
-      compareSubset([{ a: 1 }, { a: 1 }], [{ a: 1 }], { arrayMode: 'subset' })
-    ).toBe(false);
+    expect(compareSubset([{ a: 1 }, { a: 1 }], [{ a: 1 }], { arrayMode: 'subset' })).toBe(false);
   });
 
   it('subset matching finds an assignment that requires reshuffling (augmenting path)', () => {
     // {a:1} and {b:2} both also match {a:1,b:2}; only a reshuffle yields a full
     // distinct assignment: {a:1}->[1], {b:2}->[2], {a:1,b:2}->[0].
     expect(
-      compareSubset(
-        [{ a: 1 }, { b: 2 }, { a: 1, b: 2 }],
-        [{ a: 1, b: 2 }, { a: 1 }, { b: 2 }],
-        { arrayMode: 'subset' }
-      )
+      compareSubset([{ a: 1 }, { b: 2 }, { a: 1, b: 2 }], [{ a: 1, b: 2 }, { a: 1 }, { b: 2 }], {
+        arrayMode: 'subset',
+      })
     ).toBe(true);
   });
 

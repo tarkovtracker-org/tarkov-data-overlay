@@ -101,7 +101,7 @@ describe('eft-audit buildRows', () => {
           objectives: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb', count: 36 }],
         }),
       ],
-      overrides,
+      overrides
     );
     const conflict = rows.find((r) => r.field.startsWith('objective['))!;
     expect(conflict.verdict).toBe('CONFLICT');

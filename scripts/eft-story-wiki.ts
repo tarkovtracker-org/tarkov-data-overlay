@@ -73,7 +73,10 @@ export function cleanObjectiveLine(line: string): WikiStoryObjective {
     .replaceAll("'''", '')
     .replaceAll("''", '')
     .replace(/\s+/g, ' ');
-  text = text.replace(/^[ *:]+/, '').replace(/[ *:]+$/, '').trim();
+  text = text
+    .replace(/^[ *:]+/, '')
+    .replace(/[ *:]+$/, '')
+    .trim();
   return { text, optional };
 }
 

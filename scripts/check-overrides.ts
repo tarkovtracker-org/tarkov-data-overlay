@@ -132,8 +132,7 @@ function loadOptional<T = unknown>(...segments: string[]): Record<string, T> {
 }
 
 /** Load the mode-divergence registry (tooling-only; never built into dist). */
-const loadDivergences = () =>
-  loadDivergenceRegistry(join(srcDir, 'divergences', 'tasks.json5'));
+const loadDivergences = () => loadDivergenceRegistry(join(srcDir, 'divergences', 'tasks.json5'));
 
 /** Entity types checked generically, with their API endpoint and field semantics. */
 type EntityCheckSpec = {
@@ -236,14 +235,10 @@ export function normalizeWikiLink(link?: string): string | undefined {
   try {
     const parsed = new URL(trimmed);
     const protocol =
-      parsed.protocol === 'http:' || parsed.protocol === 'https:'
-        ? 'https:'
-        : parsed.protocol;
+      parsed.protocol === 'http:' || parsed.protocol === 'https:' ? 'https:' : parsed.protocol;
     const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
     const pathname =
-      parsed.pathname.replace(/\/+$/, '') === ''
-        ? '/'
-        : parsed.pathname.replace(/\/+$/, '');
+      parsed.pathname.replace(/\/+$/, '') === '' ? '/' : parsed.pathname.replace(/\/+$/, '');
     return `${protocol}//${host}${pathname}`.toLowerCase();
   } catch {
     return trimmed.toLowerCase().replace(/\/+$/, '');
@@ -323,7 +318,9 @@ export function checkTaskAdditions(
         };
       }
 
-      const availablePrestigeLevels = [...new Set(nameMatches.map((task) => getPrestigeLevel(task)))]
+      const availablePrestigeLevels = [
+        ...new Set(nameMatches.map((task) => getPrestigeLevel(task))),
+      ]
         .sort((a, b) => a - b)
         .join(', ');
       return {
@@ -443,9 +440,7 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
   const obsoleteCount = fixed.length + removedFromApi.length;
   if (obsoleteCount > 0) {
     console.log(`${icons.lightbulb} ${bold('RECOMMENDATION:')}`);
-    console.log(
-      `   Update ${overridePath} to remove ${obsoleteCount} obsolete override(s)`
-    );
+    console.log(`   Update ${overridePath} to remove ${obsoleteCount} obsolete override(s)`);
     console.log();
   }
 }
@@ -464,9 +459,7 @@ const ADDITION_COLORS: Record<AdditionStatus, string> = {
 
 function printAdditionResults(results: AdditionResult[], titlePrefix?: string): void {
   const checkTitle = titlePrefix ? `${titlePrefix} ADDITIONS CHECK` : 'ADDITIONS CHECK';
-  const summaryTitle = titlePrefix
-    ? `${titlePrefix} ADDITIONS SUMMARY`
-    : 'ADDITIONS SUMMARY';
+  const summaryTitle = titlePrefix ? `${titlePrefix} ADDITIONS SUMMARY` : 'ADDITIONS SUMMARY';
 
   printHeader(checkTitle);
 
@@ -489,11 +482,7 @@ function printAdditionResults(results: AdditionResult[], titlePrefix?: string): 
     byStatus('RESOLVED')
   );
   printCountSection(`${icons.warning} Still missing from API`, 'yellow', byStatus('MISSING'));
-  printCountSection(
-    `${icons.sync} Needs review (name-only matches)`,
-    'yellow',
-    byStatus('CHECK')
-  );
+  printCountSection(`${icons.sync} Needs review (name-only matches)`, 'yellow', byStatus('CHECK'));
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
@@ -513,9 +502,7 @@ function printEditionReferenceResults(missing: EditionTaskReference[]): void {
   );
   for (const entry of missing) {
     const title = entry.editionTitle ?? entry.editionId;
-    console.log(
-      `  - ${title} (${entry.editionId}) ${entry.kind} task ID ${entry.taskId}`
-    );
+    console.log(`  - ${title} (${entry.editionId}) ${entry.kind} task ID ${entry.taskId}`);
   }
   console.log();
 }
@@ -567,9 +554,7 @@ export function printLocaleResults(locale: string, results: LocaleValidationResu
     console.log();
   }
 
-  const obsolete = results.filter(
-    (r) => r.verdict === 'STALE' || r.verdict === 'REMOVED'
-  ).length;
+  const obsolete = results.filter((r) => r.verdict === 'STALE' || r.verdict === 'REMOVED').length;
   if (obsolete > 0) {
     console.log(`${icons.lightbulb} ${bold('RECOMMENDATION:')}`);
     console.log(
@@ -684,11 +669,7 @@ function printReferenceCrossCheck(
   console.log();
 
   console.log(
-    formatCountLabel(
-      `${icons.success} Overrides confirmed by the reference`,
-      confirmed,
-      'green'
-    )
+    formatCountLabel(`${icons.success} Overrides confirmed by the reference`, confirmed, 'green')
   );
   console.log();
 
@@ -711,9 +692,10 @@ function printReferenceCrossCheck(
  * load-bearing in PvE, and one that is quietly wrong in the mode we never
  * checked. Only overrides stale in EVERY mode are safe to retire.
  */
-function printBaseCrossModeSummary(
-  resultsByMode: Partial<Record<GameMode, ValidationResult[]>>
-): { staleEverywhere: string[]; verdictDiffers: string[] } {
+function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, ValidationResult[]>>): {
+  staleEverywhere: string[];
+  verdictDiffers: string[];
+} {
   const modes = Object.keys(resultsByMode) as GameMode[];
   printHeader('BASE OVERRIDES ACROSS ALL MODES');
   console.log(dim(`  (base overrides apply to every mode: ${modes.join(', ')})`));
@@ -734,18 +716,14 @@ function printBaseCrossModeSummary(
   for (const [taskId, perMode] of byTask) {
     const present = modes.filter((mode) => perMode[mode]);
     // A task missing from one mode's data is mode-exclusive, not a disagreement.
-    const comparable = present.filter(
-      (mode) => perMode[mode]!.status !== 'REMOVED_FROM_API'
-    );
+    const comparable = present.filter((mode) => perMode[mode]!.status !== 'REMOVED_FROM_API');
     if (comparable.length === 0) continue;
 
     const name = perMode[comparable[0]]!.name;
     const needed = comparable.filter((mode) => perMode[mode]!.stillNeeded);
 
     if (needed.length === 0) {
-      staleEverywhere.push(
-        `${name} (${taskId}) - redundant in ${comparable.join(' + ')}`
-      );
+      staleEverywhere.push(`${name} (${taskId}) - redundant in ${comparable.join(' + ')}`);
     } else if (needed.length < comparable.length) {
       const idle = comparable.filter((mode) => !perMode[mode]!.stillNeeded);
       verdictDiffers.push(
@@ -790,9 +768,7 @@ function printDivergenceReport(results: DivergenceResult[]): { actionable: numbe
     `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}: expected ${formatDivergenceValue(
       r.expected
     )}, upstream ${formatDivergenceValue(r.upstream)}${
-      r.override === undefined
-        ? ''
-        : `, override ${formatDivergenceValue(r.override)}`
+      r.override === undefined ? '' : `, override ${formatDivergenceValue(r.override)}`
     }${r.confidence === 'high' ? '' : ` [${r.confidence} confidence]`}`;
 
   printCountSection(
@@ -833,7 +809,8 @@ function printDivergenceReport(results: DivergenceResult[]): { actionable: numbe
     `${icons.success} Upstream already correct, no override needed`,
     'green',
     grouped.upstreamCorrect.map(
-      (r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field} = ${formatDivergenceValue(r.upstream)}`
+      (r) =>
+        `${r.taskName} (${r.taskId}) ${r.mode}.${r.field} = ${formatDivergenceValue(r.upstream)}`
     )
   );
 
@@ -882,11 +859,7 @@ function printEntityResults(
     'red',
     grouped.removedFromApi.map((r) => r.id)
   );
-  printCountSection(
-    `${icons.warning} Still needed`,
-    'yellow',
-    lines(grouped.stillNeeded)
-  );
+  printCountSection(`${icons.warning} Still needed`, 'yellow', lines(grouped.stillNeeded));
   printCountSection(
     `${icons.success} Fixed upstream - safe to retire`,
     'green',
@@ -902,11 +875,7 @@ function printEntityResults(
       r.details.filter((d) => d.status === 'error').map((d) => `${r.id}: ${d.message}`)
     );
   if (identityErrors.length > 0) {
-    printCountSection(
-      `${icons.error} Identity/consistency problems`,
-      'red',
-      identityErrors
-    );
+    printCountSection(`${icons.error} Identity/consistency problems`, 'red', identityErrors);
   }
 
   return { errors: grouped.removedFromApi.length + identityErrors.length };
@@ -923,9 +892,7 @@ function printStoryChapterIssues(
   );
   if (!questRefsChecked) {
     console.log(
-      dim(
-        '  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)'
-      )
+      dim('  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)')
     );
   }
   console.log();
@@ -1023,16 +990,12 @@ function printSuppressionResults(results: SuppressionStaleness[]): { stale: numb
   printCountSection(
     `${icons.warning} Stale suppressions - upstream quirk is gone, remove these`,
     'yellow',
-    stale.map((r) =>
-      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
-    )
+    stale.map((r) => `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`)
   );
   printCountSection(
     `${icons.success} Suppressions still relevant`,
     'green',
-    live.map((r) =>
-      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
-    )
+    live.map((r) => `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`)
   );
 
   return { stale: stale.length };
@@ -1078,9 +1041,7 @@ async function main(): Promise<void> {
     const editions = loadEditions();
     const additionsCount = Object.keys(additions).length;
     const editionsCount = Object.keys(editions).length;
-    printSuccess(
-      `Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`
-    );
+    printSuccess(`Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`);
 
     printProgress('Fetching current data from tarkov.dev API...');
     const apiTasks = await getTasksForMode();
@@ -1204,7 +1165,11 @@ async function main(): Promise<void> {
       printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
       const apiEntities = await getEntities(spec);
       printSuccess(`Fetched ${apiEntities.size} record(s)\n`);
-      printEntityResults(spec.label, relPath, validateEntityAdditions(entityAdditions, apiEntities));
+      printEntityResults(
+        spec.label,
+        relPath,
+        validateEntityAdditions(entityAdditions, apiEntities)
+      );
     }
 
     // Story chapters: overlay-authored, so check references rather than values.

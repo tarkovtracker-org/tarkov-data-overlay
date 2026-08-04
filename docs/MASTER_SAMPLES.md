@@ -3,6 +3,7 @@
 Comprehensive, copy-paste JSON5 examples that cover every field supported by this repo's schemas.
 
 Legend (TarkovTracker):
+
 - `UI`: Rendered in the app.
 - `UI (logic)`: Used by app logic (filters, dependency graph, map markers), but not necessarily shown directly.
 - `Console-only`: Present in task/objective data but not used/rendered by the app.
@@ -12,6 +13,7 @@ Legend (TarkovTracker):
 ## Tasks
 
 Notes:
+
 - Do not use a task-level `maps` field for new data. Use `task.map` and `objectives[].maps` instead.
 
 ### Task Override (all fields)
@@ -20,32 +22,32 @@ Notes:
 {
   // Sample Task - Override (all fields)
   // Proof: [link]
-  "task-id-1": {
-    name: "Task Name 1", // Optional | UI
-    wikiLink: "https://escapefromtarkov.fandom.com/wiki/Task_Name_1", // Optional | UI
-    map: { id: "map-id-1", name: "Map Name 1" }, // Optional | UI
+  'task-id-1': {
+    name: 'Task Name 1', // Optional | UI
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Task_Name_1', // Optional | UI
+    map: { id: 'map-id-1', name: 'Map Name 1' }, // Optional | UI
     minPlayerLevel: 20, // Optional | UI
-    factionName: "USEC", // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
+    factionName: 'USEC', // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
     kappaRequired: false, // Optional | UI (logic)
     lightkeeperRequired: false, // Optional | UI (logic)
     requiredPrestige: {
-      id: "prestige-id-1",
-      name: "Prestige Name 1",
+      id: 'prestige-id-1',
+      name: 'Prestige Name 1',
       prestigeLevel: 1,
     }, // Optional | Console-only; reserved for future UI/logic (no current TT usage found)
     experience: 8000, // Optional | UI
     disabled: false, // Optional | UI (logic); when true, task is filtered out of task lists
     taskRequirements: [
       {
-        task: { id: "task-id-prereq-1", name: "Prereq Task 1" }, // Required | UI (logic) when entry exists
-        status: ["complete"], // Optional | UI (logic); allowed: "accepted" | "active" | "complete" | "completed" | "failed"
+        task: { id: 'task-id-prereq-1', name: 'Prereq Task 1' }, // Required | UI (logic) when entry exists
+        status: ['complete'], // Optional | UI (logic); allowed: "accepted" | "active" | "complete" | "completed" | "failed"
       },
     ], // Optional | UI (logic); used by the dependency graph (previous/next tasks)
     traderRequirements: [
       {
-        trader: { id: "trader-id-1", name: "Trader Name 1" }, // Required | Console-only when entry exists
+        trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | Console-only when entry exists
         value: 2, // Required | Console-only (0-4)
-        compareMethod: ">=", // Optional | Console-only; likely one of: ">" | ">=" | "=" | "<=" | "<" (not schema-enforced)
+        compareMethod: '>=', // Optional | Console-only; likely one of: ">" | ">=" | "=" | "<=" | "<" (not schema-enforced)
       },
     ], // Optional | Console-only
     startRewards: {
@@ -53,93 +55,93 @@ Notes:
         {
           count: 3000, // Required | Console-only when entry exists
           item: {
-            id: "item-id-1",
-            name: "Item Name 1",
-            shortName: "Item Shortname 1",
+            id: 'item-id-1',
+            name: 'Item Name 1',
+            shortName: 'Item Shortname 1',
           }, // Required | Console-only when entry exists (id + name required)
         },
       ],
       traderStanding: [
         {
-          trader: { id: "trader-id-1", name: "Trader Name 1" }, // Required | Console-only when entry exists
+          trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | Console-only when entry exists
           standing: 0.01, // Required | Console-only when entry exists
         },
       ],
       offerUnlock: [
         {
-          trader: { id: "trader-id-1", name: "Trader Name 1" }, // Required | Console-only when entry exists
+          trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | Console-only when entry exists
           level: 2, // Required | Console-only when entry exists
           item: {
-            id: "item-id-2",
-            name: "Item Name 2",
-            shortName: "Item Shortname 2",
+            id: 'item-id-2',
+            name: 'Item Name 2',
+            shortName: 'Item Shortname 2',
           }, // Required | Console-only when entry exists (id + name required)
         },
       ],
       skillLevelReward: [
         {
-          name: "Skill Name 1", // Required | Console-only when entry exists
+          name: 'Skill Name 1', // Required | Console-only when entry exists
           level: 1, // Required | Console-only when entry exists
           skill: {
-            id: "skill-id-1",
-            name: "Skill Name 1",
-            imageLink: "https://example.com/skill-1.png",
+            id: 'skill-id-1',
+            name: 'Skill Name 1',
+            imageLink: 'https://example.com/skill-1.png',
           }, // Optional | Console-only (id + name required if provided)
         },
       ],
-      traderUnlock: { id: "trader-unlock-id-1", name: "Trader Unlock Name 1" }, // Optional | Console-only
+      traderUnlock: { id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }, // Optional | Console-only
     }, // Optional | Console-only
     finishRewards: {
       items: [
         {
           count: 1, // Required | UI when entry exists
           item: {
-            id: "item-id-3",
-            name: "Item Name 3",
-            shortName: "Item Shortname 3",
+            id: 'item-id-3',
+            name: 'Item Name 3',
+            shortName: 'Item Shortname 3',
           }, // Required | UI when entry exists (id + name required)
         },
       ],
       traderStanding: [
         {
-          trader: { id: "trader-id-1", name: "Trader Name 1" }, // Required | UI when entry exists
+          trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | UI when entry exists
           standing: 0.02, // Required | UI when entry exists
         },
       ],
       offerUnlock: [
         {
-          trader: { id: "trader-id-1", name: "Trader Name 1" }, // Required | UI when entry exists
+          trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | UI when entry exists
           level: 2, // Required | UI when entry exists
           item: {
-            id: "item-id-2",
-            name: "Item Name 2",
-            shortName: "Item Shortname 2",
+            id: 'item-id-2',
+            name: 'Item Name 2',
+            shortName: 'Item Shortname 2',
           }, // Required | UI when entry exists (id + name required)
         },
       ],
       skillLevelReward: [
         {
-          name: "Skill Name 2", // Required | UI when entry exists
+          name: 'Skill Name 2', // Required | UI when entry exists
           level: 2, // Required | UI when entry exists
           skill: {
-            id: "skill-id-2",
-            name: "Skill Name 2",
-            imageLink: "https://example.com/skill-2.png",
+            id: 'skill-id-2',
+            name: 'Skill Name 2',
+            imageLink: 'https://example.com/skill-2.png',
           }, // Optional | UI (shown as name even if skill object is missing)
         },
       ],
-      traderUnlock: { id: "trader-unlock-id-2", name: "Trader Unlock Name 2" }, // Optional | UI
+      traderUnlock: { id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }, // Optional | UI
     }, // Optional | UI
     objectives: {
-      "objective-id-1": {
-        description: "Objective Description 1.", // Optional | UI
-        type: "plantItem", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | UI (logic)
+      'objective-id-1': {
+        description: 'Objective Description 1.', // Optional | UI
+        type: 'plantItem', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }], // Optional | UI (logic)
         items: [
           {
-            id: "item-id-4",
-            name: "Item Name 4",
-            shortName: "Item Shortname 4",
+            id: 'item-id-4',
+            name: 'Item Name 4',
+            shortName: 'Item Shortname 4',
           },
         ], // Optional | UI (logic)
         count: 1, // Optional | UI (logic)
@@ -147,16 +149,16 @@ Notes:
         requiredKeys: [
           [
             {
-              id: "key-id-1",
-              name: "Key Name 1",
-              shortName: "Key Shortname 1",
+              id: 'key-id-1',
+              name: 'Key Name 1',
+              shortName: 'Key Shortname 1',
             },
           ],
         ], // Optional | Console-only
         optional: true, // Optional | Console-only
         zones: [
           {
-            map: { id: "map-id-1", name: "Map Name 1" }, // Required | UI (logic) when entry exists
+            map: { id: 'map-id-1', name: 'Map Name 1' }, // Required | UI (logic) when entry exists
             outline: [
               { x: 300.1, z: -100.2 },
               { x: 250.3, z: -70.4 },
@@ -169,71 +171,61 @@ Notes:
         ], // Optional | UI (logic)
         possibleLocations: [
           {
-            map: { id: "map-id-1", name: "Map Name 1" }, // Required | UI (logic) when entry exists
+            map: { id: 'map-id-1', name: 'Map Name 1' }, // Required | UI (logic) when entry exists
             positions: [{ x: 245.9, z: -130.1 }], // Required | UI (logic) when entry exists
           },
         ], // Optional | UI (logic)
       },
-      "objective-id-2": {
-        description: "Objective Description 2.",
-        type: "shoot", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }],
+      'objective-id-2': {
+        description: 'Objective Description 2.',
+        type: 'shoot', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }],
         count: 10,
         useAny: [
-          { id: "item-id-5", name: "Item Name 5", shortName: "Item Shortname 5" },
-          { id: "item-id-6", name: "Item Name 6", shortName: "Item Shortname 6" },
+          { id: 'item-id-5', name: 'Item Name 5', shortName: 'Item Shortname 5' },
+          { id: 'item-id-6', name: 'Item Name 6', shortName: 'Item Shortname 6' },
         ], // Optional | Console-only
-        usingWeapon: [
-          { id: "item-id-7", name: "Item Name 7", shortName: "Item Shortname 7" },
-        ], // Optional | Console-only
+        usingWeapon: [{ id: 'item-id-7', name: 'Item Name 7', shortName: 'Item Shortname 7' }], // Optional | Console-only
         usingWeaponMods: [
-          [
-            { id: "item-id-8", name: "Item Name 8", shortName: "Item Shortname 8" },
-          ],
+          [{ id: 'item-id-8', name: 'Item Name 8', shortName: 'Item Shortname 8' }],
         ], // Optional | Console-only
-        wearing: [
-          [
-            { id: "item-id-9", name: "Item Name 9", shortName: "Item Shortname 9" },
-          ],
-        ], // Optional | Console-only
-        notWearing: [
-          { id: "item-id-10", name: "Item Name 10", shortName: "Item Shortname 10" },
-        ], // Optional | Console-only
+        wearing: [[{ id: 'item-id-9', name: 'Item Name 9', shortName: 'Item Shortname 9' }]], // Optional | Console-only
+        notWearing: [{ id: 'item-id-10', name: 'Item Name 10', shortName: 'Item Shortname 10' }], // Optional | Console-only
         distance: 65, // Optional | Console-only
         minDurability: 40, // Optional | Console-only
         maxDurability: 85, // Optional | Console-only
         timeFromHour: 2, // Optional | Console-only
         timeUntilHour: 6, // Optional | Console-only
       },
-      "objective-id-3": {
-        description: "Objective Description 3.",
-        type: "findQuestItem", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }],
-        item: { id: "item-id-11", name: "Item Name 11", shortName: "Item Shortname 11" }, // Optional | UI (logic)
+      'objective-id-3': {
+        description: 'Objective Description 3.',
+        type: 'findQuestItem', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }],
+        item: { id: 'item-id-11', name: 'Item Name 11', shortName: 'Item Shortname 11' }, // Optional | UI (logic)
         questItem: {
-          id: "item-id-12",
-          name: "Item Name 12",
-          shortName: "Item Shortname 12",
+          id: 'item-id-12',
+          name: 'Item Name 12',
+          shortName: 'Item Shortname 12',
         }, // Optional | UI (logic)
         markerItem: {
-          id: "item-id-13",
-          name: "Item Name 13",
-          shortName: "Item Shortname 13",
+          id: 'item-id-13',
+          name: 'Item Name 13',
+          shortName: 'Item Shortname 13',
         }, // Optional | UI (logic)
         containsAll: [
-          { id: "item-id-14", name: "Item Name 14", shortName: "Item Shortname 14" },
-          { id: "item-id-15", name: "Item Name 15", shortName: "Item Shortname 15" },
+          { id: 'item-id-14', name: 'Item Name 14', shortName: 'Item Shortname 14' },
+          { id: 'item-id-15', name: 'Item Name 15', shortName: 'Item Shortname 15' },
         ], // Optional | Console-only
       },
     },
     objectivesAdd: [
       {
-        id: "objective-id-missing-1", // Required | UI (logic) when entry exists
-        description: "Objective Description Missing 1.", // Required | UI (logic) when entry exists
-        type: "findItem", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        id: 'objective-id-missing-1', // Required | UI (logic) when entry exists
+        description: 'Objective Description Missing 1.', // Required | UI (logic) when entry exists
+        type: 'findItem', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
         items: [
-          { name: "Item Name 16" }, // Required | UI (logic) when entry exists (name-only is allowed in objectivesAdd)
-          { id: "item-id-16", name: "Item Name 16" },
+          { name: 'Item Name 16' }, // Required | UI (logic) when entry exists (name-only is allowed in objectivesAdd)
+          { id: 'item-id-16', name: 'Item Name 16' },
         ], // Optional | UI (logic)
         count: 1, // Optional | UI (logic)
       },
@@ -249,112 +241,112 @@ Notes:
   // Sample Task - Addition (all fields)
   // Proof: [link]
   task_key_1: {
-    id: "task_key_1", // Required | UI (logic); should match key
-    name: "Task Name 2", // Required | UI
-    wikiLink: "https://escapefromtarkov.fandom.com/wiki/Task_Name_2", // Required | UI
-    trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | UI; include trader.id to allow app to merge in icon/image
-    map: { id: "map-id-1", name: "Map Name 1" }, // Optional | UI
+    id: 'task_key_1', // Required | UI (logic); should match key
+    name: 'Task Name 2', // Required | UI
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Task_Name_2', // Required | UI
+    trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | UI; include trader.id to allow app to merge in icon/image
+    map: { id: 'map-id-1', name: 'Map Name 1' }, // Optional | UI
     kappaRequired: false, // Optional | UI (logic)
     lightkeeperRequired: false, // Optional | UI (logic)
-    factionName: "Any", // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
+    factionName: 'Any', // Optional | UI (logic); allowed: "Any" | "USEC" | "BEAR"
     minPlayerLevel: 15, // Optional | UI
     requiredPrestige: {
-      id: "prestige-id-1",
-      name: "Prestige Name 1",
+      id: 'prestige-id-1',
+      name: 'Prestige Name 1',
       prestigeLevel: 1,
     }, // Optional | Console-only; reserved for future UI/logic (no current TT usage found)
     experience: 5000, // Optional | UI
     disabled: false, // Optional | UI (logic); when true, task is filtered out before it reaches the UI
     taskRequirements: [
       {
-        task: { id: "task-id-prereq-2", name: "Prereq Task 2" }, // Required | UI (logic) when entry exists
-        status: ["complete"], // Optional | UI (logic); allowed: "accepted" | "active" | "complete" | "completed" | "failed"
+        task: { id: 'task-id-prereq-2', name: 'Prereq Task 2' }, // Required | UI (logic) when entry exists
+        status: ['complete'], // Optional | UI (logic); allowed: "accepted" | "active" | "complete" | "completed" | "failed"
       },
     ], // Optional | UI (logic)
     traderRequirements: [
       {
-        trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | Console-only when entry exists
+        trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | Console-only when entry exists
         value: 2, // Required | Console-only (0-4)
-        compareMethod: ">=", // Optional | Console-only; likely one of: ">" | ">=" | "=" | "<=" | "<" (not schema-enforced)
+        compareMethod: '>=', // Optional | Console-only; likely one of: ">" | ">=" | "=" | "<=" | "<" (not schema-enforced)
       },
     ], // Optional | Console-only
     startRewards: {
       items: [
         {
           count: 3000, // Required | Console-only when entry exists
-          item: { id: "item-id-1", name: "Item Name 1", shortName: "Item Shortname 1" }, // Required | Console-only when entry exists (id + name required)
+          item: { id: 'item-id-1', name: 'Item Name 1', shortName: 'Item Shortname 1' }, // Required | Console-only when entry exists (id + name required)
         },
       ],
       traderStanding: [
         {
-          trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | Console-only when entry exists
+          trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | Console-only when entry exists
           standing: 0.01, // Required | Console-only when entry exists
         },
       ],
       offerUnlock: [
         {
-          trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | Console-only when entry exists
+          trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | Console-only when entry exists
           level: 2, // Required | Console-only when entry exists
-          item: { id: "item-id-2", name: "Item Name 2", shortName: "Item Shortname 2" }, // Required | Console-only when entry exists (id + name required)
+          item: { id: 'item-id-2', name: 'Item Name 2', shortName: 'Item Shortname 2' }, // Required | Console-only when entry exists (id + name required)
         },
       ],
       skillLevelReward: [
         {
-          name: "Skill Name 1", // Required | Console-only when entry exists
+          name: 'Skill Name 1', // Required | Console-only when entry exists
           level: 1, // Required | Console-only when entry exists
           skill: {
-            id: "skill-id-1",
-            name: "Skill Name 1",
-            imageLink: "https://example.com/skill-1.png",
+            id: 'skill-id-1',
+            name: 'Skill Name 1',
+            imageLink: 'https://example.com/skill-1.png',
           },
         },
       ],
-      traderUnlock: { id: "trader-unlock-id-1", name: "Trader Unlock Name 1" }, // Optional | Console-only
+      traderUnlock: { id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }, // Optional | Console-only
     }, // Optional | Console-only
     finishRewards: {
       items: [
         {
           count: 1, // Required | UI when entry exists
-          item: { id: "item-id-3", name: "Item Name 3", shortName: "Item Shortname 3" }, // Required | UI when entry exists (id + name required)
+          item: { id: 'item-id-3', name: 'Item Name 3', shortName: 'Item Shortname 3' }, // Required | UI when entry exists (id + name required)
         },
       ],
       traderStanding: [
         {
-          trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | UI when entry exists
+          trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | UI when entry exists
           standing: 0.02, // Required | UI when entry exists
         },
       ],
       offerUnlock: [
         {
-          trader: { id: "trader-id-2", name: "Trader Name 2" }, // Required | UI when entry exists
+          trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | UI when entry exists
           level: 2, // Required | UI when entry exists
-          item: { id: "item-id-2", name: "Item Name 2", shortName: "Item Shortname 2" }, // Required | UI when entry exists (id + name required)
+          item: { id: 'item-id-2', name: 'Item Name 2', shortName: 'Item Shortname 2' }, // Required | UI when entry exists (id + name required)
         },
       ],
       skillLevelReward: [
         {
-          name: "Skill Name 2", // Required | UI when entry exists
+          name: 'Skill Name 2', // Required | UI when entry exists
           level: 2, // Required | UI when entry exists
           skill: {
-            id: "skill-id-2",
-            name: "Skill Name 2",
-            imageLink: "https://example.com/skill-2.png",
+            id: 'skill-id-2',
+            name: 'Skill Name 2',
+            imageLink: 'https://example.com/skill-2.png',
           },
         },
       ],
-      traderUnlock: { id: "trader-unlock-id-2", name: "Trader Unlock Name 2" }, // Optional | UI
+      traderUnlock: { id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }, // Optional | UI
     }, // Optional | UI
     objectives: [
       {
-        id: "objective-id-4", // Required | UI (logic)
-        description: "Objective Description 4.", // Required | UI
-        type: "plantItem", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | UI (logic)
+        id: 'objective-id-4', // Required | UI (logic)
+        description: 'Objective Description 4.', // Required | UI
+        type: 'plantItem', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }], // Optional | UI (logic)
         items: [
           {
-            id: "item-id-4",
-            name: "Item Name 4",
-            shortName: "Item Shortname 4",
+            id: 'item-id-4',
+            name: 'Item Name 4',
+            shortName: 'Item Shortname 4',
           },
         ], // Optional | UI (logic)
         count: 1, // Optional | UI (logic)
@@ -362,16 +354,16 @@ Notes:
         requiredKeys: [
           [
             {
-              id: "key-id-1",
-              name: "Key Name 1",
-              shortName: "Key Shortname 1",
+              id: 'key-id-1',
+              name: 'Key Name 1',
+              shortName: 'Key Shortname 1',
             },
           ],
         ], // Optional | Console-only
         optional: true, // Optional | Console-only
         zones: [
           {
-            map: { id: "map-id-1", name: "Map Name 1" }, // Required | UI (logic) when entry exists
+            map: { id: 'map-id-1', name: 'Map Name 1' }, // Required | UI (logic) when entry exists
             outline: [
               { x: 300.1, z: -100.2 },
               { x: 250.3, z: -70.4 },
@@ -384,37 +376,27 @@ Notes:
         ],
         possibleLocations: [
           {
-            map: { id: "map-id-1", name: "Map Name 1" }, // Required | UI (logic) when entry exists
+            map: { id: 'map-id-1', name: 'Map Name 1' }, // Required | UI (logic) when entry exists
             positions: [{ x: 245.9, z: -130.1 }], // Required | UI (logic) when entry exists
           },
         ],
       },
       {
-        id: "objective-id-5", // Required | UI (logic)
-        description: "Objective Description 5.", // Required | UI
-        type: "shoot", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | UI (logic)
+        id: 'objective-id-5', // Required | UI (logic)
+        description: 'Objective Description 5.', // Required | UI
+        type: 'shoot', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }], // Optional | UI (logic)
         count: 10, // Optional | UI (logic)
         useAny: [
-          { id: "item-id-5", name: "Item Name 5", shortName: "Item Shortname 5" },
-          { id: "item-id-6", name: "Item Name 6", shortName: "Item Shortname 6" },
+          { id: 'item-id-5', name: 'Item Name 5', shortName: 'Item Shortname 5' },
+          { id: 'item-id-6', name: 'Item Name 6', shortName: 'Item Shortname 6' },
         ], // Optional | Console-only
-        usingWeapon: [
-          { id: "item-id-7", name: "Item Name 7", shortName: "Item Shortname 7" },
-        ], // Optional | Console-only
+        usingWeapon: [{ id: 'item-id-7', name: 'Item Name 7', shortName: 'Item Shortname 7' }], // Optional | Console-only
         usingWeaponMods: [
-          [
-            { id: "item-id-8", name: "Item Name 8", shortName: "Item Shortname 8" },
-          ],
+          [{ id: 'item-id-8', name: 'Item Name 8', shortName: 'Item Shortname 8' }],
         ], // Optional | Console-only
-        wearing: [
-          [
-            { id: "item-id-9", name: "Item Name 9", shortName: "Item Shortname 9" },
-          ],
-        ], // Optional | Console-only
-        notWearing: [
-          { id: "item-id-10", name: "Item Name 10", shortName: "Item Shortname 10" },
-        ], // Optional | Console-only
+        wearing: [[{ id: 'item-id-9', name: 'Item Name 9', shortName: 'Item Shortname 9' }]], // Optional | Console-only
+        notWearing: [{ id: 'item-id-10', name: 'Item Name 10', shortName: 'Item Shortname 10' }], // Optional | Console-only
         distance: 65, // Optional | Console-only
         minDurability: 40, // Optional | Console-only
         maxDurability: 85, // Optional | Console-only
@@ -422,24 +404,24 @@ Notes:
         timeUntilHour: 6, // Optional | Console-only
       },
       {
-        id: "objective-id-6", // Required | UI (logic)
-        description: "Objective Description 6.", // Required | UI
-        type: "findQuestItem", // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
-        maps: [{ id: "map-id-1", name: "Map Name 1" }], // Optional | UI (logic)
-        item: { id: "item-id-11", name: "Item Name 11", shortName: "Item Shortname 11" }, // Optional | UI (logic)
+        id: 'objective-id-6', // Required | UI (logic)
+        description: 'Objective Description 6.', // Required | UI
+        type: 'findQuestItem', // Optional | UI (logic); map view filtering recognizes: "mark" | "zone" | "extract" | "visit" | "findItem" | "findQuestItem" | "plantItem" | "plantQuestItem" | "shoot"
+        maps: [{ id: 'map-id-1', name: 'Map Name 1' }], // Optional | UI (logic)
+        item: { id: 'item-id-11', name: 'Item Name 11', shortName: 'Item Shortname 11' }, // Optional | UI (logic)
         questItem: {
-          id: "item-id-12",
-          name: "Item Name 12",
-          shortName: "Item Shortname 12",
+          id: 'item-id-12',
+          name: 'Item Name 12',
+          shortName: 'Item Shortname 12',
         }, // Optional | UI (logic)
         markerItem: {
-          id: "item-id-13",
-          name: "Item Name 13",
-          shortName: "Item Shortname 13",
+          id: 'item-id-13',
+          name: 'Item Name 13',
+          shortName: 'Item Shortname 13',
         }, // Optional | UI (logic)
         containsAll: [
-          { id: "item-id-14", name: "Item Name 14", shortName: "Item Shortname 14" },
-          { id: "item-id-15", name: "Item Name 15", shortName: "Item Shortname 15" },
+          { id: 'item-id-14', name: 'Item Name 14', shortName: 'Item Shortname 14' },
+          { id: 'item-id-15', name: 'Item Name 15', shortName: 'Item Shortname 15' },
         ], // Optional | Console-only
       },
     ], // Required | UI (logic); at least one objective in additions
@@ -450,6 +432,7 @@ Notes:
 ## Story Chapters
 
 Notes:
+
 - Keep `type` as `main` or `optional`. Story objectives do not use task objective action types there.
 - For map markers and key hints, use the same field names as task objectives: `maps`, `zones`, `possibleLocations`, `requiredKeys`.
 - For Needed Items and marker/tool display, use task-style item refs: `item`, `items`, `markerItem`, `questItem`, `count`, `foundInRaid`.
@@ -460,24 +443,24 @@ Notes:
 {
   // Sample Story Chapter - map-ready objectives
   story_chapter_key_1: {
-    id: "story_chapter_key_1", // Required
-    name: "Sample Story Chapter", // Required
-    normalizedName: "sample-story-chapter", // Required
-    wikiLink: "https://escapefromtarkov.fandom.com/wiki/Sample_Story_Chapter", // Required
+    id: 'story_chapter_key_1', // Required
+    name: 'Sample Story Chapter', // Required
+    normalizedName: 'sample-story-chapter', // Required
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Sample_Story_Chapter', // Required
     order: 10, // Required
     autoStart: false, // Optional
-    chapterRequirements: [{ id: "tour", name: "Tour" }], // Optional
-    description: "Example chapter that shows how to wire story objectives for map display.", // Optional
-    notes: "Use the task-style marker fields below when a story objective should appear on the map.", // Optional
+    chapterRequirements: [{ id: 'tour', name: 'Tour' }], // Optional
+    description: 'Example chapter that shows how to wire story objectives for map display.', // Optional
+    notes: 'Use the task-style marker fields below when a story objective should appear on the map.', // Optional
     objectives: [
       {
-        id: "story-chapter-key-1-main-1", // Required
-        type: "main", // Required | "main" | "optional"
-        description: "Locate the bunker terminal on Reserve", // Required
-        maps: [{ id: "5704e5fad2720bc05b8b4567", name: "Reserve" }], // Optional | UI (logic)
+        id: 'story-chapter-key-1-main-1', // Required
+        type: 'main', // Required | "main" | "optional"
+        description: 'Locate the bunker terminal on Reserve', // Required
+        maps: [{ id: '5704e5fad2720bc05b8b4567', name: 'Reserve' }], // Optional | UI (logic)
         zones: [
           {
-            map: { id: "5704e5fad2720bc05b8b4567", name: "Reserve" }, // Required when entry exists
+            map: { id: '5704e5fad2720bc05b8b4567', name: 'Reserve' }, // Required when entry exists
             outline: [
               { x: 118.2, z: -34.6 },
               { x: 123.8, z: -34.6 },
@@ -490,62 +473,62 @@ Notes:
         requiredKeys: [
           [
             {
-              id: "60a24479c8b4573c74fae13b",
-              name: "RB-KSM key",
-              shortName: "RB-KSM",
+              id: '60a24479c8b4573c74fae13b',
+              name: 'RB-KSM key',
+              shortName: 'RB-KSM',
             },
           ],
         ], // Optional | UI
       },
       {
-        id: "story-chapter-key-1-main-2",
-        type: "main",
-        description: "Locate and obtain the relay logs on Lighthouse",
-        maps: [{ id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }],
+        id: 'story-chapter-key-1-main-2',
+        type: 'main',
+        description: 'Locate and obtain the relay logs on Lighthouse',
+        maps: [{ id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' }],
         questItem: {
-          id: "story-quest-item-id-1",
-          name: "Relay logs",
-          shortName: "Logs",
+          id: 'story-quest-item-id-1',
+          name: 'Relay logs',
+          shortName: 'Logs',
         }, // Optional | UI
         possibleLocations: [
           {
-            map: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
+            map: { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
             positions: [{ x: 245.9, z: -130.1 }],
           },
         ], // Optional | UI (logic)
       },
       {
-        id: "story-chapter-key-1-main-3",
-        type: "main",
-        description: "Hand over 2 found in raid Power filters",
+        id: 'story-chapter-key-1-main-3',
+        type: 'main',
+        description: 'Hand over 2 found in raid Power filters',
         item: {
-          id: "5d1b2ffd86f77425243e8d17",
-          name: "Power filter",
-          shortName: "PFilter",
+          id: '5d1b2ffd86f77425243e8d17',
+          name: 'Power filter',
+          shortName: 'PFilter',
         }, // Optional | UI
         count: 2, // Optional | UI
         foundInRaid: true, // Optional | UI
       },
       {
-        id: "story-chapter-key-1-opt-1",
-        type: "optional",
-        description: "Mark the relay van with an MS2000 Marker",
-        maps: [{ id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" }],
+        id: 'story-chapter-key-1-opt-1',
+        type: 'optional',
+        description: 'Mark the relay van with an MS2000 Marker',
+        maps: [{ id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' }],
         markerItem: {
-          id: "5991b51486f77447b112d44f",
-          name: "MS2000 Marker",
-          shortName: "MS2000",
+          id: '5991b51486f77447b112d44f',
+          name: 'MS2000 Marker',
+          shortName: 'MS2000',
         }, // Optional | UI
         zones: [
           {
-            map: { id: "5704e4dad2720bb55b8b4567", name: "Lighthouse" },
+            map: { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
             position: { x: 312.4, z: 48.6 },
           },
         ],
       },
     ],
     rewards: {
-      description: "Unlocks the next story chapter and a trader contact.",
+      description: 'Unlocks the next story chapter and a trader contact.',
     }, // Optional
   },
 }
@@ -565,13 +548,13 @@ Fixes for broken tarkov.dev locale bundles, in `src/overrides/locales/<locale>.j
   tasks: {
     // Sample Task - Locale Override (all fields)
     // Proof: [link]
-    "task-id-1": {
-      name: "Correct English Task Name", // Optional | UI; Was: Wrong-language string in the en bundle
-      wikiLink: "https://escapefromtarkov.fandom.com/wiki/Correct_English_Task_Name", // Optional | UI; Was: link to wrong-language wiki page
+    'task-id-1': {
+      name: 'Correct English Task Name', // Optional | UI; Was: Wrong-language string in the en bundle
+      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Correct_English_Task_Name', // Optional | UI; Was: link to wrong-language wiki page
       objectives: {
         // ID-keyed objective patches, mirroring task override objectives
-        "objective-id-1": {
-          description: "Correct English objective description.", // Optional | UI; Was: wrong-language string in the en bundle
+        'objective-id-1': {
+          description: 'Correct English objective description.', // Optional | UI; Was: wrong-language string in the en bundle
         },
       },
     },
@@ -579,45 +562,45 @@ Fixes for broken tarkov.dev locale bundles, in `src/overrides/locales/<locale>.j
   items: {
     // Sample Item - Locale Override (all fields)
     // Proof: [link]
-    "item-id-1": {
-      name: "Correct English Item Name", // Optional | UI; Was: wrong-language string in the en bundle
-      shortName: "Correct Short", // Optional | UI; Was: wrong-language string in the en bundle
-      description: "Correct English item description.", // Optional | UI; Was: wrong-language string in the en bundle
-      wikiLink: "https://escapefromtarkov.fandom.com/wiki/Correct_English_Item_Name", // Optional | UI; Was: link to wrong-language wiki page
+    'item-id-1': {
+      name: 'Correct English Item Name', // Optional | UI; Was: wrong-language string in the en bundle
+      shortName: 'Correct Short', // Optional | UI; Was: wrong-language string in the en bundle
+      description: 'Correct English item description.', // Optional | UI; Was: wrong-language string in the en bundle
+      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Correct_English_Item_Name', // Optional | UI; Was: link to wrong-language wiki page
     },
   },
   traders: {
     // Sample Trader - Locale Override (all fields)
     // Proof: [link]
-    "trader-id-1": {
-      name: "Correct English Trader Name", // Optional | UI; Was: wrong-language string in the en bundle
-      description: "Correct English trader description.", // Optional | UI; Was: wrong-language string in the en bundle
+    'trader-id-1': {
+      name: 'Correct English Trader Name', // Optional | UI; Was: wrong-language string in the en bundle
+      description: 'Correct English trader description.', // Optional | UI; Was: wrong-language string in the en bundle
     },
   },
   maps: {
     // Sample Map - Locale Override (all fields)
     // Proof: [link]
-    "map-id-1": {
-      name: "Correct English Map Name", // Optional | UI; Was: wrong-language string in the en bundle
-      description: "Correct English map description.", // Optional | UI; Was: wrong-language string in the en bundle
+    'map-id-1': {
+      name: 'Correct English Map Name', // Optional | UI; Was: wrong-language string in the en bundle
+      description: 'Correct English map description.', // Optional | UI; Was: wrong-language string in the en bundle
     },
   },
   prestige: {
     // Sample Prestige - Locale Override (all fields)
     // Proof: [link]
-    "prestige-id-1": {
-      name: "Correct English Prestige Name", // Optional | UI; Was: wrong-language string in the en bundle
+    'prestige-id-1': {
+      name: 'Correct English Prestige Name', // Optional | UI; Was: wrong-language string in the en bundle
     },
   },
   storyChapters: {
     // Sample Story Chapter - Locale Override (all fields)
     // Proof: [link]
-    "story-chapter-id-1": {
-      name: "Correct English Chapter Name", // Optional | UI; Was: wrong-language string
-      description: "Correct English chapter description.", // Optional | UI; Was: wrong-language string
+    'story-chapter-id-1': {
+      name: 'Correct English Chapter Name', // Optional | UI; Was: wrong-language string
+      description: 'Correct English chapter description.', // Optional | UI; Was: wrong-language string
       objectives: {
-        "story-chapter-id-1-main-1": {
-          description: "Correct English objective description.", // Optional | UI; Was: wrong-language string
+        'story-chapter-id-1-main-1': {
+          description: 'Correct English objective description.', // Optional | UI; Was: wrong-language string
         },
       },
     },
@@ -638,9 +621,9 @@ Comprehensive sample for `src/additions/editions.json5` custom game edition defi
   // Sample Edition - Addition (all fields)
   // Source: Battlestate Games preorder options
   edition_key_1: {
-    id: "edition_key_1", // Required | UI (logic); should match key
+    id: 'edition_key_1', // Required | UI (logic); should match key
     value: 5, // Required | UI (logic); numeric value used by TarkovTracker (1-10)
-    title: "Sample Edition Title", // Required | UI
+    title: 'Sample Edition Title', // Required | UI
     defaultStashLevel: 4, // Required | UI (logic); level of stash starting point (1-5)
     defaultCultistCircleLevel: 0, // Required | UI (logic); starting Cultist Circle level (0-3)
     traderRepBonus: {
@@ -653,12 +636,8 @@ Comprehensive sample for `src/additions/editions.json5` custom game edition defi
       ragman: 0.2,
       jaeger: 0.2,
     }, // Required | UI (logic); starting reputation bonus per trader
-    exclusiveTaskIds: [
-      "exclusive-task-id-1",
-    ], // Optional | UI (logic); task IDs that only players with this edition can accept
-    excludedTaskIds: [
-      "excluded-task-id-1",
-    ], // Optional | UI (logic); task IDs that are bypassed/unnecessary for this edition
+    exclusiveTaskIds: ['exclusive-task-id-1'], // Optional | UI (logic); task IDs that only players with this edition can accept
+    excludedTaskIds: ['excluded-task-id-1'], // Optional | UI (logic); task IDs that are bypassed/unnecessary for this edition
   },
 }
 ```
@@ -675,11 +654,11 @@ Examples for adding new items or correcting existing ones.
 {
   // Sample Item - Addition (all fields)
   // Proof: [link]
-  "item_id_1": {
-    id: "item_id_1", // Required | UI (logic); should match key
-    name: "Sample Item Name", // Required | UI
-    shortName: "Sample Short", // Optional | UI
-    description: "Sample item description.", // Optional | UI
+  item_id_1: {
+    id: 'item_id_1', // Required | UI (logic); should match key
+    name: 'Sample Item Name', // Required | UI
+    shortName: 'Sample Short', // Optional | UI
+    description: 'Sample item description.', // Optional | UI
   },
 }
 ```
@@ -690,9 +669,9 @@ Examples for adding new items or correcting existing ones.
 {
   // Sample Item - Override
   // Proof: [link]
-  "5449016a4bdc2d6f028b456f": {
-    name: "Corrected Item Name", // Optional | UI; Was: Incorrect Item Name
-    shortName: "Corrected ShortName", // Optional | UI; Was: Incorrect ShortName
+  '5449016a4bdc2d6f028b456f': {
+    name: 'Corrected Item Name', // Optional | UI; Was: Incorrect Item Name
+    shortName: 'Corrected ShortName', // Optional | UI; Was: Incorrect ShortName
   },
 }
 ```
@@ -709,8 +688,8 @@ General overrides for trader and hideout entities.
 {
   // Sample Trader - Override
   // Proof: [link]
-  "54cbdb844bdc2d8e2d8b4567": {
-    name: "Corrected Trader Name", // Optional | UI; Was: Incorrect Trader Name
+  '54cbdb844bdc2d8e2d8b4567': {
+    name: 'Corrected Trader Name', // Optional | UI; Was: Incorrect Trader Name
   },
 }
 ```
@@ -721,8 +700,8 @@ General overrides for trader and hideout entities.
 {
   // Sample Hideout Station - Override
   // Proof: [link]
-  "5d40407c86f774318526545a": {
-    name: "Corrected Station Name", // Optional | UI; Was: Incorrect Station Name
+  '5d40407c86f774318526545a': {
+    name: 'Corrected Station Name', // Optional | UI; Was: Incorrect Station Name
   },
 }
 ```

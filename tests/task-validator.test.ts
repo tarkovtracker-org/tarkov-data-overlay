@@ -26,11 +26,7 @@ describe('validateTaskOverride', () => {
   describe('when task not found in API', () => {
     it('returns REMOVED_FROM_API status', () => {
       const override: TaskOverride = { minPlayerLevel: 15 };
-      const result = validateTaskOverride(
-        'non-existent-id',
-        override,
-        apiTasks
-      );
+      const result = validateTaskOverride('non-existent-id', override, apiTasks);
 
       expect(result.status).toBe('REMOVED_FROM_API');
       expect(result.stillNeeded).toBe(false);
@@ -45,11 +41,7 @@ describe('validateTaskOverride', () => {
 
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
-      expect(
-        result.details.some(
-          (d) => d.field === 'disabled' && d.status === 'check'
-        )
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'disabled' && d.status === 'check')).toBe(true);
     });
   });
 
@@ -61,9 +53,7 @@ describe('validateTaskOverride', () => {
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
       expect(
-        result.details.some(
-          (d) => d.field === 'minPlayerLevel' && d.status === 'needed'
-        )
+        result.details.some((d) => d.field === 'minPlayerLevel' && d.status === 'needed')
       ).toBe(true);
     });
 
@@ -73,11 +63,9 @@ describe('validateTaskOverride', () => {
 
       expect(result.status).toBe('FIXED');
       expect(result.stillNeeded).toBe(false);
-      expect(
-        result.details.some(
-          (d) => d.field === 'minPlayerLevel' && d.status === 'fixed'
-        )
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'minPlayerLevel' && d.status === 'fixed')).toBe(
+        true
+      );
     });
   });
 
@@ -137,9 +125,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'needed')).toBe(true);
     });
 
     it('returns NEEDED when task has multiple objective maps and map differs', () => {
@@ -169,9 +155,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'needed')).toBe(true);
     });
 
     it('returns NEEDED when task has multiple objective maps and map is missing', () => {
@@ -200,9 +184,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'needed')).toBe(true);
     });
 
     it('returns NEEDED when task has multiple objective maps and map is null but API map is set', () => {
@@ -232,9 +214,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'needed')).toBe(true);
     });
 
     it('returns FIXED when task has multiple objective maps and map is null with API map null', () => {
@@ -264,9 +244,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'fixed')).toBe(true);
     });
 
     it('treats Night Factory as Factory for multi-map detection', () => {
@@ -288,9 +266,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'fixed')).toBe(true);
     });
 
     it('treats Ground Zero 21+ as Ground Zero for multi-map detection', () => {
@@ -310,9 +286,7 @@ describe('validateTaskOverride', () => {
 
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'map' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'map' && d.status === 'fixed')).toBe(true);
     });
   });
 
@@ -328,9 +302,7 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'obj-1': { count: 8 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [
-        apiTaskWithObjectives,
-      ]);
+      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
 
       expect(result.status).toBe('NEEDED');
       expect(result.stillNeeded).toBe(true);
@@ -340,9 +312,7 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'obj-1': { count: 5 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [
-        apiTaskWithObjectives,
-      ]);
+      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
 
       expect(result.status).toBe('FIXED');
       expect(result.stillNeeded).toBe(false);
@@ -352,9 +322,7 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = {
         objectives: { 'non-existent-obj': { count: 5 } },
       };
-      const result = validateTaskOverride('test-task-id', override, [
-        apiTaskWithObjectives,
-      ]);
+      const result = validateTaskOverride('test-task-id', override, [apiTaskWithObjectives]);
 
       expect(result.stillNeeded).toBe(true);
       expect(result.details.some((d) => d.status === 'check')).toBe(true);
@@ -405,9 +373,7 @@ describe('validateTaskOverride', () => {
       expect(result.status).toBe('FIXED');
       expect(result.stillNeeded).toBe(false);
       expect(
-        result.details.some(
-          (d) => d.status === 'fixed' && d.message.includes('NOW IN API')
-        )
+        result.details.some((d) => d.status === 'fixed' && d.message.includes('NOW IN API'))
       ).toBe(true);
     });
 
@@ -442,10 +408,7 @@ describe('validateTaskOverride', () => {
           {
             id: 'manual-obj',
             description: 'Find items',
-            items: [
-              { name: 'Item Without ID' },
-              { id: 'item-2', name: 'Item With ID' },
-            ],
+            items: [{ name: 'Item Without ID' }, { id: 'item-2', name: 'Item With ID' }],
           },
         ],
       };
@@ -503,53 +466,45 @@ describe('validateTaskOverride', () => {
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns FIXED when startRewards matches API', () => {
       const apiTask = createApiTask({
         startRewards: {
-          items: [
-            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
-          ],
+          items: [{ item: { id: 'item-1', name: 'Item One' }, count: 2 }],
         },
       });
       const override: TaskOverride = {
         startRewards: {
-          items: [
-            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
-          ],
+          items: [{ item: { id: 'item-1', name: 'Item One' }, count: 2 }],
         },
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'startRewards' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns NEEDED when startRewards differs from API', () => {
       const apiTask = createApiTask({
         startRewards: {
-          items: [
-            { item: { id: 'item-1', name: 'Item One' }, count: 2 },
-          ],
+          items: [{ item: { id: 'item-1', name: 'Item One' }, count: 2 }],
         },
       });
       const override: TaskOverride = {
         startRewards: {
-          items: [
-            { item: { id: 'item-1', name: 'Item One' }, count: 3 },
-          ],
+          items: [{ item: { id: 'item-1', name: 'Item One' }, count: 3 }],
         },
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'startRewards' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'startRewards' && d.status === 'needed')).toBe(
+        true
+      );
     });
   });
 
@@ -559,9 +514,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { experience: 12000 };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'experience' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'experience' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns NEEDED when experience differs from API', () => {
@@ -569,9 +524,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { experience: 13000 };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'experience' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'experience' && d.status === 'needed')).toBe(
+        true
+      );
     });
   });
 
@@ -592,9 +547,9 @@ describe('validateTaskOverride', () => {
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'finishRewards' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'finishRewards' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns NEEDED when finishRewards differs from API', () => {
@@ -610,9 +565,9 @@ describe('validateTaskOverride', () => {
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'finishRewards' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'finishRewards' && d.status === 'needed')).toBe(
+        true
+      );
     });
   });
 
@@ -638,9 +593,7 @@ describe('validateTaskOverride', () => {
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
-        result.details.some(
-          (d) => d.field === 'traderRequirements' && d.status === 'fixed'
-        )
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'fixed')
       ).toBe(true);
     });
 
@@ -665,9 +618,7 @@ describe('validateTaskOverride', () => {
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
-        result.details.some(
-          (d) => d.field === 'traderRequirements' && d.status === 'needed'
-        )
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'needed')
       ).toBe(true);
     });
   });
@@ -678,9 +629,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { factionName: 'USEC' };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'factionName' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'factionName' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns NEEDED when factionName differs from API', () => {
@@ -688,9 +639,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { factionName: 'BEAR' };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'factionName' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'factionName' && d.status === 'needed')).toBe(
+        true
+      );
     });
   });
 
@@ -730,9 +681,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { kappaRequired: false };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'kappaRequired' && d.status === 'fixed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'kappaRequired' && d.status === 'fixed')).toBe(
+        true
+      );
     });
 
     it('returns NEEDED when kappaRequired differs from API', () => {
@@ -740,9 +691,9 @@ describe('validateTaskOverride', () => {
       const override: TaskOverride = { kappaRequired: false };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
-      expect(
-        result.details.some((d) => d.field === 'kappaRequired' && d.status === 'needed')
-      ).toBe(true);
+      expect(result.details.some((d) => d.field === 'kappaRequired' && d.status === 'needed')).toBe(
+        true
+      );
     });
   });
 
@@ -753,9 +704,7 @@ describe('validateTaskOverride', () => {
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
-        result.details.some(
-          (d) => d.field === 'lightkeeperRequired' && d.status === 'fixed'
-        )
+        result.details.some((d) => d.field === 'lightkeeperRequired' && d.status === 'fixed')
       ).toBe(true);
     });
 
@@ -765,9 +714,7 @@ describe('validateTaskOverride', () => {
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
-        result.details.some(
-          (d) => d.field === 'lightkeeperRequired' && d.status === 'needed'
-        )
+        result.details.some((d) => d.field === 'lightkeeperRequired' && d.status === 'needed')
       ).toBe(true);
     });
   });
