@@ -319,7 +319,9 @@ together; enforce that when presenting a perk picker. All references
 (`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids — resolve their
 display names through tarkov.dev's own data/locale, do not expect names here.
 The perk `name`/`description` are the only inline strings (English), because the
-perks do not exist upstream to resolve against.
+perks do not exist upstream to resolve against. One perk's `itemFilter`
+references an item tarkov.dev does not serve yet; resolve `itemFilter` ids
+against `itemsAdd` as a fallback (see [Resolving Added Items](#resolving-added-items)).
 
 ---
 
@@ -374,6 +376,50 @@ Notes and caveats:
   progression tools, not for recipe/ingredient lookups (inputs, output, station,
   level and duration are correct). Crafts with no task unlock omit the field,
   matching tarkov.dev.
+
+---
+
+## Resolving Added Items
+
+`itemsAdd` carries items that overlay additions reference but that tarkov.dev
+does not serve yet in **any** mode (`regular`, `pve`, `pvp-season`). Without it,
+those ids have no name anywhere and surface as raw 24-hex strings.
+
+```typescript
+interface ItemAddition {
+  id: string; // tarkov.dev/BSG item template id (matches the key)
+  name: string; // English display name
+  shortName?: string; // English short name (inventory label)
+  description?: string; // English description
+}
+```
+
+Resolve item ids upstream first, then fall back to `itemsAdd`:
+
+```typescript
+function resolveItem(id: string, apiItemsById: Map<string, Item>, overlay: Overlay) {
+  return apiItemsById.get(id) ?? overlay.itemsAdd?.[id];
+}
+```
+
+Notes and caveats:
+
+- **English only.** tarkov.dev's locale system stays the source of truth for
+  every other language; these ids resolve normally there once upstream ingests
+  them. Do not translate from these strings — treat them as a display fallback.
+- **Upstream-first ordering matters.** Once tarkov.dev serves an item, its data
+  is richer (icons, prices, categories) and authoritative. Checking the API
+  before the overlay makes each entry become dead weight rather than a stale
+  override that shadows good upstream data.
+- These entries are deleted as upstream catches up; `npm run check-overrides`
+  flags any that tarkov.dev now serves (`NOW IN API - remove the addition`).
+- **Item-resolution caveat:** 7 of these crafts reference patch 1.1.0.0 items
+  that tarkov.dev does not serve yet in any mode (all 7 products, plus some
+  inputs — the Black Division chain, Moreman's tapes, the topographic intel
+  maps). Resolving those ids against tarkov.dev alone yields nothing, so a naive
+  lookup renders a raw 24-hex id. **Resolve item ids against `itemsAdd` as a
+  fallback** (see [Resolving Added Items](#resolving-added-items)) — it carries
+  the English name/shortName/description for exactly these ids.
 
 ---
 
