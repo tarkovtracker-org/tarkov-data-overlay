@@ -42,10 +42,6 @@ export async function fetchExtendedTasks(
   return Array.from(byWikiLinkAndMode.values());
 }
 
-export function normalizeName(value: string): string {
-  return value.trim().toLowerCase();
-}
-
 /**
  * Normalize task name for comparison by removing common suffixes and variations
  */
@@ -72,8 +68,11 @@ export function resolveTask(tasks: TaskData[], options: CliOptions): TaskData | 
   }
 
   const name = options.name ?? DEFAULT_TASK_NAME;
-  const normalized = normalizeName(name);
-  return tasks.find((task) => normalizeName(task.name) === normalized);
+  // Use the same normalization as the comparison code so a name carrying a
+  // `[PVP ZONE]`/`(quest)` suffix, hyphens, or repeated whitespace still
+  // resolves against the upstream task name.
+  const normalized = normalizeTaskName(name);
+  return tasks.find((task) => normalizeTaskName(task.name) === normalized);
 }
 
 export function resolveWikiTitle(task: TaskData, wikiOverride?: string): string {

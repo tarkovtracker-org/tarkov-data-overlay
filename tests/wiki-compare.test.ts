@@ -13,6 +13,8 @@ import {
   isTaskFieldSuppressed,
   type TaskSuppressionEntry,
 } from '../scripts/wiki-compare/overlay.js';
+import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
+import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
 
@@ -162,5 +164,46 @@ describe('compareTasks', () => {
       console.log = original;
     }
     expect(logs).toHaveLength(0);
+  });
+});
+
+describe('normalizeTaskName', () => {
+  it('strips the [PVP ZONE] suffix', () => {
+    expect(normalizeTaskName('Task Name [PVP ZONE]')).toBe('task name');
+    expect(normalizeTaskName('Task Name [pvp zone]')).toBe('task name');
+  });
+
+  it('strips the (quest) disambiguation suffix', () => {
+    expect(normalizeTaskName('Task Name (quest)')).toBe('task name');
+    expect(normalizeTaskName('Task Name (Quest)')).toBe('task name');
+  });
+
+  it('normalizes hyphens and collapses repeated whitespace', () => {
+    expect(normalizeTaskName('Multi-Word-Task')).toBe('multi word task');
+    expect(normalizeTaskName('Task   Multiple   Spaces')).toBe('task multiple spaces');
+  });
+
+  it('combines every normalization', () => {
+    expect(normalizeTaskName('Complex-Name  (quest)')).toBe('complex name');
+  });
+});
+
+describe('resolveTask', () => {
+  const tasks: TaskData[] = [
+    { id: '1', name: 'Simple Task' },
+    { id: '2', name: 'Multi-Word Task [PVP ZONE]' },
+    { id: '3', name: 'Quest-Task (quest)' },
+  ];
+
+  it('resolves by id when one is supplied', () => {
+    expect(resolveTask(tasks, { id: '2' })?.id).toBe('2');
+  });
+
+  // Regression: resolveTask previously used a trim/lowercase-only normalizer, so
+  // a name carrying a [PVP ZONE]/(quest) suffix or hyphens never matched.
+  it('resolves names whose upstream form carries a suffix or hyphens', () => {
+    expect(resolveTask(tasks, { name: 'Simple  Task' })?.id).toBe('1');
+    expect(resolveTask(tasks, { name: 'multi word task' })?.id).toBe('2');
+    expect(resolveTask(tasks, { name: 'Quest Task' })?.id).toBe('3');
   });
 });
