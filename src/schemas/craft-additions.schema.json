@@ -29,7 +29,7 @@
       "duration": {
         "description": "Production time in seconds.",
         "type": "integer",
-        "minimum": 0
+        "minimum": 1
       },
       "requiredItems": {
         "description": "Input items (attributes.tool=true marks a returned tool).",
@@ -61,8 +61,8 @@
           "type": "string"
         },
         "count": {
-          "type": "number",
-          "minimum": 0
+          "type": "integer",
+          "minimum": 1
         },
         "attributes": {
           "type": "object"

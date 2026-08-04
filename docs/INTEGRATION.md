@@ -551,7 +551,7 @@ import type { Task, Overlay } from './types';
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const OVERLAY_URL =
   'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
-type GameMode = 'regular' | 'pve';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
   const get = async (path: string): Promise<Record<string, unknown>> => {

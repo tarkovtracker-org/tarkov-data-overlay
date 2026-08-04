@@ -49,7 +49,7 @@
             "multiplicator": { "type": "number" },
             "multiplicatorPrimary": { "type": "number" },
             "multiplicatorSecondary": { "type": "number" },
-            "intValue": { "type": "number" },
+            "intValue": { "type": "integer" },
             "skillIds": {
               "type": "array",
               "items": { "type": "string" }

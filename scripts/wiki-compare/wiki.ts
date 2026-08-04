@@ -251,7 +251,10 @@ export function parseObjectives(
     const mapsFromLinks = mapLinkEntries
       .filter((entry) => !isExcludedMapMention(clean, entry.link))
       .map((entry) => entry.canonical);
-    const mapsFromText = mapsFromLinks.length > 0 ? [] : extractMapsFromText(clean, mapAliasMap);
+    // Always merge text-derived maps: an objective can name one map via a link
+    // and another in plain text, so gating text extraction on link presence
+    // would drop the text-only maps. uniqueList dedupes canonical names.
+    const mapsFromText = extractMapsFromText(clean, mapAliasMap);
     const maps = uniqueList([...mapsFromLinks, ...mapsFromText]);
     const items = filterWikiItems(
       uniqueList(

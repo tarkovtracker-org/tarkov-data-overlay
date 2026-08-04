@@ -186,8 +186,12 @@ export function compareTasks(
     );
     const apiVerb = getObjectiveVerbKey(apiObj.description ?? '');
     const apiItemRefs = collectObjectiveItems(apiObj);
+    const apiDescription = apiObj.description ?? '';
+    // Match "found in raid" but not the negated "not found in raid" exception,
+    // which would otherwise misclassify an explicit non-FiR objective as FiR.
     const apiFoundInRaid =
-      apiObj.foundInRaid === true || /found in raid/i.test(apiObj.description ?? '');
+      apiObj.foundInRaid === true ||
+      (/found in raid/i.test(apiDescription) && !/not\s+found in raid/i.test(apiDescription));
 
     let matched = false;
 
