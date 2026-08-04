@@ -87,15 +87,29 @@ Edit the appropriate file in `src/overrides/`:
 tarkov.dev does not serve. Keep every new data type in `src/additions/` with its
 schema in `src/schemas/`, and register the schema in `SCHEMA_CONFIGS`
 (`src/lib/types.ts`). Prove additions the same way as any other: patch notes
-and/or an in-game screenshot, and use tarkov.dev ids for every referenced
-item/skill/trader/station so names resolve upstream.
+and/or an in-game screenshot. Reference entities by tarkov.dev id where available
+(items, traders, stations, most skills) so names resolve upstream.
+
+> **Upstream-id exception:** a few referenced ids are not in tarkov.dev yet —
+> notably some Seasonal Character faction skills (e.g. the `Usec*` skills, whose
+> `Bear*` equivalents already exist upstream). Use the correct upstream id
+> anyway; it is not invented, and the name resolves once tarkov.dev adds the
+> entity. Do not drop or rename these ids to force an immediate match.
 
 ### 2. Create a Stable ID
 
-Use a stable, snake_case key and set `id` to the same value:
+Always set `id` to the same value as the top-level key. The key format depends
+on the file — match the existing entries:
+
+- `tasksAdd`, `editions`: local `snake_case` keys (e.g. `my_event_task`)
+- `storyChapters`: local kebab-case keys
+- `seasonalPerks`, `craftsAdd`: the source tarkov.dev/BSG id (a 24-char hex id),
+  because these mirror upstream entities by id
 
 ```json5
 {
+  // local key (tasksAdd / editions); seasonalPerks & craftsAdd instead key by
+  // their source id, e.g. '655b650ab71eeb7c4168c627'
   my_event_task: {
     id: 'my_event_task',
     name: 'My Event Task',
