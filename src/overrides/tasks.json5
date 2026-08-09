@@ -61,10 +61,12 @@
     name: 'Getting Some Air'
   },
 
-  // Test Drive - Part 5 - Objective description/items incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
-  // API experience now correct (23000); obj still wrong
+  // Easy-Breezy (old: Test Drive - Part 5)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
+  //
+  // 2026-08-09: change name to S1 quest name
   '669fa3a40c828825de06d6a1': {
+    name: 'Easy-Breezy',
     objectives: {
       '66a0f5a7f9eae6761253114c': {
         description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
