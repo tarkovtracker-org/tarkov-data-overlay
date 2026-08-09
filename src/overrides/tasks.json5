@@ -78,7 +78,7 @@
   // Unique Experience (old: Test Drive - Part 6)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
   //
-  // 2026_08-09: change name to S1 quest name
+  // 2026-08-09: change name to S1 quest name
   '675c1ff1a757ddd00404f0aa': {
     name: 'Unique Experience'
   },
