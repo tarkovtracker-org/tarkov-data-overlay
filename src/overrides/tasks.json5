@@ -43,6 +43,16 @@
     },
   },
 
+
+  // Job for a Patriot (old: Test Drive - Part 3)
+  // Proof : https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
+  //
+  // 2026-08-09: change name to S1 quest name
+  '66ab9da7eb102b9bcd08591c': {
+    name: 'Job for a Patriot'
+  },
+
+
   // Test Drive - Part 4 - top-level map (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
   //
