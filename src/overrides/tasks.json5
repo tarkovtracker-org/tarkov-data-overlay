@@ -911,6 +911,354 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Supplier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supplier
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '596b36c586f77450d6045ad2': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Burning Rubber - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Burning_Rubber
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '657315e270bb0b8dba00cc48': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Golden Swag - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Golden_Swag
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5979eee086f774311955e614': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // Informed Means Armed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Informed_Means_Armed
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5b47926a86f7747ccc057c15': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // The Extortionist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Extortionist
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '596b43fb86f77457ca186186': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 7)
+    ],
+  },
+
+  // Private Club - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '675c3582f6ddc329a90f9c6d': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // No Swiping - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '658027799634223183395339': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // What's on the Flash Drive? - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5979ed3886f77431307dc512': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // Polikhim Hobo - Moved from Prapor to Skier + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Polikhim_Hobo
+  //
+  // 2026-08-10 - S1: moved to Skier LL1 (was given by Prapor, player level requirement)
+  '5979f8bb86f7743ec214c7a6': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (Prapor trader, minPlayerLevel 10)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Beyond the Red Meat (old: Beyond the Red Meat - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beyond_the_Red_Meat
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '64f5e20652fc01298e2c61e3': {
+    name: 'Beyond the Red Meat', // Was: Beyond the Red Meat - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Secret Recipe (old: Beyond the Red Meat - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_Recipe
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '64f6aafd67e11a7c6206e0d0': {
+    name: 'The Secret Recipe', // Was: Beyond the Red Meat - Part 2
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Chumming - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chumming
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b4795fb86f7745876267770': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Setup - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5c1234c286f77406fa13baeb': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Debtor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '639dbaf17c898a131e1cffff': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 31)
+    ],
+  },
+
+  // Supplements (old: Vitamins - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b478ff486f7744d184ecbbf': {
+    name: 'Supplements', // Was: Vitamins - Part 2
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Vitamins (old: Vitamins - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Vitamins
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b478eca86f7744642012254': {
+    name: 'Vitamins', // Was: Vitamins - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Walls Have Eyes - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '669fa39c64ea11e84c0642a6': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Exit Here - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Exit_Here
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '669fa395c4c5c04798002497': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Friend From the West (old: Friend From the West - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_From_the_West
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5a27c99a86f7747d2c6bdd8e': {
+    name: 'Friend From the West', // Was: Friend From the West - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Stirrup - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stirrup
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '596b455186f77457cb50eccb': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // House Arrest (old: House Arrest - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/House_Arrest
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '639135c3744e452011470807': {
+    name: 'House Arrest', // Was: House Arrest - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Safe Corridor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Safe_Corridor
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6089743983426423753cd58a': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Missing Cargo - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Missing_Cargo
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6179b4f16e9dd54ac275e407': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Rigged Game - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rigged_Game
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '5edabd13218d181e29451442': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Pyramid Scheme - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6572e876dc0d635f633a5714': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // Top Secret - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Top_Secret
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '626bd75d5bef5d7d590bd415': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Classified Technologies - Moved from Peacekeeper to Skier + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Classified_Technologies
+  //
+  // 2026-08-10 - S1: moved to Skier LL3 (was given by Peacekeeper, player level requirement)
+  '60896888e4a85c72ef3fa300': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (Peacekeeper trader, minPlayerLevel 14)
+    ],
+  },
+
+  // Long Road - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Road
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6193850f60b34236ee0483de': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Silent Caliber - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Silent_Caliber
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '5c0bc91486f7746ab41857a2': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Bullshit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bullshit
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '5c0bbaa886f7746941031d82': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Connections Up North - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Connections_Up_North
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '6764174c86addd02bc033d68': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Night Sweep - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Night_Sweep
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '60e71c11d54b755a3b53eb65': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
