@@ -1,27 +1,106 @@
 {
-  // Sales Night - Objective description wording incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
-  // API count now correct (7); description still wrong
-  '5ae449c386f7744bde357697': {
-    objectives: {
-      '5bb60cbc88a45011a8235cc5': {
-        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
-      },
-    },
-  },
+  // ===========================================================================
+  // SEASON 1 (1.1.0) quest requirement rework: player level requirements were
+  // replaced with trader loyalty levels. All quests below now require Prapor
+  // Loyalty Level 1 (LL1) instead of a player level.
+  // ===========================================================================
 
-  // The Tarkov Import (old: Test Drive - Part 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
+  // Luxurious Life - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Luxurious_Life
   //
-  // 2026-08-09: change name to S1 quest name
-  '5c0bd94186f7747a727f09b2': {
-    name: 'The Tarkov Import'
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '657315e1dccd301f1301416a': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
   },
 
-  // Power of Persuasion (old: Test Drive - Part 2)
+  // Shootout Picnic - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shootout_Picnic
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '59674cd986f7744ab26e32f2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 3)
+    ],
+  },
+
+  // Search Mission - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Search_Mission
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5fd9fad9c1ce6b1a3b486d00': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Bad Rep Evidence - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bad_Rep_Evidence
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5967530a86f77462ba22226b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // Shaking Up the Teller - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
+  '5967725e86f774601a446662': {
+    traderRequirements: [
+      // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 },
+    ],
+  },
+
+  // Background Check - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Background_Check
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5936da9e86f7742d65037edf': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Belka and Strelka - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Belka_and_Strelka
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '675c3507a06634b5110e3c18': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Debut - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5936d90786f7742b1420ba5b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Shooting Cans - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shooting_Cans
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '657315df034d76585f032e01': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Power of Persuasion (old: Test Drive - Part 2) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
   //
   // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL1 instead of player level
   '63a5cf262964a7488f5243ce': {
     name: 'Power of Persuasion',
     objectives: {
@@ -41,8 +120,29 @@
         ], // Was: { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }
       },
     },
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
   },
 
+  // Sales Night - Objective description wording incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
+  // API count now correct (7); description still wrong
+  '5ae449c386f7744bde357697': {
+    objectives: {
+      '5bb60cbc88a45011a8235cc5': {
+        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
+      },
+    },
+  },
+
+  // The Tarkov Import (old: Test Drive - Part 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
+  //
+  // 2026-08-09: change name to S1 quest name
+  '5c0bd94186f7747a727f09b2': {
+    name: 'The Tarkov Import'
+  },
 
   // Job for a Patriot (old: Test Drive - Part 3)
   // Proof : https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
