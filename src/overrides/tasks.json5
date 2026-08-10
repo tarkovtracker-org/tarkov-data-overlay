@@ -2455,6 +2455,389 @@
   },
 
   // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Rough Tarkov - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rough_Tarkov
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '66b38c7bf85b8bf7250f9cb6': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Trophy - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e2c386f77443e7549029': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Work Smarter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Work_Smarter
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '675c1cf4a757ddd00404f0a3': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Justice - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Justice
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e43786f7740a212217fa': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Swift (old: Swift One) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Swift
+  //
+  // 2026-08-10: renamed in S1 (dropped "One")
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '60e729cf5698ee7b05057439': {
+    name: 'Swift', // Was: Swift One
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Acquaintance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Acquaintance
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d24b81486f77439c92d6ba8': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Angry Watchman (old: The Huntsman Path - Evil Watchman) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Angry_Watchman
+  //
+  // 2026-08-10: renamed in S1 (Dorms PMC objectives match)
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e44386f77409453bce7b': {
+    name: 'The Huntsman Path - Angry Watchman', // Was: The Huntsman Path - Evil Watchman
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Woods Keeper - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Woods_Keeper
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e2ee86f77443e35162ea': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 13)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Big Game - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Big_Game
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '64e7b971f9d6fa49d6769b44': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Every Hunter Knows This - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Every_Hunter_Knows_This
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '66b38e144f2ab7cc530c3fe7': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Cease Fire! - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cease_Fire!
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '639136e84ed9512be67647db': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Nostalgia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Nostalgia
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e4ad86f77443e625e387': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // Courtesy Visit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Courtesy_Visit
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e48186f77443e625e386': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Crooked Cop - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Crooked_Cop
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '6578eb36e5020875d64645cd': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Claustrophobia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Claustrophobia
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '669fa3979b0ce3feae01a130': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Delicious Sausage - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Delicious_Sausage
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '63a88045abf76d719f42d715': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Dragnet - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dragnet
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '669fa3a08b4a64b332041ff7': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // The Huntsman Path - Sellout - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sellout
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e2e286f77444001e2e48': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // The Huntsman Path - Factory Chief - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Factory_Chief
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '60c0c018f7afb4354815096a': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Reserve - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reserve
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e4d586f77443e625e388': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Administrator - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '639136df4b15ca31f76bc31f': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // The Hermit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Hermit
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '61904daa7d0d857927447b9c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Fishing Place - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Place
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e4b786f77408251c4bfc': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // The Huntsman Path - Liberation (old: The Huntsman Path - Eraser - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Liberation
+  //
+  // 2026-08-10: renamed in S1 (Raiders objectives match)
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e45e86f77408251c4bfa': {
+    name: 'The Huntsman Path - Liberation', // Was: The Huntsman Path - Eraser - Part 2
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // The Huntsman Path - Outcasts - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Outcasts
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '6179ad0a6e9dd54ac275e3f2': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Huntsman Path - Forest Cleaning - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Forest_Cleaning
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e2cc86f77443e47ae019': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Forester's Duty - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forester%27s_Duty
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '66ab9da7eb102b9bcd08591c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // The Huntsman Path - Secured Perimeter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Secured_Perimeter
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e2b486f77409de05bba0': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Pest Control - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pest_Control
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '608a768d82e40b3c727fd17d': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Eraser (old: The Huntsman Path - Eraser - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Eraser
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e44f86f77443e625e385': {
+    name: 'The Huntsman Path - Eraser', // Was: The Huntsman Path - Eraser - Part 1
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Sadist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5edab4b1218d181e29451435': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Slaughterhouse - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Slaughterhouse
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '63a9b36cc31b00242d28a99f': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 40)
+    ],
+  },
+
+  // The Huntsman Path - Relentless - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '60e71e8ed54b755a3b53eb67': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 55)
+    ],
+  },
+
+  // Stray Dogs - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stray_Dogs
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '626bdcc3a371ee3a3a3514c5': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // The Huntsman Path - Controller - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Controller
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5d25e2d886f77442734d335e': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Hunting Trip - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hunting_Trip
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5d25e4ca86f77409dd5cdf2c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
     // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
