@@ -1259,6 +1259,324 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Seizing the Initiative - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Seizing_the_Initiative
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '675c1d6d59b0575973008fc7': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // New Paths (old: New Day, New Paths) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Paths
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '66aa58245ab22944110db6e9': {
+    name: 'New Paths', // Was: New Day, New Paths
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Tigr Safari - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '5a27b7a786f774579c3eb376': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // One Less Loose End - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/One_Less_Loose_End
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '669fa38fad7f1eac2607ed46': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Eagle Eye - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Eagle_Eye
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b80086f774429a5d7e20': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // Fishing Gear - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Gear
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b75b86f7742e97191958': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Weapons Circulation (old: The Cult - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Weapons_Circulation
+  //
+  // 2026-08-10: renamed in S1 (ritual spots objectives match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27ba1c86f77461ea5a3c56': {
+    name: 'Weapons Circulation', // Was: The Cult - Part 2
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Road Closed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Road_Closed
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639282134ed9512be67647ed': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Humanitarian Supplies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Humanitarian_Supplies
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b87686f77460de0252a8': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // The Cult (old: The Cult - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Cult
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b9de86f77464e5044585': {
+    name: 'The Cult', // Was: The Cult - Part 1
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Streets of Tarkov - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Streets_of_Tarkov
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639135f286e646067c176a87': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Your Car Needs a Service - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Your_Car_Needs_Service
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639135534b15ca31f76bc317': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // Scrap Metal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b7d686f77460d847e6a6': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Tracker (old: Cargo X - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tracker
+  //
+  // 2026-08-10: renamed in S1 (reservoirs/information objectives match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '5a27bb3d86f77411ea361a21': {
+    name: 'Tracker', // Was: Cargo X - Part 2
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Cargo X (old: Cargo X - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cargo_X
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '5a27bb1e86f7741f27621b7e': {
+    name: 'Cargo X', // Was: Cargo X - Part 1
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Lighthouse - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Lighthouse
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6179b4d1bca27a099552e04e': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // The Cleaner - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Cleaner
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '60e71c9ad54b755a3b53eb66': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Gifts from Tarkov (old: Cargo X - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gifts_from_Tarkov
+  //
+  // 2026-08-10: renamed in S1 (TerraGroup cargo marking objective match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '61958c366726521dd96828ec': {
+    name: 'Gifts from Tarkov', // Was: Cargo X - Part 4
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Reserve - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Reserve
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6086c852c945025d41566124': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Overpopulation - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Overpopulation
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6179aff8f57fb279792c60a1': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // The Guide - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0d4e61d09282029f53920e': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 32)
+    ],
+  },
+
+  // Counteraction - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '6179b5eabca27a099552e052': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Peacekeeping Mission - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Peacekeeping_Mission
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0d4c12d09282029f539173': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Trophies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Trophies
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '60e71ccb5688f6424c7bfec4': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 55)
+    ],
+  },
+
+  // Special Equipment - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Equipment
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '60e71ce009d7c801eb0c0ec6': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 60)
+    ],
+  },
+
+  // Samples - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Samples
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5edac020218d181e29451446': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // TerraGroup Employee - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/TerraGroup_Employee
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5edac63b930f5454f51e128b': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Insomnia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Insomnia
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0bd01e86f7747cdd799e56': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Worst Job in the World - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Worst_Job_in_the_World
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '63a9b229813bba58a50c9ee5': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
