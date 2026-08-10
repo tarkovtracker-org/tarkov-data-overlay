@@ -34,4 +34,7 @@ coverage/
 # Generated data (wiki cache, API cache, comparison results)
 data/
 
+# Local lookup notes (kept out of the repo on purpose)
+MISSING.txt
+
 eft/

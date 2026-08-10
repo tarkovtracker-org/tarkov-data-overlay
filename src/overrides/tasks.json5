@@ -697,6 +697,126 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Disease History - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Disease_History
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '60896e28e4a85c72ef3fa301': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Car Repair - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Car_Repair
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '596a218586f77420d232807c': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Drug Trafficking - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Drug_Trafficking
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '626bd75b05f287031503c7f6': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Colleagues (old: Colleagues - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Colleagues
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '5edab736cc183c769d778bc2': {
+    name: 'Colleagues', // Was: Colleagues - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Tarkov-Style Diplomacy (old: Colleagues - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tarkov-Style_Diplomacy
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 2")
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '5edaba7c0c502106f869bc02': {
+    name: 'Tarkov-Style Diplomacy', // Was: Colleagues - Part 2
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // A Difficult Choice (old: Colleagues - Part 3) - Change name
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Difficult_Choice
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 3")
+  '5edac34d0bb72a50635c2bfa': {
+    name: 'A Difficult Choice', // Was: Colleagues - Part 3
+  },
+
+  // Lost Contact - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Lost_Contact
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '6179afd0bca27a099552e040': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Seaside Vacation - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Seaside_Vacation
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '6179ad56c760af5ad2053587': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Beneath The Streets - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '66aba85403e0ee3101042877': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Crisis - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '60e71c48c1bfa3050473b8e5': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 38)
+    ],
+  },
+
+  // Decontamination Service - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '5c0d1c4cd0928202a02a6f5c': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
