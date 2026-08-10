@@ -20,72 +20,9 @@
     },
   },
 
-  // Bullshit - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Bullshit
-  // Confirmed in-game (PVE)
-  '5c0bbaa886f7746941031d82': {
-    minPlayerLevel: 19, // Was: 25 (tarkov.dev mirrors regular-mode value)
-  },
-  // Chumming - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Chumming
-  // Confirmed in-game (PVE)
-  '5b4795fb86f7745876267770': {
-    minPlayerLevel: 23, // Was: 24 (tarkov.dev mirrors regular-mode value)
-  },
-  // Developer's Secrets - Part 1 - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Developer's_Secrets_-_Part_1
-  // Confirmed in-game (PVE)
-  '65733403eefc2c312a759ddb': {
-    minPlayerLevel: 23, // Was: 25 (tarkov.dev mirrors regular-mode value)
-  },
-  // Easy Job - Part 1 - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job_-_Part_1
-  // Confirmed in-game (PVE)
-  '6179ac7511973d018217d0b9': {
-    minPlayerLevel: 17, // Was: 18 (tarkov.dev mirrors regular-mode value)
-  },
-  // Fishing Place - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Place
-  // Confirmed in-game (PVE)
-  '5d25e4b786f77408251c4bfc': {
-    minPlayerLevel: 25, // Was: 28 (tarkov.dev mirrors regular-mode value)
-  },
-  // Gunsmith - Part 15 - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Part_15
-  // Confirmed in-game (PVE)
-  '5ae3280386f7742a41359364': {
-    minPlayerLevel: 27, // Was: 29 (tarkov.dev mirrors regular-mode value)
-  },
-  // Pest Control - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Pest_Control
-  // Confirmed in-game (PVE)
-  '608a768d82e40b3c727fd17d': {
-    minPlayerLevel: 10, // Was: 20 (tarkov.dev mirrors regular-mode value)
-  },
-  // Scavenger - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
-  // Confirmed in-game (PVE)
-  '5c112d7e86f7740d6f647486': {
-    minPlayerLevel: 25, // Was: 29 (tarkov.dev mirrors regular-mode value)
-  },
-  // Surplus Goods - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Surplus_Goods
-  // Confirmed in-game (PVE)
-  '6089732b59b92115597ad789': {
-    minPlayerLevel: 13, // Was: 14 (tarkov.dev mirrors regular-mode value)
-  },
-  // The Blood of War - Part 2 - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_2
-  // Confirmed in-game (PVE)
-  '5b47876e86f7744d1c353205': {
-    minPlayerLevel: 23, // Was: 25 (tarkov.dev mirrors regular-mode value)
-  },
-  // The Punisher - Part 6 - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_6
-  // Confirmed in-game (PVE)
-  '59ca2eb686f77445a80ed049': {
-    minPlayerLevel: 16, // Was: 21 (tarkov.dev mirrors regular-mode value)
-  },
+  // REMOVED 2026-08-10: all minPlayerLevel overrides removed - the Season 1
+  // patch replaced player-level quest requirements with trader loyalty levels,
+  // so the field no longer applies to quests.
 
   // ===========================================================================
   // PARKED - upstream now serves the correct PvE value for these, so shipping
@@ -105,29 +42,9 @@
 
   // --- Converged: EFT reference, wiki and upstream now agree in both modes ---
 
-  // A Fuel Matter - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
-  // Confirmed in-game (PVE)
-  // Parked 2026-08-03: both modes now 15 (BSG unified the requirement).
-  // '608974d01a66564e74191fc0': {
-  //   minPlayerLevel: 15, // Was: 17 (tarkov.dev mirrors regular-mode value)
-  // },
-
-  // Inventory Check - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Check
-  // Confirmed in-game (PVE)
-  // Parked 2026-08-03: both modes now 15.
-  // '608974af4b05530f55550c21': {
-  //   minPlayerLevel: 15, // Was: 17 (tarkov.dev mirrors regular-mode value)
-  // },
-
-  // Psycho Sniper - PVE minimum player level differs from regular mode
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
-  // Confirmed in-game (PVE)
-  // Parked 2026-08-03: both modes now 27 (BSG lowered the regular requirement).
-  // '5c0be13186f7746f016734aa': {
-  //   minPlayerLevel: 27, // Was: 35 (tarkov.dev mirrors regular-mode value)
-  // },
+  // REMOVED 2026-08-10: parked minPlayerLevel entries (A Fuel Matter, Inventory
+  // Check, Psycho Sniper) removed - Season 1 patch replaced player-level quest
+  // requirements with trader loyalty levels.
 
   // Ambulances Again - PVE experience reward differs from regular mode
   // Proof: https://escapefromtarkov.fandom.com/wiki/Ambulances_Again

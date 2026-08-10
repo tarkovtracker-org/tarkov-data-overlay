@@ -744,7 +744,6 @@
       id: '5ac3b934156ae10c4430e83c',
       name: 'Ragman',
     },
-    minPlayerLevel: 47, // Was: 55
     requiredPrestige: {
       name: 'Prestige 4',
       prestigeLevel: 4,
@@ -1041,7 +1040,6 @@
       id: '5ac3b934156ae10c4430e83c',
       name: 'Ragman',
     },
-    minPlayerLevel: 47, // Was: 55
     requiredPrestige: {
       name: 'Prestige 5',
       prestigeLevel: 5,
@@ -1633,7 +1631,6 @@
 //      name: 'Jaeger',
 //    },
 //    kappaRequired: false,
-//    minPlayerLevel: 5,
 //    factionName: 'Any',
 //    taskRequirements: [],
 //    objectives: [
