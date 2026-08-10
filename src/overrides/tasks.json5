@@ -817,6 +817,100 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Fence Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Small Business - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '6663148ed7f171c4c20226c1': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Small Business - Part 2 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_2
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '6663149196a9349baa021baa': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Small Business - Part 3 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '66631493312343839d032d22': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Establish Contact - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Establish_Contact
+  //
+  // 2026-08-10: replaced the scav karma reputation gate with Fence LL1
+  '6672d9def1c88688a707d042': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (scav karma +4 reputation requirement)
+    ],
+  },
+
+  // Friend Among Strangers - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_Among_Strangers
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '66631489acf8442f8b05319f': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Immunity - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Immunity
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '6663148ca9290f9e0806cca1': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // The Choice - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Choice
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '60effd818b669d08a35bfad5': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Collector - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '5c51aac186f77432ea65c552': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Is This a Reference? - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Is_This_a_Reference
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '66d9cbb67b491f9d5304f6e6': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
