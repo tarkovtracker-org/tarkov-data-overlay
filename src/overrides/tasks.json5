@@ -2165,7 +2165,297 @@
     name: 'Gunsmith Master - Part 13', // Was: Gunsmith - Part 25
   },
 
-  // Sales Night - Objective description wording incorrect
+// Ragman Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Long Line - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Line
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '60e71dc0a94be721b065bbfc': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Make ULTRA Great Again - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_ULTRA_Great_Again
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae448bf86f7744d733e55ee': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Fuel Crisis (old: The Blood of War - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Crisis
+  //
+  // 2026-08-10: renamed in S1 (Interchange fuel tank objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae448f286f77448d73c0131': {
+    name: 'Fuel Crisis', // Was: The Blood of War - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Inventory Files (old: Database - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Files
+  //
+  // 2026-08-10: renamed in S1 (cargo manifests objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4493486f7744efa289417': {
+    name: 'Inventory Files', // Was: Database - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gratitude - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gratitude
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae449b386f77446d8741719': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Small Things, Big Help (old: The Blood of War - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Things,_Big_Help
+  //
+  // 2026-08-10: renamed in S1 (Woods fuel stash objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5c10f94386f774227172c572': {
+    name: 'Small Things, Big Help', // Was: The Blood of War - Part 3
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // A Big Loss (old: Database - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Big_Loss
+  //
+  // 2026-08-10: renamed in S1 (OLI cargo route documents objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4493d86f7744b8e15aa8f': {
+    name: 'A Big Loss', // Was: Database - Part 2
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Dressed to Kill - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dressed_to_Kill
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4490786f7744ca822adcc': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // The Key to Success - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Key_to_Success
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae4498786f7744bde357695': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Break the Deal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Break_the_Deal
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '675c085d59b0575973005f52': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Ballet Lover - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '639135a7e705511c8a4a1b78': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Audit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Audit
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '638fcd23dc65553116701d33': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Big Sale - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Sale
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae448e586f7744dcf0c2a67': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Minibus - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Minibus
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5b478d0f86f7744d190d91b5': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Nothing Fishy About This - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Nothing_Fishy_About_This
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '65802b627b44fa5e14638899': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Dandies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '65734c186dc1e402c80dc19e': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Supervisor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supervisor
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae449d986f774453a54a7e1': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 40)
+    ],
+  },
+
+  // Hot Delivery - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hot_Delivery
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5b478b1886f7744d1b23c57d': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Reserve Expert (old: Inventory Check) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reserve_Expert
+  //
+  // 2026-08-10: renamed in S1 (Reserve arsenal objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '608974af4b05530f55550c21': {
+    name: 'Reserve Expert', // Was: Inventory Check
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Living High is Not a Crime (old: Living High is Not a Crime - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Living_High_is_Not_a_Crime
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '5b47891f86f7744d1b23c571': {
+    name: 'Living High is Not a Crime', // Was: Living High is Not a Crime - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 27)
+    ],
+  },
+
+  // Audiophile - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Audiophile
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '639135bbc115f907b14700a6': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // A Fuel Matter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '608974d01a66564e74191fc0': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Booze - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Booze
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '60e71dc67fcf9c556f325056': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Know Your Place! - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Know_Your_Place!
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '66aa61663aa37705c5024277': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Scavenger - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '5c112d7e86f7740d6f647486': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Antique Enthusiast (old: Living High is Not a Crime - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Antique_Enthusiast
+  //
+  // 2026-08-10: renamed in S1 (antique figurine objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL4 instead of player level
+  '5c1141f386f77430ff393792': {
+    name: 'Antique Enthusiast', // Was: Living High is Not a Crime - Part 2
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+    // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
   '5ae449c386f7744bde357697': {
