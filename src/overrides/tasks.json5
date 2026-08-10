@@ -549,6 +549,98 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // THERAPIST - Season 1 quest requirement rework
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Pharmacist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pharmacist
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '5969f9e986f7741dde183a50': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Operation Aquarius (old: Operation Aquarius - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10: S1 - now requires Therapist LL1 instead of player level
+  '59689fbd86f7740d137ebfc4': {
+    name: 'Operation Aquarius', // Was: Operation Aquarius - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // Blood in the Water (old: Operation Aquarius - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Blood_in_the_Water
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10: S1 - now requires Therapist LL1 instead of player level
+  '5968eb3186f7741dde183a4d': {
+    name: 'Blood in the Water', // Was: Operation Aquarius - Part 2
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // First in Line - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/First_in_Line
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '657315ddab5a49b71f098853': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Shipment Tracking - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shipment_Tracking
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '675c047fa46173572a0bd878': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Shortage - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shortage
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '5967733e86f774602332fc84': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Supply Plans - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supply_Plans
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '596a0e1686f7741ddf17dbee': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 13)
+    ],
+  },
+
+  // Abandoned Cargo - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Abandoned_Cargo
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '675c03d1f7da9792a405549a': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong

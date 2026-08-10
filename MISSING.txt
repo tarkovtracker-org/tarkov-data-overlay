@@ -1,0 +1,37 @@
+# MISSING QUESTS - Season 1 (1.1.0)
+#
+# Quests the user provided that do NOT exist in the json.tarkov.dev task data.
+# They are new Season 1 quests and will be added as additions later.
+# Index format: <name> | <trader> | <LL>
+#
+# --- Index ---
+#
+# 1. Oil Run | Prapor | LL1
+# 2. Ironclad Proof | Prapor | LL3
+# 3. Special Order | Prapor | LL4
+# 4. Fall Ailment | Therapist | LL1
+#
+# --- Details ---
+#
+# 1. Oil Run (done 2026-08-10)
+#    - Trader: Prapor (54cb50c76803fa8b248b4571)
+#    - LL: 1
+#    - Not found in regular/tasks nor pve/tasks at lookup time.
+#
+# 2. Ironclad Proof (done 2026-08-10)
+#    - Trader: Prapor (54cb50c76803fa8b248b4571)
+#    - LL: 3
+#    - Wiki page exists (https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof)
+#      but the task is absent from regular/tasks and pve/tasks.
+#
+# 3. Special Order (done 2026-08-10)
+#    - Trader: Prapor (54cb50c76803fa8b248b4571)
+#    - LL: 4
+#    - Wiki page exists (https://escapefromtarkov.fandom.com/wiki/Special_Order)
+#      but the task is absent from regular/tasks and pve/tasks.
+#
+# 4. Fall Ailment (done 2026-08-10)
+#    - Trader: Therapist (54cb57776803fa99248b456e)
+#    - LL: 1
+#    - Wiki page exists (https://escapefromtarkov.fandom.com/wiki/Fall_Ailment)
+#      but the task is absent from regular/tasks and pve/tasks.
