@@ -125,6 +125,144 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Properties All Around - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Properties_All_Around
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '6573397ef3f8344c4575cd87': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Grenadier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Grenadier
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '5c0d190cd09282029f5390d8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // You've Got Mail - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/You%27ve_Got_Mail
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '6391359b9444fb141f4e6ee6': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gendarmerie - District Patrol (renamed: District Patrol) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
+  //
+  // 2026-08-09: renamed to "District Patrol" in S1
+  // 2026-08-10: S1 - now requires Prapor LL2 instead of player level
+  '64e7b9bffd30422ed03dad38': {
+    name: 'District Patrol', // Was: Gendarmerie - District Patrol
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Kings of the Rooftops - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '639136f086e646067c176a8b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Anesthesia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Anesthesia
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '5eda19f0edce541157209cee': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Postman Pat - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Postman_Pat_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59675ea386f77414b32bded2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Capturing Outposts - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Capturing_Outposts
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '60e71b9bbd90872cb85440f3': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 42)
+    ],
+  },
+
+  // Ice Cream Cones - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59675d6c86f7740a842fc482': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Glory to CPSU - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '639135b04ed9512be67647d7': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Delivery From the Past - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Delivery_From_the_Past
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59674eb386f774539f14813a': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Possessor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Possessor
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '669fa399033a3ce9870338a8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Job for a Patriot (old: Test Drive - Part 3) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL2 instead of player level
+  '64f5deac39e45b527a7c4232': {
+    name: 'Job for a Patriot',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
@@ -142,14 +280,6 @@
   // 2026-08-09: change name to S1 quest name
   '5c0bd94186f7747a727f09b2': {
     name: 'The Tarkov Import'
-  },
-
-  // Job for a Patriot (old: Test Drive - Part 3)
-  // Proof : https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
-  //
-  // 2026-08-09: change name to S1 quest name
-  '64f5deac39e45b527a7c4232': {
-    name: 'Job for a Patriot'
   },
 
 
