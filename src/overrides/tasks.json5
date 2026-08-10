@@ -1577,6 +1577,594 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Bad Habit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bad_Habit
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac3475486f7741d6224abd3': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Steady Signal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Steady_Signal
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '6578ec473dbd035d04531a8d': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Saving the Mole - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Saving_the_Mole
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '657315e4a6af4ab4b50f3459': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Gunsmith - MP-133 (old: Gunsmith - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MP-133
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac23c6186f7741247042bad': {
+    name: 'Gunsmith - MP-133', // Was: Gunsmith - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Courier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Courier
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '60e71d6d7fcf9c556f325055': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 52)
+    ],
+  },
+
+  // Farming (old: Farming - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Farming
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 3")
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac3462b86f7741d6118b983': {
+    name: 'Farming', // Was: Farming - Part 3
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - HK MP5 (old: Gunsmith - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_HK_MP5
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac2428686f77412450b42bf': {
+    name: 'Gunsmith - HK MP5', // Was: Gunsmith - Part 3
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 7)
+    ],
+  },
+
+  // Passion for Ergonomics - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Passion_for_Ergonomics
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '675c1570526ff496850895d9': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Gunsmith - AKS-74U (old: Gunsmith - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74U
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac2426c86f774138762edfe': {
+    name: 'Gunsmith - AKS-74U', // Was: Gunsmith - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Playing the Market (old: Farming - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Playing_the_Market
+  //
+  // 2026-08-10: renamed in S1 (control board objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac345dc86f774288030817f': {
+    name: 'Playing the Market', // Was: Farming - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Gunsmith - OP-SKS (old: Gunsmith - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_OP-SKS
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639872f9decada40426d3447': {
+    name: 'Gunsmith - OP-SKS', // Was: Gunsmith - Part 4
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Watching You - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Watching_You
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639136fa9444fb141f4e6eee': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Secret to Productivity (old: Developer's Secrets - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_to_Productivity
+  //
+  // 2026-08-10: renamed in S1 (IT firm morale objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '6573382e557ff128bf3da536': {
+    name: 'The Secret to Productivity', // Was: Developer's Secrets - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Gunsmith - Model 870 (old: Gunsmith - Part 5) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Model_870
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ae3267986f7742a413592fe': {
+    name: 'Gunsmith - Model 870', // Was: Gunsmith - Part 5
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Surveillance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surveillance
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639135e8c115f907b14700aa': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Corporate Perks (old: Developer's Secrets - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Perks
+  //
+  // 2026-08-10: renamed in S1 (IT firm office objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '65733403eefc2c312a759ddb': {
+    name: 'Corporate Perks', // Was: Developer's Secrets - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Scout - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scout
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac3477486f7741d651d6885': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Black Swan - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Black_Swan
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '669fa39b91b0a8c9680fc467': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Ill-Wisher (old: Signal - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ill-Wisher
+  //
+  // 2026-08-10: renamed in S1 (signal source objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac3467986f7741d6224abc2': {
+    name: 'Ill-Wisher', // Was: Signal - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Chemistry Closet - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemistry_Closet
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5f04886a3937dc337a6b8238': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Rat Hunting (old: Signal - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rat_Hunting
+  //
+  // 2026-08-10: renamed in S1 (PC CPU/battery objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac346a886f7744e1b083d67': {
+    name: 'Rat Hunting', // Was: Signal - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Secrets of Polikhim - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Secrets_of_Polikhim
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '66aa74571e5e199ecd094f18': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Gunsmith - M4A1 (old: Gunsmith - Part 7) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_M4A1
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ac244eb86f7741356335af1': {
+    name: 'Gunsmith - M4A1', // Was: Gunsmith - Part 7
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gunsmith - P226R (old: Gunsmith - Part 9) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_P226R
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '639872fa9b4fb827b200d8e5': {
+    name: 'Gunsmith - P226R', // Was: Gunsmith - Part 9
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // Semiconductor Crisis (old: Farming - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Semiconductor_Crisis
+  //
+  // 2026-08-10: renamed in S1 (graphics card/CPU fan objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ac3464c86f7741d651d6877': {
+    name: 'Semiconductor Crisis', // Was: Farming - Part 4
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Corporate Secrets - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Secrets
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6179b3bdc7560e13d23eeb8d': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Gunsmith - AK-105 (old: Gunsmith - Part 10) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AK-105
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae327c886f7745c7b3f2f3f': {
+    name: 'Gunsmith - AK-105', // Was: Gunsmith - Part 10
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Surplus Goods - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surplus_Goods
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6089732b59b92115597ad789': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // The Door - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Door
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '64ee9df4496db64f9b7a4432': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gunsmith - MPX (old: Gunsmith - Part 12) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MPX
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5b47799d86f7746c5d6a5fd8': {
+    name: 'Gunsmith - MPX', // Was: Gunsmith - Part 12
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Energy Crisis - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6179b3a12153c15e937d52bc': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Import - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Import
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5c139eb686f7747878361a6f': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // Gunsmith - AKS-74N (old: Gunsmith - Part 8) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74N
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3277186f7745973054106': {
+    name: 'Gunsmith - AKS-74N', // Was: Gunsmith - Part 8
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Gunsmith - AKM (old: Gunsmith - Part 6) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKM
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3270f86f77445ba41d4dd': {
+    name: 'Gunsmith - AKM', // Was: Gunsmith - Part 6
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - Vector 9x19 (old: Gunsmith - Part 11) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Vector_9x19
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '639872fc93ae507d5858c3a6': {
+    name: 'Gunsmith - Vector 9x19', // Was: Gunsmith - Part 11
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Back Door - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Back_Door
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6089736efa70fc097863b8f6': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - AS VAL (old: Gunsmith - Part 15) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AS_VAL
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3280386f7742a41359364': {
+    name: 'Gunsmith - AS VAL', // Was: Gunsmith - Part 15
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // Fertilizers - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fertilizers
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5c1128e386f7746565181106': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Psycho Sniper - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '5c0be13186f7746f016734aa': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 27)
+    ],
+  },
+
+  // Calibration - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Calibration
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '60e71d23c1bfa3050473b8e6': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 47)
+    ],
+  },
+
+  // Setting Priorities - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Setting_Priorities
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '6942b44f891369fc790e385a': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 37)
+    ],
+  },
+
+  // Shooter Born in Heaven (old: A Shooter Born in Heaven) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven
+  //
+  // 2026-08-10: renamed in S1 (dropped leading "A ")
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '5c0bde0986f77479cf22c2f8': {
+    name: 'Shooter Born in Heaven', // Was: A Shooter Born in Heaven
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Goals and Means - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Goals_and_Means
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '68db9c7557bc51a8c804c14b': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Essential Quests (renamed in S1, no loyalty requirement)
+  // ---------------------------------------------------------------------------
+
+  // Gunsmith Master - Part 1 (old: Gunsmith - Part 14) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_1
+  //
+  // 2026-08-10: renamed in S1 (HK 416A5 objectives match)
+  '639872fe8871e1272b10ccf6': {
+    name: 'Gunsmith Master - Part 1', // Was: Gunsmith - Part 14
+  },
+
+  // Gunsmith Master - Part 2 (old: Gunsmith - Part 13) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_2
+  //
+  // 2026-08-10: renamed in S1 (R11 RSASS objectives match)
+  '5ac244c486f77413e12cf945': {
+    name: 'Gunsmith Master - Part 2', // Was: Gunsmith - Part 13
+  },
+
+  // Gunsmith Master - Part 3 (old: Gunsmith - Part 16) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_3
+  //
+  // 2026-08-10: renamed in S1 (DVL-10 objectives match)
+  '5ac242ab86f77412464f68b4': {
+    name: 'Gunsmith Master - Part 3', // Was: Gunsmith - Part 16
+  },
+
+  // Gunsmith Master - Part 4 (old: Gunsmith - Part 17) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_4
+  //
+  // 2026-08-10: renamed in S1 (AK-102 objectives match)
+  '5b47749f86f7746c5d6a5fd4': {
+    name: 'Gunsmith Master - Part 4', // Was: Gunsmith - Part 17
+  },
+
+  // Gunsmith Master - Part 5 (old: Gunsmith - Part 18) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_5
+  //
+  // 2026-08-10: renamed in S1 (AKMN objectives match)
+  '5b477b6f86f7747290681823': {
+    name: 'Gunsmith Master - Part 5', // Was: Gunsmith - Part 18
+  },
+
+  // Gunsmith Master - Part 6 (old: Gunsmith - Part 19) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_6
+  //
+  // 2026-08-10: renamed in S1 (SVDS objectives match)
+  '639873003693c63d86328f25': {
+    name: 'Gunsmith Master - Part 6', // Was: Gunsmith - Part 19
+  },
+
+  // Gunsmith Master - Part 7 (old: Gunsmith - Part 20) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_7
+  //
+  // 2026-08-10: renamed in S1 (M1A objectives match)
+  '5b477f7686f7744d1b23c4d2': {
+    name: 'Gunsmith Master - Part 7', // Was: Gunsmith - Part 20
+  },
+
+  // Gunsmith Master - Part 8 (old: Gunsmith - Part 21) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_8
+  //
+  // 2026-08-10: renamed in S1 (M700/M1911 objectives match)
+  '63987301e11ec11ff5504036': {
+    name: 'Gunsmith Master - Part 8', // Was: Gunsmith - Part 21
+  },
+
+  // Gunsmith Master - Part 9 (old: Gunsmith - Part 22) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_9
+  //
+  // 2026-08-10: renamed in S1 (M4A1 objectives match)
+  '5b47825886f77468074618d3': {
+    name: 'Gunsmith Master - Part 9', // Was: Gunsmith - Part 22
+  },
+
+  // Gunsmith Master - Part 10 (old: Gunsmith - Part 23) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_10
+  //
+  // 2026-08-10: renamed in S1 (MK47 Mutant objectives match)
+  '64f83bb69878a0569d6ecfbe': {
+    name: 'Gunsmith Master - Part 10', // Was: Gunsmith - Part 23
+  },
+
+  // Gunsmith Master - Part 11 (old: Gunsmith - Part 24) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_11
+  //
+  // 2026-08-10: renamed in S1 (KAC SR-25 objectives match)
+  '64f83bcdde58fc437700d8fa': {
+    name: 'Gunsmith Master - Part 11', // Was: Gunsmith - Part 24
+  },
+
+  // Gunsmith Master - Part 13 (old: Gunsmith - Part 25) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_13
+  //
+  // 2026-08-10: renamed in S1 (PKP machine gun objectives match)
+  '64f83bd983cfca080a362c82': {
+    name: 'Gunsmith Master - Part 13', // Was: Gunsmith - Part 25
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
