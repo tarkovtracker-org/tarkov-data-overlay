@@ -361,6 +361,194 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Best Job in the World - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Best_Job_in_the_World
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '63a9ae24009ffc6a551631a5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Intimidator - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Intimidator
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '60e71bb4e456d449cd47ca75': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // The Art of Explosion - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Art_of_Explosion
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '67b45467814ab0ffa000c7e7': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Unique Experience (old: Test Drive - Part 6) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL4 instead of player level
+  '675c1ff1a757ddd00404f0aa': {
+    name: 'Unique Experience',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // Regulated Materials - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Regulated_Materials
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '5d4bec3486f7743cac246665': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Escort - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '60e71b62a0beca400d69efc4': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 46)
+    ],
+  },
+
+  // Getting Some Air (old: Test Drive - Part 4) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Getting_Some_Air
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL4 instead of player level
+  '6574e0dedc0d635f633a5805': {
+    name: 'Getting Some Air',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // The Punisher - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c50a9e86f7745fef66f4ff': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // The Punisher - Part 2 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_2
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c50c8886f7745fed3193bf': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // The Punisher - Part 3 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_3
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c512ad86f7741f0d09de9b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // The Punisher - Part 4 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_4
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca264786f77445a80ed044': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Punisher - Part 5 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_5
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca29fb86f77445ab465c87': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Punisher - Part 6 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_6
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca2eb686f77445a80ed049': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Big Customer - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Customer
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '597a171586f77405ba6887d3': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // Oil Change - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Change
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '69ce1de03e15cd80bd06f6c9': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Stick in the Wheel - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stick_in_the_Wheel
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a3f4eca8acb2d2055159': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Forge a Friendship - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forge_a_Friendship
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a15566e6a521aa051b15': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Half-Empty - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Half-Empty
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a2c17e3818d5bb0648b6': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
@@ -370,24 +558,6 @@
         description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
       },
     },
-  },
-
-
-  // Getting Some Air (old: Test Drive - Part 4)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Getting_Some_Air
-  //
-  // 2026-08-09: change name to S1 quest name
-  '6574e0dedc0d635f633a5805': {
-    name: 'Getting Some Air'
-  },
-
-
-  // Unique Experience (old: Test Drive - Part 6)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
-  //
-  // 2026-08-09: change name to S1 quest name
-  '675c1ff1a757ddd00404f0aa': {
-    name: 'Unique Experience'
   },
 
 
