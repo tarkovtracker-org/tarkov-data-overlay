@@ -641,6 +641,62 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // All Is Revealed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_Is_Revealed
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '669fa39ee749756c920d02c8': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // General Wares - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/General_Wares
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '596a1e6c86f7741ddc2d3206': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Sanitary Standards (old: Sanitary Standards - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sanitary_Standards
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10: S1 - now requires Therapist LL2 instead of player level
+  '59689ee586f7740d1570bbd5': {
+    name: 'Sanitary Standards', // Was: Sanitary Standards - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 4)
+    ],
+  },
+
+  // Population Census - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Population_Census
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '639135d89444fb141f4e6eea': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Urban Medicine - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Urban_Medicine
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '639135e0fa894f0a866afde6': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
