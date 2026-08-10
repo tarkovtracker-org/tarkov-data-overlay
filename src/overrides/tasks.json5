@@ -263,6 +263,104 @@
     ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // The Tarkov Import (old: Test Drive - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '5c0bd94186f7747a727f09b2': {
+    name: 'The Tarkov Import',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Easy-Breezy (old: Test Drive - Part 5) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '669fa3a40c828825de06d6a1': {
+    name: 'Easy-Breezy',
+    objectives: {
+      '66a0f5a7f9eae6761253114c': {
+        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
+        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: also lists Night Factory
+      },
+    },
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 32)
+    ],
+  },
+
+  // No Place for Renegades - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '60896bca6ee58f38c417d4f2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Easy Job (old: Easy Job - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job
+  //
+  // 2026-08-10: renamed to "Easy Job" in S1
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '6179ac7511973d018217d0b9': {
+    name: 'Easy Job', // Was: Easy Job - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Special Comms - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Comms
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '66ab970848ddbe9d4a0c49a8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // Reconnaissance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reconnaissance
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '626bd75c71bd851e971b82a5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Documents - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Documents
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '60896b7bfa70fc097863b8f5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // The Bunker (old: The Bunker - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Bunker
+  //
+  // 2026-08-10: renamed to "The Bunker" in S1
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '5ede55112c95834b583f052a': {
+    name: 'The Bunker', // Was: The Bunker - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
   // Sales Night - Objective description wording incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
   // API count now correct (7); description still wrong
@@ -274,14 +372,6 @@
     },
   },
 
-  // The Tarkov Import (old: Test Drive - Part 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
-  //
-  // 2026-08-09: change name to S1 quest name
-  '5c0bd94186f7747a727f09b2': {
-    name: 'The Tarkov Import'
-  },
-
 
   // Getting Some Air (old: Test Drive - Part 4)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Getting_Some_Air
@@ -291,19 +381,6 @@
     name: 'Getting Some Air'
   },
 
-  // Easy-Breezy (old: Test Drive - Part 5)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
-  //
-  // 2026-08-09: change name to S1 quest name
-  '669fa3a40c828825de06d6a1': {
-    name: 'Easy-Breezy',
-    objectives: {
-      '66a0f5a7f9eae6761253114c': {
-        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
-        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: also lists Night Factory
-      },
-    },
-  },
 
   // Unique Experience (old: Test Drive - Part 6)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
