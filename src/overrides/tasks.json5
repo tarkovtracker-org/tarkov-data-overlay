@@ -1,27 +1,106 @@
 {
-  // Sales Night - Objective description wording incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
-  // API count now correct (7); description still wrong
-  '5ae449c386f7744bde357697': {
-    objectives: {
-      '5bb60cbc88a45011a8235cc5': {
-        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
-      },
-    },
-  },
+  // ===========================================================================
+  // SEASON 1 (1.1.0) quest requirement rework: player level requirements were
+  // replaced with trader loyalty levels. All quests below now require Prapor
+  // Loyalty Level 1 (LL1) instead of a player level.
+  // ===========================================================================
 
-  // The Tarkov Import (old: Test Drive - Part 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
+  // Luxurious Life - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Luxurious_Life
   //
-  // 2026-08-09: change name to S1 quest name
-  '5c0bd94186f7747a727f09b2': {
-    name: 'The Tarkov Import'
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '657315e1dccd301f1301416a': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
   },
 
-  // Power of Persuasion (old: Test Drive - Part 2)
+  // Shootout Picnic - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shootout_Picnic
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '59674cd986f7744ab26e32f2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 3)
+    ],
+  },
+
+  // Search Mission - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Search_Mission
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5fd9fad9c1ce6b1a3b486d00': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Bad Rep Evidence - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bad_Rep_Evidence
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5967530a86f77462ba22226b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // Shaking Up the Teller - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
+  '5967725e86f774601a446662': {
+    traderRequirements: [
+      // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 },
+    ],
+  },
+
+  // Background Check - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Background_Check
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5936da9e86f7742d65037edf': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Belka and Strelka - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Belka_and_Strelka
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '675c3507a06634b5110e3c18': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Debut - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '5936d90786f7742b1420ba5b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Shooting Cans - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shooting_Cans
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '657315df034d76585f032e01': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Power of Persuasion (old: Test Drive - Part 2) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
   //
   // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL1 instead of player level
   '63a5cf262964a7488f5243ce': {
     name: 'Power of Persuasion',
     objectives: {
@@ -41,30 +120,174 @@
         ], // Was: { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }
       },
     },
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 2
+  // ---------------------------------------------------------------------------
 
-  // Job for a Patriot (old: Test Drive - Part 3)
-  // Proof : https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
+  // Properties All Around - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Properties_All_Around
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '6573397ef3f8344c4575cd87': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Grenadier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Grenadier
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '5c0d190cd09282029f5390d8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // You've Got Mail - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/You%27ve_Got_Mail
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '6391359b9444fb141f4e6ee6': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gendarmerie - District Patrol (renamed: District Patrol) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
+  //
+  // 2026-08-09: renamed to "District Patrol" in S1
+  // 2026-08-10: S1 - now requires Prapor LL2 instead of player level
+  '64e7b9bffd30422ed03dad38': {
+    name: 'District Patrol', // Was: Gendarmerie - District Patrol
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Kings of the Rooftops - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '639136f086e646067c176a8b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Anesthesia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Anesthesia
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '5eda19f0edce541157209cee': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Postman Pat - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Postman_Pat_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59675ea386f77414b32bded2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Capturing Outposts - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Capturing_Outposts
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '60e71b9bbd90872cb85440f3': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 42)
+    ],
+  },
+
+  // Ice Cream Cones - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ice_Cream_Cones
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59675d6c86f7740a842fc482': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Glory to CPSU (old: Glory to CPSU - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU
+  // The old "Glory to CPSU - Part 1" page is historical; the S1 quest is a
+  // single "Glory to CPSU" (dropped "- Part 1") with reworked optional
+  // objectives and a Prapor LL2 gate.
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '639135b04ed9512be67647d7': {
+    name: 'Glory to CPSU', // Was: Glory to CPSU - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Delivery From the Past - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Delivery_From_the_Past
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '59674eb386f774539f14813a': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Possessor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Possessor
+  //
+  // 2026-08-10 - S1: now requires Prapor LL2 instead of player level
+  '669fa399033a3ce9870338a8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Job for a Patriot (old: Test Drive - Part 3) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
   //
   // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL2 instead of player level
   '64f5deac39e45b527a7c4232': {
-    name: 'Job for a Patriot'
+    name: 'Job for a Patriot',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
   },
 
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 3
+  // ---------------------------------------------------------------------------
 
-  // Getting Some Air (old: Test Drive - Part 4)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Getting_Some_Air
+  // The Tarkov Import (old: Test Drive - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Import
   //
   // 2026-08-09: change name to S1 quest name
-  '6574e0dedc0d635f633a5805': {
-    name: 'Getting Some Air'
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '5c0bd94186f7747a727f09b2': {
+    name: 'The Tarkov Import',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
   },
 
-  // Easy-Breezy (old: Test Drive - Part 5)
+  // Easy-Breezy (old: Test Drive - Part 5) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
   //
   // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
   '669fa3a40c828825de06d6a1': {
     name: 'Easy-Breezy',
     objectives: {
@@ -73,39 +296,560 @@
         maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: also lists Night Factory
       },
     },
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 32)
+    ],
   },
 
-  // Unique Experience (old: Test Drive - Part 6)
+  // No Place for Renegades - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '60896bca6ee58f38c417d4f2': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Easy Job (old: Easy Job - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job
+  //
+  // 2026-08-10: renamed to "Easy Job" in S1
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '6179ac7511973d018217d0b9': {
+    name: 'Easy Job', // Was: Easy Job - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Special Comms - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Comms
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '66ab970848ddbe9d4a0c49a8': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // Reconnaissance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reconnaissance
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '626bd75c71bd851e971b82a5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Documents - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Documents
+  //
+  // 2026-08-10 - S1: now requires Prapor LL3 instead of player level
+  '60896b7bfa70fc097863b8f5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // The Bunker (old: The Bunker - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Bunker
+  //
+  // 2026-08-10: renamed to "The Bunker" in S1
+  // 2026-08-10: S1 - now requires Prapor LL3 instead of player level
+  '5ede55112c95834b583f052a': {
+    name: 'The Bunker', // Was: The Bunker - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Prapor Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Best Job in the World - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Best_Job_in_the_World
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '63a9ae24009ffc6a551631a5': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Intimidator - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Intimidator
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '60e71bb4e456d449cd47ca75': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // The Art of Explosion - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Art_of_Explosion
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '67b45467814ab0ffa000c7e7': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Unique Experience (old: Test Drive - Part 6) - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
   //
   // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL4 instead of player level
   '675c1ff1a757ddd00404f0aa': {
-    name: 'Unique Experience'
+    name: 'Unique Experience',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
   },
 
-
-  // Forester's Duty - objectives description incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Forester%27s_Duty
-  // Recent wiki update (post-1.0)
-  '66ab9da7eb102b9bcd08591c': {
-    objectives: {
-      '66ab9da7eb102b9bcd08591d': {
-        description: 'Eliminate 5 Scavs on Lighthouse (In one raid)', // Was: Eliminate Scavs at the village on Lighthouse (In one raid)
-        zones: [], // Was: [{ id: "Marafon_kill_village_lighthouse", position: { x: -72.8853149, y: 5.777012, z: -286.249237 }, outline: [...] }]
-        zoneNames: [], // Was: ['Village']
-      },
-      '66ab9da7eb102b9bcd085922': {
-        description: 'Eliminate 5 Scavs on Shoreline (In one raid)', // Was: Eliminate Scavs at the village on Shoreline (In one raid)
-        zones: [], // Was: [{ id: "marafon_kill_village_shoreline", position: { x: 377.300049, y: -54.42, z: 136.299988 }, outline: [...] }]
-        zoneNames: [], // Was: ['Village']
-      },
-    },
+  // Regulated Materials - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Regulated_Materials
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '5d4bec3486f7743cac246665': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
   },
 
-  // Small Business - Part 3 - in-game localization bug: the two Woods objective
-  // texts are swapped relative to their actual map markers. The marker positions
-  // (zoneId -> coordinates) are CORRECT in the game data; only the description
-  // text BSG attached to each objective is wrong, and tarkov.dev mirrors it.
+  // Escort - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '60e71b62a0beca400d69efc4': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 46)
+    ],
+  },
+
+  // Getting Some Air (old: Test Drive - Part 4) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Getting_Some_Air
+  //
+  // 2026-08-09: change name to S1 quest name
+  // 2026-08-10: S1 - now requires Prapor LL4 instead of player level
+  '6574e0dedc0d635f633a5805': {
+    name: 'Getting Some Air',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // The Punisher - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c50a9e86f7745fef66f4ff': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // The Punisher - Part 2 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_2
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c50c8886f7745fed3193bf': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // The Punisher - Part 3 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_3
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59c512ad86f7741f0d09de9b': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // The Punisher - Part 4 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_4
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca264786f77445a80ed044': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Punisher - Part 5 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_5
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca29fb86f77445ab465c87': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Punisher - Part 6 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Punisher_-_Part_6
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '59ca2eb686f77445a80ed049': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Big Customer - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Customer
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '597a171586f77405ba6887d3': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // Oil Change - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Change
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '69ce1de03e15cd80bd06f6c9': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Stick in the Wheel - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stick_in_the_Wheel
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a3f4eca8acb2d2055159': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Forge a Friendship - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forge_a_Friendship
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a15566e6a521aa051b15': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Half-Empty - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Half-Empty
+  //
+  // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  '6740a2c17e3818d5bb0648b6': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // THERAPIST - Season 1 quest requirement rework
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Pharmacist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pharmacist
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '5969f9e986f7741dde183a50': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Operation Aquarius (old: Operation Aquarius - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10: S1 - now requires Therapist LL1 instead of player level
+  '59689fbd86f7740d137ebfc4': {
+    name: 'Operation Aquarius', // Was: Operation Aquarius - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // Blood in the Water (old: Operation Aquarius - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Blood_in_the_Water
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10: S1 - now requires Therapist LL1 instead of player level
+  '5968eb3186f7741dde183a4d': {
+    name: 'Blood in the Water', // Was: Operation Aquarius - Part 2
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 6)
+    ],
+  },
+
+  // First in Line - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/First_in_Line
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '657315ddab5a49b71f098853': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Shipment Tracking - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shipment_Tracking
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '675c047fa46173572a0bd878': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Shortage - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shortage
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '5967733e86f774602332fc84': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Supply Plans - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supply_Plans
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '596a0e1686f7741ddf17dbee': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 13)
+    ],
+  },
+
+  // Abandoned Cargo - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Abandoned_Cargo
+  //
+  // 2026-08-10 - S1: now requires Therapist LL1 instead of player level
+  '675c03d1f7da9792a405549a': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // All Is Revealed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_Is_Revealed
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '669fa39ee749756c920d02c8': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // General Wares - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/General_Wares
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '596a1e6c86f7741ddc2d3206': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Sanitary Standards (old: Sanitary Standards - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sanitary_Standards
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10: S1 - now requires Therapist LL2 instead of player level
+  '59689ee586f7740d1570bbd5': {
+    name: 'Sanitary Standards', // Was: Sanitary Standards - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 4)
+    ],
+  },
+
+  // Population Census - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Population_Census
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '639135d89444fb141f4e6eea': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Urban Medicine - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Urban_Medicine
+  //
+  // 2026-08-10 - S1: now requires Therapist LL2 instead of player level
+  '639135e0fa894f0a866afde6': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Disease History - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Disease_History
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '60896e28e4a85c72ef3fa301': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Car Repair - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Car_Repair
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '596a218586f77420d232807c': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Drug Trafficking - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Drug_Trafficking
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '626bd75b05f287031503c7f6': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Colleagues (old: Colleagues - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Colleagues
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '5edab736cc183c769d778bc2': {
+    name: 'Colleagues', // Was: Colleagues - Part 1
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Tarkov-Style Diplomacy (old: Colleagues - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tarkov-Style_Diplomacy
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 2")
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '5edaba7c0c502106f869bc02': {
+    name: 'Tarkov-Style Diplomacy', // Was: Colleagues - Part 2
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // A Difficult Choice (old: Colleagues - Part 3) - Change name
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Difficult_Choice
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 3")
+  '5edac34d0bb72a50635c2bfa': {
+    name: 'A Difficult Choice', // Was: Colleagues - Part 3
+  },
+
+  // Lost Contact - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Lost_Contact
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '6179afd0bca27a099552e040': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Seaside Vacation - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Seaside_Vacation
+  //
+  // 2026-08-10 - S1: now requires Therapist LL3 instead of player level
+  '6179ad56c760af5ad2053587': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Therapist Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Beneath The Streets - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '66aba85403e0ee3101042877': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Crisis - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '60e71c48c1bfa3050473b8e5': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 38)
+    ],
+  },
+
+  // Decontamination Service - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
+  //
+  // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  '5c0d1c4cd0928202a02a6f5c': {
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Fence Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Small Business - Part 1 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_1
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '6663148ed7f171c4c20226c1': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Small Business - Part 2 - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_2
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '6663149196a9349baa021baa': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Small Business - Part 3 - Change requirements + in-game localization bug:
+  // the two Woods objective texts are swapped relative to their actual map
+  // markers. The marker positions (zoneId -> coordinates) are CORRECT in the
+  // game data; only the description text BSG attached to each objective is
+  // wrong, and tarkov.dev mirrors it.
   //   obj 666733e5... zoneId place_peacemaker_007_2_N2   -> marker at the Sawmill
   //   obj 666733e7... zoneId place_peacemaker_007_2_N2_1 -> marker at the river/Sunken Village
   // Fix = swap ONLY the description text so each names the place its marker sits.
@@ -113,7 +857,12 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
   //        (Woods objectives list both "river village" and "sawmill" marked
   //        circles); marker placement verified on the tarkov.dev interactive map.
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
   '66631493312343839d032d22': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
     objectives: {
       '666733e565831d5bafa18bbb': {
         description: 'Stash a Cultist knife at the sawmill marked circle on Woods', // marker is at the Sawmill. Was (game): "...at the river village..."
@@ -124,22 +873,1404 @@
     },
   },
 
-  // To Great Heights! - Part 3 - Inaccurate count and description.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
-  '66058cc5bb83da7ba474aba9': {
+  // Establish Contact - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Establish_Contact
+  //
+  // 2026-08-10: replaced the scav karma reputation gate with Fence LL1
+  '6672d9def1c88688a707d042': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (scav karma +4 reputation requirement)
+    ],
+  },
+
+  // Friend Among Strangers - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_Among_Strangers
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '66631489acf8442f8b05319f': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+  },
+
+  // Immunity - Change requirements + wikiLink points to the skill page instead of the quest page
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  // tarkov.dev currently returns the Immunity skill page instead of the quest page.
+  '6663148ca9290f9e0806cca1': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 0)
+    ],
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
+  },
+
+  // The Choice - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Choice
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '60effd818b669d08a35bfad5': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Collector - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '5c51aac186f77432ea65c552': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Is This a Reference? - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Is_This_a_Reference
+  //
+  // 2026-08-10 - S1: now requires Fence LL1 instead of player level
+  '66d9cbb67b491f9d5304f6e6': {
+    traderRequirements: [
+      { trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Supplier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supplier
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '596b36c586f77450d6045ad2': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Burning Rubber - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Burning_Rubber
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '657315e270bb0b8dba00cc48': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Golden Swag - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Golden_Swag
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5979eee086f774311955e614': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // Informed Means Armed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Informed_Means_Armed
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5b47926a86f7747ccc057c15': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // The Extortionist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Extortionist
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '596b43fb86f77457ca186186': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 7)
+    ],
+  },
+
+  // Private Club - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '675c3582f6ddc329a90f9c6d': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // No Swiping - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '658027799634223183395339': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // What's on the Flash Drive? - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive
+  //
+  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  '5979ed3886f77431307dc512': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // Polikhim Hobo - Moved from Prapor to Skier + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Polikhim_Hobo
+  //
+  // 2026-08-10 - S1: moved to Skier LL1 (was given by Prapor, player level requirement)
+  '5979f8bb86f7743ec214c7a6': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (Prapor trader, minPlayerLevel 10)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Beyond the Red Meat (old: Beyond the Red Meat - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beyond_the_Red_Meat
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '64f5e20652fc01298e2c61e3': {
+    name: 'Beyond the Red Meat', // Was: Beyond the Red Meat - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Secret Recipe (old: Beyond the Red Meat - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_Recipe
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '64f6aafd67e11a7c6206e0d0': {
+    name: 'The Secret Recipe', // Was: Beyond the Red Meat - Part 2
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Chumming - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chumming
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b4795fb86f7745876267770': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Setup - Change requirements + Objective wearing gear variants missing
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // Wiki Guide section lists additional valid hats and chest rigs for objective progress.
+  '5c1234c286f77406fa13baeb': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
     objectives: {
-      '662ba61d3ed61b6b78187b71': {
-        count: 2, // Was: 1
+      '5c1fa9c986f7740de474cb3d': {
+        wearing: [
+          [
+            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
+            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
+          ],
+          [
+            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
+            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+          ],
+          [
+            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
+            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
+          ],
+          [
+            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
+          ],
+          [
+            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+          ],
+          [
+            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
+          ],
+          [
+            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
+          ],
+          [
+            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+          ],
+          [
+            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
+          ],
+        ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
       },
     },
   },
 
-  // The Blood of War - Part 1 - Truck #2 location change; truck #4 objective missing zone data
+  // Debtor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '639dbaf17c898a131e1cffff': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 31)
+    ],
+  },
+
+  // Supplements (old: Vitamins - Part 2) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b478ff486f7744d184ecbbf': {
+    name: 'Supplements', // Was: Vitamins - Part 2
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Vitamins (old: Vitamins - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Vitamins
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5b478eca86f7744642012254': {
+    name: 'Vitamins', // Was: Vitamins - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Walls Have Eyes - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '669fa39c64ea11e84c0642a6': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Exit Here - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Exit_Here
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '669fa395c4c5c04798002497': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Friend From the West (old: Friend From the West - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_From_the_West
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '5a27c99a86f7747d2c6bdd8e': {
+    name: 'Friend From the West', // Was: Friend From the West - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Stirrup - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stirrup
+  //
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '596b455186f77457cb50eccb': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 8)
+    ],
+  },
+
+  // House Arrest (old: House Arrest - Part 1) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/House_Arrest
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  '639135c3744e452011470807': {
+    name: 'House Arrest', // Was: House Arrest - Part 1
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Safe Corridor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Safe_Corridor
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6089743983426423753cd58a': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Missing Cargo - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Missing_Cargo
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6179b4f16e9dd54ac275e407': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Rigged Game - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rigged_Game
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '5edabd13218d181e29451442': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // Pyramid Scheme - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6572e876dc0d635f633a5714': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // Top Secret - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Top_Secret
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '626bd75d5bef5d7d590bd415': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Classified Technologies - Moved from Peacekeeper to Skier + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Classified_Technologies
+  //
+  // 2026-08-10 - S1: moved to Skier LL3 (was given by Peacekeeper, player level requirement)
+  '60896888e4a85c72ef3fa300': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (Peacekeeper trader, minPlayerLevel 14)
+    ],
+  },
+
+  // Long Road - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Road
+  //
+  // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  '6193850f60b34236ee0483de': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Skier Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Silent Caliber - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Silent_Caliber
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '5c0bc91486f7746ab41857a2': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Bullshit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bullshit
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '5c0bbaa886f7746941031d82': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Connections Up North - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Connections_Up_North
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '6764174c86addd02bc033d68': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Night Sweep - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Night_Sweep
+  //
+  // 2026-08-10 - S1: now requires Skier LL4 instead of player level
+  '60e71c11d54b755a3b53eb65': {
+    traderRequirements: [
+      { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Seizing the Initiative - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Seizing_the_Initiative
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '675c1d6d59b0575973008fc7': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // New Paths (old: New Day, New Paths) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Paths
+  //
+  // 2026-08-10: renamed in S1
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '66aa58245ab22944110db6e9': {
+    name: 'New Paths', // Was: New Day, New Paths
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Tigr Safari - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '5a27b7a786f774579c3eb376': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // One Less Loose End - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/One_Less_Loose_End
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  '669fa38fad7f1eac2607ed46': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Eagle Eye - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Eagle_Eye
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b80086f774429a5d7e20': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // Fishing Gear - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Gear
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b75b86f7742e97191958': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Weapons Circulation (old: The Cult - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Weapons_Circulation
+  //
+  // 2026-08-10: renamed in S1 (ritual spots objectives match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27ba1c86f77461ea5a3c56': {
+    name: 'Weapons Circulation', // Was: The Cult - Part 2
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 18)
+    ],
+  },
+
+  // Road Closed - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Road_Closed
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639282134ed9512be67647ed': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Humanitarian Supplies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Humanitarian_Supplies
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b87686f77460de0252a8': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 11)
+    ],
+  },
+
+  // The Cult (old: The Cult - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Cult
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b9de86f77464e5044585': {
+    name: 'The Cult', // Was: The Cult - Part 1
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Streets of Tarkov - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Streets_of_Tarkov
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639135f286e646067c176a87': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Your Car Needs a Service - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Your_Car_Needs_Service
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '639135534b15ca31f76bc317': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // Scrap Metal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
+  '5a27b7d686f77460d847e6a6': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Tracker (old: Cargo X - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Tracker
+  //
+  // 2026-08-10: renamed in S1 (reservoirs/information objectives match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '5a27bb3d86f77411ea361a21': {
+    name: 'Tracker', // Was: Cargo X - Part 2
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Cargo X (old: Cargo X - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cargo_X
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '5a27bb1e86f7741f27621b7e': {
+    name: 'Cargo X', // Was: Cargo X - Part 1
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Lighthouse - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Lighthouse
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6179b4d1bca27a099552e04e': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // The Cleaner - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Cleaner
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '60e71c9ad54b755a3b53eb66': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Gifts from Tarkov (old: Cargo X - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gifts_from_Tarkov
+  //
+  // 2026-08-10: renamed in S1 (TerraGroup cargo marking objective match)
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '61958c366726521dd96828ec': {
+    name: 'Gifts from Tarkov', // Was: Cargo X - Part 4
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Revision - Reserve - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Revision_-_Reserve
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6086c852c945025d41566124': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Overpopulation - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Overpopulation
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL3 instead of player level
+  '6179aff8f57fb279792c60a1': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Peacekeeper Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // The Guide - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0d4e61d09282029f53920e': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 32)
+    ],
+  },
+
+  // Counteraction - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '6179b5eabca27a099552e052': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Peacekeeping Mission - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Peacekeeping_Mission
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0d4c12d09282029f539173': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Trophies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Trophies
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '60e71ccb5688f6424c7bfec4': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 55)
+    ],
+  },
+
+  // Special Equipment - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Equipment
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '60e71ce009d7c801eb0c0ec6': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 60)
+    ],
+  },
+
+  // Samples - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Samples
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5edac020218d181e29451446': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 21)
+    ],
+  },
+
+  // TerraGroup Employee - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/TerraGroup_Employee
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5edac63b930f5454f51e128b': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Insomnia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Insomnia
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '5c0bd01e86f7747cdd799e56': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Worst Job in the World - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Worst_Job_in_the_World
+  //
+  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  '63a9b229813bba58a50c9ee5': {
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Bad Habit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Bad_Habit
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac3475486f7741d6224abd3': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Steady Signal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Steady_Signal
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '6578ec473dbd035d04531a8d': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Saving the Mole - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Saving_the_Mole
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '657315e4a6af4ab4b50f3459': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+  },
+
+  // Gunsmith - MP-133 (old: Gunsmith - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MP-133
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac23c6186f7741247042bad': {
+    name: 'Gunsmith - MP-133', // Was: Gunsmith - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Courier - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Courier
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '60e71d6d7fcf9c556f325055': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 52)
+    ],
+  },
+
+  // Farming (old: Farming - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Farming
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 3")
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac3462b86f7741d6118b983': {
+    name: 'Farming', // Was: Farming - Part 3
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - HK MP5 (old: Gunsmith - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_HK_MP5
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac2428686f77412450b42bf': {
+    name: 'Gunsmith - HK MP5', // Was: Gunsmith - Part 3
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 7)
+    ],
+  },
+
+  // Passion for Ergonomics - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Passion_for_Ergonomics
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '675c1570526ff496850895d9': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Gunsmith - AKS-74U (old: Gunsmith - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74U
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL1 instead of player level
+  '5ac2426c86f774138762edfe': {
+    name: 'Gunsmith - AKS-74U', // Was: Gunsmith - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // Playing the Market (old: Farming - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Playing_the_Market
+  //
+  // 2026-08-10: renamed in S1 (control board objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac345dc86f774288030817f': {
+    name: 'Playing the Market', // Was: Farming - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Gunsmith - OP-SKS (old: Gunsmith - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_OP-SKS
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639872f9decada40426d3447': {
+    name: 'Gunsmith - OP-SKS', // Was: Gunsmith - Part 4
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 9)
+    ],
+  },
+
+  // Watching You - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Watching_You
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639136fa9444fb141f4e6eee': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Secret to Productivity (old: Developer's Secrets - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_to_Productivity
+  //
+  // 2026-08-10: renamed in S1 (IT firm morale objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '6573382e557ff128bf3da536': {
+    name: 'The Secret to Productivity', // Was: Developer's Secrets - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Gunsmith - Model 870 (old: Gunsmith - Part 5) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Model_870
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ae3267986f7742a413592fe': {
+    name: 'Gunsmith - Model 870', // Was: Gunsmith - Part 5
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Surveillance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surveillance
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '639135e8c115f907b14700aa': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Corporate Perks (old: Developer's Secrets - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Perks
+  //
+  // 2026-08-10: renamed in S1 (IT firm office objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '65733403eefc2c312a759ddb': {
+    name: 'Corporate Perks', // Was: Developer's Secrets - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Scout - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scout
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac3477486f7741d651d6885': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Black Swan - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Black_Swan
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '669fa39b91b0a8c9680fc467': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Ill-Wisher (old: Signal - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ill-Wisher
+  //
+  // 2026-08-10: renamed in S1 (signal source objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac3467986f7741d6224abc2': {
+    name: 'Ill-Wisher', // Was: Signal - Part 1
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Chemistry Closet - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemistry_Closet
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5f04886a3937dc337a6b8238': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Rat Hunting (old: Signal - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rat_Hunting
+  //
+  // 2026-08-10: renamed in S1 (PC CPU/battery objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '5ac346a886f7744e1b083d67': {
+    name: 'Rat Hunting', // Was: Signal - Part 2
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // Secrets of Polikhim - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Secrets_of_Polikhim
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL2 instead of player level
+  '66aa74571e5e199ecd094f18': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Gunsmith - M4A1 (old: Gunsmith - Part 7) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_M4A1
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ac244eb86f7741356335af1': {
+    name: 'Gunsmith - M4A1', // Was: Gunsmith - Part 7
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gunsmith - P226R (old: Gunsmith - Part 9) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_P226R
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '639872fa9b4fb827b200d8e5': {
+    name: 'Gunsmith - P226R', // Was: Gunsmith - Part 9
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 19)
+    ],
+  },
+
+  // Semiconductor Crisis (old: Farming - Part 4) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Semiconductor_Crisis
+  //
+  // 2026-08-10: renamed in S1 (graphics card/CPU fan objectives match)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ac3464c86f7741d651d6877': {
+    name: 'Semiconductor Crisis', // Was: Farming - Part 4
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Corporate Secrets - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Secrets
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6179b3bdc7560e13d23eeb8d': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Gunsmith - AK-105 (old: Gunsmith - Part 10) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AK-105
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae327c886f7745c7b3f2f3f': {
+    name: 'Gunsmith - AK-105', // Was: Gunsmith - Part 10
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Surplus Goods - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surplus_Goods
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6089732b59b92115597ad789': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // The Door - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Door
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '64ee9df4496db64f9b7a4432': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gunsmith - MPX (old: Gunsmith - Part 12) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_MPX
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5b47799d86f7746c5d6a5fd8': {
+    name: 'Gunsmith - MPX', // Was: Gunsmith - Part 12
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Energy Crisis - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6179b3a12153c15e937d52bc': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // Import - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Import
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5c139eb686f7747878361a6f': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // Gunsmith - AKS-74N (old: Gunsmith - Part 8) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74N
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3277186f7745973054106': {
+    name: 'Gunsmith - AKS-74N', // Was: Gunsmith - Part 8
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Gunsmith - AKM (old: Gunsmith - Part 6) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKM
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3270f86f77445ba41d4dd': {
+    name: 'Gunsmith - AKM', // Was: Gunsmith - Part 6
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - Vector 9x19 (old: Gunsmith - Part 11) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Vector_9x19
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '639872fc93ae507d5858c3a6': {
+    name: 'Gunsmith - Vector 9x19', // Was: Gunsmith - Part 11
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Back Door - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Back_Door
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '6089736efa70fc097863b8f6': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Gunsmith - AS VAL (old: Gunsmith - Part 15) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AS_VAL
+  //
+  // 2026-08-10: renamed in S1 (series now named by weapon)
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5ae3280386f7742a41359364': {
+    name: 'Gunsmith - AS VAL', // Was: Gunsmith - Part 15
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // Fertilizers - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fertilizers
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL3 instead of player level
+  '5c1128e386f7746565181106': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Psycho Sniper - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '5c0be13186f7746f016734aa': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 27)
+    ],
+  },
+
+  // Calibration - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Calibration
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '60e71d23c1bfa3050473b8e6': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 47)
+    ],
+  },
+
+  // Setting Priorities - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Setting_Priorities
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '6942b44f891369fc790e385a': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 37)
+    ],
+  },
+
+  // Shooter Born in Heaven (old: A Shooter Born in Heaven) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven
+  //
+  // 2026-08-10: renamed in S1 (dropped leading "A ")
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '5c0bde0986f77479cf22c2f8': {
+    name: 'Shooter Born in Heaven', // Was: A Shooter Born in Heaven
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 14)
+    ],
+  },
+
+  // Goals and Means - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Goals_and_Means
+  //
+  // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  '68db9c7557bc51a8c804c14b': {
+    traderRequirements: [
+      { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mechanic Essential Quests (renamed in S1, no loyalty requirement)
+  // ---------------------------------------------------------------------------
+
+  // Gunsmith Master - Part 1 (old: Gunsmith - Part 14) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_1
+  //
+  // 2026-08-10: renamed in S1 (HK 416A5 objectives match)
+  '639872fe8871e1272b10ccf6': {
+    name: 'Gunsmith Master - Part 1', // Was: Gunsmith - Part 14
+  },
+
+  // Gunsmith Master - Part 2 (old: Gunsmith - Part 13) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_2
+  //
+  // 2026-08-10: renamed in S1 (R11 RSASS objectives match)
+  '5ac244c486f77413e12cf945': {
+    name: 'Gunsmith Master - Part 2', // Was: Gunsmith - Part 13
+  },
+
+  // Gunsmith Master - Part 3 (old: Gunsmith - Part 16) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_3
+  //
+  // 2026-08-10: renamed in S1 (DVL-10 objectives match)
+  '5ac242ab86f77412464f68b4': {
+    name: 'Gunsmith Master - Part 3', // Was: Gunsmith - Part 16
+  },
+
+  // Gunsmith Master - Part 4 (old: Gunsmith - Part 17) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_4
+  //
+  // 2026-08-10: renamed in S1 (AK-102 objectives match)
+  '5b47749f86f7746c5d6a5fd4': {
+    name: 'Gunsmith Master - Part 4', // Was: Gunsmith - Part 17
+  },
+
+  // Gunsmith Master - Part 5 (old: Gunsmith - Part 18) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_5
+  //
+  // 2026-08-10: renamed in S1 (AKMN objectives match)
+  '5b477b6f86f7747290681823': {
+    name: 'Gunsmith Master - Part 5', // Was: Gunsmith - Part 18
+  },
+
+  // Gunsmith Master - Part 6 (old: Gunsmith - Part 19) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_6
+  //
+  // 2026-08-10: renamed in S1 (SVDS objectives match)
+  '639873003693c63d86328f25': {
+    name: 'Gunsmith Master - Part 6', // Was: Gunsmith - Part 19
+  },
+
+  // Gunsmith Master - Part 7 (old: Gunsmith - Part 20) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_7
+  //
+  // 2026-08-10: renamed in S1 (M1A objectives match)
+  '5b477f7686f7744d1b23c4d2': {
+    name: 'Gunsmith Master - Part 7', // Was: Gunsmith - Part 20
+  },
+
+  // Gunsmith Master - Part 8 (old: Gunsmith - Part 21) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_8
+  //
+  // 2026-08-10: renamed in S1 (M700/M1911 objectives match)
+  '63987301e11ec11ff5504036': {
+    name: 'Gunsmith Master - Part 8', // Was: Gunsmith - Part 21
+  },
+
+  // Gunsmith Master - Part 9 (old: Gunsmith - Part 22) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_9
+  //
+  // 2026-08-10: renamed in S1 (M4A1 objectives match)
+  '5b47825886f77468074618d3': {
+    name: 'Gunsmith Master - Part 9', // Was: Gunsmith - Part 22
+  },
+
+  // Gunsmith Master - Part 10 (old: Gunsmith - Part 23) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_10
+  //
+  // 2026-08-10: renamed in S1 (MK47 Mutant objectives match)
+  '64f83bb69878a0569d6ecfbe': {
+    name: 'Gunsmith Master - Part 10', // Was: Gunsmith - Part 23
+  },
+
+  // Gunsmith Master - Part 11 (old: Gunsmith - Part 24) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_11
+  //
+  // 2026-08-10: renamed in S1 (KAC SR-25 objectives match)
+  '64f83bcdde58fc437700d8fa': {
+    name: 'Gunsmith Master - Part 11', // Was: Gunsmith - Part 24
+  },
+
+  // Gunsmith Master - Part 13 (old: Gunsmith - Part 25) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_13
+  //
+  // 2026-08-10: renamed in S1 (PKP machine gun objectives match)
+  '64f83bd983cfca080a362c82': {
+    name: 'Gunsmith Master - Part 13', // Was: Gunsmith - Part 25
+  },
+
+// Ragman Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Long Line - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Line
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '60e71dc0a94be721b065bbfc': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 45)
+    ],
+  },
+
+  // Make ULTRA Great Again - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Make_ULTRA_Great_Again
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae448bf86f7744d733e55ee': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Fuel Crisis (old: The Blood of War - Part 1) - Renamed + Change requirements +
+  // objective zone fixes
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Crisis
+  //
+  // 2026-08-10: renamed in S1 (Interchange fuel tank objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  // Truck #2 location change; truck #4 objective missing zone data.
   // tarkov.dev now ships the fourth-tank objective (6926fcc872a6499d1fa29327) as a required
   // objective, so the former overlay-added optional objective was removed (issue #246);
   // its zone data is patched onto the real objective below, which upstream ships with empty zones.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
   '5ae448f286f77448d73c0131': {
+    name: 'Fuel Crisis', // Was: The Blood of War - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
     objectives: {
       '5ae452de86f77450595c4333': {
         zones: [
@@ -221,6 +2352,678 @@
     },
   },
 
+  // Inventory Files (old: Database - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Files
+  //
+  // 2026-08-10: renamed in S1 (cargo manifests objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4493486f7744efa289417': {
+    name: 'Inventory Files', // Was: Database - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Gratitude - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gratitude
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae449b386f77446d8741719': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Small Things, Big Help (old: The Blood of War - Part 3) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Things,_Big_Help
+  //
+  // 2026-08-10: renamed in S1 (Woods fuel stash objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5c10f94386f774227172c572': {
+    name: 'Small Things, Big Help', // Was: The Blood of War - Part 3
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // A Big Loss (old: Database - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Big_Loss
+  //
+  // 2026-08-10: renamed in S1 (OLI cargo route documents objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4493d86f7744b8e15aa8f': {
+    name: 'A Big Loss', // Was: Database - Part 2
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Dressed to Kill - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dressed_to_Kill
+  //
+  // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
+  '5ae4490786f7744ca822adcc': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // The Key to Success - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Key_to_Success
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae4498786f7744bde357695': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 26)
+    ],
+  },
+
+  // Break the Deal - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Break_the_Deal
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '675c085d59b0575973005f52': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Ballet Lover - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ballet_Lover
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '639135a7e705511c8a4a1b78': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Audit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Audit
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '638fcd23dc65553116701d33': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Big Sale - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Sale
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae448e586f7744dcf0c2a67': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Minibus - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Minibus
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5b478d0f86f7744d190d91b5': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 24)
+    ],
+  },
+
+  // Nothing Fishy About This - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Nothing_Fishy_About_This
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '65802b627b44fa5e14638899': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Dandies - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '65734c186dc1e402c80dc19e': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Supervisor - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Supervisor
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5ae449d986f774453a54a7e1': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 40)
+    ],
+  },
+
+  // Hot Delivery - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hot_Delivery
+  //
+  // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  '5b478b1886f7744d1b23c57d': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Reserve Expert (old: Inventory Check) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reserve_Expert
+  //
+  // 2026-08-10: renamed in S1 (Reserve arsenal objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '608974af4b05530f55550c21': {
+    name: 'Reserve Expert', // Was: Inventory Check
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Living High is Not a Crime (old: Living High is Not a Crime - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Living_High_is_Not_a_Crime
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '5b47891f86f7744d1b23c571': {
+    name: 'Living High is Not a Crime', // Was: Living High is Not a Crime - Part 1
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 27)
+    ],
+  },
+
+  // Audiophile - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Audiophile
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '639135bbc115f907b14700a6': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 25)
+    ],
+  },
+
+  // A Fuel Matter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '608974d01a66564e74191fc0': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // Booze - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Booze
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '60e71dc67fcf9c556f325056': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Know Your Place! - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Know_Your_Place!
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '66aa61663aa37705c5024277': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // Scavenger - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  //
+  // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  '5c112d7e86f7740d6f647486': {
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ragman Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // Antique Enthusiast (old: Living High is Not a Crime - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Antique_Enthusiast
+  //
+  // 2026-08-10: renamed in S1 (antique figurine objectives match)
+  // 2026-08-10 - S1: now requires Ragman LL4 instead of player level
+  '5c1141f386f77430ff393792': {
+    name: 'Antique Enthusiast', // Was: Living High is Not a Crime - Part 2
+    traderRequirements: [
+      { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 1
+  // ---------------------------------------------------------------------------
+
+  // Rough Tarkov - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rough_Tarkov
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '66b38c7bf85b8bf7250f9cb6': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Trophy - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e2c386f77443e7549029': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Work Smarter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Work_Smarter
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '675c1cf4a757ddd00404f0a3': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Justice - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Justice
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e43786f7740a212217fa': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Swift (old: Swift One) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Swift
+  //
+  // 2026-08-10: renamed in S1 (dropped "One")
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '60e729cf5698ee7b05057439': {
+    name: 'Swift', // Was: Swift One
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 50)
+    ],
+  },
+
+  // Acquaintance - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Acquaintance
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d24b81486f77439c92d6ba8': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Angry Watchman (old: The Huntsman Path - Evil Watchman) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Angry_Watchman
+  //
+  // 2026-08-10: renamed in S1 (Dorms PMC objectives match)
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e44386f77409453bce7b': {
+    name: 'The Huntsman Path - Angry Watchman', // Was: The Huntsman Path - Evil Watchman
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Huntsman Path - Woods Keeper - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Woods_Keeper
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
+  '5d25e2ee86f77443e35162ea': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 13)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 2
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Big Game - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Big_Game
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '64e7b971f9d6fa49d6769b44': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 17)
+    ],
+  },
+
+  // Every Hunter Knows This - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Every_Hunter_Knows_This
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '66b38e144f2ab7cc530c3fe7': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Cease Fire! - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cease_Fire!
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '639136e84ed9512be67647db': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+  },
+
+  // Nostalgia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Nostalgia
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e4ad86f77443e625e387': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // Courtesy Visit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Courtesy_Visit
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e48186f77443e625e386': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Crooked Cop - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Crooked_Cop
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '6578eb36e5020875d64645cd': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // Claustrophobia - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Claustrophobia
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '669fa3979b0ce3feae01a130': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // The Delicious Sausage - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Delicious_Sausage
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '63a88045abf76d719f42d715': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
+  // Dragnet - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dragnet
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '669fa3a08b4a64b332041ff7': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+  },
+
+  // The Huntsman Path - Sellout - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sellout
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '5d25e2e286f77444001e2e48': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // The Huntsman Path - Factory Chief - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Factory_Chief
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL2 instead of player level
+  '60c0c018f7afb4354815096a': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 3
+  // ---------------------------------------------------------------------------
+
+  // Reserve - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reserve
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e4d586f77443e625e388': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Administrator - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '639136df4b15ca31f76bc31f': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 23)
+    ],
+  },
+
+  // The Hermit - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Hermit
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '61904daa7d0d857927447b9c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // Fishing Place - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fishing_Place
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e4b786f77408251c4bfc': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+  },
+
+  // The Huntsman Path - Liberation (old: The Huntsman Path - Eraser - Part 2) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Liberation
+  //
+  // 2026-08-10: renamed in S1 (Raiders objectives match)
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e45e86f77408251c4bfa': {
+    name: 'The Huntsman Path - Liberation', // Was: The Huntsman Path - Eraser - Part 2
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 30)
+    ],
+  },
+
+  // The Huntsman Path - Outcasts - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Outcasts
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '6179ad0a6e9dd54ac275e3f2': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // The Huntsman Path - Forest Cleaning - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Forest_Cleaning
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e2cc86f77443e47ae019': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Forester's Duty - Change requirements + objectives description incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forester%27s_Duty
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  // Recent wiki update (post-1.0)
+  '66ab9da7eb102b9bcd08591c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
+    ],
+    objectives: {
+      '66ab9da7eb102b9bcd08591d': {
+        description: 'Eliminate 5 Scavs on Lighthouse (In one raid)', // Was: Eliminate Scavs at the village on Lighthouse (In one raid)
+        zoneNames: [], // Was: ['Village']
+      },
+      '66ab9da7eb102b9bcd085922': {
+        description: 'Eliminate 5 Scavs on Shoreline (In one raid)', // Was: Eliminate Scavs at the village on Shoreline (In one raid)
+        zoneNames: [], // Was: ['Village']
+      },
+    },
+  },
+
+  // The Huntsman Path - Secured Perimeter - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Secured_Perimeter
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e2b486f77409de05bba0': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Pest Control - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pest_Control
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '608a768d82e40b3c727fd17d': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // The Huntsman Path - Eraser (old: The Huntsman Path - Eraser - Part 1) - Renamed + Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Eraser
+  //
+  // 2026-08-10: renamed in S1 (dropped "- Part 1")
+  // 2026-08-10 - S1: now requires Jaeger LL3 instead of player level
+  '5d25e44f86f77443e625e385': {
+    name: 'The Huntsman Path - Eraser', // Was: The Huntsman Path - Eraser - Part 1
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 20)
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Jaeger Loyalty Level 4
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Sadist - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5edab4b1218d181e29451435': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 22)
+    ],
+  },
+
+  // Slaughterhouse - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Slaughterhouse
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '63a9b36cc31b00242d28a99f': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 40)
+    ],
+  },
+
+  // The Huntsman Path - Relentless - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '60e71e8ed54b755a3b53eb67': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 55)
+    ],
+  },
+
+  // Stray Dogs - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Stray_Dogs
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '626bdcc3a371ee3a7a3514c5': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
+    ],
+  },
+
+  // The Huntsman Path - Controller - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Controller
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5d25e2d886f77442734d335e': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+  },
+
+  // Hunting Trip - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hunting_Trip
+  //
+  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
+  '5d25e4ca86f77409dd5cdf2c': {
+    traderRequirements: [
+      { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 33)
+    ],
+  },
+
+  // Sales Night / Pathfinder (old: Sales Night) - Renamed + Objective description
+  // wording incorrect
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
+  // API count now correct (7); description still wrong
+  '5ae449c386f7744bde357697': {
+    name: 'Pathfinder', // Was: Sales Night
+    objectives: {
+      '5bb60cbc88a45011a8235cc5': {
+        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
+      },
+    },
+  },
+
+  // To Great Heights! - Part 3 - Inaccurate count and description.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
+  '66058cc5bb83da7ba474aba9': {
+    objectives: {
+      '662ba61d3ed61b6b78187b71': {
+        count: 2, // Was: 1
+      },
+    },
+  },
+
   // New Beginning (Prestige 1)
   //
   // REMOVED 2026-08-03: this override was a no-op targeting the wrong task's
@@ -274,54 +3077,6 @@
     },
   },
 
-  // Setup - Objective wearing gear variants missing
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
-  // Wiki Guide section lists additional valid hats and chest rigs for objective progress.
-  '5c1234c286f77406fa13baeb': {
-    objectives: {
-      '5c1fa9c986f7740de474cb3d': {
-        wearing: [
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
-          ],
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
-          ],
-          [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
-          ],
-          [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-        ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
-      },
-    },
-  },
-
   // Our Own Land - Objective foundInRaid flag incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
   // Wiki objective text explicitly states "found in raid" dogtags.
@@ -344,10 +3099,406 @@
     },
   },
 
-  // Immunity - wikiLink points to the skill page instead of the quest page
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)
-  // tarkov.dev currently returns the Immunity skill page instead of the quest page.
-  '6663148ca9290f9e0806cca1': {
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
+  // === Season 1 quest renames ===
+  // Quests renamed in S1; tarkov.dev still serves the old names.
+  // New names/rewards per the EFT wiki page of the new name (interwiki links on
+  // the wiki pages point to the old titles, confirming the rename).
+
+  // All This Filth... (old: Hunter) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_This_Filth...
+  '600302d73b897b11364cd161': {
+    name: 'All This Filth...', // Was: Hunter
+  },
+
+  // Pets Won't Need It (old: Pets Won't Need It - Part 1) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pets_Won%27t_Need_It
+  '64f731ab83cfca080a361e42': {
+    name: 'Pets Won\'t Need It', // Was: Pets Won't Need It - Part 1
+  },
+
+  // Gunsmith Master - Part 12 (old: Gunsmith - Old Friend's Request) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_12
+  '676529af9c90953d090882e7': {
+    name: 'Gunsmith Master - Part 12', // Was: Gunsmith - Old Friend's Request
+  },
+
+  // Metal Birds (old: Lend-Lease - Part 1) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Metal_Birds
+  '5b4794cb86f774598100d5d4': {
+    name: 'Metal Birds', // Was: Lend-Lease - Part 1
+  },
+
+  // From Hand to Hand (old: Lend-Lease - Part 2) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/From_Hand_to_Hand
+  '5c0d0f1886f77457b8210226': {
+    name: 'From Hand to Hand', // Was: Lend-Lease - Part 2
+  },
+
+  // Aid Stations (old: Trust Regain) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Aid_Stations
+  '59c9392986f7742f6923add2': {
+    name: 'Aid Stations', // Was: Trust Regain
+  },
+
+  // Ironclad Proof (old: No Offence) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof
+  '59ca1a6286f774509a270942': {
+    name: 'Ironclad Proof', // Was: No Offence
+  },
+
+  // Paramedic (old: Ambulances Again) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  // S1: exp/reputation/roubles updated; Grizzly and Surv12 rewards removed.
+  '64f3176921045e77405d63b5': {
+    name: 'Paramedic', // Was: Ambulances Again
+    experience: 10000, // Was: 7500
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, standing: 0.25 }, // Was: 0.01
+      ],
+      items: [
+        { count: 165000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 100000 + 2 Grizzly + 2 Surv12
+      ],
+    },
+  },
+
+  // Master Key (old: Spa Tour - Part 5) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
+  // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
+  // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
+  '5a0449d586f77474e66227b7': {
+    name: 'Master Key', // Was: Spa Tour - Part 5
+    experience: 3000, // Was: 6500
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02
+      ],
+      items: [
+        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 980 + RB-AO key
+        { count: 3, item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' } },
+      ],
+    },
+  },
+
+  // One-Way Ticket (old: Spa Tour - Part 1) - Renamed + Change rewards + Change objective
+  // Proof: https://escapefromtarkov.fandom.com/wiki/One-Way_Ticket
+  // S1: kill 15 targets with headshots using an AUG on Factory; exp 10000, +0.25,
+  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171); MPX/RIP/room key rewards removed.
+  '5a03153686f77442d90e2171': {
+    name: 'One-Way Ticket', // Was: Spa Tour - Part 1
+    experience: 10000, // Was: 7400
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
+      ],
+      items: [
+        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
+      ],
+    },
+    objectives: {
+      '5c9a17c686f7747dbe2da3c1': {
+        count: 15, // Was: 7
+        description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate Scavs with headshots while using a 12ga shotgun on Shoreline
+        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: Shoreline
+        usingWeapon: [{ id: '62e7c4fba689e8c9c50dfc38', name: 'Steyr AUG A1 5.56x45 assault rifle', shortName: 'AUG A1' }],
+      },
+    },
+  },
+
+  // Fuel Shortage (old: Spa Tour - Part 3) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
+  // S1: hand over 5 Household goods + 5 Flammable materials (categories, not
+  // representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
+  '5a0327ba86f77456b9154236': {
+    name: 'Fuel Shortage', // Was: Spa Tour - Part 3
+    experience: 3000, // Was: 7600
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03
+      ],
+      items: [
+        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 800 + Vector + 4 mags + 5 M67 + 2 Toolset
+      ],
+    },
+  },
+
+  // I Need More Power (old: Spa Tour - Part 4) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
+  // S1: hand over 3 Metal/Expeditionary fuel tanks (not representable via
+  // objective patches - left as-is upstream); exp 10000, +0.25,
+  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171), 2 Military flash drives.
+  '5a03296886f774569778596a': {
+    name: 'I Need More Power', // Was: Spa Tour - Part 4
+    experience: 10000, // Was: 7700
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
+      ],
+      items: [
+        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 1100 + Car battery
+        { count: 2, item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' } },
+      ],
+    },
+  },
+
+  // Chemical Experiments (old: Spa Tour - Part 7) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
+  // S1: stash a Corrugated hose in the med lab on Customs (objective restructured,
+  // not representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 570 Dollars (655 with IC2); RB-ST key and Jaeger -0.01 removed.
+  '5a27bafb86f7741c73584017': {
+    name: 'Chemical Experiments', // Was: Spa Tour - Part 7
+    experience: 3000, // Was: 9700
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger)
+      ],
+      items: [
+        { count: 570, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: RB-ST key
+      ],
+    },
+  },
+
+  // Special Order (old: No Questions Asked) - Renamed + Change rewards + Change objective
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Order
+  // S1: hand over 1 (Was: 2) Red Rebel ice pick; exp 65000, +1.5,
+  // 400,000 Roubles + TKPD Assault + 2x FMJ ammo packs.
+  '68ee1c18b4e5bc9a68018cd7': {
+    name: 'Special Order', // Was: No Questions Asked
+    experience: 65000, // Was: 11200
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0
+      ],
+      items: [
+        { count: 400000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } },
+        { count: 1, item: { id: '68ec0c1e4a10ddacb2069398', name: 'TKPD 9.3x64 carbine Assault', shortName: 'TKPD Assault' } }, // Was: TKPD XPS3-2
+        { count: 2, item: { id: '68ee0114024fb2df16004f1c', name: '9.3x64mm FMJ ammo pack (20 pcs)', shortName: 'FMJ' } }, // Was: 1x 7N33 pack
+      ],
+    },
+    objectives: {
+      '68ee1cc7e8b13097f525e6f2': {
+        count: 1, // Was: 2
+      },
+    },
+  },
+
+  // First Aid (old: Ambulance) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/First_Aid
+  // S1: find/hand over 4 Medkits + 4 Injury treatment items (categories, not
+  // representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 80,000 Roubles; defibrillator/CMS objectives and Grizzly/Golden Star rewards removed.
+  '5d25e46e86f77409453bce7c': {
+    name: 'First Aid', // Was: Ambulance
+    experience: 3000, // Was: 14800
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.1 }, // Was: 0.02
+      ],
+      items: [
+        { count: 80000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 35000 + 3 Grizzly + 3 Golden Star
+      ],
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // Season 1 removed quests
+  // ---------------------------------------------------------------------------
+  // Quests removed from EFT in Season 1 but still present in the tarkov.dev
+  // API. Consumers should filter out disabled tasks.
+  // Wiki pages carry the "This page describes content that was removed or
+  // replaced" banner ({{Historical content}} template).
+
+  // Therapist - An Apple a Day Keeps the Doctor Away (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/An_Apple_a_Day_Keeps_the_Doctor_Away
+  '5d6fb2c086f77449da599c24': {
+    disabled: true,
+  },
+
+  // Therapist - Athlete (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Athlete
+  '5c0d0d5086f774363760aef2': {
+    disabled: true,
+  },
+
+  // Therapist - Closer to the People (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Closer_to_the_People
+  '675c04f4db8807b75d0f38e8': {
+    disabled: true,
+  },
+
+  // Therapist - Dangerous Road (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dangerous_Road
+  '63ab180c87413d64ae0ac20a': {
+    disabled: true,
+  },
+
+  // Therapist - Pets Won't Need It - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pets_Won%27t_Need_It_-_Part_2
+  '6573387d0b26ed4fde798de3': {
+    disabled: true,
+  },
+
+  // Therapist - Private Clinic (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Clinic
+  '5c0be5fc86f774467a116593': {
+    disabled: true,
+  },
+
+  // Therapist - Sanitary Standards - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sanitary_Standards_-_Part_2
+  '596a204686f774576d4c95de': {
+    disabled: true,
+  },
+
+  // Prapor - Easy Job - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy_Job_-_Part_2
+  '6179acbdc760af5ad2053585': {
+    disabled: true,
+  },
+
+  // Prapor - Perfect Mediator (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
+  '5c12452c86f7744b83469073': {
+    disabled: true,
+  },
+
+  // Prapor - The Bunker - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Bunker_-_Part_2
+  '5ede567cfa6dc072ce15d6e3': {
+    disabled: true,
+  },
+
+  // Skier - Flint (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Flint
+  '5c0bdb5286f774166e38eed4': {
+    disabled: true,
+  },
+
+  // Skier - Friend From the West - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Friend_From_the_West_-_Part_2
+  '5a27d2af86f7744e1115b323': {
+    disabled: true,
+  },
+
+  // Skier - House Arrest - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/House_Arrest_-_Part_2
+  '639135cd8ba6894d155e77cb': {
+    disabled: true,
+  },
+
+  // Skier - Kind of Sabotage (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Kind_of_Sabotage
+  '596a101f86f7741ddb481582': {
+    disabled: true,
+  },
+
+  // Skier - Loyalty Buyout (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Loyalty_Buyout
+  '59c93e8e86f7742a406989c4': {
+    disabled: true,
+  },
+
+  // Peacekeeper - Cargo X - Part 3 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Cargo_X_-_Part_3
+  '5a27bb5986f7741dfb660900': {
+    disabled: true,
+  },
+
+  // Peacekeeper - Mentor (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Mentor
+  '5d6fbc2886f77449d825f9d3': {
+    disabled: true,
+  },
+
+  // Peacekeeper - Spa Tour - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Spa_Tour_-_Part_2
+  '5a03173786f77451cb427172': {
+    disabled: true,
+  },
+
+  // Peacekeeper - Spa Tour - Part 6 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Spa_Tour_-_Part_6
+  '5a27ba9586f7741b543d8e85': {
+    disabled: true,
+  },
+
+  // Mechanic - Capacity Check (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Capacity_Check
+  '669fa3a1c26f13bd04030f37': {
+    disabled: true,
+  },
+
+  // Mechanic - Farming - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Farming_-_Part_2
+  '5ac3460c86f7742880308185': {
+    disabled: true,
+  },
+
+  // Mechanic - Forklift Certified (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Forklift_Certified
+  '669fa394e0c9f9fafa082897': {
+    disabled: true,
+  },
+
+  // Mechanic - Insider (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Insider
+  '5ac3479086f7742880308199': {
+    disabled: true,
+  },
+
+  // Mechanic - Signal - Part 3 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_3
+  '5ac346cf86f7741d63233a02': {
+    disabled: true,
+  },
+
+  // Mechanic - Signal - Part 4 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_4
+  '5ac346e886f7741d6118b99b': {
+    disabled: true,
+  },
+
+  // Ragman - Charisma Brings Success (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Charisma_Brings_Success
+  '5ae4499a86f77449783815db': {
+    disabled: true,
+  },
+
+  // Ragman - No Fuss Needed (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Fuss_Needed
+  '5ae449a586f7744bde357696': {
+    disabled: true,
+  },
+
+  // Ragman - Only Business (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Only_Business
+  '5ae448a386f7744d3730fff0': {
+    disabled: true,
+  },
+
+  // Ragman - The Blood of War - Part 2 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_2
+  '5b47876e86f7744d1c353205': {
+    disabled: true,
+  },
+
+  // Jaeger - Rite of Passage (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Rite_of_Passage
+  '675c1ec7a46173572a0bf20a': {
+    disabled: true,
+  },
+
+  // Jaeger - Shady Business (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shady_Business
+  '5d25e48d86f77408251c4bfb': {
+    disabled: true,
+  },
+
+  // Jaeger - The Survivalist Path - Combat Medic (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Combat_Medic
+  '5d25e2a986f77409dd5cdf2a': {
+    disabled: true,
   },
 }
