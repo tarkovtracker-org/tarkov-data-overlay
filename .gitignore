@@ -35,3 +35,7 @@ coverage/
 data/
 
 eft/
+
+# Local lookup notes (kept out of the repo on purpose)
+/DELETE.txt
+/MISSING.txt

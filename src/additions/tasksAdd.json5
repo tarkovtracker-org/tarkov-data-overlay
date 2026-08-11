@@ -733,8 +733,8 @@
   //   },
   // },
 
-  // New Beginning (Prestige 5)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
+  // Oil Run
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
   oil_run: {
     id: 'oil_run',
     name: 'Oil Run',
@@ -804,8 +804,8 @@
     },
   },
 
-  // Ironclad Proof
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof
+  // Fall Ailment
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fall_Ailment
   fall_ailment: {
     id: 'fall_ailment',
     name: 'Fall Ailment',
@@ -882,8 +882,8 @@
     },
   },
 
-  // Aid Stations
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Aid_Stations
+  // The Tarkov Butcher
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Butcher
   the_tarkov_butcher: {
     id: 'the_tarkov_butcher',
     name: 'The Tarkov Butcher',
@@ -957,8 +957,8 @@
     },
   },
 
-  // Paramedic
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  // Demonstration model
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Demonstration_model
   demonstration_model: {
     id: 'demonstration_model',
     name: 'Demonstration Model',
@@ -1017,51 +1017,8 @@
     },
   },
 
-  // Gunsmith Master - Part 12
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_12
-  hiking: {
-    id: 'hiking',
-    name: 'Hiking',
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Hiking',
-    trader: {
-      id: '5935c25fb3acc3127c3d8cd9',
-      name: 'Peacekeeper',
-    },
-    map: null,
-    kappaRequired: false,
-    lightkeeperRequired: false,
-    factionName: 'Any',
-    traderRequirements: [
-      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 },
-    ],
-    objectives: [],
-  },
-
-  // Secret Message
-  // No wiki page found (2026-08-11) and task absent from regular/tasks and
-  // pve/tasks. Possibly a mis-transcribed name; needs manual check.
-  // Only trader and LL known from user data; objectives to be filled later.
-  secret_message: {
-    id: 'secret_message',
-    name: 'Secret Message',
-    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Secret+Message',
-    trader: {
-      id: '5935c25fb3acc3127c3d8cd9',
-      name: 'Peacekeeper',
-    },
-    map: null,
-    kappaRequired: false,
-    lightkeeperRequired: false,
-    factionName: 'Any',
-    traderRequirements: [
-      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 },
-    ],
-    objectives: [],
-  },
-
-  // First Aid
-  // Proof: https://escapefromtarkov.fandom.com/wiki/First_Aid
-
+  // New Beginning (Prestige 5)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
   new_beginning_prestige_5: {
     id: 'new_beginning_prestige_5',
     name: 'New Beginning',
@@ -1358,7 +1315,6 @@
   },
   // New Beginning (Prestige 6)
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)
-
   new_beginning_prestige_6: {
     id: 'new_beginning_prestige_6',
     name: 'New Beginning',

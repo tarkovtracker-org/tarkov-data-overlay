@@ -361,6 +361,7 @@
       ]
     },
     "639135b04ed9512be67647d7": {
+      "name": "Glory to CPSU",
       "traderRequirements": [
         {
           "trader": {
@@ -992,6 +993,15 @@
       ]
     },
     "66631493312343839d032d22": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ],
       "objectives": {
         "666733e565831d5bafa18bbb": {
           "description": "Stash a Cultist knife at the sawmill marked circle on Woods"
@@ -1024,6 +1034,15 @@
       ]
     },
     "6663148ca9290f9e0806cca1": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ],
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)"
     },
     "60effd818b669d08a35bfad5": {
@@ -1194,6 +1213,15 @@
       ]
     },
     "5c1234c286f77406fa13baeb": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ],
       "objectives": {
         "5c1fa9c986f7740de474cb3d": {
           "wearing": [
@@ -2400,6 +2428,16 @@
       ]
     },
     "5ae448f286f77448d73c0131": {
+      "name": "Fuel Crisis",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ],
       "objectives": {
         "5ae452de86f77450595c4333": {
           "zones": [
@@ -3028,6 +3066,15 @@
       ]
     },
     "66ab9da7eb102b9bcd08591c": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ],
       "objectives": {
         "66ab9da7eb102b9bcd08591d": {
           "description": "Eliminate 5 Scavs on Lighthouse (In one raid)",
@@ -3142,7 +3189,12 @@
       ]
     },
     "5ae449c386f7744bde357697": {
-      "name": "Pathfinder"
+      "name": "Pathfinder",
+      "objectives": {
+        "5bb60cbc88a45011a8235cc5": {
+          "description": "Survive and extract on Interchange 7 times"
+        }
+      }
     },
     "66058cc5bb83da7ba474aba9": {
       "objectives": {
@@ -3477,6 +3529,102 @@
           }
         ]
       }
+    },
+    "5d6fb2c086f77449da599c24": {
+      "disabled": true
+    },
+    "5c0d0d5086f774363760aef2": {
+      "disabled": true
+    },
+    "675c04f4db8807b75d0f38e8": {
+      "disabled": true
+    },
+    "63ab180c87413d64ae0ac20a": {
+      "disabled": true
+    },
+    "6573387d0b26ed4fde798de3": {
+      "disabled": true
+    },
+    "5c0be5fc86f774467a116593": {
+      "disabled": true
+    },
+    "596a204686f774576d4c95de": {
+      "disabled": true
+    },
+    "6179acbdc760af5ad2053585": {
+      "disabled": true
+    },
+    "5c12452c86f7744b83469073": {
+      "disabled": true
+    },
+    "5ede567cfa6dc072ce15d6e3": {
+      "disabled": true
+    },
+    "5c0bdb5286f774166e38eed4": {
+      "disabled": true
+    },
+    "5a27d2af86f7744e1115b323": {
+      "disabled": true
+    },
+    "639135cd8ba6894d155e77cb": {
+      "disabled": true
+    },
+    "596a101f86f7741ddb481582": {
+      "disabled": true
+    },
+    "59c93e8e86f7742a406989c4": {
+      "disabled": true
+    },
+    "5a27bb5986f7741dfb660900": {
+      "disabled": true
+    },
+    "5d6fbc2886f77449d825f9d3": {
+      "disabled": true
+    },
+    "5a03173786f77451cb427172": {
+      "disabled": true
+    },
+    "5a27ba9586f7741b543d8e85": {
+      "disabled": true
+    },
+    "669fa3a1c26f13bd04030f37": {
+      "disabled": true
+    },
+    "5ac3460c86f7742880308185": {
+      "disabled": true
+    },
+    "669fa394e0c9f9fafa082897": {
+      "disabled": true
+    },
+    "5ac3479086f7742880308199": {
+      "disabled": true
+    },
+    "5ac346cf86f7741d63233a02": {
+      "disabled": true
+    },
+    "5ac346e886f7741d6118b99b": {
+      "disabled": true
+    },
+    "5ae4499a86f77449783815db": {
+      "disabled": true
+    },
+    "5ae449a586f7744bde357696": {
+      "disabled": true
+    },
+    "5ae448a386f7744d3730fff0": {
+      "disabled": true
+    },
+    "5b47876e86f7744d1c353205": {
+      "disabled": true
+    },
+    "675c1ec7a46173572a0bf20a": {
+      "disabled": true
+    },
+    "5d25e48d86f77408251c4bfb": {
+      "disabled": true
+    },
+    "5d25e2a986f77409dd5cdf2a": {
+      "disabled": true
     }
   },
   "editions": {
@@ -6515,52 +6663,6 @@
         ]
       }
     },
-    "hiking": {
-      "id": "hiking",
-      "name": "Hiking",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Hiking",
-      "trader": {
-        "id": "5935c25fb3acc3127c3d8cd9",
-        "name": "Peacekeeper"
-      },
-      "map": null,
-      "kappaRequired": false,
-      "lightkeeperRequired": false,
-      "factionName": "Any",
-      "traderRequirements": [
-        {
-          "trader": {
-            "id": "5935c25fb3acc3127c3d8cd9",
-            "name": "Peacekeeper"
-          },
-          "value": 1
-        }
-      ],
-      "objectives": []
-    },
-    "secret_message": {
-      "id": "secret_message",
-      "name": "Secret Message",
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Secret+Message",
-      "trader": {
-        "id": "5935c25fb3acc3127c3d8cd9",
-        "name": "Peacekeeper"
-      },
-      "map": null,
-      "kappaRequired": false,
-      "lightkeeperRequired": false,
-      "factionName": "Any",
-      "traderRequirements": [
-        {
-          "trader": {
-            "id": "5935c25fb3acc3127c3d8cd9",
-            "name": "Peacekeeper"
-          },
-          "value": 2
-        }
-      ],
-      "objectives": []
-    },
     "new_beginning_prestige_5": {
       "id": "new_beginning_prestige_5",
       "name": "New Beginning",
@@ -7243,9 +7345,6 @@
         "60896bca6ee58f38c417d4f2": {
           "experience": 15300
         },
-        "5c12452c86f7744b83469073": {
-          "experience": 20900
-        },
         "5edab4b1218d181e29451435": {
           "experience": 16300
         },
@@ -7290,7 +7389,7 @@
   },
   "$meta": {
     "version": "1.0.0",
-    "generated": "2026-08-11T10:39:38.430Z",
-    "sha256": "51b52c9cd8cdb6f3f0a5bf2a903f9ff7a55b85cfe3dc1a1d16f282688b68c07e"
+    "generated": "2026-08-11T11:44:34.459Z",
+    "sha256": "01b6e605466692399bebd2c43af01cec5a08588dfbe4c5390e1dd7655c9ff9c0"
   }
 }

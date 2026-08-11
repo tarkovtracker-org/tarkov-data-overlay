@@ -107,24 +107,6 @@
     },
   },
 
-  // Perfect Mediator
-  '5c12452c86f7744b83469073': {
-    name: 'Perfect Mediator',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 20900,
-        pve: 12000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'eft-reference',
-        verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=20900: the wiki (last edited 2026-02-18) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=12000 from the EFT capture.',
-      },
-    },
-  },
-
   // The Huntsman Path - Sadist
   '5edab4b1218d181e29451435': {
     name: 'The Huntsman Path - Sadist',

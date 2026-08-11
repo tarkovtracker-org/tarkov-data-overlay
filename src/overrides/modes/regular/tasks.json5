@@ -71,11 +71,10 @@
     experience: 15300, // Was: 10300 (tarkov.dev mirrors PvE data)
   },
 
-  // Perfect Mediator - PvP awards 20,900 EXP (PvE awards 12,000)
+  // Perfect Mediator - removed from EFT in Season 1 (disabled in base overrides),
+  // so the regular-mode experience correction no longer applies.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
-  '5c12452c86f7744b83469073': {
-    experience: 20900, // Was: 12000 (tarkov.dev mirrors PvE data)
-  },
+  // (removed 2026-08-10 with the Season 1 quest purge)
 
   // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
   // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
