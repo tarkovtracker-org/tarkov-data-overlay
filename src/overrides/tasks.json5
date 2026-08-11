@@ -2896,12 +2896,10 @@
     objectives: {
       '66ab9da7eb102b9bcd08591d': {
         description: 'Eliminate 5 Scavs on Lighthouse (In one raid)', // Was: Eliminate Scavs at the village on Lighthouse (In one raid)
-        zones: [], // Was: [{ id: "Marafon_kill_village_lighthouse", position: { x: -72.8853149, y: 5.777012, z: -286.249237 }, outline: [...] }]
         zoneNames: [], // Was: ['Village']
       },
       '66ab9da7eb102b9bcd085922': {
         description: 'Eliminate 5 Scavs on Shoreline (In one raid)', // Was: Eliminate Scavs at the village on Shoreline (In one raid)
-        zones: [], // Was: [{ id: "marafon_kill_village_shoreline", position: { x: 377.300049, y: -54.42, z: 136.299988 }, outline: [...] }]
         zoneNames: [], // Was: ['Village']
       },
     },
