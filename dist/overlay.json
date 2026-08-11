@@ -7386,8 +7386,8 @@
     }
   },
   "$meta": {
-    "version": "1.56",
-    "generated": "2026-08-11T13:18:54.839Z",
-    "sha256": "feb65b7ff7facb240070528b01cc9b3e8e1428323753c3e8017a260242ec9795"
+    "version": "1.57",
+    "generated": "2026-08-11T14:27:26.972Z",
+    "sha256": "9dcebc5cefb9d11528fd4508b0c8ad617792c9f62208a02b92f356ae598363ee"
   }
 }
