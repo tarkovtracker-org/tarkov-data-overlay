@@ -8,11 +8,13 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
+import { execSync } from 'child_process';
 import {
   getProjectPaths,
   loadAllJson5FromDir,
   getPackageVersion,
   SUPPORTED_GAME_MODES,
+  icons,
   type OverlayOutput,
 } from '../src/lib/index.js';
 
@@ -75,12 +77,30 @@ function generateSha256(content: string): string {
 }
 
 /**
+ * Latest release tag (e.g. "v1.55" -> "1.55"), or undefined when git is not
+ * available. Matches the CI version source: releases are tags, package.json
+ * stays at the initial 1.0.0.
+ */
+function getLatestTagVersion(): string | undefined {
+  try {
+    const tag = execSync('git describe --tags --abbrev=0', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+    return tag.replace(/^v/, '');
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Build the overlay.json file
  */
 function build(): void {
   console.log('Building overlay...\n');
 
-  const version = process.env.OVERLAY_VERSION || getPackageVersion(rootDir);
+  const version = process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
 
   // Load all source files
   const data = loadSourceFiles();
@@ -139,7 +159,7 @@ function build(): void {
         .join(', ')
     : undefined;
 
-  console.log('✅ Built overlay.json');
+  console.log(`Build overlay.json : ${icons.checkmark}`);
   console.log(`   Entities: ${entityCounts}`);
   if (modeCounts) {
     console.log(`   Modes: ${modeCounts}`);

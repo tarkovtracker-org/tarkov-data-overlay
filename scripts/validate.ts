@@ -16,6 +16,7 @@ import {
   listJson5Files,
   SCHEMA_CONFIGS,
   SUPPORTED_GAME_MODES,
+  icons,
   type LocaleOverlay,
   type SchemaValidationResult,
 } from '../src/lib/index.js';
@@ -338,9 +339,9 @@ export function printResults(results: SchemaValidationResult[]): boolean {
 
   for (const result of results) {
     if (result.valid) {
-      console.log(`✅ ${result.file}`);
+      console.log(`${result.file} : ${icons.checkmark}`);
     } else {
-      console.log(`❌ ${result.file}`);
+      console.log(`${result.file} : ${icons.error}`);
       for (const error of result.errors || []) {
         console.log(`   ${error}`);
       }

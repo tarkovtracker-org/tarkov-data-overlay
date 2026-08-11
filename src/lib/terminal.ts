@@ -19,16 +19,16 @@ export const colors = {
   gray: '\x1b[90m',
 } as const;
 
-/** Status icons with colors */
+/** Status markers with colors (plain words, shown after the label: "label : status") */
 export const icons = {
-  success: `${colors.green}✅${colors.reset}`,
-  warning: `${colors.yellow}⚠️${colors.reset}`,
-  error: `${colors.red}❌${colors.reset}`,
-  info: `${colors.cyan}ℹ️${colors.reset}`,
-  trash: `${colors.red}🗑️${colors.reset}`,
-  sync: `${colors.yellow}🔄${colors.reset}`,
-  lightbulb: `${colors.yellow}💡${colors.reset}`,
-  checkmark: `${colors.green}✓${colors.reset}`,
+  success: `${colors.green}OK${colors.reset}`,
+  warning: `${colors.yellow}Warning${colors.reset}`,
+  error: `${colors.red}Error${colors.reset}`,
+  info: `${colors.cyan}Info${colors.reset}`,
+  trash: `${colors.red}Deleted${colors.reset}`,
+  sync: `${colors.yellow}Fixed${colors.reset}`,
+  lightbulb: `${colors.yellow}Tip${colors.reset}`,
+  checkmark: `${colors.green}OK${colors.reset}`,
 } as const;
 
 /**
@@ -71,10 +71,10 @@ export function printProgress(message: string): void {
 }
 
 /**
- * Print success with checkmark
+ * Print a success message with a trailing status marker
  */
 export function printSuccess(message: string): void {
-  console.log(`${icons.checkmark} ${message}`);
+  console.log(`${message.trimEnd()} : ${icons.checkmark}`);
 }
 
 /**
@@ -95,23 +95,25 @@ export function printListItem(text: string, indent = 2): void {
 }
 
 /**
- * Format a count summary (e.g., "Still needed (3)")
+ * Format a count summary (e.g., "Still needed (3)"). Trailing status is
+ * appended by the call site as ": <status>" when desired.
  */
 export function formatCountLabel(label: string, count: number, color: keyof typeof colors): string {
-  return `${colors[color]}${colors.bright}${label} (${count}):${colors.reset}`;
+  return `${colors[color]}${colors.bright}${label} (${count})${colors.reset}`;
 }
 
 /**
- * Print a "label (count):" header followed by one line per item, or a dim
- * "None" placeholder when the list is empty. This is the standard summary
+ * Print a "label (count) : status" header followed by one line per item, or a
+ * dim "None" placeholder when the list is empty. This is the standard summary
  * section shape used by the maintenance reports.
  */
 export function printCountSection(
   label: string,
   color: keyof typeof colors,
-  items: string[]
+  items: string[],
+  icon?: string
 ): void {
-  console.log(formatCountLabel(label, items.length, color));
+  console.log(`${formatCountLabel(label, items.length, color)}${icon ? ` : ${icon}` : ''}`);
   if (items.length > 0) {
     for (const item of items) {
       console.log(`  - ${item}`);

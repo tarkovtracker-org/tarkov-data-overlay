@@ -14,6 +14,7 @@ import {
   bold,
   dim,
   icons,
+  colorize,
   sleep,
 } from '../../src/lib/index.js';
 import {
@@ -345,7 +346,7 @@ export async function runBulkMode(
       const reason = error instanceof Error ? error.message : String(error);
       failedTasks.push({ id: task.id, name: task.name, reason });
       process.stderr.write(
-        `\n${icons.error} ${task.name} (${task.id}) failed: ${reason}\n`
+        `\n${task.name} (${task.id}) failed: ${reason} : ${icons.error}\n`
       );
     }
   }
@@ -423,13 +424,13 @@ export async function runBulkMode(
     console.log();
     printHeader('WIKI DATA FRESHNESS (1.0 = Nov 15, 2025)');
     console.log(
-      `  🟢 Post-1.0 wiki edits: ${post1_0Count} ${dim('(high confidence)')}`
+      `  ${colorize('[POST-1.0]', 'green')} wiki edits: ${post1_0Count} ${dim('(high confidence)')}`
     );
     console.log(
-      `  🔴 Pre-1.0 wiki edits: ${pre1_0Count} ${dim('(may be outdated)')}`
+      `  ${colorize('[PRE-1.0]', 'red')} wiki edits: ${pre1_0Count} ${dim('(may be outdated)')}`
     );
     if (unknownCount > 0) {
-      console.log(`  ⚪ Unknown: ${unknownCount} ${dim('(no revision data)')}`);
+      console.log(`  ${dim('[UNKNOWN]')} Unknown: ${unknownCount} ${dim('(no revision data)')}`);
     }
   }
 
@@ -455,7 +456,7 @@ export async function runBulkMode(
       const [taskId, field] = key.split(':');
       const task = tasksWithWiki.find((t) => t.id === taskId);
       const taskName = task?.name ?? 'Unknown Task';
-      console.log(`  🗑️  ${taskName} ${dim(`[${field}]`)}`);
+      console.log(`  ${taskName} [${field}] : ${icons.trash}`);
       console.log(`     ${dim(`ID: ${taskId}`)}`);
     }
     console.log();
@@ -471,15 +472,15 @@ export async function runBulkMode(
     // Priority order and labels
     const priorityOrder: Priority[] = ['high', 'medium', 'low'];
     const priorityLabels: Record<Priority, string> = {
-      high: '🔴 HIGH',
-      medium: '🟡 MEDIUM',
-      low: '🟢 LOW',
+      high: colorize('[HIGH]', 'red'),
+      medium: colorize('[MEDIUM]', 'yellow'),
+      low: colorize('[LOW]', 'green'),
     };
 
     const priorityIcons: Record<Priority, string> = {
-      high: '🔴',
-      medium: '🟡',
-      low: '🟢',
+      high: colorize('[HIGH]', 'red'),
+      medium: colorize('[MEDIUM]', 'yellow'),
+      low: colorize('[LOW]', 'green'),
     };
 
     const categoryLabels: Record<string, string> = {
@@ -527,10 +528,10 @@ export async function runBulkMode(
     ): void => {
       const freshness =
         d.wikiEditedPost1_0 === true
-          ? '🟢'
+          ? colorize('[POST-1.0]', 'green')
           : d.wikiEditedPost1_0 === false
-          ? '🔴'
-          : '⚪';
+            ? colorize('[PRE-1.0]', 'red')
+            : dim('[UNKNOWN]');
       const editInfo =
         d.wikiEditDaysAgo !== undefined ? `${d.wikiEditDaysAgo}d ago` : '';
       const priorityPrefix = showPriority

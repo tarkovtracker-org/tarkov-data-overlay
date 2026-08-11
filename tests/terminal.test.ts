@@ -27,14 +27,14 @@ describe('colors', () => {
 
 describe('icons', () => {
   it('contains expected icons with colors', () => {
-    expect(icons.success).toContain('✅');
-    expect(icons.warning).toContain('⚠️');
-    expect(icons.error).toContain('❌');
-    expect(icons.info).toContain('ℹ️');
-    expect(icons.trash).toContain('🗑️');
-    expect(icons.sync).toContain('🔄');
-    expect(icons.lightbulb).toContain('💡');
-    expect(icons.checkmark).toContain('✓');
+    expect(icons.success).toContain('OK');
+    expect(icons.warning).toContain('Warning');
+    expect(icons.error).toContain('Error');
+    expect(icons.info).toContain('Info');
+    expect(icons.trash).toContain('Deleted');
+    expect(icons.sync).toContain('Fixed');
+    expect(icons.lightbulb).toContain('Tip');
+    expect(icons.checkmark).toContain('OK');
   });
 });
 

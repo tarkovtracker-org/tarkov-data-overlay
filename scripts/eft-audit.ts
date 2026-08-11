@@ -214,7 +214,7 @@ function printReport(rows: Row[], mode: GameMode): void {
     if (items.length === 0) continue;
     const meta = VERDICT_META[verdict];
     console.log(
-      bold(`\n${meta.icon} ${meta.color}${verdict}${colors.reset} (${items.length}) ${dim('- ' + meta.blurb)}`),
+      bold(`\n${verdict} (${items.length}) : ${meta.icon} ${dim('- ' + meta.blurb)}`),
     );
     for (const r of items) {
       console.log(
@@ -228,10 +228,10 @@ function printReport(rows: Row[], mode: GameMode): void {
 
   const count = (v: Verdict) => rows.filter((r) => r.verdict === v).length;
   printHeader('SUMMARY');
-  console.log(`  ${icons.error} GAP      (add override):    ${bold(String(count('GAP')))}`);
-  console.log(`  ${icons.error} CONFLICT (fix override):    ${bold(String(count('CONFLICT')))}`);
-  console.log(`  ${icons.warning} STALE    (remove override): ${bold(String(count('STALE')))}`);
-  console.log(`  ${icons.success} OK       (keep override):   ${bold(String(count('OK')))}`);
+  console.log(`  GAP      (add override):    ${bold(String(count('GAP')))} : ${icons.error}`);
+  console.log(`  CONFLICT (fix override):    ${bold(String(count('CONFLICT')))} : ${icons.error}`);
+  console.log(`  STALE    (remove override): ${bold(String(count('STALE')))} : ${icons.warning}`);
+  console.log(`  OK       (keep override):   ${bold(String(count('OK')))} : ${icons.success}`);
   console.log();
 }
 
