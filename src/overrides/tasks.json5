@@ -3116,4 +3116,213 @@
   '6663148ca9290f9e0806cca1': {
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
   },
+
+  // === Season 1 quest renames ===
+  // Quests renamed in S1; tarkov.dev still serves the old names.
+  // New names/rewards per the EFT wiki page of the new name (interwiki links on
+  // the wiki pages point to the old titles, confirming the rename).
+
+  // All This Filth... (old: Hunter) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_This_Filth...
+  '600302d73b897b11364cd161': {
+    name: 'All This Filth...', // Was: Hunter
+  },
+
+  // Pets Won't Need It (old: Pets Won't Need It - Part 1) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pets_Won%27t_Need_It
+  '64f731ab83cfca080a361e42': {
+    name: 'Pets Won\'t Need It', // Was: Pets Won't Need It - Part 1
+  },
+
+  // Gunsmith Master - Part 12 (old: Gunsmith - Old Friend's Request) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_12
+  '676529af9c90953d090882e7': {
+    name: 'Gunsmith Master - Part 12', // Was: Gunsmith - Old Friend's Request
+  },
+
+  // Metal Birds (old: Lend-Lease - Part 1) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Metal_Birds
+  '5b4794cb86f774598100d5d4': {
+    name: 'Metal Birds', // Was: Lend-Lease - Part 1
+  },
+
+  // From Hand to Hand (old: Lend-Lease - Part 2) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/From_Hand_to_Hand
+  '5c0d0f1886f77457b8210226': {
+    name: 'From Hand to Hand', // Was: Lend-Lease - Part 2
+  },
+
+  // Aid Stations (old: Trust Regain) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Aid_Stations
+  '59c9392986f7742f6923add2': {
+    name: 'Aid Stations', // Was: Trust Regain
+  },
+
+  // Ironclad Proof (old: No Offence) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof
+  '59ca1a6286f774509a270942': {
+    name: 'Ironclad Proof', // Was: No Offence
+  },
+
+  // Pathfinder (old: Sales Night) - Renamed
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
+  '5ae449c386f7744bde357697': {
+    name: 'Pathfinder', // Was: Sales Night
+  },
+
+  // Paramedic (old: Ambulances Again) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  // S1: exp/reputation/roubles updated; Grizzly and Surv12 rewards removed.
+  '64f3176921045e77405d63b5': {
+    name: 'Paramedic', // Was: Ambulances Again
+    experience: 10000, // Was: 7500
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, standing: 0.25 }, // Was: 0.01
+      ],
+      items: [
+        { count: 165000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 100000 + 2 Grizzly + 2 Surv12
+      ],
+    },
+  },
+
+  // Master Key (old: Spa Tour - Part 5) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
+  // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
+  // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
+  '5a0449d586f77474e66227b7': {
+    name: 'Master Key', // Was: Spa Tour - Part 5
+    experience: 3000, // Was: 6500
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02
+      ],
+      items: [
+        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 980 + RB-AO key
+        { count: 3, item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' } },
+      ],
+    },
+  },
+
+  // One-Way Ticket (old: Spa Tour - Part 1) - Renamed + Change rewards + Change objective
+  // Proof: https://escapefromtarkov.fandom.com/wiki/One-Way_Ticket
+  // S1: kill 15 targets with headshots using an AUG on Factory; exp 10000, +0.25,
+  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171); MPX/RIP/room key rewards removed.
+  '5a03153686f77442d90e2171': {
+    name: 'One-Way Ticket', // Was: Spa Tour - Part 1
+    experience: 10000, // Was: 7400
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
+      ],
+      items: [
+        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
+      ],
+    },
+    objectives: {
+      '5c9a17c686f7747dbe2da3c1': {
+        count: 15, // Was: 7
+        description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate Scavs with headshots while using a 12ga shotgun on Shoreline
+        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: Shoreline
+        usingWeapon: [{ id: '62e7c4fba689e8c9c50dfc38', name: 'Steyr AUG A1 5.56x45 assault rifle', shortName: 'AUG A1' }],
+      },
+    },
+  },
+
+  // Fuel Shortage (old: Spa Tour - Part 3) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
+  // S1: hand over 5 Household goods + 5 Flammable materials (categories, not
+  // representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
+  '5a0327ba86f77456b9154236': {
+    name: 'Fuel Shortage', // Was: Spa Tour - Part 3
+    experience: 3000, // Was: 7600
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03
+      ],
+      items: [
+        { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 800 + Vector + 4 mags + 5 M67 + 2 Toolset
+      ],
+    },
+  },
+
+  // I Need More Power (old: Spa Tour - Part 4) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
+  // S1: hand over 3 Metal/Expeditionary fuel tanks (not representable via
+  // objective patches - left as-is upstream); exp 10000, +0.25,
+  // 1347 Dollars (IC2, base = 1347 / 1.15 = 1171), 2 Military flash drives.
+  '5a03296886f774569778596a': {
+    name: 'I Need More Power', // Was: Spa Tour - Part 4
+    experience: 10000, // Was: 7700
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
+      ],
+      items: [
+        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 1100 + Car battery
+        { count: 2, item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' } },
+      ],
+    },
+  },
+
+  // Chemical Experiments (old: Spa Tour - Part 7) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
+  // S1: stash a Corrugated hose in the med lab on Customs (objective restructured,
+  // not representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 570 Dollars (655 with IC2); RB-ST key and Jaeger -0.01 removed.
+  '5a27bafb86f7741c73584017': {
+    name: 'Chemical Experiments', // Was: Spa Tour - Part 7
+    experience: 3000, // Was: 9700
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger)
+      ],
+      items: [
+        { count: 570, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: RB-ST key
+      ],
+    },
+  },
+
+  // Special Order (old: No Questions Asked) - Renamed + Change rewards + Change objective
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Special_Order
+  // S1: hand over 1 (Was: 2) Red Rebel ice pick; exp 65000, +1.5,
+  // 400,000 Roubles + TKPD Assault + 2x FMJ ammo packs.
+  '68ee1c18b4e5bc9a68018cd7': {
+    name: 'Special Order', // Was: No Questions Asked
+    experience: 65000, // Was: 11200
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0
+      ],
+      items: [
+        { count: 400000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } },
+        { count: 1, item: { id: '68ec0c1e4a10ddacb2069398', name: 'TKPD 9.3x64 carbine Assault', shortName: 'TKPD Assault' } }, // Was: TKPD XPS3-2
+        { count: 2, item: { id: '68ee0114024fb2df16004f1c', name: '9.3x64mm FMJ ammo pack (20 pcs)', shortName: 'FMJ' } }, // Was: 1x 7N33 pack
+      ],
+    },
+    objectives: {
+      '68ee1cc7e8b13097f525e6f2': {
+        count: 1, // Was: 2
+      },
+    },
+  },
+
+  // First Aid (old: Ambulance) - Renamed + Change rewards
+  // Proof: https://escapefromtarkov.fandom.com/wiki/First_Aid
+  // S1: find/hand over 4 Medkits + 4 Injury treatment items (categories, not
+  // representable via objective patches - left as-is upstream); exp 3000, +0.1,
+  // 80,000 Roubles; defibrillator/CMS objectives and Grizzly/Golden Star rewards removed.
+  '5d25e46e86f77409453bce7c': {
+    name: 'First Aid', // Was: Ambulance
+    experience: 3000, // Was: 14800
+    finishRewards: {
+      traderStanding: [
+        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.1 }, // Was: 0.02
+      ],
+      items: [
+        { count: 80000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 35000 + 3 Grizzly + 3 Golden Star
+      ],
+    },
+  },
 }

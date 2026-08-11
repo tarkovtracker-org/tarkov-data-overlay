@@ -735,6 +735,333 @@
 
   // New Beginning (Prestige 5)
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
+  oil_run: {
+    id: 'oil_run',
+    name: 'Oil Run',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Oil_Run',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: {
+      id: '56f40101d2720b2a4d8b45d6',
+      name: 'Customs',
+    },
+    kappaRequired: true,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 },
+    ],
+    objectives: [
+      {
+        id: 'oil_run_obj01',
+        description: 'Locate and mark any of the fuel tank trucks with an MS2000 Marker on Customs',
+        type: 'mark',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        markerItem: {
+          id: '5991b51486f77447b112d44f',
+          name: 'MS2000 Marker',
+          shortName: 'MS2000',
+        },
+        count: 1,
+      },
+    ],
+    experience: 3000,
+    finishRewards: {
+      items: [
+        {
+          count: 93920,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 1,
+          item: {
+            id: '5d1b2fa286f77425227d1674',
+            name: 'Electric motor',
+            shortName: 'Motor',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb50c76803fa8b248b4571',
+            name: 'Prapor',
+          },
+          standing: 0.1,
+        },
+      ],
+    },
+  },
+
+  // Ironclad Proof
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof
+  fall_ailment: {
+    id: 'fall_ailment',
+    name: 'Fall Ailment',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Fall_Ailment',
+    trader: {
+      id: '54cb57776803fa99248b456e',
+      name: 'Therapist',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 },
+    ],
+    objectives: [
+      {
+        id: 'fall_ailment_obj01',
+        description: 'Find 5 Disposable syringes found in raid',
+        type: 'findItem',
+        items: [
+          {
+            id: '5d1b3f2d86f774253763b735',
+            name: 'Disposable syringe',
+            shortName: 'Syringe',
+          },
+        ],
+        foundInRaid: true,
+        count: 5,
+      },
+      {
+        id: 'fall_ailment_obj02',
+        description: 'Hand over the Disposable syringes',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5d1b3f2d86f774253763b735',
+            name: 'Disposable syringe',
+            shortName: 'Syringe',
+          },
+        ],
+        count: 5,
+      },
+    ],
+    experience: 3000,
+    finishRewards: {
+      items: [
+        {
+          count: 80000,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 2,
+          item: {
+            id: '5d1b3a5d86f774252167ba22',
+            name: 'Pile of meds',
+            shortName: 'Meds',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb57776803fa99248b456e',
+            name: 'Therapist',
+          },
+          standing: 0.1,
+        },
+      ],
+    },
+  },
+
+  // Aid Stations
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Aid_Stations
+  the_tarkov_butcher: {
+    id: 'the_tarkov_butcher',
+    name: 'The Tarkov Butcher',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Butcher',
+    trader: {
+      id: '54cb57776803fa99248b456e',
+      name: 'Therapist',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 },
+    ],
+    objectives: [
+      {
+        id: 'the_tarkov_butcher_obj01',
+        description: 'Locate and obtain the chemical container on Ground Zero',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        count: 1,
+      },
+      {
+        id: 'the_tarkov_butcher_obj02',
+        description: 'Stash the container by the police station on Streets of Tarkov',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        count: 1,
+      },
+    ],
+    experience: 10000,
+    finishRewards: {
+      items: [
+        {
+          count: 165000,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 2,
+          item: {
+            id: '5d02797c86f774203f38e30a',
+            name: 'Surv12 field surgical kit',
+            shortName: 'Surv12',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb57776803fa99248b456e',
+            name: 'Therapist',
+          },
+          standing: 0.25,
+        },
+      ],
+    },
+  },
+
+  // Paramedic
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  demonstration_model: {
+    id: 'demonstration_model',
+    name: 'Demonstration Model',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Demonstration_model',
+    trader: {
+      id: '5935c25fb3acc3127c3d8cd9',
+      name: 'Peacekeeper',
+    },
+    map: {
+      id: '5704e5fad2720bc05b8b4567',
+      name: 'Reserve',
+    },
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 },
+    ],
+    objectives: [
+      {
+        id: 'demonstration_model_obj01',
+        description: 'Eliminate any 15 targets with headshots with 7.62x51 assault rifles or DMRs on Reserve',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        bodyParts: ['head'],
+        shotType: 'kill',
+        count: 15,
+      },
+    ],
+    experience: 28000,
+    finishRewards: {
+      items: [
+        {
+          count: 1900,
+          item: {
+            id: '5696686a4bdc2da3298b456a',
+            name: 'Dollars',
+            shortName: 'USD',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '5935c25fb3acc3127c3d8cd9',
+            name: 'Peacekeeper',
+          },
+          standing: 0.75,
+        },
+      ],
+    },
+  },
+
+  // Gunsmith Master - Part 12
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_Master_-_Part_12
+  hiking: {
+    id: 'hiking',
+    name: 'Hiking',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Hiking',
+    trader: {
+      id: '5935c25fb3acc3127c3d8cd9',
+      name: 'Peacekeeper',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 1 },
+    ],
+    objectives: [],
+  },
+
+  // Secret Message
+  // No wiki page found (2026-08-11) and task absent from regular/tasks and
+  // pve/tasks. Possibly a mis-transcribed name; needs manual check.
+  // Only trader and LL known from user data; objectives to be filled later.
+  secret_message: {
+    id: 'secret_message',
+    name: 'Secret Message',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Secret+Message',
+    trader: {
+      id: '5935c25fb3acc3127c3d8cd9',
+      name: 'Peacekeeper',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 2 },
+    ],
+    objectives: [],
+  },
+
+  // First Aid
+  // Proof: https://escapefromtarkov.fandom.com/wiki/First_Aid
+
   new_beginning_prestige_5: {
     id: 'new_beginning_prestige_5',
     name: 'New Beginning',
@@ -1031,6 +1358,7 @@
   },
   // New Beginning (Prestige 6)
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_6)
+
   new_beginning_prestige_6: {
     id: 'new_beginning_prestige_6',
     name: 'New Beginning',

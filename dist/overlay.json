@@ -123,15 +123,107 @@
     }
   },
   "tasks": {
-    "5ae449c386f7744bde357697": {
-      "objectives": {
-        "5bb60cbc88a45011a8235cc5": {
-          "description": "Survive and extract on Interchange 7 times"
+    "657315e1dccd301f1301416a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
         }
-      }
+      ]
+    },
+    "59674cd986f7744ab26e32f2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5fd9fad9c1ce6b1a3b486d00": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5967530a86f77462ba22226b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5967725e86f774601a446662": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5936da9e86f7742d65037edf": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c3507a06634b5110e3c18": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5936d90786f7742b1420ba5b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "657315df034d76585f032e01": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
     },
     "63a5cf262964a7488f5243ce": {
-      "map": null,
+      "name": "Power of Persuasion",
       "objectives": {
         "63a5cf262964a7488f5243d1": {
           "description": "Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange",
@@ -157,9 +249,176 @@
             }
           ]
         }
-      }
+      },
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "6573397ef3f8344c4575cd87": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5c0d190cd09282029f5390d8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6391359b9444fb141f4e6ee6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "64e7b9bffd30422ed03dad38": {
+      "name": "District Patrol",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639136f086e646067c176a8b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5eda19f0edce541157209cee": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "59675ea386f77414b32bded2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "60e71b9bbd90872cb85440f3": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "59675d6c86f7740a842fc482": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135b04ed9512be67647d7": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "59674eb386f774539f14813a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa399033a3ce9870338a8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "64f5deac39e45b527a7c4232": {
+      "name": "Job for a Patriot",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5c0bd94186f7747a727f09b2": {
+      "name": "The Tarkov Import",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
     },
     "669fa3a40c828825de06d6a1": {
+      "name": "Easy-Breezy",
       "objectives": {
         "66a0f5a7f9eae6761253114c": {
           "description": "Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
@@ -170,21 +429,567 @@
             }
           ]
         }
-      }
-    },
-    "66ab9da7eb102b9bcd08591c": {
-      "objectives": {
-        "66ab9da7eb102b9bcd08591d": {
-          "description": "Eliminate 5 Scavs on Lighthouse (In one raid)",
-          "zones": [],
-          "zoneNames": []
-        },
-        "66ab9da7eb102b9bcd085922": {
-          "description": "Eliminate 5 Scavs on Shoreline (In one raid)",
-          "zones": [],
-          "zoneNames": []
+      },
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
         }
-      }
+      ]
+    },
+    "60896bca6ee58f38c417d4f2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179ac7511973d018217d0b9": {
+      "name": "Easy Job",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "66ab970848ddbe9d4a0c49a8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "626bd75c71bd851e971b82a5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "60896b7bfa70fc097863b8f5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ede55112c95834b583f052a": {
+      "name": "The Bunker",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "63a9ae24009ffc6a551631a5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71bb4e456d449cd47ca75": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "67b45467814ab0ffa000c7e7": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "675c1ff1a757ddd00404f0aa": {
+      "name": "Unique Experience",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5d4bec3486f7743cac246665": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71b62a0beca400d69efc4": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6574e0dedc0d635f633a5805": {
+      "name": "Getting Some Air",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59c50a9e86f7745fef66f4ff": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59c50c8886f7745fed3193bf": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59c512ad86f7741f0d09de9b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59ca264786f77445a80ed044": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59ca29fb86f77445ab465c87": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "59ca2eb686f77445a80ed049": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "597a171586f77405ba6887d3": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "69ce1de03e15cd80bd06f6c9": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6740a3f4eca8acb2d2055159": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6740a15566e6a521aa051b15": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6740a2c17e3818d5bb0648b6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5969f9e986f7741dde183a50": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "59689fbd86f7740d137ebfc4": {
+      "name": "Operation Aquarius",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5968eb3186f7741dde183a4d": {
+      "name": "Blood in the Water",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "657315ddab5a49b71f098853": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c047fa46173572a0bd878": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5967733e86f774602332fc84": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "596a0e1686f7741ddf17dbee": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c03d1f7da9792a405549a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "669fa39ee749756c920d02c8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "596a1e6c86f7741ddc2d3206": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "59689ee586f7740d1570bbd5": {
+      "name": "Sanitary Standards",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135d89444fb141f4e6eea": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135e0fa894f0a866afde6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "60896e28e4a85c72ef3fa301": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "596a218586f77420d232807c": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "626bd75b05f287031503c7f6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5edab736cc183c769d778bc2": {
+      "name": "Colleagues",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5edaba7c0c502106f869bc02": {
+      "name": "Tarkov-Style Diplomacy",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5edac34d0bb72a50635c2bfa": {
+      "name": "A Difficult Choice"
+    },
+    "6179afd0bca27a099552e040": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179ad56c760af5ad2053587": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "66aba85403e0ee3101042877": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71c48c1bfa3050473b8e5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5c0d1c4cd0928202a02a6f5c": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6663148ed7f171c4c20226c1": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "6663149196a9349baa021baa": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ]
     },
     "66631493312343839d032d22": {
       "objectives": {
@@ -196,123 +1001,197 @@
         }
       }
     },
-    "66058cc5bb83da7ba474aba9": {
-      "objectives": {
-        "662ba61d3ed61b6b78187b71": {
-          "count": 2
+    "6672d9def1c88688a707d042": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
         }
-      }
+      ]
     },
-    "5ae448f286f77448d73c0131": {
-      "objectives": {
-        "5ae452de86f77450595c4333": {
-          "zones": [
-            {
-              "map": {
-                "id": "5714dbc024597771384a510d",
-                "name": "Interchange"
-              },
-              "outline": [
-                {
-                  "x": 425.018925,
-                  "y": 28.55,
-                  "z": 130.950611
-                },
-                {
-                  "x": 428.681993,
-                  "y": 28.55,
-                  "z": 119.523366
-                },
-                {
-                  "x": 432.491075,
-                  "y": 28.55,
-                  "z": 120.744389
-                },
-                {
-                  "x": 428.828007,
-                  "y": 28.55,
-                  "z": 132.171634
-                }
-              ],
-              "position": {
-                "x": 428.755,
-                "y": 28.55,
-                "z": 125.8475
-              }
-            }
-          ]
-        },
-        "6926fcc872a6499d1fa29327": {
-          "zones": [
-            {
-              "map": {
-                "id": "5714dbc024597771384a510d",
-                "name": "Interchange"
-              },
-              "outline": [
-                {
-                  "x": 35.316765,
-                  "y": 22.91,
-                  "z": 303.477869
-                },
-                {
-                  "x": 46.143366,
-                  "y": 22.91,
-                  "z": 308.653264
-                },
-                {
-                  "x": 44.418235,
-                  "y": 22.91,
-                  "z": 312.262131
-                },
-                {
-                  "x": 33.591634,
-                  "y": 22.91,
-                  "z": 307.086736
-                }
-              ],
-              "position": {
-                "x": 39.8675,
-                "y": 22.91,
-                "z": 307.87
-              },
-              "top": 24.35,
-              "bottom": 21.35
-            }
-          ]
+    "66631489acf8442f8b05319f": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
         }
-      }
+      ]
     },
-    "6848100b00afffa81f09e365": {
-      "objectives": {
-        "6848116061809d65b8503617": {
-          "exitStatus": [
-            "Survived"
-          ]
+    "6663148ca9290f9e0806cca1": {
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)"
+    },
+    "60effd818b669d08a35bfad5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
         }
-      },
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "name": "Ragman"
-            },
-            "standing": 0.1
-          }
-        ]
-      }
+      ]
     },
-    "68481881f43abfdda2058369": {
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "name": "Ragman"
-            },
-            "standing": 0.1
-          }
-        ]
-      }
+    "5c51aac186f77432ea65c552": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "66d9cbb67b491f9d5304f6e6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "579dc571d53a0658a154fbec",
+            "name": "Fence"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "596b36c586f77450d6045ad2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "657315e270bb0b8dba00cc48": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5979eee086f774311955e614": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5b47926a86f7747ccc057c15": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "596b43fb86f77457ca186186": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c3582f6ddc329a90f9c6d": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "658027799634223183395339": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5979ed3886f77431307dc512": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5979f8bb86f7743ec214c7a6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "64f5e20652fc01298e2c61e3": {
+      "name": "Beyond the Red Meat",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "64f6aafd67e11a7c6206e0d0": {
+      "name": "The Secret Recipe",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5b4795fb86f7745876267770": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
     },
     "5c1234c286f77406fa13baeb": {
       "objectives": {
@@ -430,6 +1309,1879 @@
         }
       }
     },
+    "639dbaf17c898a131e1cffff": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5b478ff486f7744d184ecbbf": {
+      "name": "Supplements",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5b478eca86f7744642012254": {
+      "name": "Vitamins",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa39c64ea11e84c0642a6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa395c4c5c04798002497": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27c99a86f7747d2c6bdd8e": {
+      "name": "Friend From the West",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "596b455186f77457cb50eccb": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135c3744e452011470807": {
+      "name": "House Arrest",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6089743983426423753cd58a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179b4f16e9dd54ac275e407": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5edabd13218d181e29451442": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6572e876dc0d635f633a5714": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "626bd75d5bef5d7d590bd415": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "60896888e4a85c72ef3fa300": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6193850f60b34236ee0483de": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c0bc91486f7746ab41857a2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5c0bbaa886f7746941031d82": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6764174c86addd02bc033d68": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71c11d54b755a3b53eb65": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "675c1d6d59b0575973008fc7": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "66aa58245ab22944110db6e9": {
+      "name": "New Paths",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5a27b7a786f774579c3eb376": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "669fa38fad7f1eac2607ed46": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5a27b80086f774429a5d7e20": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27b75b86f7742e97191958": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27ba1c86f77461ea5a3c56": {
+      "name": "Weapons Circulation",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639282134ed9512be67647ed": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27b87686f77460de0252a8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27b9de86f77464e5044585": {
+      "name": "The Cult",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135f286e646067c176a87": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135534b15ca31f76bc317": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27b7d686f77460d847e6a6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5a27bb3d86f77411ea361a21": {
+      "name": "Tracker",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5a27bb1e86f7741f27621b7e": {
+      "name": "Cargo X",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179b4d1bca27a099552e04e": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "60e71c9ad54b755a3b53eb66": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "61958c366726521dd96828ec": {
+      "name": "Gifts from Tarkov",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6086c852c945025d41566124": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179aff8f57fb279792c60a1": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c0d4e61d09282029f53920e": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6179b5eabca27a099552e052": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5c0d4c12d09282029f539173": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71ccb5688f6424c7bfec4": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71ce009d7c801eb0c0ec6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5edac020218d181e29451446": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5edac63b930f5454f51e128b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5c0bd01e86f7747cdd799e56": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "63a9b229813bba58a50c9ee5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5ac3475486f7741d6224abd3": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "6578ec473dbd035d04531a8d": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "657315e4a6af4ab4b50f3459": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ac23c6186f7741247042bad": {
+      "name": "Gunsmith - MP-133",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "60e71d6d7fcf9c556f325055": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ac3462b86f7741d6118b983": {
+      "name": "Farming",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ac2428686f77412450b42bf": {
+      "name": "Gunsmith - HK MP5",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c1570526ff496850895d9": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ac2426c86f774138762edfe": {
+      "name": "Gunsmith - AKS-74U",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ac345dc86f774288030817f": {
+      "name": "Playing the Market",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639872f9decada40426d3447": {
+      "name": "Gunsmith - OP-SKS",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639136fa9444fb141f4e6eee": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6573382e557ff128bf3da536": {
+      "name": "The Secret to Productivity",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ae3267986f7742a413592fe": {
+      "name": "Gunsmith - Model 870",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135e8c115f907b14700aa": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "65733403eefc2c312a759ddb": {
+      "name": "Corporate Perks",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ac3477486f7741d651d6885": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa39b91b0a8c9680fc467": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ac3467986f7741d6224abc2": {
+      "name": "Ill-Wisher",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5f04886a3937dc337a6b8238": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ac346a886f7744e1b083d67": {
+      "name": "Rat Hunting",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "66aa74571e5e199ecd094f18": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ac244eb86f7741356335af1": {
+      "name": "Gunsmith - M4A1",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "639872fa9b4fb827b200d8e5": {
+      "name": "Gunsmith - P226R",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ac3464c86f7741d651d6877": {
+      "name": "Semiconductor Crisis",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179b3bdc7560e13d23eeb8d": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ae327c886f7745c7b3f2f3f": {
+      "name": "Gunsmith - AK-105",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6089732b59b92115597ad789": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "64ee9df4496db64f9b7a4432": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5b47799d86f7746c5d6a5fd8": {
+      "name": "Gunsmith - MPX",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179b3a12153c15e937d52bc": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c139eb686f7747878361a6f": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ae3277186f7745973054106": {
+      "name": "Gunsmith - AKS-74N",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ae3270f86f77445ba41d4dd": {
+      "name": "Gunsmith - AKM",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "639872fc93ae507d5858c3a6": {
+      "name": "Gunsmith - Vector 9x19",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6089736efa70fc097863b8f6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5ae3280386f7742a41359364": {
+      "name": "Gunsmith - AS VAL",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c1128e386f7746565181106": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c0be13186f7746f016734aa": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71d23c1bfa3050473b8e6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "6942b44f891369fc790e385a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5c0bde0986f77479cf22c2f8": {
+      "name": "Shooter Born in Heaven",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "68db9c7557bc51a8c804c14b": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5a7c2eca46aef81a7ca2145d",
+            "name": "Mechanic"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "639872fe8871e1272b10ccf6": {
+      "name": "Gunsmith Master - Part 1"
+    },
+    "5ac244c486f77413e12cf945": {
+      "name": "Gunsmith Master - Part 2"
+    },
+    "5ac242ab86f77412464f68b4": {
+      "name": "Gunsmith Master - Part 3"
+    },
+    "5b47749f86f7746c5d6a5fd4": {
+      "name": "Gunsmith Master - Part 4"
+    },
+    "5b477b6f86f7747290681823": {
+      "name": "Gunsmith Master - Part 5"
+    },
+    "639873003693c63d86328f25": {
+      "name": "Gunsmith Master - Part 6"
+    },
+    "5b477f7686f7744d1b23c4d2": {
+      "name": "Gunsmith Master - Part 7"
+    },
+    "63987301e11ec11ff5504036": {
+      "name": "Gunsmith Master - Part 8"
+    },
+    "5b47825886f77468074618d3": {
+      "name": "Gunsmith Master - Part 9"
+    },
+    "64f83bb69878a0569d6ecfbe": {
+      "name": "Gunsmith Master - Part 10"
+    },
+    "64f83bcdde58fc437700d8fa": {
+      "name": "Gunsmith Master - Part 11"
+    },
+    "64f83bd983cfca080a362c82": {
+      "name": "Gunsmith Master - Part 13"
+    },
+    "60e71dc0a94be721b065bbfc": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae448bf86f7744d733e55ee": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae448f286f77448d73c0131": {
+      "objectives": {
+        "5ae452de86f77450595c4333": {
+          "zones": [
+            {
+              "map": {
+                "id": "5714dbc024597771384a510d",
+                "name": "Interchange"
+              },
+              "outline": [
+                {
+                  "x": 425.018925,
+                  "y": 28.55,
+                  "z": 130.950611
+                },
+                {
+                  "x": 428.681993,
+                  "y": 28.55,
+                  "z": 119.523366
+                },
+                {
+                  "x": 432.491075,
+                  "y": 28.55,
+                  "z": 120.744389
+                },
+                {
+                  "x": 428.828007,
+                  "y": 28.55,
+                  "z": 132.171634
+                }
+              ],
+              "position": {
+                "x": 428.755,
+                "y": 28.55,
+                "z": 125.8475
+              }
+            }
+          ]
+        },
+        "6926fcc872a6499d1fa29327": {
+          "zones": [
+            {
+              "map": {
+                "id": "5714dbc024597771384a510d",
+                "name": "Interchange"
+              },
+              "outline": [
+                {
+                  "x": 35.316765,
+                  "y": 22.91,
+                  "z": 303.477869
+                },
+                {
+                  "x": 46.143366,
+                  "y": 22.91,
+                  "z": 308.653264
+                },
+                {
+                  "x": 44.418235,
+                  "y": 22.91,
+                  "z": 312.262131
+                },
+                {
+                  "x": 33.591634,
+                  "y": 22.91,
+                  "z": 307.086736
+                }
+              ],
+              "position": {
+                "x": 39.8675,
+                "y": 22.91,
+                "z": 307.87
+              },
+              "top": 24.35,
+              "bottom": 21.35
+            }
+          ]
+        }
+      }
+    },
+    "5ae4493486f7744efa289417": {
+      "name": "Inventory Files",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae449b386f77446d8741719": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5c10f94386f774227172c572": {
+      "name": "Small Things, Big Help",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae4493d86f7744b8e15aa8f": {
+      "name": "A Big Loss",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae4490786f7744ca822adcc": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5ae4498786f7744bde357695": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "675c085d59b0575973005f52": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639135a7e705511c8a4a1b78": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "638fcd23dc65553116701d33": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ae448e586f7744dcf0c2a67": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5b478d0f86f7744d190d91b5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "65802b627b44fa5e14638899": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "65734c186dc1e402c80dc19e": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5ae449d986f774453a54a7e1": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5b478b1886f7744d1b23c57d": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "608974af4b05530f55550c21": {
+      "name": "Reserve Expert",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5b47891f86f7744d1b23c571": {
+      "name": "Living High is Not a Crime",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "639135bbc115f907b14700a6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "608974d01a66564e74191fc0": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "60e71dc67fcf9c556f325056": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "66aa61663aa37705c5024277": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c112d7e86f7740d6f647486": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5c1141f386f77430ff393792": {
+      "name": "Antique Enthusiast",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5ac3b934156ae10c4430e83c",
+            "name": "Ragman"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "66b38c7bf85b8bf7250f9cb6": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5d25e2c386f77443e7549029": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "675c1cf4a757ddd00404f0a3": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5d25e43786f7740a212217fa": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "60e729cf5698ee7b05057439": {
+      "name": "Swift",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5d24b81486f77439c92d6ba8": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5d25e44386f77409453bce7b": {
+      "name": "The Huntsman Path - Angry Watchman",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5d25e2ee86f77443e35162ea": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "64e7b971f9d6fa49d6769b44": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "66b38e144f2ab7cc530c3fe7": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "639136e84ed9512be67647db": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5d25e4ad86f77443e625e387": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5d25e48186f77443e625e386": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6578eb36e5020875d64645cd": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa3979b0ce3feae01a130": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "63a88045abf76d719f42d715": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa3a08b4a64b332041ff7": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5d25e2e286f77444001e2e48": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "60c0c018f7afb4354815096a": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5d25e4d586f77443e625e388": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "639136df4b15ca31f76bc31f": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "61904daa7d0d857927447b9c": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5d25e4b786f77408251c4bfc": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5d25e45e86f77408251c4bfa": {
+      "name": "The Huntsman Path - Liberation",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "6179ad0a6e9dd54ac275e3f2": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5d25e2cc86f77443e47ae019": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "66ab9da7eb102b9bcd08591c": {
+      "objectives": {
+        "66ab9da7eb102b9bcd08591d": {
+          "description": "Eliminate 5 Scavs on Lighthouse (In one raid)",
+          "zones": [],
+          "zoneNames": []
+        },
+        "66ab9da7eb102b9bcd085922": {
+          "description": "Eliminate 5 Scavs on Shoreline (In one raid)",
+          "zones": [],
+          "zoneNames": []
+        }
+      }
+    },
+    "5d25e2b486f77409de05bba0": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "608a768d82e40b3c727fd17d": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5d25e44f86f77443e625e385": {
+      "name": "The Huntsman Path - Eraser",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "5edab4b1218d181e29451435": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "63a9b36cc31b00242d28a99f": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "60e71e8ed54b755a3b53eb67": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "626bdcc3a371ee3a3a3514c5": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5d25e2d886f77442734d335e": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5d25e4ca86f77409dd5cdf2c": {
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "5ae449c386f7744bde357697": {
+      "name": "Pathfinder"
+    },
+    "66058cc5bb83da7ba474aba9": {
+      "objectives": {
+        "662ba61d3ed61b6b78187b71": {
+          "count": 2
+        }
+      }
+    },
+    "6848100b00afffa81f09e365": {
+      "objectives": {
+        "6848116061809d65b8503617": {
+          "exitStatus": [
+            "Survived"
+          ]
+        }
+      },
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "name": "Ragman"
+            },
+            "standing": 0.1
+          }
+        ]
+      }
+    },
+    "68481881f43abfdda2058369": {
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "name": "Ragman"
+            },
+            "standing": 0.1
+          }
+        ]
+      }
+    },
     "6179b5b06e9dd54ac275e409": {
       "objectives": {
         "6194fbf785a6d62c481a7aee": {
@@ -449,8 +3201,282 @@
         }
       }
     },
-    "6663148ca9290f9e0806cca1": {
-      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)"
+    "600302d73b897b11364cd161": {
+      "name": "All This Filth..."
+    },
+    "64f731ab83cfca080a361e42": {
+      "name": "Pets Won't Need It"
+    },
+    "676529af9c90953d090882e7": {
+      "name": "Gunsmith Master - Part 12"
+    },
+    "5b4794cb86f774598100d5d4": {
+      "name": "Metal Birds"
+    },
+    "5c0d0f1886f77457b8210226": {
+      "name": "From Hand to Hand"
+    },
+    "59c9392986f7742f6923add2": {
+      "name": "Aid Stations"
+    },
+    "59ca1a6286f774509a270942": {
+      "name": "Ironclad Proof"
+    },
+    "64f3176921045e77405d63b5": {
+      "name": "Paramedic",
+      "experience": 10000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "54cb57776803fa99248b456e",
+              "name": "Therapist"
+            },
+            "standing": 0.25
+          }
+        ],
+        "items": [
+          {
+            "count": 165000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          }
+        ]
+      }
+    },
+    "5a0449d586f77474e66227b7": {
+      "name": "Master Key",
+      "experience": 3000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.1
+          }
+        ],
+        "items": [
+          {
+            "count": 585,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          },
+          {
+            "count": 3,
+            "item": {
+              "id": "5734779624597737e04bf329",
+              "name": "CPU fan",
+              "shortName": "CPU fan"
+            }
+          }
+        ]
+      }
+    },
+    "5a03153686f77442d90e2171": {
+      "name": "One-Way Ticket",
+      "experience": 10000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.25
+          }
+        ],
+        "items": [
+          {
+            "count": 1171,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          }
+        ]
+      },
+      "objectives": {
+        "5c9a17c686f7747dbe2da3c1": {
+          "count": 15,
+          "description": "Eliminate 15 targets with headshots while using an AUG on Factory",
+          "maps": [
+            {
+              "id": "55f2d3fd4bdc2d5f408b4567",
+              "name": "Factory"
+            }
+          ],
+          "usingWeapon": [
+            {
+              "id": "62e7c4fba689e8c9c50dfc38",
+              "name": "Steyr AUG A1 5.56x45 assault rifle",
+              "shortName": "AUG A1"
+            }
+          ]
+        }
+      }
+    },
+    "5a0327ba86f77456b9154236": {
+      "name": "Fuel Shortage",
+      "experience": 3000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.1
+          }
+        ],
+        "items": [
+          {
+            "count": 585,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          }
+        ]
+      }
+    },
+    "5a03296886f774569778596a": {
+      "name": "I Need More Power",
+      "experience": 10000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.25
+          }
+        ],
+        "items": [
+          {
+            "count": 1171,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "62a0a16d0b9d3c46de5b6e97",
+              "name": "Military flash drive",
+              "shortName": "MFD"
+            }
+          }
+        ]
+      }
+    },
+    "5a27bafb86f7741c73584017": {
+      "name": "Chemical Experiments",
+      "experience": 3000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.1
+          }
+        ],
+        "items": [
+          {
+            "count": 570,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          }
+        ]
+      }
+    },
+    "68ee1c18b4e5bc9a68018cd7": {
+      "name": "Special Order",
+      "experience": 65000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "54cb50c76803fa8b248b4571",
+              "name": "Prapor"
+            },
+            "standing": 1.5
+          }
+        ],
+        "items": [
+          {
+            "count": 400000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "68ec0c1e4a10ddacb2069398",
+              "name": "TKPD 9.3x64 carbine Assault",
+              "shortName": "TKPD Assault"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "68ee0114024fb2df16004f1c",
+              "name": "9.3x64mm FMJ ammo pack (20 pcs)",
+              "shortName": "FMJ"
+            }
+          }
+        ]
+      },
+      "objectives": {
+        "68ee1cc7e8b13097f525e6f2": {
+          "count": 1
+        }
+      }
+    },
+    "5d25e46e86f77409453bce7c": {
+      "name": "First Aid",
+      "experience": 3000,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5c0647fdd443bc2504c2d371",
+              "name": "Jaeger"
+            },
+            "standing": 0.1
+          }
+        ],
+        "items": [
+          {
+            "count": 80000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          }
+        ]
+      }
     }
   },
   "editions": {
@@ -3191,6 +6217,350 @@
     }
   },
   "tasksAdd": {
+    "oil_run": {
+      "id": "oil_run",
+      "name": "Oil Run",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Oil_Run",
+      "trader": {
+        "id": "54cb50c76803fa8b248b4571",
+        "name": "Prapor"
+      },
+      "map": {
+        "id": "56f40101d2720b2a4d8b45d6",
+        "name": "Customs"
+      },
+      "kappaRequired": true,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 1
+        }
+      ],
+      "objectives": [
+        {
+          "id": "oil_run_obj01",
+          "description": "Locate and mark any of the fuel tank trucks with an MS2000 Marker on Customs",
+          "type": "mark",
+          "maps": [
+            {
+              "id": "56f40101d2720b2a4d8b45d6",
+              "name": "Customs"
+            }
+          ],
+          "markerItem": {
+            "id": "5991b51486f77447b112d44f",
+            "name": "MS2000 Marker",
+            "shortName": "MS2000"
+          },
+          "count": 1
+        }
+      ],
+      "experience": 3000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 93920,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "5d1b2fa286f77425227d1674",
+              "name": "Electric motor",
+              "shortName": "Motor"
+            }
+          }
+        ],
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "54cb50c76803fa8b248b4571",
+              "name": "Prapor"
+            },
+            "standing": 0.1
+          }
+        ]
+      }
+    },
+    "fall_ailment": {
+      "id": "fall_ailment",
+      "name": "Fall Ailment",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Fall_Ailment",
+      "trader": {
+        "id": "54cb57776803fa99248b456e",
+        "name": "Therapist"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ],
+      "objectives": [
+        {
+          "id": "fall_ailment_obj01",
+          "description": "Find 5 Disposable syringes found in raid",
+          "type": "findItem",
+          "items": [
+            {
+              "id": "5d1b3f2d86f774253763b735",
+              "name": "Disposable syringe",
+              "shortName": "Syringe"
+            }
+          ],
+          "foundInRaid": true,
+          "count": 5
+        },
+        {
+          "id": "fall_ailment_obj02",
+          "description": "Hand over the Disposable syringes",
+          "type": "giveItem",
+          "items": [
+            {
+              "id": "5d1b3f2d86f774253763b735",
+              "name": "Disposable syringe",
+              "shortName": "Syringe"
+            }
+          ],
+          "count": 5
+        }
+      ],
+      "experience": 3000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 80000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "5d1b3a5d86f774252167ba22",
+              "name": "Pile of meds",
+              "shortName": "Meds"
+            }
+          }
+        ],
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "54cb57776803fa99248b456e",
+              "name": "Therapist"
+            },
+            "standing": 0.1
+          }
+        ]
+      }
+    },
+    "the_tarkov_butcher": {
+      "id": "the_tarkov_butcher",
+      "name": "The Tarkov Butcher",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Butcher",
+      "trader": {
+        "id": "54cb57776803fa99248b456e",
+        "name": "Therapist"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ],
+      "objectives": [
+        {
+          "id": "the_tarkov_butcher_obj01",
+          "description": "Locate and obtain the chemical container on Ground Zero",
+          "type": "findQuestItem",
+          "maps": [
+            {
+              "id": "653e6760052c01c1c805532f",
+              "name": "Ground Zero"
+            }
+          ],
+          "count": 1
+        },
+        {
+          "id": "the_tarkov_butcher_obj02",
+          "description": "Stash the container by the police station on Streets of Tarkov",
+          "type": "plantItem",
+          "maps": [
+            {
+              "id": "5714dc692459777137212e12",
+              "name": "Streets of Tarkov"
+            }
+          ],
+          "count": 1
+        }
+      ],
+      "experience": 10000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 165000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          },
+          {
+            "count": 2,
+            "item": {
+              "id": "5d02797c86f774203f38e30a",
+              "name": "Surv12 field surgical kit",
+              "shortName": "Surv12"
+            }
+          }
+        ],
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "54cb57776803fa99248b456e",
+              "name": "Therapist"
+            },
+            "standing": 0.25
+          }
+        ]
+      }
+    },
+    "demonstration_model": {
+      "id": "demonstration_model",
+      "name": "Demonstration Model",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Demonstration_model",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": {
+        "id": "5704e5fad2720bc05b8b4567",
+        "name": "Reserve"
+      },
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 3
+        }
+      ],
+      "objectives": [
+        {
+          "id": "demonstration_model_obj01",
+          "description": "Eliminate any 15 targets with headshots with 7.62x51 assault rifles or DMRs on Reserve",
+          "type": "shoot",
+          "maps": [
+            {
+              "id": "5704e5fad2720bc05b8b4567",
+              "name": "Reserve"
+            }
+          ],
+          "bodyParts": [
+            "head"
+          ],
+          "shotType": "kill",
+          "count": 15
+        }
+      ],
+      "experience": 28000,
+      "finishRewards": {
+        "items": [
+          {
+            "count": 1900,
+            "item": {
+              "id": "5696686a4bdc2da3298b456a",
+              "name": "Dollars",
+              "shortName": "USD"
+            }
+          }
+        ],
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5935c25fb3acc3127c3d8cd9",
+              "name": "Peacekeeper"
+            },
+            "standing": 0.75
+          }
+        ]
+      }
+    },
+    "hiking": {
+      "id": "hiking",
+      "name": "Hiking",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Hiking",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ],
+      "objectives": []
+    },
+    "secret_message": {
+      "id": "secret_message",
+      "name": "Secret Message",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Special:Search?query=Secret+Message",
+      "trader": {
+        "id": "5935c25fb3acc3127c3d8cd9",
+        "name": "Peacekeeper"
+      },
+      "map": null,
+      "kappaRequired": false,
+      "lightkeeperRequired": false,
+      "factionName": "Any",
+      "traderRequirements": [
+        {
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ],
+      "objectives": []
+    },
     "new_beginning_prestige_5": {
       "id": "new_beginning_prestige_5",
       "name": "New Beginning",
@@ -3200,7 +6570,6 @@
         "id": "5ac3b934156ae10c4430e83c",
         "name": "Ragman"
       },
-      "minPlayerLevel": 47,
       "requiredPrestige": {
         "name": "Prestige 4",
         "prestigeLevel": 4
@@ -3509,7 +6878,6 @@
         "id": "5ac3b934156ae10c4430e83c",
         "name": "Ragman"
       },
-      "minPlayerLevel": 47,
       "requiredPrestige": {
         "name": "Prestige 5",
         "prestigeLevel": 5
@@ -3848,9 +7216,6 @@
   "modes": {
     "regular": {
       "tasks": {
-        "6752f6d83038f7df520c83e8": {
-          "minPlayerLevel": 20
-        },
         "67d03be712fb5f8fd2096332": {
           "objectives": {
             "67d03be712fb5f8fd2096334": {
@@ -3897,39 +7262,6 @@
               "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
             }
           }
-        },
-        "5c0bbaa886f7746941031d82": {
-          "minPlayerLevel": 19
-        },
-        "5b4795fb86f7745876267770": {
-          "minPlayerLevel": 23
-        },
-        "65733403eefc2c312a759ddb": {
-          "minPlayerLevel": 23
-        },
-        "6179ac7511973d018217d0b9": {
-          "minPlayerLevel": 17
-        },
-        "5d25e4b786f77408251c4bfc": {
-          "minPlayerLevel": 25
-        },
-        "5ae3280386f7742a41359364": {
-          "minPlayerLevel": 27
-        },
-        "608a768d82e40b3c727fd17d": {
-          "minPlayerLevel": 10
-        },
-        "5c112d7e86f7740d6f647486": {
-          "minPlayerLevel": 25
-        },
-        "6089732b59b92115597ad789": {
-          "minPlayerLevel": 13
-        },
-        "5b47876e86f7744d1c353205": {
-          "minPlayerLevel": 23
-        },
-        "59ca2eb686f77445a80ed049": {
-          "minPlayerLevel": 16
         }
       }
     }
@@ -3957,8 +7289,8 @@
     }
   },
   "$meta": {
-    "version": "1.55",
-    "generated": "2026-08-04T00:38:15.168Z",
-    "sha256": "897c7a2f947abf09694ae14b43010c8f31e69da5b1c8e06ba6a9d674abc383c4"
+    "version": "1.0.0",
+    "generated": "2026-08-11T10:39:38.430Z",
+    "sha256": "51b52c9cd8cdb6f3f0a5bf2a903f9ff7a55b85cfe3dc1a1d16f282688b68c07e"
   }
 }

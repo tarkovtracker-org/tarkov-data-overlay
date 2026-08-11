@@ -203,4 +203,10 @@
   '5d25e2a986f77409dd5cdf2a': {
     disabled: true,
   },
+
+  // Prapor - Glory to CPSU - Part 1 (remove from EFT in Season 1)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
+  '639135b04ed9512be67647d7': {
+    disabled: true,
+  },
 }
