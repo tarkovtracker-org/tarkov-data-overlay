@@ -8,6 +8,7 @@ import {
   printHeader,
   bold,
   dim,
+  colorize,
 } from '../../src/lib/index.js';
 import {
   TARKOV_1_0_LAUNCH,
@@ -524,7 +525,9 @@ export function printWikiData(wiki: WikiTaskData): void {
       day: 'numeric',
     });
     const isPost1_0 = revDate >= TARKOV_1_0_LAUNCH;
-    const freshness = isPost1_0 ? '🟢 Post-1.0' : '🔴 Pre-1.0';
+    const freshness = isPost1_0
+      ? colorize('[POST-1.0]', 'green')
+      : colorize('[PRE-1.0]', 'red');
     console.log(
       `${bold('Last Edit')}: ${dateStr} (${daysAgo} days ago) ${freshness}`
     );
