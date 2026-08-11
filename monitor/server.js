@@ -3,8 +3,9 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
+const { exec, execSync } = require("child_process");
 
-const PORT = Number(process.env.PORT) || 3476;
+const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const MAX_ROWS = Number(process.env.MAX_ROWS) || 250;
 
@@ -19,7 +20,32 @@ const REMOTE_FETCH_TIMEOUT_MS =
 const REMOTE_FETCH_MAX_BYTES =
   Number(process.env.REMOTE_FETCH_MAX_BYTES) || 5 * 1024 * 1024;
 
-const TARKOV_JSON_BASE = "https://json.tarkov.dev";
+const TARKOV_JSON_BASE =
+  process.env.TARKOV_JSON_BASE || "https://json.tarkov.dev";
+
+// Game modes served by json.tarkov.dev. The list is refreshed at startup from
+// the live /endpoints `gameModes` payload (see startModeDiscovery) so the
+// monitor follows upstream renames automatically; these defaults apply when
+// discovery fails. pvp-season is BSG's Seasonal Character mode (EFT 1.1.0.0).
+const DEFAULT_MODES = ["regular", "pve", "pvp-season"];
+const MODE_LABELS = {
+  regular: "PvP",
+  pve: "PvE",
+  "pvp-season": "PvP PvE Seasonal",
+  "pvp-pve-seasonal": "PvP PvE Seasonal",
+};
+
+let supportedModes = [...DEFAULT_MODES];
+
+function getModeLabel(mode) {
+  if (MODE_LABELS[mode]) {
+    return MODE_LABELS[mode];
+  }
+  return mode
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
 const VIEW_CONFIG = {
   tasks: {
@@ -62,23 +88,70 @@ const VIEW_CONFIG = {
     lede: "Items added by the overlay.",
     requiresMode: false,
   },
+  prestige: {
+    title: "Prestige Overrides",
+    lede: "Prestige-level corrections included in the overlay build.",
+    requiresMode: false,
+  },
+  locales: {
+    title: "Locale Corrections",
+    lede: "Per-locale translation corrections in the overlay.",
+    requiresMode: false,
+    requiresLocale: true,
+  },
+  seasonalPerks: {
+    title: "Seasonal Perks",
+    lede: "Seasonal (pvp-season) perks defined by the overlay.",
+    requiresMode: false,
+  },
+  craftsAdd: {
+    title: "Craft Additions",
+    lede: "Hideout crafts added by the overlay.",
+    requiresMode: false,
+  },
 };
 
 const DEFAULT_VIEW = "tasks";
 const DEFAULT_MODE = "regular";
 
 const overlayState = { data: null, updatedAt: null, error: null };
-const apiState = {
-  regular: { data: null, updatedAt: null, error: null },
-  pve: { data: null, updatedAt: null, error: null },
-};
+const apiState = Object.fromEntries(
+  DEFAULT_MODES.map((mode) => [
+    mode,
+    { data: null, updatedAt: null, error: null },
+  ]),
+);
 
 const summaryByKey = new Map();
 const readLocks = {
   overlay: { isReading: false, pendingRead: false },
-  apiRegular: { isReading: false, pendingRead: false },
-  apiPve: { isReading: false, pendingRead: false },
+  ...Object.fromEntries(
+    DEFAULT_MODES.map((mode) => [
+      mode,
+      { isReading: false, pendingRead: false },
+    ]),
+  ),
 };
+
+// Register additional game modes discovered at startup (apiState/readLocks are
+// seeded from DEFAULT_MODES so the module works under test without I/O).
+function registerModes(modes) {
+  if (!Array.isArray(modes)) {
+    return;
+  }
+  let changed = false;
+  modes.forEach((mode) => {
+    if (typeof mode !== "string" || mode in apiState) {
+      return;
+    }
+    apiState[mode] = { data: null, updatedAt: null, error: null };
+    readLocks[mode] = { isReading: false, pendingRead: false };
+    changed = true;
+  });
+  if (changed) {
+    supportedModes = Object.keys(apiState);
+  }
+}
 
 const clientsByKey = new Map();
 let overlayFsWatcher = null;
@@ -89,6 +162,110 @@ function parseIsoDate(value) {
   }
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+// Latest release tag (e.g. "v1.56" -> "1.56") from git, the authority for
+// released overlay versions. Falls back to undefined when git is unavailable.
+let cachedTagVersion;
+function getLatestTagVersion() {
+  if (cachedTagVersion !== undefined) {
+    return cachedTagVersion;
+  }
+  try {
+    const tag = execSync("git describe --tags --abbrev=0", {
+      cwd: __dirname,
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
+    cachedTagVersion = tag.replace(/^v/, "");
+  } catch {
+    cachedTagVersion = undefined;
+  }
+  return cachedTagVersion;
+}
+
+function versionNums(value) {
+  return String(value || "")
+    .replace(/^v/i, "")
+    .split(/[.\-]/)
+    .map((part) => Number.parseInt(part, 10) || 0);
+}
+
+function isVersionStale(metaVersion, latestVersion) {
+  if (!latestVersion) {
+    return false;
+  }
+  if (!metaVersion) {
+    return true;
+  }
+  const loaded = versionNums(metaVersion);
+  const latest = versionNums(latestVersion);
+  for (let i = 0; i < Math.max(loaded.length, latest.length); i += 1) {
+    const loadedPart = loaded[i] || 0;
+    const latestPart = latest[i] || 0;
+    if (loadedPart !== latestPart) {
+      return loadedPart < latestPart;
+    }
+  }
+  return false;
+}
+
+// Rebuild the overlay from sources (npm run build) so the monitor can refresh
+// dist/overlay.json instead of only warning that it is stale. Set REBUILD_TOKEN
+// to require ?token= on POST /rebuild.
+const REPO_ROOT = path.resolve(__dirname, "..");
+const rebuildState = { running: false, lastRun: null, lastSuccess: null, error: null };
+
+function rebuildOverlay() {
+  return new Promise((resolve, reject) => {
+    if (process.env.NODE_ENV === "test") {
+      resolve({ output: "Rebuild skipped in test environment" });
+      return;
+    }
+    if (rebuildState.running) {
+      const error = new Error("A rebuild is already in progress");
+      error.conflict = true;
+      reject(error);
+      return;
+    }
+    rebuildState.running = true;
+    rebuildState.error = null;
+    const child = exec("npm run build", {
+      cwd: REPO_ROOT,
+      timeout: 120000,
+      maxBuffer: 10 * 1024 * 1024,
+      env: { ...process.env, OVERLAY_VERSION: getLatestTagVersion() || "" },
+    });
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      output += chunk;
+    });
+    child.on("error", (error) => {
+      rebuildState.running = false;
+      rebuildState.lastRun = new Date().toISOString();
+      rebuildState.error = error.message;
+      reject(error);
+    });
+    child.on("exit", (code) => {
+      rebuildState.running = false;
+      rebuildState.lastRun = new Date().toISOString();
+      if (code === 0) {
+        rebuildState.lastSuccess = rebuildState.lastRun;
+        resolve({ output });
+      } else {
+        rebuildState.error = `npm run build exited with code ${code}`;
+        reject(new Error(rebuildState.error));
+      }
+    });
+  });
+}
+
+function isRebuildEnabled() {
+  return process.env.NODE_ENV !== "test";
 }
 
 async function refreshOverlayIfStale() {
@@ -301,10 +478,22 @@ function normalizeView(view) {
 }
 
 function normalizeMode(mode) {
-  if (mode === "pve" || mode === "regular") {
-    return mode;
+  return supportedModes.includes(mode) ? mode : DEFAULT_MODES[0];
+}
+
+function getAvailableLocales() {
+  const locales = overlayState.data && overlayState.data.locales;
+  return locales && typeof locales === "object" && !Array.isArray(locales)
+    ? Object.keys(locales)
+    : [];
+}
+
+function normalizeLocale(locale) {
+  const available = getAvailableLocales();
+  if (available.includes(locale)) {
+    return locale;
   }
-  return DEFAULT_MODE;
+  return available[0] || "en";
 }
 
 function removeClient(key, client) {
@@ -490,7 +679,7 @@ function buildStoryChapterSections(chapters = {}) {
 }
 
 function buildTaskAdditionSections(tasksAdd = {}, mode) {
-  const section = createSection(`Task Additions (${mode})`, [
+  const section = createSection(`Task Additions (${getModeLabel(mode)})`, [
     "Task",
     "ID",
     "Trader",
@@ -500,7 +689,7 @@ function buildTaskAdditionSections(tasksAdd = {}, mode) {
 
   for (const [taskId, addition] of Object.entries(tasksAdd)) {
     if (!addition || typeof addition !== "object") {
-      pushRow(section, [taskId, taskId, "-", "-", "-"]); 
+      pushRow(section, [taskId, taskId, "-", "-", "-"]);
       continue;
     }
     const traderName = addition.trader?.name || "-";
@@ -511,6 +700,169 @@ function buildTaskAdditionSections(tasksAdd = {}, mode) {
       traderName,
       mapName,
       addition.wikiLink || "-",
+    ]);
+  }
+
+  return [section];
+}
+
+function buildPrestigeSections(prestige = {}) {
+  const section = createSection("Prestige Levels", [
+    "Level",
+    "ID",
+    "Name",
+    "Conditions",
+    "Story Requirements",
+  ]);
+
+  for (const [id, entry] of Object.entries(prestige)) {
+    if (!entry || typeof entry !== "object") {
+      pushRow(section, ["-", id, "-", "-", "-"]);
+      continue;
+    }
+    const conditionsCount = entry.conditions
+      ? Object.keys(entry.conditions).length
+      : 0;
+    const storyRequirements = Array.isArray(entry.storyRequirements)
+      ? entry.storyRequirements
+      : [];
+    const storySummary =
+      storyRequirements.length > 0
+        ? storyRequirements.map((req) => req.name || req.storyChapter).join("; ")
+        : "-";
+    pushRow(section, [
+      entry.prestigeLevel ?? "-",
+      entry.id || id,
+      entry.name || "-",
+      conditionsCount || "-",
+      storySummary,
+    ]);
+  }
+
+  return [section];
+}
+
+function buildLocaleSections(locales = {}, locale) {
+  const bundle = locales[locale] || {};
+  const sections = [];
+
+  for (const [entityType, entries] of Object.entries(bundle)) {
+    if (!entries || typeof entries !== "object") {
+      continue;
+    }
+    const section = createSection(`${entityType} (${locale})`, [
+      "Entity",
+      "Field",
+      "Overlay",
+    ]);
+
+    for (const [entityId, patch] of Object.entries(entries)) {
+      if (!patch || typeof patch !== "object") {
+        pushRow(section, [entityId, "value", formatValue(patch)]);
+        continue;
+      }
+      for (const [field, value] of Object.entries(patch)) {
+        if (value === undefined) continue;
+        if (field === "objectives" && value && typeof value === "object") {
+          for (const [objectiveId, objectivePatch] of Object.entries(value)) {
+            if (!objectivePatch || typeof objectivePatch !== "object") {
+              continue;
+            }
+            for (const [objectiveField, objectiveValue] of Object.entries(
+              objectivePatch,
+            )) {
+              if (objectiveValue === undefined) continue;
+              pushRow(section, [
+                entityId,
+                `objective:${objectiveId}.${objectiveField}`,
+                formatValue(objectiveValue),
+              ]);
+            }
+          }
+          continue;
+        }
+        pushRow(section, [entityId, field, formatValue(value)]);
+      }
+    }
+
+    if (section.rows.length > 0) {
+      sections.push(section);
+    }
+  }
+
+  if (sections.length === 0) {
+    const empty = createSection(`Locale ${locale}`, [
+      "Entity",
+      "Field",
+      "Overlay",
+    ]);
+    pushRow(empty, ["(no corrections)", "-", "-"]);
+    return [empty];
+  }
+  return sections;
+}
+
+function buildSeasonalPerkSections(perks = {}) {
+  const section = createSection("Seasonal Perks", [
+    "Perk",
+    "ID",
+    "Type",
+    "Points",
+    "Effects",
+  ]);
+
+  for (const [id, perk] of Object.entries(perks)) {
+    if (!perk || typeof perk !== "object") {
+      pushRow(section, [id, id, "-", "-", "-"]);
+      continue;
+    }
+    const effects = Array.isArray(perk.effects) ? perk.effects : [];
+    const effectSummary =
+      effects.length > 0
+        ? effects.map((effect) => effect.effectId || "?").join(", ")
+        : "-";
+    pushRow(section, [
+      perk.name || id,
+      perk.id || id,
+      perk.type || "-",
+      perk.points ?? "-",
+      effectSummary,
+    ]);
+  }
+
+  return [section];
+}
+
+function buildCraftAddSections(crafts = {}) {
+  const section = createSection("Craft Additions", [
+    "Craft",
+    "ID",
+    "Station",
+    "Level",
+    "Duration",
+    "Product",
+  ]);
+
+  for (const [id, craft] of Object.entries(crafts)) {
+    if (!craft || typeof craft !== "object") {
+      pushRow(section, [id, id, "-", "-", "-", "-"]);
+      continue;
+    }
+    const duration =
+      typeof craft.duration === "number"
+        ? `${Math.round(craft.duration / 60)} min`
+        : "-";
+    const product =
+      craft.productItem && typeof craft.productItem === "object"
+        ? craft.productItem.item || "-"
+        : "-";
+    pushRow(section, [
+      craft.id || id,
+      id,
+      craft.station || "-",
+      craft.level ?? "-",
+      duration,
+      product,
     ]);
   }
 
@@ -1005,7 +1357,10 @@ async function fetchApiTasks(mode) {
 }
 
 async function refreshApiTasks(mode) {
-  const lock = mode === "pve" ? readLocks.apiPve : readLocks.apiRegular;
+  const lock = readLocks[mode];
+  if (!lock) {
+    return;
+  }
   if (lock.isReading) {
     lock.pendingRead = true;
     return;
@@ -1029,7 +1384,7 @@ async function refreshApiTasks(mode) {
   }
 }
 
-function buildSummary(view, mode) {
+function buildSummary(view, mode, locale) {
   const overlay = overlayState.data;
   if (!overlay) {
     return {
@@ -1101,41 +1456,102 @@ function buildSummary(view, mode) {
     };
   }
 
+  if (view === "prestige") {
+    return {
+      sections: buildPrestigeSections(overlay.prestige || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "locales") {
+    return {
+      sections: buildLocaleSections(overlay.locales || {}, locale),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "seasonalPerks") {
+    return {
+      sections: buildSeasonalPerkSections(overlay.seasonalPerks || {}),
+      error: overlayState.error || null,
+    };
+  }
+
+  if (view === "craftsAdd") {
+    return {
+      sections: buildCraftAddSections(overlay.craftsAdd || {}),
+      error: overlayState.error || null,
+    };
+  }
+
   return { sections: [], error: "Unknown view" };
 }
 
 function rebuildSummaries() {
   Object.keys(VIEW_CONFIG).forEach((view) => {
-    if (view === "tasks" || view === "tasksAdd") {
-      ["regular", "pve"].forEach((mode) => {
+    const config = VIEW_CONFIG[view];
+    if (config.requiresMode) {
+      supportedModes.forEach((mode) => {
         const key = getSummaryKey(view, mode);
         const summary = buildSummary(view, mode);
         summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, mode));
+        broadcast(key, "summary", getState(view, mode, ""));
+      });
+      return;
+    }
+    if (config.requiresLocale) {
+      const locales = getAvailableLocales();
+      if (locales.length === 0) {
+        const key = getSummaryKey(view, "en");
+        const summary = buildSummary(view, "", "en");
+        summaryByKey.set(key, summary);
+        broadcast(key, "summary", getState(view, "", "en"));
+        return;
+      }
+      locales.forEach((locale) => {
+        const key = getSummaryKey(view, locale);
+        const summary = buildSummary(view, "", locale);
+        summaryByKey.set(key, summary);
+        broadcast(key, "summary", getState(view, "", locale));
       });
       return;
     }
     const key = getSummaryKey(view, "");
-    const summary = buildSummary(view, "");
+    const summary = buildSummary(view, "", "");
     summaryByKey.set(key, summary);
-    broadcast(key, "summary", getState(view, ""));
+    broadcast(key, "summary", getState(view, "", ""));
   });
 }
 
-function getState(view, mode) {
+function getState(view, mode, locale) {
   const config = VIEW_CONFIG[view];
-  const key = getSummaryKey(view, config?.requiresMode ? mode : "");
+  const key = getSummaryKey(
+    view,
+    config?.requiresLocale ? locale : config?.requiresMode ? mode : "",
+  );
   const summary = summaryByKey.get(key) || { sections: [], error: null };
+  const meta = overlayState.data?.$meta || null;
+  const latestVersion = getLatestTagVersion();
+  const stale = isVersionStale(meta && meta.version, latestVersion);
 
   return {
     view,
     mode: config?.requiresMode ? mode : null,
+    locale: config?.requiresLocale ? locale : null,
+    locales: getAvailableLocales(),
+    modes: supportedModes,
+    modeLabels: Object.fromEntries(
+      supportedModes.map((entry) => [entry, getModeLabel(entry)]),
+    ),
     title: config?.title || view,
     lede: config?.lede || "",
     overlay: {
       path: OVERLAY_PATH,
       updatedAt: overlayState.updatedAt,
-      meta: overlayState.data?.$meta || null,
+      meta,
+      version: meta ? meta.version : null,
+      latestVersion,
+      stale,
       error: overlayState.error,
     },
     api: config?.requiresMode
@@ -1144,6 +1560,11 @@ function getState(view, mode) {
           error: apiState[mode]?.error || null,
         }
       : null,
+    rebuild: {
+      enabled: isRebuildEnabled(),
+      running: rebuildState.running,
+      lastSuccess: rebuildState.lastSuccess,
+    },
     sections: summary.sections,
     error: summary.error,
   };
@@ -1192,13 +1613,26 @@ function startApiPolling() {
       .catch(() => {})
       .finally(() => setTimeout(() => schedulePoll(mode), API_POLL_MS));
   };
-  schedulePoll("regular");
-  schedulePoll("pve");
+  supportedModes.forEach((mode) => schedulePoll(mode));
+}
+
+// Refresh the supported game-mode list from json.tarkov.dev /endpoints so mode
+// renames upstream (e.g. pvp-season) propagate without redeploying.
+async function startModeDiscovery() {
+  try {
+    const envelope = await fetchEnvelopeOnce("endpoints");
+    const gameModes = envelope.data && envelope.data.gameModes;
+    registerModes(gameModes);
+  } catch {
+    // Keep the defaults; polling still works.
+  }
 }
 
 if (process.env.NODE_ENV !== "test") {
   startOverlayWatcher();
-  startApiPolling();
+  startModeDiscovery()
+    .catch(() => {})
+    .finally(() => startApiPolling());
 }
 
 const server = http.createServer((req, res) => {
@@ -1209,6 +1643,50 @@ const server = http.createServer((req, res) => {
 
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = requestUrl.pathname;
+
+  if (pathname === "/rebuild") {
+    if (req.method !== "POST") {
+      send(res, 405, "Method not allowed");
+      return;
+    }
+    if (!isRebuildEnabled()) {
+      send(
+        res,
+        503,
+        JSON.stringify({ ok: false, error: "Rebuild is disabled" }),
+        "application/json; charset=utf-8",
+      );
+      return;
+    }
+    const token = process.env.REBUILD_TOKEN;
+    if (token && requestUrl.searchParams.get("token") !== token) {
+      send(
+        res,
+        401,
+        JSON.stringify({ ok: false, error: "Invalid rebuild token" }),
+        "application/json; charset=utf-8",
+      );
+      return;
+    }
+    rebuildOverlay()
+      .then((result) => {
+        send(
+          res,
+          200,
+          JSON.stringify({ ok: true, output: result.output }),
+          "application/json; charset=utf-8",
+        );
+      })
+      .catch((error) => {
+        send(
+          res,
+          error.conflict ? 409 : 500,
+          JSON.stringify({ ok: false, error: error.message }),
+          "application/json; charset=utf-8",
+        );
+      });
+    return;
+  }
 
   if (req.method !== "GET") {
     send(res, 405, "Method not allowed");
@@ -1221,6 +1699,7 @@ const server = http.createServer((req, res) => {
         requestUrl.searchParams.get("type"),
     );
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
     const config = VIEW_CONFIG[view];
     refreshOverlayIfStale()
       .catch(() => {})
@@ -1228,10 +1707,50 @@ const server = http.createServer((req, res) => {
         send(
           res,
           200,
-          JSON.stringify(getState(view, config?.requiresMode ? mode : "")),
+          JSON.stringify(
+            getState(
+              view,
+              config?.requiresMode ? mode : "",
+              config?.requiresLocale ? locale : "",
+            ),
+          ),
           "application/json; charset=utf-8",
         );
       });
+    return;
+  }
+
+  if (pathname === "/health") {
+    const apiHealth = supportedModes.map((mode) => ({
+      mode,
+      updatedAt: apiState[mode]?.updatedAt || null,
+      error: apiState[mode]?.error || null,
+    }));
+    send(
+      res,
+      200,
+      JSON.stringify({
+        ok:
+          !overlayState.error &&
+          apiHealth.some((entry) => !entry.error && entry.updatedAt),
+        uptime: process.uptime(),
+        modes: supportedModes,
+        rebuild: {
+          enabled: isRebuildEnabled(),
+          running: rebuildState.running,
+          lastRun: rebuildState.lastRun,
+          lastSuccess: rebuildState.lastSuccess,
+          error: rebuildState.error,
+        },
+        overlay: {
+          updatedAt: overlayState.updatedAt,
+          error: overlayState.error,
+          meta: overlayState.data?.$meta || null,
+        },
+        api: apiHealth,
+      }),
+      "application/json; charset=utf-8",
+    );
     return;
   }
 
@@ -1241,8 +1760,16 @@ const server = http.createServer((req, res) => {
         requestUrl.searchParams.get("type"),
     );
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
     const config = VIEW_CONFIG[view];
-    const key = getSummaryKey(view, config?.requiresMode ? mode : "");
+    const key = getSummaryKey(
+      view,
+      config?.requiresLocale
+        ? locale
+        : config?.requiresMode
+          ? mode
+          : "",
+    );
     refreshOverlayIfStale()
       .catch(() => {})
       .finally(() => {
@@ -1280,7 +1807,13 @@ const server = http.createServer((req, res) => {
           !writeSse(
             key,
             res,
-            `event: summary\ndata: ${JSON.stringify(getState(view, config?.requiresMode ? mode : ""))}\n\n`,
+            `event: summary\ndata: ${JSON.stringify(
+              getState(
+                view,
+                config?.requiresMode ? mode : "",
+                config?.requiresLocale ? locale : "",
+              ),
+            )}\n\n`,
           )
         ) {
           cleanup();
@@ -1305,7 +1838,11 @@ const server = http.createServer((req, res) => {
     pathname === "/items-additions" ||
     pathname === "/traders" ||
     pathname === "/editions" ||
-    pathname === "/story-chapters"
+    pathname === "/story-chapters" ||
+    pathname === "/prestige" ||
+    pathname === "/locales" ||
+    pathname === "/seasonal-perks" ||
+    pathname === "/crafts"
   ) {
     serveStatic(res, "/index.html");
     return;
@@ -1355,12 +1892,20 @@ if (process.env.NODE_ENV === "test") {
     buildEditionsSections,
     buildStoryChapterSections,
     buildTaskAdditionSections,
+    buildPrestigeSections,
+    buildLocaleSections,
+    buildSeasonalPerkSections,
+    buildCraftAddSections,
     mergeTaskOverrides,
     rebuildSummaries,
     valuesEqual,
     formatValue,
     normalizeView,
     normalizeMode,
+    getLatestTagVersion,
+    isVersionStale,
+    rebuildOverlay,
+    isRebuildEnabled,
     createSection,
     pushRow,
     overlayState,

@@ -13,9 +13,18 @@
           <p class="eyebrow">Overlay Monitor</p>
           <h1 id="page-title">Tasks</h1>
           <p id="page-lede" class="lede">Task corrections.</p>
-          <div id="mode-switch" class="mode-switch" aria-label="Game mode selector">
-            <button type="button" data-mode="regular" aria-pressed="true">Regular</button>
-            <button type="button" data-mode="pve" aria-pressed="false">PvE</button>
+          <div class="controls">
+            <div id="mode-switch" class="mode-switch" aria-label="Game mode selector">
+              <button type="button" data-mode="regular" aria-pressed="true">PvP</button>
+              <button type="button" data-mode="pve" aria-pressed="false">PvE</button>
+              <button type="button" data-mode="pvp-season" aria-pressed="false">PvP PvE Seasonal</button>
+            </div>
+            <div id="locale-wrap" class="locale-wrap" style="display: none">
+              <label class="locale-label" for="locale-select">Locale</label>
+              <select id="locale-select" class="locale-select" aria-label="Locale selector">
+                <option value="en">en</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="meta">
@@ -31,19 +40,45 @@
             <span class="label">Overlay build</span>
             <span id="overlay-build" class="updated">n/a</span>
           </div>
+          <div class="meta-row">
+            <span class="label">Updated</span>
+            <span id="overlay-age" class="updated">n/a</span>
+          </div>
+          <div class="meta-actions">
+            <button id="refresh-btn" class="refresh-btn" type="button" title="Refresh now">
+              Refresh
+            </button>
+          </div>
         </div>
       </header>
+
+      <div id="error-banner" class="error-banner" style="display: none"></div>
 
       <nav id="nav" class="nav">
         <a href="/tasks" data-view="tasks">Tasks</a>
         <a href="/tasks-additions" data-view="tasksAdd">Tasks Additions</a>
+        <a href="/prestige" data-view="prestige">Prestige</a>
+        <a href="/story-chapters" data-view="storyChapters">Story Chapters</a>
         <a href="/items" data-view="items">Items</a>
+        <a href="/items-additions" data-view="itemsAdd">Items Additions</a>
         <a href="/hideout" data-view="hideout">Hideout</a>
         <a href="/traders" data-view="traders">Traders</a>
         <a href="/editions" data-view="editions">Editions</a>
-        <a href="/story-chapters" data-view="storyChapters">Story Chapters</a>
-        <a href="/items-additions" data-view="itemsAdd">Items Additions</a>
+        <a href="/seasonal-perks" data-view="seasonalPerks">Seasonal Perks</a>
+        <a href="/crafts" data-view="craftsAdd">Crafts</a>
+        <a href="/locales" data-view="locales">Locales</a>
       </nav>
+
+      <div class="toolbar">
+        <input
+          id="search"
+          class="search"
+          type="search"
+          placeholder="Filter rows…"
+          autocomplete="off"
+          aria-label="Filter table rows"
+        />
+      </div>
 
       <main>
         <section id="summary" class="summary"></section>
