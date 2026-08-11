@@ -74,7 +74,7 @@ export function printProgress(message: string): void {
  * Print a success message with a trailing status marker
  */
 export function printSuccess(message: string): void {
-  console.log(`${message.replace(/\s+$/, '')} : ${icons.checkmark}`);
+  console.log(`${message.trimEnd()} : ${icons.checkmark}`);
 }
 
 /**
