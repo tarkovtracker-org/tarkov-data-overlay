@@ -2977,7 +2977,7 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Stray_Dogs
   //
   // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
-  '626bdcc3a371ee3a3a3514c5': {
+  '626bdcc3a371ee3a7a3514c5': {
     traderRequirements: [
       { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
     ],
