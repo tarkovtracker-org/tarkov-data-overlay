@@ -154,6 +154,169 @@ h1 {
   margin-top: 8px;
 }
 
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.locale-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.locale-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.65rem;
+}
+
+.locale-select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.locale-select:hover,
+.locale-select:focus {
+  border-color: var(--accent);
+}
+
+.locale-select option {
+  background: var(--bg-accent);
+  color: var(--ink);
+}
+
+.meta-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.refresh-btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 5px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.refresh-btn:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  color: var(--muted);
+}
+
+.updated.is-stale {
+  color: #e2c58a;
+  font-weight: 600;
+}
+
+.error-banner {
+  background: rgba(194, 104, 88, 0.15);
+  border: 1px solid rgba(194, 104, 88, 0.5);
+  color: #e09a8b;
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  word-break: break-word;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-btn {
+  border: 1px solid var(--accent);
+  background: rgba(156, 168, 107, 0.15);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 5px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.update-btn:hover {
+  background: rgba(156, 168, 107, 0.3);
+  border-color: var(--accent);
+}
+
+.update-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.status.is-ok {
+  color: #a7e0b7;
+}
+
+.status.is-error {
+  color: #e09a8b;
+}
+
+.status.is-muted {
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search:focus {
+  border-color: var(--accent);
+}
+
+.search::placeholder {
+  color: var(--muted);
+}
+
 .mode-switch button {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
@@ -233,6 +396,17 @@ h1 {
 .table th {
   background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.table tbody tr:hover {
+  background: rgba(156, 168, 107, 0.05);
 }
 
 .table .badge {
@@ -275,12 +449,14 @@ h1 {
 
 .value {
   font-family: "JetBrains Mono", "IBM Plex Mono", "Fira Code", monospace;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px 10px;
-  border-radius: 10px;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 6px;
   white-space: pre-wrap;
-  max-width: 320px;
   word-break: break-word;
+  max-width: 100%;
+  vertical-align: top;
 }
 
 .code {
@@ -320,6 +496,16 @@ h1 {
 .section h2 {
   margin: 0 0 10px;
   font-size: 1.2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.section-count {
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .section .note {
