@@ -3078,12 +3078,10 @@
       "objectives": {
         "66ab9da7eb102b9bcd08591d": {
           "description": "Eliminate 5 Scavs on Lighthouse (In one raid)",
-          "zones": [],
           "zoneNames": []
         },
         "66ab9da7eb102b9bcd085922": {
           "description": "Eliminate 5 Scavs on Shoreline (In one raid)",
-          "zones": [],
           "zoneNames": []
         }
       }
@@ -3155,7 +3153,7 @@
         }
       ]
     },
-    "626bdcc3a371ee3a3a3514c5": {
+    "626bdcc3a371ee3a7a3514c5": {
       "traderRequirements": [
         {
           "trader": {
@@ -7388,8 +7386,8 @@
     }
   },
   "$meta": {
-    "version": "1.0.0",
-    "generated": "2026-08-11T11:44:34.459Z",
-    "sha256": "01b6e605466692399bebd2c43af01cec5a08588dfbe4c5390e1dd7655c9ff9c0"
+    "version": "1.56",
+    "generated": "2026-08-11T13:18:54.839Z",
+    "sha256": "feb65b7ff7facb240070528b01cc9b3e8e1428323753c3e8017a260242ec9795"
   }
 }
