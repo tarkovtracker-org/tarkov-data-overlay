@@ -1,0 +1,33 @@
+tests/eft-compare.test.ts
+  s_e3c12fca4f41fe::t_7094775d1b6849 196-198
+  s_e3c12fca4f41fe::t_40a2efa8b44085 215-219,227-231,253-257,264-268
+tests/wiki-compare.test.ts
+  s_e3c12fca4f41fe::t_601f3a0c13d5ce 3,18
+  s_e3c12fca4f41fe::t_a3c57e13958b30 273-289
+scripts/wiki-compare/wiki.ts
+  s_e3c12fca4f41fe::t_40a2efa8b44085 7,52,155,181,184,205,245-246,323,352,398,416,418,457,460,494,501-502,511,530
+  s_e3c12fca4f41fe::t_20b2e442138758 262-266
+scripts/eft-compare.ts
+  s_e3c12fca4f41fe::t_89fa20679f9e2a 512-514
+  s_e3c12fca4f41fe::t_d6b0288e4bd5bb 175-180,185-199,202-208,211,213-222,227
+dist/overlay.json
+  s_e3c12fca4f41fe::t_6f6073177da369 9345,9374,9475-9476
+src/overrides/modes/regular/tasks.json5
+  s_e3c12fca4f41fe::t_f6fe8aebcedfcc 44,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a40c8b590c78779ec2c5cdebdbe8f5fa291ae8b1",
+  "prompts": {},
+  "sessions": {
+    "s_e3c12fca4f41fe": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ff756-0198-7e2f-93ac-9420420f488e",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
