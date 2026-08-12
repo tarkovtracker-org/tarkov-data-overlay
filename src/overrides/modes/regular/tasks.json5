@@ -41,7 +41,7 @@
   '63a5cf262964a7488f5243ce': {
     objectives: {
       '63a5cf262964a7488f5243d1': {
-        description: 'Eliminate 20 PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was (PvE): "Eliminate PMC operatives with an MP5SD on Woods, Ground Zero, Interchange, or Customs"
+        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was (PvE): "Eliminate PMC operatives with an MP5SD on Woods, Ground Zero, Interchange, or Customs"
         count: 20, // Was: 5 (tarkov.dev mirrors PvE count)
         usingWeapon: [
           {
@@ -66,7 +66,7 @@
   '669fa3a40c828825de06d6a1': {
     objectives: {
       '66a0f5a7f9eae6761253114c': {
-        description: 'Eliminate any 50 targets while using an SR-2M with suppressor and KP-SR2 sight on Factory', // Was (PvE): "Eliminate any target with SR-2M with suppressor and KP-SR2 sight on Reserve or Lighthouse"
+        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory', // Was (PvE): "Eliminate any target with SR-2M with suppressor and KP-SR2 sight on Reserve or Lighthouse"
         count: 50, // Was: 30 (tarkov.dev mirrors PvE count)
         maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was (PvE): Reserve, Lighthouse
       },

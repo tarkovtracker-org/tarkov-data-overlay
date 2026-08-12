@@ -193,6 +193,9 @@ describe('reference file selection', () => {
     const dir = makeRefDir();
     try {
       expect(() => requireMatchingReferenceMode(dir, 'pvp-season')).toThrow(/pvp-season/);
+      // findReferenceFile must not silently return a cross-mode capture when
+      // no candidate matches the requested mode or has an inconclusive URL.
+      expect(() => findReferenceFile(dir, 'pvp-season')).toThrow(/pvp-season/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -209,7 +212,11 @@ describe('reference file selection', () => {
         join(dir, 'quest_list.copied.json'),
         JSON.stringify({
           ...base,
-          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-06-30T10:00:00.000Z' },
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-06-30T10:00:00.000Z',
+          },
         })
       );
       // Older mtime, newer capture timestamp.
@@ -217,7 +224,11 @@ describe('reference file selection', () => {
         join(dir, 'quest_list.fresh.json'),
         JSON.stringify({
           ...base,
-          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-08-11T07:37:37.290Z' },
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-08-11T07:37:37.290Z',
+          },
         })
       );
       const now = Date.now() / 1000;
@@ -239,14 +250,22 @@ describe('reference file selection', () => {
       writeFileSync(
         join(dir, 'quest_list.pve.json'),
         JSON.stringify({
-          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-08-11T07:37:37.290Z' },
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-08-11T07:37:37.290Z',
+          },
           response: { decoded_response: { data: [] } },
         })
       );
       writeFileSync(
         join(dir, 'quest_list.unknown.json'),
         JSON.stringify({
-          request: { method: 'POST', url: 'https://internal.example.com/client/quest/list', timestamp: '2026-06-30T10:00:00.000Z' },
+          request: {
+            method: 'POST',
+            url: 'https://internal.example.com/client/quest/list',
+            timestamp: '2026-06-30T10:00:00.000Z',
+          },
           response: { decoded_response: { data: [] } },
         })
       );

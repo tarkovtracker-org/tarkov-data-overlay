@@ -172,8 +172,46 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
         return candidate;
       }
     }
+    // Every candidate provably belongs to another mode. Signal the miss
+    // explicitly instead of returning a cross-mode capture (loadEftTasks
+    // degrades this to null; direct callers get a clear error).
+    throw new Error(
+      `No ${mode} quest reference file found in ${eftDir}: every capture belongs to another mode.`
+    );
   }
   return ranked[0];
+}
+
+interface ReferenceEnvelope {
+  mode: GameMode | null | 'unusable';
+  timestamp: number | null;
+}
+
+/** Parse a reference file's envelope once and cache it. Ranking and mode
+ * selection both need the capture timestamp and the captured request URL, and
+ * re-reading + re-parsing each multi-MB dump per helper is wasted work across
+ * findReferenceFile and requireMatchingReferenceMode. */
+const referenceEnvelopeCache = new Map<string, ReferenceEnvelope>();
+
+function readReferenceEnvelope(file: string): ReferenceEnvelope {
+  const cached = referenceEnvelopeCache.get(file);
+  if (cached) return cached;
+  let envelope: ReferenceEnvelope;
+  try {
+    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
+      request?: { url?: string; timestamp?: string };
+    };
+    const ts = raw?.request?.timestamp;
+    const ms = typeof ts === 'string' ? Date.parse(ts) : Number.NaN;
+    envelope = {
+      mode: modeFromRequestUrl(raw?.request?.url),
+      timestamp: Number.isNaN(ms) ? null : ms,
+    };
+  } catch {
+    envelope = { mode: 'unusable', timestamp: null };
+  }
+  referenceEnvelopeCache.set(file, envelope);
+  return envelope;
 }
 
 /** Infer the game mode from a reference file's captured request URL metadata.
@@ -181,31 +219,12 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
  * can ignore malformed captures instead of treating them as unknown-mode), and
  * null when the file is valid but its capture URL is inconclusive. */
 function modeFromReferenceFile(file: string): GameMode | null | 'unusable' {
-  try {
-    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
-      request?: { url?: string };
-    };
-    return modeFromRequestUrl(raw?.request?.url);
-  } catch {
-    return 'unusable';
-  }
+  return readReferenceEnvelope(file).mode;
 }
 
 /** The capture time from the reference envelope, or null when absent/parsing fails. */
 function captureTimestamp(file: string): number | null {
-  try {
-    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
-      request?: { timestamp?: string };
-    };
-    const ts = raw?.request?.timestamp;
-    if (typeof ts === 'string') {
-      const ms = Date.parse(ts);
-      if (!Number.isNaN(ms)) return ms;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+  return readReferenceEnvelope(file).timestamp;
 }
 
 /** Read the quest array out of the reference-file envelope. */
@@ -490,6 +509,9 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
     const arg = argv[i];
     if (arg === '--mode') {
       const value = argv[(i += 1)];
+      // The local quest reference only has regular and pve captures (there is
+      // no pvp-season reference), so --mode is limited to those two even though
+      // SUPPORTED_GAME_MODES also lists pvp-season for upstream fetches.
       if (value !== 'pve' && value !== 'regular') {
         throw new Error(`--mode must be 'pve' or 'regular', got '${value}'`);
       }

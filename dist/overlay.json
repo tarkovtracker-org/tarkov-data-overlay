@@ -9342,7 +9342,7 @@
         "63a5cf262964a7488f5243ce": {
           "objectives": {
             "63a5cf262964a7488f5243d1": {
-              "description": "Eliminate 20 PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange",
+              "description": "Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange",
               "count": 20,
               "usingWeapon": [
                 {
@@ -9371,7 +9371,7 @@
         "669fa3a40c828825de06d6a1": {
           "objectives": {
             "66a0f5a7f9eae6761253114c": {
-              "description": "Eliminate any 50 targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
+              "description": "Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
               "count": 50,
               "maps": [
                 {
@@ -9472,7 +9472,7 @@
   },
   "$meta": {
     "version": "1.58",
-    "generated": "2026-08-12T19:11:55.201Z",
-    "sha256": "c11963e5aded912ecce2caf84548e8aca548be3199a1ffe209c957bd4d3c6542"
+    "generated": "2026-08-12T20:07:03.713Z",
+    "sha256": "a2b73e764c324d5ed13d0e08fd7e49b8a4469bc3976fb1f0f7ed06e7114e4a5f"
   }
 }

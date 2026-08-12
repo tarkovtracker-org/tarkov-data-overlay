@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildMapAliasMap,
   compareTasks,
   getPriority,
   normalizeItemName,
@@ -14,7 +15,7 @@ import {
   type TaskSuppressionEntry,
 } from '../scripts/wiki-compare/overlay.js';
 import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
-import { extractCount } from '../scripts/wiki-compare/wiki.js';
+import { extractCount, parseObjectives } from '../scripts/wiki-compare/wiki.js';
 import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
@@ -267,5 +268,22 @@ describe('extractCount', () => {
     expect(extractCount('Survive for 5 minutes while suffering from dehydration')).toBeUndefined();
     expect(extractCount('Visit the pier within 20 minutes of the raid start')).toBeUndefined();
     expect(extractCount('Eliminate Scavs from over 40 meters away')).toBeUndefined();
+  });
+});
+
+describe('parseObjectives map extraction', () => {
+  const aliasMap = buildMapAliasMap(['Customs', 'Factory', 'Streets of Tarkov']);
+
+  it('keeps text-only map mentions when an objective also links a map', () => {
+    const [objective] = parseObjectives(
+      ['Eliminate 5 Scavs on [[Customs]] and 5 on Factory'],
+      aliasMap
+    );
+    expect(objective.maps).toEqual(expect.arrayContaining(['Customs', 'Factory']));
+  });
+
+  it('does not double-report a map that is both linked and named in text', () => {
+    const [objective] = parseObjectives(['Eliminate 5 Scavs on [[Customs]]'], aliasMap);
+    expect(objective.maps).toEqual(['Customs']);
   });
 });
