@@ -165,6 +165,9 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
   if (mode) {
     for (const candidate of ranked) {
       const candidateMode = modeFromReferenceFile(candidate);
+      // An unparseable capture cannot be used for comparison, so skip it; a
+      // valid capture with an inconclusive URL stays plausible (callers then
+      // trust --mode).
       if (candidateMode === null || candidateMode === mode) {
         return candidate;
       }
@@ -173,15 +176,18 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
   return ranked[0];
 }
 
-/** Infer the game mode from a reference file's captured request URL metadata. */
-function modeFromReferenceFile(file: string): GameMode | null {
+/** Infer the game mode from a reference file's captured request URL metadata.
+ * Returns 'unusable' when the file cannot be parsed at all (so mode selection
+ * can ignore malformed captures instead of treating them as unknown-mode), and
+ * null when the file is valid but its capture URL is inconclusive. */
+function modeFromReferenceFile(file: string): GameMode | null | 'unusable' {
   try {
     const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
       request?: { url?: string };
     };
     return modeFromRequestUrl(raw?.request?.url);
   } catch {
-    return null;
+    return 'unusable';
   }
 }
 
@@ -521,6 +527,9 @@ export function requireMatchingReferenceMode(eftDir: string, mode: GameMode): Ga
     // and this guard mirrors that same plausibility rule.
     const hasMatching = findQuestListFiles(eftDir).some((f) => {
       const candidateMode = modeFromReferenceFile(f);
+      // Mirror findReferenceFile: a valid capture whose mode cannot be detected
+      // is plausible for any requested mode (callers then trust --mode); an
+      // unparseable capture is not usable and never counts.
       return candidateMode === null || candidateMode === mode;
     });
     if (!hasMatching) {
@@ -663,7 +672,8 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
   } catch {
     return null;
   }
-  return modeFromReferenceFile(refFile);
+  const mode = modeFromReferenceFile(refFile);
+  return mode === 'unusable' ? null : mode;
 }
 
 export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };

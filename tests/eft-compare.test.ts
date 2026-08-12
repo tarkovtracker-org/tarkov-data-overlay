@@ -254,8 +254,15 @@ describe('reference file selection', () => {
       utimesSync(join(dir, 'quest_list.pve.json'), now, now);
       utimesSync(join(dir, 'quest_list.unknown.json'), now - 3600, now - 3600);
 
+      // A malformed newer capture must not shadow a valid matching capture.
+      writeFileSync(join(dir, 'quest_list.broken.json'), '{ this is not json');
+      const bnow = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.broken.json'), bnow, bnow);
+
       // findReferenceFile prefers the null-mode capture for --mode regular...
       expect(findReferenceFile(dir, 'regular')).toMatch(/quest_list\.unknown\.json$/);
+      // ...and skips the malformed capture even though it is the newest.
+      expect(findReferenceFile(dir, 'pve')).toMatch(/quest_list\.pve\.json$/);
       // ...and the guard must not contradict it by throwing (the null-mode file
       // is plausible for any requested mode; the caller then trusts --mode).
       expect(() => requireMatchingReferenceMode(dir, 'regular')).not.toThrow();
