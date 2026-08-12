@@ -496,13 +496,13 @@ function printReport(discrepancies: Discrepancy[], matched: number, apiMissing: 
       if (field === 'objective.description') {
         const objId = d.field.replace(/^objective\[(.*)\]\.description$/, '$1');
         console.log(
-          `  ${icons.warning} ${d.taskName} ${dim(`(${d.taskId})`)} ${dim(objId)}\n` +
+          `  ${d.taskName} ${dim(`(${d.taskId})`)} ${dim(objId)} : ${icons.warning}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}\n` +
             `     eft: ${colors.green}${d.eft}${colors.reset}`
         );
       } else {
         console.log(
-          `  ${icons.warning} ${d.taskName} ${dim(`(${d.taskId})`)}\n` +
+          `  ${d.taskName} ${dim(`(${d.taskId})`)} : ${icons.warning}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}  ` +
             `eft: ${colors.green}${d.eft}${colors.reset}` +
             (isCount(d) ? `  ${dim(d.field)}` : '')

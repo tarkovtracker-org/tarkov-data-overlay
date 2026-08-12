@@ -132,7 +132,8 @@ function loadOptional<T = unknown>(...segments: string[]): Record<string, T> {
 }
 
 /** Load the mode-divergence registry (tooling-only; never built into dist). */
-const loadDivergences = () => loadDivergenceRegistry(join(srcDir, 'divergences', 'tasks.json5'));
+const loadDivergences = () =>
+  loadDivergenceRegistry(join(srcDir, 'divergences', 'tasks.json5'));
 
 /** Entity types checked generically, with their API endpoint and field semantics. */
 type EntityCheckSpec = {
@@ -197,13 +198,6 @@ const STATUS_ICONS: Record<ValidationResult['status'], string> = {
   NOT_FOUND: icons.error,
 };
 
-const DETAIL_ICONS: Record<ValidationDetail['status'], string> = {
-  needed: icons.warning,
-  check: icons.warning,
-  fixed: icons.success,
-  info: icons.info,
-};
-
 const DETAIL_COLORS: Record<ValidationDetail['status'], string> = {
   needed: colors.yellow,
   check: colors.yellow,
@@ -235,10 +229,14 @@ export function normalizeWikiLink(link?: string): string | undefined {
   try {
     const parsed = new URL(trimmed);
     const protocol =
-      parsed.protocol === 'http:' || parsed.protocol === 'https:' ? 'https:' : parsed.protocol;
+      parsed.protocol === 'http:' || parsed.protocol === 'https:'
+        ? 'https:'
+        : parsed.protocol;
     const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
     const pathname =
-      parsed.pathname.replace(/\/+$/, '') === '' ? '/' : parsed.pathname.replace(/\/+$/, '');
+      parsed.pathname.replace(/\/+$/, '') === ''
+        ? '/'
+        : parsed.pathname.replace(/\/+$/, '');
     return `${protocol}//${host}${pathname}`.toLowerCase();
   } catch {
     return trimmed.toLowerCase().replace(/\/+$/, '');
@@ -318,9 +316,7 @@ export function checkTaskAdditions(
         };
       }
 
-      const availablePrestigeLevels = [
-        ...new Set(nameMatches.map((task) => getPrestigeLevel(task))),
-      ]
+      const availablePrestigeLevels = [...new Set(nameMatches.map((task) => getPrestigeLevel(task)))]
         .sort((a, b) => a - b)
         .join(', ');
       return {
@@ -412,12 +408,11 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
   // Print details for each task
   for (const result of results) {
     const icon = STATUS_ICONS[result.status];
-    console.log(`${icon} ${bold(result.name)} ${dim(`(${result.id})`)}`);
+    console.log(`${bold(result.name)} ${dim(`(${result.id})`)} : ${icon}`);
 
     for (const detail of result.details) {
-      const detailIcon = DETAIL_ICONS[detail.status];
       const color = DETAIL_COLORS[detail.status];
-      console.log(`   ${detailIcon} ${color}${detail.message}${colors.reset}`);
+      console.log(`   ${color}${detail.message}${colors.reset}`);
     }
     console.log();
   }
@@ -428,19 +423,22 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
   const { stillNeeded, fixed, removedFromApi } = categorizeResults(results);
   const line = (r: ValidationResult) => `${r.name} (${r.id})`;
 
-  printCountSection(`${icons.success} Still need overrides`, 'green', stillNeeded.map(line));
-  printCountSection(`${icons.sync} Fixed in API, can remove`, 'yellow', fixed.map(line));
+  printCountSection('Still need overrides', 'green', stillNeeded.map(line), icons.success);
+  printCountSection('Fixed in API, can remove', 'yellow', fixed.map(line), icons.sync);
   printCountSection(
-    `${icons.trash} Removed from API, delete from overlay`,
+    'Removed from API, delete from overlay',
     'red',
-    removedFromApi.map(line)
+    removedFromApi.map(line),
+    icons.trash
   );
 
   // Print recommendation
   const obsoleteCount = fixed.length + removedFromApi.length;
   if (obsoleteCount > 0) {
-    console.log(`${icons.lightbulb} ${bold('RECOMMENDATION:')}`);
-    console.log(`   Update ${overridePath} to remove ${obsoleteCount} obsolete override(s)`);
+    console.log(`${bold('RECOMMENDATION')} : ${icons.lightbulb}`);
+    console.log(
+      `   Update ${overridePath} to remove ${obsoleteCount} obsolete override(s)`
+    );
     console.log();
   }
 }
@@ -459,14 +457,16 @@ const ADDITION_COLORS: Record<AdditionStatus, string> = {
 
 function printAdditionResults(results: AdditionResult[], titlePrefix?: string): void {
   const checkTitle = titlePrefix ? `${titlePrefix} ADDITIONS CHECK` : 'ADDITIONS CHECK';
-  const summaryTitle = titlePrefix ? `${titlePrefix} ADDITIONS SUMMARY` : 'ADDITIONS SUMMARY';
+  const summaryTitle = titlePrefix
+    ? `${titlePrefix} ADDITIONS SUMMARY`
+    : 'ADDITIONS SUMMARY';
 
   printHeader(checkTitle);
 
   for (const result of results) {
     const icon = ADDITION_ICONS[result.status];
     const color = ADDITION_COLORS[result.status];
-    console.log(`${icon} ${bold(result.name)} ${dim(`(${result.key})`)}`);
+    console.log(`${bold(result.name)} ${dim(`(${result.key})`)} : ${icon}`);
     console.log(`   ${color}${result.message}${colors.reset}`);
     console.log();
   }
@@ -477,32 +477,31 @@ function printAdditionResults(results: AdditionResult[], titlePrefix?: string): 
   printHeader(summaryTitle);
 
   printCountSection(
-    `${icons.success} Resolved in API (remove from tasksAdd)`,
+    'Resolved in API (remove from tasksAdd)',
     'green',
-    byStatus('RESOLVED')
+    byStatus('RESOLVED'),
+    icons.success
   );
-  printCountSection(`${icons.warning} Still missing from API`, 'yellow', byStatus('MISSING'));
-  printCountSection(`${icons.sync} Needs review (name-only matches)`, 'yellow', byStatus('CHECK'));
+  printCountSection('Still missing from API', 'yellow', byStatus('MISSING'), icons.warning);
+  printCountSection('Needs review (name-only matches)', 'yellow', byStatus('CHECK'), icons.sync);
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
   printHeader('EDITION EXCLUSIONS CHECK');
 
   if (missing.length === 0) {
-    console.log(`${icons.success} All edition task references exist in API\n`);
+    console.log(`All edition task references exist in API : ${icons.success}\n`);
     return;
   }
 
   console.log(
-    formatCountLabel(
-      `${icons.warning} Missing edition task references (review)`,
-      missing.length,
-      'yellow'
-    )
+    `${formatCountLabel('Missing edition task references (review)', missing.length, 'yellow')} : ${icons.warning}`
   );
   for (const entry of missing) {
     const title = entry.editionTitle ?? entry.editionId;
-    console.log(`  - ${title} (${entry.editionId}) ${entry.kind} task ID ${entry.taskId}`);
+    console.log(
+      `  - ${title} (${entry.editionId}) ${entry.kind} task ID ${entry.taskId}`
+    );
   }
   console.log();
 }
@@ -541,7 +540,7 @@ export function printLocaleResults(locale: string, results: LocaleValidationResu
   for (const verdict of LOCALE_VERDICT_ORDER) {
     const subset = results.filter((r) => r.verdict === verdict);
     const meta = LOCALE_VERDICT_META[verdict];
-    console.log(formatCountLabel(`${meta.icon} ${meta.label}`, subset.length, meta.color));
+    console.log(`${formatCountLabel(meta.label, subset.length, meta.color)} : ${meta.icon}`);
     for (const r of subset) {
       console.log(`  - ${r.entityType}/${r.entityId} ${bold(r.field)}`);
       if (r.overrideValue !== undefined) {
@@ -554,9 +553,11 @@ export function printLocaleResults(locale: string, results: LocaleValidationResu
     console.log();
   }
 
-  const obsolete = results.filter((r) => r.verdict === 'STALE' || r.verdict === 'REMOVED').length;
+  const obsolete = results.filter(
+    (r) => r.verdict === 'STALE' || r.verdict === 'REMOVED'
+  ).length;
   if (obsolete > 0) {
-    console.log(`${icons.lightbulb} ${bold('RECOMMENDATION:')}`);
+    console.log(`${bold('RECOMMENDATION')} : ${icons.lightbulb}`);
     console.log(
       `   Update src/overrides/locales/${locale}.json5 to remove ${obsolete} obsolete patch(es)`
     );
@@ -644,11 +645,11 @@ function printReferenceCrossCheck(
   // Numeric (count) overrides are an exact signal: disagreeing with the
   // reference almost always means the override is wrong.
   console.log(
-    formatCountLabel(
-      `${icons.error} Count overrides that CONFLICT with the reference (likely wrong)`,
+    `${formatCountLabel(
+      'Count overrides that CONFLICT with the reference (likely wrong)',
       countConflicts.length,
       'red'
-    )
+    )} : ${icons.error}`
   );
   countConflicts.forEach(printConflict);
   if (countConflicts.length === 0) console.log(`  ${dim('None')}`);
@@ -658,27 +659,27 @@ function printReferenceCrossCheck(
   // overrides (e.g. fixing a localization bug), so a text mismatch is not by
   // itself proof the override is wrong - flag it for review, don't condemn it.
   console.log(
-    formatCountLabel(
-      `${icons.warning} Description overrides that differ from the reference (review - wording may intentionally differ)`,
+    `${formatCountLabel(
+      'Description overrides that differ from the reference (review - wording may intentionally differ)',
       descConflicts.length,
       'yellow'
-    )
+    )} : ${icons.warning}`
   );
   descConflicts.forEach(printConflict);
   if (descConflicts.length === 0) console.log(`  ${dim('None')}`);
   console.log();
 
   console.log(
-    formatCountLabel(`${icons.success} Overrides confirmed by the reference`, confirmed, 'green')
+    `${formatCountLabel('Overrides confirmed by the reference', confirmed, 'green')} : ${icons.success}`
   );
   console.log();
 
   console.log(
-    formatCountLabel(
-      `${icons.info} Objective overrides the reference can't adjudicate`,
+    `${formatCountLabel(
+      "Objective overrides the reference can't adjudicate",
       unverifiable.length,
       'cyan'
-    )
+    )} : ${icons.info}`
   );
   console.log();
 }
@@ -692,10 +693,9 @@ function printReferenceCrossCheck(
  * load-bearing in PvE, and one that is quietly wrong in the mode we never
  * checked. Only overrides stale in EVERY mode are safe to retire.
  */
-function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, ValidationResult[]>>): {
-  staleEverywhere: string[];
-  verdictDiffers: string[];
-} {
+function printBaseCrossModeSummary(
+  resultsByMode: Partial<Record<GameMode, ValidationResult[]>>
+): { staleEverywhere: string[]; verdictDiffers: string[] } {
   const modes = Object.keys(resultsByMode) as GameMode[];
   printHeader('BASE OVERRIDES ACROSS ALL MODES');
   console.log(dim(`  (base overrides apply to every mode: ${modes.join(', ')})`));
@@ -716,14 +716,18 @@ function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, Valid
   for (const [taskId, perMode] of byTask) {
     const present = modes.filter((mode) => perMode[mode]);
     // A task missing from one mode's data is mode-exclusive, not a disagreement.
-    const comparable = present.filter((mode) => perMode[mode]!.status !== 'REMOVED_FROM_API');
+    const comparable = present.filter(
+      (mode) => perMode[mode]!.status !== 'REMOVED_FROM_API'
+    );
     if (comparable.length === 0) continue;
 
     const name = perMode[comparable[0]]!.name;
     const needed = comparable.filter((mode) => perMode[mode]!.stillNeeded);
 
     if (needed.length === 0) {
-      staleEverywhere.push(`${name} (${taskId}) - redundant in ${comparable.join(' + ')}`);
+      staleEverywhere.push(
+        `${name} (${taskId}) - redundant in ${comparable.join(' + ')}`
+      );
     } else if (needed.length < comparable.length) {
       const idle = comparable.filter((mode) => !perMode[mode]!.stillNeeded);
       verdictDiffers.push(
@@ -733,14 +737,16 @@ function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, Valid
   }
 
   printCountSection(
-    `${icons.warning} Base overrides redundant in EVERY mode (safe to retire)`,
+    'Base overrides redundant in EVERY mode (safe to retire)',
     'yellow',
-    staleEverywhere
+    staleEverywhere,
+    icons.warning
   );
   printCountSection(
-    `${icons.info} Base overrides whose verdict DIFFERS by mode (keep; consider moving to a mode file)`,
+    'Base overrides whose verdict DIFFERS by mode (keep; consider moving to a mode file)',
     'cyan',
-    verdictDiffers
+    verdictDiffers,
+    icons.info
   );
 
   return { staleEverywhere, verdictDiffers };
@@ -768,18 +774,22 @@ function printDivergenceReport(results: DivergenceResult[]): { actionable: numbe
     `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}: expected ${formatDivergenceValue(
       r.expected
     )}, upstream ${formatDivergenceValue(r.upstream)}${
-      r.override === undefined ? '' : `, override ${formatDivergenceValue(r.override)}`
+      r.override === undefined
+        ? ''
+        : `, override ${formatDivergenceValue(r.override)}`
     }${r.confidence === 'high' ? '' : ` [${r.confidence} confidence]`}`;
 
   printCountSection(
-    `${icons.error} Wrong data being served - no override corrects upstream (ADD an override)`,
+    'Wrong data being served - no override corrects upstream (ADD an override)',
     'red',
-    grouped.missing.map((r) => `${describe(r)}\n      proof: ${r.proof}`)
+    grouped.missing.map((r) => `${describe(r)}\n      proof: ${r.proof}`),
+    icons.error
   );
   printCountSection(
-    `${icons.error} Override present but disagrees with the recorded truth (FIX the override)`,
+    'Override present but disagrees with the recorded truth (FIX the override)',
     'red',
-    grouped.wrong.map((r) => `${describe(r)}\n      proof: ${r.proof}`)
+    grouped.wrong.map((r) => `${describe(r)}\n      proof: ${r.proof}`),
+    icons.error
   );
 
   // Mirroring is the upstream root cause: identical values in both modes for a
@@ -787,38 +797,42 @@ function printDivergenceReport(results: DivergenceResult[]): { actionable: numbe
   const mirroredFields = new Map<string, DivergenceResult>();
   for (const r of grouped.mirrored) mirroredFields.set(`${r.taskId}:${r.field}`, r);
   printCountSection(
-    `${icons.warning} Upstream is MIRRORING one mode into the other (report to tarkov.dev)`,
+    'Upstream is MIRRORING one mode into the other (report to tarkov.dev)',
     'yellow',
     Array.from(mirroredFields.values()).map(
       (r) =>
         `${r.taskName} (${r.taskId}) ${r.field}: tarkov.dev serves the same value in both modes`
-    )
+    ),
+    icons.warning
   );
 
   printCountSection(
-    `${icons.success} Overrides doing necessary work`,
+    'Overrides doing necessary work',
     'green',
-    grouped.active.map(describe)
+    grouped.active.map(describe),
+    icons.success
   );
   printCountSection(
-    `${icons.info} Redundant guards - upstream currently correct, KEEP for flip protection`,
+    'Redundant guards - upstream currently correct, KEEP for flip protection',
     'cyan',
-    grouped.redundant.map(describe)
+    grouped.redundant.map(describe),
+    icons.info
   );
   printCountSection(
-    `${icons.success} Upstream already correct, no override needed`,
+    'Upstream already correct, no override needed',
     'green',
     grouped.upstreamCorrect.map(
-      (r) =>
-        `${r.taskName} (${r.taskId}) ${r.mode}.${r.field} = ${formatDivergenceValue(r.upstream)}`
-    )
+      (r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field} = ${formatDivergenceValue(r.upstream)}`
+    ),
+    icons.success
   );
 
   if (grouped.notInMode.length > 0) {
     printCountSection(
-      `${icons.info} Registered field not applicable (task absent from that mode)`,
+      'Registered field not applicable (task absent from that mode)',
       'cyan',
-      grouped.notInMode.map((r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}`)
+      grouped.notInMode.map((r) => `${r.taskName} (${r.taskId}) ${r.mode}.${r.field}`),
+      icons.info
     );
   }
 
@@ -855,15 +869,17 @@ function printEntityResults(
     list.flatMap((r) => [r.id, ...r.details.map((d) => `   ${d.message}`)]);
 
   printCountSection(
-    `${icons.error} Entries whose ID is missing upstream (verify the ID)`,
+    'Entries whose ID is missing upstream (verify the ID)',
     'red',
-    grouped.removedFromApi.map((r) => r.id)
+    grouped.removedFromApi.map((r) => r.id),
+    icons.error
   );
-  printCountSection(`${icons.warning} Still needed`, 'yellow', lines(grouped.stillNeeded));
+  printCountSection('Still needed', 'yellow', lines(grouped.stillNeeded), icons.warning);
   printCountSection(
-    `${icons.success} Fixed upstream - safe to retire`,
+    'Fixed upstream - safe to retire',
     'green',
-    lines(grouped.fixed)
+    lines(grouped.fixed),
+    icons.success
   );
 
   // REMOVED_FROM_API results carry their own 'error' detail and are already
@@ -875,7 +891,7 @@ function printEntityResults(
       r.details.filter((d) => d.status === 'error').map((d) => `${r.id}: ${d.message}`)
     );
   if (identityErrors.length > 0) {
-    printCountSection(`${icons.error} Identity/consistency problems`, 'red', identityErrors);
+    printCountSection('Identity/consistency problems', 'red', identityErrors, icons.error);
   }
 
   return { errors: grouped.removedFromApi.length + identityErrors.length };
@@ -892,15 +908,18 @@ function printStoryChapterIssues(
   );
   if (!questRefsChecked) {
     console.log(
-      dim('  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)')
+      dim(
+        '  (no eft/ reference available: quest-ID resolution skipped, internal consistency only)'
+      )
     );
   }
   console.log();
 
   printCountSection(
-    `${icons.error} Referential integrity problems`,
+    'Referential integrity problems',
     'red',
-    issues.map((i) => `${i.chapterId} [${i.kind}]: ${i.message}`)
+    issues.map((i) => `${i.chapterId} [${i.kind}]: ${i.message}`),
+    icons.error
   );
 
   return { errors: issues.length };
@@ -988,14 +1007,20 @@ function printSuppressionResults(results: SuppressionStaleness[]): { stale: numb
   const live = results.filter((r) => !r.stale);
 
   printCountSection(
-    `${icons.warning} Stale suppressions - upstream quirk is gone, remove these`,
+    'Stale suppressions - upstream quirk is gone, remove these',
     'yellow',
-    stale.map((r) => `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`)
+    stale.map((r) =>
+      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
+    ),
+    icons.warning
   );
   printCountSection(
-    `${icons.success} Suppressions still relevant`,
+    'Suppressions still relevant',
     'green',
-    live.map((r) => `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`)
+    live.map((r) =>
+      `${r.taskId}${r.objectiveId ? ` / ${r.objectiveId}` : ''}: ${r.message}`
+    ),
+    icons.success
   );
 
   return { stale: stale.length };
@@ -1041,7 +1066,9 @@ async function main(): Promise<void> {
     const editions = loadEditions();
     const additionsCount = Object.keys(additions).length;
     const editionsCount = Object.keys(editions).length;
-    printSuccess(`Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`);
+    printSuccess(
+      `Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`
+    );
 
     printProgress('Fetching current data from tarkov.dev API...');
     const apiTasks = await getTasksForMode();
@@ -1165,11 +1192,7 @@ async function main(): Promise<void> {
       printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
       const apiEntities = await getEntities(spec);
       printSuccess(`Fetched ${apiEntities.size} record(s)\n`);
-      printEntityResults(
-        spec.label,
-        relPath,
-        validateEntityAdditions(entityAdditions, apiEntities)
-      );
+      printEntityResults(spec.label, relPath, validateEntityAdditions(entityAdditions, apiEntities));
     }
 
     // Story chapters: overlay-authored, so check references rather than values.
@@ -1231,7 +1254,7 @@ async function main(): Promise<void> {
 
     if (strict && actionable > 0) {
       printError(
-        `\n${icons.error} ${actionable} actionable problem(s) found (--strict). ` +
+        `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
       process.exit(2);

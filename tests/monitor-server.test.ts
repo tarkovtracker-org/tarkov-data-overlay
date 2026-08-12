@@ -29,6 +29,10 @@ describe('module import sanity', () => {
     expect(typeof mod.buildEditionsSections).toBe('function');
     expect(typeof mod.buildStoryChapterSections).toBe('function');
     expect(typeof mod.buildTaskAdditionSections).toBe('function');
+    expect(typeof mod.buildPrestigeSections).toBe('function');
+    expect(typeof mod.buildLocaleSections).toBe('function');
+    expect(typeof mod.buildSeasonalPerkSections).toBe('function');
+    expect(typeof mod.buildCraftAddSections).toBe('function');
     expect(typeof mod.mergeTaskOverrides).toBe('function');
     expect(typeof mod.rebuildSummaries).toBe('function');
     expect(typeof mod.valuesEqual).toBe('function');
@@ -49,6 +53,7 @@ describe('module import sanity', () => {
     expect(mod.overlayState).toHaveProperty('updatedAt');
     expect(mod.apiState).toHaveProperty('regular');
     expect(mod.apiState).toHaveProperty('pve');
+    expect(mod.apiState).toHaveProperty('pvp-season');
   });
 });
 
@@ -64,12 +69,18 @@ const {
   buildEditionsSections,
   buildStoryChapterSections,
   buildTaskAdditionSections,
+  buildPrestigeSections,
+  buildLocaleSections,
+  buildSeasonalPerkSections,
+  buildCraftAddSections,
   mergeTaskOverrides,
   rebuildSummaries,
   valuesEqual,
   formatValue,
   normalizeView,
   normalizeMode,
+  getLatestTagVersion,
+  isVersionStale,
   createSection,
   pushRow,
   overlayState,
@@ -192,9 +203,16 @@ describe('buildSummary', () => {
       storyChapters: { ch1: { id: 'ch1', name: 'Ch1' } },
       itemsAdd: {},
       tasksAdd: { ct: { id: 'ct', name: 'Custom' } },
+      prestige: { p1: { prestigeLevel: 1, name: 'First' } },
+      locales: {
+        en: { tasks: { t1: { name: 'Renamed' } } },
+      },
+      seasonalPerks: {},
+      craftsAdd: {},
       modes: {
         regular: { tasks: {}, tasksAdd: {} },
         pve: { tasks: {}, tasksAdd: {} },
+        'pvp-season': { tasks: {}, tasksAdd: {} },
       },
     };
     overlayState.updatedAt = new Date().toISOString();
@@ -206,6 +224,9 @@ describe('buildSummary', () => {
     apiState.pve.data = [];
     apiState.pve.updatedAt = new Date().toISOString();
     apiState.pve.error = null;
+    apiState['pvp-season'].data = [];
+    apiState['pvp-season'].updatedAt = new Date().toISOString();
+    apiState['pvp-season'].error = null;
   });
 
   it('returns an error when overlay is not loaded', () => {
@@ -252,6 +273,23 @@ describe('buildSummary', () => {
 
   it('returns error string for unknown view', () => {
     expect(buildSummary('nope', '').error).toBe('Unknown view');
+  });
+
+  it('returns 1 section for "prestige"', () => {
+    const s = buildSummary('prestige', '');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toBe('Prestige Levels');
+  });
+
+  it('returns locale sections for "locales"', () => {
+    const s = buildSummary('locales', '', 'en');
+    expect(s.sections).toHaveLength(1);
+    expect(s.sections[0].title).toBe('tasks (en)');
+  });
+
+  it('returns 1 section for "seasonalPerks" and "craftsAdd"', () => {
+    expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perks');
+    expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions');
   });
 });
 
@@ -304,6 +342,110 @@ describe('buildTaskAdditionSections', () => {
     expect(sec.rows[0][2]).toBe('Prapor');
     expect(sec.rows[0][3]).toBe('Customs');
   });
+
+  it('uses the human-readable mode label in the title', () => {
+    const [sec] = buildTaskAdditionSections({}, 'regular');
+    expect(sec.title).toBe('Task Additions (PvP)');
+    const [seasonal] = buildTaskAdditionSections({}, 'pvp-season');
+    expect(seasonal.title).toBe('Task Additions (PvP PvE Seasonal)');
+  });
+});
+
+describe('buildPrestigeSections', () => {
+  it('renders prestige metadata', () => {
+    const [sec] = buildPrestigeSections({
+      p1: {
+        id: 'p1',
+        prestigeLevel: 1,
+        name: 'First',
+        conditions: { c1: { type: 'playerLevel', playerLevel: 55 } },
+        storyRequirements: [
+          { type: 'storyChapterStatus', storyChapter: 'tour', name: 'Tour', status: ['complete'] },
+        ],
+      },
+    });
+    expect(sec.rows[0][0]).toBe(1);
+    expect(sec.rows[0][1]).toBe('p1');
+    expect(sec.rows[0][3]).toBe(1);
+    expect(sec.rows[0][4]).toBe('Tour');
+  });
+
+  it('handles entries without story requirements', () => {
+    const [sec] = buildPrestigeSections({ p2: { prestigeLevel: 2 } });
+    expect(sec.rows[0][4]).toBe('-');
+  });
+});
+
+describe('buildLocaleSections', () => {
+  it('renders one section per entity type with field rows', () => {
+    const sections = buildLocaleSections(
+      {
+        en: {
+          tasks: { t1: { name: 'Renamed', objectives: { o1: { description: 'Fixed' } } } },
+          items: { i1: { name: 'Item EN' } },
+        },
+      },
+      'en'
+    );
+    expect(sections.map((s: any) => s.title)).toEqual(['tasks (en)', 'items (en)']);
+    const taskRows = sections[0].rows;
+    expect(taskRows).toEqual([
+      ['t1', 'name', 'Renamed'],
+      ['t1', 'objective:o1.description', 'Fixed'],
+    ]);
+  });
+
+  it('returns an empty placeholder section for unknown locales', () => {
+    const [sec] = buildLocaleSections({ en: { tasks: { t1: { name: 'x' } } } }, 'fr');
+    expect(sec.rows[0][0]).toBe('(no corrections)');
+  });
+
+  it('skips empty entity bundles', () => {
+    const sections = buildLocaleSections({ en: { tasks: {} } }, 'en');
+    expect(sections).toHaveLength(1);
+    expect(sections[0].rows[0][0]).toBe('(no corrections)');
+  });
+});
+
+describe('buildSeasonalPerkSections', () => {
+  it('renders perk metadata and effect ids', () => {
+    const [sec] = buildSeasonalPerkSections({
+      perk1: {
+        id: 'perk1',
+        name: 'Perk One',
+        type: 'common',
+        points: 5,
+        effects: [{ effectId: 'pmc_experience_multiplicator' }],
+      },
+    });
+    expect(sec.rows[0][0]).toBe('Perk One');
+    expect(sec.rows[0][3]).toBe(5);
+    expect(sec.rows[0][4]).toBe('pmc_experience_multiplicator');
+  });
+
+  it('handles perks without effects', () => {
+    const [sec] = buildSeasonalPerkSections({ p: { name: 'P' } });
+    expect(sec.rows[0][4]).toBe('-');
+  });
+});
+
+describe('buildCraftAddSections', () => {
+  it('renders craft metadata with formatted duration', () => {
+    const [sec] = buildCraftAddSections({
+      c1: {
+        id: 'c1',
+        station: 'medstation',
+        level: 3,
+        duration: 3600,
+        productItem: { item: 'meds', count: 1 },
+      },
+    });
+    expect(sec.rows[0][0]).toBe('c1');
+    expect(sec.rows[0][2]).toBe('medstation');
+    expect(sec.rows[0][3]).toBe(3);
+    expect(sec.rows[0][4]).toBe('60 min');
+    expect(sec.rows[0][5]).toBe('meds');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -324,13 +466,35 @@ describe('normalizeView', () => {
 });
 
 describe('normalizeMode', () => {
-  it('passes through regular / pve', () => {
+  it('passes through regular / pve / pvp-season', () => {
     expect(normalizeMode('regular')).toBe('regular');
     expect(normalizeMode('pve')).toBe('pve');
+    expect(normalizeMode('pvp-season')).toBe('pvp-season');
   });
   it('defaults to "regular"', () => {
     expect(normalizeMode('x')).toBe('regular');
     expect(normalizeMode(null)).toBe('regular');
+  });
+});
+
+describe('isVersionStale', () => {
+  it('flags loaded builds behind the latest release', () => {
+    expect(isVersionStale('1.0.0', '1.56')).toBe(true);
+    expect(isVersionStale('1.55', '1.56')).toBe(true);
+    expect(isVersionStale('1.56', '1.56')).toBe(false);
+    expect(isVersionStale('1.56.1', '1.56')).toBe(false);
+  });
+  it('tolerates leading v and missing versions', () => {
+    expect(isVersionStale('v1.0.0', 'v1.56')).toBe(true);
+    expect(isVersionStale('', '1.56')).toBe(true);
+    expect(isVersionStale('1.56', undefined)).toBe(false);
+    expect(isVersionStale('1.56', null)).toBe(false);
+  });
+  it('reports the local git tag as a non-empty string', () => {
+    const tag = getLatestTagVersion();
+    if (tag !== undefined) {
+      expect(tag).toMatch(/^\d/);
+    }
   });
 });
 
@@ -416,9 +580,14 @@ describe('HTTP — real monitor/server.js handlers', () => {
       storyChapters: {},
       itemsAdd: {},
       tasksAdd: {},
+      prestige: { p1: { prestigeLevel: 1, name: 'First' } },
+      locales: { en: { tasks: { t1: { name: 'Renamed' } } } },
+      seasonalPerks: { perk1: { id: 'perk1', name: 'Perk One' } },
+      craftsAdd: {},
       modes: {
         regular: { tasks: {}, tasksAdd: {} },
         pve: { tasks: {}, tasksAdd: {} },
+        'pvp-season': { tasks: {}, tasksAdd: {} },
       },
     };
     overlayState.updatedAt = new Date().toISOString();
@@ -430,6 +599,9 @@ describe('HTTP — real monitor/server.js handlers', () => {
     apiState.pve.data = [];
     apiState.pve.updatedAt = new Date().toISOString();
     apiState.pve.error = null;
+    apiState['pvp-season'].data = [];
+    apiState['pvp-season'].updatedAt = new Date().toISOString();
+    apiState['pvp-season'].error = null;
 
     // Fill the summaryByKey cache (same as refreshOverlay → rebuildSummaries)
     rebuildSummaries();
@@ -457,6 +629,9 @@ describe('HTTP — real monitor/server.js handlers', () => {
     apiState.pve.data = null;
     apiState.pve.updatedAt = null;
     apiState.pve.error = null;
+    apiState['pvp-season'].data = null;
+    apiState['pvp-season'].updatedAt = null;
+    apiState['pvp-season'].error = null;
     return new Promise<void>((resolve) => server.close(resolve));
   });
 
@@ -502,6 +677,74 @@ describe('HTTP — real monitor/server.js handlers', () => {
   it('GET /latest — respects mode=pve', async () => {
     const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=pve`)).json();
     expect(data.mode).toBe('pve');
+  });
+
+  it('GET /latest — respects mode=pvp-season', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=pvp-season`)).json();
+    expect(data.mode).toBe('pvp-season');
+  });
+
+  it('GET /latest — exposes human-readable mode labels', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=regular`)).json();
+    expect(data.modes).toContain('pvp-season');
+    expect(data.modeLabels.regular).toBe('PvP');
+    expect(data.modeLabels['pvp-season']).toBe('PvP PvE Seasonal');
+  });
+
+  it('GET /latest — rebuild block reports availability', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=regular`)).json();
+    expect(data.rebuild).toHaveProperty('enabled');
+    expect(data.rebuild).toHaveProperty('running');
+  });
+
+  it('POST /rebuild — disabled in the test environment', async () => {
+    const res = await fetch(`${baseUrl}/rebuild`, { method: 'POST' });
+    expect(res.status).toBe(503);
+    const data = await res.json();
+    expect(data.ok).toBe(false);
+  });
+
+  it('GET /rebuild — 405', async () => {
+    const res = await fetch(`${baseUrl}/rebuild`);
+    expect(res.status).toBe(405);
+  });
+
+  it('GET /latest — defaults unknown mode to regular', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=tasks&mode=xxx`)).json();
+    expect(data.mode).toBe('regular');
+  });
+
+  it('GET /latest — view=prestige returns prestige sections', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=prestige`)).json();
+    expect(data.view).toBe('prestige');
+    expect(data.mode).toBeNull();
+    expect(data.sections[0].title).toBe('Prestige Levels');
+    expect(data.sections[0].rows[0][1]).toBe('p1');
+  });
+
+  it('GET /latest — view=locales with locale=en returns locale sections', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=locales&locale=en`)).json();
+    expect(data.view).toBe('locales');
+    expect(data.locale).toBe('en');
+    expect(data.locales).toContain('en');
+    expect(data.sections[0].title).toBe('tasks (en)');
+  });
+
+  it('GET /latest — view=seasonalPerks returns perk rows', async () => {
+    const data = await (await fetch(`${baseUrl}/latest?view=seasonalPerks`)).json();
+    expect(data.sections[0].title).toBe('Seasonal Perks');
+    expect(data.sections[0].rows[0][0]).toBe('Perk One');
+  });
+
+  it('GET /health — reports ok and mode api states', async () => {
+    const res = await fetch(`${baseUrl}/health`);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.ok).toBe(true);
+    const modes = data.api.map((entry: any) => entry.mode);
+    expect(modes).toContain('regular');
+    expect(modes).toContain('pve');
+    expect(modes).toContain('pvp-season');
   });
 
   // -- /events ---------------------------------------------------------------

@@ -4,7 +4,12 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import { printHeader, bold, dim } from '../../src/lib/index.js';
+import {
+  printHeader,
+  bold,
+  dim,
+  colorize,
+} from '../../src/lib/index.js';
 import {
   TARKOV_1_0_LAUNCH,
   TraderReputation,
@@ -49,7 +54,9 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
 
   const parseResponse = await fetch(`${WIKI_API}?${parseParams.toString()}`);
   if (!parseResponse.ok) {
-    throw new Error(`Wiki request failed: ${parseResponse.status} ${parseResponse.statusText}`);
+    throw new Error(
+      `Wiki request failed: ${parseResponse.status} ${parseResponse.statusText}`
+    );
   }
 
   const parseData = (await parseResponse.json()) as {
@@ -152,7 +159,10 @@ export function extractCount(text: string, links: string[] = []): number | undef
   // Remove numeric ranges like "3-4".
   scrubbed = scrubbed.replace(/\b\d+\s*[-–]\s*\d+\b/g, '');
   // Remove calibers/dimensions like "7.62x51" or "12x70".
-  scrubbed = scrubbed.replace(/\b\d+(?:\.\d+)?\s*(?:x|×)\s*\d+(?:\.\d+)?\b/g, '');
+  scrubbed = scrubbed.replace(
+    /\b\d+(?:\.\d+)?\s*(?:x|×)\s*\d+(?:\.\d+)?\b/g,
+    ''
+  );
   // Remove decimals like "7.62".
   scrubbed = scrubbed.replace(/\b\d+\.\d+\b/g, '');
   // Remove numbers like "#2".
@@ -178,10 +188,14 @@ export function extractCount(text: string, links: string[] = []): number | undef
   const verbs =
     '(?:kill|eliminate|neutralize|find|locate|obtain|get|hand over|handover|turn in|submit|deliver|give|bring|collect|stash|install|mark|plant|place|reach|visit|use|transfer|complete|survive|extract|escape|hit|shoot)';
 
-  let match = scrubbed.match(new RegExp(`\\b(${numberPattern})\\b\\s*${countWords}\\b`, 'i'));
+  let match = scrubbed.match(
+    new RegExp(`\\b(${numberPattern})\\b\\s*${countWords}\\b`, 'i')
+  );
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
-  match = scrubbed.match(new RegExp(`\\b${countWords}\\b\\s*(${numberPattern})\\b`, 'i'));
+  match = scrubbed.match(
+    new RegExp(`\\b${countWords}\\b\\s*(${numberPattern})\\b`, 'i')
+  );
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
   match = scrubbed.match(new RegExp(`\\b(${numberPattern})\\b\\s*x\\b`, 'i'));
@@ -190,11 +204,16 @@ export function extractCount(text: string, links: string[] = []): number | undef
   match = scrubbed.match(new RegExp(`\\bx\\s*(${numberPattern})\\b`, 'i'));
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
-  match = scrubbed.match(new RegExp(`\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b`, 'i'));
+  match = scrubbed.match(
+    new RegExp(`\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b`, 'i')
+  );
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
   match = scrubbed.match(
-    new RegExp(`\\b(${numberPattern})\\b\\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\\b`, 'i')
+    new RegExp(
+      `\\b(${numberPattern})\\b\\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\\b`,
+      'i'
+    )
   );
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
@@ -234,8 +253,8 @@ export function parseObjectives(
     const mapLinkIndexes = new Set<number>();
 
     linkData.forEach((link, index) => {
-      const candidates = [link.target, link.display].filter((value): value is string =>
-        Boolean(value)
+      const candidates = [link.target, link.display].filter(
+        (value): value is string => Boolean(value)
       );
       let matchedMap = false;
       for (const candidate of candidates) {
@@ -251,10 +270,8 @@ export function parseObjectives(
     const mapsFromLinks = mapLinkEntries
       .filter((entry) => !isExcludedMapMention(clean, entry.link))
       .map((entry) => entry.canonical);
-    // Always merge text-derived maps: an objective can name one map via a link
-    // and another in plain text, so gating text extraction on link presence
-    // would drop the text-only maps. uniqueList dedupes canonical names.
-    const mapsFromText = extractMapsFromText(clean, mapAliasMap);
+    const mapsFromText =
+      mapsFromLinks.length > 0 ? [] : extractMapsFromText(clean, mapAliasMap);
     const maps = uniqueList([...mapsFromLinks, ...mapsFromText]);
     const items = filterWikiItems(
       uniqueList(
@@ -312,7 +329,9 @@ export function parseRewards(lines: string[]): WikiRewards {
       }
     }
 
-    const itemMatch = clean.match(new RegExp(`^(\\d+)\\s*(?:x|\\u00d7)\\s*(.+)$`, 'i'));
+    const itemMatch = clean.match(
+      new RegExp(`^(\\d+)\\s*(?:x|\\u00d7)\\s*(.+)$`, 'i')
+    );
     if (itemMatch && itemMatch[1] && itemMatch[2]) {
       items.push({ count: Number(itemMatch[1]), name: itemMatch[2].trim() });
     }
@@ -341,7 +360,8 @@ export function parseRelatedQuestItems(wikitext: string): WikiRelatedItem[] {
 
     const itemCell = currentRow[1] ?? '';
     const requirementCell = currentRow[3] ?? '';
-    const name = extractWikiLinks(itemCell)[0] ?? stripWikiMarkup(itemCell).trim();
+    const name =
+      extractWikiLinks(itemCell)[0] ?? stripWikiMarkup(itemCell).trim();
     if (name.length === 0) {
       currentRow = [];
       return;
@@ -387,7 +407,10 @@ export function parseRelatedQuestItems(wikitext: string): WikiRelatedItem[] {
 
 export function parseInfoboxLinks(wikitext: string, field: string): string[] {
   // Use [ \t]* instead of \s* to avoid matching newlines
-  const regex = new RegExp(`^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`, 'mi');
+  const regex = new RegExp(
+    `^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`,
+    'mi'
+  );
   const match = wikitext.match(regex);
   if (!match || !match[1]) return [];
   const value = match[1].trim();
@@ -405,9 +428,15 @@ export function parseInfoboxLinks(wikitext: string, field: string): string[] {
   return results;
 }
 
-export function parseInfoboxValue(wikitext: string, field: string): string | undefined {
+export function parseInfoboxValue(
+  wikitext: string,
+  field: string
+): string | undefined {
   // Use [ \t]* instead of \s* to avoid matching newlines
-  const regex = new RegExp(`^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`, 'mi');
+  const regex = new RegExp(
+    `^\\|\\s*${escapeRegExp(field)}\\s*=[ \\t]*(.+)$`,
+    'mi'
+  );
   const match = wikitext.match(regex);
   if (!match || !match[1]) return undefined;
   return match[1].trim();
@@ -446,10 +475,14 @@ export function parseWikiTask(
 
   const relatedItems = parseRelatedQuestItems(wikitext);
   const relatedRequiredItems = uniqueList(
-    relatedItems.filter((item) => /required/i.test(item.requirement ?? '')).map((item) => item.name)
+    relatedItems
+      .filter((item) => /required/i.test(item.requirement ?? ''))
+      .map((item) => item.name)
   );
   const relatedHandoverItems = uniqueList(
-    relatedItems.filter((item) => /handover/i.test(item.requirement ?? '')).map((item) => item.name)
+    relatedItems
+      .filter((item) => /handover/i.test(item.requirement ?? ''))
+      .map((item) => item.name)
   );
 
   const nextTasks = uniqueList([
@@ -483,15 +516,21 @@ export function printWikiData(wiki: WikiTaskData): void {
   // Show last revision info
   if (wiki.lastRevision) {
     const revDate = new Date(wiki.lastRevision.timestamp);
-    const daysAgo = Math.floor((Date.now() - revDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysAgo = Math.floor(
+      (Date.now() - revDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
     const dateStr = revDate.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
     const isPost1_0 = revDate >= TARKOV_1_0_LAUNCH;
-    const freshness = isPost1_0 ? '🟢 Post-1.0' : '🔴 Pre-1.0';
-    console.log(`${bold('Last Edit')}: ${dateStr} (${daysAgo} days ago) ${freshness}`);
+    const freshness = isPost1_0
+      ? colorize('[POST-1.0]', 'green')
+      : colorize('[PRE-1.0]', 'red');
+    console.log(
+      `${bold('Last Edit')}: ${dateStr} (${daysAgo} days ago) ${freshness}`
+    );
     console.log(`  ${dim(`by ${wiki.lastRevision.user}`)}`);
   }
 
@@ -500,7 +539,9 @@ export function printWikiData(wiki: WikiTaskData): void {
     console.log(`  - ${stripWikiMarkup(line)}`);
   }
   if (wiki.minPlayerLevel !== undefined) {
-    console.log(`  ${dim(`Detected level requirement: ${wiki.minPlayerLevel}`)}`);
+    console.log(
+      `  ${dim(`Detected level requirement: ${wiki.minPlayerLevel}`)}`
+    );
   }
   if (wiki.maps.length > 0) {
     console.log(`  ${dim(`Detected map(s): ${wiki.maps.join(', ')}`)}`);
@@ -519,7 +560,9 @@ export function printWikiData(wiki: WikiTaskData): void {
     console.log(`  - ${reward}`);
   }
   if (wiki.rewards.items.length > 0) {
-    console.log(`  ${dim(`Parsed ${wiki.rewards.items.length} reward item(s)`)}`);
+    console.log(
+      `  ${dim(`Parsed ${wiki.rewards.items.length} reward item(s)`)}`
+    );
   }
 
   console.log();

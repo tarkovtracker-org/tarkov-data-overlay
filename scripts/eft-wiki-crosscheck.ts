@@ -189,7 +189,7 @@ function printReport(rows: Row[]): void {
             ? dim('(no wiki value)')
             : `${colorFor(r.wikiAgreesWith)}${r.wiki}${colors.reset}`;
       console.log(
-        `  ${icons.warning} ${r.taskName} ${dim(`(${r.taskId})`)}\n` +
+        `  ${r.taskName} ${dim(`(${r.taskId})`)} : ${icons.warning}\n` +
           `     api: ${colors.red}${r.api}${colors.reset}  ` +
           `eft: ${colors.green}${r.eft}${colors.reset}  ` +
           `wiki: ${wikiStr}  ${dim(`→ wiki backs ${r.wikiAgreesWith}`)}`

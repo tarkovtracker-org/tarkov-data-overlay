@@ -107,24 +107,8 @@
     },
   },
 
-  // Perfect Mediator
-  '5c12452c86f7744b83469073': {
-    name: 'Perfect Mediator',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 20900,
-        pve: 12000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'PvP=20900 confirmed by the wiki (still reads +20,900 EXP as of 2026-08-12). NOT present in the 1.1.0.0 capture (eft/eft-1.1-pve), so the PvE figure of 12000 could not be re-verified against the new patch; upstream still serves 12000 for PvE. Re-verify PvE in-game when a capture covering it is available.',
-      },
-    },
-  },
-
+  // Perfect Mediator - REMOVED 2026-08-10 on main: superseded by the Season 1
+  // trader-loyalty rework; see git history (commit 045c943).
   // The Huntsman Path - Sadist
   '5edab4b1218d181e29451435': {
     name: 'The Huntsman Path - Sadist',
@@ -165,61 +149,11 @@
   // CONVERGED - EFT reference, wiki and upstream all agree on a single value in
   // both modes. No override is needed in either mode. Recorded so that a future
   // re-divergence is detectable rather than silent.
+  //
+  // REMOVED 2026-08-10: the minPlayerLevel records (A Fuel Matter, Inventory
+  // Check, Psycho Sniper) were dropped - the Season 1 patch replaced
+  // player-level quest requirements with trader loyalty levels.
   // ---------------------------------------------------------------------------
-
-  // A Fuel Matter
-  '608974d01a66564e74191fc0': {
-    name: 'A Fuel Matter',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter',
-    status: 'converged',
-    fields: {
-      minPlayerLevel: {
-        regular: 15,
-        pve: 15,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the current wiki still reads "Must be level 15" and the 2026-06-30 capture verified pve at 15, so the value stands. Upstream now serves 27 in every mode - base override added.',
-      },
-    },
-  },
-
-  // Inventory Check
-  '608974af4b05530f55550c21': {
-    name: 'Inventory Check',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Inventory_Check',
-    status: 'converged',
-    fields: {
-      minPlayerLevel: {
-        regular: 15,
-        pve: 15,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the wiki page has no requirements section and the 2026-06-30 capture verified pve at 15. Upstream now serves 0 in every mode - base override added.',
-      },
-    },
-  },
-
-  // Psycho Sniper
-  '5c0be13186f7746f016734aa': {
-    name: 'Psycho Sniper',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper',
-    status: 'converged',
-    fields: {
-      minPlayerLevel: {
-        regular: 27,
-        pve: 27,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Previously diverged (regular 35 / PvE 27); BSG lowered the regular requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the current wiki still reads "Must be level 27" and the 2026-06-30 capture verified pve at 27. Upstream now serves 40 in every mode - base override added.',
-      },
-    },
-  },
 
   // Ambulances Again
   '64f3176921045e77405d63b5': {

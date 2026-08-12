@@ -1,10 +1,8 @@
 {
-  // A Helping Hand - PvP starts at character level 20
-  // Proof: https://x.com/tarkov/status/1879463301949559292
-  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
-  '6752f6d83038f7df520c83e8': {
-    minPlayerLevel: 20, // Was: 0 (tarkov.dev mirrors PvE data)
-  },
+  // A Helping Hand - minPlayerLevel override REMOVED 2026-08-10: the Season 1
+  // patch replaced player-level quest requirements with trader loyalty levels,
+  // so the field no longer applies to quests.
+  // (Old: PvP starts at character level 20; Was: 0 (tarkov.dev mirrors PvE data))
 
   // Vacate the Premises - PvP has 24 kills (differs from PvE's 36)
   // Change the objective
@@ -110,11 +108,10 @@
     experience: 15300, // Was: 10300 (tarkov.dev mirrors PvE data)
   },
 
-  // Perfect Mediator - PvP awards 20,900 EXP (PvE awards 12,000)
+  // Perfect Mediator - removed from EFT in Season 1 (disabled in base overrides),
+  // so the regular-mode experience correction no longer applies.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
-  '5c12452c86f7744b83469073': {
-    experience: 20900, // Was: 12000 (tarkov.dev mirrors PvE data)
-  },
+  // (removed 2026-08-10 with the Season 1 quest purge)
 
   // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
   // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot

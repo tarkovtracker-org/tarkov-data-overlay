@@ -14,6 +14,7 @@ import {
   bold,
   dim,
   icons,
+  colorize,
   sleep,
 } from '../../src/lib/index.js';
 import {
@@ -40,10 +41,24 @@ import {
   loadTaskRequirementOverrides,
   loadTaskSuppressions,
 } from './overlay.js';
-import { buildMapAliasMap, collectMapNames } from './normalize.js';
-import { fetchExtendedTasks, resolveTask, resolveWikiTitle } from './api.js';
-import { WikiFetchResult, fetchWikiWikitext, parseWikiTask, printWikiData } from './wiki.js';
-import { compareTasks } from './compare.js';
+import {
+  buildMapAliasMap,
+  collectMapNames,
+} from './normalize.js';
+import {
+  fetchExtendedTasks,
+  resolveTask,
+  resolveWikiTitle,
+} from './api.js';
+import {
+  WikiFetchResult,
+  fetchWikiWikitext,
+  parseWikiTask,
+  printWikiData,
+} from './wiki.js';
+import {
+  compareTasks,
+} from './compare.js';
 
 export function parseArgs(argv: string[]): CliOptions & { help?: boolean } {
   const options: CliOptions & { help?: boolean } = {};
@@ -169,8 +184,12 @@ export function printUsage(): void {
   console.log(
     '  --output, -o [path] Save results to file (default: data/results/comparison-<timestamp>.json)'
   );
-  console.log('  --group-by <type>  Group output by: priority or category (default: category)');
-  console.log('  --gameMode, -g     Game mode: regular (PVP), pve, or both (default: both)');
+  console.log(
+    '  --group-by <type>  Group output by: priority or category (default: category)'
+  );
+  console.log(
+    '  --gameMode, -g     Game mode: regular (PVP), pve, or both (default: both)'
+  );
   console.log('  --id <taskId>      Find task by ID');
   console.log('  --name <taskName>  Find task by name');
   console.log('  --wiki <pageTitle> Override wiki page title');
@@ -179,9 +198,13 @@ export function printUsage(): void {
   console.log('Examples:');
   console.log('  tsx scripts/wiki-compare.ts Grenadier');
   console.log('  tsx scripts/wiki-compare.ts --all --cache');
-  console.log('  tsx scripts/wiki-compare.ts --all --cache --group-by=priority');
+  console.log(
+    '  tsx scripts/wiki-compare.ts --all --cache --group-by=priority'
+  );
   console.log('  tsx scripts/wiki-compare.ts --all --refresh --output');
-  console.log('  tsx scripts/wiki-compare.ts --all --output data/results/pve-comparison.json');
+  console.log(
+    '  tsx scripts/wiki-compare.ts --all --output data/results/pve-comparison.json'
+  );
   console.log('  tsx scripts/wiki-compare.ts --all --gameMode=pve --cache');
   console.log();
 }
@@ -197,7 +220,9 @@ export async function runSingleTask(
   const task = resolveTask(tasks, options);
   if (!task) {
     printError(
-      `Task not found (id=${options.id ?? 'n/a'}, name=${options.name ?? DEFAULT_TASK_NAME})`
+      `Task not found (id=${options.id ?? 'n/a'}, name=${
+        options.name ?? DEFAULT_TASK_NAME
+      })`
     );
     printUsage();
     process.exit(1);
@@ -213,11 +238,18 @@ export async function runSingleTask(
       wikitext: wikiCache.wikitext,
       lastRevision: wikiCache.lastRevision,
     };
-    printSuccess(`Loaded wiki page "${wikiResponse.title}" from cache (${wikiCache.fetchedAt})`);
+    printSuccess(
+      `Loaded wiki page "${wikiResponse.title}" from cache (${wikiCache.fetchedAt})`
+    );
   } else {
     printProgress(`Fetching wiki wikitext for "${wikiTitle}"...`);
     wikiResponse = await fetchWikiWikitext(wikiTitle);
-    saveWikiCache(task.id, wikiResponse.title, wikiResponse.wikitext, wikiResponse.lastRevision);
+    saveWikiCache(
+      task.id,
+      wikiResponse.title,
+      wikiResponse.wikitext,
+      wikiResponse.lastRevision
+    );
     printSuccess(`Fetched wiki page "${wikiResponse.title}"`);
   }
 
@@ -237,14 +269,15 @@ export async function runBulkMode(
   options: CliOptions
 ): Promise<void> {
   const tasksWithWiki = tasks.filter((t) => t.wikiLink);
-  printProgress(`Found ${tasksWithWiki.length}/${tasks.length} tasks with wiki links`);
+  printProgress(
+    `Found ${tasksWithWiki.length}/${tasks.length} tasks with wiki links`
+  );
 
   // Load suppressed fields (overlay corrections + wiki-incorrect suppressions).
   // Scope to the active game mode so a PvE-only correction does not mask a
   // genuine regular-mode divergence (and vice versa).
-  const { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys } = loadSuppressedFields(
-    options.gameMode ?? 'both'
-  );
+  const { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys } =
+    loadSuppressedFields(options.gameMode ?? 'both');
   const taskSuppressions = loadTaskSuppressions();
   if (overlayCount > 0 || wikiIncorrectCount > 0) {
     printProgress(
@@ -266,11 +299,14 @@ export async function runBulkMode(
   for (const task of tasksWithWiki) {
     checked += 1;
     const wikiTitle = resolveWikiTitle(task);
-    process.stdout.write(`\r[${checked}/${tasksWithWiki.length}] ${task.name.padEnd(40)}`);
+    process.stdout.write(
+      `\r[${checked}/${tasksWithWiki.length}] ${task.name.padEnd(40)}`
+    );
 
     try {
       let wikiResponse: WikiFetchResult;
-      const wikiCache = options.useCache && !options.refresh ? loadWikiCache(task.id) : null;
+      const wikiCache =
+        options.useCache && !options.refresh ? loadWikiCache(task.id) : null;
 
       if (wikiCache) {
         wikiResponse = {
@@ -309,7 +345,9 @@ export async function runBulkMode(
       errors += 1;
       const reason = error instanceof Error ? error.message : String(error);
       failedTasks.push({ id: task.id, name: task.name, reason });
-      process.stderr.write(`\n${icons.error} ${task.name} (${task.id}) failed: ${reason}\n`);
+      process.stderr.write(
+        `\n${task.name} (${task.id}) failed: ${reason} : ${icons.error}\n`
+      );
     }
   }
 
@@ -332,7 +370,10 @@ export async function runBulkMode(
   // Filter out suppressed discrepancies (overlay corrections + wiki-incorrect)
   const newDiscrepancies = allDiscrepancies.filter((d) => {
     const key = `${d.taskId}:${d.field}`;
-    return !suppressed.has(key) && !isTaskFieldSuppressed(taskSuppressions, d.taskId, d.field);
+    return (
+      !suppressed.has(key) &&
+      !isTaskFieldSuppressed(taskSuppressions, d.taskId, d.field)
+    );
   });
   const filteredCount = allDiscrepancies.length - newDiscrepancies.length;
 
@@ -350,33 +391,53 @@ export async function runBulkMode(
     }
   }
   if (elevatedCount > 0) {
-    console.log(dim(`Elevated to high priority (registered mode divergence): ${elevatedCount}`));
+    console.log(
+      dim(
+        `Elevated to high priority (registered mode divergence): ${elevatedCount}`
+      )
+    );
   }
 
   if (filteredCount > 0) {
     console.log(
-      `${dim(`Suppressed (overlay + wiki-incorrect + task suppressions): ${filteredCount}`)}`
+      `${dim(
+        `Suppressed (overlay + wiki-incorrect + task suppressions): ${filteredCount}`
+      )}`
     );
   }
-  console.log(`${bold(`New discrepancies to review: ${newDiscrepancies.length}`)}`);
+  console.log(
+    `${bold(`New discrepancies to review: ${newDiscrepancies.length}`)}`
+  );
 
   // Post-1.0 wiki edit summary
-  const post1_0Count = newDiscrepancies.filter((d) => d.wikiEditedPost1_0 === true).length;
-  const pre1_0Count = newDiscrepancies.filter((d) => d.wikiEditedPost1_0 === false).length;
-  const unknownCount = newDiscrepancies.filter((d) => d.wikiEditedPost1_0 === undefined).length;
+  const post1_0Count = newDiscrepancies.filter(
+    (d) => d.wikiEditedPost1_0 === true
+  ).length;
+  const pre1_0Count = newDiscrepancies.filter(
+    (d) => d.wikiEditedPost1_0 === false
+  ).length;
+  const unknownCount = newDiscrepancies.filter(
+    (d) => d.wikiEditedPost1_0 === undefined
+  ).length;
 
   if (post1_0Count > 0 || pre1_0Count > 0) {
     console.log();
     printHeader('WIKI DATA FRESHNESS (1.0 = Nov 15, 2025)');
-    console.log(`  🟢 Post-1.0 wiki edits: ${post1_0Count} ${dim('(high confidence)')}`);
-    console.log(`  🔴 Pre-1.0 wiki edits: ${pre1_0Count} ${dim('(may be outdated)')}`);
+    console.log(
+      `  ${colorize('[POST-1.0]', 'green')} wiki edits: ${post1_0Count} ${dim('(high confidence)')}`
+    );
+    console.log(
+      `  ${colorize('[PRE-1.0]', 'red')} wiki edits: ${pre1_0Count} ${dim('(may be outdated)')}`
+    );
     if (unknownCount > 0) {
-      console.log(`  ⚪ Unknown: ${unknownCount} ${dim('(no revision data)')}`);
+      console.log(`  ${dim('[UNKNOWN]')} Unknown: ${unknownCount} ${dim('(no revision data)')}`);
     }
   }
 
   // Check for stale wiki-incorrect suppressions (wiki now matches API)
-  const allDiscrepancyKeys = new Set(allDiscrepancies.map((d) => `${d.taskId}:${d.field}`));
+  const allDiscrepancyKeys = new Set(
+    allDiscrepancies.map((d) => `${d.taskId}:${d.field}`)
+  );
   const staleSuppresions: string[] = [];
   for (const key of wikiIncorrectKeys) {
     if (!allDiscrepancyKeys.has(key)) {
@@ -387,17 +448,21 @@ export async function runBulkMode(
   if (staleSuppresions.length > 0) {
     console.log();
     printHeader('STALE WIKI-INCORRECT SUPPRESSIONS');
-    console.log(`  ${bold('These suppressions can be removed')} - wiki now matches API:`);
+    console.log(
+      `  ${bold('These suppressions can be removed')} - wiki now matches API:`
+    );
     console.log();
     for (const key of staleSuppresions) {
       const [taskId, field] = key.split(':');
       const task = tasksWithWiki.find((t) => t.id === taskId);
       const taskName = task?.name ?? 'Unknown Task';
-      console.log(`  🗑️  ${taskName} ${dim(`[${field}]`)}`);
+      console.log(`  ${taskName} [${field}] : ${icons.trash}`);
       console.log(`     ${dim(`ID: ${taskId}`)}`);
     }
     console.log();
-    console.log(`  ${dim(`Remove from: src/suppressions/wiki-incorrect.json5`)}`);
+    console.log(
+      `  ${dim(`Remove from: src/suppressions/wiki-incorrect.json5`)}`
+    );
   }
   console.log();
 
@@ -407,15 +472,15 @@ export async function runBulkMode(
     // Priority order and labels
     const priorityOrder: Priority[] = ['high', 'medium', 'low'];
     const priorityLabels: Record<Priority, string> = {
-      high: '🔴 HIGH',
-      medium: '🟡 MEDIUM',
-      low: '🟢 LOW',
+      high: colorize('[HIGH]', 'red'),
+      medium: colorize('[MEDIUM]', 'yellow'),
+      low: colorize('[LOW]', 'green'),
     };
 
     const priorityIcons: Record<Priority, string> = {
-      high: '🔴',
-      medium: '🟡',
-      low: '🟢',
+      high: colorize('[HIGH]', 'red'),
+      medium: colorize('[MEDIUM]', 'yellow'),
+      low: colorize('[LOW]', 'green'),
     };
 
     const categoryLabels: Record<string, string> = {
@@ -462,15 +527,28 @@ export async function runBulkMode(
       showCategory: boolean
     ): void => {
       const freshness =
-        d.wikiEditedPost1_0 === true ? '🟢' : d.wikiEditedPost1_0 === false ? '🔴' : '⚪';
-      const editInfo = d.wikiEditDaysAgo !== undefined ? `${d.wikiEditDaysAgo}d ago` : '';
-      const priorityPrefix = showPriority ? `${priorityIcons[d.priority]} ` : '  ';
-      const categoryInfo = showCategory ? ` ${dim(`[${getCategoryLabel(d.field)}]`)}` : '';
+        d.wikiEditedPost1_0 === true
+          ? colorize('[POST-1.0]', 'green')
+          : d.wikiEditedPost1_0 === false
+            ? colorize('[PRE-1.0]', 'red')
+            : dim('[UNKNOWN]');
+      const editInfo =
+        d.wikiEditDaysAgo !== undefined ? `${d.wikiEditDaysAgo}d ago` : '';
+      const priorityPrefix = showPriority
+        ? `${priorityIcons[d.priority]} `
+        : '  ';
+      const categoryInfo = showCategory
+        ? ` ${dim(`[${getCategoryLabel(d.field)}]`)}`
+        : '';
 
       console.log(`\n${priorityPrefix}${d.taskName}${categoryInfo}`);
       console.log(`    ${dim(`ID: ${d.taskId}`)}`);
       console.log(`    API:  ${d.apiValue}`);
-      console.log(`    Wiki: ${d.wikiValue} ${d.trustsWiki ? dim('← likely correct') : ''}`);
+      console.log(
+        `    Wiki: ${d.wikiValue} ${
+          d.trustsWiki ? dim('← likely correct') : ''
+        }`
+      );
       if (editInfo) {
         console.log(`    ${dim(`Wiki edit: ${freshness} ${editInfo}`)}`);
       }
@@ -620,7 +698,9 @@ export async function runBulkMode(
           medium: byPriority.medium.length,
           low: byPriority.low.length,
         },
-        byCategory: Object.fromEntries(Object.entries(byCategory).map(([k, v]) => [k, v.length])),
+        byCategory: Object.fromEntries(
+          Object.entries(byCategory).map(([k, v]) => [k, v.length])
+        ),
       },
       // Primary grouping based on --group-by flag
       discrepancies: groupBy === 'category' ? byCategory : byPriority,
@@ -645,8 +725,8 @@ export async function main(): Promise<void> {
     gameMode === 'both'
       ? 'PVP + PVE (mode-specific)'
       : gameMode === 'regular'
-        ? 'PVP only'
-        : 'PVE only';
+      ? 'PVP only'
+      : 'PVE only';
 
   // Load or fetch API data
   let tasks: ExtendedTaskData[];

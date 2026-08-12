@@ -733,6 +733,290 @@
   //   },
   // },
 
+  // Oil Run
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
+  oil_run: {
+    id: 'oil_run',
+    name: 'Oil Run',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Oil_Run',
+    trader: {
+      id: '54cb50c76803fa8b248b4571',
+      name: 'Prapor',
+    },
+    map: {
+      id: '56f40101d2720b2a4d8b45d6',
+      name: 'Customs',
+    },
+    kappaRequired: true,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 },
+    ],
+    objectives: [
+      {
+        id: 'oil_run_obj01',
+        description: 'Locate and mark any of the fuel tank trucks with an MS2000 Marker on Customs',
+        type: 'mark',
+        maps: [
+          {
+            id: '56f40101d2720b2a4d8b45d6',
+            name: 'Customs',
+          },
+        ],
+        markerItem: {
+          id: '5991b51486f77447b112d44f',
+          name: 'MS2000 Marker',
+          shortName: 'MS2000',
+        },
+        count: 1,
+      },
+    ],
+    experience: 3000,
+    finishRewards: {
+      items: [
+        {
+          count: 93920,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 1,
+          item: {
+            id: '5d1b2fa286f77425227d1674',
+            name: 'Electric motor',
+            shortName: 'Motor',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb50c76803fa8b248b4571',
+            name: 'Prapor',
+          },
+          standing: 0.1,
+        },
+      ],
+    },
+  },
+
+  // Fall Ailment
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fall_Ailment
+  fall_ailment: {
+    id: 'fall_ailment',
+    name: 'Fall Ailment',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Fall_Ailment',
+    trader: {
+      id: '54cb57776803fa99248b456e',
+      name: 'Therapist',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 1 },
+    ],
+    objectives: [
+      {
+        id: 'fall_ailment_obj01',
+        description: 'Find 5 Disposable syringes found in raid',
+        type: 'findItem',
+        items: [
+          {
+            id: '5d1b3f2d86f774253763b735',
+            name: 'Disposable syringe',
+            shortName: 'Syringe',
+          },
+        ],
+        foundInRaid: true,
+        count: 5,
+      },
+      {
+        id: 'fall_ailment_obj02',
+        description: 'Hand over the Disposable syringes',
+        type: 'giveItem',
+        items: [
+          {
+            id: '5d1b3f2d86f774253763b735',
+            name: 'Disposable syringe',
+            shortName: 'Syringe',
+          },
+        ],
+        count: 5,
+      },
+    ],
+    experience: 3000,
+    finishRewards: {
+      items: [
+        {
+          count: 80000,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 2,
+          item: {
+            id: '5d1b3a5d86f774252167ba22',
+            name: 'Pile of meds',
+            shortName: 'Meds',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb57776803fa99248b456e',
+            name: 'Therapist',
+          },
+          standing: 0.1,
+        },
+      ],
+    },
+  },
+
+  // The Tarkov Butcher
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Butcher
+  the_tarkov_butcher: {
+    id: 'the_tarkov_butcher',
+    name: 'The Tarkov Butcher',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Butcher',
+    trader: {
+      id: '54cb57776803fa99248b456e',
+      name: 'Therapist',
+    },
+    map: null,
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 2 },
+    ],
+    objectives: [
+      {
+        id: 'the_tarkov_butcher_obj01',
+        description: 'Locate and obtain the chemical container on Ground Zero',
+        type: 'findQuestItem',
+        maps: [
+          {
+            id: '653e6760052c01c1c805532f',
+            name: 'Ground Zero',
+          },
+        ],
+        count: 1,
+      },
+      {
+        id: 'the_tarkov_butcher_obj02',
+        description: 'Stash the container by the police station on Streets of Tarkov',
+        type: 'plantItem',
+        maps: [
+          {
+            id: '5714dc692459777137212e12',
+            name: 'Streets of Tarkov',
+          },
+        ],
+        count: 1,
+      },
+    ],
+    experience: 10000,
+    finishRewards: {
+      items: [
+        {
+          count: 165000,
+          item: {
+            id: '5449016a4bdc2d6f028b456f',
+            name: 'Roubles',
+            shortName: 'RUB',
+          },
+        },
+        {
+          count: 2,
+          item: {
+            id: '5d02797c86f774203f38e30a',
+            name: 'Surv12 field surgical kit',
+            shortName: 'Surv12',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '54cb57776803fa99248b456e',
+            name: 'Therapist',
+          },
+          standing: 0.25,
+        },
+      ],
+    },
+  },
+
+  // Demonstration model
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Demonstration_model
+  demonstration_model: {
+    id: 'demonstration_model',
+    name: 'Demonstration Model',
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Demonstration_model',
+    trader: {
+      id: '5935c25fb3acc3127c3d8cd9',
+      name: 'Peacekeeper',
+    },
+    map: {
+      id: '5704e5fad2720bc05b8b4567',
+      name: 'Reserve',
+    },
+    kappaRequired: false,
+    lightkeeperRequired: false,
+    factionName: 'Any',
+    traderRequirements: [
+      { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 3 },
+    ],
+    objectives: [
+      {
+        id: 'demonstration_model_obj01',
+        description: 'Eliminate any 15 targets with headshots with 7.62x51 assault rifles or DMRs on Reserve',
+        type: 'shoot',
+        maps: [
+          {
+            id: '5704e5fad2720bc05b8b4567',
+            name: 'Reserve',
+          },
+        ],
+        bodyParts: ['head'],
+        shotType: 'kill',
+        count: 15,
+      },
+    ],
+    experience: 28000,
+    finishRewards: {
+      items: [
+        {
+          count: 1900,
+          item: {
+            id: '5696686a4bdc2da3298b456a',
+            name: 'Dollars',
+            shortName: 'USD',
+          },
+        },
+      ],
+      traderStanding: [
+        {
+          trader: {
+            id: '5935c25fb3acc3127c3d8cd9',
+            name: 'Peacekeeper',
+          },
+          standing: 0.75,
+        },
+      ],
+    },
+  },
+
   // New Beginning (Prestige 5)
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_5)
   new_beginning_prestige_5: {
@@ -744,7 +1028,6 @@
       id: '5ac3b934156ae10c4430e83c',
       name: 'Ragman',
     },
-    minPlayerLevel: 47, // Was: 55
     requiredPrestige: {
       name: 'Prestige 4',
       prestigeLevel: 4,
@@ -1041,7 +1324,6 @@
       id: '5ac3b934156ae10c4430e83c',
       name: 'Ragman',
     },
-    minPlayerLevel: 47, // Was: 55
     requiredPrestige: {
       name: 'Prestige 5',
       prestigeLevel: 5,
@@ -1621,393 +1903,392 @@
   //   },
   // },
 
-  //  // Duck Hunt
-  //  // Proof: https://escapefromtarkov.fandom.com/wiki/Duck_Hunt
-  //  // tarkov.dev API currently does not return this task in `tasks`.
-  //  duck_hunt: {
-  //    id: 'duck_hunt',
-  //    name: 'Duck Hunt',
-  //    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Duck_Hunt',
-  //    trader: {
-  //      id: '5c0647fdd443bc2504c2d371',
-  //      name: 'Jaeger',
-  //    },
-  //    kappaRequired: false,
-  //    minPlayerLevel: 5,
-  //    factionName: 'Any',
-  //    taskRequirements: [],
-  //    objectives: [
-  //      {
-  //        id: 'duck_hunt_obj01',
-  //        description: 'Locate and shoot down all the toy ducks on Customs',
-  //        type: 'shoot',
-  //        maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj02',
-  //        description: 'Locate and shoot down all the toy ducks on Shoreline',
-  //        type: 'shoot',
-  //        maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Shoreline' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj03',
-  //        description: 'Locate and shoot down all the toy ducks on Factory',
-  //        type: 'shoot',
-  //        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
-  //        count: 9,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj04',
-  //        description: 'Locate and shoot down all the toy ducks on Woods',
-  //        type: 'shoot',
-  //        maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj05',
-  //        description: 'Locate and shoot down all the toy ducks on Ground Zero',
-  //        type: 'shoot',
-  //        maps: [{ id: '653e6760052c01c1c805532f', name: 'Ground Zero' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj06',
-  //        description: 'Locate and shoot down all the toy ducks on Interchange',
-  //        type: 'shoot',
-  //        maps: [{ id: '5714dbc024597771384a510d', name: 'Interchange' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj07',
-  //        description: 'Locate and shoot down all the toy ducks on Reserve',
-  //        type: 'shoot',
-  //        maps: [{ id: '5704e5fad2720bc05b8b4567', name: 'Reserve' }],
-  //        count: 10,
-  //      },
-  //      {
-  //        id: 'duck_hunt_obj08',
-  //        description: 'Hand over the item: Can of duck pate',
-  //        type: 'giveItem',
-  //        items: [
-  //          {
-  //            id: '69774bb0a247161ff1068335',
-  //            name: 'Can of duck pate',
-  //          },
-  //        ],
-  //        foundInRaid: false,
-  //        count: 15,
-  //      },
-  //    ],
-  //    experience: 25000,
-  //    finishRewards: {
-  //      items: [
-  //        {
-  //          count: 345234,
-  //          item: {
-  //            id: '5449016a4bdc2d6f028b456f',
-  //            name: 'Roubles',
-  //            shortName: 'RUB',
-  //          },
-  //        },
-  //      ],
-  //      traderStanding: [
-  //        {
-  //          trader: {
-  //            id: '5c0647fdd443bc2504c2d371',
-  //            name: 'Jaeger',
-  //          },
-  //          standing: 0.03,
-  //        },
-  //      ],
-  //      customization: [
-  //        {
-  //          id: 'duck_hunt_customization01',
-  //          name: 'Scavenger target',
-  //          customizationType: 'ShootingRangeMark',
-  //          customizationTypeName: 'Targets',
-  //        },
-  //      ],
-  //      achievement: [
-  //        {
-  //          id: '6984ab58ee0ae2c0d5075f33',
-  //          name: 'Duck Hunt',
-  //          description: 'Complete the Duck Hunt 2026 event task',
-  //        },
-  //      ],
-  //      skillLevelReward: [
-  //        {
-  //          name: 'Perception',
-  //          level: 4,
-  //          skill: {
-  //            id: 'Perception',
-  //            name: 'Perception',
-  //          },
-  //        },
-  //      ],
-  //    },
-  //  },
+//  // Duck Hunt
+//  // Proof: https://escapefromtarkov.fandom.com/wiki/Duck_Hunt
+//  // tarkov.dev API currently does not return this task in `tasks`.
+//  duck_hunt: {
+//    id: 'duck_hunt',
+//    name: 'Duck Hunt',
+//    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Duck_Hunt',
+//    trader: {
+//      id: '5c0647fdd443bc2504c2d371',
+//      name: 'Jaeger',
+//    },
+//    kappaRequired: false,
+//    factionName: 'Any',
+//    taskRequirements: [],
+//    objectives: [
+//      {
+//        id: 'duck_hunt_obj01',
+//        description: 'Locate and shoot down all the toy ducks on Customs',
+//        type: 'shoot',
+//        maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj02',
+//        description: 'Locate and shoot down all the toy ducks on Shoreline',
+//        type: 'shoot',
+//        maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Shoreline' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj03',
+//        description: 'Locate and shoot down all the toy ducks on Factory',
+//        type: 'shoot',
+//        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
+//        count: 9,
+//      },
+//      {
+//        id: 'duck_hunt_obj04',
+//        description: 'Locate and shoot down all the toy ducks on Woods',
+//        type: 'shoot',
+//        maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj05',
+//        description: 'Locate and shoot down all the toy ducks on Ground Zero',
+//        type: 'shoot',
+//        maps: [{ id: '653e6760052c01c1c805532f', name: 'Ground Zero' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj06',
+//        description: 'Locate and shoot down all the toy ducks on Interchange',
+//        type: 'shoot',
+//        maps: [{ id: '5714dbc024597771384a510d', name: 'Interchange' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj07',
+//        description: 'Locate and shoot down all the toy ducks on Reserve',
+//        type: 'shoot',
+//        maps: [{ id: '5704e5fad2720bc05b8b4567', name: 'Reserve' }],
+//        count: 10,
+//      },
+//      {
+//        id: 'duck_hunt_obj08',
+//        description: 'Hand over the item: Can of duck pate',
+//        type: 'giveItem',
+//        items: [
+//          {
+//            id: '69774bb0a247161ff1068335',
+//            name: 'Can of duck pate',
+//          },
+//        ],
+//        foundInRaid: false,
+//        count: 15,
+//      },
+//    ],
+//    experience: 25000,
+//    finishRewards: {
+//      items: [
+//        {
+//          count: 345234,
+//          item: {
+//            id: '5449016a4bdc2d6f028b456f',
+//            name: 'Roubles',
+//            shortName: 'RUB',
+//          },
+//        },
+//      ],
+//      traderStanding: [
+//        {
+//          trader: {
+//            id: '5c0647fdd443bc2504c2d371',
+//            name: 'Jaeger',
+//          },
+//          standing: 0.03,
+//        },
+//      ],
+//      customization: [
+//        {
+//          id: 'duck_hunt_customization01',
+//          name: 'Scavenger target',
+//          customizationType: 'ShootingRangeMark',
+//          customizationTypeName: 'Targets',
+//        },
+//      ],
+//      achievement: [
+//        {
+//          id: '6984ab58ee0ae2c0d5075f33',
+//          name: 'Duck Hunt',
+//          description: 'Complete the Duck Hunt 2026 event task',
+//        },
+//      ],
+//      skillLevelReward: [
+//        {
+//          name: 'Perception',
+//          level: 4,
+//          skill: {
+//            id: 'Perception',
+//            name: 'Perception',
+//          },
+//        },
+//      ],
+//    },
+//  },
 
-  // Pillager event tasks (event ended - disabled, see issue #217).
-  // Wiki marks these as {{Historical content}}/{{Event content}}.
-  // Re-enable (uncomment) if the event returns.
-  // Casus Belli
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Casus_belli
-  // casus_belli: {
-  // id: 'casus_belli',
-  // name: 'Casus belli',
-  // wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Casus_belli',
-  // trader: {
-  // id: '6617beeaa9cfa777ca915b7c',
-  // name: 'Ref',
-  // },
-  // map: null,
-  // kappaRequired: false,
-  // factionName: 'Any',
-  // objectives: [
-  // {
-  // id: 'casus_belli_obj01',
-  // description: 'Eliminate 5 pillagers',
-  // type: 'shoot',
-  // maps: [
-  // { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
-  // { id: '5714dbc024597771384a510d', name: 'Interchange' },
-  // { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
-  // { id: '5704e554d2720bac5b8b456e', name: 'Shoreline' },
-  // { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
-  // ],
-  // count: 5,
-  // shotType: 'kill',
-  // targetNames: ['Pillager'],
-  // optional: false,
-  // },
-  // {
-  // id: 'casus_belli_obj02',
-  // description: 'Hand over 3 found in raid painted CQCM masks',
-  // type: 'giveItem',
-  // items: [
-  // {
-  // id: '67a4b71ad3228756b6088ee2',
-  // name: 'Atomic Defense CQCM ballistic mask (Smile)',
-  // shortName: 'Smile',
-  // },
-  // {
-  // id: '67a5c5b6dfdf568c9009af66',
-  // name: 'Atomic Defense CQCM ballistic mask (Stop Me)',
-  // shortName: 'Stop Me',
-  // },
-  // {
-  // id: '67a5c5df782ce4655104db14',
-  // name: 'Atomic Defense CQCM ballistic mask (Scars)',
-  // shortName: 'Scars',
-  // },
-  // {
-  // id: '67a5c5f37f52620c5b05b4d6',
-  // name: 'Atomic Defense CQCM ballistic mask (Target)',
-  // shortName: 'Target',
-  // },
-  // {
-  // id: '67a5c6068fcd9fb73f0752cf',
-  // name: 'Atomic Defense CQCM ballistic mask (Skull)',
-  // shortName: 'Skull',
-  // },
-  // {
-  // id: '67a5c61c7f52620c5b05b4d8',
-  // name: 'Atomic Defense CQCM ballistic mask (Demon)',
-  // shortName: 'Demon',
-  // },
-  // {
-  // id: '67a5c657782ce4655104db16',
-  // name: 'Atomic Defense CQCM ballistic mask (El Día de Muertos)',
-  // shortName: 'Muertos',
-  // },
-  // {
-  // id: '688b3bfa1ed594eccd0c45ee',
-  // name: 'Atomic Defense CQCM ballistic mask (Ping)',
-  // shortName: 'Ping',
-  // },
-  // {
-  // id: '68a9a04373d52d47830759c7',
-  // name: 'Atomic Defense CQCM ballistic mask (Loui Peeton)',
-  // shortName: 'Loui Peeton',
-  // },
-  // {
-  // id: '68a9a0b01696fb8c1e0ee9cc',
-  // name: 'Atomic Defense CQCM ballistic mask (Toxic)',
-  // shortName: 'Toxic',
-  // },
-  // {
-  // id: '68a9a1223e1ee5a70504c126',
-  // name: 'Atomic Defense CQCM ballistic mask (Crash Tested)',
-  // shortName: 'Crash Tested',
-  // },
-  // {
-  // id: '68a9a15d73d52d47830759c9',
-  // name: 'Atomic Defense CQCM ballistic mask (Demonic Face)',
-  // shortName: 'Demonic',
-  // },
-  // {
-  // id: '68d54d0525ac8590a8075ac3',
-  // name: 'Atomic Defense CQCM ballistic mask (Loui Peeton)',
-  // shortName: 'LP',
-  // },
-  // {
-  // id: '6936ff8734029a096c06f95a',
-  // name: 'Atomic Defense CQCM ballistic mask (Blasted Ice)',
-  // shortName: 'Blasted Ice',
-  // },
-  // ],
-  // foundInRaid: true,
-  // count: 3,
-  // optional: false,
-  // },
-  // ],
-  // experience: 10000,
-  // finishRewards: {
-  // items: [
-  // {
-  // count: 50,
-  // item: {
-  // id: '5d235b4d86f7742e017bc88a',
-  // name: 'GP coin',
-  // shortName: 'GP',
-  // },
-  // },
-  // {
-  // count: 1,
-  // item: {
-  // id: '5fbcc1d9016cce60e8341ab3',
-  // name: 'SIG MCX .300 Blackout assault rifle',
-  // shortName: 'MCX',
-  // },
-  // },
-  // {
-  // count: 1,
-  // item: {
-  // id: '544a378f4bdc2d30388b4567',
-  // name: 'AR-15 5.56x45 Magpul PMAG 40 GEN M3 STANAG 40-round magazine',
-  // shortName: 'GEN M3',
-  // },
-  // },
-  // {
-  // count: 2,
-  // item: {
-  // id: '657023bebfc87b3a34093207',
-  // name: '.300 Blackout BCP FMJ ammo pack (50 pcs)',
-  // shortName: 'FMJ',
-  // },
-  // },
-  // ],
-  // },
-  // },
+    // Pillager event tasks (event ended - disabled, see issue #217).
+    // Wiki marks these as {{Historical content}}/{{Event content}}.
+    // Re-enable (uncomment) if the event returns.
+    // Casus Belli
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Casus_belli
+    // casus_belli: {
+      // id: 'casus_belli',
+      // name: 'Casus belli',
+      // wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Casus_belli',
+      // trader: {
+        // id: '6617beeaa9cfa777ca915b7c',
+        // name: 'Ref',
+      // },
+      // map: null,
+      // kappaRequired: false,
+      // factionName: 'Any',
+      // objectives: [
+        // {
+          // id: 'casus_belli_obj01',
+          // description: 'Eliminate 5 pillagers',
+          // type: 'shoot',
+          // maps: [
+            // { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
+            // { id: '5714dbc024597771384a510d', name: 'Interchange' },
+            // { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
+            // { id: '5704e554d2720bac5b8b456e', name: 'Shoreline' },
+            // { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
+          // ],
+          // count: 5,
+          // shotType: 'kill',
+          // targetNames: ['Pillager'],
+          // optional: false,
+        // },
+        // {
+          // id: 'casus_belli_obj02',
+          // description: 'Hand over 3 found in raid painted CQCM masks',
+          // type: 'giveItem',
+          // items: [
+            // {
+              // id: '67a4b71ad3228756b6088ee2',
+              // name: 'Atomic Defense CQCM ballistic mask (Smile)',
+              // shortName: 'Smile',
+            // },
+            // {
+              // id: '67a5c5b6dfdf568c9009af66',
+              // name: 'Atomic Defense CQCM ballistic mask (Stop Me)',
+              // shortName: 'Stop Me',
+            // },
+            // {
+              // id: '67a5c5df782ce4655104db14',
+              // name: 'Atomic Defense CQCM ballistic mask (Scars)',
+              // shortName: 'Scars',
+            // },
+            // {
+              // id: '67a5c5f37f52620c5b05b4d6',
+              // name: 'Atomic Defense CQCM ballistic mask (Target)',
+              // shortName: 'Target',
+            // },
+            // {
+              // id: '67a5c6068fcd9fb73f0752cf',
+              // name: 'Atomic Defense CQCM ballistic mask (Skull)',
+              // shortName: 'Skull',
+            // },
+            // {
+              // id: '67a5c61c7f52620c5b05b4d8',
+              // name: 'Atomic Defense CQCM ballistic mask (Demon)',
+              // shortName: 'Demon',
+            // },
+            // {
+              // id: '67a5c657782ce4655104db16',
+              // name: 'Atomic Defense CQCM ballistic mask (El Día de Muertos)',
+              // shortName: 'Muertos',
+            // },
+            // {
+              // id: '688b3bfa1ed594eccd0c45ee',
+              // name: 'Atomic Defense CQCM ballistic mask (Ping)',
+              // shortName: 'Ping',
+            // },
+            // {
+              // id: '68a9a04373d52d47830759c7',
+              // name: 'Atomic Defense CQCM ballistic mask (Loui Peeton)',
+              // shortName: 'Loui Peeton',
+            // },
+            // {
+              // id: '68a9a0b01696fb8c1e0ee9cc',
+              // name: 'Atomic Defense CQCM ballistic mask (Toxic)',
+              // shortName: 'Toxic',
+            // },
+            // {
+              // id: '68a9a1223e1ee5a70504c126',
+              // name: 'Atomic Defense CQCM ballistic mask (Crash Tested)',
+              // shortName: 'Crash Tested',
+            // },
+            // {
+              // id: '68a9a15d73d52d47830759c9',
+              // name: 'Atomic Defense CQCM ballistic mask (Demonic Face)',
+              // shortName: 'Demonic',
+            // },
+            // {
+              // id: '68d54d0525ac8590a8075ac3',
+              // name: 'Atomic Defense CQCM ballistic mask (Loui Peeton)',
+              // shortName: 'LP',
+            // },
+            // {
+              // id: '6936ff8734029a096c06f95a',
+              // name: 'Atomic Defense CQCM ballistic mask (Blasted Ice)',
+              // shortName: 'Blasted Ice',
+            // },
+          // ],
+          // foundInRaid: true,
+          // count: 3,
+          // optional: false,
+        // },
+      // ],
+      // experience: 10000,
+      // finishRewards: {
+        // items: [
+          // {
+            // count: 50,
+            // item: {
+              // id: '5d235b4d86f7742e017bc88a',
+              // name: 'GP coin',
+              // shortName: 'GP',
+            // },
+          // },
+          // {
+            // count: 1,
+            // item: {
+              // id: '5fbcc1d9016cce60e8341ab3',
+              // name: 'SIG MCX .300 Blackout assault rifle',
+              // shortName: 'MCX',
+            // },
+          // },
+          // {
+            // count: 1,
+            // item: {
+              // id: '544a378f4bdc2d30388b4567',
+              // name: 'AR-15 5.56x45 Magpul PMAG 40 GEN M3 STANAG 40-round magazine',
+              // shortName: 'GEN M3',
+            // },
+          // },
+          // {
+            // count: 2,
+            // item: {
+              // id: '657023bebfc87b3a34093207',
+              // name: '.300 Blackout BCP FMJ ammo pack (50 pcs)',
+              // shortName: 'FMJ',
+            // },
+          // },
+        // ],
+      // },
+    // },
 
-  // Backup Plan
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Backup_Plan
-  // backup_plan: {
-  // id: 'backup_plan',
-  // name: 'Backup Plan',
-  // wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Backup_Plan',
-  // trader: {
-  // id: '6617beeaa9cfa777ca915b7c',
-  // name: 'Ref',
-  // },
-  // map: null,
-  // kappaRequired: false,
-  // factionName: 'Any',
-  // taskRequirements: [
-  // {
-  // task: {
-  // id: 'casus_belli',
-  // name: 'Casus belli',
-  // },
-  // },
-  // ],
-  // objectives: [
-  // {
-  // id: 'backup_plan_obj01',
-  // description: 'Stash the Grizzly medkit in the large barn at the old sawmill on Woods',
-  // type: 'plantItem',
-  // maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
-  // items: [
-  // {
-  // id: '590c657e86f77412b013051d',
-  // name: 'Grizzly medical kit',
-  // shortName: 'Grizzly',
-  // },
-  // ],
-  // count: 1,
-  // optional: false,
-  // },
-  // {
-  // id: 'backup_plan_obj02',
-  // description: 'Transit from Woods to Customs',
-  // type: 'extract',
-  // maps: [
-  // { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
-  // { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
-  // ],
-  // exitStatus: ['ExpBonusmarathon Name'],
-  // count: 1,
-  // optional: false,
-  // },
-  // {
-  // id: 'backup_plan_obj03',
-  // description: 'Eliminate any 6 targets on Customs',
-  // type: 'shoot',
-  // maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
-  // count: 6,
-  // shotType: 'kill',
-  // optional: false,
-  // },
-  // {
-  // id: 'backup_plan_obj04',
-  // description: 'Survive and extract from Customs',
-  // type: 'extract',
-  // maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
-  // exitStatus: ['Survived'],
-  // count: 1,
-  // optional: false,
-  // },
-  // ],
-  // experience: 12000,
-  // finishRewards: {
-  // items: [
-  // {
-  // count: 50,
-  // item: {
-  // id: '5d235b4d86f7742e017bc88a',
-  // name: 'GP coin',
-  // shortName: 'GP',
-  // },
-  // },
-  // {
-  // count: 1,
-  // item: {
-  // id: '606587252535c57a13424cfd',
-  // name: 'CMMG Mk47 Mutant 7.62x39 assault rifle',
-  // shortName: 'Mk47',
-  // },
-  // },
-  // {
-  // count: 3,
-  // item: {
-  // id: '59d6272486f77466146386ff',
-  // name: 'AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine',
-  // shortName: 'GEN M3',
-  // },
-  // },
-  // {
-  // count: 7,
-  // item: {
-  // id: '64acea09c4eda9354b0226ad',
-  // name: '7.62x39mm T-45M1 gzh ammo pack (20 pcs)',
-  // shortName: 'T-45M1',
-  // },
-  // },
-  // ],
-  // },
-  // },
+    // Backup Plan
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Backup_Plan
+    // backup_plan: {
+      // id: 'backup_plan',
+      // name: 'Backup Plan',
+      // wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Backup_Plan',
+      // trader: {
+        // id: '6617beeaa9cfa777ca915b7c',
+        // name: 'Ref',
+      // },
+      // map: null,
+      // kappaRequired: false,
+      // factionName: 'Any',
+      // taskRequirements: [
+        // {
+          // task: {
+            // id: 'casus_belli',
+            // name: 'Casus belli',
+          // },
+        // },
+      // ],
+      // objectives: [
+        // {
+          // id: 'backup_plan_obj01',
+          // description: 'Stash the Grizzly medkit in the large barn at the old sawmill on Woods',
+          // type: 'plantItem',
+          // maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
+          // items: [
+            // {
+              // id: '590c657e86f77412b013051d',
+              // name: 'Grizzly medical kit',
+              // shortName: 'Grizzly',
+            // },
+          // ],
+          // count: 1,
+          // optional: false,
+        // },
+        // {
+          // id: 'backup_plan_obj02',
+          // description: 'Transit from Woods to Customs',
+          // type: 'extract',
+          // maps: [
+            // { id: '5704e3c2d2720bac5b8b4567', name: 'Woods' },
+            // { id: '56f40101d2720b2a4d8b45d6', name: 'Customs' },
+          // ],
+          // exitStatus: ['ExpBonusmarathon Name'],
+          // count: 1,
+          // optional: false,
+        // },
+        // {
+          // id: 'backup_plan_obj03',
+          // description: 'Eliminate any 6 targets on Customs',
+          // type: 'shoot',
+          // maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
+          // count: 6,
+          // shotType: 'kill',
+          // optional: false,
+        // },
+        // {
+          // id: 'backup_plan_obj04',
+          // description: 'Survive and extract from Customs',
+          // type: 'extract',
+          // maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
+          // exitStatus: ['Survived'],
+          // count: 1,
+          // optional: false,
+        // },
+      // ],
+      // experience: 12000,
+      // finishRewards: {
+        // items: [
+          // {
+            // count: 50,
+            // item: {
+              // id: '5d235b4d86f7742e017bc88a',
+              // name: 'GP coin',
+              // shortName: 'GP',
+            // },
+          // },
+          // {
+            // count: 1,
+            // item: {
+              // id: '606587252535c57a13424cfd',
+              // name: 'CMMG Mk47 Mutant 7.62x39 assault rifle',
+              // shortName: 'Mk47',
+            // },
+          // },
+          // {
+            // count: 3,
+            // item: {
+              // id: '59d6272486f77466146386ff',
+              // name: 'AK 7.62x39 Magpul PMAG 30 GEN M3 30-round magazine',
+              // shortName: 'GEN M3',
+            // },
+          // },
+          // {
+            // count: 7,
+            // item: {
+              // id: '64acea09c4eda9354b0226ad',
+              // name: '7.62x39mm T-45M1 gzh ammo pack (20 pcs)',
+              // shortName: 'T-45M1',
+            // },
+          // },
+        // ],
+      // },
+    // },
 
-  // add Taking What's Mine soon
+    // add Taking What's Mine soon
 }
