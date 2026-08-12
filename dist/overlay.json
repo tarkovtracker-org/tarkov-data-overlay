@@ -3686,7 +3686,7 @@
       "value": 5,
       "title": "The Unheard",
       "defaultStashLevel": 5,
-      "defaultCultistCircleLevel": 3,
+      "defaultCultistCircleLevel": 1,
       "traderRepBonus": {
         "prapor": 0.2,
         "therapist": 0.2,
@@ -3706,7 +3706,7 @@
       "value": 6,
       "title": "Edge of Darkness + Unheard",
       "defaultStashLevel": 5,
-      "defaultCultistCircleLevel": 3,
+      "defaultCultistCircleLevel": 1,
       "traderRepBonus": {
         "prapor": 0.2,
         "therapist": 0.2,
@@ -7387,7 +7387,7 @@
   },
   "$meta": {
     "version": "1.57",
-    "generated": "2026-08-11T14:27:26.972Z",
-    "sha256": "9dcebc5cefb9d11528fd4508b0c8ad617792c9f62208a02b92f356ae598363ee"
+    "generated": "2026-08-12T00:47:12.582Z",
+    "sha256": "d88fe120f1885ea205f69893e95c82ea5a845a94749bd0991ab7407234a57802"
   }
 }

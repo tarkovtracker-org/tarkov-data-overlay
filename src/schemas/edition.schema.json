@@ -5,8 +5,8 @@
     "additionalProperties": true,
     "properties": {
       "defaultCultistCircleLevel": {
-        "description": "Starting Cultist Circle level (0-3)",
-        "maximum": 3,
+        "description": "Starting Cultist Circle level (0-1)",
+        "maximum": 1,
         "minimum": 0,
         "type": "integer"
       },
