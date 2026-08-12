@@ -228,4 +228,39 @@ describe('reference file selection', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  // Regression: requireMatchingReferenceMode must agree with findReferenceFile
+  // on what counts as usable - a capture whose mode cannot be detected (null)
+  // is plausible for any requested mode, so it must not be rejected outright.
+  it('treats a null-mode capture as usable when no exact-mode capture exists', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    try {
+      // Newest capture is provably pve; older capture has an unparseable URL.
+      writeFileSync(
+        join(dir, 'quest_list.pve.json'),
+        JSON.stringify({
+          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-08-11T07:37:37.290Z' },
+          response: { decoded_response: { data: [] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'quest_list.unknown.json'),
+        JSON.stringify({
+          request: { method: 'POST', url: 'https://internal.example.com/client/quest/list', timestamp: '2026-06-30T10:00:00.000Z' },
+          response: { decoded_response: { data: [] } },
+        })
+      );
+      const now = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.pve.json'), now, now);
+      utimesSync(join(dir, 'quest_list.unknown.json'), now - 3600, now - 3600);
+
+      // findReferenceFile prefers the null-mode capture for --mode regular...
+      expect(findReferenceFile(dir, 'regular')).toMatch(/quest_list\.unknown\.json$/);
+      // ...and the guard must not contradict it by throwing (the null-mode file
+      // is plausible for any requested mode; the caller then trusts --mode).
+      expect(() => requireMatchingReferenceMode(dir, 'regular')).not.toThrow();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

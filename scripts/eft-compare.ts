@@ -512,10 +512,14 @@ export function requireMatchingReferenceMode(eftDir: string, mode: GameMode): Ga
   const refMode = detectReferenceMode(eftDir);
   if (refMode && refMode !== mode) {
     // The newest capture belongs to another mode. That is only an error when no
-    // capture for the requested mode exists at all - findReferenceFile(eftDir,
-    // mode) picks the newest matching capture, so callers must pass the mode
-    // through to it.
-    const hasMatching = findQuestListFiles(eftDir).some((f) => modeFromReferenceFile(f) === mode);
+    // usable capture for the requested mode exists at all - findReferenceFile(
+    // eftDir, mode) picks the newest matching capture (treating a candidate
+    // whose mode cannot be detected as plausible, so callers then trust --mode),
+    // and this guard mirrors that same plausibility rule.
+    const hasMatching = findQuestListFiles(eftDir).some((f) => {
+      const candidateMode = modeFromReferenceFile(f);
+      return candidateMode === null || candidateMode === mode;
+    });
     if (!hasMatching) {
       throw new Error(
         `No ${mode} reference file found in ${eftDir}: the newest capture is ${refMode}. ` +
