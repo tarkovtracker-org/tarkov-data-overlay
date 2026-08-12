@@ -1,0 +1,19 @@
+scripts/eft-compare.ts
+  s_19214bc1150cb8::t_5c13eb554ddc9f 154-164,166,173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4e0b4ccb33217e1ba0ebb03b9849b0bdc2ed2351",
+  "prompts": {},
+  "sessions": {
+    "s_19214bc1150cb8": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ff5ec-14ac-780f-8ec2-28a34e50167c",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
