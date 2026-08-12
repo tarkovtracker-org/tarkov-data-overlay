@@ -70,6 +70,10 @@ The `eft:*` scripts cross-check the overlay against a local quest reference -
 values verified in-game and kept out of the repo - which is the authority for
 numeric quest fields (experience, minPlayerLevel, objective counts). The
 reference lives in `eft/` and all derived output in `data/` — both gitignored.
+Versioned captures go in subdirectories (`eft/eft-1.1-pve/`); `findReferenceFile`
+scans recursively and auto-detects the most recently captured `quest_list`
+reference, so a fresh dump supersedes an older one without touching the tooling
+call sites (pass an explicit `eftDir` to pin a specific capture).
 Never commit the reference or anything derived from it; PRs carry only the
 resulting JSON5 corrections plus proof links.
 

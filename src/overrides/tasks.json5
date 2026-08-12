@@ -1,14 +1,14 @@
 {
-  // Sales Night - Objective description wording incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Sales_Night
-  // API count now correct (7); description still wrong
-  '5ae449c386f7744bde357697': {
-    objectives: {
-      '5bb60cbc88a45011a8235cc5': {
-        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
-      },
-    },
-  },
+  // Pathfinder - objective 5bb60cbc... description
+  //
+  // REMOVED 2026-08-12: this override was mis-attributed to a quest called
+  // "Sales Night", which does not exist in tarkov.dev, the 1.1.0.0 capture, or
+  // the wiki. The objective it targeted (5bb60cbc88a45011a8235cc5 on task
+  // 5ae449c386f7744bde357697 = Pathfinder) is a type=visit objective whose
+  // correct text is "Visit the Railway Exfil exit on Interchange" - confirmed
+  // by BOTH game captures and tarkov.dev. The override rewrote it to "Survive
+  // and extract on Interchange 7 times", corrupting accurate data; it is now
+  // removed. Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
 
   // Test Drive - Part 1 - Objective description wording (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_1
@@ -27,29 +27,17 @@
   //   },
   // },
 
-  // Test Drive - Part 2 - Objective description/maps incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_2
-  // API experience now correct (12000); map/obj still wrong
-  '63a5cf262964a7488f5243ce': {
-    map: null, // Was: { id: "5714dc692459777137212e12", name: "Streets of Tarkov" }
-    objectives: {
-      '63a5cf262964a7488f5243d1': {
-        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was: Eliminate PMC operatives while using an SR-2M with a suppressor and KP-SR2 sight on Streets of Tarkov
-        usingWeapon: [
-          {
-            id: '59411abb86f77478f702b5d2',
-            name: 'HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD',
-            shortName: 'MP5 SD',
-          },
-        ], // Was: "id": "62e14904c2699c0ec93adc47", "name": "SR-2M Veresk 9x21 submachine gun", "shortName": "SR-2M"
-        maps: [
-          { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
-          { id: '653e6760052c01c1c805532f', name: 'Ground Zero' },
-          { id: '5714dbc024597771384a510d', name: 'Interchange' },
-        ], // Was: { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' }
-      },
-    },
-  },
+  // Power of Persuasion (aka "Test Drive - Part 2") - objective map/weapon/count
+  //
+  // MOVED to src/overrides/modes/regular/tasks.json5 2026-08-12: this is a
+  // mode divergence, not a shared correction. The wiki (regular witness, last
+  // edited 2026-08-09) documents "Eliminate 20 PMCs using an MP5SD on Streets of
+  // Tarkov, Ground Zero or Interchange", while BOTH game captures (PvE) read
+  // "Eliminate PMC operatives with an MP5SD on Woods, Ground Zero, Interchange,
+  // or Customs" with count 5. tarkov.dev mirrors the PvE text into regular, so
+  // the correction is regular-only. The old base entry also carried a top-level
+  // `map: null` that upstream has since fixed (API serves map: null).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
 
   // Test Drive - Part 4 - top-level map (now fixed upstream)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_4
@@ -65,57 +53,50 @@
   //   map: null, // Was: { id: "5704e554d2720bac5b8b456e", name: "Shoreline" }
   // },
 
-  // Test Drive - Part 5 - Objective description/items incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Test_Drive_-_Part_5
-  // API experience now correct (23000); obj still wrong
-  '669fa3a40c828825de06d6a1': {
-    objectives: {
-      '66a0f5a7f9eae6761253114c': {
-        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory',
-        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: also lists Night Factory
-      },
-    },
-  },
+  // Easy-Breezy (aka "Test Drive - Part 5") - objective map/count
+  //
+  // MOVED to src/overrides/modes/regular/tasks.json5 2026-08-12: a mode
+  // divergence. The wiki (regular witness, last edited 2026-08-05) documents
+  // "Eliminate any 50 targets while using an SR-2M with suppressor and KP-SR2
+  // sight on Factory", while BOTH game captures (PvE) read "...on Reserve or
+  // Lighthouse" with count 30. tarkov.dev mirrors the PvE text into regular, so
+  // the correction is regular-only.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
 
-  // Forester's Duty - objectives description incorrect
+  // Forester's Duty - objective descriptions carry the count (wiki: "5 Scavs")
   // Proof: https://escapefromtarkov.fandom.com/wiki/Forester%27s_Duty
-  // Recent wiki update (post-1.0)
+  // The game text omits the count (it lives in the objective data, which the
+  // API already serves correctly); the override adds it to the description per
+  // the wiki. The former zones/zoneNames clears were dropped 2026-08-12: the
+  // API now serves empty zones and omits zoneNames, so those fields are no-ops.
   '66ab9da7eb102b9bcd08591c': {
     objectives: {
       '66ab9da7eb102b9bcd08591d': {
         description: 'Eliminate 5 Scavs on Lighthouse (In one raid)', // Was: Eliminate Scavs at the village on Lighthouse (In one raid)
-        zones: [], // Was: [{ id: "Marafon_kill_village_lighthouse", position: { x: -72.8853149, y: 5.777012, z: -286.249237 }, outline: [...] }]
-        zoneNames: [], // Was: ['Village']
       },
       '66ab9da7eb102b9bcd085922': {
         description: 'Eliminate 5 Scavs on Shoreline (In one raid)', // Was: Eliminate Scavs at the village on Shoreline (In one raid)
-        zones: [], // Was: [{ id: "marafon_kill_village_shoreline", position: { x: 377.300049, y: -54.42, z: 136.299988 }, outline: [...] }]
-        zoneNames: [], // Was: ['Village']
       },
     },
   },
 
-  // Small Business - Part 3 - in-game localization bug: the two Woods objective
-  // texts are swapped relative to their actual map markers. The marker positions
-  // (zoneId -> coordinates) are CORRECT in the game data; only the description
-  // text BSG attached to each objective is wrong, and tarkov.dev mirrors it.
-  //   obj 666733e5... zoneId place_peacemaker_007_2_N2   -> marker at the Sawmill
-  //   obj 666733e7... zoneId place_peacemaker_007_2_N2_1 -> marker at the river/Sunken Village
-  // Fix = swap ONLY the description text so each names the place its marker sits.
-  // Do NOT "correct" this back against the raw game/API text: the game text is the bug.
+  // Small Business - Part 3 - the two Woods objective descriptions
+  //
+  // REMOVED 2026-08-12: this override swapped the two Woods objective texts
+  // ("river village" <-> "sawmill") on the theory that the game text was bugged
+  // relative to the map markers. Every current source now agrees the game text
+  // is correct as-is:
+  //   - tarkov.dev serves obj 666733e565... = "river village" / obj 666733e743... = "sawmill"
+  //   - the 2026-06-30 AND the 2026-08-12 (1.1.0.0) client captures both carry
+  //     the same texts in localization.en
+  //   - the wiki guide maps the FIRST Woods spot to the dilapidated village in
+  //     the north (= river village), matching objective index order, and lists
+  //     the sawmill as the second spot
+  // The former marker-position claim could not be reproduced from current zone
+  // coordinates (obj 666733e565... sits at (196, -7), well east of the known
+  // sawmill anchor points around (23, 99)); re-add only with a fresh in-game
+  // marker screenshot. A regression would be caught by the reference cross-check.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
-  //        (Woods objectives list both "river village" and "sawmill" marked
-  //        circles); marker placement verified on the tarkov.dev interactive map.
-  '66631493312343839d032d22': {
-    objectives: {
-      '666733e565831d5bafa18bbb': {
-        description: 'Stash a Cultist knife at the sawmill marked circle on Woods', // marker is at the Sawmill. Was (game): "...at the river village..."
-      },
-      '666733e7430c8972d6a5f438': {
-        description: 'Stash a Cultist knife at the river village marked circle on Woods', // marker is at the river/Sunken Village. Was (game): "...at the sawmill..."
-      },
-    },
-  },
 
   // To Great Heights! - Part 3 - Inaccurate count and description.
   // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3
@@ -127,11 +108,13 @@
     },
   },
 
-  // The Blood of War - Part 1 - Truck #2 location change; truck #4 objective missing zone data
-  // tarkov.dev now ships the fourth-tank objective (6926fcc872a6499d1fa29327) as a required
-  // objective, so the former overlay-added optional objective was removed (issue #246);
-  // its zone data is patched onto the real objective below, which upstream ships with empty zones.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+  // Fuel Crisis - second fuel tank objective ships with empty zones upstream;
+  // the zone is patched in (in-game verified, issue #246). The former fourth-
+  // tank zone patch (6926fcc872a6499d1fa29327) was REMOVED 2026-08-12: tarkov.dev
+  // dropped the third/fourth tank objectives entirely (the task now carries
+  // only two objectives, matching the 1.1.0.0 capture), so that sub-entry
+  // targeted a removed objective.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Crisis
   '5ae448f286f77448d73c0131': {
     objectives: {
       '5ae452de86f77450595c4333': {
@@ -168,47 +151,6 @@
               y: 28.55, // Was: 22.85
               z: 125.8475, // Was: 14.53
             },
-          },
-        ],
-      },
-      '6926fcc872a6499d1fa29327': {
-        // Fourth fuel tank - upstream objective ships with no zone data
-        zones: [
-          // Was: []
-          {
-            map: {
-              id: '5714dbc024597771384a510d',
-              name: 'Interchange',
-            },
-            outline: [
-              {
-                x: 35.316765,
-                y: 22.91,
-                z: 303.477869,
-              },
-              {
-                x: 46.143366,
-                y: 22.91,
-                z: 308.653264,
-              },
-              {
-                x: 44.418235,
-                y: 22.91,
-                z: 312.262131,
-              },
-              {
-                x: 33.591634,
-                y: 22.91,
-                z: 307.086736,
-              },
-            ],
-            position: {
-              x: 39.8675,
-              y: 22.91,
-              z: 307.87,
-            },
-            top: 24.35,
-            bottom: 21.35,
           },
         ],
       },
@@ -268,89 +210,13 @@
     },
   },
 
-  // Setup - Objective wearing gear variants missing
+  // Setup - objective wearing gear variants
+  //
+  // REMOVED 2026-08-12: the API now serves the same 9 hat/vest combinations the
+  // override supplied - the only difference was element ordering within each
+  // pair and pair ordering (verified: normalized item-id sets are identical).
+  // Shipping the override only reordered already-accurate upstream data.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
-  // Wiki Guide section lists additional valid hats and chest rigs for objective progress.
-  '5c1234c286f77406fa13baeb': {
-    objectives: {
-      '5c1fa9c986f7740de474cb3d': {
-        wearing: [
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            {
-              id: '6937f02dfd6488bb27024839',
-              name: 'Domontovich ushanka hat',
-              shortName: 'Domont',
-            },
-          ],
-          [
-            { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-          [
-            {
-              id: '693fd1200ec97e98040bd3f9',
-              name: 'Tac-Kek JayPC plate carrier (Black)',
-              shortName: 'JayPC',
-            },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            {
-              id: '693fd1200ec97e98040bd3f9',
-              name: 'Tac-Kek JayPC plate carrier (Black)',
-              shortName: 'JayPC',
-            },
-            {
-              id: '6937f02dfd6488bb27024839',
-              name: 'Domontovich ushanka hat',
-              shortName: 'Domont',
-            },
-          ],
-          [
-            {
-              id: '693fd1200ec97e98040bd3f9',
-              name: 'Tac-Kek JayPC plate carrier (Black)',
-              shortName: 'JayPC',
-            },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-          [
-            {
-              id: '693fd13aa490096a05028cc8',
-              name: 'Tac-Kek JayPC plate carrier (OD Green)',
-              shortName: 'JayPC',
-            },
-            { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
-          ],
-          [
-            {
-              id: '693fd13aa490096a05028cc8',
-              name: 'Tac-Kek JayPC plate carrier (OD Green)',
-              shortName: 'JayPC',
-            },
-            {
-              id: '6937f02dfd6488bb27024839',
-              name: 'Domontovich ushanka hat',
-              shortName: 'Domont',
-            },
-          ],
-          [
-            {
-              id: '693fd13aa490096a05028cc8',
-              name: 'Tac-Kek JayPC plate carrier (OD Green)',
-              shortName: 'JayPC',
-            },
-            { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
-          ],
-        ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
-      },
-    },
-  },
 
   // Our Own Land - Objective foundInRaid flag incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
@@ -379,5 +245,118 @@
   // tarkov.dev currently returns the Immunity skill page instead of the quest page.
   '6663148ca9290f9e0806cca1': {
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
+  },
+
+  // ---------------------------------------------------------------------------
+  // EFT 1.1.0.0 (Seasonal Character) quest experience rework, verified against
+  // the 2026-08-12 PvE client capture (eft/eft-1.1-pve) and the wiki.
+  //
+  // BSG consolidated quest XP rewards to a small set of standard values in
+  // patch 1.1.0.0; tarkov.dev synced most quests but still serves the old
+  // per-quest value for the tasks below - in EVERY mode (regular/pve/pvp-season
+  // all mirror the same stale number). Both the wiki (regular witness) and the
+  // in-game capture (PvE witness) agree on the new value for these ten, so the
+  // correction is shared and belongs in base. Each entry is recorded in
+  // src/divergences/tasks.json5 (status: converged) so a future flip is
+  // detected instead of silently shipping wrong data.
+  // ---------------------------------------------------------------------------
+
+  // Dandies - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '65734c186dc1e402c80dc19e': {
+    experience: 10000, // Was: 11000 (all modes, stale pre-1.1 value)
+  },
+
+  // No Swiping - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '658027799634223183395339': {
+    experience: 3000, // Was: 12000 (all modes, stale pre-1.1 value)
+  },
+
+  // Scavenger - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '5c112d7e86f7740d6f647486': {
+    experience: 28000, // Was: 10000 (all modes, stale pre-1.1 value)
+  },
+
+  // Debtor - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '639dbaf17c898a131e1cffff': {
+    experience: 10000, // Was: 13200 (all modes, stale pre-1.1 value)
+  },
+
+  // Shooter Born in Heaven - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '5c0bde0986f77479cf22c2f8': {
+    experience: 65000, // Was: 55000 (all modes, stale pre-1.1 value)
+  },
+
+  // Pyramid Scheme - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '6572e876dc0d635f633a5714': {
+    experience: 28000, // Was: 12400 (all modes, stale pre-1.1 value)
+  },
+
+  // District Patrol - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '64e7b9bffd30422ed03dad38': {
+    experience: 10000, // Was: 8300 (all modes, stale pre-1.1 value)
+  },
+
+  // Escort - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '60e71b62a0beca400d69efc4': {
+    experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
+  },
+
+  // Decontamination Service - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '5c0d1c4cd0928202a02a6f5c': {
+    experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
+  },
+
+  // Hell on Earth - Part 1 - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '666314b0acf8442f8b0531a1': {
+    experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
+  },
+
+  // ---------------------------------------------------------------------------
+  // minPlayerLevel regressions - previously parked 2026-08-03 as "BSG unified
+  // the requirement" (converged at 15/15/27), upstream has since moved away
+  // from those values in every mode. The 1.1.0.0 capture (eft/eft-1.1-pve)
+  // carries Level conditions for only 8 quests, so these three cannot be
+  // re-verified there; the current wiki still documents 15 / 27 and the
+  // 2026-06-30 capture verified pve at 15/15/27, so the recorded values are
+  // restored. Recorded in src/divergences/tasks.json5 so a flip is detected.
+  // ---------------------------------------------------------------------------
+
+  // A Fuel Matter - minimum player level (wiki: "Must be level 15")
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter
+  '608974d01a66564e74191fc0': {
+    minPlayerLevel: 15, // Was: 27 (upstream moved off the converged value)
+  },
+
+  // Inventory Check - minimum player level (2026-06-30 capture: Level 15;
+  // the wiki page carries no requirements section)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Inventory_Check
+  '608974af4b05530f55550c21': {
+    minPlayerLevel: 15, // Was: 0 (upstream moved off the converged value)
+  },
+
+  // Psycho Sniper - minimum player level (wiki: "Must be level 27")
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Psycho_Sniper
+  '5c0be13186f7746f016734aa': {
+    minPlayerLevel: 27, // Was: 40 (upstream moved off the converged value)
   },
 }

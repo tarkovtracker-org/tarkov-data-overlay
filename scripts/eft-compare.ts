@@ -28,7 +28,7 @@
  * `quest_list` filename fragment (the enriched variant is preferred).
  */
 
-import { readFileSync, readdirSync, writeFileSync } from 'fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import {
   isDirectExecution,
@@ -112,18 +112,45 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
-/** Locate the quest reference file inside the eft directory. Prefers the
- * enriched ("rollinglatest.modified") variant since it additionally carries
- * `localization.en` objective text. */
+/**
+ * Recursively collect quest-reference files (name matches `quest_list` /
+ * `quest-list`, `.json`) under `dir`, including subdirectories so versioned
+ * captures like `eft/eft-1.1-pve/` are discovered.
+ */
+function findQuestListFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...findQuestListFiles(full));
+    } else if (
+      entry.isFile() &&
+      /quest[_-]list/i.test(entry.name) &&
+      entry.name.endsWith('.json')
+    ) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+/** Locate the quest reference file under the eft directory. Prefers the most
+ * recently captured reference (mtime) so a fresh dump like `eft/eft-1.1-pve/`
+ * supersedes an older capture; the enriched ("rollinglatest.modified") variant
+ * breaks ties since it additionally carries `localization.en` objective text. */
 export function findReferenceFile(eftDir: string): string {
-  const candidates = readdirSync(eftDir).filter(
-    (f) => /quest[_-]list/i.test(f) && f.endsWith('.json')
-  );
+  const candidates = findQuestListFiles(eftDir);
   if (candidates.length === 0) {
     throw new Error(`No quest reference file found in ${eftDir}`);
   }
-  const enriched = candidates.find((f) => f.includes('rollinglatest.modified'));
-  return join(eftDir, enriched ?? candidates[0]);
+  candidates.sort((a, b) => {
+    const byTime = statSync(b).mtimeMs - statSync(a).mtimeMs;
+    if (byTime !== 0) return byTime;
+    const aEnriched = a.includes('rollinglatest.modified') ? 1 : 0;
+    const bEnriched = b.includes('rollinglatest.modified') ? 1 : 0;
+    return bEnriched - aEnriched;
+  });
+  return candidates[0];
 }
 
 /** Read the quest array out of the reference-file envelope. */

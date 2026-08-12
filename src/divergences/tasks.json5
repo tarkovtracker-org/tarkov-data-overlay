@@ -43,12 +43,12 @@
     fields: {
       experience: {
         regular: 18100,
-        pve: 9800,
+        pve: 10000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=18100: the wiki (last edited 2026-05-22) and the tarkov.dev regular-mode snapshot recorded in overlay commit adaa123 (2026-06-29). PvE=9800 verified in-game (PvE).',
+        verified: '2026-08-12',
+        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 9800 is superseded by 10000, which upstream now serves for PvE. PvP=18100 still stands per the wiki (regular witness); tarkov.dev mirrors the PvE value into regular, so the regular override remains load-bearing.',
       },
     },
   },
@@ -57,16 +57,16 @@
   '6179b5eabca27a099552e052': {
     name: 'Counteraction',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Counteraction',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 22000,
-        pve: 11000,
-        confidence: 'medium',
+        regular: 65000,
+        pve: 65000,
+        confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=22000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-03-28 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Kings of the Rooftops proves PvP XP can be rebalanced within weeks, so re-verify in-game on a PvP character.',
+        verified: '2026-08-12',
+        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 65000 for PvE and the wiki page has been updated to +65,000 EXP, so the pre-1.0 PvP figure of 22000 is obsolete. Upstream serves 65000 in both modes; the former regular override (22000) is parked.',
       },
     },
   },
@@ -79,12 +79,12 @@
     fields: {
       experience: {
         regular: 13000,
-        pve: 8500,
+        pve: 28000,
         confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=13000 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-04-14 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify in-game on a PvP character.',
+        verified: '2026-08-12',
+        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 8500 is superseded by 28000, which upstream now serves for PvE. PvP=13000 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
       },
     },
   },
@@ -97,12 +97,12 @@
     fields: {
       experience: {
         regular: 15300,
-        pve: 10300,
+        pve: 28000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=15300: the wiki (last edited 2026-04-04) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=10300 verified in-game (PvE).',
+        verified: '2026-08-12',
+        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 10300 is superseded by 28000, which upstream now serves for PvE. PvP=15300 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
       },
     },
   },
@@ -120,7 +120,7 @@
         regularSource: 'wiki',
         pveSource: 'in-game',
         verified: '2026-08-03',
-        note: 'Two post-1.0 witnesses agree on PvP=20900: the wiki (last edited 2026-02-18) and the tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29). PvE=12000 verified in-game (PvE).',
+        note: 'PvP=20900 confirmed by the wiki (still reads +20,900 EXP as of 2026-08-12). NOT present in the 1.1.0.0 capture (eft/eft-1.1-pve), so the PvE figure of 12000 could not be re-verified against the new patch; upstream still serves 12000 for PvE. Re-verify PvE in-game when a capture covering it is available.',
       },
     },
   },
@@ -133,12 +133,12 @@
     fields: {
       experience: {
         regular: 16300,
-        pve: 12100,
+        pve: 65000,
         confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Divergence confirmed. PvP=16300 is corroborated by the post-1.0 tarkov.dev regular-mode snapshot in overlay commit adaa123 (2026-06-29), but the wiki page was last edited 2025-10-12 (BEFORE the EFT 1.0 launch), so the wiki is not an independent post-1.0 witness. Re-verify in-game on a PvP character.',
+        verified: '2026-08-12',
+        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 12100 is superseded by 65000, which upstream now serves for PvE. PvP=16300 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
       },
     },
   },
@@ -147,16 +147,16 @@
   '639136f086e646067c176a8b': {
     name: 'Kings of the Rooftops',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
         regular: 10000,
-        pve: 7700,
-        confidence: 'medium',
+        pve: 10000,
+        confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'MEDIUM CONFIDENCE (volatile): PvP=10000 is confirmed by a wiki edit on 2026-08-03. Note the value CHANGED from the 14700 recorded in overlay commit adaa123 (2026-06-29), which proves BSG actively rebalances PvP XP within weeks - so any single-date snapshot can go stale. PvE remains 7700 (verified in-game), so the divergence persists after the rebalance. Re-verify in-game on a PvP character.',
+        verified: '2026-08-12',
+        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 10000 for PvE (superseding the 2026-06-30 figure of 7700), the wiki reads 10,000, and upstream serves 10000 in both modes. The former regular override (10000) is parked as redundant.',
       },
     },
   },
@@ -176,11 +176,11 @@
       minPlayerLevel: {
         regular: 15,
         pve: 15,
-        confidence: 'high',
+        confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement.',
+        verified: '2026-08-12',
+        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the current wiki still reads "Must be level 15" and the 2026-06-30 capture verified pve at 15, so the value stands. Upstream now serves 27 in every mode - base override added.',
       },
     },
   },
@@ -194,10 +194,11 @@
       minPlayerLevel: {
         regular: 15,
         pve: 15,
-        confidence: 'high',
+        confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
+        verified: '2026-08-12',
+        note: 'Previously diverged (regular 17 / PvE 15); BSG unified the requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the wiki page has no requirements section and the 2026-06-30 capture verified pve at 15. Upstream now serves 0 in every mode - base override added.',
       },
     },
   },
@@ -211,11 +212,11 @@
       minPlayerLevel: {
         regular: 27,
         pve: 27,
-        confidence: 'high',
+        confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Previously diverged (regular 35 / PvE 27); BSG lowered the regular requirement.',
+        verified: '2026-08-12',
+        note: 'Previously diverged (regular 35 / PvE 27); BSG lowered the regular requirement. The 1.1.0.0 capture carries a Level condition for only 8 quests, so this could NOT be re-verified there; the current wiki still reads "Must be level 27" and the 2026-06-30 capture verified pve at 27. Upstream now serves 40 in every mode - base override added.',
       },
     },
   },
@@ -227,13 +228,13 @@
     status: 'converged',
     fields: {
       experience: {
-        regular: 7500,
-        pve: 7500,
+        regular: 10000,
+        pve: 10000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-03',
-        note: 'Previously diverged (regular 12000 / PvE 7500); wiki now agrees on 7500 for both.',
+        verified: '2026-08-12',
+        note: 'Re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): PvE reads 10000 (superseding the 2026-06-30 figure of 7500) and upstream serves 10000 in both modes, so the pair is converged at 10000.',
       },
     },
   },
@@ -254,6 +255,456 @@
         confidence: 'high',
         pveSource: 'in-game',
         verified: '2026-08-03',
+      },
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // EFT 1.1.0.0 (Seasonal Character) quest experience rework - verified
+  // 2026-08-12 against the fresh PvE client capture (eft/eft-1.1-pve) and
+  // cross-checked against the wiki. BSG consolidated quest XP to a small set of
+  // standard values; tarkov.dev still serves the old per-quest value for these
+  // tasks in every mode. Entries whose wiki value matches the new figure are
+  // CONVERGED (base overrides); entries where the wiki still documents the old
+  // value are DIVERGENT (PvE-only overrides) pending a PvP capture.
+  // ---------------------------------------------------------------------------
+
+  // Dandies (converged, base override)
+  '65734c186dc1e402c80dc19e': {
+    name: 'Dandies',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Dandies',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 10000,
+        pve: 10000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // No Swiping (converged, base override)
+  '658027799634223183395339': {
+    name: 'No Swiping',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/No_Swiping',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 3000,
+        pve: 3000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Scavenger (converged, base override)
+  '5c112d7e86f7740d6f647486': {
+    name: 'Scavenger',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Scavenger',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 28000,
+        pve: 28000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Debtor (converged, base override)
+  '639dbaf17c898a131e1cffff': {
+    name: 'Debtor',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Debtor',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 10000,
+        pve: 10000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Shooter Born in Heaven (converged, base override)
+  '5c0bde0986f77479cf22c2f8': {
+    name: 'Shooter Born in Heaven',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 65000,
+        pve: 65000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Pyramid Scheme (converged, base override)
+  '6572e876dc0d635f633a5714': {
+    name: 'Pyramid Scheme',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 28000,
+        pve: 28000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // District Patrol (converged, base override)
+  '64e7b9bffd30422ed03dad38': {
+    name: 'District Patrol',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/District_Patrol',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 10000,
+        pve: 10000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Escort (converged, base override)
+  '60e71b62a0beca400d69efc4': {
+    name: 'Escort',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Escort',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 65000,
+        pve: 65000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Decontamination Service (converged, base override)
+  '5c0d1c4cd0928202a02a6f5c': {
+    name: 'Decontamination Service',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Decontamination_Service',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 65000,
+        pve: 65000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Hell on Earth - Part 1 (converged, base override)
+  '666314b0acf8442f8b0531a1': {
+    name: 'Hell on Earth - Part 1',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1',
+    status: 'converged',
+    fields: {
+      experience: {
+        regular: 3000,
+        pve: 3000,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+      },
+    },
+  },
+
+  // Surveillance (divergent, PvE-only override - wiki still documents the old value)
+  '639135e8c115f907b14700aa': {
+    name: 'Surveillance',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Surveillance',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 12000,
+        pve: 10000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 12000. If a PvP capture confirms regular also changed, converge at 10000 and move the override to base.',
+      },
+    },
+  },
+
+  // Private Club (divergent, PvE-only override)
+  '675c3582f6ddc329a90f9c6d': {
+    name: 'Private Club',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Private_Club',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 11000,
+        pve: 3000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=3000 from the 1.1.0.0 capture; regular per the wiki still reads 11000.',
+      },
+    },
+  },
+
+  // Properties All Around (divergent, PvE-only override)
+  '6573397ef3f8344c4575cd87': {
+    name: 'Properties All Around',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Properties_All_Around',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 6600,
+        pve: 10000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 6600.',
+      },
+    },
+  },
+
+  // Unique Experience (divergent, PvE-only override)
+  '675c1ff1a757ddd00404f0aa': {
+    name: 'Unique Experience',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Unique_Experience',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 32000,
+        pve: 65000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 32000.',
+      },
+    },
+  },
+
+  // Reconnaissance (divergent, PvE-only override)
+  '626bd75c71bd851e971b82a5': {
+    name: 'Reconnaissance',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Reconnaissance',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 7500,
+        pve: 28000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=28000 from the 1.1.0.0 capture; regular per the wiki still reads 7500.',
+      },
+    },
+  },
+
+  // Hell on Earth - Part 2 (divergent, PvE-only override)
+  '666314b2a9290f9e0806cca3': {
+    name: 'Hell on Earth - Part 2',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 16000,
+        pve: 28000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=28000 from the 1.1.0.0 capture; regular per the wiki still reads 16000.',
+      },
+    },
+  },
+
+  // A Difficult Choice (divergent, PvE-only override)
+  '5edac34d0bb72a50635c2bfa': {
+    name: 'A Difficult Choice',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/A_Difficult_Choice',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 27500,
+        pve: 65000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 27500.',
+      },
+    },
+  },
+
+  // Beneath The Streets (divergent, PvE-only override)
+  '66aba85403e0ee3101042877': {
+    name: 'Beneath The Streets',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 24000,
+        pve: 65000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 24000.',
+      },
+    },
+  },
+
+  // Crisis (divergent, PvE-only override)
+  '60e71c48c1bfa3050473b8e5': {
+    name: 'Crisis',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Crisis',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 34000,
+        pve: 65000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 34000.',
+      },
+    },
+  },
+
+  // Job for a Patriot (divergent, PvE-only override)
+  '64f5deac39e45b527a7c4232': {
+    name: 'Job for a Patriot',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot',
+    status: 'divergent',
+    fields: {
+      experience: {
+        regular: 18000,
+        pve: 10000,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 18000.',
+      },
+    },
+  },
+
+  // Collector (divergent, PvE-only minPlayerLevel - no regular witness)
+  '5c51aac186f77432ea65c552': {
+    name: 'Collector',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Collector',
+    status: 'divergent',
+    fields: {
+      minPlayerLevel: {
+        regular: 42,
+        pve: 40,
+        confidence: 'medium',
+        regularSource: 'tarkov.dev',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE Level condition = 40 in the 1.1.0.0 capture. The wiki lists no player level for Collector (only Scav karma + trader loyalties), so regular is UNVERIFIED - 42 is the upstream value recorded as a placeholder so the pair is pinned for flip detection. Re-verify regular in-game.',
+      },
+    },
+  },
+
+  // Long Road (divergent, PvE-only objective count)
+  '6193850f60b34236ee0483de': {
+    name: 'Long Road',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Long_Road',
+    status: 'divergent',
+    fields: {
+      'objective[6193dabd5f6468204470571f].count': {
+        regular: 4,
+        pve: 7,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'PvE CounterCreator value = 7 in the 1.1.0.0 capture; the wiki still documents 4 for regular.',
+      },
+    },
+  },
+
+  // Vacate the Premises (divergent objective count + description)
+  '67d03be712fb5f8fd2096332': {
+    name: 'Vacate the Premises',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Vacate_the_Premises',
+    status: 'divergent',
+    fields: {
+      'objective[67d03be712fb5f8fd2096334].count': {
+        regular: 24,
+        pve: 36,
+        confidence: 'high',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'The wiki states it outright: "Eliminate 24 PMC operatives inside The Labyrinth. Note: The objective in the PvE mode is to eliminate any 36 targets in The Labyrinth instead." PvE count 36 confirmed in the 1.1.0.0 capture.',
+      },
+    },
+  },
+
+  // Power of Persuasion (divergent objective count/maps/weapon)
+  '63a5cf262964a7488f5243ce': {
+    name: 'Power of Persuasion',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion',
+    status: 'divergent',
+    fields: {
+      'objective[63a5cf262964a7488f5243d1].count': {
+        regular: 20,
+        pve: 5,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'Wiki (edited 2026-08-09) documents 20 PMCs with an MP5SD on Streets/Ground Zero/Interchange; both game captures (PvE) read 5 PMCs with an MP5SD on Woods/Ground Zero/Interchange/Customs. tarkov.dev serves the PvE variant in both modes.',
+      },
+    },
+  },
+
+  // Easy-Breezy (divergent objective count/maps)
+  '669fa3a40c828825de06d6a1': {
+    name: 'Easy-Breezy',
+    proof: 'https://escapefromtarkov.fandom.com/wiki/Easy-Breezy',
+    status: 'divergent',
+    fields: {
+      'objective[66a0f5a7f9eae6761253114c].count': {
+        regular: 50,
+        pve: 30,
+        confidence: 'medium',
+        regularSource: 'wiki',
+        pveSource: 'in-game',
+        verified: '2026-08-12',
+        note: 'Wiki (edited 2026-08-05) documents 50 targets with an SR-2M on Factory; both game captures (PvE) read 30 targets on Reserve or Lighthouse. tarkov.dev serves the PvE variant in both modes.',
       },
     },
   },

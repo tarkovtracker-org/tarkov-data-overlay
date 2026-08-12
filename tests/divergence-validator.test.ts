@@ -259,6 +259,60 @@ describe('validateDivergences', () => {
     expect(results.every((r) => r.verdict === 'UPSTREAM_CORRECT')).toBe(true);
     expect(results.some((r) => r.mirrored)).toBe(false);
   });
+
+  it('adjudicates objective[<id>].count registry fields against objectives', () => {
+    const OBJECTIVE_ID = '6193dabd5f6468204470571f';
+    const taskWithCount = (count: number): TaskData =>
+      ({
+        id: '6193850f60b34236ee0483de',
+        name: 'Long Road',
+        minPlayerLevel: 1,
+        objectives: [{ id: OBJECTIVE_ID, count }],
+      }) as unknown as TaskData;
+
+    const registry: Record<string, TaskDivergence> = {
+      '6193850f60b34236ee0483de': {
+        name: 'Long Road',
+        proof: 'https://escapefromtarkov.fandom.com/wiki/Long_Road',
+        status: 'divergent',
+        fields: {
+          [`objective[${OBJECTIVE_ID}].count`]: {
+            regular: 4,
+            pve: 7,
+            confidence: 'medium',
+            verified: '2026-08-12',
+          },
+        },
+      },
+    };
+
+    // PvE: upstream serves the old count (4), the pve override supplies 7.
+    const pveOverride: Record<string, TaskOverride> = {
+      '6193850f60b34236ee0483de': {
+        objectives: { [OBJECTIVE_ID]: { count: 7 } },
+      },
+    };
+
+    const results = validateDivergences(
+      registry,
+      {},
+      {
+        regular: { apiTasks: [taskWithCount(4)], modeOverrides: {} },
+        pve: { apiTasks: [taskWithCount(4)], modeOverrides: pveOverride },
+      }
+    );
+
+    expect(results).toHaveLength(2);
+    const regular = results.find((r) => r.mode === 'regular');
+    const pve = results.find((r) => r.mode === 'pve');
+    // Regular: upstream serves the recorded regular value -> correct as-is.
+    expect(regular?.verdict).toBe('UPSTREAM_CORRECT');
+    // PvE: upstream wrong, override supplies the recorded value -> active.
+    expect(pve?.verdict).toBe('OVERRIDE_ACTIVE');
+    // Mirror detection: upstream serves 4 in both modes while the registry
+    // records divergent values, so the mirrored flag is raised on the pve row.
+    expect(pve?.mirrored).toBe(true);
+  });
 });
 
 describe('categorizeDivergenceResults', () => {
