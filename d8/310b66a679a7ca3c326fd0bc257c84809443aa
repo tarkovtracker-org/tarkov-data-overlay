@@ -1,0 +1,21 @@
+scripts/wiki-compare/api.ts
+  s_790e742c0b526b::t_77cc9e3898eae1 45-47,50-53,56-62,64,79-87
+tests/wiki-compare.test.ts
+  s_790e742c0b526b::t_079c2c3f795196 186-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d8310b66a679a7ca3c326fd0bc257c84809443aa",
+  "prompts": {},
+  "sessions": {
+    "s_790e742c0b526b": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fcb36-ba3b-75a6-9f48-f454fcaddf8e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
