@@ -204,8 +204,14 @@ export function extractCount(text: string, links: string[] = []): number | undef
   match = scrubbed.match(new RegExp(`\\bx\\s*(${numberPattern})\\b`, 'i'));
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 
+  // Last-resort verb fallback: "reach 10", "visit 3", ... A number that is
+  // part of a distance/time qualifier ("over 40 meters away", "for 5 minutes")
+  // is not an objective count, so exclude it with a negative lookahead.
   match = scrubbed.match(
-    new RegExp(`\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b`, 'i')
+    new RegExp(
+      `\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b(?!\\s*(?:meters?|metres?|minutes?|seconds?|hours?|km)\\b)`,
+      'i'
+    )
   );
   if (match?.[1]) return Number(match[1].replace(/,/g, ''));
 

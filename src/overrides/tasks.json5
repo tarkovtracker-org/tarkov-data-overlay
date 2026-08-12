@@ -2318,10 +2318,11 @@
   // 2026-08-10: renamed in S1 (Interchange fuel tank objectives match)
   // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
   // Truck #2 location change; truck #4 objective missing zone data.
-  // tarkov.dev now ships the fourth-tank objective (6926fcc872a6499d1fa29327) as a required
-  // objective, so the former overlay-added optional objective was removed (issue #246);
-  // its zone data is patched onto the real objective below, which upstream ships with empty zones.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+  // The second fuel tank objective ships with empty zones upstream; the zone is
+  // patched in (in-game verified, issue #246). The former fourth-tank zone patch
+  // (6926fcc872a6499d1fa29327) was REMOVED 2026-08-12: tarkov.dev dropped the
+  // third/fourth tank objectives entirely (matching the 1.1.0.0 capture).
+  // See commit 6c3700f.
   '5ae448f286f77448d73c0131': {
     name: 'Fuel Crisis', // Was: The Blood of War - Part 1
     traderRequirements: [

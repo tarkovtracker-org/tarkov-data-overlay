@@ -244,12 +244,17 @@ export async function runSingleTask(
   } else {
     printProgress(`Fetching wiki wikitext for "${wikiTitle}"...`);
     wikiResponse = await fetchWikiWikitext(wikiTitle);
-    saveWikiCache(
-      task.id,
-      wikiResponse.title,
-      wikiResponse.wikitext,
-      wikiResponse.lastRevision
-    );
+    // An explicit --wiki override resolves to a different article than the
+    // task's regular wiki page; caching it under the task id would poison the
+    // cache for later plain runs (they would compare against the wrong page).
+    if (!options.wiki) {
+      saveWikiCache(
+        task.id,
+        wikiResponse.title,
+        wikiResponse.wikitext,
+        wikiResponse.lastRevision
+      );
+    }
     printSuccess(`Fetched wiki page "${wikiResponse.title}"`);
   }
 

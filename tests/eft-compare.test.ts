@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { parseEftTasks, compare, crossCheckOverrides } from '../scripts/eft-compare.js';
+import { mkdtempSync, writeFileSync, utimesSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import {
+  parseEftTasks,
+  compare,
+  crossCheckOverrides,
+  findReferenceFile,
+  requireMatchingReferenceMode,
+} from '../scripts/eft-compare.js';
 import type { TaskData } from '../src/lib/index.js';
 
 describe('eft-compare', () => {
@@ -136,5 +145,56 @@ describe('crossCheckOverrides', () => {
     const entries = crossCheckOverrides(overrides, eft);
     expect(entries).toHaveLength(1);
     expect(entries[0].verdict).toBe('NO_REFERENCE_DATA');
+  });
+});
+
+describe('reference file selection', () => {
+  function makeRefDir(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    const base = {
+      request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list' },
+      response: { decoded_response: { data: [] } },
+    };
+    // Newest capture = pve; older capture = regular (pvp gateway).
+    writeFileSync(join(dir, 'quest_list.pve.json'), JSON.stringify(base));
+    const regular = {
+      ...base,
+      request: { method: 'POST', url: 'https://gw-pvp.escapefromtarkov.com/client/quest/list' },
+    };
+    writeFileSync(join(dir, 'quest_list.regular.json'), JSON.stringify(regular));
+    const now = Date.now() / 1000;
+    utimesSync(join(dir, 'quest_list.pve.json'), now, now);
+    utimesSync(join(dir, 'quest_list.regular.json'), now - 3600, now - 3600);
+    return dir;
+  }
+
+  it('prefers the newest capture overall when no mode is requested', () => {
+    const dir = makeRefDir();
+    try {
+      expect(findReferenceFile(dir)).toMatch(/quest_list\.pve\.json$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // Regression: a mixed-mode directory used to reject the requested mode even
+  // when a matching capture existed, because only the newest file was checked.
+  it('prefers a capture matching the requested mode over the newest capture', () => {
+    const dir = makeRefDir();
+    try {
+      expect(findReferenceFile(dir, 'regular')).toMatch(/quest_list\.regular\.json$/);
+      expect(requireMatchingReferenceMode(dir, 'regular')).toBe('pve');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a mode with no capture in the directory', () => {
+    const dir = makeRefDir();
+    try {
+      expect(() => requireMatchingReferenceMode(dir, 'pvp-season')).toThrow(/pvp-season/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -19,6 +19,21 @@
   // only: tarkov.dev's locale system is the source of truth for every other
   // language, and these resolve normally there once upstream ingests them.
   //
+  // Proof (independently verifiable, per item):
+  //   - Decrypted flash drive           https://escapefromtarkov.fandom.com/wiki/Decrypted_flash_drive
+  //   - Folder with TerraGroup evidence (Finances/Staff) and TerraGroup Labs
+  //     evidence (Developments/Reports) https://escapefromtarkov.fandom.com/wiki/Folder_with_TerraGroup_evidence_(Finances)
+  //   - SSD with TerraGroup evidence    https://escapefromtarkov.fandom.com/wiki/SSD_with_TerraGroup_evidence
+  //   - Topographic intel maps (Factory/City/Customs/Nature reserve/Lighthouse)
+  //                                     https://escapefromtarkov.fandom.com/wiki/Factory_plant_topographic_intel_maps
+  //   - Military flash drive with topographic intel
+  //                                     https://escapefromtarkov.fandom.com/wiki/Military_flash_drive_with_topographic_intel
+  //   - Dogtag USEC                      https://escapefromtarkov.fandom.com/wiki/Dogtag
+  //   - Moreman's audio tapes #1/#2      (no dedicated page; part of the Moreman's
+  //                                     phone quest chain) https://escapefromtarkov.fandom.com/wiki/Moreman%27s_phone
+  //   - Data from Black Division laptop  (no wiki page yet; verified in the in-game
+  //                                     1.1.0.0 capture only - re-link once the wiki covers it)
+  //
   // Lifecycle: merge-by-id, same as craftsAdd - each entry becomes redundant the
   // moment tarkov.dev serves the item, and should then be deleted. Verify with
   // `npm run check-overrides` (reports itemsAdd entries that upstream now covers).

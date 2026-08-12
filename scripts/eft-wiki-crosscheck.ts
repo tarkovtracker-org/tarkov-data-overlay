@@ -216,7 +216,7 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir);
+    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
     if (!eftTasks) throw new Error(`No quest reference file found in ${opts.eftDir}`);
 
     // The reference file is mode-specific; refuse a mismatch so wiki rows

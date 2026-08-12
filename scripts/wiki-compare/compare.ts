@@ -265,8 +265,16 @@ export function compareTasks(
     }
   }
 
+  // Match "found in raid" but not the negated "not found in raid" exception,
+  // mirroring the objective-level check above: a non-FiR handover objective
+  // must not contribute its items to the redundant-find filter.
   const apiFoundInRaidItemSets = (apiTask.objectives ?? [])
-    .filter((obj) => obj.foundInRaid === true || /found in raid/i.test(obj.description ?? ''))
+    .filter(
+      (obj) =>
+        obj.foundInRaid === true ||
+        (/found in raid/i.test(obj.description ?? '') &&
+          !/not\s+found in raid/i.test(obj.description ?? ''))
+    )
     .map((obj) => buildAliasSet(collectObjectiveItems(obj)));
 
   const unmatchedWiki: WikiObjective[] = [];

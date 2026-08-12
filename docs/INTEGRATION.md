@@ -397,7 +397,14 @@ interface ItemAddition {
 Resolve item ids upstream first, then fall back to `itemsAdd`:
 
 ```typescript
-function resolveItem(id: string, apiItemsById: Map<string, Item>, overlay: Overlay) {
+// The guide does not define an upstream `Item` type, so the map value uses an
+// inline structural shape: at minimum an id + display name, plus whatever other
+// fields tarkov.dev serves.
+function resolveItem(
+  id: string,
+  apiItemsById: Map<string, { id: string; name: string; [key: string]: unknown }>,
+  overlay: Overlay
+) {
   return apiItemsById.get(id) ?? overlay.itemsAdd?.[id];
 }
 ```

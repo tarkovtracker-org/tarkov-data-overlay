@@ -240,7 +240,7 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Loading quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir);
+    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
     if (!eftTasks) {
       printError(
         `No quest reference file found in ${opts.eftDir}`,
