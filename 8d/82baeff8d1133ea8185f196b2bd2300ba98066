@@ -1,0 +1,51 @@
+scripts/eft-wiki-crosscheck.ts
+  s_19214bc1150cb8::t_7c0786d6fe81c0 219
+scripts/wiki-compare/wiki.ts
+  s_19214bc1150cb8::t_52f15d9054dbdd 207-209,211,213-214
+  s_19214bc1150cb8::t_0765abc74fcfaf 212
+tests/seasonal-perks.test.ts
+  s_19214bc1150cb8::t_0c5583f27e4d21 1-51
+docs/INTEGRATION.md
+  s_19214bc1150cb8::t_396e451bb8a04e 400-407
+tests/eft-compare.test.ts
+  s_19214bc1150cb8::t_bc55fbc69aa9fb 150-200
+  s_19214bc1150cb8::t_e4ad87b7102d13 2-11
+src/additions/itemsAdd.json5
+  s_19214bc1150cb8::t_42575959c7cd74 22-36
+src/overrides/tasks.json5
+  s_19214bc1150cb8::t_d28e0cfcbe2ba7 2321-2325
+scripts/wiki-compare/cli.ts
+  s_19214bc1150cb8::t_36410502c9f1f6 247-257
+tests/wiki-compare.test.ts
+  s_19214bc1150cb8::t_4e7f2da112daab 181-182
+  s_19214bc1150cb8::t_e09e327eb420bf 252-271
+  s_19214bc1150cb8::t_6358b3c47275c7 174-176
+  s_19214bc1150cb8::t_923b8347bb4da1 17,158-173,177-180,183-191
+scripts/eft-audit.ts
+  s_19214bc1150cb8::t_5070a51aeb9eab 243
+dist/overlay.json
+  s_19214bc1150cb8::t_71d5cc9624ab61 9513-9515
+scripts/wiki-compare/compare.ts
+  s_19214bc1150cb8::t_7c9d6941d250b0 268-270,272-277
+scripts/eft-compare.ts
+  s_19214bc1150cb8::t_393482cdc5e5a3 173
+  s_19214bc1150cb8::t_f0e7dfc97607a8 493-503,595,598
+  s_19214bc1150cb8::t_2fd951def45e3a 557,638
+  s_19214bc1150cb8::t_bfba3fafad8b5b 140-146,158-165,169-172,174-178
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8d82baeff8d1133ea8185f196b2bd2300ba98066",
+  "prompts": {},
+  "sessions": {
+    "s_19214bc1150cb8": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ff5ec-14ac-780f-8ec2-28a34e50167c",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
