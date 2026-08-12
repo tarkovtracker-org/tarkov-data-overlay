@@ -197,4 +197,35 @@ describe('reference file selection', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  // Regression: filesystem mtime reflects copy/edit time, not capture time, so
+  // ranking must use the envelope's request.timestamp when present.
+  it('ranks by the capture timestamp in the envelope, not by file mtime', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    try {
+      const base = { response: { decoded_response: { data: [] } } };
+      // Newer mtime, older capture timestamp (e.g. a copied/edited older dump).
+      writeFileSync(
+        join(dir, 'quest_list.copied.json'),
+        JSON.stringify({
+          ...base,
+          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-06-30T10:00:00.000Z' },
+        })
+      );
+      // Older mtime, newer capture timestamp.
+      writeFileSync(
+        join(dir, 'quest_list.fresh.json'),
+        JSON.stringify({
+          ...base,
+          request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list', timestamp: '2026-08-11T07:37:37.290Z' },
+        })
+      );
+      const now = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.copied.json'), now, now);
+      utimesSync(join(dir, 'quest_list.fresh.json'), now - 7200, now - 7200);
+      expect(findReferenceFile(dir)).toMatch(/quest_list\.fresh\.json$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

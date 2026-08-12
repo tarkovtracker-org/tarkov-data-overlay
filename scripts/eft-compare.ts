@@ -135,9 +135,12 @@ function findQuestListFiles(dir: string): string[] {
 }
 
 /** Locate the quest reference file under the eft directory. Prefers the most
- * recently captured reference (mtime) so a fresh dump like `eft/eft-1.1-pve/`
- * supersedes an older capture; the enriched ("rollinglatest.modified") variant
- * breaks ties since it additionally carries `localization.en` objective text.
+ * recently captured reference: the capture timestamp in each file's envelope
+ * (`request.timestamp`) is authoritative, with the filesystem mtime as a
+ * deterministic fallback for files that lack one (e.g. after copying/editing,
+ * where mtime reflects the copy time rather than the capture). The enriched
+ * ("rollinglatest.modified") variant breaks ties since it additionally carries
+ * `localization.en` objective text.
  * When `mode` is given, candidates whose capture URL identifies that mode are
  * preferred (still newest-first), so a directory holding captures for several
  * modes (e.g. `eft/eft-1.1-{regular,pve}/`) selects the capture matching the
@@ -149,8 +152,9 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
     throw new Error(`No quest reference file found in ${eftDir}`);
   }
   candidates.sort((a, b) => {
-    const byTime = statSync(b).mtimeMs - statSync(a).mtimeMs;
-    if (byTime !== 0) return byTime;
+    const rank = (f: string): number => captureTimestamp(f) ?? statSync(f).mtimeMs;
+    const byCapture = rank(b) - rank(a);
+    if (byCapture !== 0) return byCapture;
     const aEnriched = a.includes('rollinglatest.modified') ? 1 : 0;
     const bEnriched = b.includes('rollinglatest.modified') ? 1 : 0;
     return bEnriched - aEnriched;
@@ -173,6 +177,23 @@ function modeFromReferenceFile(file: string): GameMode | null {
       request?: { url?: string };
     };
     return modeFromRequestUrl(raw?.request?.url);
+  } catch {
+    return null;
+  }
+}
+
+/** The capture time from the reference envelope, or null when absent/parsing fails. */
+function captureTimestamp(file: string): number | null {
+  try {
+    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
+      request?: { timestamp?: string };
+    };
+    const ts = raw?.request?.timestamp;
+    if (typeof ts === 'string') {
+      const ms = Date.parse(ts);
+      if (!Number.isNaN(ms)) return ms;
+    }
+    return null;
   } catch {
     return null;
   }
