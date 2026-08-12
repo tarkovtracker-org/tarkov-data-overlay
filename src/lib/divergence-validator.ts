@@ -82,9 +82,7 @@ function overrideFieldValue(entry: TaskOverride | undefined, field: string): unk
   if (!entry) return undefined;
   const objectiveId = objectiveFieldId(field);
   if (objectiveId) {
-    const objectives = (entry as unknown as Record<string, unknown>).objectives as
-      Record<string, { count?: unknown }> | undefined;
-    return objectives?.[objectiveId]?.count;
+    return entry.objectives?.[objectiveId]?.count;
   }
   return (entry as unknown as Record<string, unknown>)[field];
 }

@@ -229,7 +229,8 @@ export async function runSingleTask(
   }
 
   const wikiTitle = resolveWikiTitle(task, options.wiki);
-  const wikiCache = options.useCache && !options.refresh ? loadWikiCache(task.id) : null;
+  const wikiCache =
+    !options.wiki && options.useCache && !options.refresh ? loadWikiCache(task.id) : null;
   let wikiResponse: WikiFetchResult;
 
   if (wikiCache) {
