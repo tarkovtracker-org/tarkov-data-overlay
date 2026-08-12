@@ -151,23 +151,26 @@ export function findReferenceFile(eftDir: string, mode?: GameMode): string {
   if (candidates.length === 0) {
     throw new Error(`No quest reference file found in ${eftDir}`);
   }
-  candidates.sort((a, b) => {
-    const rank = (f: string): number => captureTimestamp(f) ?? statSync(f).mtimeMs;
-    const byCapture = rank(b) - rank(a);
-    if (byCapture !== 0) return byCapture;
-    const aEnriched = a.includes('rollinglatest.modified') ? 1 : 0;
-    const bEnriched = b.includes('rollinglatest.modified') ? 1 : 0;
-    return bEnriched - aEnriched;
-  });
+  // Precompute the capture rank (envelope timestamp, else mtime) and the
+  // enriched tie-break once: reading+parsing each multi-MB dump inside the
+  // comparator would redo the work O(n log n) times.
+  const ranked = candidates
+    .map((file) => ({
+      file,
+      ts: captureTimestamp(file) ?? statSync(file).mtimeMs,
+      enriched: file.includes('rollinglatest.modified') ? 1 : 0,
+    }))
+    .sort((a, b) => b.ts - a.ts || b.enriched - a.enriched)
+    .map((entry) => entry.file);
   if (mode) {
-    for (const candidate of candidates) {
+    for (const candidate of ranked) {
       const candidateMode = modeFromReferenceFile(candidate);
       if (candidateMode === null || candidateMode === mode) {
         return candidate;
       }
     }
   }
-  return candidates[0];
+  return ranked[0];
 }
 
 /** Infer the game mode from a reference file's captured request URL metadata. */
