@@ -183,6 +183,11 @@ describe('normalizeTaskName', () => {
     expect(normalizeTaskName('Task   Multiple   Spaces')).toBe('task multiple spaces');
   });
 
+  it('strips stacked suffixes', () => {
+    expect(normalizeTaskName('Task [PVP ZONE] (quest)')).toBe('task');
+    expect(normalizeTaskName('Task (quest) [PVP ZONE]')).toBe('task');
+  });
+
   it('combines every normalization', () => {
     expect(normalizeTaskName('Complex-Name  (quest)')).toBe('complex name');
   });
