@@ -7,7 +7,7 @@
   // - value: Numeric ID used by TarkovTracker (1-6)
   // - title: Display name
   // - defaultStashLevel: Starting stash level (1-5)
-  // - defaultCultistCircleLevel: Starting cultist circle level (0 or 3)
+  // - defaultCultistCircleLevel: Starting cultist circle level (0 or 1)
   // - traderRepBonus: Starting reputation bonus per trader (0.0 or 0.2)
   // - exclusiveTaskIds: Task IDs only available to this edition (tarkov.dev IDs)
   // - excludedTaskIds: Task IDs not available to this edition (edition already grants the perk)
@@ -111,7 +111,7 @@
     value: 5,
     title: 'The Unheard',
     defaultStashLevel: 5,
-    defaultCultistCircleLevel: 3,
+    defaultCultistCircleLevel: 1,
     traderRepBonus: {
       prapor: 0.2,
       therapist: 0.2,
@@ -135,7 +135,7 @@
     value: 6,
     title: 'Edge of Darkness + Unheard',
     defaultStashLevel: 5,
-    defaultCultistCircleLevel: 3,
+    defaultCultistCircleLevel: 1,
     traderRepBonus: {
       prapor: 0.2,
       therapist: 0.2,
