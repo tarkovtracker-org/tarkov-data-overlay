@@ -1132,34 +1132,70 @@
           ],
           [
             { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
             { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
             { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
             { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
         ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
@@ -2288,7 +2324,7 @@
     name: 'Gunsmith Master - Part 13', // Was: Gunsmith - Part 25
   },
 
-// Ragman Loyalty Level 1
+  // Ragman Loyalty Level 1
   // ---------------------------------------------------------------------------
 
   // Long Line - Change requirements
@@ -3149,7 +3185,7 @@
   // Pets Won't Need It (old: Pets Won't Need It - Part 1) - Renamed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pets_Won%27t_Need_It
   '64f731ab83cfca080a361e42': {
-    name: 'Pets Won\'t Need It', // Was: Pets Won't Need It - Part 1
+    name: "Pets Won't Need It", // Was: Pets Won't Need It - Part 1
   },
 
   // Gunsmith Master - Part 12 (old: Gunsmith - Old Friend's Request) - Renamed
@@ -3193,7 +3229,10 @@
         { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, standing: 0.25 }, // Was: 0.01
       ],
       items: [
-        { count: 165000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 100000 + 2 Grizzly + 2 Surv12
+        {
+          count: 165000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 100000 + 2 Grizzly + 2 Surv12
       ],
     },
   },
@@ -3211,7 +3250,10 @@
       ],
       items: [
         { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 980 + RB-AO key
-        { count: 3, item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' } },
+        {
+          count: 3,
+          item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' },
+        },
       ],
     },
   },
@@ -3228,7 +3270,10 @@
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
       ],
       items: [
-        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
+        {
+          count: 1171,
+          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
+        }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
       ],
     },
     objectives: {
@@ -3236,7 +3281,13 @@
         count: 15, // Was: 7
         description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate Scavs with headshots while using a 12ga shotgun on Shoreline
         maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: Shoreline
-        usingWeapon: [{ id: '62e7c4fba689e8c9c50dfc38', name: 'Steyr AUG A1 5.56x45 assault rifle', shortName: 'AUG A1' }],
+        usingWeapon: [
+          {
+            id: '62e7c4fba689e8c9c50dfc38',
+            name: 'Steyr AUG A1 5.56x45 assault rifle',
+            shortName: 'AUG A1',
+          },
+        ],
       },
     },
   },
@@ -3272,8 +3323,14 @@
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
       ],
       items: [
-        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 1100 + Car battery
-        { count: 2, item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' } },
+        {
+          count: 1171,
+          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
+        }, // Was: 1100 + Car battery
+        {
+          count: 2,
+          item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' },
+        },
       ],
     },
   },
@@ -3308,9 +3365,26 @@
         { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0
       ],
       items: [
-        { count: 400000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } },
-        { count: 1, item: { id: '68ec0c1e4a10ddacb2069398', name: 'TKPD 9.3x64 carbine Assault', shortName: 'TKPD Assault' } }, // Was: TKPD XPS3-2
-        { count: 2, item: { id: '68ee0114024fb2df16004f1c', name: '9.3x64mm FMJ ammo pack (20 pcs)', shortName: 'FMJ' } }, // Was: 1x 7N33 pack
+        {
+          count: 400000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        },
+        {
+          count: 1,
+          item: {
+            id: '68ec0c1e4a10ddacb2069398',
+            name: 'TKPD 9.3x64 carbine Assault',
+            shortName: 'TKPD Assault',
+          },
+        }, // Was: TKPD XPS3-2
+        {
+          count: 2,
+          item: {
+            id: '68ee0114024fb2df16004f1c',
+            name: '9.3x64mm FMJ ammo pack (20 pcs)',
+            shortName: 'FMJ',
+          },
+        }, // Was: 1x 7N33 pack
       ],
     },
     objectives: {
@@ -3333,7 +3407,10 @@
         { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.1 }, // Was: 0.02
       ],
       items: [
-        { count: 80000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 35000 + 3 Grizzly + 3 Golden Star
+        {
+          count: 80000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 35000 + 3 Grizzly + 3 Golden Star
       ],
     },
   },
@@ -3543,5 +3620,4 @@
   '666314b0acf8442f8b0531a1': {
     experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
   },
-
 }

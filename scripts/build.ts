@@ -101,7 +101,8 @@ function getLatestTagVersion(): string | undefined {
 function build(): void {
   console.log('Building overlay...\n');
 
-  const version = process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
+  const version =
+    process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
 
   // Load all source files
   const data = loadSourceFiles();
