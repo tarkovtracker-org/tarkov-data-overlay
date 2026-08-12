@@ -1,0 +1,50 @@
+src/divergences/tasks.json5
+  s_e8b11f93ba06c4::t_76637988cce1cf 629,632,635
+  s_e8b11f93ba06c4::t_ce61c88c5e9704 46,50-51,60,63-65,68-69,82,86-87,100,104-105,123,136,140-141,150,154-155,158-159,231-232,236-237
+  s_e8b11f93ba06c4::t_637c8d521c9cd0 657-710
+  s_e8b11f93ba06c4::t_3f0d328eeab51e 261-628,630-631,633-634,636-656
+  s_e8b11f93ba06c4::t_9f23b002b29cc9 179,182-183,197,200-201,215,218-219
+AGENTS.md
+  s_e8b11f93ba06c4::t_ee277ef8ee2be7 73-76
+src/overrides/modes/regular/tasks.json5
+  s_e8b11f93ba06c4::t_155fe623a4a466 103-111,150-157
+  s_e8b11f93ba06c4::t_4db41001e5e937 33-77
+tests/divergence-validator.test.ts
+  s_e8b11f93ba06c4::t_9fb37eb17424a7 296-303
+  s_e8b11f93ba06c4::t_56cdc8899da22e 262-295,304-315
+src/overrides/tasks.json5
+  s_e8b11f93ba06c4::t_288b046e6e7def 333-361
+  s_e8b11f93ba06c4::t_ef1cc50256f59a 2-11,30-40,56-64,66,68-71
+  s_e8b11f93ba06c4::t_b108e6436d3ebf 111-117
+  s_e8b11f93ba06c4::t_a9851ab1169eed 213-218
+  s_e8b11f93ba06c4::t_ecbbc2f8c75fdd 83-98
+  s_e8b11f93ba06c4::t_0e72e7ea2dd124 249-332
+src/lib/divergence-validator.ts
+  s_e8b11f93ba06c4::t_62e1931710a21b 65-80,82-84,87-91,105-106,108,124-127
+  s_e8b11f93ba06c4::t_9fb37eb17424a7 81,85-86
+src/overrides/modes/pve/tasks.json5
+  s_e8b11f93ba06c4::t_fb3df3bb6d49ad 38-45,85-91,99-197
+scripts/eft-compare.ts
+  s_e8b11f93ba06c4::t_8b90a0c013c766 31
+  s_e8b11f93ba06c4::t_9fb37eb17424a7 126-130
+  s_e8b11f93ba06c4::t_a448728ab98670 115-125,131-140,142,146-153
+dist/overlay.json
+  s_e8b11f93ba06c4::t_c7e397e53f0bba 236-274,5820-5859
+  s_e8b11f93ba06c4::t_efaad143cda1ba 129,132,5725-5764,5888-5889
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6c3700f657640e6ac6c507514f2924b8a155e370",
+  "prompts": {},
+  "sessions": {
+    "s_e8b11f93ba06c4": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ff580-60f7-7601-a4f0-da9614dec49c",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
