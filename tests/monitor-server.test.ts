@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createRequire } from 'module';
+import path from 'node:path';
 
 // NODE_ENV must be "test" *before* require() so the module:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
@@ -16,6 +17,7 @@ process.env.NODE_ENV = 'test';
 
 const require = createRequire(import.meta.url);
 const mod = require('../monitor/server.js');
+const { readPositiveInteger } = require('../monitor/lib/config.js');
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -81,6 +83,8 @@ const {
   normalizeMode,
   getLatestTagVersion,
   isVersionStale,
+  isRebuildEnabled,
+  safeJoin,
   createSection,
   pushRow,
   overlayState,
@@ -562,6 +566,42 @@ describe('createSection / pushRow', () => {
   });
 });
 
+describe('monitor hardening', () => {
+  it('rejects unsafe numeric environment values', () => {
+    expect(readPositiveInteger('25', 10)).toBe(25);
+    expect(readPositiveInteger('0', 10)).toBe(10);
+    expect(readPositiveInteger('-1', 10)).toBe(10);
+    expect(readPositiveInteger('Infinity', 10)).toBe(10);
+    expect(readPositiveInteger('1.5', 10)).toBe(10);
+  });
+
+  it('keeps static paths inside the configured public directory', () => {
+    const publicDir = path.resolve('monitor/public');
+    expect(safeJoin(publicDir, '/app.js')).toBe(path.join(publicDir, 'app.js'));
+    expect(safeJoin(publicDir, '../publicity/secret.txt')).toBeNull();
+    expect(safeJoin(publicDir, 'nested/../../server.js')).toBeNull();
+  });
+
+  it('requires explicit opt-in before enabling rebuilds', () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousAllowRebuild = process.env.ALLOW_REBUILD;
+    try {
+      process.env.NODE_ENV = 'development';
+      delete process.env.ALLOW_REBUILD;
+      expect(isRebuildEnabled()).toBe(false);
+      process.env.ALLOW_REBUILD = 'true';
+      expect(isRebuildEnabled()).toBe(true);
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+      if (previousAllowRebuild === undefined) {
+        delete process.env.ALLOW_REBUILD;
+      } else {
+        process.env.ALLOW_REBUILD = previousAllowRebuild;
+      }
+    }
+  });
+});
+
 // ---------------------------------------------------------------------------
 // HTTP integration — starts the REAL server from monitor/server.js
 // ---------------------------------------------------------------------------
@@ -641,6 +681,8 @@ describe('HTTP — real monitor/server.js handlers', () => {
     const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('application/json');
+    expect(res.headers.get('content-security-policy')).toContain("default-src 'self'");
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
   });
 
   it('GET /latest — response shape includes overlay, api, sections', async () => {

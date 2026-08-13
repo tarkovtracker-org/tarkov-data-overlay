@@ -27,6 +27,19 @@ Browse the hosted monitor at [monitor.nivmizz7.fr](https://monitor.nivmizz7.fr),
 npm run monitor
 ```
 
+The monitor is read-only by default. To enable its local “Update overlay” action,
+explicitly opt in when starting it:
+
+```bash
+ALLOW_REBUILD=true npm run monitor
+```
+
+Set `REBUILD_TOKEN` as well when exposing the rebuild API to another trusted
+service. Authenticated callers can pass it as a bearer token (preferred) or as
+the `?token=` query parameter. `TARGET_OVERLAY` can point the monitor at a local
+overlay file or an HTTP(S) URL; rebuilds remain disabled for remote overlay
+targets.
+
 ## Maintenance
 
 The overlay is regularly validated against the tarkov.dev API to ensure corrections are still needed:
@@ -36,9 +49,10 @@ npm run check-overrides
 ```
 
 This command compares all overrides against current API data and reports:
+
 - ✅ Overrides that are still needed
 - 🔄 Corrections that have been fixed upstream (can be removed)
-- 🗑️  Tasks that have been removed from the API (can be deleted)
+- 🗑️ Tasks that have been removed from the API (can be deleted)
 
 Run this periodically to keep the overlay lean and accurate.
 

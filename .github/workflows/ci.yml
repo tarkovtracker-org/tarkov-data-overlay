@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies
+        run: npm run audit:dependencies
+
       - name: Compute next tag
         id: version
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -46,6 +49,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Check monitor JavaScript
+        run: npm run check:monitor
 
       - name: Run tests
         run: npm test
@@ -86,7 +92,7 @@ jobs:
         id: notes
         run: |
           latest_tag="${{ steps.version.outputs.latest_tag }}"
-          
+
           if [[ -z "$latest_tag" ]]; then
             echo "Initial release" > /tmp/release-notes.txt
           else
@@ -97,12 +103,12 @@ jobs:
           const path = require('path');
           const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
           const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
-          
+
           delete current.$meta;
           delete previous.$meta;
-          
+
           const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
-          
+
           const getFiles = (dir) => {
             const files = [];
             const walk = (p) => {
@@ -116,7 +122,7 @@ jobs:
             walk(dir);
             return files.sort();
           };
-          
+
           // Map source files to their keys in the built overlay
           // Note: itemsAdd and tasksAdd are stored under their own keys in overlay.json
           const map = {
@@ -126,10 +132,10 @@ jobs:
             'editions': 'editions', 'storyChapters': 'storyChapters',
             'prestige': 'prestige'
           };
-          
+
           const lines = [];
           let hasChanges = false;
-          
+
           getFiles('src').forEach(f => {
             const rel = f.replace(/^src\//, '');
             const name = path.basename(f, path.extname(f));
@@ -168,11 +174,11 @@ jobs:
               lines.push('');
             }
           });
-          
+
           if (!hasChanges) {
             lines.push('No changes in source files');
           }
-          
+
           fs.writeFileSync('/tmp/release-notes.txt', lines.join('\n'));
           EOF
             node /tmp/gen-notes.js
