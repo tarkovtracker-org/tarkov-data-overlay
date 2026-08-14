@@ -1,0 +1,27 @@
+monitor/server.js
+  s_81f9edad14b561::t_3f5b48659e2b44 457-459,461-465,1172-1181,1221
+  s_81f9edad14b561::t_e971d05e56f4c7 1222-1229,1232-1259,1261-1266
+  s_81f9edad14b561::t_08e5100ac82d6d 57,230-232,454,527,530,532-544,546,549
+  s_81f9edad14b561::t_001424a099e8c5 1340-1341
+tests/monitor-server.test.ts
+  s_81f9edad14b561::t_359e0ff329e109 512
+  s_81f9edad14b561::t_57cb7bdd601f0c 60-61,103-104,507-511,513-522,762-784
+monitor/public/app.js
+  s_81f9edad14b561::t_fa6e4f3f317ad7 27-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e1ae3aa98e9f8682975086e29874a6f817653e51",
+  "prompts": {},
+  "sessions": {
+    "s_81f9edad14b561": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00083-90ef-7834-acf4-a73c9d6a0f15",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
