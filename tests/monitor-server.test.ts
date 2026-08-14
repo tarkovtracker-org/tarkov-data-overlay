@@ -7,28 +7,32 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createRequire } from 'module';
 import path from 'node:path';
 
-// NODE_ENV must be "test" *before* require() so the module:
+// NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
 //   2. populates module.exports
 process.env.NODE_ENV = 'test';
 
-const require = createRequire(import.meta.url);
+let mod: any;
+let configModule: any;
 const previousTargetOverlay = process.env.TARGET_OVERLAY;
-process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
-const mod = require('../monitor/server.js');
-if (previousTargetOverlay === undefined) {
-  delete process.env.TARGET_OVERLAY;
-} else {
-  process.env.TARGET_OVERLAY = previousTargetOverlay;
+try {
+  process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
+  // These CommonJS monitor modules intentionally have no declaration files.
+  // @ts-expect-error Dynamic import of the JavaScript CommonJS server module.
+  mod = (await import('../monitor/server.js')).default;
+  // @ts-expect-error Dynamic import of the JavaScript CommonJS config module.
+  configModule = (await import('../monitor/lib/config.js')).default;
+} finally {
+  if (previousTargetOverlay === undefined) {
+    delete process.env.TARGET_OVERLAY;
+  } else {
+    process.env.TARGET_OVERLAY = previousTargetOverlay;
+  }
 }
-const {
-  readPositiveInteger,
-  readPort,
-  readTimerMilliseconds,
-} = require('../monitor/lib/config.js');
+
+const { readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
