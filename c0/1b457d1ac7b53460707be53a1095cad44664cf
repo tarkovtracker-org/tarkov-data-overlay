@@ -1,0 +1,23 @@
+scripts/check-overrides.ts
+  s_a2b95317a2f376::t_7c2e19b5f716f0 863-868,873-874
+src/lib/terminal.ts
+  s_a2b95317a2f376::t_4da3c65b4e0219 109-112,118-119,121-122
+tests/terminal.test.ts
+  s_a2b95317a2f376::t_b4e14bee0cc838 5-14,93-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "c01b457d1ac7b53460707be53a1095cad44664cf",
+  "prompts": {},
+  "sessions": {
+    "s_a2b95317a2f376": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ffffd-9cdf-7ea0-942b-fa9e1346ed32",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
