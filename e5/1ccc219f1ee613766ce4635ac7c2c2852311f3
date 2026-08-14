@@ -1,0 +1,46 @@
+monitor/server.js
+  s_81f9edad14b561::t_370905b7bb416e 25-30,636,664,735,777-782
+src/lib/tarkov-api-shared.d.cts
+  s_81f9edad14b561::t_263b260e1e9696 27-31
+  s_81f9edad14b561::t_0da3ddc854f80f 33,39
+  s_81f9edad14b561::t_e98feb3315d564 16,18,22-23
+  s_81f9edad14b561::t_c4b76a960162be 1-15,17,19-21,24-26,32,34-38,40-45
+scripts/lib/sequence-matcher.ts
+  s_81f9edad14b561::t_b6c2aa17f75099 84-103,105-108
+src/lib/tarkov-api.ts
+  s_81f9edad14b561::t_049f40c7f2c3c1 33-38,160,214,299-304,351-355
+  s_81f9edad14b561::t_c0ea7b58cfaf16 350
+src/lib/tarkov-api-shared.cjs
+  s_81f9edad14b561::t_51aaaac8c57eb7 1-29,31-37,39-42,44-48,51-92
+  s_81f9edad14b561::t_a2e9193ac46889 30,38,43,49-50
+monitor/public/app.js
+  s_81f9edad14b561::t_b9b4bafbcf08ac 31,549,595
+tests/monitor-server.test.ts
+  s_81f9edad14b561::t_263b260e1e9696 610
+  s_81f9edad14b561::t_971c0b8479db0a 36,608-609,611
+package.json
+  s_81f9edad14b561::t_c36ddc34bc131a 24-25
+  s_81f9edad14b561::t_1a862cf3b3d15b 17
+monitor/public/view-config.js
+  s_81f9edad14b561::t_6707a2af69f1c6 83-95
+AGENTS.md
+  s_81f9edad14b561::t_54596f22e90890 112-115
+monitor/lib/config.js
+  s_81f9edad14b561::t_d24e8cb37cd1d8 6-11,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e51ccc219f1ee613766ce4635ac7c2c2852311f3",
+  "prompts": {},
+  "sessions": {
+    "s_81f9edad14b561": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00083-90ef-7834-acf4-a73c9d6a0f15",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
