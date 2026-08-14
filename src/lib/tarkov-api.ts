@@ -422,8 +422,16 @@ export async function fetchRawEntities(
   const cache: EndpointCache = new Map();
   const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
   // Some endpoints (e.g. crafts) return the collection directly under `data`
-  // as a top-level array rather than an id-keyed object.
+  // as a top-level array rather than an id-keyed object. A top-level array
+  // cannot be keyed by name, so combining it with a `collectionKey` is a
+  // misconfiguration and fails loudly rather than silently indexing the
+  // wrong collection.
   if (Array.isArray(envelope.data)) {
+    if (collectionKey) {
+      throw new Error(
+        `fetchRawEntities: ${mode}/${endpoint} returned a top-level array but collectionKey '${collectionKey}' was provided`
+      );
+    }
     return toLookup(envelope.data);
   }
   const data = isRecord(envelope.data) ? envelope.data : {};

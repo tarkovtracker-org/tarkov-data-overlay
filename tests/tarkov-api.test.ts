@@ -480,6 +480,16 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
       expect(entities.get('item-a')).toBeDefined();
     });
 
+    it('throws when a top-level array is combined with a collectionKey', async () => {
+      mockEndpoints({
+        'regular/crafts': { data: [{ id: 'craft-a' }] },
+      });
+
+      await expect(fetchRawEntities('regular', 'crafts', 'crafts')).rejects.toThrow(
+        /collectionKey 'crafts' was provided/
+      );
+    });
+
     it('treats the data object itself as the collection when no key is provided', async () => {
       mockEndpoints({
         'regular/traders': { data: { 'trader-a': { id: 'trader-a' } } },
