@@ -1,0 +1,25 @@
+tests/monitor-server.test.ts
+  s_5d2bc8e54a27b3::t_0b6b8673d0db4f 834-843
+  s_5d2bc8e54a27b3::t_a1e694c37f4ad8 616,619,631-634
+monitor/server.js
+  s_5d2bc8e54a27b3::t_4c309ef0ab183c 142,196-197,210,216,1149-1151,1159,1218-1221
+  s_5d2bc8e54a27b3::t_f79332c8f2a7dc 1152-1158
+README.md
+  s_5d2bc8e54a27b3::t_cb1b7b8be645fb 38-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "25ff7a23b718a82477dbb6e1ef286ecc76ef5782",
+  "prompts": {},
+  "sessions": {
+    "s_5d2bc8e54a27b3": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fff4c-7fe3-7cb7-bbaf-35b2ce1ddd9e",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
