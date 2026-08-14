@@ -1,0 +1,43 @@
+tests/monitor-server.test.ts
+  s_81f9edad14b561::t_480cd65991a88e 663-675
+  s_81f9edad14b561::t_9b45771481ece5 61,106,620-624
+tests/tarkov-api-shared.test.ts
+  s_81f9edad14b561::t_31ac74c9cb9003 1-24,26-30
+  s_81f9edad14b561::t_28234918c10810 25
+package.json
+  s_81f9edad14b561::t_9de4b090bba430 22
+tests/eft-compare.test.ts
+  s_81f9edad14b561::t_28234918c10810 83-103
+  s_81f9edad14b561::t_c7ce581fe80621 2,10-11,13,75-82,104-125
+monitor/server.js
+  s_81f9edad14b561::t_f565b29f32c2f0 436-437,478-482,979-987,989-990,992,994,1000-1004
+  s_81f9edad14b561::t_ba18ef70fb9835 1348
+src/lib/tarkov-api-shared.d.cts
+  s_81f9edad14b561::t_997a57163db3ec 5-17,40,54
+tests/wiki-compare.test.ts
+  s_81f9edad14b561::t_0c21a49e74c583 265-271
+tests/tarkov-api.test.ts
+  s_81f9edad14b561::t_2b11085783a588 115,126,129
+  s_81f9edad14b561::t_1de98919e97255 113-114,116-125,127-128,130-133
+src/lib/tarkov-api.ts
+  s_81f9edad14b561::t_28234918c10810 84
+  s_81f9edad14b561::t_1b7eb43cbe2e0a 83,85,352
+.github/workflows/ci.yml
+  s_81f9edad14b561::t_b4d9bd56620aca 34-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6fcb9f9e1b64540e0e7b833687f776390078fe1f",
+  "prompts": {},
+  "sessions": {
+    "s_81f9edad14b561": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00083-90ef-7834-acf4-a73c9d6a0f15",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
