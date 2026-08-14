@@ -378,6 +378,23 @@ function send(res, status, body, contentType = "text/plain; charset=utf-8") {
   res.end(body);
 }
 
+function handleResponseFailure(res) {
+  if (res.destroyed || res.writableEnded) {
+    return;
+  }
+  try {
+    if (res.headersSent) {
+      res.end();
+    } else {
+      send(res, 500, "Internal server error");
+    }
+  } catch {
+    if (!res.destroyed) {
+      res.destroy();
+    }
+  }
+}
+
 function safeJoin(base, requestPath) {
   const resolvedBase = path.resolve(base);
   const relativeRequest = String(requestPath || "").replace(/^[/\\]+/, "");
@@ -1169,16 +1186,18 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/latest") {
-    resolveViewParams(requestUrl).then(({ view, mode, locale, config }) => {
-      send(
-        res,
-        200,
-        JSON.stringify(
-          getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
-        ),
-        "application/json; charset=utf-8"
-      );
-    });
+    resolveViewParams(requestUrl)
+      .then(({ view, mode, locale, config }) => {
+        send(
+          res,
+          200,
+          JSON.stringify(
+            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+          ),
+          "application/json; charset=utf-8"
+        );
+      })
+      .catch(() => handleResponseFailure(res));
     return;
   }
 
@@ -1263,7 +1282,7 @@ const server = http.createServer((req, res) => {
           cleanup();
         }
       }, 15000);
-    });
+    }).catch(() => handleResponseFailure(res));
     return;
   }
 
@@ -1339,6 +1358,7 @@ if (process.env.NODE_ENV === "test") {
     normalizeMode,
     normalizeLocale,
     parseViewParams,
+    handleResponseFailure,
     getLatestTagVersion,
     isVersionStale,
     rebuildOverlay,

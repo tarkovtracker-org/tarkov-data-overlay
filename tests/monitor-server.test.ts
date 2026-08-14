@@ -59,6 +59,7 @@ describe('module import sanity', () => {
     expect(typeof mod.normalizeMode).toBe('function');
     expect(typeof mod.normalizeLocale).toBe('function');
     expect(typeof mod.parseViewParams).toBe('function');
+    expect(typeof mod.handleResponseFailure).toBe('function');
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
@@ -102,6 +103,7 @@ const {
   normalizeMode,
   normalizeLocale,
   parseViewParams,
+  handleResponseFailure,
   getLatestTagVersion,
   isVersionStale,
   isRebuildEnabled,
@@ -613,6 +615,46 @@ describe('createSection / pushRow', () => {
 });
 
 describe('monitor hardening', () => {
+  it('closes failed asynchronous responses without throwing', () => {
+    const sent: Array<{ status?: number; body?: string }> = [];
+    const unsentResponse = {
+      destroyed: false,
+      writableEnded: false,
+      headersSent: false,
+      writeHead: (status: number) => sent.push({ status }),
+      end: (body?: string) => sent.push({ body }),
+      destroy: () => {
+        unsentResponse.destroyed = true;
+      },
+    };
+    handleResponseFailure(unsentResponse);
+    expect(sent).toEqual([{ status: 500 }, { body: 'Internal server error' }]);
+
+    const ended: Array<string | undefined> = [];
+    handleResponseFailure({
+      destroyed: false,
+      writableEnded: false,
+      headersSent: true,
+      end: (body?: string) => ended.push(body),
+    });
+    expect(ended).toEqual([undefined]);
+
+    const failedResponse = {
+      destroyed: false,
+      writableEnded: false,
+      headersSent: false,
+      writeHead: () => {
+        throw new Error('socket closed');
+      },
+      end: () => {},
+      destroy: () => {
+        failedResponse.destroyed = true;
+      },
+    };
+    expect(() => handleResponseFailure(failedResponse)).not.toThrow();
+    expect(failedResponse.destroyed).toBe(true);
+  });
+
   it('rejects unsafe numeric environment values', () => {
     expect(readPositiveInteger('25', 10)).toBe(25);
     expect(readPositiveInteger('0', 10)).toBe(10);
