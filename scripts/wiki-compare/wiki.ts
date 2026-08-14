@@ -172,41 +172,32 @@ export function extractCount(text: string, links: string[] = []): number | undef
     ''
   );
 
-  const numberPattern = '\\d{1,3}(?:,\\d{3})*';
-  const countWords =
-    '(?:times?|kills?|targets?|pmcs?|scavs?|operatives?|headshots?|shots?|matches?|raiders?|rogues?|snipers?|dogtags?|tags?)';
-  const verbs =
-    '(?:kill|eliminate|neutralize|find|locate|obtain|get|hand over|handover|turn in|submit|deliver|give|bring|collect|stash|install|mark|plant|place|reach|visit|use|transfer|complete|survive|extract|escape|hit|shoot)';
-
   // Each candidate regex looks for a count in a specific position. The first
   // pattern that captures a number wins, matching the original early-return
-  // ladder order.
+  // ladder order. These patterns are literals because no runtime input is part
+  // of their grammar.
   const extract = (pattern: RegExp): number | undefined => {
     const m = scrubbed.match(pattern);
     return m?.[1] ? Number(m[1].replace(/,/g, '')) : undefined;
   };
 
   return (
-    extract(new RegExp(`\\b(${numberPattern})\\b\\s*${countWords}\\b`, 'i')) ??
-    extract(new RegExp(`\\b${countWords}\\b\\s*(${numberPattern})\\b`, 'i')) ??
-    extract(new RegExp(`\\b(${numberPattern})\\b\\s*x\\b`, 'i')) ??
-    extract(new RegExp(`\\bx\\s*(${numberPattern})\\b`, 'i')) ??
+    extract(
+      /\b(\d{1,3}(?:,\d{3})*)\b\s*(?:times?|kills?|targets?|pmcs?|scavs?|operatives?|headshots?|shots?|matches?|raiders?|rogues?|snipers?|dogtags?|tags?)\b/i
+    ) ??
+    extract(
+      /\b(?:times?|kills?|targets?|pmcs?|scavs?|operatives?|headshots?|shots?|matches?|raiders?|rogues?|snipers?|dogtags?|tags?)\b\s*(\d{1,3}(?:,\d{3})*)\b/i
+    ) ??
+    extract(/\b(\d{1,3}(?:,\d{3})*)\b\s*x\b/i) ??
+    extract(/\bx\s*(\d{1,3}(?:,\d{3})*)\b/i) ??
     // Last-resort verb fallback: "reach 10", "visit 3", ... A number that is
     // part of a distance/time qualifier ("over 40 meters away", "for 5
     // minutes") is not an objective count, so exclude it with a negative
     // lookahead.
     extract(
-      new RegExp(
-        `\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b(?!\\s*(?:meters?|metres?|minutes?|seconds?|hours?|km)\\b)`,
-        'i'
-      )
+      /\b(?:kill|eliminate|neutralize|find|locate|obtain|get|hand over|handover|turn in|submit|deliver|give|bring|collect|stash|install|mark|plant|place|reach|visit|use|transfer|complete|survive|extract|escape|hit|shoot)\b[^\d]{0,24}\b(\d{1,3}(?:,\d{3})*)\b(?!\s*(?:meters?|metres?|minutes?|seconds?|hours?|km)\b)/i
     ) ??
-    extract(
-      new RegExp(
-        `\\b(${numberPattern})\\b\\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\\b`,
-        'i'
-      )
-    )
+    extract(/\b(\d{1,3}(?:,\d{3})*)\b\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\b/i)
   );
 }
 

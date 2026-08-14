@@ -1226,7 +1226,18 @@ const server = http.createServer((req, res) => {
 
   if (pathname === "/events") {
     resolveViewParams(requestUrl).then(({ view, mode, locale, config, key }) => {
-      res.writeHead(200, responseHeaders("text/event-stream", { Connection: "keep-alive" }));
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self'; base-uri 'none'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+      );
+      res.setHeader("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+      res.setHeader("Referrer-Policy", "no-referrer");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "DENY");
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("Connection", "keep-alive");
+      res.writeHead(200);
       const clients = clientsByKey.get(key) || new Set();
       clientsByKey.set(key, clients);
       clients.add(res);
