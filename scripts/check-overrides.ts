@@ -866,12 +866,19 @@ function printEntityResults(
     grouped.removedFromApi.map((r) => r.id),
     icons.error
   );
-  printCountSection('Still needed', 'yellow', lines(grouped.stillNeeded), icons.warning);
+  printCountSection(
+    'Still needed',
+    'yellow',
+    lines(grouped.stillNeeded),
+    icons.warning,
+    grouped.stillNeeded.length
+  );
   printCountSection(
     'Fixed upstream - safe to retire',
     'green',
     lines(grouped.fixed),
-    icons.success
+    icons.success,
+    grouped.fixed.length
   );
 
   // REMOVED_FROM_API results carry their own 'error' detail and are already
