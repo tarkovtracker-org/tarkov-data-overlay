@@ -125,6 +125,88 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('rejects trader requirement ids that match neither the upstream nor the synthetic shape', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    // Missing the 'overlay.' prefix, so consumers merging patch-by-id would
+    // treat it as an upstream id that does not exist.
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.1',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 1,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('must match pattern'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts upstream, composite upstream, and synthetic trader requirement ids', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    // Upstream serves both '<24-hex>' and composite '<taskId>-<traderId>' ids;
+    // overlay-authored entries use the synthetic 'overlay.' form.
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }
+            },
+            {
+              id: '61e6e60c5ca3b3783662be27-579dc571d53a0658a154fbec',
+              requirementType: 'reputation',
+              compareMethod: '<=',
+              value: -3,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            },
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.1',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 1,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.errors).toBeUndefined();
+      expect(result.valid).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects locale patches for unknown local entity IDs', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-locale-'));
     const filePath = join(tempDir, 'en.json5');
