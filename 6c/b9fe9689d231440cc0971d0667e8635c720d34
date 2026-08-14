@@ -1,0 +1,23 @@
+scripts/check-overrides.ts
+  s_a2b95317a2f376::t_c7c75bca91a215 191-197
+src/lib/tarkov-api.ts
+  s_a2b95317a2f376::t_2ebf77e3f49d79 424-428
+tests/tarkov-api.test.ts
+  s_a2b95317a2f376::t_66465a2b4fa6ac 9,453-492
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6cb9fe9689d231440cc0971d0667e8635c720d34",
+  "prompts": {},
+  "sessions": {
+    "s_a2b95317a2f376": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ffffd-9cdf-7ea0-942b-fa9e1346ed32",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
