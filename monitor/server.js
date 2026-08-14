@@ -101,10 +101,9 @@ function getLatestTagVersion() {
       .toString()
       .trim();
     cachedTagVersion = tag.replace(/^v/, "");
+    tagVersionLoaded = true;
   } catch {
     cachedTagVersion = undefined;
-  } finally {
-    tagVersionLoaded = true;
   }
   return cachedTagVersion;
 }
