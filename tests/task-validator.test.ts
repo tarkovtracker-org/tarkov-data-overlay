@@ -696,7 +696,9 @@ describe('validateTaskOverride', () => {
       const detail = result.details.find((d) => d.field === 'traderRequirements');
 
       expect(detail?.status).toBe('needed');
-      expect(detail?.message).toContain('override omits 1 API requirement(s)');
+      expect(detail?.message).toContain(
+        'override omits 1 API requirement(s) (Fence reputation >= 1)'
+      );
     });
 
     it('returns NEEDED when an empty override clears non-empty API requirements', () => {

@@ -272,6 +272,38 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('rejects synthetic level ids with non-LL1-LL4 embedded values', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '657315e1dccd301f1301416a': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2.5',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('must match pattern'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects synthetic ids whose embedded discriminator disagrees with the entry', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
     const filePath = join(tempDir, 'tasks.json5');

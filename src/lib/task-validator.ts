@@ -156,6 +156,10 @@ function traderRequirementKey(req: TraderRequirementLike): string {
   );
 }
 
+function formatTraderRequirement(req: TraderRequirementLike): string {
+  return `${req.trader?.name ?? req.trader?.id ?? '?'} ${req.requirementType} ${req.compareMethod} ${req.value}`;
+}
+
 /**
  * Validate trader requirements by semantic identity.
  *
@@ -197,16 +201,14 @@ const validateTraderRequirements: FieldValidator = (override, apiTask) => {
     };
   }
 
-  const remaining = apiReqs.map((req) => traderRequirementKey(req));
+  const remaining = [...apiReqs];
   const unmatched: string[] = [];
 
   for (const overrideReq of overrideReqs) {
     const key = traderRequirementKey(overrideReq);
-    const index = remaining.indexOf(key);
+    const index = remaining.findIndex((apiReq) => traderRequirementKey(apiReq) === key);
     if (index === -1) {
-      unmatched.push(
-        `${overrideReq.trader?.name ?? overrideReq.trader?.id ?? '?'} ${overrideReq.requirementType} ${overrideReq.compareMethod} ${overrideReq.value}`
-      );
+      unmatched.push(formatTraderRequirement(overrideReq));
     } else {
       remaining.splice(index, 1);
     }
@@ -227,7 +229,7 @@ const validateTraderRequirements: FieldValidator = (override, apiTask) => {
     return {
       field: 'traderRequirements',
       status: 'needed',
-      message: `traderRequirements: override omits ${remaining.length} API requirement(s) (${remaining.join('; ')}) - STILL NEEDED`,
+      message: `traderRequirements: override omits ${remaining.length} API requirement(s) (${remaining.map(formatTraderRequirement).join('; ')}) - STILL NEEDED`,
     };
   }
 
