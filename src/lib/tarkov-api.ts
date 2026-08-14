@@ -80,7 +80,9 @@ function stringId(value: unknown): string | undefined {
  * Remove undefined values so adapted objects compare cleanly against overrides.
  */
 function compact<T extends JsonRecord>(value: T): T {
-  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined)) as T;
+  return Object.fromEntries(
+    Object.entries(value).filter(([key, entry]) => !UNSAFE_KEYS.has(key) && entry !== undefined)
+  ) as T;
 }
 
 /**
@@ -347,7 +349,7 @@ async function buildContext(
   mode: GameMode,
   tasksData: JsonRecord
 ): Promise<Context> {
-  return buildSharedTaskContext<Envelope, Context, GameMode>(cache, mode, tasksData, {
+  return buildSharedTaskContext<Envelope, GameMode>(cache, mode, tasksData, {
     fetchEnvelope,
     fetchTranslations,
     isRecord,

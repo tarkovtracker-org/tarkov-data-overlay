@@ -2,6 +2,19 @@ type JsonRecord = Record<string, unknown>;
 
 type EndpointCache<T> = Map<string, Promise<T>>;
 
+type TaskContext = {
+  itemsById: Map<string, JsonRecord>;
+  questItemsById: Map<string, JsonRecord>;
+  tasksById: Map<string, JsonRecord>;
+  mapsById: Map<string, JsonRecord>;
+  tradersById: Map<string, JsonRecord>;
+  prestigeById: Map<string, JsonRecord>;
+  itemsEn: Record<string, string>;
+  tasksEn: Record<string, string>;
+  mapsEn: Record<string, string>;
+  tradersEn: Record<string, string>;
+};
+
 export function fetchCached<T>(
   cache: EndpointCache<T>,
   path: string,
@@ -24,11 +37,7 @@ export function adaptReward<T, TContext>(
   }
 ): T | undefined;
 
-export function buildTaskContext<
-  TEnvelope extends { data: unknown },
-  TContext,
-  TMode extends string,
->(
+export function buildTaskContext<TEnvelope extends { data: unknown }, TMode extends string>(
   cache: EndpointCache<TEnvelope>,
   mode: TMode,
   tasksData: JsonRecord,
@@ -42,4 +51,4 @@ export function buildTaskContext<
     isRecord: (value: unknown) => value is JsonRecord;
     toLookup: (value: unknown) => Map<string, JsonRecord>;
   }
-): Promise<TContext>;
+): Promise<TaskContext>;

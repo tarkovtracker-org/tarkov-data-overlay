@@ -58,6 +58,7 @@ describe('module import sanity', () => {
     expect(typeof mod.normalizeView).toBe('function');
     expect(typeof mod.normalizeMode).toBe('function');
     expect(typeof mod.normalizeLocale).toBe('function');
+    expect(typeof mod.getSummaryKey).toBe('function');
     expect(typeof mod.parseViewParams).toBe('function');
     expect(typeof mod.handleResponseFailure).toBe('function');
     expect(typeof mod.createSection).toBe('function');
@@ -102,6 +103,7 @@ const {
   normalizeView,
   normalizeMode,
   normalizeLocale,
+  getSummaryKey,
   parseViewParams,
   handleResponseFailure,
   getLatestTagVersion,
@@ -615,6 +617,11 @@ describe('createSection / pushRow', () => {
 });
 
 describe('monitor hardening', () => {
+  it('keeps mode and locale distinct in summary subscription keys', () => {
+    expect(getSummaryKey('locales', 'pve', 'fr')).toBe('locales:pve:fr');
+    expect(getSummaryKey('locales', '', 'fr')).toBe('locales::fr');
+  });
+
   it('closes failed asynchronous responses without throwing', () => {
     const sent: Array<{ status?: number; body?: string }> = [];
     const unsentResponse = {
@@ -653,6 +660,19 @@ describe('monitor hardening', () => {
     };
     expect(() => handleResponseFailure(failedResponse)).not.toThrow();
     expect(failedResponse.destroyed).toBe(true);
+
+    const closedCalls: string[] = [];
+    const closedResponse = {
+      destroyed: true,
+      writableEnded: false,
+      headersSent: false,
+      writeHead: () => closedCalls.push('writeHead'),
+      end: () => closedCalls.push('end'),
+      destroy: () => closedCalls.push('destroy'),
+    };
+    handleResponseFailure(closedResponse);
+    handleResponseFailure({ ...closedResponse, destroyed: false, writableEnded: true });
+    expect(closedCalls).toEqual([]);
   });
 
   it('rejects unsafe numeric environment values', () => {

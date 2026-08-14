@@ -31,6 +31,9 @@ jobs:
       - name: Audit dependencies
         run: npm run audit:dependencies
 
+      - name: Run Fallow security analysis
+        run: npm run fallow:security
+
       - name: Compute next tag
         id: version
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

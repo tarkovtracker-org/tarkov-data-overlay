@@ -433,8 +433,8 @@ function serveStatic(res, requestPath) {
   });
 }
 
-function getSummaryKey(view, mode) {
-  return `${view}:${mode || ""}`;
+function getSummaryKey(view, mode = "", locale = "") {
+  return `${view}:${mode}:${locale}`;
 }
 
 function normalizeView(view) {
@@ -475,10 +475,11 @@ async function resolveViewParams(requestUrl) {
   const params = parseViewParams(requestUrl);
   await refreshOverlayIfStale().catch(() => {});
   const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-  const key = getSummaryKey(
-    params.view,
-    params.config?.requiresLocale ? locale : params.config?.requiresMode ? params.mode : ""
-  );
+  const scope = {
+    mode: params.config?.requiresMode ? params.mode : "",
+    locale: params.config?.requiresLocale ? locale : "",
+  };
+  const key = getSummaryKey(params.view, scope.mode, scope.locale);
   return { ...params, locale, key };
 }
 
@@ -975,45 +976,32 @@ function buildSummary(view, mode, locale) {
 function rebuildSummaries() {
   Object.keys(VIEW_CONFIG).forEach((view) => {
     const config = VIEW_CONFIG[view];
-    if (config.requiresMode) {
-      supportedModes.forEach((mode) => {
-        const key = getSummaryKey(view, mode);
-        const summary = buildSummary(view, mode);
-        summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, mode, ""));
-      });
-      return;
-    }
-    if (config.requiresLocale) {
-      const locales = getAvailableLocales();
-      if (locales.length === 0) {
-        const key = getSummaryKey(view, "en");
-        const summary = buildSummary(view, "", "en");
-        summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, "", "en"));
-        return;
-      }
+    const modes = config.requiresMode ? supportedModes : [""];
+    const availableLocales = getAvailableLocales();
+    const locales = config.requiresLocale
+      ? availableLocales.length > 0
+        ? availableLocales
+        : ["en"]
+      : [""];
+
+    modes.forEach((mode) => {
       locales.forEach((locale) => {
-        const key = getSummaryKey(view, locale);
-        const summary = buildSummary(view, "", locale);
+        const key = getSummaryKey(view, mode, locale);
+        const summary = buildSummary(view, mode, locale);
         summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, "", locale));
+        broadcast(key, "summary", getState(view, mode, locale));
       });
-      return;
-    }
-    const key = getSummaryKey(view, "");
-    const summary = buildSummary(view, "", "");
-    summaryByKey.set(key, summary);
-    broadcast(key, "summary", getState(view, "", ""));
+    });
   });
 }
 
 function getState(view, mode, locale) {
   const config = VIEW_CONFIG[view];
-  const key = getSummaryKey(
-    view,
-    config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
-  );
+  const scope = {
+    mode: config?.requiresMode ? mode : "",
+    locale: config?.requiresLocale ? locale : "",
+  };
+  const key = getSummaryKey(view, scope.mode, scope.locale);
   const summary = summaryByKey.get(key) || { sections: [], error: null };
   const meta = overlayState.data?.$meta || null;
   const latestVersion = getLatestTagVersion();
@@ -1357,6 +1345,7 @@ if (process.env.NODE_ENV === "test") {
     normalizeView,
     normalizeMode,
     normalizeLocale,
+    getSummaryKey,
     parseViewParams,
     handleResponseFailure,
     getLatestTagVersion,

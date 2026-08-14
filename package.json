@@ -19,6 +19,7 @@
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
+    "fallow:security": "fallow security",
     "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#dist\"",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,cts,json,json5,md}\"",
