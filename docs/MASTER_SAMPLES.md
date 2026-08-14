@@ -3,6 +3,7 @@
 Comprehensive, copy-paste JSON5 examples that cover every field supported by this repo's schemas.
 
 Legend (TarkovTracker):
+
 - `UI`: Rendered in the app.
 - `UI (logic)`: Used by app logic (filters, dependency graph, map markers), but not necessarily shown directly.
 - `Console-only`: Present in task/objective data but not used/rendered by the app.
@@ -12,6 +13,7 @@ Legend (TarkovTracker):
 ## Tasks
 
 Notes:
+
 - Do not use a task-level `maps` field for new data. Use `task.map` and `objectives[].maps` instead.
 
 ### Task Override (all fields)
@@ -450,6 +452,7 @@ Notes:
 ## Story Chapters
 
 Notes:
+
 - Keep `type` as `main` or `optional`. Story objectives do not use task objective action types there.
 - For map markers and key hints, use the same field names as task objectives: `maps`, `zones`, `possibleLocations`, `requiredKeys`.
 - For Needed Items and marker/tool display, use task-style item refs: `item`, `items`, `markerItem`, `questItem`, `count`, `foundInRaid`.

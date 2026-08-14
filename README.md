@@ -13,7 +13,7 @@ The tarkov.dev API is an excellent resource, but game updates sometimes outpace 
 
 Fetch the overlay from jsDelivr CDN:
 
-```
+```text
 https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json
 ```
 
