@@ -66,4 +66,13 @@ describe('story chapters (EFT-sourced)', () => {
     expect(objs.some((o) => o.endingId)).toBe(true);
     expect(objs.some((o) => (o.mutuallyExclusiveWith?.length ?? 0) > 0)).toBe(true);
   });
+
+  it('wires Network Provider - Part 1 as a story-chapter unlock for Batya and The Ticket', () => {
+    const unlock = { id: '625d6ff5ddc94657c21a1625', name: 'Network Provider - Part 1' };
+    for (const cid of ['batya', 'the-ticket']) {
+      const ch = chapters[cid];
+      expect(ch, `chapter ${cid}`).toBeDefined();
+      expect(ch.questUnlocks ?? [], `${cid} questUnlocks`).toContainEqual(unlock);
+    }
+  });
 });

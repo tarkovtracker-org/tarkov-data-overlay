@@ -111,7 +111,13 @@
     "notes": null,
     "rewards": null,
     "mapUnlocks": [],
-    "traderUnlocks": []
+    "traderUnlocks": [],
+    "questUnlocks": [
+      {
+        "id": "625d6ff5ddc94657c21a1625",
+        "name": "Network Provider - Part 1"
+      }
+    ]
   },
   "the-unheard": {
     "id": "the-unheard",
@@ -232,6 +238,12 @@
       {
         "id": "688246518448b05efd61d461",
         "name": "Mr. Kerman"
+      }
+    ],
+    "questUnlocks": [
+      {
+        "id": "625d6ff5ddc94657c21a1625",
+        "name": "Network Provider - Part 1"
       }
     ],
     "objectives": [
