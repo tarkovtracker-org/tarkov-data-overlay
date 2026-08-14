@@ -1,0 +1,24 @@
+.github/workflows/ci.yml
+  s_81f9edad14b561::t_6e88cf83e68fec 35
+monitor/server.js
+  s_81f9edad14b561::t_e3bc7fffe549af 1229-1240
+scripts/wiki-compare/wiki.ts
+  s_81f9edad14b561::t_59c2c137fcadc2 177-178,185-192,198
+  s_81f9edad14b561::t_35ab97d6f910e5 200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6e7bc38c4ba1f089681b77fa7a454324353b1742",
+  "prompts": {},
+  "sessions": {
+    "s_81f9edad14b561": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00083-90ef-7834-acf4-a73c9d6a0f15",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
