@@ -19,11 +19,7 @@ export interface TaskOverride {
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
-  traderRequirements?: Array<{
-    trader: { id: string; name: string };
-    value: number;
-    compareMethod?: string;
-  }>;
+  traderRequirements?: TraderRequirement[];
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -154,6 +150,45 @@ export interface TaskRequirement {
   status?: string[];
 }
 
+/**
+ * Comparison methods json.tarkov.dev serves for trader requirements. Loyalty
+ * Level (`level`) entries use `>=`; reputation entries use `>=`, `<=`, and `<`.
+ */
+export type TraderRequirementCompareMethod = '>=' | '<=' | '>' | '<' | '=';
+
+/**
+ * The discriminated trader-requirement semantics served by json.tarkov.dev:
+ * `level` is a trader Loyalty Level (LL1-LL4); `reputation` is a trader
+ * reputation threshold (scav karma / trader rep). Consumers must switch their
+ * requirement evaluation on this field - the value range alone is ambiguous
+ * (reputation serves positive, zero, and negative values).
+ */
+export type TraderRequirementType = 'level' | 'reputation';
+
+/**
+ * Trader requirement in json.tarkov.dev's discriminated shape.
+ *
+ * `id` is the upstream requirement id, or a deterministic synthetic id (see
+ * `SYNTHETIC_REQUIREMENT_ID_PREFIX`) for overlay-authored requirements absent
+ * upstream. The id is the merge identity consumers use to patch-by-id rather
+ * than replace the whole array.
+ */
+export interface TraderRequirement {
+  id: string;
+  requirementType: TraderRequirementType;
+  compareMethod: TraderRequirementCompareMethod;
+  value: number;
+  trader: { id: string; name: string };
+}
+
+/**
+ * Prefix for synthetic requirement ids authored into the overlay for
+ * requirements that have no upstream counterpart. Kept distinct from
+ * tarkov.dev's 24-hex ids so consumers can tell overlay-authored requirements
+ * apart at a glance.
+ */
+export const SYNTHETIC_REQUIREMENT_ID_PREFIX = 'overlay.';
+
 /** Task addition structure for new tasks not in tarkov.dev */
 export interface TaskAddition {
   id: string;
@@ -166,11 +201,7 @@ export interface TaskAddition {
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives: TaskObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
-  traderRequirements?: Array<{
-    trader: { id: string; name: string };
-    value: number;
-    compareMethod?: string;
-  }>;
+  traderRequirements?: TraderRequirement[];
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -202,11 +233,7 @@ export interface TaskData {
   factionName?: string;
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   taskRequirements?: TaskRequirement[];
-  traderRequirements?: Array<{
-    trader: { id: string; name: string };
-    value: number;
-    compareMethod?: string;
-  }>;
+  traderRequirements?: TraderRequirement[];
   objectives?: TaskObjective[];
   experience?: number;
   startRewards?: TaskRewards;

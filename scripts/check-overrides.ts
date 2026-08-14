@@ -253,6 +253,27 @@ function getPrestigeLevel(task: { requiredPrestige?: { prestigeLevel: number } |
   return task.requiredPrestige?.prestigeLevel ?? 0;
 }
 
+/** Count of trader requirements by semantic type. */
+export type RequirementTypeCounts = { level: number; reputation: number };
+
+/**
+ * Count trader requirements by semantic type for a task list.
+ *
+ * Exported for tests; `check-overrides` prints this per game mode so the
+ * level/reputation split is visible (issue #274 acceptance: "CI reports
+ * requirement counts by semantic type and mode").
+ */
+export function countRequirementTypes(tasks: TaskData[]): RequirementTypeCounts {
+  const counts: RequirementTypeCounts = { level: 0, reputation: 0 };
+  for (const task of tasks) {
+    for (const req of task.traderRequirements ?? []) {
+      if (req.requirementType === 'level') counts.level += 1;
+      else if (req.requirementType === 'reputation') counts.reputation += 1;
+    }
+  }
+  return counts;
+}
+
 function buildApiIndexes(apiTasks: TaskData[]) {
   const byWikiLink = new Map<string, TaskData>();
   const byName = new Map<string, TaskData[]>();
@@ -677,6 +698,23 @@ function printReferenceCrossCheck(
       'cyan'
     )} : ${icons.info}`
   );
+  console.log();
+}
+
+/**
+ * Report upstream trader-requirement counts by semantic type and mode.
+ *
+ * Surfaces the level/reputation split so a consumer's requirement evaluation
+ * can be kept in sync with the discriminated upstream schema.
+ */
+function printRequirementTypeCounts(apiTasksByMode: Partial<Record<GameMode, TaskData[]>>): void {
+  printHeader('TRADER REQUIREMENT TYPE COUNTS (UPSTREAM)');
+  for (const mode of SUPPORTED_GAME_MODES) {
+    const tasks = apiTasksByMode[mode];
+    if (!tasks) continue;
+    const counts = countRequirementTypes(tasks);
+    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation`);
+  }
   console.log();
 }
 
@@ -1115,6 +1153,8 @@ async function main(): Promise<void> {
         printAdditionResults(modeAdditionResults, mode.toUpperCase());
       }
     }
+
+    printRequirementTypeCounts(apiTasksByMode);
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};

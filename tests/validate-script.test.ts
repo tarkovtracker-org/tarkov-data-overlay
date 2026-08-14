@@ -91,6 +91,40 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('rejects ambiguous trader requirements missing the semantic discriminator', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    // Pre-#274 reduced shape: trader + value, no id/requirementType/compareMethod.
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            { trader: { id: 'prapor', name: 'Prapor' }, value: 1 }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors?.some(
+          (error) =>
+            error.includes("must have required property 'requirementType'") ||
+            error.includes("must have required property 'compareMethod'") ||
+            error.includes("must have required property 'id'")
+        )
+      ).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects locale patches for unknown local entity IDs', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-locale-'));
     const filePath = join(tempDir, 'en.json5');

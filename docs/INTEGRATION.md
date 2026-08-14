@@ -240,6 +240,68 @@ handles this by appending `objectivesAdd` to the objective list.
 
 ---
 
+## Applying Trader Requirements
+
+Trader requirements use json.tarkov.dev's **discriminated** shape. Every entry
+identifies whether it is a Loyalty Level (`level`, LL1-LL4) or a trader
+reputation threshold (`reputation`, incl. scav karma), because the value range
+alone is ambiguous — reputation entries serve positive, zero, and negative
+values, with `>=`, `<=`, and `<` comparators.
+
+```typescript
+interface TraderRequirement {
+  id: string; // upstream requirement id, or a stable 'overlay.'-prefixed synthetic id
+  requirementType: 'level' | 'reputation';
+  compareMethod: '>=' | '<=' | '>' | '<' | '=';
+  value: number;
+  trader: { id: string; name: string };
+}
+```
+
+### Merge semantics (patch-by-id)
+
+Merge requirements by `id`, not by array position, so an overlay cannot
+accidentally strip the `level`/`reputation` discriminator that was present
+upstream:
+
+```typescript
+function applyTraderRequirements(
+  baseReqs: TraderRequirement[],
+  overrideReqs: TraderRequirement[]
+): TraderRequirement[] {
+  const byId = new Map(baseReqs.map((r) => [r.id, r]));
+  for (const req of overrideReqs) {
+    byId.set(req.id, { ...byId.get(req.id), ...req }); // patch existing, else append
+  }
+  return [...byId.values()];
+}
+```
+
+- **Overlay-only requirements** carry a synthetic id prefixed `overlay.` (e.g.
+  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`), deterministic and
+  stable across builds. They never collide with a tarkov.dev 24-hex id, so they
+  append instead of patch.
+- **Upstream-preserved requirements** keep their upstream `id`, so a correction
+  patches the existing requirement in place.
+- **Clearing requirements** is expressed by an empty array
+  (`traderRequirements: []`), which replaces the upstream array.
+- **Do not** re-derive the semantic from `trader` + `value`: Fence LL1 and Fence
+  `reputation >= 1` are distinct requirements. Switch evaluation on
+  `requirementType`, not on value range or trader identity.
+
+### Migration / compatibility
+
+The new fields (`id`, `requirementType`, `compareMethod`) are additive: existing
+consumers that only read `trader` + `value` keep working, and a wholesale
+`{ ...baseTask, ...override }` replace-array merge is still correct for the
+current data. To benefit from the discriminated schema, migrate the
+`traderRequirements` merge to patch-by-id as shown above. Requirements that were
+mislabeled as Loyalty Level but are actually reputation gates were removed from
+the overlay (upstream already serves the correct discriminated entries), so a
+consumer that switches on `requirementType` will not see them regress.
+
+---
+
 ## Applying Mode-Specific Data (PVP vs PVE vs Seasonal)
 
 Some corrections differ by game mode. The overlay stores these under

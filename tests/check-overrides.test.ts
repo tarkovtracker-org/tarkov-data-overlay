@@ -7,6 +7,7 @@ import {
   normalizeWikiLink,
   checkTaskAdditions,
   checkEditionTaskReferences,
+  countRequirementTypes,
 } from '../scripts/check-overrides.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
 
@@ -29,6 +30,50 @@ function createApiTask(overrides: Partial<TaskData> = {}): TaskData {
     ...overrides,
   };
 }
+
+describe('countRequirementTypes', () => {
+  it('counts level and reputation requirements separately', () => {
+    const tasks: TaskData[] = [
+      createApiTask({
+        id: 't1',
+        traderRequirements: [
+          {
+            id: 'r1',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: 'prapor', name: 'Prapor' },
+          },
+          {
+            id: 'r2',
+            requirementType: 'reputation',
+            compareMethod: '>=',
+            value: 1,
+            trader: { id: 'fence', name: 'Fence' },
+          },
+        ],
+      }),
+      createApiTask({
+        id: 't2',
+        traderRequirements: [
+          {
+            id: 'r3',
+            requirementType: 'reputation',
+            compareMethod: '<',
+            value: -1,
+            trader: { id: 'fence', name: 'Fence' },
+          },
+        ],
+      }),
+    ];
+
+    expect(countRequirementTypes(tasks)).toEqual({ level: 1, reputation: 2 });
+  });
+
+  it('returns zeros for tasks without trader requirements', () => {
+    expect(countRequirementTypes([createApiTask()])).toEqual({ level: 0, reputation: 0 });
+  });
+});
 
 describe('normalizeWikiLink', () => {
   it('normalizes scheme, host, query, fragment, and trailing slashes', () => {

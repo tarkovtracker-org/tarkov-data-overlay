@@ -234,7 +234,15 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
               t1: {
                 id: 't1',
                 name: 't1 name',
-                traderRequirements: [{ trader: 'tr1', value: 2, compareMethod: '>=' }],
+                traderRequirements: [
+                  {
+                    id: 'req-1',
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: 'tr1',
+                  },
+                ],
                 finishRewards: {
                   traderStanding: [{ trader: 'tr1', standing: 0.05 }],
                   items: [{ item: 'i1', count: 3 }],
@@ -256,7 +264,13 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const tasks = await fetchTasks();
     const task = tasks[0];
 
-    expect(task.traderRequirements?.[0].trader).toEqual({ id: 'tr1', name: 'Prapor' });
+    expect(task.traderRequirements?.[0]).toEqual({
+      id: 'req-1',
+      requirementType: 'level',
+      compareMethod: '>=',
+      value: 2,
+      trader: { id: 'tr1', name: 'Prapor' },
+    });
     expect(task.finishRewards?.traderStanding?.[0].trader).toEqual({ id: 'tr1', name: 'Prapor' });
     expect(task.finishRewards?.items?.[0].item).toEqual({
       id: 'i1',

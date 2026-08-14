@@ -850,10 +850,51 @@
         "type": "array"
       },
       "traderRequirements": {
-        "description": "Trader loyalty requirements to start the task",
+        "description": "Trader requirements to start the task (loyalty level or reputation)",
         "items": {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "requirementType": {
+                    "const": "level"
+                  }
+                },
+                "required": ["requirementType"]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "description": "Loyalty Level (LL1-LL4)",
+                    "maximum": 4,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
           "properties": {
+            "id": {
+              "description": "Upstream requirement id, or a stable 'overlay.'-prefixed synthetic id for overlay-authored requirements",
+              "type": "string"
+            },
+            "requirementType": {
+              "description": "Semantic of the requirement: 'level' (Loyalty Level) or 'reputation' (trader rep / scav karma)",
+              "enum": ["level", "reputation"],
+              "type": "string"
+            },
+            "compareMethod": {
+              "description": "Comparison method for the requirement",
+              "enum": [">=", "<=", ">", "<", "="],
+              "type": "string"
+            },
+            "value": {
+              "description": "Threshold value: integer 0-4 for 'level'; any number (including negative) for 'reputation'",
+              "type": "number"
+            },
             "trader": {
+              "additionalProperties": false,
               "properties": {
                 "id": {
                   "type": "string"
@@ -864,19 +905,9 @@
               },
               "required": ["id", "name"],
               "type": "object"
-            },
-            "value": {
-              "description": "Required trader level/loyalty",
-              "maximum": 4,
-              "minimum": 0,
-              "type": "integer"
-            },
-            "compareMethod": {
-              "description": "Comparison method for the requirement (e.g., '>=')",
-              "type": "string"
             }
           },
-          "required": ["trader", "value"],
+          "required": ["id", "requirementType", "compareMethod", "value", "trader"],
           "type": "object"
         },
         "type": "array"

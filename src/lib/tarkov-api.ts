@@ -28,6 +28,7 @@ import type {
   TaskObjective,
   TaskRewards,
   TaskRequirement,
+  TraderRequirement,
   GameMode,
 } from './types.js';
 import {
@@ -311,9 +312,17 @@ function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) }) as unknown as TaskRequirement;
 }
 
-function adaptTraderRequirement(raw: unknown, ctx: Context): unknown {
-  if (!isRecord(raw)) return raw;
-  return compact({ ...raw, trader: resolveTraderRef(raw.trader, ctx) });
+function adaptTraderRequirement(raw: unknown, ctx: Context): TraderRequirement {
+  if (!isRecord(raw)) return raw as TraderRequirement;
+  // Preserve the upstream discriminated schema (id, requirementType,
+  // compareMethod, value) and resolve the trader reference. `id` is normalized
+  // explicitly so the merge identity survives adaptation even if upstream ever
+  // moves it into an inline object.
+  return compact({
+    ...raw,
+    id: stringId(raw) ?? '',
+    trader: resolveTraderRef(raw.trader, ctx),
+  }) as unknown as TraderRequirement;
 }
 
 function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
