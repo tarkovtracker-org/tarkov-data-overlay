@@ -1,0 +1,19 @@
+tests/monitor-server.test.ts
+  s_1c9ec2c6a3ee48::t_9cca44481fc6cd 107-115,710,713,833,836
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "53f8906a7e030a9957603048771f0dca8ff8f52a",
+  "prompts": {},
+  "sessions": {
+    "s_1c9ec2c6a3ee48": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fff23-5469-7edc-bc32-d42f84845297",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
