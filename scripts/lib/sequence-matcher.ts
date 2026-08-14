@@ -81,36 +81,31 @@ function findLongestMatch(
     j2len = newj2len;
   }
 
-  // Extend the best by non-junk elements on each end.
-  while (besti > alo && bestj > blo && !bjunk.has(b[bestj - 1]) && a[besti - 1] === b[bestj - 1]) {
-    besti -= 1;
-    bestj -= 1;
-    bestsize += 1;
-  }
-  while (
-    besti + bestsize < ahi &&
-    bestj + bestsize < bhi &&
-    !bjunk.has(b[bestj + bestsize]) &&
-    a[besti + bestsize] === b[bestj + bestsize]
-  ) {
-    bestsize += 1;
-  }
+  const extendMatch = (junk: boolean): void => {
+    while (
+      besti > alo &&
+      bestj > blo &&
+      bjunk.has(b[bestj - 1]) === junk &&
+      a[besti - 1] === b[bestj - 1]
+    ) {
+      besti -= 1;
+      bestj -= 1;
+      bestsize += 1;
+    }
+    while (
+      besti + bestsize < ahi &&
+      bestj + bestsize < bhi &&
+      bjunk.has(b[bestj + bestsize]) === junk &&
+      a[besti + bestsize] === b[bestj + bestsize]
+    ) {
+      bestsize += 1;
+    }
+  };
 
-  // Then extend by junk elements on each end (no-op with an empty junk set,
-  // kept for fidelity with the CPython implementation).
-  while (besti > alo && bestj > blo && bjunk.has(b[bestj - 1]) && a[besti - 1] === b[bestj - 1]) {
-    besti -= 1;
-    bestj -= 1;
-    bestsize += 1;
-  }
-  while (
-    besti + bestsize < ahi &&
-    bestj + bestsize < bhi &&
-    bjunk.has(b[bestj + bestsize]) &&
-    a[besti + bestsize] === b[bestj + bestsize]
-  ) {
-    bestsize += 1;
-  }
+  // CPython first extends by non-junk elements, then by junk elements. The
+  // second pass is a no-op with the empty junk set used by sequenceRatio.
+  extendMatch(false);
+  extendMatch(true);
 
   return { a: besti, b: bestj, size: bestsize };
 }

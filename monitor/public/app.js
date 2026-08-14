@@ -28,6 +28,7 @@ const viewMeta = window.viewMeta || {};
 const fallbackModes = viewMeta.DEFAULT_MODES || [];
 const fallbackModeLabels = viewMeta.MODE_LABELS || {};
 const viewConfig = viewMeta.VIEW_CONFIG || {};
+const buildViewParams = viewMeta.buildViewParams;
 
 const viewRoutes = {
   tasks: "tasks",
@@ -539,27 +540,13 @@ function updateUrl() {
   window.history.replaceState({}, "", url);
 }
 
-// Browser behavior is covered by the monitor integration and real-browser smoke tests,
-// but fallow cannot attribute that coverage to this standalone script.
-// fallow-ignore-next-line complexity
-function buildViewParams() {
-  const params = new URLSearchParams({ view: currentView });
-  if (viewConfig[currentView]?.requiresMode) {
-    params.set("mode", currentMode);
-  }
-  if (viewConfig[currentView]?.requiresLocale) {
-    params.set("locale", currentLocale);
-  }
-  return params;
-}
-
 async function fetchLatest() {
   if (latestFetchController) {
     latestFetchController.abort();
   }
   latestFetchController = new AbortController();
   try {
-    const params = buildViewParams();
+    const params = buildViewParams(currentView, currentMode, currentLocale);
     const response = await fetch(`/latest?${params}`, {
       cache: "no-store",
       signal: latestFetchController.signal,
@@ -605,7 +592,7 @@ function connectEvents() {
   }
   stopPolling();
 
-  const params = buildViewParams();
+  const params = buildViewParams(currentView, currentMode, currentLocale);
   eventSource = new EventSource(`/events?${params}`);
   eventSource.addEventListener("summary", (event) => {
     sseRetryMs = 1000;

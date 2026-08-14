@@ -109,6 +109,10 @@ TypeScript uses 2-space indentation, semicolons, and ESM imports (see `"type": "
 
 Vitest is the only test framework. Tests should be named `*.test.ts` under `tests/`. There is no explicit coverage gate, but add or update tests when you change shared library behavior or validation logic.
 
+## Static Analysis Findings
+
+Fix fallow findings at their root whenever the code can be safely consolidated, simplified, removed, or covered by tests. Do not add `fallow-ignore` suppressions for resolvable findings; suppressions must be reserved for genuinely unavoidable tool false positives or external/runtime constraints, include a specific reason, and receive explicit reviewer approval.
+
 ## Commit & Pull Request Guidelines
 
 Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.

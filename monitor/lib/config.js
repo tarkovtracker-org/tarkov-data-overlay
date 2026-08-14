@@ -3,7 +3,12 @@
 const path = require("path");
 
 // Shared with the browser (loaded as a static script before app.js).
-const { DEFAULT_MODES, MODE_LABELS, VIEW_CONFIG } = require("../public/view-config.js");
+const {
+  DEFAULT_MODES,
+  MODE_LABELS,
+  VIEW_CONFIG,
+  buildViewParams,
+} = require("../public/view-config.js");
 
 function readPositiveInteger(value, fallback) {
   const parsed = Number(value);
@@ -47,6 +52,7 @@ const config = Object.freeze({
 module.exports = {
   DEFAULT_MODES,
   VIEW_CONFIG,
+  buildViewParams,
   config,
   getModeLabel,
   readPositiveInteger,

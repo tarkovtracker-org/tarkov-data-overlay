@@ -33,7 +33,7 @@ try {
   }
 }
 
-const { readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
+const { buildViewParams, readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -603,6 +603,12 @@ describe('monitor hardening', () => {
     expect(readPort('65536', 3000)).toBe(3000);
     expect(readTimerMilliseconds('2147483647', 120000)).toBe(2147483647);
     expect(readTimerMilliseconds('2147483648', 120000)).toBe(120000);
+  });
+
+  it('builds view-specific query parameters from the shared configuration', () => {
+    expect(buildViewParams('tasks', 'pve', 'en').toString()).toBe('view=tasks&mode=pve');
+    expect(buildViewParams('locales', 'regular', 'en').toString()).toBe('view=locales&locale=en');
+    expect(buildViewParams('items', 'pve', 'en').toString()).toBe('view=items');
   });
 
   it('only enables rebuilds for the default overlay path', () => {

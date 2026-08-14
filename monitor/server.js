@@ -22,6 +22,12 @@ const {
   pushRow,
   valuesEqual,
 } = require("./lib/sections.js");
+const {
+  adaptReward: adaptSharedReward,
+  buildTaskContext: buildSharedTaskContext,
+  fetchCached,
+  resolveReferenceMatrix,
+} = require("../src/lib/tarkov-api-shared.cjs");
 
 const PORT = config.port;
 const PUBLIC_DIR = config.publicDir;
@@ -627,14 +633,7 @@ async function fetchEnvelopeOnce(path) {
 // Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
 // within one refresh are deduped, while each poll cycle fetches fresh data.
 function fetchEnvelope(cache, path) {
-  const existing = cache.get(path);
-  if (existing) return existing;
-  const promise = fetchEnvelopeOnce(path).catch((error) => {
-    cache.delete(path);
-    throw error;
-  });
-  cache.set(path, promise);
-  return promise;
+  return fetchCached(cache, path, fetchEnvelopeOnce);
 }
 
 async function fetchTranslations(cache, mode, endpoint) {
@@ -662,13 +661,7 @@ function resolveItemRefs(value, ctx) {
 }
 
 function resolveItemRefMatrix(value, ctx) {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((group) => {
-      const list = Array.isArray(group) ? group : [group];
-      return list.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
-    })
-    .filter((group) => group.length > 0);
+  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
 }
 
 function resolveMapRef(value, ctx) {
@@ -739,29 +732,7 @@ function adaptObjective(raw, ctx) {
 }
 
 function adaptReward(raw, ctx) {
-  if (!isRecord(raw)) return undefined;
-  return compact({
-    ...raw,
-    items: Array.isArray(raw.items)
-      ? raw.items
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, item: resolveItemRef(entry.item, ctx) }))
-      : undefined,
-    traderStanding: Array.isArray(raw.traderStanding)
-      ? raw.traderStanding
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) }))
-      : undefined,
-    offerUnlock: Array.isArray(raw.offerUnlock)
-      ? raw.offerUnlock.filter(isRecord).map((entry) =>
-          compact({
-            ...entry,
-            trader: resolveTraderRef(entry.trader, ctx),
-            item: resolveItemRef(entry.item, ctx),
-          })
-        )
-      : undefined,
-  });
+  return adaptSharedReward(raw, ctx, { isRecord, compact, resolveItemRef, resolveTraderRef });
 }
 
 function adaptTaskRequirement(raw, ctx) {
@@ -803,32 +774,12 @@ function adaptTask(raw, ctx) {
 }
 
 async function buildTaskContext(cache, mode, tasksData) {
-  const [itemsEnvelope, mapsEnvelope, tradersEnvelope, itemsEn, tasksEn, mapsEn, tradersEn] =
-    await Promise.all([
-      fetchEnvelope(cache, `${mode}/items`),
-      fetchEnvelope(cache, `${mode}/maps`),
-      fetchEnvelope(cache, `${mode}/traders`),
-      fetchTranslations(cache, mode, "items"),
-      fetchTranslations(cache, mode, "tasks"),
-      fetchTranslations(cache, mode, "maps"),
-      fetchTranslations(cache, mode, "traders"),
-    ]);
-
-  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
-  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
-
-  return {
-    itemsById: toLookup(itemsData.items),
-    questItemsById: toLookup(tasksData.questItems),
-    tasksById: toLookup(tasksData.tasks),
-    mapsById: toLookup(mapsData.maps),
-    tradersById: toLookup(tradersEnvelope.data),
-    prestigeById: toLookup(tasksData.prestige),
-    itemsEn,
-    tasksEn,
-    mapsEn,
-    tradersEn,
-  };
+  return buildSharedTaskContext(cache, mode, tasksData, {
+    fetchEnvelope,
+    fetchTranslations,
+    isRecord,
+    toLookup,
+  });
 }
 
 async function fetchApiTasks(mode) {

@@ -80,7 +80,19 @@
     },
   };
 
-  const meta = { DEFAULT_MODES, MODE_LABELS, VIEW_CONFIG };
+  function buildViewParams(view, mode, locale) {
+    const params = new URLSearchParams({ view });
+    const config = VIEW_CONFIG[view];
+    if (config?.requiresMode) {
+      params.set("mode", mode);
+    }
+    if (config?.requiresLocale) {
+      params.set("locale", locale);
+    }
+    return params;
+  }
+
+  const meta = { DEFAULT_MODES, MODE_LABELS, VIEW_CONFIG, buildViewParams };
 
   if (typeof module === "object" && module.exports) {
     module.exports = meta;
