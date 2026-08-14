@@ -48,7 +48,7 @@ Notes:
         id: '6a5672392ee61bd094c49e28', // Required | Console-only; upstream id, or stable 'overlay.'-prefixed synthetic id
         requirementType: 'level', // Required | Console-only; "level" (LL1-LL4) or "reputation" (trader rep / scav karma)
         compareMethod: '>=', // Required | Console-only; ">=" | "<=" | ">" | "<" | "="
-        value: 2, // Required | Console-only; integer 0-4 for "level", any number for "reputation"
+        value: 2, // Required | Console-only; integer 1-4 for "level", any number for "reputation"
         trader: { id: 'trader-id-1', name: 'Trader Name 1' }, // Required | Console-only when entry exists
       },
     ], // Optional | Console-only
@@ -270,7 +270,7 @@ Notes:
         id: '6a5672392ee61bd094c49e28', // Required | Console-only; upstream id, or stable 'overlay.'-prefixed synthetic id
         requirementType: 'level', // Required | Console-only; "level" (LL1-LL4) or "reputation" (trader rep / scav karma)
         compareMethod: '>=', // Required | Console-only; ">=" | "<=" | ">" | "<" | "="
-        value: 2, // Required | Console-only; integer 0-4 for "level", any number for "reputation"
+        value: 2, // Required | Console-only; integer 1-4 for "level", any number for "reputation"
         trader: { id: 'trader-id-2', name: 'Trader Name 2' }, // Required | Console-only when entry exists
       },
     ], // Optional | Console-only

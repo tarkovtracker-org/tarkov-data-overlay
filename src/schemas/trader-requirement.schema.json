@@ -13,6 +13,9 @@
       },
       "then": {
         "properties": {
+          "compareMethod": {
+            "const": ">="
+          },
           "value": {
             "description": "Loyalty Level (LL1-LL4)",
             "maximum": 4,
@@ -25,8 +28,8 @@
   ],
   "properties": {
     "id": {
-      "description": "Merge identity: an upstream requirement id ('<24-hex>' or the composite '<24-hex taskId>-<24-hex traderId>'), or a stable synthetic id 'overlay.<taskId>.<traderId>.<type>.<method>.<value>' for overlay-authored requirements",
-      "pattern": "^(?:[0-9a-f]{24}(?:-[0-9a-f]{24})?|overlay\\.[0-9a-f]{24}\\.[0-9a-f]{24}\\.(?:level\\.(?:>=|<=|>|<|=)\\.[1-4]|reputation\\.(?:>=|<=|>|<|=)\\.-?[0-9]+(?:\\.[0-9]+)?))$",
+      "description": "Merge identity: an upstream requirement id ('<24-hex>' or the composite '<24-hex taskId>-<24-hex traderId>'), or a stable synthetic id 'overlay.<taskId>.<traderId>.<type>.<method>.<value>[.occurrence.<n>]' used for requirements without an upstream id",
+      "pattern": "^(?:[0-9a-f]{24}(?:-[0-9a-f]{24})?|overlay\\.[0-9a-f]{24}\\.[0-9a-f]{24}\\.(?:level\\.>=\\.[1-4]|reputation\\.(?:>=|<=|>|<|=)\\.-?[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)(?:\\.occurrence\\.(?:[2-9]|[1-9][0-9]+))?)$",
       "type": "string"
     },
     "requirementType": {

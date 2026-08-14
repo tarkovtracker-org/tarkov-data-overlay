@@ -252,8 +252,8 @@ values, with `>=`, `<=`, and `<` comparators.
 interface TraderRequirement {
   id: string; // upstream requirement id, or a stable 'overlay.'-prefixed synthetic id
   requirementType: 'level' | 'reputation';
-  compareMethod: '>=' | '<=' | '>' | '<' | '=';
-  value: number;
+  compareMethod: '>=' | '<=' | '>' | '<' | '='; // level requires '>='
+  value: number; // level requires an integer from 1 through 4
   trader: { id: string; name: string };
 }
 ```
@@ -280,14 +280,19 @@ function applyTraderRequirements(
 }
 ```
 
-- **Overlay-only requirements** carry a synthetic id prefixed `overlay.` (e.g.
-  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`), deterministic and
-  stable across builds. They never collide with an upstream id (`<24-hex>`, or
-  the composite `<24-hex taskId>-<24-hex traderId>` tarkov.dev emits for some
-  reputation gates), so they append instead of patch. Both id shapes are
-  enforced by the task schemas, and `npm run validate` additionally checks that
-  each synthetic id is derived from the entry it labels (and that no two
-  requirements in one task share an id), so a malformed or drifted id fails
+- **Synthetic requirement IDs** use the `overlay.` prefix (for example,
+  `overlay.<taskId>.<traderId>.<type>.<method>.<value>`). The prefix identifies
+  the ID as synthetic; it does not imply that the requirement itself was
+  authored by the overlay. Overlay-only requirements use this form, and the
+  API adapter also assigns it when an upstream requirement is missing an ID.
+  Semantically identical repeated id-less upstream entries keep the base ID for
+  the first occurrence and add `.occurrence.<n>` from the second occurrence so
+  they remain distinct and deterministic. Synthetic IDs never collide with an
+  upstream ID (`<24-hex>`, or the composite `<24-hex taskId>-<24-hex traderId>`
+  tarkov.dev emits for some reputation gates). Both ID shapes are enforced by
+  the task schemas, and `npm run validate` additionally checks that each
+  synthetic ID is derived from the entry it labels (and that no two
+  requirements in one task share an ID), so a malformed or drifted ID fails
   validation.
 - **Upstream-preserved requirements** keep their upstream `id`, so a correction
   patches the existing requirement in place.

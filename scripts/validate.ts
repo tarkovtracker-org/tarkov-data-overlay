@@ -165,14 +165,12 @@ export function validateFile(
   }
 }
 
-/**
- * Task files whose `traderRequirements` carry overlay-authored merge identities.
- */
+/** Task files whose `traderRequirements` may carry synthetic merge identities. */
 const TASK_REQUIREMENT_FILE_PATTERN =
   /^(?:overrides|additions)\/(?:modes\/[^/]+\/)?(?:tasks|tasksAdd)\.json5$/;
 
 /**
- * Cross-check overlay-authored trader-requirement ids against the entry they identify.
+ * Cross-check synthetic trader-requirement ids against the entry they identify.
  *
  * The schema pattern proves a synthetic id's *shape*
  * (`overlay.<taskId>.<traderId>.<type>.<method>.<value>`); this proves its
@@ -209,9 +207,18 @@ export function validateTraderRequirementIds(
 
         if (!id.startsWith(SYNTHETIC_REQUIREMENT_ID_PREFIX)) return;
 
-        // `value` is the last segment and may itself contain a '.' (decimals).
-        const [, encodedTaskId, encodedTraderId, encodedType, encodedMethod, ...valueParts] =
-          id.split('.');
+        // Remove the prefix before decoding fields. `value` is the last field
+        // and may itself contain a '.' (decimals).
+        const encodedFields = id.slice(SYNTHETIC_REQUIREMENT_ID_PREFIX.length);
+        const [encodedTaskId, encodedTraderId, encodedType, encodedMethod, ...valueParts] =
+          encodedFields.split('.');
+        if (
+          valueParts.length >= 3 &&
+          valueParts.at(-2) === 'occurrence' &&
+          /^\d+$/.test(valueParts.at(-1) ?? '')
+        ) {
+          valueParts.splice(-2);
+        }
         const encodedValue = valueParts.join('.');
         const traderId = isRecord(requirement.trader) ? requirement.trader.id : undefined;
 
@@ -251,7 +258,7 @@ export function validateTraderRequirementIds(
  * Validate a task source file against its schema, then cross-check the
  * merge identities its trader requirements declare.
  */
-function validateTaskSourceFile(
+export function validateTaskSourceFile(
   filePath: string,
   displayPath: string,
   validators: ValidatorCache

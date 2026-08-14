@@ -301,6 +301,18 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
                     value: 1,
                     trader: '579dc571d53a0658a154fbec',
                   },
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
                 ],
               },
             },
@@ -328,6 +340,8 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(task.traderRequirements?.map((requirement) => requirement.id)).toEqual([
       'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
       'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.>=.1',
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2.occurrence.2',
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2.occurrence.3',
     ]);
   });
 

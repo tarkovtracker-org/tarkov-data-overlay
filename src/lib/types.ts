@@ -165,27 +165,40 @@ export type TraderRequirementCompareMethod = '>=' | '<=' | '>' | '<' | '=';
  */
 export type TraderRequirementType = 'level' | 'reputation';
 
-/**
- * Trader requirement in json.tarkov.dev's discriminated shape.
- *
- * `id` is the upstream requirement id, or a deterministic synthetic id (see
- * `SYNTHETIC_REQUIREMENT_ID_PREFIX`) for overlay-authored requirements absent
- * upstream. The id is the merge identity consumers use to patch-by-id rather
- * than replace the whole array.
- */
-export interface TraderRequirement {
+/** Shared fields for trader requirements in json.tarkov.dev's discriminated shape. */
+interface TraderRequirementBase {
   id: string;
-  requirementType: TraderRequirementType;
-  compareMethod: TraderRequirementCompareMethod;
-  value: number;
   trader: { id: string; name: string };
 }
 
+/** Trader Loyalty Level requirement (LL1-LL4). */
+export interface TraderLevelRequirement extends TraderRequirementBase {
+  requirementType: 'level';
+  compareMethod: '>=';
+  value: 1 | 2 | 3 | 4;
+}
+
+/** Trader reputation threshold requirement (trader rep / scav karma). */
+export interface TraderReputationRequirement extends TraderRequirementBase {
+  requirementType: 'reputation';
+  compareMethod: TraderRequirementCompareMethod;
+  value: number;
+}
+
 /**
- * Prefix for synthetic requirement ids authored into the overlay for
- * requirements that have no upstream counterpart. Kept distinct from
- * tarkov.dev's 24-hex ids so consumers can tell overlay-authored requirements
- * apart at a glance.
+ * Trader requirement in json.tarkov.dev's discriminated shape.
+ *
+ * `id` is an upstream requirement id or a deterministic synthetic id (see
+ * `SYNTHETIC_REQUIREMENT_ID_PREFIX`). The adapter also assigns synthetic ids
+ * when an upstream requirement has no id. The id is the merge identity
+ * consumers use to patch-by-id rather than replace the whole array.
+ */
+export type TraderRequirement = TraderLevelRequirement | TraderReputationRequirement;
+
+/**
+ * Prefix identifying deterministic synthetic requirement ids. Synthetic ids
+ * may be authored in overlay data or assigned by the API adapter when an
+ * upstream requirement omits its id.
  */
 export const SYNTHETIC_REQUIREMENT_ID_PREFIX = 'overlay.';
 

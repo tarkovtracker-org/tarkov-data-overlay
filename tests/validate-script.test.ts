@@ -19,6 +19,7 @@ import {
   validateFile,
   validateLocaleEntityIds,
   validateSourceFiles,
+  validateTaskSourceFile,
   validateTraderRequirementIds,
 } from '../scripts/validate.js';
 
@@ -208,6 +209,72 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it("rejects level requirements whose comparator is not '>='", () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '<=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('must be equal to constant'))).toBe(
+        true
+      );
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts a valid Loyalty Level requirement', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 4,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toBeUndefined();
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects Loyalty Level zero', () => {
     const validators = initializeValidators();
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
@@ -299,6 +366,136 @@ describe('scripts/validate helpers', () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors?.some((error) => error.includes('must match pattern'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('runs trader requirement identity validation for matching task display paths', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-task-source-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '59674cd986f7744ab26e32f2': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTaskSourceFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('synthetic id encodes task id'))).toBe(
+        true
+      );
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts synthetic reputation ids with exponent-form values', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '657315e1dccd301f1301416a': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.>=.1e+21',
+              requirementType: 'reputation',
+              compareMethod: '>=',
+              value: 1e+21,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTaskSourceFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toBeUndefined();
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts an occurrence-suffixed decimal reputation identity for a task path', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-task-source-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '657315e1dccd301f1301416a': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.>=.1.25.occurrence.2',
+              requirementType: 'reputation',
+              compareMethod: '>=',
+              value: 1.25,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTaskSourceFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toBeUndefined();
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('skips trader requirement identity validation for non-task display paths', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-task-source-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '59674cd986f7744ab26e32f2': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTaskSourceFile(filePath, 'overrides/not-tasks.json5', validators);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toBeUndefined();
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
