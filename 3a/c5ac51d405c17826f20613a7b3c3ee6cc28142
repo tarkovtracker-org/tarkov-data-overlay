@@ -1,0 +1,29 @@
+package.json
+  s_3a7e1236a33548::t_43eca5d3ceb5ab 19,43
+.markdownlint.json
+  s_3a7e1236a33548::t_1c62432a054d0b 1-10
+docs/MASTER_SAMPLES.md
+  s_3a7e1236a33548::t_271c4b5905f6c5 6,16,455
+README.md
+  s_3a7e1236a33548::t_8f48ba21421526 16
+.github/PULL_REQUEST_TEMPLATE.md
+  s_3a7e1236a33548::t_271c4b5905f6c5 16
+.github/workflows/ci.yml
+  s_3a7e1236a33548::t_f14139c8a1be9c 50-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3ac5ac51d405c17826f20613a7b3c3ee6cc28142",
+  "prompts": {},
+  "sessions": {
+    "s_3a7e1236a33548": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019ffee6-9f6e-7414-bf37-2d7a9803d7b6",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
