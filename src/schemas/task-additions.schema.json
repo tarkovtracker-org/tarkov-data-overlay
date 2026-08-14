@@ -852,64 +852,7 @@
       "traderRequirements": {
         "description": "Trader requirements to start the task (loyalty level or reputation)",
         "items": {
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "requirementType": {
-                    "const": "level"
-                  }
-                },
-                "required": ["requirementType"]
-              },
-              "then": {
-                "properties": {
-                  "value": {
-                    "description": "Loyalty Level (LL1-LL4)",
-                    "maximum": 4,
-                    "minimum": 0,
-                    "type": "integer"
-                  }
-                }
-              }
-            }
-          ],
-          "properties": {
-            "id": {
-              "description": "Merge identity: an upstream requirement id ('<24-hex>' or the composite '<24-hex taskId>-<24-hex traderId>'), or a stable synthetic id 'overlay.<taskId>.<traderId>.<type>.<method>.<value>' for overlay-authored requirements",
-              "pattern": "^(?:[0-9a-f]{24}(?:-[0-9a-f]{24})?|overlay\\.[0-9a-f]{24}\\.[0-9a-f]{24}\\.(?:level|reputation)\\.(?:>=|<=|>|<|=)\\.-?[0-9]+(?:\\.[0-9]+)?)$",
-              "type": "string"
-            },
-            "requirementType": {
-              "description": "Semantic of the requirement: 'level' (Loyalty Level) or 'reputation' (trader rep / scav karma)",
-              "enum": ["level", "reputation"],
-              "type": "string"
-            },
-            "compareMethod": {
-              "description": "Comparison method for the requirement",
-              "enum": [">=", "<=", ">", "<", "="],
-              "type": "string"
-            },
-            "value": {
-              "description": "Threshold value: integer 0-4 for 'level'; any number (including negative) for 'reputation'",
-              "type": "number"
-            },
-            "trader": {
-              "additionalProperties": false,
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            }
-          },
-          "required": ["id", "requirementType", "compareMethod", "value", "trader"],
-          "type": "object"
+          "$ref": "trader-requirement.schema.json"
         },
         "type": "array"
       },

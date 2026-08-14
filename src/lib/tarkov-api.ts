@@ -22,6 +22,7 @@
  * once. Across calls the cache is not shared, mirroring the monitor's pattern.
  */
 
+import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
 import type {
   TaskData,
   TaskItemRef,
@@ -312,16 +313,27 @@ function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) }) as unknown as TaskRequirement;
 }
 
-function adaptTraderRequirement(raw: unknown, ctx: Context): TraderRequirement {
+function adaptTraderRequirement(raw: unknown, taskId: string, ctx: Context): TraderRequirement {
   if (!isRecord(raw)) return raw as TraderRequirement;
-  // Preserve the upstream discriminated schema (id, requirementType,
-  // compareMethod, value) and resolve the trader reference. `id` is normalized
-  // explicitly so the merge identity survives adaptation even if upstream ever
-  // moves it into an inline object.
+
+  const trader = resolveTraderRef(raw.trader, ctx);
+  const upstreamId = stringId(raw);
+  const generatedId = [
+    SYNTHETIC_REQUIREMENT_ID_PREFIX.slice(0, -1),
+    taskId,
+    trader?.id,
+    raw.requirementType,
+    raw.compareMethod,
+    raw.value,
+  ].join('.');
+
+  // Preserve an upstream merge identity when present. If upstream regresses and
+  // omits it, derive the same deterministic identity used by overlay-authored
+  // requirements so multiple id-less entries cannot collapse onto `id: ''`.
   return compact({
     ...raw,
-    id: stringId(raw) ?? '',
-    trader: resolveTraderRef(raw.trader, ctx),
+    id: upstreamId ?? generatedId,
+    trader,
   }) as unknown as TraderRequirement;
 }
 
@@ -343,7 +355,7 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
       ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
       : undefined,
     traderRequirements: Array.isArray(raw.traderRequirements)
-      ? raw.traderRequirements.map((req) => adaptTraderRequirement(req, ctx))
+      ? raw.traderRequirements.map((req) => adaptTraderRequirement(req, id, ctx))
       : undefined,
     objectives: Array.isArray(raw.objectives)
       ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))

@@ -279,6 +279,58 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     });
   });
 
+  it('generates stable, distinct ids for id-less trader requirements', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              '657315e1dccd301f1301416a': {
+                id: '657315e1dccd301f1301416a',
+                name: 'task name',
+                traderRequirements: [
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
+                  {
+                    requirementType: 'reputation',
+                    compareMethod: '>=',
+                    value: 1,
+                    trader: '579dc571d53a0658a154fbec',
+                  },
+                ],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 'task name': 'Task' } },
+        'regular/traders': {
+          data: {
+            '54cb50c76803fa8b248b4571': {
+              id: '54cb50c76803fa8b248b4571',
+              name: 'prapor name',
+            },
+            '579dc571d53a0658a154fbec': {
+              id: '579dc571d53a0658a154fbec',
+              name: 'fence name',
+            },
+          },
+        },
+        'regular/traders_en': { data: { 'prapor name': 'Prapor', 'fence name': 'Fence' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(task.traderRequirements?.map((requirement) => requirement.id)).toEqual([
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+      'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.>=.1',
+    ]);
+  });
+
   it('resolves requiredPrestige from the prestige array', async () => {
     mockEndpoints(
       baseRoutes('regular', {

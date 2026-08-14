@@ -220,6 +220,17 @@ const validateTraderRequirements: FieldValidator = (override, apiTask) => {
     };
   }
 
+  // A non-empty override remains a whole-array replacement for consumers that
+  // have not migrated to patch-by-id. Matching only a strict subset therefore
+  // intentionally clears the omitted API requirements and is still needed.
+  if (remaining.length > 0) {
+    return {
+      field: 'traderRequirements',
+      status: 'needed',
+      message: `traderRequirements: override omits ${remaining.length} API requirement(s) (${remaining.join('; ')}) - STILL NEEDED`,
+    };
+  }
+
   return {
     field: 'traderRequirements',
     status: 'fixed',

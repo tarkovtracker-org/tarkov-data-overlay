@@ -662,6 +662,43 @@ describe('validateTaskOverride', () => {
       ).toBe(true);
     });
 
+    it('returns NEEDED when a matching override omits an API requirement', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+          {
+            id: '66dace4d03b34844877a50fc',
+            requirementType: 'reputation',
+            compareMethod: '>=',
+            value: 1,
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
+          },
+        ],
+      });
+      const override: TaskOverride = {
+        traderRequirements: [
+          {
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+      const detail = result.details.find((d) => d.field === 'traderRequirements');
+
+      expect(detail?.status).toBe('needed');
+      expect(detail?.message).toContain('override omits 1 API requirement(s)');
+    });
+
     it('returns NEEDED when an empty override clears non-empty API requirements', () => {
       const apiTask = createApiTask({
         traderRequirements: [

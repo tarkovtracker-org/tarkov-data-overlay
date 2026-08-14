@@ -208,6 +208,70 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('rejects Loyalty Level zero', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 0,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors?.some((error) => error.includes('must be >= 1'))).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts reputation zero', () => {
+    const validators = initializeValidators();
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-json5-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        'task-id': {
+          traderRequirements: [
+            {
+              id: '66dace4d03b34844877a50fc',
+              requirementType: 'reputation',
+              compareMethod: '>=',
+              value: 0,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toBeUndefined();
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it('rejects synthetic ids whose embedded discriminator disagrees with the entry', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
     const filePath = join(tempDir, 'tasks.json5');
