@@ -1,0 +1,40 @@
+src/schemas/task-additions.schema.json
+  s_2b08c07cab3ffa::t_ba3020ad2b8c5b 855
+src/schemas/task-override.schema.json
+  s_2b08c07cab3ffa::t_4321869e9d3036 1163
+tests/task-validator.test.ts
+  s_2b08c07cab3ffa::t_ccb3410f0359e8 665-701
+tests/overlay-schema.test.ts
+  s_2b08c07cab3ffa::t_33a24a1e79f068 103
+src/schemas/trader-requirement.schema.json
+  s_2b08c07cab3ffa::t_fa8cb0c8ccb163 1-62
+tests/tarkov-api.test.ts
+  s_2b08c07cab3ffa::t_844e53fcf81772 282-333
+scripts/validate.ts
+  s_2b08c07cab3ffa::t_e1a529bcc0d41a 87-94
+tests/validate-script.test.ts
+  s_2b08c07cab3ffa::t_a742075da306e4 212-225,252-267,270-274
+  s_2b08c07cab3ffa::t_c362be4d674abd 211,226-251,268-269
+src/lib/tarkov-api.ts
+  s_2b08c07cab3ffa::t_7f39340ed3107c 25,322
+  s_2b08c07cab3ffa::t_bb5dc9b5903e96 316
+  s_2b08c07cab3ffa::t_7c26e52f696677 318-321,323-332,335-336,358
+src/lib/task-validator.ts
+  s_2b08c07cab3ffa::t_f5646ba089efec 223-233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "dc64ca7b3fe79b3a7fb4c3ed731b8e0f0e194c98",
+  "prompts": {},
+  "sessions": {
+    "s_2b08c07cab3ffa": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00279-9a72-7048-b3c9-b3eab940af95",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
