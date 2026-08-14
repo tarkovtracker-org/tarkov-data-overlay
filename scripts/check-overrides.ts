@@ -188,6 +188,13 @@ const ENTITY_ADDITION_SPECS: EntityCheckSpec[] = [
     endpoint: 'items',
     collectionKey: 'items',
   },
+  {
+    label: 'craftsAdd',
+    segments: ['additions', 'craftsAdd.json5'],
+    endpoint: 'crafts',
+    // The crafts endpoint returns the collection directly under `data` as a
+    // top-level array (no wrapping collection key).
+  },
 ];
 
 const STATUS_ICONS: Record<ValidationResult['status'], string> = {
