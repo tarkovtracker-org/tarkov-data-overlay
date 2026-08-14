@@ -1,0 +1,25 @@
+src/lib/task-validator.ts
+  s_2b08c07cab3ffa::t_8a95120f38092d 159-162,204,209,211,232
+tests/task-validator.test.ts
+  s_2b08c07cab3ffa::t_732c3af9e35fb8 699-701
+tests/validate-script.test.ts
+  s_2b08c07cab3ffa::t_4e5e885726068e 275-306
+src/schemas/trader-requirement.schema.json
+  s_2b08c07cab3ffa::t_782ac2e0044380 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b24f96fa720a269213a5e9790ad459799df40efb",
+  "prompts": {},
+  "sessions": {
+    "s_2b08c07cab3ffa": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00279-9a72-7048-b3c9-b3eab940af95",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
