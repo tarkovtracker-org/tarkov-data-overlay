@@ -1,4 +1,39 @@
 {
+  // ---------------------------------------------------------------------------
+  // Provenance notes (kept from the 2026-08-12 capture-alignment pass, commit
+  // 6c3700f) for entries that were dropped or moved:
+  //
+  // Pathfinder - REMOVED: an objective description was mis-attributed to a
+  // nonexistent quest ("Sales Night"); it rewrote a correct type=visit
+  // objective ("Visit the Railway Exfil exit on Interchange", confirmed by both
+  // captures + tarkov.dev) into fabricated text.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
+  //
+  // Power of Persuasion (aka "Test Drive - Part 2") - MOVED to
+  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
+  // (regular) = 20 PMCs on Streets/GZ/Interchange; captures (PvE) = 5 on
+  // Woods/GZ/Interchange/Customs.
+  //
+  // Easy-Breezy (aka "Test Drive - Part 5") - MOVED to
+  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
+  // (regular) = 50 targets on Factory; captures (PvE) = 30 on
+  // Reserve/Lighthouse.
+  //
+  // Small Business - Part 3 - REMOVED: the two Woods objective descriptions
+  // were swapped, contradicting tarkov.dev, BOTH game captures, and the wiki
+  // guide. Re-add only with a fresh in-game marker screenshot.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
+  //
+  // Setup - REMOVED: the API serves the same 9 hat/vest combinations
+  // (verified: normalized item-id sets are identical; only ordering differed).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
+  //
+  // minPlayerLevel overrides (A Fuel Matter, Inventory Check, Psycho Sniper,
+  // Bullshit, Chumming, ...) - REMOVED: the Season 1 patch replaced
+  // player-level quest requirements with trader loyalty levels; the 1.1.0.0
+  // capture carries no Level conditions for these quests.
+  // ---------------------------------------------------------------------------
+
   // ===========================================================================
   // SEASON 1 (1.1.0) quest requirement rework: player level requirements were
   // replaced with trader loyalty levels. All quests below now require Prapor
@@ -164,11 +199,14 @@
   //
   // 2026-08-09: renamed to "District Patrol" in S1
   // 2026-08-10: S1 - now requires Prapor LL2 instead of player level
+  // District Patrol - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '64e7b9bffd30422ed03dad38': {
     name: 'District Patrol', // Was: Gendarmerie - District Patrol
     traderRequirements: [
       { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 20)
     ],
+    experience: 10000, // Was: 8300 (all modes, stale pre-1.1 value)
   },
 
   // Kings of the Rooftops - Change requirements
@@ -425,10 +463,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
   //
   // 2026-08-10 - S1: now requires Prapor LL4 instead of player level
+  // Escort - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '60e71b62a0beca400d69efc4': {
     traderRequirements: [
       { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
+    experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
   },
 
   // Getting Some Air (old: Test Drive - Part 4) - Change requirements
@@ -815,10 +856,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
   //
   // 2026-08-10 - S1: now requires Therapist LL4 instead of player level
+  // Decontamination Service - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '5c0d1c4cd0928202a02a6f5c': {
     traderRequirements: [
       { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 35)
     ],
+    experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
   },
 
   // ---------------------------------------------------------------------------
@@ -1003,10 +1047,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
   //
   // 2026-08-10 - S1: now requires Skier LL1 instead of player level
+  // No Swiping - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '658027799634223183395339': {
     traderRequirements: [
       { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 24)
     ],
+    experience: 3000, // Was: 12000 (all modes, stale pre-1.1 value)
   },
 
   // What's on the Flash Drive? - Change requirements
@@ -1085,34 +1132,70 @@
           ],
           [
             { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
             { id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
             { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
-            { id: '693fd1200ec97e98040bd3f9', name: 'Tac-Kek JayPC plate carrier (Black)', shortName: 'JayPC' },
+            {
+              id: '693fd1200ec97e98040bd3f9',
+              name: 'Tac-Kek JayPC plate carrier (Black)',
+              shortName: 'JayPC',
+            },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
             { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
-            { id: '6937f02dfd6488bb27024839', name: 'Domontovich ushanka hat', shortName: 'Domont' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
+            {
+              id: '6937f02dfd6488bb27024839',
+              name: 'Domontovich ushanka hat',
+              shortName: 'Domont',
+            },
           ],
           [
-            { id: '693fd13aa490096a05028cc8', name: 'Tac-Kek JayPC plate carrier (OD Green)', shortName: 'JayPC' },
+            {
+              id: '693fd13aa490096a05028cc8',
+              name: 'Tac-Kek JayPC plate carrier (OD Green)',
+              shortName: 'JayPC',
+            },
             { id: '6937efd50543dcc2560a2c81', name: 'New Year ushanka hat', shortName: 'Ushanka' },
           ],
         ], // Was: [[{ id: '572b7adb24597762ae139821', name: 'Scav Vest', shortName: 'Scav Vest' }, { id: '59e7708286f7742cbd762753', name: 'Ushanka ear flap hat', shortName: 'Ushanka' }]]
@@ -1124,10 +1207,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
   //
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // Debtor - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '639dbaf17c898a131e1cffff': {
     traderRequirements: [
       { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 31)
     ],
+    experience: 10000, // Was: 13200 (all modes, stale pre-1.1 value)
   },
 
   // Supplements (old: Vitamins - Part 2) - Change requirements
@@ -1246,10 +1332,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
   //
   // 2026-08-10 - S1: now requires Skier LL3 instead of player level
+  // Pyramid Scheme - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '6572e876dc0d635f633a5714': {
     traderRequirements: [
       { trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 28)
     ],
+    experience: 28000, // Was: 12400 (all modes, stale pre-1.1 value)
   },
 
   // Top Secret - Change requirements
@@ -2115,11 +2204,14 @@
   //
   // 2026-08-10: renamed in S1 (dropped leading "A ")
   // 2026-08-10 - S1: now requires Mechanic LL4 instead of player level
+  // Shooter Born in Heaven - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '5c0bde0986f77479cf22c2f8': {
     name: 'Shooter Born in Heaven', // Was: A Shooter Born in Heaven
     traderRequirements: [
       { trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' }, value: 4 }, // Was: [] (player level requirement, minPlayerLevel 14)
     ],
+    experience: 65000, // Was: 55000 (all modes, stale pre-1.1 value)
   },
 
   // Goals and Means - Change requirements
@@ -2232,7 +2324,7 @@
     name: 'Gunsmith Master - Part 13', // Was: Gunsmith - Part 25
   },
 
-// Ragman Loyalty Level 1
+  // Ragman Loyalty Level 1
   // ---------------------------------------------------------------------------
 
   // Long Line - Change requirements
@@ -2262,10 +2354,11 @@
   // 2026-08-10: renamed in S1 (Interchange fuel tank objectives match)
   // 2026-08-10 - S1: now requires Ragman LL1 instead of player level
   // Truck #2 location change; truck #4 objective missing zone data.
-  // tarkov.dev now ships the fourth-tank objective (6926fcc872a6499d1fa29327) as a required
-  // objective, so the former overlay-added optional objective was removed (issue #246);
-  // its zone data is patched onto the real objective below, which upstream ships with empty zones.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Blood_of_War_-_Part_1
+  // The second fuel tank objective ships with empty zones upstream; the zone is
+  // patched in (in-game verified, issue #246). The former fourth-tank zone patch
+  // (6926fcc872a6499d1fa29327) was REMOVED 2026-08-12: tarkov.dev dropped the
+  // third/fourth tank objectives entirely (matching the 1.1.0.0 capture).
+  // See commit 6c3700f.
   '5ae448f286f77448d73c0131': {
     name: 'Fuel Crisis', // Was: The Blood of War - Part 1
     traderRequirements: [
@@ -2306,46 +2399,6 @@
               y: 28.55, // Was: 22.85
               z: 125.8475, // Was: 14.53
             },
-          },
-        ],
-      },
-      '6926fcc872a6499d1fa29327': {
-        // Fourth fuel tank - upstream objective ships with no zone data
-        zones: [ // Was: []
-          {
-            map: {
-              id: '5714dbc024597771384a510d',
-              name: 'Interchange',
-            },
-            outline: [
-              {
-                x: 35.316765,
-                y: 22.91,
-                z: 303.477869,
-              },
-              {
-                x: 46.143366,
-                y: 22.91,
-                z: 308.653264,
-              },
-              {
-                x: 44.418235,
-                y: 22.91,
-                z: 312.262131,
-              },
-              {
-                x: 33.591634,
-                y: 22.91,
-                z: 307.086736,
-              },
-            ],
-            position: {
-              x: 39.8675,
-              y: 22.91,
-              z: 307.87,
-            },
-            top: 24.35,
-            bottom: 21.35,
           },
         ],
       },
@@ -2486,10 +2539,26 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
   //
   // 2026-08-10 - S1: now requires Ragman LL2 instead of player level
+  // ---------------------------------------------------------------------------
+  // EFT 1.1.0.0 (Seasonal Character) quest experience rework, verified against
+  // the 2026-08-12 PvE client capture (eft/eft-1.1-pve) and the wiki.
+  //
+  // BSG consolidated quest XP rewards to a small set of standard values in
+  // patch 1.1.0.0; tarkov.dev synced most quests but still serves the old
+  // per-quest value for the tasks below - in EVERY mode (regular/pve/pvp-season
+  // all mirror the same stale number). Both the wiki (regular witness) and the
+  // in-game capture (PvE witness) agree on the new value for these ten, so the
+  // correction is shared and belongs in base. Each entry is recorded in
+  // src/divergences/tasks.json5 (status: converged) so a future flip is
+  // detected instead of silently shipping wrong data.
+  // ---------------------------------------------------------------------------
+  // Dandies - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '65734c186dc1e402c80dc19e': {
     traderRequirements: [
       { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 2 }, // Was: [] (player level requirement, minPlayerLevel 33)
     ],
+    experience: 10000, // Was: 11000 (all modes, stale pre-1.1 value)
   },
 
   // Supervisor - Change requirements
@@ -2584,10 +2653,13 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
   //
   // 2026-08-10 - S1: now requires Ragman LL3 instead of player level
+  // Scavenger - quest XP reworked in 1.1.0.0
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
   '5c112d7e86f7740d6f647486': {
     traderRequirements: [
       { trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' }, value: 3 }, // Was: [] (player level requirement, minPlayerLevel 29)
     ],
+    experience: 28000, // Was: 10000 (all modes, stale pre-1.1 value)
   },
 
   // ---------------------------------------------------------------------------
@@ -3113,7 +3185,7 @@
   // Pets Won't Need It (old: Pets Won't Need It - Part 1) - Renamed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pets_Won%27t_Need_It
   '64f731ab83cfca080a361e42': {
-    name: 'Pets Won\'t Need It', // Was: Pets Won't Need It - Part 1
+    name: "Pets Won't Need It", // Was: Pets Won't Need It - Part 1
   },
 
   // Gunsmith Master - Part 12 (old: Gunsmith - Old Friend's Request) - Renamed
@@ -3157,7 +3229,10 @@
         { trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' }, standing: 0.25 }, // Was: 0.01
       ],
       items: [
-        { count: 165000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 100000 + 2 Grizzly + 2 Surv12
+        {
+          count: 165000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 100000 + 2 Grizzly + 2 Surv12
       ],
     },
   },
@@ -3175,7 +3250,10 @@
       ],
       items: [
         { count: 585, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 980 + RB-AO key
-        { count: 3, item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' } },
+        {
+          count: 3,
+          item: { id: '5734779624597737e04bf329', name: 'CPU fan', shortName: 'CPU fan' },
+        },
       ],
     },
   },
@@ -3192,7 +3270,10 @@
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
       ],
       items: [
-        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
+        {
+          count: 1171,
+          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
+        }, // Was: 950 + MPX + 3 mags + 5 RIP + room 306 key
       ],
     },
     objectives: {
@@ -3200,7 +3281,13 @@
         count: 15, // Was: 7
         description: 'Eliminate 15 targets with headshots while using an AUG on Factory', // Was: Eliminate Scavs with headshots while using a 12ga shotgun on Shoreline
         maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was: Shoreline
-        usingWeapon: [{ id: '62e7c4fba689e8c9c50dfc38', name: 'Steyr AUG A1 5.56x45 assault rifle', shortName: 'AUG A1' }],
+        usingWeapon: [
+          {
+            id: '62e7c4fba689e8c9c50dfc38',
+            name: 'Steyr AUG A1 5.56x45 assault rifle',
+            shortName: 'AUG A1',
+          },
+        ],
       },
     },
   },
@@ -3236,8 +3323,14 @@
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03
       ],
       items: [
-        { count: 1171, item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' } }, // Was: 1100 + Car battery
-        { count: 2, item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' } },
+        {
+          count: 1171,
+          item: { id: '5696686a4bdc2da3298b456a', name: 'Dollars', shortName: 'USD' },
+        }, // Was: 1100 + Car battery
+        {
+          count: 2,
+          item: { id: '62a0a16d0b9d3c46de5b6e97', name: 'Military flash drive', shortName: 'MFD' },
+        },
       ],
     },
   },
@@ -3272,9 +3365,26 @@
         { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0
       ],
       items: [
-        { count: 400000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } },
-        { count: 1, item: { id: '68ec0c1e4a10ddacb2069398', name: 'TKPD 9.3x64 carbine Assault', shortName: 'TKPD Assault' } }, // Was: TKPD XPS3-2
-        { count: 2, item: { id: '68ee0114024fb2df16004f1c', name: '9.3x64mm FMJ ammo pack (20 pcs)', shortName: 'FMJ' } }, // Was: 1x 7N33 pack
+        {
+          count: 400000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        },
+        {
+          count: 1,
+          item: {
+            id: '68ec0c1e4a10ddacb2069398',
+            name: 'TKPD 9.3x64 carbine Assault',
+            shortName: 'TKPD Assault',
+          },
+        }, // Was: TKPD XPS3-2
+        {
+          count: 2,
+          item: {
+            id: '68ee0114024fb2df16004f1c',
+            name: '9.3x64mm FMJ ammo pack (20 pcs)',
+            shortName: 'FMJ',
+          },
+        }, // Was: 1x 7N33 pack
       ],
     },
     objectives: {
@@ -3297,7 +3407,10 @@
         { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.1 }, // Was: 0.02
       ],
       items: [
-        { count: 80000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 35000 + 3 Grizzly + 3 Golden Star
+        {
+          count: 80000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 35000 + 3 Grizzly + 3 Golden Star
       ],
     },
   },
@@ -3500,5 +3613,11 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Combat_Medic
   '5d25e2a986f77409dd5cdf2a': {
     disabled: true,
+  },
+  // Hell on Earth - Part 1 - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
+  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  '666314b0acf8442f8b0531a1': {
+    experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
   },
 }

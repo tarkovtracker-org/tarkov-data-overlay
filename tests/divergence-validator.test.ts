@@ -26,7 +26,7 @@ const makeTask = (experience: number): TaskData =>
     minPlayerLevel: 10,
     objectives: [],
     experience,
-  } as unknown as TaskData);
+  }) as unknown as TaskData;
 
 const registry = (
   overrides: Partial<TaskDivergence['fields']['experience']> = {}
@@ -83,10 +83,14 @@ describe('effectiveOverrideValue', () => {
 describe('validateDivergences', () => {
   it('flags OVERRIDE_MISSING when upstream is wrong and nothing corrects it', () => {
     // The regression shape: upstream mirrors the PvE value into regular.
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(9800),
-      pve: ctx(9800),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(9800),
+        pve: ctx(9800),
+      }
+    );
 
     const regular = results.find((r) => r.mode === 'regular');
     expect(regular?.verdict).toBe('OVERRIDE_MISSING');
@@ -95,29 +99,41 @@ describe('validateDivergences', () => {
   });
 
   it('detects that upstream is mirroring one mode into the other', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(9800),
-      pve: ctx(9800),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(9800),
+        pve: ctx(9800),
+      }
+    );
 
     expect(results.every((r) => r.mirrored)).toBe(true);
   });
 
   it('does not report mirroring when upstream serves distinct values', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(18100),
-      pve: ctx(9800),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(18100),
+        pve: ctx(9800),
+      }
+    );
 
     expect(results.some((r) => r.mirrored)).toBe(false);
     expect(results.every((r) => r.verdict === 'UPSTREAM_CORRECT')).toBe(true);
   });
 
   it('reports OVERRIDE_ACTIVE when an override supplies the value upstream lacks', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(9800, { [TASK_ID]: { experience: 18100 } as TaskOverride }),
-      pve: ctx(9800),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(9800, { [TASK_ID]: { experience: 18100 } as TaskOverride }),
+        pve: ctx(9800),
+      }
+    );
 
     expect(results.find((r) => r.mode === 'regular')?.verdict).toBe('OVERRIDE_ACTIVE');
   });
@@ -125,25 +141,37 @@ describe('validateDivergences', () => {
   it('reports OVERRIDE_REDUNDANT rather than "stale" when upstream agrees', () => {
     // This is the case that must never be presented as "safe to delete":
     // removing it is what lets a mirror flip go unnoticed.
-    const results = validateDivergences(registry(), {}, {
-      pve: ctx(9800, { [TASK_ID]: { experience: 9800 } as TaskOverride }),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        pve: ctx(9800, { [TASK_ID]: { experience: 9800 } as TaskOverride }),
+      }
+    );
 
     expect(results[0].verdict).toBe('OVERRIDE_REDUNDANT');
   });
 
   it('reports OVERRIDE_WRONG when an override disagrees with recorded truth', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(9800, { [TASK_ID]: { experience: 12345 } as TaskOverride }),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(9800, { [TASK_ID]: { experience: 12345 } as TaskOverride }),
+      }
+    );
 
     expect(results[0].verdict).toBe('OVERRIDE_WRONG');
   });
 
   it('reports NOT_IN_MODE when the task is absent from that mode', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: { apiTasks: [], modeOverrides: {} },
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: { apiTasks: [], modeOverrides: {} },
+      }
+    );
 
     expect(results[0].verdict).toBe('NOT_IN_MODE');
   });
@@ -160,10 +188,14 @@ describe('validateDivergences', () => {
       },
     };
 
-    const results = validateDivergences(pveOnly, {}, {
-      regular: ctx(2900),
-      pve: ctx(2900),
-    });
+    const results = validateDivergences(
+      pveOnly,
+      {},
+      {
+        regular: ctx(2900),
+        pve: ctx(2900),
+      }
+    );
 
     expect(results).toHaveLength(1);
     expect(results[0].mode).toBe('pve');
@@ -177,9 +209,13 @@ describe('validateDivergences', () => {
   });
 
   it('carries confidence and proof through to the result', () => {
-    const results = validateDivergences(registry({ confidence: 'medium' }), {}, {
-      regular: ctx(9800),
-    });
+    const results = validateDivergences(
+      registry({ confidence: 'medium' }),
+      {},
+      {
+        regular: ctx(9800),
+      }
+    );
 
     expect(results[0].confidence).toBe('medium');
     expect(results[0].proof).toContain('escapefromtarkov.fandom.com');
@@ -200,28 +236,95 @@ describe('validateDivergences', () => {
     };
     const withLevel = (level: number): DivergenceModeContext => ({
       apiTasks: [
-        { id: '608974d01a66564e74191fc0', name: 'A Fuel Matter', minPlayerLevel: level, objectives: [] } as unknown as TaskData,
+        {
+          id: '608974d01a66564e74191fc0',
+          name: 'A Fuel Matter',
+          minPlayerLevel: level,
+          objectives: [],
+        } as unknown as TaskData,
       ],
       modeOverrides: {},
     });
 
-    const results = validateDivergences(converged, {}, {
-      regular: withLevel(15),
-      pve: withLevel(15),
-    });
+    const results = validateDivergences(
+      converged,
+      {},
+      {
+        regular: withLevel(15),
+        pve: withLevel(15),
+      }
+    );
 
     expect(results).toHaveLength(2);
     expect(results.every((r) => r.verdict === 'UPSTREAM_CORRECT')).toBe(true);
     expect(results.some((r) => r.mirrored)).toBe(false);
   });
+
+  it('adjudicates objective[<id>].count registry fields against objectives', () => {
+    const OBJECTIVE_ID = '6193dabd5f6468204470571f';
+    const taskWithCount = (count: number): TaskData =>
+      ({
+        id: '6193850f60b34236ee0483de',
+        name: 'Long Road',
+        minPlayerLevel: 1,
+        objectives: [{ id: OBJECTIVE_ID, count }],
+      }) as unknown as TaskData;
+
+    const registry: Record<string, TaskDivergence> = {
+      '6193850f60b34236ee0483de': {
+        name: 'Long Road',
+        proof: 'https://escapefromtarkov.fandom.com/wiki/Long_Road',
+        status: 'divergent',
+        fields: {
+          [`objective[${OBJECTIVE_ID}].count`]: {
+            regular: 4,
+            pve: 7,
+            confidence: 'medium',
+            verified: '2026-08-12',
+          },
+        },
+      },
+    };
+
+    // PvE: upstream serves the old count (4), the pve override supplies 7.
+    const pveOverride: Record<string, TaskOverride> = {
+      '6193850f60b34236ee0483de': {
+        objectives: { [OBJECTIVE_ID]: { count: 7 } },
+      },
+    };
+
+    const results = validateDivergences(
+      registry,
+      {},
+      {
+        regular: { apiTasks: [taskWithCount(4)], modeOverrides: {} },
+        pve: { apiTasks: [taskWithCount(4)], modeOverrides: pveOverride },
+      }
+    );
+
+    expect(results).toHaveLength(2);
+    const regular = results.find((r) => r.mode === 'regular');
+    const pve = results.find((r) => r.mode === 'pve');
+    // Regular: upstream serves the recorded regular value -> correct as-is.
+    expect(regular?.verdict).toBe('UPSTREAM_CORRECT');
+    // PvE: upstream wrong, override supplies the recorded value -> active.
+    expect(pve?.verdict).toBe('OVERRIDE_ACTIVE');
+    // Mirror detection: upstream serves 4 in both modes while the registry
+    // records divergent values, so the mirrored flag is raised on the pve row.
+    expect(pve?.mirrored).toBe(true);
+  });
 });
 
 describe('categorizeDivergenceResults', () => {
   it('separates actionable problems from intentional guards', () => {
-    const results = validateDivergences(registry(), {}, {
-      regular: ctx(9800),
-      pve: ctx(9800, { [TASK_ID]: { experience: 9800 } as TaskOverride }),
-    });
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: ctx(9800),
+        pve: ctx(9800, { [TASK_ID]: { experience: 9800 } as TaskOverride }),
+      }
+    );
 
     const grouped = categorizeDivergenceResults(results);
 

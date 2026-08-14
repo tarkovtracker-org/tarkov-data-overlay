@@ -15,7 +15,8 @@ https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/over
 ### Example (JavaScript/TypeScript)
 
 ```typescript
-const OVERLAY_URL = 'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
+const OVERLAY_URL =
+  'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
 
 async function fetchOverlay() {
   const response = await fetch(OVERLAY_URL);
@@ -98,6 +99,37 @@ async function fetchOverlay() {
       "tasksAdd": {
         "<mode-added-task-id>": { "id": "<mode-added-task-id>", "name": "..." }
       }
+    },
+    "pvp-season": {
+      "tasks": {
+        "<task-id>": { "minPlayerLevel": 5 }
+      }
+    }
+  },
+  "seasonalPerks": {
+    "<perk-id>": {
+      "id": "<perk-id>",
+      "type": "personal",
+      "name": "Hemophilia",
+      "description": "• Bleeding chance is increased by 25%",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": ["<other-perk-id>"],
+      "effects": [
+        { "effectId": "bleeding_chance_multiplicator", "multiplicator": 1.25 }
+      ]
+    }
+  },
+  "craftsAdd": {
+    "<craft-id>": {
+      "id": "<craft-id>",
+      "station": "<station-id>",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 600,
+      "requiredItems": [{ "item": "<item-id>", "count": 1, "attributes": {} }],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": { "item": "<item-id>", "count": 1, "attributes": {} }
     }
   },
   "locales": {
@@ -162,7 +194,7 @@ function applyOverlay(baseTask: Task, overlay: Overlay): Task | null {
 
 // Usage with filtering
 const activeTasks = tasks
-  .map(task => applyOverlay(task, overlay))
+  .map((task) => applyOverlay(task, overlay))
   .filter((task): task is Task => task !== null);
 ```
 
@@ -185,7 +217,7 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task {
 
   // Apply objective patches (ID-keyed object)
   if (taskOverride.objectives && typeof taskOverride.objectives === 'object') {
-    result.objectives = baseTask.objectives.map(obj => {
+    result.objectives = baseTask.objectives.map((obj) => {
       const patch = (taskOverride.objectives as Record<string, any>)[obj.id];
       return patch ? { ...obj, ...patch } : obj;
     });
@@ -193,10 +225,7 @@ function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task {
 
   // Append missing objectives
   if (taskOverride.objectivesAdd && Array.isArray(taskOverride.objectivesAdd)) {
-    result.objectives = [
-      ...(result.objectives || []),
-      ...taskOverride.objectivesAdd,
-    ] as any;
+    result.objectives = [...(result.objectives || []), ...taskOverride.objectivesAdd] as any;
   }
 
   return result;
@@ -211,23 +240,19 @@ handles this by appending `objectivesAdd` to the objective list.
 
 ---
 
-## Applying Mode-Specific Data (PVP vs PVE)
+## Applying Mode-Specific Data (PVP vs PVE vs Seasonal)
 
 Some corrections differ by game mode. The overlay stores these under
-`modes.regular` and `modes.pve`.
+`modes.regular`, `modes.pve`, and `modes["pvp-season"]`.
 
 - Apply shared data first (`tasks`, `tasksAdd`)
 - Then apply mode-specific data (`modes[gameMode].tasks`, `modes[gameMode].tasksAdd`)
 - Use the same `gameMode` value for both the tarkov.dev data fetch and overlay merge
 
 ```typescript
-type GameMode = 'regular' | 'pve';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
-function getTaskOverrideForMode(
-  taskId: string,
-  overlay: Overlay,
-  gameMode: GameMode
-) {
+function getTaskOverrideForMode(taskId: string, overlay: Overlay, gameMode: GameMode) {
   const shared = overlay.tasks?.[taskId] ?? {};
   const modeSpecific = overlay.modes?.[gameMode]?.tasks?.[taskId] ?? {};
   const merged = { ...shared, ...modeSpecific };
@@ -241,6 +266,167 @@ function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddi
   ];
 }
 ```
+
+> **Seasonal mode = `pvp-season`.** BSG's Seasonal Character (EFT patch 1.1.0.0)
+> is served by tarkov.dev like any other mode — `json.tarkov.dev/pvp-season/*`,
+> listed under `gameModes` at `json.tarkov.dev/endpoints`. Fetch and merge it
+> exactly as you would `regular` or `pve`. Note the hyphenated key requires
+> bracket access (`overlay.modes["pvp-season"]`). One thing tarkov.dev does
+> _not_ serve for this mode is seasonal perks — those are a separate top-level
+> addition (`seasonalPerks`, see below), not part of the `modes` section.
+
+---
+
+## Applying Seasonal Perks
+
+`seasonalPerks` is a top-level addition (not a `modes` section) because
+tarkov.dev has no seasonal-perks endpoint for the `pvp-season` mode. It is an
+object keyed by the perk id:
+
+```typescript
+interface SeasonalPerkEffect {
+  effectId: string; // e.g. "pmc_experience_multiplicator"
+  multiplicator?: number; // present for multiplicative effects
+  intValue?: number; // present for e.g. skill_level_preset
+  skillIds?: string[]; // tarkov.dev skill ids (resolve names via tarkov.dev)
+  itemFilter?: {
+    // tarkov.dev ItemFilters shape - arrays of tarkov.dev ids (names resolve via locale)
+    allowedCategories?: string[];
+    allowedItems?: string[];
+    excludedCategories?: string[];
+    excludedItems?: string[];
+  };
+  [key: string]: unknown; // other BSG effect-specific fields
+}
+
+interface SeasonalPerk {
+  id: string;
+  type: string; // tier: "common" | "personal"
+  name: string;
+  description?: string;
+  points?: number | null; // perk-point value; null = none
+  mutuallyExclusiveSeasonalPerkIds?: string[];
+  effects?: SeasonalPerkEffect[];
+}
+
+// Only meaningful when the player is on a Seasonal Character.
+const perks = Object.values(overlay.seasonalPerks ?? {});
+const commonPerks = perks.filter((p) => p.type === 'common');
+```
+
+Perks with a non-empty `mutuallyExclusiveSeasonalPerkIds` cannot be selected
+together; enforce that when presenting a perk picker. All references
+(`skillIds`, `itemFilter`, trader ids, etc.) are tarkov.dev ids — resolve their
+display names through tarkov.dev's own data/locale, do not expect names here.
+The perk `name`/`description` are the only inline strings (English), because the
+perks do not exist upstream to resolve against. One perk's `itemFilter`
+references an item tarkov.dev does not serve yet; resolve `itemFilter` ids
+against `itemsAdd` as a fallback (see [Resolving Added Items](#resolving-added-items)).
+
+---
+
+## Applying Added Crafts
+
+`craftsAdd` supplies hideout crafts missing from tarkov.dev, keyed by craft id,
+in tarkov.dev's **static-JSON** craft shape (all tarkov.dev ids):
+
+```typescript
+interface Craft {
+  id: string;
+  station: string; // tarkov.dev HideoutStation id
+  level: number;
+  duration: number; // production time in seconds
+  requiredItems: Array<{
+    item: string; // tarkov.dev item id
+    count: number;
+    attributes?: { tool?: boolean };
+  }>;
+  productItem: { item: string; count: number; attributes?: Record<string, unknown> };
+  requiredQuestItems?: string[];
+  gameEditions?: string[];
+  // Present (as null) on quest-gated crafts whose unlocking task id is unknown;
+  // omitted on crafts with no task unlock, matching tarkov.dev.
+  taskUnlock?: string | null;
+}
+```
+
+Merge by id:
+
+```typescript
+const byId = new Map(tarkovDevCrafts.map((c) => [c.id, c]));
+const crafts = [
+  ...tarkovDevCrafts,
+  ...Object.values(overlay.craftsAdd ?? {}).filter((c) => !byId.has(c.id)),
+];
+```
+
+Notes and caveats:
+
+- Shape matches `json.tarkov.dev/{mode}/crafts` (uses `productItem`, `station`
+  is an id). If you consume the **GraphQL** API instead, map `productItem` →
+  `rewardItems` and the `station` id → the `HideoutStation` object.
+- These are patch 1.1.0.0 crafts absent upstream (e.g. the Black Division
+  decryption chain in the Intelligence Center). Merge-by-id makes them drop out
+  automatically once tarkov.dev serves them.
+- **Unlock caveat:** the quest-gated crafts carry `taskUnlock: null` — they are
+  unlocked by a quest in-game, but the source does not expose which one, so the
+  id is left null as a fillable placeholder (tarkov.dev serves a task-id string
+  here). Until it is filled, treat those crafts as _available once their
+  (unstated) quest is done_, not as unconditionally available — relevant for
+  progression tools, not for recipe/ingredient lookups (inputs, output, station,
+  level and duration are correct). Crafts with no task unlock omit the field,
+  matching tarkov.dev.
+
+---
+
+## Resolving Added Items
+
+`itemsAdd` carries items that overlay additions reference but that tarkov.dev
+does not serve yet in **any** mode (`regular`, `pve`, `pvp-season`). Without it,
+those ids have no name anywhere and surface as raw 24-hex strings.
+
+```typescript
+interface ItemAddition {
+  id: string; // tarkov.dev/BSG item template id (matches the key)
+  name: string; // English display name
+  shortName?: string; // English short name (inventory label)
+  description?: string; // English description
+}
+```
+
+Resolve item ids upstream first, then fall back to `itemsAdd`:
+
+```typescript
+// The guide does not define an upstream `Item` type, so the map value uses an
+// inline structural shape: at minimum an id + display name, plus whatever other
+// fields tarkov.dev serves.
+function resolveItem(
+  id: string,
+  apiItemsById: Map<string, { id: string; name: string; [key: string]: unknown }>,
+  overlay: Overlay
+) {
+  return apiItemsById.get(id) ?? overlay.itemsAdd?.[id];
+}
+```
+
+Notes and caveats:
+
+- **English only.** tarkov.dev's locale system stays the source of truth for
+  every other language; these ids resolve normally there once upstream ingests
+  them. Do not translate from these strings — treat them as a display fallback.
+- **Upstream-first ordering matters.** Once tarkov.dev serves an item, its data
+  is richer (icons, prices, categories) and authoritative. Checking the API
+  before the overlay makes each entry become dead weight rather than a stale
+  override that shadows good upstream data.
+- These entries are deleted as upstream catches up; `npm run check-overrides`
+  flags any that tarkov.dev now serves (`NOW IN API - remove the addition`).
+- **Item-resolution caveat:** 7 of these crafts reference patch 1.1.0.0 items
+  that tarkov.dev does not serve yet in any mode (all 7 products, plus some
+  inputs — the Black Division chain, Moreman's tapes, the topographic intel
+  maps). Resolving those ids against tarkov.dev alone yields nothing, so a naive
+  lookup renders a raw 24-hex id. **Resolve item ids against `itemsAdd` as a
+  fallback** (see [Resolving Added Items](#resolving-added-items)) — it carries
+  the English name/shortName/description for exactly these ids.
 
 ---
 
@@ -289,7 +475,7 @@ function applyLocaleOverlay(
 
   // Apply ID-keyed objective description patches
   if (patch.objectives) {
-    result.objectives = (task.objectives ?? []).map(obj => {
+    result.objectives = (task.objectives ?? []).map((obj) => {
       const objPatch = patch.objectives?.[obj.id];
       return objPatch ? { ...obj, ...objPatch } : obj;
     });
@@ -337,8 +523,19 @@ synthetic conditions to append. Apply it by merging top-level fields, then
 patching/appending conditions by ID:
 
 ```typescript
-type PrestigeCondition = { id: string; type: string; task?: string; status?: string[]; [k: string]: unknown };
-type Prestige = { id: string; prestigeLevel: number; conditions: PrestigeCondition[]; [k: string]: unknown };
+type PrestigeCondition = {
+  id: string;
+  type: string;
+  task?: string;
+  status?: string[];
+  [k: string]: unknown;
+};
+type Prestige = {
+  id: string;
+  prestigeLevel: number;
+  conditions: PrestigeCondition[];
+  [k: string]: unknown;
+};
 
 function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
   const override = overlay.prestige?.[base.id];
@@ -354,9 +551,7 @@ function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
       remaining.delete(cond.id);
       return patch ? { ...cond, ...patch } : cond;
     });
-    result.conditions.push(
-      ...Array.from(remaining, ([id, patch]) => ({ id, ...patch }))
-    );
+    result.conditions.push(...Array.from(remaining, ([id, patch]) => ({ id, ...patch })));
   }
   return result;
 }
@@ -407,8 +602,9 @@ import type { Task, Overlay } from './types';
 // the task name + map; a full consumer resolves items/traders/prestige/rewards
 // the same way (see src/lib/tarkov-api.ts for the complete adapter).
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
-const OVERLAY_URL = 'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
-type GameMode = 'regular' | 'pve';
+const OVERLAY_URL =
+  'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
   const get = async (path: string): Promise<Record<string, unknown>> => {
@@ -443,9 +639,10 @@ async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
   return Object.values(tasks).map((raw) => ({
     ...raw,
     name: translate(tasksEn as Record<string, string>, raw.name),
-    map: typeof raw.map === 'string'
-      ? { id: raw.map, name: translate(mapsEn as Record<string, string>, maps[raw.map]?.name) }
-      : raw.map,
+    map:
+      typeof raw.map === 'string'
+        ? { id: raw.map, name: translate(mapsEn as Record<string, string>, maps[raw.map]?.name) }
+        : raw.map,
   })) as unknown as Task[];
 }
 
@@ -454,11 +651,7 @@ async function fetchOverlay(): Promise<Overlay> {
   return response.json();
 }
 
-function applyTaskOverlayForMode(
-  task: Task,
-  overlay: Overlay,
-  gameMode: GameMode
-): Task {
+function applyTaskOverlayForMode(task: Task, overlay: Overlay, gameMode: GameMode): Task {
   const taskOverride = getTaskOverrideForMode(task.id, overlay, gameMode);
   if (!taskOverride) return task;
 
@@ -467,12 +660,9 @@ function applyTaskOverlayForMode(
 }
 
 async function getTasksWithOverlay(gameMode: GameMode): Promise<Task[]> {
-  const [tasks, overlay] = await Promise.all([
-    fetchTasks(gameMode),
-    fetchOverlay()
-  ]);
+  const [tasks, overlay] = await Promise.all([fetchTasks(gameMode), fetchOverlay()]);
 
-  const patchedTasks = tasks.map(task => applyTaskOverlayForMode(task, overlay, gameMode));
+  const patchedTasks = tasks.map((task) => applyTaskOverlayForMode(task, overlay, gameMode));
 
   const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
   return [...patchedTasks, ...addedTasks];
@@ -503,6 +693,9 @@ interface Overlay {
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
   prestige?: Record<string, PrestigeOverride>;
+  // Seasonal (pvp-season) data tarkov.dev does not serve; see the sections above.
+  seasonalPerks?: Record<string, SeasonalPerk>;
+  craftsAdd?: Record<string, Craft>;
   // Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...)
   locales?: Record<string, LocaleOverlay>;
   $meta: {
@@ -512,7 +705,7 @@ interface Overlay {
   };
 }
 
-type GameMode = 'regular' | 'pve';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
@@ -522,25 +715,34 @@ interface ModeOverlay {
 // Sparse fixes for one broken locale bundle; apply after data overrides,
 // only when rendering the matching locale.
 interface LocaleOverlay {
-  tasks?: Record<string, {
-    name?: string;
-    wikiLink?: string;
-    objectives?: Record<string, { description?: string }>;
-  }>;
-  items?: Record<string, {
-    name?: string;
-    shortName?: string;
-    description?: string;
-    wikiLink?: string;
-  }>;
+  tasks?: Record<
+    string,
+    {
+      name?: string;
+      wikiLink?: string;
+      objectives?: Record<string, { description?: string }>;
+    }
+  >;
+  items?: Record<
+    string,
+    {
+      name?: string;
+      shortName?: string;
+      description?: string;
+      wikiLink?: string;
+    }
+  >;
   traders?: Record<string, { name?: string; description?: string }>;
   maps?: Record<string, { name?: string; description?: string }>;
   prestige?: Record<string, { name?: string }>;
-  storyChapters?: Record<string, {
-    name?: string;
-    description?: string;
-    objectives?: Record<string, { description?: string }>;
-  }>;
+  storyChapters?: Record<
+    string,
+    {
+      name?: string;
+      description?: string;
+      objectives?: Record<string, { description?: string }>;
+    }
+  >;
 }
 
 interface TaskOverride {
@@ -633,14 +835,17 @@ interface PrestigeOverride {
   prestigeLevel?: number;
   name?: string;
   // Per-condition patches keyed by condition id; overlay-only ids are appended
-  conditions?: Record<string, {
-    type?: string;
-    task?: string;      // corrected/appended taskStatus target (tarkov.dev or tasksAdd id)
-    status?: string[];
-    playerLevel?: number;
-    skill?: string;
-    level?: number;
-  }>;
+  conditions?: Record<
+    string,
+    {
+      type?: string;
+      task?: string; // corrected/appended taskStatus target (tarkov.dev or tasksAdd id)
+      status?: string[];
+      playerLevel?: number;
+      skill?: string;
+      level?: number;
+    }
+  >;
   // Authoritative in-game story requirements; [] means none
   storyRequirements?: Array<
     | {
@@ -652,7 +857,7 @@ interface PrestigeOverride {
     | {
         type: 'storyObjectiveStatus';
         storyChapter: string; // storyChapters id
-        objective: string;    // objective id for storyObjectiveStatus
+        objective: string; // objective id for storyObjectiveStatus
         name: string;
         status: string[];
       }

@@ -3,14 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  colors,
-  icons,
-  colorize,
-  bold,
-  dim,
-  formatCountLabel,
-} from '../src/lib/index.js';
+import { colors, icons, colorize, bold, dim, formatCountLabel } from '../src/lib/index.js';
 
 describe('colors', () => {
   it('contains expected color codes', () => {

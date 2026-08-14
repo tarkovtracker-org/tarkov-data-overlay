@@ -27,12 +27,7 @@ import type { LocaleBundle, TranslationMap } from './tarkov-api.js';
 export type LocaleVerdict = 'STALE' | 'NEEDED' | 'REMOVED' | 'UNVERIFIABLE';
 
 export type LocaleEntityType =
-  | 'tasks'
-  | 'items'
-  | 'traders'
-  | 'maps'
-  | 'prestige'
-  | 'storyChapters';
+  'tasks' | 'items' | 'traders' | 'maps' | 'prestige' | 'storyChapters';
 
 export interface LocaleValidationResult {
   locale: string;
@@ -103,7 +98,11 @@ function compareValues(
   };
 }
 
-function removedResult(base: ResultBase, field: string, overrideValue?: string): LocaleValidationResult {
+function removedResult(
+  base: ResultBase,
+  field: string,
+  overrideValue?: string
+): LocaleValidationResult {
   return {
     ...base,
     field,
@@ -148,9 +147,7 @@ function checkObjectivePatches(
   translations: TranslationMap
 ): LocaleValidationResult[] {
   const results: LocaleValidationResult[] = [];
-  const coreObjectives = Array.isArray(core.objectives)
-    ? core.objectives.filter(isRecord)
-    : [];
+  const coreObjectives = Array.isArray(core.objectives) ? core.objectives.filter(isRecord) : [];
 
   for (const [objectiveId, patch] of Object.entries(objectives)) {
     const field = `objectives[${objectiveId}].description`;
@@ -278,9 +275,7 @@ export function validateLocaleOverrides(
   for (const check of checks) {
     const patches = overrides[check.entityType];
     if (!patches) continue;
-    results.push(
-      ...checkEntityPatches(locale, check, patches as Record<string, JsonRecord>)
-    );
+    results.push(...checkEntityPatches(locale, check, patches as Record<string, JsonRecord>));
   }
 
   // Story chapters are overlay-authored additions with no tarkov.dev
@@ -293,7 +288,8 @@ export function validateLocaleOverrides(
       entityId: chapterId,
       field: '*',
       verdict: 'UNVERIFIABLE',
-      message: 'storyChapters are overlay-authored and absent from tarkov.dev - cannot verify, keep override',
+      message:
+        'storyChapters are overlay-authored and absent from tarkov.dev - cannot verify, keep override',
     });
   }
 

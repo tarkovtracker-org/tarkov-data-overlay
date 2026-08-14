@@ -18,7 +18,7 @@ import type {
   DivergenceField,
   DivergenceResult,
   DivergenceVerdict,
-  GameMode,
+  DivergenceMode,
   TaskData,
   TaskDivergence,
   TaskOverride,
@@ -62,6 +62,32 @@ export interface DivergenceModeContext {
 }
 
 /**
+ * Registry field keys of the form `objective[<id>].count` address a count on
+ * one objective (mirroring how the rest of the overlay patches objectives by
+ * id). Returns the objective id, or null for plain scalar fields.
+ */
+const OBJECTIVE_FIELD_KEY = /^objective\[([0-9a-fA-F]{24})\]\.count$/;
+
+function objectiveFieldId(field: string): string | null {
+  const match = OBJECTIVE_FIELD_KEY.exec(field);
+  return match ? match[1] : null;
+}
+
+/**
+ * Read a field off an override entry, resolving `objective[<id>].count` keys
+ * into the id-keyed objectives map. Returns undefined when the entry does not
+ * cover the field (so callers fall through to the next override layer).
+ */
+function overrideFieldValue(entry: TaskOverride | undefined, field: string): unknown {
+  if (!entry) return undefined;
+  const objectiveId = objectiveFieldId(field);
+  if (objectiveId) {
+    return entry.objectives?.[objectiveId]?.count;
+  }
+  return (entry as unknown as Record<string, unknown>)[field];
+}
+
+/**
  * Resolve the value a consumer would see for `field` in `mode`, considering
  * only the overlay (not the API). Returns undefined when no override covers it.
  *
@@ -74,20 +100,13 @@ export function effectiveOverrideValue(
   baseOverrides: Record<string, TaskOverride>,
   modeOverrides: Record<string, TaskOverride>
 ): unknown {
-  const modeEntry = modeOverrides[taskId] as Record<string, unknown> | undefined;
-  if (modeEntry && field in modeEntry) return modeEntry[field];
+  const modeValue = overrideFieldValue(modeOverrides[taskId], field);
+  if (modeValue !== undefined) return modeValue;
 
-  const baseEntry = baseOverrides[taskId] as Record<string, unknown> | undefined;
-  if (baseEntry && field in baseEntry) return baseEntry[field];
-
-  return undefined;
+  return overrideFieldValue(baseOverrides[taskId], field);
 }
 
-function verdictFor(
-  expected: unknown,
-  upstream: unknown,
-  override: unknown
-): DivergenceVerdict {
+function verdictFor(expected: unknown, upstream: unknown, override: unknown): DivergenceVerdict {
   const actual = override !== undefined ? override : upstream;
 
   if (valuesEqual(actual, expected)) {
@@ -100,6 +119,10 @@ function verdictFor(
 
 /** Read a field off an API task without widening TaskData. */
 function apiFieldValue(task: TaskData, field: string): unknown {
+  const objectiveId = objectiveFieldId(field);
+  if (objectiveId) {
+    return task.objectives?.find((o) => o.id === objectiveId)?.count;
+  }
   return (task as unknown as Record<string, unknown>)[field];
 }
 
@@ -111,7 +134,7 @@ function isMirrored(
   taskId: string,
   field: string,
   fieldDef: DivergenceField,
-  contexts: Partial<Record<GameMode, DivergenceModeContext>>
+  contexts: Partial<Record<DivergenceMode, DivergenceModeContext>>
 ): boolean {
   if (fieldDef.regular === undefined || fieldDef.pve === undefined) return false;
   if (valuesEqual(fieldDef.regular, fieldDef.pve)) return false;
@@ -133,7 +156,7 @@ function isMirrored(
 export function validateDivergences(
   registry: Record<string, TaskDivergence>,
   baseOverrides: Record<string, TaskOverride>,
-  contexts: Partial<Record<GameMode, DivergenceModeContext>>
+  contexts: Partial<Record<DivergenceMode, DivergenceModeContext>>
 ): DivergenceResult[] {
   const results: DivergenceResult[] = [];
 
@@ -141,7 +164,7 @@ export function validateDivergences(
     for (const [field, fieldDef] of Object.entries(entry.fields)) {
       const mirrored = isMirrored(taskId, field, fieldDef, contexts);
 
-      for (const mode of Object.keys(contexts) as GameMode[]) {
+      for (const mode of Object.keys(contexts) as DivergenceMode[]) {
         const context = contexts[mode];
         if (!context) continue;
 

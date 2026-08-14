@@ -73,7 +73,7 @@ interface Overlay {
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const OVERLAY_URL =
   'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
-type GameMode = 'regular' | 'pve';
+type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 /**
  * Fetch tasks from the json.tarkov.dev static endpoints.
@@ -88,7 +88,10 @@ type GameMode = 'regular' | 'pve';
 async function fetchTasksFromTarkovDev(gameMode: GameMode = 'regular'): Promise<Task[]> {
   const get = async (path: string): Promise<Record<string, unknown>> => {
     const response = await fetch(`${TARKOV_JSON_BASE}/${gameMode}/${path}`, {
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'tarkov-data-overlay-example',
+      },
     });
     if (!response.ok) {
       throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
@@ -217,10 +220,7 @@ function applyTaskOverlay(task: Task, overlay: Overlay): Task | null {
 
   // Append missing objectives
   if (taskOverride.objectivesAdd) {
-    result.objectives = [
-      ...(result.objectives || []),
-      ...taskOverride.objectivesAdd,
-    ];
+    result.objectives = [...(result.objectives || []), ...taskOverride.objectivesAdd];
   }
 
   return result;
@@ -256,9 +256,7 @@ async function main() {
   for (const task of correctedTasks) {
     const original = tasks.find((t) => t.id === task.id)!;
     if (original.minPlayerLevel !== task.minPlayerLevel) {
-      console.log(
-        `  ${task.name}: level ${original.minPlayerLevel} → ${task.minPlayerLevel}`
-      );
+      console.log(`  ${task.name}: level ${original.minPlayerLevel} → ${task.minPlayerLevel}`);
     }
   }
 

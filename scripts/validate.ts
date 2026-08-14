@@ -195,12 +195,18 @@ function addRecordIds(index: Set<string>, value: unknown): void {
 
 async function fetchJsonData(path: string): Promise<Record<string, unknown>> {
   const response = await fetch(`https://json.tarkov.dev/${path}`, {
-    headers: { Accept: 'application/json' },
+    headers: {
+      Accept: 'application/json',
+      'User-Agent':
+        'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)',
+    },
   });
   if (!response.ok) {
-    throw new Error(`tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`);
+    throw new Error(
+      `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
+    );
   }
-  const payload = await response.json() as unknown;
+  const payload = (await response.json()) as unknown;
   if (!isRecord(payload) || !isRecord(payload.data)) {
     throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data object`);
   }
@@ -254,7 +260,11 @@ export function validateLocaleEntityIds(
       }
     }
 
-    return { file: displayPath, valid: errors.length === 0, errors: errors.length ? errors : undefined };
+    return {
+      file: displayPath,
+      valid: errors.length === 0,
+      errors: errors.length ? errors : undefined,
+    };
   } catch (error) {
     return {
       file: displayPath,
@@ -301,16 +311,12 @@ export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
   }
 
   const suppressionsFile = join(srcDir, 'suppressions', 'tasks.json5');
-  results.push(
-    validateFile(suppressionsFile, 'suppressions/tasks.json5', validators)
-  );
+  results.push(validateFile(suppressionsFile, 'suppressions/tasks.json5', validators));
 
   // Validate the mode-divergence registry (tooling-only; never built into dist)
   const divergencesFile = join(srcDir, 'divergences', 'tasks.json5');
   if (existsSync(divergencesFile)) {
-    results.push(
-      validateFile(divergencesFile, 'divergences/tasks.json5', validators)
-    );
+    results.push(validateFile(divergencesFile, 'divergences/tasks.json5', validators));
   }
 
   // Validate mode-specific overrides

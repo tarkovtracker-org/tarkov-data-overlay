@@ -18,6 +18,7 @@ import { compareSubset, valuesEqual, formatValue } from '../src/lib/index.js';
 const base = join('src', 'overrides', 'tasks.json5');
 const regularFile = join('src', 'overrides', 'modes', 'regular', 'tasks.json5');
 const pveFile = join('src', 'overrides', 'modes', 'pve', 'tasks.json5');
+const seasonalFile = join('src', 'overrides', 'modes', 'pvp-season', 'tasks.json5');
 
 describe('taskOverlayFiles', () => {
   it('includes the base override file', () => {
@@ -28,6 +29,21 @@ describe('taskOverlayFiles', () => {
     const files = taskOverlayFiles('both');
     expect(files.some((f) => f.endsWith(regularFile))).toBe(true);
     expect(files.some((f) => f.endsWith(pveFile))).toBe(true);
+  });
+
+  it('excludes the pvp-season file from the "both" scope', () => {
+    // The wiki comparison only fetches regular + pve, and its suppression keys
+    // are not mode-qualified, so a seasonal override must not enter the merged
+    // scope where it could mask a real regular/pve discrepancy.
+    const files = taskOverlayFiles('both');
+    expect(files.some((f) => f.endsWith(seasonalFile))).toBe(false);
+  });
+
+  it('still loads the pvp-season file when scoped explicitly', () => {
+    const files = taskOverlayFiles('pvp-season');
+    expect(files.some((f) => f.endsWith(seasonalFile))).toBe(true);
+    expect(files.some((f) => f.endsWith(regularFile))).toBe(false);
+    expect(files.some((f) => f.endsWith(pveFile))).toBe(false);
   });
 
   it('scopes to base + the requested mode only', () => {
@@ -95,9 +111,7 @@ describe('shared compare helpers', () => {
 
   it('matches arrays as a subset only when asked', () => {
     expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }])).toBe(false);
-    expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }], { arrayMode: 'subset' })).toBe(
-      true
-    );
+    expect(compareSubset([{ a: 1 }], [{ a: 1 }, { a: 2 }], { arrayMode: 'subset' })).toBe(true);
   });
 
   it('subset matching backtracks past a bad greedy pick (overlapping candidates)', () => {
@@ -105,29 +119,21 @@ describe('shared compare helpers', () => {
     // first-match binds {a:1}->{a:1,b:2}, then {a:1,b:2} can't match {a:1}.
     // A correct distinct assignment exists, so this must be true.
     expect(
-      compareSubset(
-        [{ a: 1 }, { a: 1, b: 2 }],
-        [{ a: 1, b: 2 }, { a: 1 }],
-        { arrayMode: 'subset' }
-      )
+      compareSubset([{ a: 1 }, { a: 1, b: 2 }], [{ a: 1, b: 2 }, { a: 1 }], { arrayMode: 'subset' })
     ).toBe(true);
   });
 
   it('subset matching rejects when no distinct assignment exists', () => {
-    expect(
-      compareSubset([{ a: 1 }, { a: 1 }], [{ a: 1 }], { arrayMode: 'subset' })
-    ).toBe(false);
+    expect(compareSubset([{ a: 1 }, { a: 1 }], [{ a: 1 }], { arrayMode: 'subset' })).toBe(false);
   });
 
   it('subset matching finds an assignment that requires reshuffling (augmenting path)', () => {
     // {a:1} and {b:2} both also match {a:1,b:2}; only a reshuffle yields a full
     // distinct assignment: {a:1}->[1], {b:2}->[2], {a:1,b:2}->[0].
     expect(
-      compareSubset(
-        [{ a: 1 }, { b: 2 }, { a: 1, b: 2 }],
-        [{ a: 1, b: 2 }, { a: 1 }, { b: 2 }],
-        { arrayMode: 'subset' }
-      )
+      compareSubset([{ a: 1 }, { b: 2 }, { a: 1, b: 2 }], [{ a: 1, b: 2 }, { a: 1 }, { b: 2 }], {
+        arrayMode: 'subset',
+      })
     ).toBe(true);
   });
 

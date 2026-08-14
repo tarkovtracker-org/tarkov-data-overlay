@@ -5,18 +5,11 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import {
-  fetchTasks,
-  findTaskById,
-} from '../../src/lib/index.js';
-import type { TaskData, GameMode } from '../../src/lib/types.js';
-import {
-  CliOptions,
-  DEFAULT_TASK_NAME,
-  ExtendedTaskData,
-} from './types.js';
+import { fetchTasks, findTaskById } from '../../src/lib/index.js';
+import type { TaskData } from '../../src/lib/types.js';
+import { CliOptions, DEFAULT_TASK_NAME, ExtendedTaskData } from './types.js';
 
-export async function fetchTasksForMode(mode: GameMode): Promise<ExtendedTaskData[]> {
+export async function fetchTasksForMode(mode: 'regular' | 'pve'): Promise<ExtendedTaskData[]> {
   const tasks = await fetchTasks(mode);
   // Tag each task with its game mode
   return tasks.map((t) => ({ ...t, gameModes: [mode] }));
@@ -49,22 +42,26 @@ export async function fetchExtendedTasks(
   return Array.from(byWikiLinkAndMode.values());
 }
 
-export function normalizeName(value: string): string {
-  return value.trim().toLowerCase();
-}
+/** Trailing disambiguation suffixes upstream appends to task names. */
+const TASK_NAME_SUFFIX = /\s*(?:\[pvp zone\]|\(quest\))\s*$/i;
 
 /**
  * Normalize task name for comparison by removing common suffixes and variations
+ *
+ * Suffixes are stripped in a loop: they stack (e.g. `Task [PVP ZONE] (quest)`),
+ * and a single pass per suffix would leave the inner one behind once the outer
+ * one stops being terminal.
  */
 export function normalizeTaskName(value: string): string {
+  let name = value.trim().toLowerCase();
+  let previous: string;
+  do {
+    previous = name;
+    name = name.replace(TASK_NAME_SUFFIX, '');
+  } while (name !== previous);
+
   return (
-    value
-      .trim()
-      .toLowerCase()
-      // Remove [PVP ZONE] suffix
-      .replace(/\s*\[pvp zone\]\s*$/i, '')
-      // Remove (quest) disambiguation suffix
-      .replace(/\s*\(quest\)\s*$/i, '')
+    name
       // Normalize hyphens to spaces for comparison
       .replace(/-/g, ' ')
       // Collapse multiple spaces
@@ -73,17 +70,25 @@ export function normalizeTaskName(value: string): string {
   );
 }
 
-export function resolveTask(
-  tasks: TaskData[],
-  options: CliOptions
-): TaskData | undefined {
+export function resolveTask(tasks: TaskData[], options: CliOptions): TaskData | undefined {
   if (options.id) {
     return findTaskById(tasks, options.id);
   }
 
   const name = options.name ?? DEFAULT_TASK_NAME;
-  const normalized = normalizeName(name);
-  return tasks.find((task) => normalizeName(task.name) === normalized);
+
+  // Prefer an exact (case-insensitive) match so a caller naming one specific
+  // variant - e.g. 'Task [PVP ZONE]' - still selects that task rather than
+  // whichever variant happens to come first under the looser normalization.
+  const exact = name.trim().toLowerCase();
+  const exactMatch = tasks.find((task) => task.name.trim().toLowerCase() === exact);
+  if (exactMatch) return exactMatch;
+
+  // Fall back to the comparison code's normalization so a name carrying a
+  // `[PVP ZONE]`/`(quest)` suffix, hyphens, or repeated whitespace still
+  // resolves against the upstream task name.
+  const normalized = normalizeTaskName(name);
+  return tasks.find((task) => normalizeTaskName(task.name) === normalized);
 }
 
 export function resolveWikiTitle(task: TaskData, wikiOverride?: string): string {

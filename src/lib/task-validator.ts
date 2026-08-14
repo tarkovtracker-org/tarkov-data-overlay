@@ -12,17 +12,10 @@ import type {
   ValidationDetail,
   ValidationStatus,
 } from './types.js';
-import {
-  compareSubset,
-  formatValue,
-  type CompareOptions,
-} from './value-compare.js';
+import { compareSubset, formatValue, type CompareOptions } from './value-compare.js';
 
 /** Field validator function signature */
-type FieldValidator = (
-  override: TaskOverride,
-  apiTask: TaskData
-) => ValidationDetail | null;
+type FieldValidator = (override: TaskOverride, apiTask: TaskData) => ValidationDetail | null;
 
 type ObjectiveLike = { maps?: Array<{ id?: string; name?: string }> };
 
@@ -316,9 +309,7 @@ export function validateTaskOverride(
   }
 
   // Determine overall status
-  const needsOverride = details.some(
-    (d) => d.status === 'needed' || d.status === 'check'
-  );
+  const needsOverride = details.some((d) => d.status === 'needed' || d.status === 'check');
   const status: ValidationStatus = needsOverride ? 'NEEDED' : 'FIXED';
 
   return {

@@ -1,1 +1,167 @@
-{}
+{
+  // Items referenced by overlay additions that tarkov.dev does not serve yet.
+  //
+  // Every id here is a real BSG item template that `craftsAdd` / `seasonalPerks`
+  // reference but that is absent from json.tarkov.dev in ALL served modes
+  // (regular, pve, pvp-season), so an id-only reference would render as a raw
+  // 24-hex string in consuming UIs. These entries carry the English
+  // name/shortName/description so a consumer can resolve a display label today.
+  //
+  // Scope check before adding an entry: an id is only unresolvable if it is
+  // missing from BOTH `{mode}/items` and `{mode}/tasks` -> `questItems`, AND has
+  // no `"<id> Name"` key in the `{mode}/items_en` / `{mode}/tasks_en` translation
+  // maps. Upstream serves questItems with placeholder `"<id> Name"` strings that
+  // the _en bundles resolve, so an item can look nameless in the entity payload
+  // yet still resolve correctly. Those do NOT belong here.
+  //
+  // Source: in-game EFT 1.1.0.0 seasonal capture (items.json template `_type: Item`
+  // + locale_en.json `"<id> Name" / " ShortName" / " Description"` keys). English
+  // only: tarkov.dev's locale system is the source of truth for every other
+  // language, and these resolve normally there once upstream ingests them.
+  //
+  // Proof (independently verifiable, per item):
+  //   - Decrypted flash drive           https://escapefromtarkov.fandom.com/wiki/Decrypted_flash_drive
+  //   - Folder with TerraGroup evidence (Finances/Staff) and TerraGroup Labs
+  //     evidence (Developments/Reports) https://escapefromtarkov.fandom.com/wiki/Folder_with_TerraGroup_evidence_(Finances)
+  //   - SSD with TerraGroup evidence    https://escapefromtarkov.fandom.com/wiki/SSD_with_TerraGroup_evidence
+  //   - Topographic intel maps (Factory/City/Customs/Nature reserve/Lighthouse)
+  //                                     https://escapefromtarkov.fandom.com/wiki/Factory_plant_topographic_intel_maps
+  //   - Military flash drive with topographic intel
+  //                                     https://escapefromtarkov.fandom.com/wiki/Military_flash_drive_with_topographic_intel
+  //   - Dogtag USEC                      https://escapefromtarkov.fandom.com/wiki/Dogtag
+  //   - Moreman's audio tapes #1/#2      (no dedicated page; part of the Moreman's
+  //                                     phone quest chain) https://escapefromtarkov.fandom.com/wiki/Moreman%27s_phone
+  //   - Data from Black Division laptop  (no wiki page yet; verified in the in-game
+  //                                     1.1.0.0 capture only - re-link once the wiki covers it)
+  //
+  // Lifecycle: merge-by-id, same as craftsAdd - each entry becomes redundant the
+  // moment tarkov.dev serves the item, and should then be deleted. Verify with
+  // `npm run check-overrides` (reports itemsAdd entries that upstream now covers).
+
+  // Moreman's audio tape #1  [craft product]
+  '688896b3ea36baf84d085544': {
+    id: '688896b3ea36baf84d085544',
+    name: "Moreman's audio tape #1",
+    shortName: 'Morem. 1',
+    description: 'This audio tape contains a recording recovered from Moreman’s damaged phone.',
+  },
+
+  // Moreman's audio tape #2  [craft product]
+  '68889737562720383f0f8548': {
+    id: '68889737562720383f0f8548',
+    name: "Moreman's audio tape #2",
+    shortName: 'Morem. 2',
+    description: 'One of the recordings from Moreman’s damaged phone was successfully transferred onto this audio tape.',
+  },
+
+  // Decrypted flash drive  [craft product]
+  '660bbc98c38b837877075e4a': {
+    id: '660bbc98c38b837877075e4a',
+    name: 'Decrypted flash drive',
+    shortName: 'Flash drive',
+    description: 'A decrypted flash drive. Stores the login kostochkin_g_b and several encrypted documents.',
+  },
+
+  // Folder with TerraGroup evidence (Finances)  [craft input]
+  '67c034f0e7a5da1e070f6de8': {
+    id: '67c034f0e7a5da1e070f6de8',
+    name: 'Folder with TerraGroup evidence (Finances)',
+    shortName: 'TG finance',
+    description: 'A folder containing documents that compromise TerraGroup, focusing specifically on the organization’s financial activities.',
+  },
+
+  // Folder with TerraGroup Labs evidence (Developments)  [craft input]
+  '67c035140610e91bea05699a': {
+    id: '67c035140610e91bea05699a',
+    name: 'Folder with TerraGroup Labs evidence (Developments)',
+    shortName: 'TGL dev.',
+    description: 'A folder containing documents that compromise TerraGroup Labs, focusing specifically on the organization’s developments.',
+  },
+
+  // Folder with TerraGroup evidence (Staff)  [craft input]
+  '67c0351e354fca26a0008038': {
+    id: '67c0351e354fca26a0008038',
+    name: 'Folder with TerraGroup evidence (Staff)',
+    shortName: 'TG staff',
+    description: 'A folder containing documents that compromise TerraGroup, focusing specifically on the organization’s staff records.',
+  },
+
+  // Folder with TerraGroup Labs evidence (Reports)  [craft input]
+  '67c0352dd98287be7b0923d6': {
+    id: '67c0352dd98287be7b0923d6',
+    name: 'Folder with TerraGroup Labs evidence (Reports)',
+    shortName: 'TGL rep.',
+    description: 'A folder containing documents that compromise TerraGroup Labs, focusing specifically on the organization’s project reports.',
+  },
+
+  // SSD with TerraGroup evidence  [craft product]
+  '67c0497068e50a07b10d2576': {
+    id: '67c0497068e50a07b10d2576',
+    name: 'SSD with TerraGroup evidence',
+    shortName: 'TG dirt',
+    description: 'A solid-state drive containing incriminating material. TerraGroup would likely pay handsomely for one like this. Or maybe others would.',
+  },
+
+  // Factory plant topographic intel maps  [craft input]
+  '67c04b062669b12ac6034866': {
+    id: '67c04b062669b12ac6034866',
+    name: 'Factory plant topographic intel maps',
+    shortName: 'Factory',
+    description: 'Materials that will help you better orient yourself around the area.',
+  },
+
+  // City topographic intel maps  [craft input]
+  '67c04b15e7a5da1e070f6dea': {
+    id: '67c04b15e7a5da1e070f6dea',
+    name: 'City topographic intel maps',
+    shortName: 'City',
+    description: 'Materials that will help you better orient yourself around the area.',
+  },
+
+  // Customs topographic intel maps  [craft input]
+  '67c04b286df6ad43b3005fb9': {
+    id: '67c04b286df6ad43b3005fb9',
+    name: 'Customs topographic intel maps',
+    shortName: 'Customs',
+    description: 'Materials that will help you better orient yourself around the area.',
+  },
+
+  // Nature reserve topographic intel maps  [craft input]
+  '67c04b351becc43a45071286': {
+    id: '67c04b351becc43a45071286',
+    name: 'Nature reserve topographic intel maps',
+    shortName: 'Woods',
+    description: 'Materials that will help you better orient yourself around the area.',
+  },
+
+  // Lighthouse topographic intel maps  [craft input]
+  '67c04b420610e91bea05699c': {
+    id: '67c04b420610e91bea05699c',
+    name: 'Lighthouse topographic intel maps',
+    shortName: 'Lighthouse',
+    description: 'Materials that will help you better orient yourself around the area.',
+  },
+
+  // Military flash drive with topographic intel  [craft product]
+  '67c04b8de7a5da1e070f6dec': {
+    id: '67c04b8de7a5da1e070f6dec',
+    name: 'Military flash drive with topographic intel',
+    shortName: 'MFD intel',
+    description: 'A military flash drive containing the full set of topographic reconnaissance materials. Lucky is the one who gets their hands on it.',
+  },
+
+  // Data from Black Division laptop  [craft product]
+  '6a6692d4beccfa243d0bb575': {
+    id: '6a6692d4beccfa243d0bb575',
+    name: 'Data from Black Division laptop',
+    shortName: 'BD data',
+    description: "This storage device contains all the data successfully decrypted and extracted from the Black Division rugged laptop by following Mechanic's instructions.",
+  },
+
+  // Dogtag USEC  [perk itemFilter]
+  '5b9b9020e7ef6f5716480215': {
+    id: '5b9b9020e7ef6f5716480215',
+    name: 'Dogtag USEC',
+    shortName: 'USEC',
+  },
+}

@@ -1,0 +1,85 @@
+{
+  "$id": "seasonal-perk.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Seasonal Perk",
+  "description": "Schema for seasonal perk data in tarkov-data-overlay. Seasonal perks are the BSG \"Seasonal Character\" mechanic (EFT patch 1.1.0.0). tarkov.dev serves the pvp-season game mode but has no seasonal-perks endpoint, so they ship as an overlay addition keyed by the perk id.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "type", "name"],
+    "properties": {
+      "id": {
+        "description": "BSG perk id (matches the object key).",
+        "type": "string"
+      },
+      "type": {
+        "description": "Perk tier as reported by the client (e.g. \"common\", \"personal\").",
+        "type": "string"
+      },
+      "name": {
+        "description": "Display name (from the client locale bundle).",
+        "type": "string"
+      },
+      "description": {
+        "description": "Display description (from the client locale bundle).",
+        "type": "string"
+      },
+      "points": {
+        "description": "Perk-point cost/refund; null when the perk carries no point value.",
+        "type": ["integer", "null"]
+      },
+      "mutuallyExclusiveSeasonalPerkIds": {
+        "description": "Perk ids that cannot be selected alongside this one.",
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "effects": {
+        "description": "Effects the perk grants or imposes.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["effectId"],
+          "properties": {
+            "effectId": {
+              "description": "BSG effect identifier, e.g. \"pmc_experience_multiplicator\".",
+              "type": "string"
+            },
+            "multiplicator": { "type": "number" },
+            "multiplicatorPrimary": { "type": "number" },
+            "multiplicatorSecondary": { "type": "number" },
+            "intValue": { "type": "integer" },
+            "skillIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "itemFilter": {
+              "description": "Items/categories the effect applies to, matching tarkov.dev's served ItemFilters shape. Arrays of tarkov.dev ids: item template ids for items, item-category node ids for categories. Ids only - names resolve via tarkov.dev's locale system.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "allowedCategories": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "allowedItems": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "excludedCategories": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "excludedItems": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

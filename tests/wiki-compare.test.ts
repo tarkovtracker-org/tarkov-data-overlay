@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildMapAliasMap,
   compareTasks,
   getPriority,
   normalizeItemName,
@@ -13,6 +14,9 @@ import {
   isTaskFieldSuppressed,
   type TaskSuppressionEntry,
 } from '../scripts/wiki-compare/overlay.js';
+import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
+import { extractCount, parseObjectives } from '../scripts/wiki-compare/wiki.js';
+import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
 
@@ -152,6 +156,42 @@ describe('compareTasks', () => {
     expect(result.some((d) => d.field === 'objectives.count')).toBe(false);
   });
 
+  // Regression: a handover objective whose description says "(not found in raid)"
+  // is an explicit non-FiR exception and must not suppress an unmatched wiki
+  // find objective as redundant. Previously the positive-only /found in raid/i
+  // test matched the negation, hiding a real discrepancy.
+  it('does not treat "not found in raid" objectives as FiR for redundant-find suppression', () => {
+    const api: ExtendedTaskData = {
+      id: 'task-1',
+      name: 'Test Task',
+      minPlayerLevel: 10,
+      objectives: [
+        {
+          id: 'o1',
+          type: 'handOver',
+          description: 'Hand over the flash drive (not found in raid)',
+          items: [{ id: 'item-1', name: 'Flash drive' }],
+        },
+        // A second objective so the both-sides-single-objective shortcut does
+        // not kick in and force-match the objectives.
+        { id: 'o2', type: 'shoot', description: 'Eliminate 5 Scavs on Customs', count: 5 },
+      ],
+    };
+    const wiki = makeWiki({
+      minPlayerLevel: 10,
+      // The verb is derived from the text by getObjectiveVerbKey ("Find" -> find).
+      objectives: [{ text: 'Find the flash drive', items: ['Flash drive'] }],
+    });
+
+    const result = compareTasks(api, wiki, EMPTY_ALIASES, false);
+
+    // The wiki find objective is not redundant, so it stays unmatched and is
+    // reported as missing from the API.
+    expect(
+      result.some((d) => d.field === 'objectives.description' && d.apiValue === 'not found')
+    ).toBe(true);
+  });
+
   it('does not print when verbose is false', () => {
     const logs: unknown[] = [];
     const original = console.log;
@@ -162,5 +202,88 @@ describe('compareTasks', () => {
       console.log = original;
     }
     expect(logs).toHaveLength(0);
+  });
+});
+
+describe('normalizeTaskName', () => {
+  it('strips the [PVP ZONE] suffix', () => {
+    expect(normalizeTaskName('Task Name [PVP ZONE]')).toBe('task name');
+    expect(normalizeTaskName('Task Name [pvp zone]')).toBe('task name');
+  });
+
+  it('strips the (quest) disambiguation suffix', () => {
+    expect(normalizeTaskName('Task Name (quest)')).toBe('task name');
+    expect(normalizeTaskName('Task Name (Quest)')).toBe('task name');
+  });
+
+  it('normalizes hyphens and collapses repeated whitespace', () => {
+    expect(normalizeTaskName('Multi-Word-Task')).toBe('multi word task');
+    expect(normalizeTaskName('Task   Multiple   Spaces')).toBe('task multiple spaces');
+  });
+
+  it('strips stacked suffixes', () => {
+    expect(normalizeTaskName('Task [PVP ZONE] (quest)')).toBe('task');
+    expect(normalizeTaskName('Task (quest) [PVP ZONE]')).toBe('task');
+  });
+
+  it('combines every normalization', () => {
+    expect(normalizeTaskName('Complex-Name  (quest)')).toBe('complex name');
+  });
+});
+
+describe('resolveTask', () => {
+  const tasks: TaskData[] = [
+    { id: '1', name: 'Simple Task' },
+    { id: '2', name: 'Multi-Word Task [PVP ZONE]' },
+    { id: '3', name: 'Quest-Task (quest)' },
+  ];
+
+  it('resolves by id when one is supplied', () => {
+    expect(resolveTask(tasks, { id: '2' })?.id).toBe('2');
+  });
+
+  // Regression: resolveTask previously used a trim/lowercase-only normalizer, so
+  // a name carrying a [PVP ZONE]/(quest) suffix or hyphens never matched.
+  it('resolves names whose upstream form carries a suffix or hyphens', () => {
+    expect(resolveTask(tasks, { name: 'Simple  Task' })?.id).toBe('1');
+    expect(resolveTask(tasks, { name: 'multi word task' })?.id).toBe('2');
+    expect(resolveTask(tasks, { name: 'Quest Task' })?.id).toBe('3');
+  });
+});
+
+describe('extractCount', () => {
+  it('parses counts from count-word patterns', () => {
+    expect(extractCount('Eliminate 5 Scavs on Customs')).toBe(5);
+    expect(extractCount('Find 3 dogtags')).toBe(3);
+  });
+
+  it('parses counts from the verb fallback', () => {
+    expect(extractCount('Reach 15 Strength skill level')).toBe(15);
+    expect(extractCount('Visit 4 locations on Woods')).toBe(4);
+  });
+
+  // Regression: the verb fallback used to treat any nearby number as the count,
+  // so a duration qualifier like "for 5 minutes" produced a false count of 5.
+  it('ignores numbers that belong to time/distance qualifiers', () => {
+    expect(extractCount('Survive for 5 minutes while suffering from dehydration')).toBeUndefined();
+    expect(extractCount('Visit the pier within 20 minutes of the raid start')).toBeUndefined();
+    expect(extractCount('Eliminate Scavs from over 40 meters away')).toBeUndefined();
+  });
+});
+
+describe('parseObjectives map extraction', () => {
+  const aliasMap = buildMapAliasMap(['Customs', 'Factory', 'Streets of Tarkov']);
+
+  it('keeps text-only map mentions when an objective also links a map', () => {
+    const [objective] = parseObjectives(
+      ['Eliminate 5 Scavs on [[Customs]] and 5 on Factory'],
+      aliasMap
+    );
+    expect(objective.maps).toEqual(expect.arrayContaining(['Customs', 'Factory']));
+  });
+
+  it('does not double-report a map that is both linked and named in text', () => {
+    const [objective] = parseObjectives(['Eliminate 5 Scavs on [[Customs]]'], aliasMap);
+    expect(objective.maps).toEqual(['Customs']);
   });
 });

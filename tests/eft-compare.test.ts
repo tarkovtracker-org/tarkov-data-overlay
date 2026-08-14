@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { parseEftTasks, compare, crossCheckOverrides } from '../scripts/eft-compare.js';
+import { mkdtempSync, writeFileSync, utimesSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import {
+  parseEftTasks,
+  compare,
+  crossCheckOverrides,
+  findReferenceFile,
+  requireMatchingReferenceMode,
+} from '../scripts/eft-compare.js';
 import type { TaskData } from '../src/lib/index.js';
 
 describe('eft-compare', () => {
@@ -136,5 +145,148 @@ describe('crossCheckOverrides', () => {
     const entries = crossCheckOverrides(overrides, eft);
     expect(entries).toHaveLength(1);
     expect(entries[0].verdict).toBe('NO_REFERENCE_DATA');
+  });
+});
+
+describe('reference file selection', () => {
+  function makeRefDir(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    const base = {
+      request: { method: 'POST', url: 'https://gw-pve.escapefromtarkov.com/client/quest/list' },
+      response: { decoded_response: { data: [] } },
+    };
+    // Newest capture = pve; older capture = regular (pvp gateway).
+    writeFileSync(join(dir, 'quest_list.pve.json'), JSON.stringify(base));
+    const regular = {
+      ...base,
+      request: { method: 'POST', url: 'https://gw-pvp.escapefromtarkov.com/client/quest/list' },
+    };
+    writeFileSync(join(dir, 'quest_list.regular.json'), JSON.stringify(regular));
+    const now = Date.now() / 1000;
+    utimesSync(join(dir, 'quest_list.pve.json'), now, now);
+    utimesSync(join(dir, 'quest_list.regular.json'), now - 3600, now - 3600);
+    return dir;
+  }
+
+  it('prefers the newest capture overall when no mode is requested', () => {
+    const dir = makeRefDir();
+    try {
+      expect(findReferenceFile(dir)).toMatch(/quest_list\.pve\.json$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // Regression: a mixed-mode directory used to reject the requested mode even
+  // when a matching capture existed, because only the newest file was checked.
+  it('prefers a capture matching the requested mode over the newest capture', () => {
+    const dir = makeRefDir();
+    try {
+      expect(findReferenceFile(dir, 'regular')).toMatch(/quest_list\.regular\.json$/);
+      expect(requireMatchingReferenceMode(dir, 'regular')).toBe('pve');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a mode with no capture in the directory', () => {
+    const dir = makeRefDir();
+    try {
+      expect(() => requireMatchingReferenceMode(dir, 'pvp-season')).toThrow(/pvp-season/);
+      // findReferenceFile must not silently return a cross-mode capture when
+      // no candidate matches the requested mode or has an inconclusive URL.
+      expect(() => findReferenceFile(dir, 'pvp-season')).toThrow(/pvp-season/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // Regression: filesystem mtime reflects copy/edit time, not capture time, so
+  // ranking must use the envelope's request.timestamp when present.
+  it('ranks by the capture timestamp in the envelope, not by file mtime', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    try {
+      const base = { response: { decoded_response: { data: [] } } };
+      // Newer mtime, older capture timestamp (e.g. a copied/edited older dump).
+      writeFileSync(
+        join(dir, 'quest_list.copied.json'),
+        JSON.stringify({
+          ...base,
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-06-30T10:00:00.000Z',
+          },
+        })
+      );
+      // Older mtime, newer capture timestamp.
+      writeFileSync(
+        join(dir, 'quest_list.fresh.json'),
+        JSON.stringify({
+          ...base,
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-08-11T07:37:37.290Z',
+          },
+        })
+      );
+      const now = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.copied.json'), now, now);
+      utimesSync(join(dir, 'quest_list.fresh.json'), now - 7200, now - 7200);
+      expect(findReferenceFile(dir)).toMatch(/quest_list\.fresh\.json$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // Regression: requireMatchingReferenceMode must agree with findReferenceFile
+  // on what counts as usable - a capture whose mode cannot be detected (null)
+  // is plausible for any requested mode, so it must not be rejected outright.
+  it('treats a null-mode capture as usable when no exact-mode capture exists', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-'));
+    try {
+      // Newest capture is provably pve; older capture has an unparseable URL.
+      writeFileSync(
+        join(dir, 'quest_list.pve.json'),
+        JSON.stringify({
+          request: {
+            method: 'POST',
+            url: 'https://gw-pve.escapefromtarkov.com/client/quest/list',
+            timestamp: '2026-08-11T07:37:37.290Z',
+          },
+          response: { decoded_response: { data: [] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'quest_list.unknown.json'),
+        JSON.stringify({
+          request: {
+            method: 'POST',
+            url: 'https://internal.example.com/client/quest/list',
+            timestamp: '2026-06-30T10:00:00.000Z',
+          },
+          response: { decoded_response: { data: [] } },
+        })
+      );
+      const now = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.pve.json'), now, now);
+      utimesSync(join(dir, 'quest_list.unknown.json'), now - 3600, now - 3600);
+
+      // A malformed newer capture must not shadow a valid matching capture.
+      writeFileSync(join(dir, 'quest_list.broken.json'), '{ this is not json');
+      const bnow = Date.now() / 1000;
+      utimesSync(join(dir, 'quest_list.broken.json'), bnow, bnow);
+
+      // findReferenceFile prefers the null-mode capture for --mode regular...
+      expect(findReferenceFile(dir, 'regular')).toMatch(/quest_list\.unknown\.json$/);
+      // ...and skips the malformed capture even though it is the newest.
+      expect(findReferenceFile(dir, 'pve')).toMatch(/quest_list\.pve\.json$/);
+      // ...and the guard must not contradict it by throwing (the null-mode file
+      // is plausible for any requested mode; the caller then trusts --mode).
+      expect(() => requireMatchingReferenceMode(dir, 'regular')).not.toThrow();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

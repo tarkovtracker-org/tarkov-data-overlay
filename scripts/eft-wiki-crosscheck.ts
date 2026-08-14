@@ -104,7 +104,7 @@ async function fetchWikitext(title: string): Promise<string | undefined> {
 /** Build the discrepant (field, eft, api) rows the same way eft:compare does. */
 function buildDiscrepancies(
   eftTasks: Map<string, EftTask>,
-  apiTasks: TaskData[],
+  apiTasks: TaskData[]
 ): Array<{ task: TaskData; field: Field; api: number; eft: number }> {
   const out: Array<{ task: TaskData; field: Field; api: number; eft: number }> = [];
   for (const eft of eftTasks.values()) {
@@ -136,7 +136,7 @@ function buildDiscrepancies(
 function agreement(
   api: number | undefined,
   eft: number,
-  wiki: number | undefined,
+  wiki: number | undefined
 ): Row['wikiAgreesWith'] {
   if (wiki === undefined) return 'no-wiki-value';
   const matchesEft = wiki === eft;
@@ -153,11 +153,10 @@ export function classifyWiki(
   api: number | undefined,
   eft: number,
   wiki: number | undefined,
-  fetchFailed: boolean,
+  fetchFailed: boolean
 ): Row['wikiAgreesWith'] {
   return fetchFailed ? 'fetch-failed' : agreement(api, eft, wiki);
 }
-
 
 function colorFor(verdict: Row['wikiAgreesWith']): string {
   switch (verdict) {
@@ -193,7 +192,7 @@ function printReport(rows: Row[]): void {
         `  ${r.taskName} ${dim(`(${r.taskId})`)} : ${icons.warning}\n` +
           `     api: ${colors.red}${r.api}${colors.reset}  ` +
           `eft: ${colors.green}${r.eft}${colors.reset}  ` +
-          `wiki: ${wikiStr}  ${dim(`→ wiki backs ${r.wikiAgreesWith}`)}`,
+          `wiki: ${wikiStr}  ${dim(`→ wiki backs ${r.wikiAgreesWith}`)}`
       );
     }
   }
@@ -203,7 +202,9 @@ function printReport(rows: Row[]): void {
   console.log(`  Discrepancies cross-checked: ${rows.length}`);
   console.log(`  Wiki backs reference:        ${bold(String(tally('eft')))}`);
   console.log(`  Wiki backs tarkov.dev API:   ${bold(String(tally('api')))}`);
-  console.log(`  Wiki agrees with both:       ${tally('both')} ${dim('(api==eft, not a real conflict)')}`);
+  console.log(
+    `  Wiki agrees with both:       ${tally('both')} ${dim('(api==eft, not a real conflict)')}`
+  );
   console.log(`  Wiki agrees with neither:    ${tally('neither')}`);
   console.log(`  No usable wiki value:        ${tally('no-wiki-value')}`);
   console.log(`  Wiki fetch failed:           ${tally('fetch-failed')}`);
@@ -215,7 +216,7 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir);
+    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
     if (!eftTasks) throw new Error(`No quest reference file found in ${opts.eftDir}`);
 
     // The reference file is mode-specific; refuse a mismatch so wiki rows

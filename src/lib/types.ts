@@ -107,7 +107,7 @@ export interface ObjectiveZone {
   bottom?: number;
 }
 
-export interface ObjectiveZoneAdd extends Omit<ObjectiveZone, "map" | "outline"> {
+export interface ObjectiveZoneAdd extends Omit<ObjectiveZone, 'map' | 'outline'> {
   map: { id: string; name: string };
   outline: Array<{ x: number; y?: number; z: number }>;
 }
@@ -119,14 +119,14 @@ export interface ObjectivePossibleLocation {
 
 export interface ObjectivePossibleLocationAdd extends Omit<
   ObjectivePossibleLocation,
-  "map" | "positions"
+  'map' | 'positions'
 > {
   map: { id: string; name: string };
   positions: Array<{ x: number; y?: number; z: number }>;
 }
 
 /** Objective override for nested corrections */
-export interface ObjectiveOverride extends Omit<Partial<TaskObjective>, "id"> {}
+export interface ObjectiveOverride extends Omit<Partial<TaskObjective>, 'id'> {}
 
 /** Objective addition for missing objectives */
 /** Task item reference for added objectives (allows name-only references) */
@@ -137,11 +137,10 @@ export interface TaskItemRefAdd {
 }
 
 /** Objective addition for missing objectives */
-export interface ObjectiveAdd
-  extends Omit<
-    Partial<TaskObjective>,
-    "id" | "description" | "items" | "zones" | "possibleLocations"
-  > {
+export interface ObjectiveAdd extends Omit<
+  Partial<TaskObjective>,
+  'id' | 'description' | 'items' | 'zones' | 'possibleLocations'
+> {
   id: string;
   description: string;
   items?: TaskItemRefAdd[];
@@ -181,8 +180,10 @@ export interface TaskAddition {
 }
 
 /** Objective definition for task additions */
-export interface TaskObjectiveAdd
-  extends Omit<Partial<TaskObjective>, "id" | "description" | "zones" | "possibleLocations"> {
+export interface TaskObjectiveAdd extends Omit<
+  Partial<TaskObjective>,
+  'id' | 'description' | 'zones' | 'possibleLocations'
+> {
   id: string;
   description: string;
   zones?: ObjectiveZoneAdd[];
@@ -222,16 +223,12 @@ export interface ValidationResult {
 }
 
 /** Possible validation statuses */
-export type ValidationStatus =
-  | "NEEDED"
-  | "FIXED"
-  | "NOT_FOUND"
-  | "REMOVED_FROM_API";
+export type ValidationStatus = 'NEEDED' | 'FIXED' | 'NOT_FOUND' | 'REMOVED_FROM_API';
 
 /** Detail about a specific field validation */
 export interface ValidationDetail {
   field: string;
-  status: "needed" | "fixed" | "check" | "info";
+  status: 'needed' | 'fixed' | 'check' | 'info';
   message: string;
 }
 
@@ -332,16 +329,118 @@ export interface StoryChapter {
   rewards?: StoryRewards | null;
 }
 
-/** Supported game modes for mode-specific overrides */
-export const SUPPORTED_GAME_MODES = ['regular', 'pve'] as const;
+/**
+ * Game modes tarkov.dev serves upstream data for.
+ *
+ * json.tarkov.dev exposes these under `/{mode}/...` and its `/endpoints`
+ * listing reports them in `gameModes`. `pvp-season` is BSG's Seasonal Character
+ * mode (EFT patch 1.1.0.0); tarkov.dev serves it like any other mode (tasks,
+ * items, maps, traders, hideout, ...). Everything that fetches or compares
+ * against tarkov.dev iterates this list.
+ */
+export const SUPPORTED_GAME_MODES = ['regular', 'pve', 'pvp-season'] as const;
 
-/** Valid game modes for mode-specific overrides */
+/** A game mode tarkov.dev serves upstream data for. */
 export type GameMode = (typeof SUPPORTED_GAME_MODES)[number];
+
+/**
+ * Modes the mode-divergence registry adjudicates.
+ *
+ * Divergence is the artifact of tarkov.dev deriving one mode's numbers from the
+ * other, historically between `regular` and `pve`; the registry is
+ * intentionally scoped to that pair. Extend only with proof of a third-mode
+ * mirror.
+ */
+export const DIVERGENCE_MODES = ['regular', 'pve'] as const;
+
+/** A game mode the divergence registry records per-mode values for. */
+export type DivergenceMode = (typeof DIVERGENCE_MODES)[number];
 
 /** Mode-specific overlay data */
 export interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
+}
+
+/**
+ * Items/categories a seasonal-perk effect applies to, matching tarkov.dev's
+ * served `ItemFilters` shape: arrays of tarkov.dev ids (item template ids for
+ * items, item-category node ids for categories). Ids only - names resolve via
+ * tarkov.dev's locale system, so no strings are hard-coded here.
+ */
+export interface SeasonalPerkItemFilter {
+  allowedCategories?: string[];
+  allowedItems?: string[];
+  excludedCategories?: string[];
+  excludedItems?: string[];
+}
+
+/** A single effect granted or imposed by a seasonal perk. */
+export interface SeasonalPerkEffect {
+  /** BSG effect identifier, e.g. "pmc_experience_multiplicator". */
+  effectId: string;
+  /** Multiplier applied by the effect, when it is multiplicative. */
+  multiplicator?: number;
+  multiplicatorPrimary?: number;
+  multiplicatorSecondary?: number;
+  /** Integer magnitude for effects like skill_level_preset. */
+  intValue?: number;
+  /** Skills the effect targets (skill_* effects). */
+  skillIds?: string[];
+  /** Items/categories the effect applies to (tarkov.dev ItemFilters shape). */
+  itemFilter?: SeasonalPerkItemFilter;
+  /** Pass any other BSG effect fields through untouched. */
+  [key: string]: unknown;
+}
+
+/**
+ * A seasonal perk (BSG "Seasonal Character" mechanic, used by the `pvp-season`
+ * mode). tarkov.dev serves the pvp-season mode but not its perks (there is no
+ * perks endpoint), so this ships as an overlay addition keyed by the perk id.
+ */
+export interface SeasonalPerk {
+  id: string;
+  /** Perk tier as reported in-game (e.g. "common", "personal"). */
+  type: string;
+  name: string;
+  description?: string;
+  /** Perk-point cost/refund; null when the perk has no point value. */
+  points?: number | null;
+  /** Perk ids that cannot be selected alongside this one. */
+  mutuallyExclusiveSeasonalPerkIds?: string[];
+  effects?: SeasonalPerkEffect[];
+}
+
+/** An input or output item of a craft (tarkov.dev item id + count). */
+export interface CraftItemRef {
+  item: string;
+  count: number;
+  /** e.g. `{ tool: true }` for a returned tool. */
+  attributes?: Record<string, unknown>;
+}
+
+/**
+ * A hideout craft missing from tarkov.dev, in tarkov.dev's craft shape so it can
+ * be merged into the crafts list and adopted upstream directly.
+ */
+export interface CraftAddition {
+  id: string;
+  /** tarkov.dev hideout station id. */
+  station: string;
+  /** Required station level. */
+  level: number;
+  /**
+   * Id of the task that unlocks the craft. `null` on quest-gated crafts whose
+   * unlocking task id is not yet known (fillable placeholder); omitted when the
+   * craft has no task unlock, matching tarkov.dev.
+   */
+  taskUnlock?: string | null;
+  /** Production time in seconds. */
+  duration: number;
+  requiredItems: CraftItemRef[];
+  requiredQuestItems?: unknown[];
+  gameEditions?: string[];
+  productItem: CraftItemRef;
 }
 
 /** Locale patch for a single objective's locale-sensitive text */
@@ -459,6 +558,10 @@ export interface OverlayOutput {
   editions?: Record<string, unknown>;
   storyChapters?: Record<string, StoryChapter>;
   prestige?: Record<string, PrestigeOverride>;
+  /** Seasonal perks (BSG Seasonal Character mechanic); absent from tarkov.dev. */
+  seasonalPerks?: Record<string, SeasonalPerk>;
+  /** Hideout crafts missing from tarkov.dev, in tarkov.dev's craft shape. */
+  craftsAdd?: Record<string, CraftAddition>;
   modes?: Partial<Record<GameMode, ModeOverlay>>;
   /** Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...) */
   locales?: Record<string, LocaleOverlay>;
@@ -495,7 +598,7 @@ export interface SchemaConfig {
 export type DivergenceConfidence = 'high' | 'medium' | 'low';
 
 /** Where a recorded per-mode value came from */
-export type DivergenceSource = 'wiki' | 'eft-reference' | 'tarkov.dev' | 'in-game';
+export type DivergenceSource = 'wiki' | 'tarkov.dev' | 'in-game';
 
 /**
  * Whether the two modes genuinely differ, currently agree, or the task only
@@ -546,7 +649,7 @@ export interface DivergenceResult {
   taskId: string;
   taskName: string;
   field: string;
-  mode: GameMode;
+  mode: DivergenceMode;
   verdict: DivergenceVerdict;
   expected: unknown;
   upstream: unknown;
@@ -564,8 +667,11 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/pvp-season/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'additions/tasksAdd.json5', schemaFile: 'task-additions.schema.json' },
   { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
+  { pattern: 'additions/seasonalPerks.json5', schemaFile: 'seasonal-perk.schema.json' },
+  { pattern: 'additions/craftsAdd.json5', schemaFile: 'craft-additions.schema.json' },
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
   { pattern: 'overrides/prestige.json5', schemaFile: 'prestige-override.schema.json' },

@@ -146,9 +146,7 @@ describe('locale-override.schema.json', () => {
 
 describe('locale source files', () => {
   it('registers a wildcard schema config for locale files', () => {
-    const config = SCHEMA_CONFIGS.find(
-      (entry) => entry.pattern === 'overrides/locales/*.json5'
-    );
+    const config = SCHEMA_CONFIGS.find((entry) => entry.pattern === 'overrides/locales/*.json5');
 
     expect(config).toBeDefined();
     expect(config?.schemaFile).toBe('locale-override.schema.json');
@@ -180,9 +178,7 @@ describe('locale source files', () => {
   });
 
   it('seeds en.json5 with the four New Beginning corrections', () => {
-    const en = loadJson5File<LocaleOverlay>(
-      join(srcDir, 'overrides', 'locales', 'en.json5')
-    );
+    const en = loadJson5File<LocaleOverlay>(join(srcDir, 'overrides', 'locales', 'en.json5'));
 
     expect(en.tasks).toBeDefined();
     expect(Object.keys(en.tasks ?? {}).sort()).toEqual([...NEW_BEGINNING_TASK_IDS].sort());

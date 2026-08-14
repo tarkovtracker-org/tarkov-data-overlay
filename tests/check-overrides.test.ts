@@ -14,9 +14,7 @@ function createTaskAddition(overrides: Partial<TaskAddition> = {}): TaskAddition
   return {
     id: overrides.id ?? 'addition-id',
     name: overrides.name ?? 'Test Addition',
-    wikiLink:
-      overrides.wikiLink ??
-      'https://escapefromtarkov.fandom.com/wiki/Test_Addition',
+    wikiLink: overrides.wikiLink ?? 'https://escapefromtarkov.fandom.com/wiki/Test_Addition',
     trader: overrides.trader ?? { name: 'Prapor' },
     objectives: overrides.objectives ?? [{ id: 'obj-1', description: 'Do thing' }],
     ...overrides,
@@ -34,11 +32,8 @@ function createApiTask(overrides: Partial<TaskData> = {}): TaskData {
 
 describe('normalizeWikiLink', () => {
   it('normalizes scheme, host, query, fragment, and trailing slashes', () => {
-    const link =
-      'http://www.escapefromtarkov.fandom.com/wiki/New_Beginning/?oldid=1#History';
-    expect(normalizeWikiLink(link)).toBe(
-      'https://escapefromtarkov.fandom.com/wiki/new_beginning'
-    );
+    const link = 'http://www.escapefromtarkov.fandom.com/wiki/New_Beginning/?oldid=1#History';
+    expect(normalizeWikiLink(link)).toBe('https://escapefromtarkov.fandom.com/wiki/new_beginning');
   });
 
   it('returns a trimmed lowercase fallback for malformed URLs', () => {
@@ -58,8 +53,7 @@ describe('checkTaskAdditions', () => {
     const additions = {
       taskA: createTaskAddition({
         name: 'New Beginning',
-        wikiLink:
-          'http://www.escapefromtarkov.fandom.com/wiki/New_Beginning/?oldid=1#History',
+        wikiLink: 'http://www.escapefromtarkov.fandom.com/wiki/New_Beginning/?oldid=1#History',
       }),
     };
     const apiTasks = [

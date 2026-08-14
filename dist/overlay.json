@@ -303,7 +303,8 @@
           },
           "value": 2
         }
-      ]
+      ],
+      "experience": 10000
     },
     "639136f086e646067c176a8b": {
       "traderRequirements": [
@@ -574,7 +575,8 @@
           },
           "value": 4
         }
-      ]
+      ],
+      "experience": 65000
     },
     "6574e0dedc0d635f633a5805": {
       "name": "Getting Some Air",
@@ -968,7 +970,8 @@
           },
           "value": 4
         }
-      ]
+      ],
+      "experience": 65000
     },
     "6663148ed7f171c4c20226c1": {
       "traderRequirements": [
@@ -1153,7 +1156,8 @@
           },
           "value": 1
         }
-      ]
+      ],
+      "experience": 3000
     },
     "5979ed3886f77431307dc512": {
       "traderRequirements": [
@@ -1346,7 +1350,8 @@
           },
           "value": 2
         }
-      ]
+      ],
+      "experience": 10000
     },
     "5b478ff486f7744d184ecbbf": {
       "name": "Supplements",
@@ -1471,7 +1476,8 @@
           },
           "value": 3
         }
-      ]
+      ],
+      "experience": 28000
     },
     "626bd75d5bef5d7d590bd415": {
       "traderRequirements": [
@@ -2356,7 +2362,8 @@
           },
           "value": 4
         }
-      ]
+      ],
+      "experience": 65000
     },
     "68db9c7557bc51a8c804c14b": {
       "traderRequirements": [
@@ -2473,45 +2480,6 @@
                 "y": 28.55,
                 "z": 125.8475
               }
-            }
-          ]
-        },
-        "6926fcc872a6499d1fa29327": {
-          "zones": [
-            {
-              "map": {
-                "id": "5714dbc024597771384a510d",
-                "name": "Interchange"
-              },
-              "outline": [
-                {
-                  "x": 35.316765,
-                  "y": 22.91,
-                  "z": 303.477869
-                },
-                {
-                  "x": 46.143366,
-                  "y": 22.91,
-                  "z": 308.653264
-                },
-                {
-                  "x": 44.418235,
-                  "y": 22.91,
-                  "z": 312.262131
-                },
-                {
-                  "x": 33.591634,
-                  "y": 22.91,
-                  "z": 307.086736
-                }
-              ],
-              "position": {
-                "x": 39.8675,
-                "y": 22.91,
-                "z": 307.87
-              },
-              "top": 24.35,
-              "bottom": 21.35
             }
           ]
         }
@@ -2661,7 +2629,8 @@
           },
           "value": 2
         }
-      ]
+      ],
+      "experience": 10000
     },
     "5ae449d986f774453a54a7e1": {
       "traderRequirements": [
@@ -2762,7 +2731,8 @@
           },
           "value": 3
         }
-      ]
+      ],
+      "experience": 28000
     },
     "5c1141f386f77430ff393792": {
       "name": "Antique Enthusiast",
@@ -3623,6 +3593,827 @@
     },
     "5d25e2a986f77409dd5cdf2a": {
       "disabled": true
+    },
+    "666314b0acf8442f8b0531a1": {
+      "experience": 3000
+    }
+  },
+  "craftsAdd": {
+    "655b650ab71eeb7c4168c627": {
+      "id": "655b650ab71eeb7c4168c627",
+      "station": "5d484fba654e7600691aadf7",
+      "level": 3,
+      "duration": 10000,
+      "requiredItems": [
+        {
+          "item": "59e3556c86f7741776641ac2",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "5e2af4d286f7746d4159f07a",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "5e2af41e86f774755a234b67",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "61bf83814088ec1a363d7097",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "591094e086f7747caa7bb2ef",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "656f611f94b480b8a500c0db",
+          "count": 2,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "5ab8e79e86f7742d8b372e78",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "67092bbfc45f0546bf097a7e": {
+      "id": "67092bbfc45f0546bf097a7e",
+      "station": "5d484fcd654e7668ec2ec322",
+      "level": 2,
+      "taskUnlock": null,
+      "duration": 600,
+      "requiredItems": [
+        {
+          "item": "5448fee04bdc2dbc018b4567",
+          "count": 5,
+          "attributes": {}
+        },
+        {
+          "item": "6389c6c7dbfd5e4b95197e68",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "59e3606886f77417674759a5",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5fca138c2a7b221b2852a5c6",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5ed5166ad380ab312177c100",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5c10c8fd86f7743d7d706df3",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "6707d0804e617ec94f0e562f",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "67093210d514d26f8408612b": {
+      "id": "67093210d514d26f8408612b",
+      "station": "5d484fcd654e7668ec2ec322",
+      "level": 2,
+      "taskUnlock": null,
+      "duration": 600,
+      "requiredItems": [
+        {
+          "item": "5d1b33a686f7742523398398",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "6707d0804e617ec94f0e562f",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "590c695186f7741e566b64a2",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "544fb3f34bdc2d03748b456a",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "6707d0bdaab679420007e01a",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "5ee49f2c6abbcb7ba704abc2": {
+      "id": "5ee49f2c6abbcb7ba704abc2",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "duration": 5400,
+      "requiredItems": [
+        {
+          "item": "590c5a7286f7747884343aea",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5737201124597760fc4431f1",
+          "count": 200,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "573719df2459775a626ccbc2",
+        "count": 200,
+        "attributes": {}
+      }
+    },
+    "655b34dc1273611d2462ab74": {
+      "id": "655b34dc1273611d2462ab74",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "duration": 2770,
+      "requiredItems": [
+        {
+          "item": "59e6927d86f77411da468256",
+          "count": 180,
+          "attributes": {}
+        },
+        {
+          "item": "590c31c586f774245e3141b2",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "62a0a0bb621468534a797ad5",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "5c0d5ae286f7741e46554302",
+        "count": 180,
+        "attributes": {}
+      }
+    },
+    "655b48fe065b076eb02c4b46": {
+      "id": "655b48fe065b076eb02c4b46",
+      "station": "5d484fda654e7600681d9315",
+      "level": 2,
+      "duration": 15480,
+      "requiredItems": [
+        {
+          "item": "64b7af5a8532cf95ee0a0dbd",
+          "count": 120,
+          "attributes": {}
+        },
+        {
+          "item": "590c5a7286f7747884343aea",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "62a09ee4cf4a99369e262453",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "544fb5454bdc2df8738b456a",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "5656d7c34bdc2d9d198b4587",
+        "count": 120,
+        "attributes": {}
+      }
+    },
+    "655b4e591fe356507267b2f5": {
+      "id": "655b4e591fe356507267b2f5",
+      "station": "5d484fda654e7600681d9315",
+      "level": 3,
+      "duration": 8400,
+      "requiredItems": [
+        {
+          "item": "5d6fc78386f77449d825f9dc",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "619cbfccbedcde2f5b3f7bdd",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "59e77a2386f7742ee578960a",
+        "count": 40,
+        "attributes": {}
+      }
+    },
+    "6617cdb6b24b0ea24505f618": {
+      "id": "6617cdb6b24b0ea24505f618",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 1800,
+      "requiredItems": [
+        {
+          "item": "5d4042a986f7743185265463",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "5d1b31ce86f7742523398394",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "5d0376a486f7747d8050965c",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "6389c70ca33d8c4cdf4932c6",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "590a358486f77429692b2790",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "63a0b2eabea67a6d93009e52",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "66582be04de4820934746cea": {
+      "id": "66582be04de4820934746cea",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "duration": 300,
+      "requiredItems": [
+        {
+          "item": "5c07df7f0db834001b73588a",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "544fb5454bdc2df8738b456a",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "665828c44de4820934746ce4",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "66582972ac60f009f270d2aa",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "67449c79268737ef6908d636": {
+      "id": "67449c79268737ef6908d636",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 10,
+      "requiredItems": [
+        {
+          "item": "6740987b89d5e1ddc603f4f0",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "67449b6c89d5e1ddc603f504",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "674078c4a9c9adf0450d59f9",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "6745925da9c9adf0450d5bca": {
+      "id": "6745925da9c9adf0450d5bca",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 10,
+      "requiredItems": [
+        {
+          "item": "67409848d0b2f8eb9b034db9",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "544fb5454bdc2df8738b456a",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "674098588466ebb03408b210",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "68dbdd31cbbef1fa710f5311": {
+      "id": "68dbdd31cbbef1fa710f5311",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 19800,
+      "requiredItems": [
+        {
+          "item": "68d271fc17de6a40270d5657",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "5672cb124bdc2d1a0f8b4568",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "57347baf24597738002c6178",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "56742c324bdc2d150f8b456d",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "688896b3ea36baf84d085544",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "68dbddc362392833810125f7": {
+      "id": "68dbddc362392833810125f7",
+      "station": "5d484fda654e7600681d9315",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 19800,
+      "requiredItems": [
+        {
+          "item": "68d271fc17de6a40270d5657",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "5c06782b86f77426df5407d2",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "57347baf24597738002c6178",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5c06779c86f77426e00dd782",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "68889737562720383f0f8548",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "5eda007f658fac5b8c3862a6": {
+      "id": "5eda007f658fac5b8c3862a6",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 2,
+      "duration": 140000,
+      "requiredItems": [
+        {
+          "item": "5c1265fc86f7743f896a21c2",
+          "count": 3,
+          "attributes": {}
+        },
+        {
+          "item": "5af0561e86f7745f5f3ad6ac",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5d0376a486f7747d8050965c",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "590c639286f774151567fa95",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "590c2e1186f77425357b6124",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "6389c7750ef44505c87f5996",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "590a3efd86f77437d351a25b",
+          "count": 2,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "5c052f6886f7746b1e3db148",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "5eda0ad40699b81bb9142aae": {
+      "id": "5eda0ad40699b81bb9142aae",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 2,
+      "duration": 225000,
+      "requiredItems": [
+        {
+          "item": "57347baf24597738002c6178",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "590c392f86f77444754deb29",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "56742c324bdc2d150f8b456d",
+          "count": 3,
+          "attributes": {}
+        },
+        {
+          "item": "590c2e1186f77425357b6124",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "6389c8fb46b54c634724d847",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "5c05300686f7746dce784e5d",
+        "count": 2,
+        "attributes": {}
+      }
+    },
+    "660c2dbaa2a92e70cc074863": {
+      "id": "660c2dbaa2a92e70cc074863",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 900,
+      "requiredItems": [
+        {
+          "item": "660bbc47c38b837877075e47",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "660bbc98c38b837877075e4a",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "66140c4a9688754de10dac07": {
+      "id": "66140c4a9688754de10dac07",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "duration": 600,
+      "requiredItems": [
+        {
+          "item": "660bbc47c38b837877075e47",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "660bc341c38b837877075e4c",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "661e6c26750e453380391f55": {
+      "id": "661e6c26750e453380391f55",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 600,
+      "requiredItems": [
+        {
+          "item": "660bbc47c38b837877075e47",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "660bc341c38b837877075e4c",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "670932d7b564327a0e023fcb": {
+      "id": "670932d7b564327a0e023fcb",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 900,
+      "requiredItems": [
+        {
+          "item": "590c621186f774138d11ea29",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "6707d13e4e617ec94f0e5631",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "67c08dba9320f644db06f4f4": {
+      "id": "67c08dba9320f644db06f4f4",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 21600,
+      "requiredItems": [
+        {
+          "item": "67c034f0e7a5da1e070f6de8",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c035140610e91bea05699a",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c0351e354fca26a0008038",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c0352dd98287be7b0923d6",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "590c392f86f77444754deb29",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "67c0497068e50a07b10d2576",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "67c882409564fee332097c3e": {
+      "id": "67c882409564fee332097c3e",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 21600,
+      "requiredItems": [
+        {
+          "item": "67c04b062669b12ac6034866",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c04b15e7a5da1e070f6dea",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c04b286df6ad43b3005fb9",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c04b351becc43a45071286",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "67c04b420610e91bea05699c",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "62a0a16d0b9d3c46de5b6e97",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "67c04b8de7a5da1e070f6dec",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "690a8dac7c24a3e1eb052b5d": {
+      "id": "690a8dac7c24a3e1eb052b5d",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 19800,
+      "requiredItems": [
+        {
+          "item": "67ee77389fcc485cf10615f3",
+          "count": 1,
+          "attributes": {
+            "tool": true
+          }
+        },
+        {
+          "item": "57347baf24597738002c6178",
+          "count": 3,
+          "attributes": {}
+        },
+        {
+          "item": "5c05308086f7746b2101e90b",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "5734779624597737e04bf329",
+          "count": 3,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "68e7d1be6656898e78015bd9",
+        "count": 1,
+        "attributes": {}
+      }
+    },
+    "6a673d7a4da15f1334018588": {
+      "id": "6a673d7a4da15f1334018588",
+      "station": "5d484fdf654e7600691aadf8",
+      "level": 1,
+      "taskUnlock": null,
+      "duration": 900,
+      "requiredItems": [
+        {
+          "item": "62a0a16d0b9d3c46de5b6e97",
+          "count": 1,
+          "attributes": {}
+        },
+        {
+          "item": "6389c70ca33d8c4cdf4932c6",
+          "count": 2,
+          "attributes": {}
+        },
+        {
+          "item": "6a5f9c25e8c84d8b0602f22a",
+          "count": 1,
+          "attributes": {}
+        }
+      ],
+      "requiredQuestItems": [],
+      "gameEditions": [],
+      "productItem": {
+        "item": "6a6692d4beccfa243d0bb575",
+        "count": 1,
+        "attributes": {}
+      }
     }
   },
   "editions": {
@@ -3736,7 +4527,1224 @@
       ]
     }
   },
-  "itemsAdd": {},
+  "itemsAdd": {
+    "688896b3ea36baf84d085544": {
+      "id": "688896b3ea36baf84d085544",
+      "name": "Moreman's audio tape #1",
+      "shortName": "Morem. 1",
+      "description": "This audio tape contains a recording recovered from Moreman’s damaged phone."
+    },
+    "68889737562720383f0f8548": {
+      "id": "68889737562720383f0f8548",
+      "name": "Moreman's audio tape #2",
+      "shortName": "Morem. 2",
+      "description": "One of the recordings from Moreman’s damaged phone was successfully transferred onto this audio tape."
+    },
+    "660bbc98c38b837877075e4a": {
+      "id": "660bbc98c38b837877075e4a",
+      "name": "Decrypted flash drive",
+      "shortName": "Flash drive",
+      "description": "A decrypted flash drive. Stores the login kostochkin_g_b and several encrypted documents."
+    },
+    "67c034f0e7a5da1e070f6de8": {
+      "id": "67c034f0e7a5da1e070f6de8",
+      "name": "Folder with TerraGroup evidence (Finances)",
+      "shortName": "TG finance",
+      "description": "A folder containing documents that compromise TerraGroup, focusing specifically on the organization’s financial activities."
+    },
+    "67c035140610e91bea05699a": {
+      "id": "67c035140610e91bea05699a",
+      "name": "Folder with TerraGroup Labs evidence (Developments)",
+      "shortName": "TGL dev.",
+      "description": "A folder containing documents that compromise TerraGroup Labs, focusing specifically on the organization’s developments."
+    },
+    "67c0351e354fca26a0008038": {
+      "id": "67c0351e354fca26a0008038",
+      "name": "Folder with TerraGroup evidence (Staff)",
+      "shortName": "TG staff",
+      "description": "A folder containing documents that compromise TerraGroup, focusing specifically on the organization’s staff records."
+    },
+    "67c0352dd98287be7b0923d6": {
+      "id": "67c0352dd98287be7b0923d6",
+      "name": "Folder with TerraGroup Labs evidence (Reports)",
+      "shortName": "TGL rep.",
+      "description": "A folder containing documents that compromise TerraGroup Labs, focusing specifically on the organization’s project reports."
+    },
+    "67c0497068e50a07b10d2576": {
+      "id": "67c0497068e50a07b10d2576",
+      "name": "SSD with TerraGroup evidence",
+      "shortName": "TG dirt",
+      "description": "A solid-state drive containing incriminating material. TerraGroup would likely pay handsomely for one like this. Or maybe others would."
+    },
+    "67c04b062669b12ac6034866": {
+      "id": "67c04b062669b12ac6034866",
+      "name": "Factory plant topographic intel maps",
+      "shortName": "Factory",
+      "description": "Materials that will help you better orient yourself around the area."
+    },
+    "67c04b15e7a5da1e070f6dea": {
+      "id": "67c04b15e7a5da1e070f6dea",
+      "name": "City topographic intel maps",
+      "shortName": "City",
+      "description": "Materials that will help you better orient yourself around the area."
+    },
+    "67c04b286df6ad43b3005fb9": {
+      "id": "67c04b286df6ad43b3005fb9",
+      "name": "Customs topographic intel maps",
+      "shortName": "Customs",
+      "description": "Materials that will help you better orient yourself around the area."
+    },
+    "67c04b351becc43a45071286": {
+      "id": "67c04b351becc43a45071286",
+      "name": "Nature reserve topographic intel maps",
+      "shortName": "Woods",
+      "description": "Materials that will help you better orient yourself around the area."
+    },
+    "67c04b420610e91bea05699c": {
+      "id": "67c04b420610e91bea05699c",
+      "name": "Lighthouse topographic intel maps",
+      "shortName": "Lighthouse",
+      "description": "Materials that will help you better orient yourself around the area."
+    },
+    "67c04b8de7a5da1e070f6dec": {
+      "id": "67c04b8de7a5da1e070f6dec",
+      "name": "Military flash drive with topographic intel",
+      "shortName": "MFD intel",
+      "description": "A military flash drive containing the full set of topographic reconnaissance materials. Lucky is the one who gets their hands on it."
+    },
+    "6a6692d4beccfa243d0bb575": {
+      "id": "6a6692d4beccfa243d0bb575",
+      "name": "Data from Black Division laptop",
+      "shortName": "BD data",
+      "description": "This storage device contains all the data successfully decrypted and extracted from the Black Division rugged laptop by following Mechanic's instructions."
+    },
+    "5b9b9020e7ef6f5716480215": {
+      "id": "5b9b9020e7ef6f5716480215",
+      "name": "Dogtag USEC",
+      "shortName": "USEC"
+    }
+  },
+  "seasonalPerks": {
+    "69c41a19cd28c936320a7523": {
+      "id": "69c41a19cd28c936320a7523",
+      "type": "common",
+      "name": "No Insurance",
+      "description": "• Cannot insure items before raid",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "effectId": "insurance_disabled"
+        }
+      ]
+    },
+    "69c41a86383fc5c9ad03f3d5": {
+      "id": "69c41a86383fc5c9ad03f3d5",
+      "type": "common",
+      "name": "Handyman",
+      "description": "• Item crafting time is reduced by 50%\n• Crafting skill starts at level 51",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "skillIds": [
+            "Crafting"
+          ],
+          "intValue": 51,
+          "effectId": "skill_level_preset"
+        },
+        {
+          "multiplicator": 0.87,
+          "effectId": "craft_time_multiplicator"
+        }
+      ]
+    },
+    "69c41adf883efd5e3b09ccae": {
+      "id": "69c41adf883efd5e3b09ccae",
+      "type": "common",
+      "name": "Seasoned PMCs",
+      "description": "• Your character gains 25% more experience",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "multiplicator": 1.25,
+          "effectId": "pmc_experience_multiplicator"
+        }
+      ]
+    },
+    "69ce5d9296f3b267fa08f137": {
+      "id": "69ce5d9296f3b267fa08f137",
+      "type": "common",
+      "name": "Armor Shortage",
+      "description": "• Traders across Tarkov are experiencing an armor shortage",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": []
+    },
+    "69ce5e104e0a1c7ca20781c9": {
+      "id": "69ce5e104e0a1c7ca20781c9",
+      "type": "common",
+      "name": "Black Division",
+      "description": "• Black Division operatives can be encountered on specific locations",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": []
+    },
+    "69ce5eb3e4b79de94a0d78c8": {
+      "id": "69ce5eb3e4b79de94a0d78c8",
+      "type": "common",
+      "name": "No FiR for Hideout",
+      "description": "• Hideout zones don't require the Found in Raid status",
+      "points": null,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "mode": "not_require",
+          "effectId": "hideout_fir"
+        }
+      ]
+    },
+    "69c3cd003ffdba4e68086bd7": {
+      "id": "69c3cd003ffdba4e68086bd7",
+      "type": "personal",
+      "name": "Hemophilia",
+      "description": "• Bleeding chance is increased by 25%",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c4116a383fc5c9ad03f3d1"
+      ],
+      "effects": [
+        {
+          "multiplicator": 1.25,
+          "effectId": "bleeding_chance_multiplicator"
+        }
+      ]
+    },
+    "69c3cddcfb79911cf20022d6": {
+      "id": "69c3cddcfb79911cf20022d6",
+      "type": "personal",
+      "name": "Osteoporosis",
+      "description": "• Limb fracture chance is increased by 25%\n• Falling from heights deals 20% more damage",
+      "points": 3,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c41632d7a7b2ca660e0c59"
+      ],
+      "effects": [
+        {
+          "multiplicator": 1.25,
+          "effectId": "fracture_chance_multiplicator"
+        },
+        {
+          "multiplicator": 1.2,
+          "effectId": "fall_damage_multiplicator"
+        }
+      ]
+    },
+    "69c3d036042c81ad9209eeae": {
+      "id": "69c3d036042c81ad9209eeae",
+      "type": "personal",
+      "name": "Well That Hurt!",
+      "description": "• All medkit uses consume 25% more resource",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [],
+            "allowedItems": [
+              "590c657e86f77412b013051d",
+              "60098ad7c2240c0fe85c570a",
+              "590c661e86f7741e566b646a",
+              "590c678286f77426c9660122",
+              "5755356824597772cb798962",
+              "544fb45d4bdc2dee738b4568"
+            ],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "multiplicator": 1.25,
+          "effectId": "item_resource_drain_multiplicator"
+        }
+      ]
+    },
+    "69c3d21749d7d7c520026425": {
+      "id": "69c3d21749d7d7c520026425",
+      "type": "personal",
+      "name": "Incompetent",
+      "description": "• All character skills are leveled 25% slower (Excluding Bolt-action Rifles)\n• All character skills can only be increased up to level 30 (Excluding Crafting)",
+      "points": 10,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69ce64064e0a1c7ca20781d3",
+        "6a578102e7737aa469066518"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "AimDrills",
+            "Assault",
+            "AttachedLauncher",
+            "Attention",
+            "Charisma",
+            "CovertMovement",
+            "Crafting",
+            "DMR",
+            "Endurance",
+            "HMG",
+            "Health",
+            "HeavyVests",
+            "HideoutManagement",
+            "Immunity",
+            "Intellect",
+            "LMG",
+            "Launcher",
+            "LightVests",
+            "MagDrills",
+            "Melee",
+            "Metabolism",
+            "Perception",
+            "Pistol",
+            "Revolver",
+            "SMG",
+            "Search",
+            "Shotgun",
+            "Strength",
+            "StressResistance",
+            "Surgery",
+            "Throwing",
+            "TroubleShooting",
+            "Vitality",
+            "WeaponTreatment"
+          ],
+          "multiplicator": 0.75,
+          "effectId": "skill_experience_multiplicator"
+        },
+        {
+          "skillIds": [
+            "AimDrills",
+            "Assault",
+            "AttachedLauncher",
+            "Attention",
+            "Charisma",
+            "CovertMovement",
+            "DMR",
+            "Endurance",
+            "HMG",
+            "Health",
+            "HeavyVests",
+            "HideoutManagement",
+            "Immunity",
+            "Intellect",
+            "LMG",
+            "Launcher",
+            "LightVests",
+            "MagDrills",
+            "Melee",
+            "Metabolism",
+            "Perception",
+            "Pistol",
+            "Revolver",
+            "SMG",
+            "Search",
+            "Shotgun",
+            "Sniper",
+            "Strength",
+            "StressResistance",
+            "Surgery",
+            "Throwing",
+            "TroubleShooting",
+            "Vitality",
+            "WeaponTreatment"
+          ],
+          "intValue": 30,
+          "effectId": "skill_max_level_cap"
+        }
+      ]
+    },
+    "69c3d2acfe3c5632e4045fe8": {
+      "id": "69c3d2acfe3c5632e4045fe8",
+      "type": "personal",
+      "name": "Polydipsia",
+      "description": "• Hydration is consumed 15% faster",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c411d8883efd5e3b09ccab"
+      ],
+      "effects": [
+        {
+          "multiplicator": 1.2,
+          "effectId": "hydration_drain_multiplicator"
+        }
+      ]
+    },
+    "69c3d35feaf97663fb0bb367": {
+      "id": "69c3d35feaf97663fb0bb367",
+      "type": "personal",
+      "name": "Chronic Fatigue Syndrome",
+      "description": "• Energy is consumed 20% faster",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c412519b5263783d0fe520",
+        "69c40c0f5e9ce5a8970f6be9"
+      ],
+      "effects": [
+        {
+          "multiplicator": 1.2,
+          "effectId": "energy_drain_multiplicator"
+        }
+      ]
+    },
+    "69c3d43030f896ebef0ed357": {
+      "id": "69c3d43030f896ebef0ed357",
+      "type": "personal",
+      "name": "Personality Vacuum",
+      "description": "• Charisma skill cannot be increased\n• All trader items cost 20% more",
+      "points": 2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69ce62886e199f4bbe0ab19b"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "Charisma"
+          ],
+          "effectId": "skill_not_growing"
+        },
+        {
+          "traderIds": [
+            "5ac3b934156ae10c4430e83c",
+            "58330581ace78e27b8b10cee",
+            "5c0647fdd443bc2504c2d371",
+            "5a7c2eca46aef81a7ca2145d",
+            "5935c25fb3acc3127c3d8cd9",
+            "579dc571d53a0658a154fbec",
+            "54cb50c76803fa8b248b4571",
+            "54cb57776803fa99248b456e"
+          ],
+          "tradeAction": "buy",
+          "multiplicator": 1.2,
+          "effectId": "trader_prices_by_trader_multiplicator"
+        }
+      ]
+    },
+    "69c3d4e949d7d7c52002642a": {
+      "id": "69c3d4e949d7d7c52002642a",
+      "type": "personal",
+      "name": "Dr. Jekyll",
+      "description": "• After gaining the Fresh Wound status, it cannot be removed until the end of the raid",
+      "points": 1,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "effectId": "fresh_wounds_until_raid_end"
+        }
+      ]
+    },
+    "69c3d6a9af28f094100fe128": {
+      "id": "69c3d6a9af28f094100fe128",
+      "type": "personal",
+      "name": "Allergic",
+      "description": "• Become allergic to 3 random items from the Provisions or Medication category",
+      "points": 3,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [
+              "5448f3a14bdc2d27728b4569",
+              "5448f3a64bdc2d60728b456a",
+              "543be6674bdc2df1348b4569"
+            ],
+            "allowedItems": [],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "randomSlotCount": 3,
+          "appliedRandomEffectCount": 1,
+          "subEffects": {
+            "pain": {
+              "enabled": true,
+              "durationSeconds": 30
+            },
+            "tremor": {
+              "enabled": true,
+              "durationSeconds": 20
+            },
+            "tunnelVision": {
+              "enabled": true,
+              "durationSeconds": 20
+            },
+            "onPainkillers": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "healthRegeneration": {
+              "enabled": true,
+              "amount": -3,
+              "durationSeconds": 30
+            },
+            "hydrationRecovery": {
+              "enabled": true,
+              "amount": -3,
+              "durationSeconds": 30
+            },
+            "energyRecovery": {
+              "enabled": true,
+              "amount": -3,
+              "durationSeconds": 30
+            }
+          },
+          "effectId": "allergy"
+        }
+      ]
+    },
+    "69c3da13eaf97663fb0bb36d": {
+      "id": "69c3da13eaf97663fb0bb36d",
+      "type": "personal",
+      "name": "Broken Secure Container",
+      "description": "• Secure container can only be filled with cash, keys, dogtags, special equipment, certain containers and Battle Pass documents",
+      "points": 6,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [
+              "543be5e94bdc2df1348b4568",
+              "5447e0e74bdc2d3c308b4567",
+              "567849dd4bdc2d150f8b456e",
+              "543be5dd4bdc2deb348b4569"
+            ],
+            "allowedItems": [
+              "68fb41120760c7891606613c",
+              "6662e9aca7e0b43baa3d5f74",
+              "68fb412b0760c7891606613e",
+              "6662e9cda7e0b43baa3d5f76",
+              "68fb4143a854bc7ae80fad3e",
+              "6662e9f37fa79a6d83730fa0",
+              "68fb4157b280c103230e3b3c",
+              "6662ea05f6259762c56f3189",
+              "59f32bb586f774757e1e8442",
+              "68f15e26f1aa7e100a0ca208",
+              "675dc9d37ae1a8792107ca96",
+              "675dcb0545b1a2d108011b2b",
+              "684180bc51bf8645f7067bc8",
+              "68f0f63c645c14a02104142a",
+              "68f0f60a121d878a2303eedb",
+              "684181208d035f60230f63f9",
+              "68f15cf222c8979ee308f495",
+              "68df991142e96f583d042b8a",
+              "68df9908972cf1e1ec07256a",
+              "68df991dbeba86572e097ceb",
+              "68df9927a38a5e37d80df6c9",
+              "68f153aa7da590b6df0515da",
+              "68f15e53103c5d9d4f022c78",
+              "6764207f2fa5e32733055c4a",
+              "6764202ae307804338014c1a",
+              "68418091b5b0c9e4c60f0e7a",
+              "684180ee9b6d80d840042e8a",
+              "68f0f64f183146ea530330aa",
+              "68f0f662859ebec8d501b76a",
+              "68f15dbab2b53abd200b9378",
+              "68df99a614ca2428b2017cd8",
+              "68df99975d4e135b130392ca",
+              "68df99b2f716906506098308",
+              "68df99c05d4e135b130392cc",
+              "5b9b9020e7ef6f5716480215",
+              "60b0f6c058e0b0481a09ad11",
+              "59fafd4b86f7745ca07e1232",
+              "62a09d3bcf4a99369e262447",
+              "6937eccbfd921faceb0dfecd",
+              "5783c43d2459774bbe137486",
+              "5c093e3486f77430cb02e593",
+              "6a354a30652075cf460944c6",
+              "6a354a9a9cd7a91b45027a89",
+              "6a354abe73339990030ca469",
+              "6a354aa56632508bd10476dc",
+              "6a3549435288a3fe6e085224",
+              "6a3548e72a963bcdd8098649",
+              "6a354a6f8d465a55c70065c8",
+              "6a354a7e6632508bd10476d8",
+              "6a354a6240e6797a930312e5",
+              "6a354a077e4ccdbe95005266",
+              "59f32c3b86f77472a31742f0",
+              "6a461aed7391ab085a093760",
+              "6a461bf82b2264dbe10d0ee6",
+              "6a461c41ec88c6b9a509fb17",
+              "6a31807f17005505b70d5827",
+              "6a3182dc6cd8de21cf0a3a7d",
+              "6a31830dde69ceafd805afa0",
+              "6a317b9692cfdcddcb02a58e",
+              "6a3181f178450ec91c0ea1aa",
+              "6a31824878450ec91c0ea1ae",
+              "6a31828557705071410ca00e",
+              "6a3182b72fd891345e047eef",
+              "6937ecc3dbdccab44605fcf0",
+              "697883474afb9f7de10380ba"
+            ],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "effectId": "pouch_item_filter_restrict"
+        }
+      ]
+    },
+    "69c3da8fc0e4deb02605f3c9": {
+      "id": "69c3da8fc0e4deb02605f3c9",
+      "type": "personal",
+      "name": "No Flea Market",
+      "description": "• Trading with players on the Flea Market is disabled",
+      "points": 10,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "effectId": "flea_market_npc_only"
+        }
+      ]
+    },
+    "69c3e8d8af28f094100fe130": {
+      "id": "69c3e8d8af28f094100fe130",
+      "type": "personal",
+      "name": "Marathon Runner",
+      "description": "• Arm and leg stamina is consumed 20% slower",
+      "points": -3,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3ce913ffdba4e68086bdb",
+        "69c41111cd28c936320a7520"
+      ],
+      "effects": [
+        {
+          "bodyPartTypes": [
+            "arms",
+            "legs"
+          ],
+          "multiplicator": 0.8,
+          "effectId": "stamina_consumption_body_parts_multiplicator"
+        }
+      ]
+    },
+    "69c405a9d7a7b2ca660e0c56": {
+      "id": "69c405a9d7a7b2ca660e0c56",
+      "type": "personal",
+      "name": "Bushborne",
+      "description": "• Walking in vegetation generates 75% less noise and movement slowdown",
+      "points": -5,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "multiplicatorPrimary": 0.25,
+          "multiplicatorSecondary": 0.25,
+          "effectId": "bush_interaction_multiplicators"
+        }
+      ]
+    },
+    "69c406731d8aec4a2b0551bd": {
+      "id": "69c406731d8aec4a2b0551bd",
+      "type": "personal",
+      "name": "Juice Time",
+      "description": "• Consuming a juice drink grants the Painkiller effect for 60 seconds",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [],
+            "allowedItems": [
+              "57513f07245977207e26a311",
+              "57513f9324597720a7128161",
+              "57513fcc24597720a31c09a6",
+              "544fb62a4bdc2dfb738b4568"
+            ],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "randomSlotCount": 4,
+          "appliedRandomEffectCount": 1,
+          "subEffects": {
+            "pain": {
+              "enabled": false,
+              "durationSeconds": 30
+            },
+            "tremor": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "tunnelVision": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "onPainkillers": {
+              "enabled": true,
+              "durationSeconds": 60
+            },
+            "healthRegeneration": {
+              "enabled": false,
+              "amount": 1,
+              "durationSeconds": 5
+            },
+            "hydrationRecovery": {
+              "enabled": false,
+              "amount": 0,
+              "durationSeconds": 0
+            },
+            "energyRecovery": {
+              "enabled": false,
+              "amount": 0,
+              "durationSeconds": 0
+            }
+          },
+          "effectId": "allergy"
+        }
+      ]
+    },
+    "69c40cb782362c4aff041510": {
+      "id": "69c40cb782362c4aff041510",
+      "type": "personal",
+      "name": "Street Tax",
+      "description": "• Once per week, some Scavs pay you protection money",
+      "points": -1,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "periodUnixSeconds": 604800,
+          "mailTemplateId": "69ce6b95603956f0c0030557",
+          "effectId": "scheduled_mail"
+        }
+      ]
+    },
+    "69c40e131f8903ce7a06984c": {
+      "id": "69c40e131f8903ce7a06984c",
+      "type": "personal",
+      "name": "The Tarkov Shooter",
+      "description": "• Bolt-action Rifles skill leveling speed is increased by 100%\n• Bolt-action Rifles skill starts at level 25",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69ce64064e0a1c7ca20781d3"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "Sniper"
+          ],
+          "intValue": 25,
+          "effectId": "skill_level_preset"
+        },
+        {
+          "skillIds": [
+            "Sniper"
+          ],
+          "multiplicator": 2,
+          "effectId": "skill_experience_multiplicator"
+        }
+      ]
+    },
+    "69c40f9f9b5263783d0fe51d": {
+      "id": "69c40f9f9b5263783d0fe51d",
+      "type": "personal",
+      "name": "Diet",
+      "description": "• All provisions consume 50% less resource",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [
+              "543be6674bdc2df1348b4569"
+            ],
+            "allowedItems": [],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "multiplicator": 0.5,
+          "effectId": "item_resource_drain_multiplicator"
+        }
+      ]
+    },
+    "69c4116a383fc5c9ad03f3d1": {
+      "id": "69c4116a383fc5c9ad03f3d1",
+      "type": "personal",
+      "name": "Thrombophilia",
+      "description": "• Bleeding chance is decreased by 25%",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3cd003ffdba4e68086bd7"
+      ],
+      "effects": [
+        {
+          "multiplicator": 0.75,
+          "effectId": "bleeding_chance_multiplicator"
+        }
+      ]
+    },
+    "69c411d8883efd5e3b09ccab": {
+      "id": "69c411d8883efd5e3b09ccab",
+      "type": "personal",
+      "name": "Hypodipsia",
+      "description": "• Hydration is consumed 20% slower",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3d2acfe3c5632e4045fe8"
+      ],
+      "effects": [
+        {
+          "multiplicator": 0.8,
+          "effectId": "hydration_drain_multiplicator"
+        }
+      ]
+    },
+    "69c412519b5263783d0fe520": {
+      "id": "69c412519b5263783d0fe520",
+      "type": "personal",
+      "name": "Polyphagia",
+      "description": "• Energy is consumed 20% slower",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3d35feaf97663fb0bb367",
+        "69c40c0f5e9ce5a8970f6be9"
+      ],
+      "effects": [
+        {
+          "multiplicator": 0.8,
+          "effectId": "energy_drain_multiplicator"
+        }
+      ]
+    },
+    "69c41632d7a7b2ca660e0c59": {
+      "id": "69c41632d7a7b2ca660e0c59",
+      "type": "personal",
+      "name": "Sturdy Bones",
+      "description": "• Limb fracture chance is decreased by 25%\n• Falling from heights deals 20% less damage",
+      "points": -3,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3cddcfb79911cf20022d6"
+      ],
+      "effects": [
+        {
+          "multiplicator": 0.75,
+          "effectId": "fracture_chance_multiplicator"
+        },
+        {
+          "multiplicator": 0.8,
+          "effectId": "fall_damage_multiplicator"
+        }
+      ]
+    },
+    "69ce62886e199f4bbe0ab19b": {
+      "id": "69ce62886e199f4bbe0ab19b",
+      "type": "personal",
+      "name": "Third Leg",
+      "description": "• Movement speed is decreased by 1%\n• Buying items at Therapist is 5% cheaper",
+      "points": 1,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c41111cd28c936320a7520",
+        "69c3d43030f896ebef0ed357"
+      ],
+      "effects": [
+        {
+          "multiplicator": 0.99,
+          "effectId": "sprint_speed_multiplicator"
+        },
+        {
+          "traderIds": [
+            "54cb57776803fa99248b456e"
+          ],
+          "tradeAction": "buy",
+          "multiplicator": 0.95,
+          "effectId": "trader_prices_by_trader_multiplicator"
+        }
+      ]
+    },
+    "69ce64064e0a1c7ca20781d3": {
+      "id": "69ce64064e0a1c7ca20781d3",
+      "type": "personal",
+      "name": "Average",
+      "description": "• All character skills are set to level 25 but cannot be leveled further (Excluding Crafting skill)",
+      "points": -12,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c40e131f8903ce7a06984c",
+        "69c410831f8903ce7a06984f",
+        "69c3d21749d7d7c520026425",
+        "6a578102e7737aa469066518"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "AimDrills",
+            "Assault",
+            "AttachedLauncher",
+            "Attention",
+            "Charisma",
+            "CovertMovement",
+            "Crafting",
+            "DMR",
+            "Endurance",
+            "HMG",
+            "Health",
+            "HeavyVests",
+            "HideoutManagement",
+            "Immunity",
+            "Intellect",
+            "LMG",
+            "Launcher",
+            "LightVests",
+            "MagDrills",
+            "Melee",
+            "Metabolism",
+            "Perception",
+            "Pistol",
+            "Revolver",
+            "SMG",
+            "Search",
+            "Shotgun",
+            "Sniper",
+            "Strength",
+            "StressResistance",
+            "Surgery",
+            "Throwing",
+            "TroubleShooting",
+            "Vitality",
+            "WeaponTreatment"
+          ],
+          "effectId": "skill_not_growing"
+        },
+        {
+          "skillIds": [
+            "AdvancedModding",
+            "AimDrills",
+            "Assault",
+            "AttachedLauncher",
+            "Attention",
+            "Auctions",
+            "Barter",
+            "BearAksystems",
+            "BearAssaultoperations",
+            "BearAuthority",
+            "BearHeavycaliber",
+            "BearRawpower",
+            "BotReload",
+            "BotSound",
+            "Charisma",
+            "Cleanoperations",
+            "CovertMovement",
+            "DMR",
+            "Endurance",
+            "FieldMedicine",
+            "FirstAid",
+            "Freetrading",
+            "HMG",
+            "Health",
+            "HeavyVests",
+            "HideoutManagement",
+            "Immunity",
+            "Intellect",
+            "LMG",
+            "Launcher",
+            "LightVests",
+            "Lockpicking",
+            "MagDrills",
+            "Melee",
+            "Memory",
+            "Metabolism",
+            "NightOps",
+            "Perception",
+            "Pistol",
+            "ProneMovement",
+            "RecoilControl",
+            "Revolver",
+            "SMG",
+            "Search",
+            "Shadowconnections",
+            "Shotgun",
+            "SilentOps",
+            "Sniper",
+            "Sniping",
+            "Strength",
+            "StressResistance",
+            "Surgery",
+            "Taskperformance",
+            "Throwing",
+            "TroubleShooting",
+            "UsecArsystems",
+            "UsecDeepweaponmodding",
+            "UsecLongrangeoptics",
+            "UsecNegotiations",
+            "UsecTactics",
+            "Vitality",
+            "WeaponModding",
+            "WeaponTreatment"
+          ],
+          "intValue": 25,
+          "effectId": "skill_level_preset"
+        }
+      ]
+    },
+    "69ce64fe6e199f4bbe0ab1a1": {
+      "id": "69ce64fe6e199f4bbe0ab1a1",
+      "type": "personal",
+      "name": "Kappa Protocol",
+      "description": "• Immediately receive Secure container Kappa",
+      "points": -12,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "periodUnixSeconds": 31556926,
+          "mailTemplateId": "69ce6921603956f0c003054c",
+          "effectId": "scheduled_mail"
+        }
+      ]
+    },
+    "6a578102e7737aa469066518": {
+      "id": "6a578102e7737aa469066518",
+      "type": "personal",
+      "name": "Prodigy",
+      "description": "• Skill experience gain is increased by 30%",
+      "points": -5,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69ce64064e0a1c7ca20781d3",
+        "69c3d21749d7d7c520026425"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "AimDrills",
+            "Assault",
+            "AttachedLauncher",
+            "Attention",
+            "Charisma",
+            "CovertMovement",
+            "Crafting",
+            "DMR",
+            "Endurance",
+            "HMG",
+            "Health",
+            "HeavyVests",
+            "HideoutManagement",
+            "Immunity",
+            "Intellect",
+            "LMG",
+            "Launcher",
+            "LightVests",
+            "MagDrills",
+            "Melee",
+            "Metabolism",
+            "Perception",
+            "Pistol",
+            "Revolver",
+            "SMG",
+            "Search",
+            "Shotgun",
+            "Sniper",
+            "Strength",
+            "StressResistance",
+            "Surgery",
+            "Throwing",
+            "TroubleShooting",
+            "Vitality",
+            "WeaponTreatment"
+          ],
+          "multiplicator": 1.3,
+          "effectId": "skill_experience_multiplicator"
+        }
+      ]
+    },
+    "6a5789f713792e2c7c0d2a5b": {
+      "id": "6a5789f713792e2c7c0d2a5b",
+      "type": "personal",
+      "name": "Lucky",
+      "description": "• Audentes fortuna iuvat!",
+      "points": -1,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "6a578ac032cea863f505beed"
+      ],
+      "effects": [
+        {
+          "effectId": "lucky"
+        }
+      ]
+    },
+    "6a578ac032cea863f505beed": {
+      "id": "6a578ac032cea863f505beed",
+      "type": "personal",
+      "name": "Unlucky",
+      "description": "• Your bad luck can sometimes have dire consequences",
+      "points": 1,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "6a5789f713792e2c7c0d2a5b"
+      ],
+      "effects": [
+        {
+          "effectId": "unlucky"
+        }
+      ]
+    },
+    "69c3ce913ffdba4e68086bdb": {
+      "id": "69c3ce913ffdba4e68086bdb",
+      "type": "personal",
+      "name": "Exhaustion",
+      "description": "• Arm and leg stamina recovers 20% slower\n• Arm and leg stamina is reduced by 10",
+      "points": 5,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3e8d8af28f094100fe130",
+        "69c40c0f5e9ce5a8970f6be9"
+      ],
+      "effects": [
+        {
+          "bodyPartTypes": [
+            "arms",
+            "legs"
+          ],
+          "multiplicator": 0.8,
+          "effectId": "stamina_restore_body_parts_multiplicator"
+        },
+        {
+          "bodyPartTypes": [
+            "arms",
+            "legs"
+          ],
+          "intValue": -10,
+          "effectId": "stamina_scale_body_parts"
+        }
+      ]
+    },
+    "69c405332f253132020be099": {
+      "id": "69c405332f253132020be099",
+      "type": "personal",
+      "name": "Safecracker",
+      "description": "• Mechanical keys have a 25% chance not to lose durability when used",
+      "points": -5,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "keyTypes": [
+            "mechanical"
+          ],
+          "multiplicator": 0.25,
+          "effectId": "key_durability_multiplicator"
+        }
+      ]
+    },
+    "69c40ae21d8aec4a2b0551c2": {
+      "id": "69c40ae21d8aec4a2b0551c2",
+      "type": "personal",
+      "name": "Sailor's Nostalgia",
+      "description": "• Consuming canned fish grants the Health Regeneration (+2) effect for 30 seconds",
+      "points": -2,
+      "mutuallyExclusiveSeasonalPerkIds": [],
+      "effects": [
+        {
+          "itemFilter": {
+            "allowedCategories": [],
+            "allowedItems": [
+              "57347d5f245977448b40fa81",
+              "57347d9c245977448b40fa85",
+              "5673de654bdc2d180f8b456d",
+              "5bc9c29cd4351e003562b8a3"
+            ],
+            "excludedCategories": [],
+            "excludedItems": []
+          },
+          "randomSlotCount": 4,
+          "appliedRandomEffectCount": 1,
+          "subEffects": {
+            "pain": {
+              "enabled": false,
+              "durationSeconds": 30
+            },
+            "tremor": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "tunnelVision": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "onPainkillers": {
+              "enabled": false,
+              "durationSeconds": 0
+            },
+            "healthRegeneration": {
+              "enabled": true,
+              "amount": 2,
+              "durationSeconds": 30
+            },
+            "hydrationRecovery": {
+              "enabled": false,
+              "amount": 0,
+              "durationSeconds": 0
+            },
+            "energyRecovery": {
+              "enabled": false,
+              "amount": 0,
+              "durationSeconds": 0
+            }
+          },
+          "effectId": "allergy"
+        }
+      ]
+    },
+    "69c40c0f5e9ce5a8970f6be9": {
+      "id": "69c40c0f5e9ce5a8970f6be9",
+      "type": "personal",
+      "name": "Youth",
+      "description": "• Energy is consumed 20% slower\n• Arm and leg stamina is increased by 10",
+      "points": -5,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3ce913ffdba4e68086bdb",
+        "69c3d35feaf97663fb0bb367",
+        "69c412519b5263783d0fe520"
+      ],
+      "effects": [
+        {
+          "bodyPartTypes": [
+            "arms",
+            "legs"
+          ],
+          "intValue": 10,
+          "effectId": "stamina_scale_body_parts"
+        },
+        {
+          "multiplicator": 0.8,
+          "effectId": "energy_drain_multiplicator"
+        }
+      ]
+    },
+    "69c410831f8903ce7a06984f": {
+      "id": "69c410831f8903ce7a06984f",
+      "type": "personal",
+      "name": "Hercules",
+      "description": "• Strength and Endurance skills start at level 15",
+      "points": -5,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69ce64064e0a1c7ca20781d3"
+      ],
+      "effects": [
+        {
+          "skillIds": [
+            "Strength",
+            "Endurance"
+          ],
+          "intValue": 15,
+          "effectId": "skill_level_preset"
+        }
+      ]
+    },
+    "69c41111cd28c936320a7520": {
+      "id": "69c41111cd28c936320a7520",
+      "type": "personal",
+      "name": "Sprinter",
+      "description": "• Running speed is increased by 5%",
+      "points": -3,
+      "mutuallyExclusiveSeasonalPerkIds": [
+        "69c3e8d8af28f094100fe130",
+        "69ce62886e199f4bbe0ab19b"
+      ],
+      "effects": [
+        {
+          "multiplicator": 1.05,
+          "effectId": "sprint_speed_multiplicator"
+        }
+      ]
+    }
+  },
   "storyChapters": {
     "tour": {
       "id": "tour",
@@ -7331,11 +9339,51 @@
             }
           }
         },
+        "63a5cf262964a7488f5243ce": {
+          "objectives": {
+            "63a5cf262964a7488f5243d1": {
+              "description": "Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange",
+              "count": 20,
+              "usingWeapon": [
+                {
+                  "id": "59411abb86f77478f702b5d2",
+                  "name": "HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD",
+                  "shortName": "MP5 SD"
+                }
+              ],
+              "maps": [
+                {
+                  "id": "5714dc692459777137212e12",
+                  "name": "Streets of Tarkov"
+                },
+                {
+                  "id": "653e6760052c01c1c805532f",
+                  "name": "Ground Zero"
+                },
+                {
+                  "id": "5714dbc024597771384a510d",
+                  "name": "Interchange"
+                }
+              ]
+            }
+          }
+        },
+        "669fa3a40c828825de06d6a1": {
+          "objectives": {
+            "66a0f5a7f9eae6761253114c": {
+              "description": "Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
+              "count": 50,
+              "maps": [
+                {
+                  "id": "55f2d3fd4bdc2d5f408b4567",
+                  "name": "Factory"
+                }
+              ]
+            }
+          }
+        },
         "5eda19f0edce541157209cee": {
           "experience": 18100
-        },
-        "6179b5eabca27a099552e052": {
-          "experience": 22000
         },
         "6179b3a12153c15e937d52bc": {
           "experience": 13000
@@ -7345,9 +9393,6 @@
         },
         "5edab4b1218d181e29451435": {
           "experience": 16300
-        },
-        "639136f086e646067c176a8b": {
-          "experience": 10000
         }
       }
     },
@@ -7357,6 +9402,46 @@
           "objectives": {
             "68342265a8d674b5740b31f3": {
               "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena"
+            }
+          }
+        },
+        "639135e8c115f907b14700aa": {
+          "experience": 10000
+        },
+        "675c3582f6ddc329a90f9c6d": {
+          "experience": 3000
+        },
+        "6573397ef3f8344c4575cd87": {
+          "experience": 10000
+        },
+        "675c1ff1a757ddd00404f0aa": {
+          "experience": 65000
+        },
+        "626bd75c71bd851e971b82a5": {
+          "experience": 28000
+        },
+        "666314b2a9290f9e0806cca3": {
+          "experience": 28000
+        },
+        "5edac34d0bb72a50635c2bfa": {
+          "experience": 65000
+        },
+        "66aba85403e0ee3101042877": {
+          "experience": 65000
+        },
+        "60e71c48c1bfa3050473b8e5": {
+          "experience": 65000
+        },
+        "64f5deac39e45b527a7c4232": {
+          "experience": 10000
+        },
+        "5c51aac186f77432ea65c552": {
+          "minPlayerLevel": 40
+        },
+        "6193850f60b34236ee0483de": {
+          "objectives": {
+            "6193dabd5f6468204470571f": {
+              "count": 7
             }
           }
         }
@@ -7387,7 +9472,7 @@
   },
   "$meta": {
     "version": "1.58",
-    "generated": "2026-08-12T00:56:25.319Z",
-    "sha256": "5a1be8f12d5b0b9a72a1b76c10b1c84d4f968ad2411cfd8a52e767c2619528f9"
+    "generated": "2026-08-12T20:07:03.713Z",
+    "sha256": "a2b73e764c324d5ed13d0e08fd7e49b8a4469bc3976fb1f0f7ed06e7114e4a5f"
   }
 }

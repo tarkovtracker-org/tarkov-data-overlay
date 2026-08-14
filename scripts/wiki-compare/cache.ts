@@ -7,9 +7,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import {
-  ExtendedTaskData,
-} from './types.js';
+import { ExtendedTaskData } from './types.js';
 
 // Cache directories
 export const CACHE_DIR = path.join(process.cwd(), 'data', 'cache');

@@ -295,18 +295,14 @@
         "type": "main",
         "description": "Accept Mr. Kerman's cooperation offer",
         "notes": "Kerman Route — leads to Savior or Fallen ending",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-13"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-13"]
       },
       {
         "id": "the-ticket-main-13",
         "type": "main",
         "description": "Refuse Mr. Kerman's cooperation offer",
         "notes": "Refuse Route — leads to Survivor or Debtor ending",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-12"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-12"]
       },
       {
         "id": "the-ticket-main-14",
@@ -362,9 +358,7 @@
         "description": "Hand over the TerraGroup evidence to Mr. Kerman",
         "notes": "Savior ending — cooperate fully with Kerman",
         "endingId": "savior",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-23"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-23"]
       },
       {
         "id": "the-ticket-main-23",
@@ -372,9 +366,7 @@
         "description": "Betray Mr. Kerman and keep the evidence",
         "notes": "Fallen ending — turn against Kerman",
         "endingId": "fallen",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-22"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-22"]
       },
       {
         "id": "the-ticket-main-24",
@@ -388,9 +380,7 @@
         "description": "Pay Prapor to arrange Terminal access",
         "notes": "Survivor ending — pay the ruble cost",
         "endingId": "survivor",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-26"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-26"]
       },
       {
         "id": "the-ticket-main-26",
@@ -398,9 +388,7 @@
         "description": "Seek Lightkeeper for Terminal access",
         "notes": "Debtor ending — work with Lightkeeper instead",
         "endingId": "debtor",
-        "mutuallyExclusiveWith": [
-          "the-ticket-main-25"
-        ]
+        "mutuallyExclusiveWith": ["the-ticket-main-25"]
       },
       {
         "id": "the-ticket-main-27",

@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
- * Normalize a raw EFT quest reference file into clean, minimal local files.
+ * Normalize a local EFT quest reference file into clean, minimal local files.
  *
- * The raw reference is a deeply nested response envelope full of fields
- * irrelevant to data validation (mail settings, UI flags, raw reward item
- * trees, per-language localization, etc). This script distills it into one tidy
+ * The reference is a deeply nested structure full of fields irrelevant to data
+ * validation (mail settings, UI flags, reward item trees, per-language
+ * localization, etc). This script distills it into one tidy
  * `quests.json` keyed by tarkov.dev-compatible quest id, keeping only the
  * fields useful for cross-checking the overlay:
  *
@@ -31,8 +31,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import { findReferenceFile, modeFromRequestUrl } from './eft-compare.js';
-import {
-  isDirectExecution, printProgress, printSuccess, printError } from '../src/lib/index.js';
+import { isDirectExecution, printProgress, printSuccess, printError } from '../src/lib/index.js';
+import type { GameMode } from '../src/lib/types.js';
 
 /** Quest prereq status codes. */
 const STATUS_NAMES: Record<number, string> = {
@@ -147,7 +147,7 @@ interface CleanQuest {
 interface NormalizedOutput {
   $meta: {
     source: string;
-    mode: 'pve' | 'regular' | 'unknown';
+    mode: GameMode | 'unknown';
     appVersion?: string;
     capturedAt?: string;
     generated: string;
@@ -286,7 +286,7 @@ function compactRef(ref: CleanRef): CleanRef {
   return out;
 }
 
-function detectMode(url?: string): 'pve' | 'regular' | 'unknown' {
+function detectMode(url?: string): GameMode | 'unknown' {
   return modeFromRequestUrl(url) ?? 'unknown';
 }
 

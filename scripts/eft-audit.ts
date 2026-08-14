@@ -116,7 +116,7 @@ function effectiveOverrides(mode: GameMode): Record<string, TaskOverride> {
 function classify(
   reference: number,
   api: number | undefined,
-  override: number | undefined,
+  override: number | undefined
 ): Verdict | null {
   const apiCorrect = api !== undefined && api === reference;
   const hasOverride = override !== undefined;
@@ -134,7 +134,7 @@ function classify(
 function buildRows(
   eftTasks: Map<string, EftTask>,
   apiTasks: TaskData[],
-  overrides: Record<string, TaskOverride>,
+  overrides: Record<string, TaskOverride>
 ): Row[] {
   const rows: Row[] = [];
 
@@ -146,7 +146,7 @@ function buildRows(
 
     const scalar = (
       field: 'experience' | 'minPlayerLevel',
-      reference: number | undefined,
+      reference: number | undefined
     ): void => {
       if (reference === undefined) return; // reference can't adjudicate
       const verdict = classify(reference, api[field], ov?.[field]);
@@ -171,8 +171,7 @@ function buildRows(
       const apiObj = apiObjectives.get(objId);
       const apiCount = typeof apiObj?.count === 'number' ? apiObj.count : undefined;
       const objOverride = ov?.objectives?.[objId];
-      const overrideCount =
-        typeof objOverride?.count === 'number' ? objOverride.count : undefined;
+      const overrideCount = typeof objOverride?.count === 'number' ? objOverride.count : undefined;
       const verdict = classify(refCount, apiCount, overrideCount);
       if (verdict) {
         rows.push({
@@ -191,11 +190,18 @@ function buildRows(
   return rows;
 }
 
-
 const VERDICT_META: Record<Verdict, { icon: string; color: string; blurb: string }> = {
   GAP: { icon: icons.error, color: colors.red, blurb: 'API wrong, NO override - add one' },
-  CONFLICT: { icon: icons.error, color: colors.red, blurb: 'override disagrees with reference - fix it' },
-  STALE: { icon: icons.warning, color: colors.yellow, blurb: 'API fixed upstream - override redundant, remove it' },
+  CONFLICT: {
+    icon: icons.error,
+    color: colors.red,
+    blurb: 'override disagrees with reference - fix it',
+  },
+  STALE: {
+    icon: icons.warning,
+    color: colors.yellow,
+    blurb: 'API fixed upstream - override redundant, remove it',
+  },
   OK: { icon: icons.success, color: colors.green, blurb: 'override correct and still needed' },
 };
 
@@ -213,15 +219,13 @@ function printReport(rows: Row[], mode: GameMode): void {
     const items = rows.filter((r) => r.verdict === verdict);
     if (items.length === 0) continue;
     const meta = VERDICT_META[verdict];
-    console.log(
-      bold(`\n${verdict} (${items.length}) : ${meta.icon} ${dim('- ' + meta.blurb)}`),
-    );
+    console.log(bold(`\n${verdict} (${items.length}) : ${meta.icon} ${dim('- ' + meta.blurb)}`));
     for (const r of items) {
       console.log(
         `  ${r.taskName} ${dim(`(${r.taskId})`)} ${dim(fieldLabel(r.field))}\n` +
           `     reference: ${colors.green}${r.reference}${colors.reset}  ` +
           `api: ${colors.red}${r.api}${colors.reset}  ` +
-          `override: ${r.override === undefined ? dim('none') : colors.cyan + r.override + colors.reset}`,
+          `override: ${r.override === undefined ? dim('none') : colors.cyan + r.override + colors.reset}`
       );
     }
   }
@@ -240,11 +244,11 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Loading quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir);
+    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
     if (!eftTasks) {
       printError(
         `No quest reference file found in ${opts.eftDir}`,
-        new Error('place a quest reference file in eft/ to run the audit'),
+        new Error('place a quest reference file in eft/ to run the audit')
       );
       process.exit(1);
     }
@@ -254,9 +258,7 @@ async function main(): Promise<void> {
     // false GAP/CONFLICT rows, so refuse a mismatch.
     const refMode = requireMatchingReferenceMode(opts.eftDir, opts.mode);
     if (!refMode) {
-      console.log(
-        dim(`  (could not detect reference mode; trusting --mode ${opts.mode})`),
-      );
+      console.log(dim(`  (could not detect reference mode; trusting --mode ${opts.mode})`));
     }
 
     printProgress(`Fetching ${opts.mode} tasks from tarkov.dev...`);

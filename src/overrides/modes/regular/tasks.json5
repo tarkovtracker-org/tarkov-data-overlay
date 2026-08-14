@@ -28,6 +28,52 @@
   },
 
   // ---------------------------------------------------------------------------
+  // Mode-divergent objective maps/counts - tarkov.dev mirrors the PvE text into
+  // regular. The wiki (regular witness, edited 2026-08-05/09) documents the
+  // PvP variant; both game captures (PvE) carry the other variant. See
+  // src/divergences/tasks.json5 for the recorded per-mode counts.
+  // ---------------------------------------------------------------------------
+
+  // Power of Persuasion - PvP: 20 PMCs with MP5SD on Streets/Ground Zero/
+  // Interchange (wiki); PvE: 5 PMCs with MP5SD on Woods/Ground Zero/Interchange/
+  // Customs (captures). tarkov.dev serves the PvE variant in both modes.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
+  '63a5cf262964a7488f5243ce': {
+    objectives: {
+      '63a5cf262964a7488f5243d1': {
+        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was (PvE): "Eliminate PMC operatives with an MP5SD on Woods, Ground Zero, Interchange, or Customs"
+        count: 20, // Was: 5 (tarkov.dev mirrors PvE count)
+        usingWeapon: [
+          {
+            id: '59411abb86f77478f702b5d2',
+            name: 'HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD',
+            shortName: 'MP5 SD',
+          },
+        ], // Was: MP5 (unsilenced) - contradicts even the PvE description
+        maps: [
+          { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
+          { id: '653e6760052c01c1c805532f', name: 'Ground Zero' },
+          { id: '5714dbc024597771384a510d', name: 'Interchange' },
+        ], // Was (PvE): Woods, Ground Zero, Interchange, Customs
+      },
+    },
+  },
+
+  // Easy-Breezy - PvP: 50 targets with SR-2M on Factory (wiki); PvE: 30 targets
+  // on Reserve or Lighthouse (captures). tarkov.dev serves the PvE variant in
+  // both modes.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
+  '669fa3a40c828825de06d6a1': {
+    objectives: {
+      '66a0f5a7f9eae6761253114c': {
+        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory', // Was (PvE): "Eliminate any target with SR-2M with suppressor and KP-SR2 sight on Reserve or Lighthouse"
+        count: 50, // Was: 30 (tarkov.dev mirrors PvE count)
+        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was (PvE): Reserve, Lighthouse
+      },
+    },
+  },
+
+  // ---------------------------------------------------------------------------
   // Regular-mode experience: tarkov.dev now mirrors the PvE value into regular.
   //
   // These previously only needed a PvE override because upstream mirrored the
@@ -37,7 +83,7 @@
   // values are recorded in src/divergences/tasks.json5 so a future flip in
   // either direction is detected instead of silently shipping wrong data.
   //
-  // PvE values verified against a local EFT client capture (2026-06-30);
+  // PvE values verified in-game on the PvE profile (2026-06-30);
   // regular values verified against the wiki, which documents PvP.
   // ---------------------------------------------------------------------------
 
@@ -47,19 +93,10 @@
     experience: 18100, // Was: 9800 (tarkov.dev mirrors PvE data)
   },
 
-  // Counteraction - PvP awards 22,000 EXP (PvE awards 11,000)
-  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
-  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
-  // (edited 2025-03-28). Re-verify against a PvP client capture.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Counteraction
-  '6179b5eabca27a099552e052': {
-    experience: 22000, // Was: 11000 (tarkov.dev mirrors PvE data)
-  },
-
   // Energy Crisis - PvP awards 13,000 EXP (PvE awards 8,500)
   // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
   // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
-  // (edited 2025-04-14). Re-verify against a PvP client capture.
+  // (edited 2025-04-14). Re-verify in-game on a PvP character.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
   '6179b3a12153c15e937d52bc': {
     experience: 13000, // Was: 8500 (tarkov.dev mirrors PvE data)
@@ -79,20 +116,9 @@
   // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
   // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
   // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
-  // (edited 2025-10-12). Re-verify against a PvP client capture.
+  // (edited 2025-10-12). Re-verify in-game on a PvP character.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
   '5edab4b1218d181e29451435': {
     experience: 16300, // Was: 12100 (tarkov.dev mirrors PvE data)
-  },
-
-  // Kings of the Rooftops - PvP awards 10,000 EXP (PvE awards 7,700)
-  // MEDIUM CONFIDENCE: the wiki is the only PvP witness and it now reads 10,000
-  // where 14,700 was recorded when the PvE override was authored, so the wiki
-  // itself changed. 10,000 is applied because upstream currently serves the
-  // mirrored PvE value (7,700), which is certainly wrong for regular.
-  // Re-verify against a PvP client capture when one is available.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops
-  '639136f086e646067c176a8b': {
-    experience: 10000, // Was: 7700 (tarkov.dev mirrors PvE data)
   },
 }

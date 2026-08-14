@@ -23,7 +23,8 @@ const { rootDir, srcDir, distDir } = getProjectPaths();
 /**
  * Load mode-specific override and addition files
  */
-function loadModeFiles(): Partial<Record<string, Record<string, Record<string, unknown>>>> | undefined {
+function loadModeFiles():
+  Partial<Record<string, Record<string, Record<string, unknown>>>> | undefined {
   const modes: Record<string, Record<string, Record<string, unknown>>> = {};
 
   for (const mode of SUPPORTED_GAME_MODES) {
@@ -100,7 +101,8 @@ function getLatestTagVersion(): string | undefined {
 function build(): void {
   console.log('Building overlay...\n');
 
-  const version = process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
+  const version =
+    process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
 
   // Load all source files
   const data = loadSourceFiles();

@@ -28,7 +28,7 @@
  * `quest_list` filename fragment (the enriched variant is preferred).
  */
 
-import { readFileSync, readdirSync, writeFileSync } from 'fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, isAbsolute } from 'path';
 import {
   isDirectExecution,
@@ -112,18 +112,119 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
-/** Locate the quest reference file inside the eft directory. Prefers the
- * enriched ("rollinglatest.modified") variant since it additionally carries
- * `localization.en` objective text. */
-export function findReferenceFile(eftDir: string): string {
-  const candidates = readdirSync(eftDir).filter(
-    (f) => /quest[_-]list/i.test(f) && f.endsWith('.json'),
-  );
+/**
+ * Recursively collect quest-reference files (name matches `quest_list` /
+ * `quest-list`, `.json`) under `dir`, including subdirectories so versioned
+ * captures like `eft/eft-1.1-pve/` are discovered.
+ */
+function findQuestListFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...findQuestListFiles(full));
+    } else if (
+      entry.isFile() &&
+      /quest[_-]list/i.test(entry.name) &&
+      entry.name.endsWith('.json')
+    ) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+/** Locate the quest reference file under the eft directory. Prefers the most
+ * recently captured reference: the capture timestamp in each file's envelope
+ * (`request.timestamp`) is authoritative, with the filesystem mtime as a
+ * deterministic fallback for files that lack one (e.g. after copying/editing,
+ * where mtime reflects the copy time rather than the capture). The enriched
+ * ("rollinglatest.modified") variant breaks ties since it additionally carries
+ * `localization.en` objective text.
+ * When `mode` is given, candidates whose capture URL identifies that mode are
+ * preferred (still newest-first), so a directory holding captures for several
+ * modes (e.g. `eft/eft-1.1-{regular,pve}/`) selects the capture matching the
+ * requested mode instead of rejecting the directory. Candidates whose mode
+ * cannot be detected stay in the pool. */
+export function findReferenceFile(eftDir: string, mode?: GameMode): string {
+  const candidates = findQuestListFiles(eftDir);
   if (candidates.length === 0) {
     throw new Error(`No quest reference file found in ${eftDir}`);
   }
-  const enriched = candidates.find((f) => f.includes('rollinglatest.modified'));
-  return join(eftDir, enriched ?? candidates[0]);
+  // Precompute the capture rank (envelope timestamp, else mtime) and the
+  // enriched tie-break once: reading+parsing each multi-MB dump inside the
+  // comparator would redo the work O(n log n) times.
+  const ranked = candidates
+    .map((file) => ({
+      file,
+      ts: captureTimestamp(file) ?? statSync(file).mtimeMs,
+      enriched: file.includes('rollinglatest.modified') ? 1 : 0,
+    }))
+    .sort((a, b) => b.ts - a.ts || b.enriched - a.enriched)
+    .map((entry) => entry.file);
+  if (mode) {
+    for (const candidate of ranked) {
+      const candidateMode = modeFromReferenceFile(candidate);
+      // An unparseable capture cannot be used for comparison, so skip it; a
+      // valid capture with an inconclusive URL stays plausible (callers then
+      // trust --mode).
+      if (candidateMode === null || candidateMode === mode) {
+        return candidate;
+      }
+    }
+    // Every candidate provably belongs to another mode. Signal the miss
+    // explicitly instead of returning a cross-mode capture (loadEftTasks
+    // degrades this to null; direct callers get a clear error).
+    throw new Error(
+      `No ${mode} quest reference file found in ${eftDir}: every capture belongs to another mode.`
+    );
+  }
+  return ranked[0];
+}
+
+interface ReferenceEnvelope {
+  mode: GameMode | null | 'unusable';
+  timestamp: number | null;
+}
+
+/** Parse a reference file's envelope once and cache it. Ranking and mode
+ * selection both need the capture timestamp and the captured request URL, and
+ * re-reading + re-parsing each multi-MB dump per helper is wasted work across
+ * findReferenceFile and requireMatchingReferenceMode. */
+const referenceEnvelopeCache = new Map<string, ReferenceEnvelope>();
+
+function readReferenceEnvelope(file: string): ReferenceEnvelope {
+  const cached = referenceEnvelopeCache.get(file);
+  if (cached) return cached;
+  let envelope: ReferenceEnvelope;
+  try {
+    const raw = JSON.parse(readFileSync(file, 'utf-8')) as {
+      request?: { url?: string; timestamp?: string };
+    };
+    const ts = raw?.request?.timestamp;
+    const ms = typeof ts === 'string' ? Date.parse(ts) : Number.NaN;
+    envelope = {
+      mode: modeFromRequestUrl(raw?.request?.url),
+      timestamp: Number.isNaN(ms) ? null : ms,
+    };
+  } catch {
+    envelope = { mode: 'unusable', timestamp: null };
+  }
+  referenceEnvelopeCache.set(file, envelope);
+  return envelope;
+}
+
+/** Infer the game mode from a reference file's captured request URL metadata.
+ * Returns 'unusable' when the file cannot be parsed at all (so mode selection
+ * can ignore malformed captures instead of treating them as unknown-mode), and
+ * null when the file is valid but its capture URL is inconclusive. */
+function modeFromReferenceFile(file: string): GameMode | null | 'unusable' {
+  return readReferenceEnvelope(file).mode;
+}
+
+/** The capture time from the reference envelope, or null when absent/parsing fails. */
+function captureTimestamp(file: string): number | null {
+  return readReferenceEnvelope(file).timestamp;
 }
 
 /** Read the quest array out of the reference-file envelope. */
@@ -197,7 +298,7 @@ interface Discrepancy {
 function compare(
   eftTasks: Map<string, EftTask>,
   apiTasks: TaskData[],
-  options: { descriptions?: boolean } = {},
+  options: { descriptions?: boolean } = {}
 ): {
   discrepancies: Discrepancy[];
   matched: number;
@@ -216,7 +317,11 @@ function compare(
     matched += 1;
     const name = api.name;
 
-    if (eft.experience !== undefined && api.experience !== undefined && eft.experience !== api.experience) {
+    if (
+      eft.experience !== undefined &&
+      api.experience !== undefined &&
+      eft.experience !== api.experience
+    ) {
       discrepancies.push({
         taskId: eft.id,
         taskName: name,
@@ -328,7 +433,7 @@ interface OverrideLike {
  */
 export function crossCheckOverrides(
   overrides: Record<string, OverrideLike>,
-  eftTasks: Map<string, EftTask>,
+  eftTasks: Map<string, EftTask>
 ): CrossCheckEntry[] {
   const entries: CrossCheckEntry[] = [];
 
@@ -404,6 +509,9 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
     const arg = argv[i];
     if (arg === '--mode') {
       const value = argv[(i += 1)];
+      // The local quest reference only has regular and pve captures (there is
+      // no pvp-season reference), so --mode is limited to those two even though
+      // SUPPORTED_GAME_MODES also lists pvp-season for upstream fetches.
       if (value !== 'pve' && value !== 'regular') {
         throw new Error(`--mode must be 'pve' or 'regular', got '${value}'`);
       }
@@ -434,11 +542,24 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
 export function requireMatchingReferenceMode(eftDir: string, mode: GameMode): GameMode | null {
   const refMode = detectReferenceMode(eftDir);
   if (refMode && refMode !== mode) {
-    throw new Error(
-      `The reference file in ${eftDir} is a ${refMode} file, but --mode is ${mode}. ` +
-        `Comparing across modes yields false positives. Re-run with --mode ${refMode}, ` +
-        `or supply a ${mode} reference file.`,
-    );
+    // The newest capture belongs to another mode. That is only an error when no
+    // usable capture for the requested mode exists at all - findReferenceFile(
+    // eftDir, mode) picks the newest matching capture (treating a candidate
+    // whose mode cannot be detected as plausible, so callers then trust --mode),
+    // and this guard mirrors that same plausibility rule.
+    const hasMatching = findQuestListFiles(eftDir).some((f) => {
+      const candidateMode = modeFromReferenceFile(f);
+      // Mirror findReferenceFile: a valid capture whose mode cannot be detected
+      // is plausible for any requested mode (callers then trust --mode); an
+      // unparseable capture is not usable and never counts.
+      return candidateMode === null || candidateMode === mode;
+    });
+    if (!hasMatching) {
+      throw new Error(
+        `No ${mode} reference file found in ${eftDir}: the newest capture is ${refMode}. ` +
+          `Re-run with --mode ${refMode}, or supply a ${mode} reference file.`
+      );
+    }
   }
   return refMode;
 }
@@ -467,14 +588,14 @@ function printReport(discrepancies: Discrepancy[], matched: number, apiMissing: 
         console.log(
           `  ${d.taskName} ${dim(`(${d.taskId})`)} ${dim(objId)} : ${icons.warning}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}\n` +
-            `     eft: ${colors.green}${d.eft}${colors.reset}`,
+            `     eft: ${colors.green}${d.eft}${colors.reset}`
         );
       } else {
         console.log(
           `  ${d.taskName} ${dim(`(${d.taskId})`)} : ${icons.warning}\n` +
             `     api: ${colors.red}${d.api}${colors.reset}  ` +
             `eft: ${colors.green}${d.eft}${colors.reset}` +
-            (isCount(d) ? `  ${dim(d.field)}` : ''),
+            (isCount(d) ? `  ${dim(d.field)}` : '')
         );
       }
     }
@@ -492,7 +613,7 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2), ['--descriptions']);
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
-    const refFile = findReferenceFile(opts.eftDir);
+    const refFile = findReferenceFile(opts.eftDir, opts.mode);
 
     // The reference file is mode-specific; refuse a mismatch.
     requireMatchingReferenceMode(opts.eftDir, opts.mode);
@@ -530,10 +651,10 @@ if (isDirectExecution(import.meta.url)) {
  * return the normalized task map. Returns null when no reference file is present
  * so callers can skip the cross-check cleanly instead of throwing.
  */
-export function loadEftTasks(eftDir: string): Map<string, EftTask> | null {
+export function loadEftTasks(eftDir: string, mode?: GameMode): Map<string, EftTask> | null {
   let refFile: string;
   try {
-    refFile = findReferenceFile(eftDir);
+    refFile = findReferenceFile(eftDir, mode);
   } catch {
     return null;
   }
@@ -573,13 +694,8 @@ export function detectReferenceMode(eftDir: string): GameMode | null {
   } catch {
     return null;
   }
-  try {
-    const raw = JSON.parse(readFileSync(refFile, 'utf-8')) as any;
-    return modeFromRequestUrl(raw?.request?.url);
-  } catch {
-    // Unusable reference: treat the mode as indeterminate rather than throwing.
-    return null;
-  }
+  const mode = modeFromReferenceFile(refFile);
+  return mode === 'unusable' ? null : mode;
 }
 
 export { parseEftTasks, compare, readQuestArray, type EftTask, type Discrepancy };

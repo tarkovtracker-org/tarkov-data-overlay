@@ -6,13 +6,7 @@
   "type": "object",
   "additionalProperties": {
     "type": "object",
-    "required": [
-      "id",
-      "name",
-      "normalizedName",
-      "wikiLink",
-      "order"
-    ],
+    "required": ["id", "name", "normalizedName", "wikiLink", "order"],
     "properties": {
       "id": {
         "description": "Unique identifier for the story chapter",
@@ -279,10 +273,7 @@
                 },
                 "required": ["map"],
                 "additionalProperties": false,
-                "anyOf": [
-                  { "required": ["outline"] },
-                  { "required": ["position"] }
-                ]
+                "anyOf": [{ "required": ["outline"] }, { "required": ["position"] }]
               }
             },
             "possibleLocations": {

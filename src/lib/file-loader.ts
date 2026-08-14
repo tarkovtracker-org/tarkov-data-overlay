@@ -52,7 +52,7 @@ export function loadJsonFile<T = unknown>(filePath: string): T {
  */
 export function listJson5Files(dirPath: string): string[] {
   if (!existsSync(dirPath)) return [];
-  return readdirSync(dirPath).filter(f => f.endsWith('.json5'));
+  return readdirSync(dirPath).filter((f) => f.endsWith('.json5'));
 }
 
 /**

@@ -9,22 +9,27 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import JSON5 from 'json5';
 import type { TaskRequirement, GameMode } from '../../src/lib/types.js';
-import { SUPPORTED_GAME_MODES } from '../../src/lib/types.js';
 import { loadDivergenceRegistry, divergentFieldKeys } from '../../src/lib/index.js';
-import {
-  ExtendedTaskData,
-} from './types.js';
+import { ExtendedTaskData } from './types.js';
 
 /** Which override files apply when comparing a given game mode. */
 export type SuppressionScope = GameMode | 'both';
 
+/**
+ * Game modes the wiki comparison covers.
+ *
+ * The wiki-compare CLI only fetches `regular` and `pve` (see
+ * `scripts/wiki-compare/api.ts`) and its suppression keys are not
+ * mode-qualified, so the `'both'` scope must load only these two modes'
+ * overrides. Including `pvp-season` here would let a seasonal override for a
+ * shared task field silently mask a genuine `regular`/`pve` discrepancy.
+ * `pvp-season` overrides stay reachable only through an explicit `pvp-season`
+ * scope, reserved for a future seasonal comparison mode.
+ */
+const WIKI_COMPARE_MODES: readonly GameMode[] = ['regular', 'pve'];
+
 // Overlay file for filtering already-addressed discrepancies
-export const TASKS_OVERLAY_FILE = path.join(
-  process.cwd(),
-  'src',
-  'overrides',
-  'tasks.json5'
-);
+export const TASKS_OVERLAY_FILE = path.join(process.cwd(), 'src', 'overrides', 'tasks.json5');
 
 /**
  * Task-override files that apply to a comparison in `scope`.
@@ -32,15 +37,14 @@ export const TASKS_OVERLAY_FILE = path.join(
  * Base overrides apply to every mode. Mode-specific overrides apply only to
  * their mode - so a regular-mode comparison must NOT load the PvE file, or a
  * PvE-only correction would suppress (mask) a genuine regular-mode divergence.
- * `'both'` loads everything, for the merged overview run.
+ * `'both'` loads the base plus the wiki-comparable modes (`regular`/`pve`), for
+ * the merged overview run.
  */
 export function taskOverlayFiles(scope: SuppressionScope = 'both'): string[] {
   const files = [TASKS_OVERLAY_FILE];
-  const modes = scope === 'both' ? SUPPORTED_GAME_MODES : [scope];
+  const modes = scope === 'both' ? WIKI_COMPARE_MODES : [scope];
   for (const mode of modes) {
-    files.push(
-      path.join(process.cwd(), 'src', 'overrides', 'modes', mode, 'tasks.json5')
-    );
+    files.push(path.join(process.cwd(), 'src', 'overrides', 'modes', mode, 'tasks.json5'));
   }
   return files.filter((file) => fs.existsSync(file));
 }
@@ -57,12 +61,7 @@ function readOverlayFile(file: string): Record<string, Record<string, unknown>> 
   }
 }
 
-export const DIVERGENCES_FILE = path.join(
-  process.cwd(),
-  'src',
-  'divergences',
-  'tasks.json5'
-);
+export const DIVERGENCES_FILE = path.join(process.cwd(), 'src', 'divergences', 'tasks.json5');
 
 /**
  * `taskId:field` keys for fields recorded as genuinely mode-divergent.
@@ -107,9 +106,7 @@ export type SuppressedFieldsResult = {
   wikiIncorrectKeys: Set<string>; // Track wiki-incorrect separately to check for stale entries
 };
 
-export type ObjectiveSuppressionValue =
-  | true
-  | { fields?: Record<string, boolean> };
+export type ObjectiveSuppressionValue = true | { fields?: Record<string, boolean> };
 
 export type TaskSuppressionEntry = {
   objectives?: Record<string, ObjectiveSuppressionValue>;
@@ -158,9 +155,7 @@ export function isObjectiveSuppressed(
   if (!field || !suppression || typeof suppression !== 'object') return false;
 
   const fields = suppression.fields ?? {};
-  const shortField = field.startsWith('objectives.')
-    ? field.slice('objectives.'.length)
-    : field;
+  const shortField = field.startsWith('objectives.') ? field.slice('objectives.'.length) : field;
   return fields[field] === true || fields[shortField] === true;
 }
 
@@ -184,111 +179,91 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
     for (const [taskId, fields] of Object.entries(overlay)) {
       if (!fields || typeof fields !== 'object') continue;
       for (const field of Object.keys(fields)) {
-          const beforeSize = suppressed.size;
+        const beforeSize = suppressed.size;
 
-          // Map overlay field names to discrepancy field names
-          if (field === 'objectives') {
-            const objectiveOverrides = (fields as Record<string, unknown>)[
-              field
-            ];
-            if (objectiveOverrides && typeof objectiveOverrides === 'object') {
-              for (const objOverride of Object.values(
-                objectiveOverrides as Record<string, unknown>
-              )) {
-                if (!objOverride || typeof objOverride !== 'object') continue;
-                if ('count' in (objOverride as Record<string, unknown>)) {
-                  suppressed.add(`${taskId}:objectives.count`);
-                }
-                if ('description' in (objOverride as Record<string, unknown>)) {
-                  suppressed.add(`${taskId}:objectives.description`);
-                }
-                if ('maps' in (objOverride as Record<string, unknown>)) {
-                  suppressed.add(`${taskId}:objectives.maps`);
-                }
-                const itemOverrideKeys = [
-                  'items',
-                  'usingWeapon',
-                  'usingWeaponMods',
-                  'useAny',
-                  'containsAll',
-                  'markerItem',
-                  'questItem',
-                  'item',
-                  'requiredKeys',
-                ];
-                if (
-                  itemOverrideKeys.some(
-                    (key) => key in (objOverride as Record<string, unknown>)
-                  )
-                ) {
-                  suppressed.add(`${taskId}:objectives.items`);
-                }
+        // Map overlay field names to discrepancy field names
+        if (field === 'objectives') {
+          const objectiveOverrides = (fields as Record<string, unknown>)[field];
+          if (objectiveOverrides && typeof objectiveOverrides === 'object') {
+            for (const objOverride of Object.values(
+              objectiveOverrides as Record<string, unknown>
+            )) {
+              if (!objOverride || typeof objOverride !== 'object') continue;
+              if ('count' in (objOverride as Record<string, unknown>)) {
+                suppressed.add(`${taskId}:objectives.count`);
               }
-            } else {
-              suppressed.add(`${taskId}:objectives.count`);
+              if ('description' in (objOverride as Record<string, unknown>)) {
+                suppressed.add(`${taskId}:objectives.description`);
+              }
+              if ('maps' in (objOverride as Record<string, unknown>)) {
+                suppressed.add(`${taskId}:objectives.maps`);
+              }
+              const itemOverrideKeys = [
+                'items',
+                'usingWeapon',
+                'usingWeaponMods',
+                'useAny',
+                'containsAll',
+                'markerItem',
+                'questItem',
+                'item',
+                'requiredKeys',
+              ];
+              if (itemOverrideKeys.some((key) => key in (objOverride as Record<string, unknown>))) {
+                suppressed.add(`${taskId}:objectives.items`);
+              }
             }
-          } else if (
-            field === 'experience' ||
-            field === 'minPlayerLevel' ||
-            field === 'taskRequirements' ||
-            field === 'reputation' ||
-            field === 'money' ||
-            field === 'finishRewards' ||
-            field === 'map'
-          ) {
-            suppressed.add(`${taskId}:${field}`);
+          } else {
+            suppressed.add(`${taskId}:objectives.count`);
+          }
+        } else if (
+          field === 'experience' ||
+          field === 'minPlayerLevel' ||
+          field === 'taskRequirements' ||
+          field === 'reputation' ||
+          field === 'money' ||
+          field === 'finishRewards' ||
+          field === 'map'
+        ) {
+          suppressed.add(`${taskId}:${field}`);
 
-            if (
-              field === 'finishRewards' &&
-              fields &&
-              typeof fields === 'object'
-            ) {
-              const finishRewards = (fields as Record<string, unknown>)[field];
-              if (finishRewards && typeof finishRewards === 'object') {
-                const rewards = finishRewards as Record<string, unknown>;
-                const items = Array.isArray(rewards.items) ? rewards.items : [];
-                const hasRoubles = items.some((item) => {
-                  if (!item || typeof item !== 'object') return false;
-                  const rewardItem = item as Record<string, unknown>;
-                  const itemInfo = rewardItem.item as
-                    | Record<string, unknown>
-                    | undefined;
-                  const itemName =
-                    typeof itemInfo?.name === 'string' ? itemInfo.name : '';
-                  const itemId =
-                    typeof itemInfo?.id === 'string' ? itemInfo.id : '';
-                  return (
-                    itemName === 'Roubles' ||
-                    itemId === '5449016a4bdc2d6f028b456f'
-                  );
-                });
-                if (hasRoubles) {
-                  suppressed.add(`${taskId}:money`);
-                }
+          if (field === 'finishRewards' && fields && typeof fields === 'object') {
+            const finishRewards = (fields as Record<string, unknown>)[field];
+            if (finishRewards && typeof finishRewards === 'object') {
+              const rewards = finishRewards as Record<string, unknown>;
+              const items = Array.isArray(rewards.items) ? rewards.items : [];
+              const hasRoubles = items.some((item) => {
+                if (!item || typeof item !== 'object') return false;
+                const rewardItem = item as Record<string, unknown>;
+                const itemInfo = rewardItem.item as Record<string, unknown> | undefined;
+                const itemName = typeof itemInfo?.name === 'string' ? itemInfo.name : '';
+                const itemId = typeof itemInfo?.id === 'string' ? itemInfo.id : '';
+                return itemName === 'Roubles' || itemId === '5449016a4bdc2d6f028b456f';
+              });
+              if (hasRoubles) {
+                suppressed.add(`${taskId}:money`);
+              }
 
-                const traderStanding = Array.isArray(rewards.traderStanding)
-                  ? rewards.traderStanding
-                  : [];
-                for (const entry of traderStanding) {
-                  if (!entry || typeof entry !== 'object') continue;
-                  const traderEntry = entry as Record<string, unknown>;
-                  const trader = traderEntry.trader as
-                    | Record<string, unknown>
-                    | undefined;
-                  const traderName =
-                    typeof trader?.name === 'string' ? trader.name : '';
-                  if (traderName) {
-                    suppressed.add(`${taskId}:reputation.${traderName}`);
-                  }
+              const traderStanding = Array.isArray(rewards.traderStanding)
+                ? rewards.traderStanding
+                : [];
+              for (const entry of traderStanding) {
+                if (!entry || typeof entry !== 'object') continue;
+                const traderEntry = entry as Record<string, unknown>;
+                const trader = traderEntry.trader as Record<string, unknown> | undefined;
+                const traderName = typeof trader?.name === 'string' ? trader.name : '';
+                if (traderName) {
+                  suppressed.add(`${taskId}:reputation.${traderName}`);
                 }
               }
             }
           }
+        }
 
-          // Also add the raw field name for flexibility
-          suppressed.add(`${taskId}:${field}`);
+        // Also add the raw field name for flexibility
+        suppressed.add(`${taskId}:${field}`);
 
-          overlayCount += suppressed.size - beforeSize;
+        overlayCount += suppressed.size - beforeSize;
       }
     }
   }
@@ -343,8 +318,7 @@ export function buildNextTaskMap(
   const nextMap = new Map<string, Set<string>>();
 
   for (const task of tasks) {
-    const requirements =
-      requirementOverrides?.get(task.id) ?? task.taskRequirements ?? [];
+    const requirements = requirementOverrides?.get(task.id) ?? task.taskRequirements ?? [];
     for (const req of requirements) {
       const reqTaskId = req?.task?.id;
       if (!reqTaskId) continue;

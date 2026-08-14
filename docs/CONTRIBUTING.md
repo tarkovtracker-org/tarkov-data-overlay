@@ -18,11 +18,11 @@ Additions live in `src/additions/` and should include the full object.
 ## Project Data Layout
 
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
-- `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`).
+- `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
-- `dist/overlay.json`: Generated output from `npm run build`.
+- `dist/overlay.json`: Generated output from `npm run build` (committed to the repo; regenerate it whenever you change source data).
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
-  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`).
+  appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
 
 ---
 
@@ -63,8 +63,12 @@ Edit the appropriate file in `src/overrides/`:
 1. Fork the repository
 2. Create a branch: `fix/task-grenadier-level`
 3. Make your changes
-4. Run `npm run validate` to check your changes
-5. Submit a PR using the template
+4. Run `npm run validate` (and `npm run typecheck` / `npm test` when you touch
+   `src/lib/`, `scripts/`, or tests)
+5. For any data change, run `npm run build` and commit the regenerated
+   `dist/overlay.json`
+6. Record the commands you ran — and call out any regenerated output — in the PR
+7. Submit a PR using the template
 
 ---
 
@@ -72,17 +76,40 @@ Edit the appropriate file in `src/overrides/`:
 
 ### 1. Pick the Right File
 
-- New tasks not in the API → `src/additions/tasksAdd.json5`
-- New editions → `src/additions/editions.json5`
-- New story chapters → `src/additions/storyChapters.json5`
-- New items → `src/additions/itemsAdd.json5`
+- New tasks not in the API → `src/additions/tasksAdd.json5` (schema `task-additions.schema.json`)
+- New editions → `src/additions/editions.json5` (schema `edition.schema.json`)
+- New story chapters → `src/additions/storyChapters.json5` (schema `story-chapter.schema.json`)
+- New items → `src/additions/itemsAdd.json5` (schema `item-additions.schema.json`)
+- New seasonal (`pvp-season`) perks → `src/additions/seasonalPerks.json5` (schema `seasonal-perk.schema.json`)
+- New hideout crafts missing from the API → `src/additions/craftsAdd.json5` (schema `craft-additions.schema.json`)
+
+`seasonalPerks` and `craftsAdd` cover `pvp-season` (Seasonal Character) data
+tarkov.dev does not serve. Keep every new data type in `src/additions/` with its
+schema in `src/schemas/`, and register the schema in `SCHEMA_CONFIGS`
+(`src/lib/types.ts`). Prove additions the same way as any other: patch notes
+and/or an in-game screenshot. Reference entities by tarkov.dev id where available
+(items, traders, stations, most skills) so names resolve upstream.
+
+> **Upstream-id exception:** a few referenced ids are not in tarkov.dev yet —
+> notably some Seasonal Character faction skills (e.g. the `Usec*` skills, whose
+> `Bear*` equivalents already exist upstream). Use the correct upstream id
+> anyway; it is not invented, and the name resolves once tarkov.dev adds the
+> entity. Do not drop or rename these ids to force an immediate match.
 
 ### 2. Create a Stable ID
 
-Use a stable, snake_case key and set `id` to the same value:
+Always set `id` to the same value as the top-level key. The key format depends
+on the file — match the existing entries:
+
+- `tasksAdd`, `editions`: local `snake_case` keys (e.g. `my_event_task`)
+- `storyChapters`: local kebab-case keys
+- `seasonalPerks`, `craftsAdd`: the source tarkov.dev/BSG id (a 24-char hex id),
+  because these mirror upstream entities by id
 
 ```json5
 {
+  // local key (tasksAdd / editions); seasonalPerks & craftsAdd instead key by
+  // their source id, e.g. '655b650ab71eeb7c4168c627'
   my_event_task: {
     id: 'my_event_task',
     name: 'My Event Task',
@@ -192,10 +219,7 @@ If tarkov.dev is missing the objective entirely, add it using `objectivesAdd`:
       {
         id: 'objective-id-here',
         description: 'Find in raid',
-        items: [
-          { name: 'Item Name 1' },
-          { name: 'Item Name 2', id: 'item-id-2' },
-        ],
+        items: [{ name: 'Item Name 1' }, { name: 'Item Name 2', id: 'item-id-2' }],
       },
     ],
   },
@@ -216,8 +240,11 @@ npm run validate
 # Type-check scripts and tests
 npm run typecheck
 
-# Build the overlay locally
+# Build the overlay locally (commit the regenerated dist/overlay.json for data changes)
 npm run build
+
+# Run the test suite (required when changing src/lib/, scripts/, or tests)
+npm test
 ```
 
 ---

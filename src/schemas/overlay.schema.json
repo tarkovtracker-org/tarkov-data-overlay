@@ -41,6 +41,12 @@
     "storyChapters": {
       "$ref": "story-chapter.schema.json"
     },
+    "seasonalPerks": {
+      "$ref": "seasonal-perk.schema.json"
+    },
+    "craftsAdd": {
+      "$ref": "craft-additions.schema.json"
+    },
     "tasks": {
       "$ref": "task-override.schema.json"
     },
@@ -74,6 +80,14 @@
           "additionalProperties": false
         },
         "pve": {
+          "type": "object",
+          "properties": {
+            "tasks": { "$ref": "task-override.schema.json" },
+            "tasksAdd": { "$ref": "task-additions.schema.json" }
+          },
+          "additionalProperties": false
+        },
+        "pvp-season": {
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },

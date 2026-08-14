@@ -7,6 +7,7 @@ import {
   fetchTasks,
   fetchLocaleBundle,
   findTaskById,
+  USER_AGENT,
   type TaskData,
 } from '../src/lib/index.js';
 
@@ -57,6 +58,27 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  });
+
+  it('sends Accept: application/json and the descriptive User-Agent on every request', async () => {
+    const fetchMock = mockEndpoints(baseRoutes('regular'));
+
+    await fetchTasks();
+
+    // A named UA is required in practice: Cloudflare 403s browser-mimicking UAs
+    // from non-browser clients, so this contract must not silently regress.
+    expect(fetchMock).toHaveBeenCalled();
+    const calls = fetchMock.mock.calls as unknown as Array<
+      [string, { headers?: Record<string, string> }?]
+    >;
+    for (const [, init] of calls) {
+      const headers = init?.headers ?? {};
+      expect(headers.Accept).toBe('application/json');
+      expect(headers['User-Agent']).toBe(USER_AGENT);
+    }
+    expect(USER_AGENT).toBe(
+      'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)'
+    );
   });
 
   it('resolves task name and objective description from the _en map', async () => {
@@ -202,8 +224,10 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
         'regular/tasks_en': { data: { 't1 name': 'T1' } },
         'regular/traders': { data: { tr1: { id: 'tr1', name: 'tr1 name' } } },
         'regular/traders_en': { data: { 'tr1 name': 'Prapor' } },
-        'regular/items': { data: { items: { i1: { id: 'i1', name: 'i1 name', shortName: 'i1s' } } } },
-        'regular/items_en': { data: { 'i1 name': 'Bandage', 'i1s': 'Band' } },
+        'regular/items': {
+          data: { items: { i1: { id: 'i1', name: 'i1 name', shortName: 'i1s' } } },
+        },
+        'regular/items_en': { data: { 'i1 name': 'Bandage', i1s: 'Band' } },
       })
     );
 

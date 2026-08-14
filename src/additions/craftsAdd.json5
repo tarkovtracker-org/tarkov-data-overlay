@@ -1,0 +1,873 @@
+{
+  // Hideout crafts observed in-game but NOT served by tarkov.dev.
+  //
+  // tarkov.dev's craft list is stale relative to the current game: it serves
+  // the same crafts for `regular` and `pvp-season` and is missing the recipes
+  // below (verified in-game). Several are patch 1.1.0.0 content - notably the
+  // Black Division decryption chain in the Intelligence Center - but they live
+  // in the shared game data (both modes), so this is a base addition, not mode-
+  // specific. Entries use tarkov.dev's craft shape (station/level/duration/
+  // requiredItems/productItem) with tarkov.dev ids, so they can be adopted
+  // directly.
+  //
+  // taskUnlock: the id of the task that unlocks the craft. Present as null on
+  // quest-gated crafts whose unlocking task id is not in the capture - fill it
+  // in (or let tarkov.dev resolve it) when known. Absent on crafts with no task
+  // unlock, matching how tarkov.dev omits it. requiredQuestItems/gameEditions
+  // are [] like the served shape.
+  //
+  // Excluded: 17 Christmas Tree (event station, areaType 21) recipes -
+  // that station is not modeled by tarkov.dev or the capture, and the event is
+  // not active; they are omitted rather than shipped with a null station.
+  //
+  // Source: verified in-game (Seasonal Character hideout production screens).
+  // Proof: EFT patch 1.1.0.0 (Seasonal Character / Black Division), 2026-08-03.
+  //   https://steamdb.info/patchnotes/24536010/
+
+  // --- Lavatory (areaType 2) ---
+  // BNTI Gzhel-K body armor  (level 3)
+  '655b650ab71eeb7c4168c627': {
+    id: '655b650ab71eeb7c4168c627',
+    station: '5d484fba654e7600691aadf7',
+    level: 3,
+    duration: 10000,
+    requiredItems: [
+      {
+        item: '59e3556c86f7741776641ac2',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '5e2af4d286f7746d4159f07a',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '5e2af41e86f774755a234b67',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '61bf83814088ec1a363d7097',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '591094e086f7747caa7bb2ef',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '656f611f94b480b8a500c0db',
+        count: 2,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '5ab8e79e86f7742d8b372e78',
+      count: 1,
+      attributes: {},
+    },
+  },
+
+  // --- Medstation (areaType 7) ---
+  // TG-Vi-24 lethal vaccine  (level 2) [quest-gated]
+  '67092bbfc45f0546bf097a7e': {
+    id: '67092bbfc45f0546bf097a7e',
+    station: '5d484fcd654e7668ec2ec322',
+    level: 2,
+    taskUnlock: null,
+    duration: 600,
+    requiredItems: [
+      {
+        item: '5448fee04bdc2dbc018b4567',
+        count: 5,
+        attributes: {},
+      },
+      {
+        item: '6389c6c7dbfd5e4b95197e68',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '59e3606886f77417674759a5',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5fca138c2a7b221b2852a5c6',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5ed5166ad380ab312177c100',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5c10c8fd86f7743d7d706df3',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '6707d0804e617ec94f0e562f',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // TG-Vi-24 true vaccine  (level 2) [quest-gated]
+  '67093210d514d26f8408612b': {
+    id: '67093210d514d26f8408612b',
+    station: '5d484fcd654e7668ec2ec322',
+    level: 2,
+    taskUnlock: null,
+    duration: 600,
+    requiredItems: [
+      {
+        item: '5d1b33a686f7742523398398',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '6707d0804e617ec94f0e562f',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '590c695186f7741e566b64a2',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '544fb3f34bdc2d03748b456a',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '6707d0bdaab679420007e01a',
+      count: 1,
+      attributes: {},
+    },
+  },
+
+  // --- Workbench (areaType 10) ---
+  // 9x18mm PM PBM gzh  (level 1)
+  '5ee49f2c6abbcb7ba704abc2': {
+    id: '5ee49f2c6abbcb7ba704abc2',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    duration: 5400,
+    requiredItems: [
+      {
+        item: '590c5a7286f7747884343aea',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5737201124597760fc4431f1',
+        count: 200,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '573719df2459775a626ccbc2',
+      count: 200,
+      attributes: {},
+    },
+  },
+  // 5.56x45mm Warmageddon  (level 1)
+  '655b34dc1273611d2462ab74': {
+    id: '655b34dc1273611d2462ab74',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    duration: 2770,
+    requiredItems: [
+      {
+        item: '59e6927d86f77411da468256',
+        count: 180,
+        attributes: {},
+      },
+      {
+        item: '590c31c586f774245e3141b2',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '62a0a0bb621468534a797ad5',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '5c0d5ae286f7741e46554302',
+      count: 180,
+      attributes: {},
+    },
+  },
+  // 7.62x39mm PS gzh  (level 2)
+  '655b48fe065b076eb02c4b46': {
+    id: '655b48fe065b076eb02c4b46',
+    station: '5d484fda654e7600681d9315',
+    level: 2,
+    duration: 15480,
+    requiredItems: [
+      {
+        item: '64b7af5a8532cf95ee0a0dbd',
+        count: 120,
+        attributes: {},
+      },
+      {
+        item: '590c5a7286f7747884343aea',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '62a09ee4cf4a99369e262453',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '544fb5454bdc2df8738b456a',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '5656d7c34bdc2d9d198b4587',
+      count: 120,
+      attributes: {},
+    },
+  },
+  // 7.62x54mm R PS gzh  (level 3)
+  '655b4e591fe356507267b2f5': {
+    id: '655b4e591fe356507267b2f5',
+    station: '5d484fda654e7600681d9315',
+    level: 3,
+    duration: 8400,
+    requiredItems: [
+      {
+        item: '5d6fc78386f77449d825f9dc',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '619cbfccbedcde2f5b3f7bdd',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '59e77a2386f7742ee578960a',
+      count: 40,
+      attributes: {},
+    },
+  },
+  // Radio repeater  (level 1) [quest-gated]
+  '6617cdb6b24b0ea24505f618': {
+    id: '6617cdb6b24b0ea24505f618',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    taskUnlock: null,
+    duration: 1800,
+    requiredItems: [
+      {
+        item: '5d4042a986f7743185265463',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '5d1b31ce86f7742523398394',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '5d0376a486f7747d8050965c',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '6389c70ca33d8c4cdf4932c6',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '590a358486f77429692b2790',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '63a0b2eabea67a6d93009e52',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Unlocked supply crate (Epic)  (level 1)
+  '66582be04de4820934746cea': {
+    id: '66582be04de4820934746cea',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    duration: 300,
+    requiredItems: [
+      {
+        item: '5c07df7f0db834001b73588a',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '544fb5454bdc2df8738b456a',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '665828c44de4820934746ce4',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '66582972ac60f009f270d2aa',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Opened case  (level 1) [quest-gated]
+  '67449c79268737ef6908d636': {
+    id: '67449c79268737ef6908d636',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    taskUnlock: null,
+    duration: 10,
+    requiredItems: [
+      {
+        item: '6740987b89d5e1ddc603f4f0',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '67449b6c89d5e1ddc603f504',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '674078c4a9c9adf0450d59f9',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Opened box  (level 1) [quest-gated]
+  '6745925da9c9adf0450d5bca': {
+    id: '6745925da9c9adf0450d5bca',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    taskUnlock: null,
+    duration: 10,
+    requiredItems: [
+      {
+        item: '67409848d0b2f8eb9b034db9',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '544fb5454bdc2df8738b456a',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '674098588466ebb03408b210',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Moreman's audio tape #1  (level 1) [quest-gated]
+  '68dbdd31cbbef1fa710f5311': {
+    id: '68dbdd31cbbef1fa710f5311',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    taskUnlock: null,
+    duration: 19800,
+    requiredItems: [
+      {
+        item: '68d271fc17de6a40270d5657',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '5672cb124bdc2d1a0f8b4568',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '57347baf24597738002c6178',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '56742c324bdc2d150f8b456d',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '688896b3ea36baf84d085544',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Moreman's audio tape #2  (level 1) [quest-gated]
+  '68dbddc362392833810125f7': {
+    id: '68dbddc362392833810125f7',
+    station: '5d484fda654e7600681d9315',
+    level: 1,
+    taskUnlock: null,
+    duration: 19800,
+    requiredItems: [
+      {
+        item: '68d271fc17de6a40270d5657',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '5c06782b86f77426df5407d2',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '57347baf24597738002c6178',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5c06779c86f77426e00dd782',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '68889737562720383f0f8548',
+      count: 1,
+      attributes: {},
+    },
+  },
+
+  // --- Intelligence Center (areaType 11) ---
+  // Military COFDM Wireless Signal Transmitter  (level 2)
+  '5eda007f658fac5b8c3862a6': {
+    id: '5eda007f658fac5b8c3862a6',
+    station: '5d484fdf654e7600691aadf8',
+    level: 2,
+    duration: 140000,
+    requiredItems: [
+      {
+        item: '5c1265fc86f7743f896a21c2',
+        count: 3,
+        attributes: {},
+      },
+      {
+        item: '5af0561e86f7745f5f3ad6ac',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5d0376a486f7747d8050965c',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '590c639286f774151567fa95',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '590c2e1186f77425357b6124',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '6389c7750ef44505c87f5996',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '590a3efd86f77437d351a25b',
+        count: 2,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '5c052f6886f7746b1e3db148',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // VPX Flash Storage Module  (level 2)
+  '5eda0ad40699b81bb9142aae': {
+    id: '5eda0ad40699b81bb9142aae',
+    station: '5d484fdf654e7600691aadf8',
+    level: 2,
+    duration: 225000,
+    requiredItems: [
+      {
+        item: '57347baf24597738002c6178',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '590c392f86f77444754deb29',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '56742c324bdc2d150f8b456d',
+        count: 3,
+        attributes: {},
+      },
+      {
+        item: '590c2e1186f77425357b6124',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '6389c8fb46b54c634724d847',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '5c05300686f7746dce784e5d',
+      count: 2,
+      attributes: {},
+    },
+  },
+  // Decrypted flash drive  (level 1) [quest-gated]
+  '660c2dbaa2a92e70cc074863': {
+    id: '660c2dbaa2a92e70cc074863',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 900,
+    requiredItems: [
+      {
+        item: '660bbc47c38b837877075e47',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '660bbc98c38b837877075e4a',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Documents with decrypted data  (level 1)
+  '66140c4a9688754de10dac07': {
+    id: '66140c4a9688754de10dac07',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    duration: 600,
+    requiredItems: [
+      {
+        item: '660bbc47c38b837877075e47',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '660bc341c38b837877075e4c',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Documents with decrypted data  (level 1) [quest-gated]
+  '661e6c26750e453380391f55': {
+    id: '661e6c26750e453380391f55',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 600,
+    requiredItems: [
+      {
+        item: '660bbc47c38b837877075e47',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '660bc341c38b837877075e4c',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Flash drive with special software  (level 1) [quest-gated]
+  '670932d7b564327a0e023fcb': {
+    id: '670932d7b564327a0e023fcb',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 900,
+    requiredItems: [
+      {
+        item: '590c621186f774138d11ea29',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '6707d13e4e617ec94f0e5631',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // SSD with TerraGroup evidence  (level 1) [quest-gated]
+  '67c08dba9320f644db06f4f4': {
+    id: '67c08dba9320f644db06f4f4',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 21600,
+    requiredItems: [
+      {
+        item: '67c034f0e7a5da1e070f6de8',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c035140610e91bea05699a',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c0351e354fca26a0008038',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c0352dd98287be7b0923d6',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '590c392f86f77444754deb29',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '67c0497068e50a07b10d2576',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Military flash drive with topographic intel  (level 1) [quest-gated]
+  '67c882409564fee332097c3e': {
+    id: '67c882409564fee332097c3e',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 21600,
+    requiredItems: [
+      {
+        item: '67c04b062669b12ac6034866',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c04b15e7a5da1e070f6dea',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c04b286df6ad43b3005fb9',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c04b351becc43a45071286',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '67c04b420610e91bea05699c',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '62a0a16d0b9d3c46de5b6e97',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '67c04b8de7a5da1e070f6dec',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Decrypted Sliderkey flash drive marked with A.P.  (level 1) [quest-gated]
+  '690a8dac7c24a3e1eb052b5d': {
+    id: '690a8dac7c24a3e1eb052b5d',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 19800,
+    requiredItems: [
+      {
+        item: '67ee77389fcc485cf10615f3',
+        count: 1,
+        attributes: {
+          tool: true,
+        },
+      },
+      {
+        item: '57347baf24597738002c6178',
+        count: 3,
+        attributes: {},
+      },
+      {
+        item: '5c05308086f7746b2101e90b',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '5734779624597737e04bf329',
+        count: 3,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '68e7d1be6656898e78015bd9',
+      count: 1,
+      attributes: {},
+    },
+  },
+  // Data from Black Division laptop  (level 1) [quest-gated]
+  '6a673d7a4da15f1334018588': {
+    id: '6a673d7a4da15f1334018588',
+    station: '5d484fdf654e7600691aadf8',
+    level: 1,
+    taskUnlock: null,
+    duration: 900,
+    requiredItems: [
+      {
+        item: '62a0a16d0b9d3c46de5b6e97',
+        count: 1,
+        attributes: {},
+      },
+      {
+        item: '6389c70ca33d8c4cdf4932c6',
+        count: 2,
+        attributes: {},
+      },
+      {
+        item: '6a5f9c25e8c84d8b0602f22a',
+        count: 1,
+        attributes: {},
+      },
+    ],
+    requiredQuestItems: [],
+    gameEditions: [],
+    productItem: {
+      item: '6a6692d4beccfa243d0bb575',
+      count: 1,
+      attributes: {},
+    },
+  },
+}

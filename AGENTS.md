@@ -21,7 +21,7 @@ Scripts share utilities via `src/lib/index.ts`:
 - `terminal.ts` - Console output formatting (colors, icons, progress, summary sections)
 - `types.ts` - Shared TypeScript interfaces and schema configs
 
-The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry point re-exporting the public/test API, with the implementation in `scripts/wiki-compare/` (`types`, `cache`, `overlay`, `normalize`, `api`, `wiki`, `compare`, `cli`). Shared eft-reference parsing (`findReferenceFile`, `parseEftTasks`, `detectReferenceMode`, `parseModeArgs`, `requireMatchingReferenceMode`) lives in `scripts/eft-compare.ts` and is imported by the other `eft:*` scripts.
+The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry point re-exporting the public/test API, with the implementation in `scripts/wiki-compare/` (`types`, `cache`, `overlay`, `normalize`, `api`, `wiki`, `compare`, `cli`). Shared reference-file parsing (`findReferenceFile`, `parseEftTasks`, `detectReferenceMode`, `parseModeArgs`, `requireMatchingReferenceMode`) lives in `scripts/eft-compare.ts` and is imported by the other `eft:*` scripts.
 
 ### Build Pipeline
 
@@ -31,6 +31,27 @@ The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry p
 ### Output Structure
 
 The built `dist/overlay.json` contains entity sections keyed by tarkov.dev IDs (tasks, items, etc.) plus a `$meta` object with version, generated timestamp, and SHA256 hash.
+
+### Game Modes
+
+Two mode lists live in `src/lib/types.ts`:
+
+- `SUPPORTED_GAME_MODES` (`regular`, `pve`, `pvp-season`) — the modes tarkov.dev
+  serves upstream, as reported by `json.tarkov.dev/endpoints` (`gameModes`).
+  `pvp-season` is BSG's Seasonal Character (patch 1.1.0.0) and is served like any
+  other mode (`/{mode}/tasks`, `items`, `maps`, `traders`, `hideout`, ...).
+  Everything that fetches/compares against tarkov.dev iterates this list, and
+  `build.ts`/`validate.ts` iterate it for `src/overrides/modes/<mode>/` sections.
+- `DIVERGENCE_MODES` (`regular`, `pve`) — the pair the mode-divergence registry
+  adjudicates. Divergence is the artifact of tarkov.dev deriving one mode's
+  numbers from the other; it is scoped to regular↔pve. Extend only with proof of
+  a third-mode mirror.
+
+Seasonal-only data types tarkov.dev does not model at all live in dedicated
+additions, e.g. `src/additions/seasonalPerks.json5` (schema
+`seasonal-perk.schema.json`): tarkov.dev serves the `pvp-season` mode but has no
+seasonal-perks endpoint, so the perks ship as an addition, following the same
+pattern as `editions.json5`.
 
 ## Build, Test, and Development Commands
 
@@ -45,13 +66,18 @@ The built `dist/overlay.json` contains entity sections keyed by tarkov.dev IDs (
 
 ### Reference cross-check tooling (local-only)
 
-The `eft:*` scripts cross-check the overlay against a local quest reference file,
-the authority for numeric quest fields (experience, minPlayerLevel, objective
-counts). The reference file lives in `eft/` and all derived output in `data/` —
-both gitignored. Never commit reference files or anything derived from them; PRs
-carry only the resulting JSON5 corrections plus proof links.
+The `eft:*` scripts cross-check the overlay against a local quest reference -
+values verified in-game and kept out of the repo - which is the authority for
+numeric quest fields (experience, minPlayerLevel, objective counts). The
+reference lives in `eft/` and all derived output in `data/` — both gitignored.
+Versioned captures go in subdirectories (`eft/eft-1.1-pve/`); `findReferenceFile`
+scans recursively and auto-detects the most recently captured `quest_list`
+reference, so a fresh dump supersedes an older one without touching the tooling
+call sites (pass an explicit `eftDir` to pin a specific capture).
+Never commit the reference or anything derived from it; PRs carry only the
+resulting JSON5 corrections plus proof links.
 
-- `npm run eft:normalize` distills a raw reference file into a clean
+- `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
 - `npm run eft:compare` lists where the reference disagrees with the live API.
 - `npm run eft:wiki` cross-references those reference-vs-API discrepancies

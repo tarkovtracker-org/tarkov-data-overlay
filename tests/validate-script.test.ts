@@ -10,6 +10,7 @@ import {
   getProjectPaths,
   listJson5Files,
   SCHEMA_CONFIGS,
+  SUPPORTED_GAME_MODES,
 } from '../src/lib/index.js';
 import {
   buildLocalLocaleEntityIdIndex,
@@ -40,7 +41,7 @@ describe('scripts/validate helpers', () => {
       ),
       'suppressions/tasks.json5',
       'divergences/tasks.json5',
-      ...['regular', 'pve'].flatMap((mode) => [
+      ...SUPPORTED_GAME_MODES.flatMap((mode) => [
         ...listJson5Files(join(srcDir, 'overrides', 'modes', mode)).map(
           (file) => `overrides/modes/${mode}/${file}`
         ),
@@ -67,7 +68,7 @@ describe('scripts/validate helpers', () => {
       const result = validateFile(filePath, 'overrides/tasks.json5', validators);
 
       expect(result.valid).toBe(false);
-      expect(result.errors?.[0]).toContain("Failed to parse JSON5 file");
+      expect(result.errors?.[0]).toContain('Failed to parse JSON5 file');
       expect(result.errors?.[0]).toContain(filePath);
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
