@@ -1,0 +1,68 @@
+scripts/eft-compare.ts
+  s_81f9edad14b561::t_c558496142f662 656,695,714-720
+  s_81f9edad14b561::t_fb4fe9542c2b69 696-713
+  s_81f9edad14b561::t_da60a8b770887f 116-133,269-273,275-279
+monitor/server.js
+  s_81f9edad14b561::t_3c731a4ad2a547 440-448,1199,1251
+package.json
+  s_81f9edad14b561::t_5a1b1889f89901 19-21
+  s_81f9edad14b561::t_bfa9621b5cf236 17
+  s_81f9edad14b561::t_47433a0a55c048 45
+.fallowrc.json
+  s_81f9edad14b561::t_32fc2695bddb8c 1-6,12-13
+  s_81f9edad14b561::t_5ea882ccecf0b2 7-11
+scripts/eft-audit.ts
+  s_81f9edad14b561::t_072e320f619f36 62
+  s_81f9edad14b561::t_57dde836ce217b 265
+  s_81f9edad14b561::t_c6128a073fab21 41
+  s_81f9edad14b561::t_fcca79e5f88b44 242-245
+src/lib/entity-validator.ts
+  s_81f9edad14b561::t_d59b280f3c7cf0 22,469
+scripts/wiki-compare/compare.ts
+  s_81f9edad14b561::t_7717f608fe55cb 64
+  s_81f9edad14b561::t_02e22b56d6e80f 47-63,65-66,612,639
+src/lib/task-validator.ts
+  s_81f9edad14b561::t_6629a65eab9da6 343-345
+monitor/public/index.html
+  s_81f9edad14b561::t_994b23700f0124 91
+scripts/eft-wiki-crosscheck.ts
+  s_81f9edad14b561::t_072e320f619f36 38
+  s_81f9edad14b561::t_4f6c9600fd7491 212,215
+  s_81f9edad14b561::t_f2a8d84f724850 268
+tests/monitor-server.test.ts
+  s_81f9edad14b561::t_24dba486a602e2 11,723-733
+  s_81f9edad14b561::t_80c7b9f4961c4b 713-722,734-735
+monitor/public/app.js
+  s_81f9edad14b561::t_4accd9aacac924 545-555,562,608
+  s_81f9edad14b561::t_077d9f899100af 27-30
+  s_81f9edad14b561::t_b605b97cf9f61c 542-544
+monitor/public/view-config.js
+  s_81f9edad14b561::t_3642415919d161 87-88
+  s_81f9edad14b561::t_f533b6a63e8951 1-86,89-91
+monitor/lib/config.js
+  s_81f9edad14b561::t_1caeabcf38462f 5-6
+scripts/wiki-compare/wiki.ts
+  s_81f9edad14b561::t_b8f7c0a7f982b7 181-187,189-208
+scripts/eft-normalize.ts
+  s_81f9edad14b561::t_d1137a442c96b9 33,212-218,220-222
+  s_81f9edad14b561::t_d0933732e9d360 219
+scripts/wiki-compare/overlay.ts
+  s_81f9edad14b561::t_c7e31614a2044f 196-225,228-257,259-268,273,275-276,278
+  s_81f9edad14b561::t_71487d071900d3 163-179,194-195,310-313
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "441b0c778894c15442069eb95c4dfe646641abec",
+  "prompts": {},
+  "sessions": {
+    "s_81f9edad14b561": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00083-90ef-7834-acf4-a73c9d6a0f15",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
