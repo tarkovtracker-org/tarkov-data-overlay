@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
+import vm from 'node:vm';
 
 // NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
@@ -707,6 +708,29 @@ describe('HTTP — real monitor/server.js handlers', () => {
     apiState['pvp-season'].updatedAt = null;
     apiState['pvp-season'].error = null;
     return new Promise<void>((resolve) => server.close(resolve));
+  });
+
+  // -- static assets ---------------------------------------------------------
+
+  it('GET /view-config.js — serves the shared browser configuration', async () => {
+    const res = await fetch(`${baseUrl}/view-config.js`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/javascript');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+
+    const source = await res.text();
+    const context: {
+      window: { viewMeta?: typeof configModule };
+      module: { exports: typeof configModule | Record<string, never> };
+    } = { window: {}, module: { exports: {} } };
+    vm.runInNewContext(source, context);
+
+    expect(context.window.viewMeta).toBe(context.module.exports);
+    expect(context.window.viewMeta?.DEFAULT_MODES).toEqual(['regular', 'pve', 'pvp-season']);
+    expect(Object.keys(context.window.viewMeta?.VIEW_CONFIG ?? {})).toEqual(
+      Object.keys(VIEW_CONFIG)
+    );
   });
 
   // -- /latest ---------------------------------------------------------------

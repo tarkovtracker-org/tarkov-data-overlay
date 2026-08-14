@@ -20,8 +20,6 @@
  * the reference parser from eft-compare; both are pure imports here.
  */
 
-import { writeFileSync } from 'fs';
-
 import {
   isDirectExecution,
   sleep,
@@ -37,12 +35,7 @@ import {
   icons,
   type TaskData,
 } from '../src/lib/index.js';
-import {
-  loadEftTasks,
-  parseModeArgs,
-  requireMatchingReferenceMode,
-  type EftTask,
-} from './eft-compare.js';
+import { loadReferenceTasks, parseModeArgs, writeJsonOutput, type EftTask } from './eft-compare.js';
 import { parseWikiTask, buildMapAliasMap } from './wiki-compare.js';
 
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
@@ -216,12 +209,10 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Parsing quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
-    if (!eftTasks) throw new Error(`No quest reference file found in ${opts.eftDir}`);
+    const { tasks: eftTasks } = loadReferenceTasks(opts);
 
     // The reference file is mode-specific; refuse a mismatch so wiki rows
-    // aren't built from cross-mode data.
-    requireMatchingReferenceMode(opts.eftDir, opts.mode);
+    // aren't built from cross-mode data (loadReferenceTasks already guards it).
     printSuccess(`Parsed ${eftTasks.size} quests from reference file`);
 
     printProgress(`Fetching ${opts.mode} tasks from tarkov.dev...`);
@@ -274,8 +265,7 @@ async function main(): Promise<void> {
     printReport(rows);
 
     if (opts.jsonOut) {
-      writeFileSync(opts.jsonOut, JSON.stringify(rows, null, 2));
-      printSuccess(`Wrote ${rows.length} cross-checked rows to ${opts.jsonOut}`);
+      writeJsonOutput(opts.jsonOut, rows, 'cross-checked rows');
     }
 
     process.exit(0);

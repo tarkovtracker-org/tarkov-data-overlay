@@ -19,6 +19,7 @@
 
 import type { TaskData } from './types.js';
 import { compareSubset, formatValue } from './value-compare.js';
+import { categorizeResults } from './task-validator.js';
 
 export type EntityDetailStatus = 'needed' | 'fixed' | 'synthetic' | 'error' | 'info';
 
@@ -465,9 +466,5 @@ export function checkTaskSuppressionStaleness(
 
 /** Group entity results by status for reporting. */
 export function categorizeEntityResults(results: EntityValidationResult[]) {
-  return {
-    stillNeeded: results.filter((r) => r.stillNeeded),
-    fixed: results.filter((r) => r.status === 'FIXED'),
-    removedFromApi: results.filter((r) => r.status === 'REMOVED_FROM_API'),
-  };
+  return categorizeResults(results);
 }

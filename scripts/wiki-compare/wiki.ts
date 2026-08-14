@@ -178,35 +178,36 @@ export function extractCount(text: string, links: string[] = []): number | undef
   const verbs =
     '(?:kill|eliminate|neutralize|find|locate|obtain|get|hand over|handover|turn in|submit|deliver|give|bring|collect|stash|install|mark|plant|place|reach|visit|use|transfer|complete|survive|extract|escape|hit|shoot)';
 
-  let match = scrubbed.match(new RegExp(`\\b(${numberPattern})\\b\\s*${countWords}\\b`, 'i'));
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
+  // Each candidate regex looks for a count in a specific position. The first
+  // pattern that captures a number wins, matching the original early-return
+  // ladder order.
+  const extract = (pattern: RegExp): number | undefined => {
+    const m = scrubbed.match(pattern);
+    return m?.[1] ? Number(m[1].replace(/,/g, '')) : undefined;
+  };
 
-  match = scrubbed.match(new RegExp(`\\b${countWords}\\b\\s*(${numberPattern})\\b`, 'i'));
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
-
-  match = scrubbed.match(new RegExp(`\\b(${numberPattern})\\b\\s*x\\b`, 'i'));
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
-
-  match = scrubbed.match(new RegExp(`\\bx\\s*(${numberPattern})\\b`, 'i'));
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
-
-  // Last-resort verb fallback: "reach 10", "visit 3", ... A number that is
-  // part of a distance/time qualifier ("over 40 meters away", "for 5 minutes")
-  // is not an objective count, so exclude it with a negative lookahead.
-  match = scrubbed.match(
-    new RegExp(
-      `\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b(?!\\s*(?:meters?|metres?|minutes?|seconds?|hours?|km)\\b)`,
-      'i'
+  return (
+    extract(new RegExp(`\\b(${numberPattern})\\b\\s*${countWords}\\b`, 'i')) ??
+    extract(new RegExp(`\\b${countWords}\\b\\s*(${numberPattern})\\b`, 'i')) ??
+    extract(new RegExp(`\\b(${numberPattern})\\b\\s*x\\b`, 'i')) ??
+    extract(new RegExp(`\\bx\\s*(${numberPattern})\\b`, 'i')) ??
+    // Last-resort verb fallback: "reach 10", "visit 3", ... A number that is
+    // part of a distance/time qualifier ("over 40 meters away", "for 5
+    // minutes") is not an objective count, so exclude it with a negative
+    // lookahead.
+    extract(
+      new RegExp(
+        `\\b${verbs}\\b[^\\d]{0,24}\\b(${numberPattern})\\b(?!\\s*(?:meters?|metres?|minutes?|seconds?|hours?|km)\\b)`,
+        'i'
+      )
+    ) ??
+    extract(
+      new RegExp(
+        `\\b(${numberPattern})\\b\\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\\b`,
+        'i'
+      )
     )
   );
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
-
-  match = scrubbed.match(
-    new RegExp(`\\b(${numberPattern})\\b\\s*(?:items?|pcs?|pieces?|packs?|bottles?|units?)\\b`, 'i')
-  );
-  if (match?.[1]) return Number(match[1].replace(/,/g, ''));
-
-  return undefined;
 }
 
 export function parseObjectives(

@@ -24,77 +24,10 @@ let lastState = null;
 let filterText = "";
 let renderedSections = [];
 
-const fallbackModes = ["regular", "pve", "pvp-season"];
-const fallbackModeLabels = {
-  regular: "PvP",
-  pve: "PvE",
-  "pvp-season": "PvP PvE Seasonal",
-  "pvp-pve-seasonal": "PvP PvE Seasonal",
-};
-
-const viewConfig = {
-  tasks: {
-    title: "Task Overrides",
-    lede: "Corrections from the overlay compared to tarkov.dev.",
-    requiresMode: true,
-  },
-  tasksAdd: {
-    title: "Task Additions",
-    lede: "Tasks added by the overlay that are missing from tarkov.dev.",
-    requiresMode: true,
-  },
-  items: {
-    title: "Item Overrides",
-    lede: "Item corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  hideout: {
-    title: "Hideout Overrides",
-    lede: "Hideout corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  traders: {
-    title: "Trader Overrides",
-    lede: "Trader corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  editions: {
-    title: "Editions",
-    lede: "Game editions defined by the overlay.",
-    requiresMode: false,
-  },
-  storyChapters: {
-    title: "Story Chapters",
-    lede: "Storyline chapter additions in the overlay.",
-    requiresMode: false,
-  },
-  itemsAdd: {
-    title: "Item Additions",
-    lede: "Items added by the overlay.",
-    requiresMode: false,
-  },
-  prestige: {
-    title: "Prestige Overrides",
-    lede: "Prestige-level corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  locales: {
-    title: "Locale Corrections",
-    lede: "Per-locale translation corrections in the overlay.",
-    requiresMode: false,
-    requiresLocale: true,
-  },
-  seasonalPerks: {
-    title: "Seasonal Perks",
-    lede: "Seasonal (pvp-season) perks defined by the overlay.",
-    requiresMode: false,
-  },
-  craftsAdd: {
-    title: "Craft Additions",
-    lede: "Hideout crafts added by the overlay.",
-    requiresMode: false,
-  },
-};
+const viewMeta = window.viewMeta || {};
+const fallbackModes = viewMeta.DEFAULT_MODES || [];
+const fallbackModeLabels = viewMeta.MODE_LABELS || {};
+const viewConfig = viewMeta.VIEW_CONFIG || {};
 
 const viewRoutes = {
   tasks: "tasks",
@@ -606,19 +539,27 @@ function updateUrl() {
   window.history.replaceState({}, "", url);
 }
 
+// Browser behavior is covered by the monitor integration and real-browser smoke tests,
+// but fallow cannot attribute that coverage to this standalone script.
+// fallow-ignore-next-line complexity
+function buildViewParams() {
+  const params = new URLSearchParams({ view: currentView });
+  if (viewConfig[currentView]?.requiresMode) {
+    params.set("mode", currentMode);
+  }
+  if (viewConfig[currentView]?.requiresLocale) {
+    params.set("locale", currentLocale);
+  }
+  return params;
+}
+
 async function fetchLatest() {
   if (latestFetchController) {
     latestFetchController.abort();
   }
   latestFetchController = new AbortController();
   try {
-    const params = new URLSearchParams({ view: currentView });
-    if (viewConfig[currentView]?.requiresMode) {
-      params.set("mode", currentMode);
-    }
-    if (viewConfig[currentView]?.requiresLocale) {
-      params.set("locale", currentLocale);
-    }
+    const params = buildViewParams();
     const response = await fetch(`/latest?${params}`, {
       cache: "no-store",
       signal: latestFetchController.signal,
@@ -664,13 +605,7 @@ function connectEvents() {
   }
   stopPolling();
 
-  const params = new URLSearchParams({ view: currentView });
-  if (viewConfig[currentView]?.requiresMode) {
-    params.set("mode", currentMode);
-  }
-  if (viewConfig[currentView]?.requiresLocale) {
-    params.set("locale", currentLocale);
-  }
+  const params = buildViewParams();
   eventSource = new EventSource(`/events?${params}`);
   eventSource.addEventListener("summary", (event) => {
     sseRetryMs = 1000;

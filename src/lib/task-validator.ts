@@ -340,7 +340,9 @@ export function validateAllOverrides(
 /**
  * Categorize validation results by status
  */
-export function categorizeResults(results: ValidationResult[]) {
+export function categorizeResults<T extends { stillNeeded: boolean; status: string }>(
+  results: T[]
+) {
   return {
     stillNeeded: results.filter((r) => r.stillNeeded),
     fixed: results.filter((r) => r.status === 'FIXED'),

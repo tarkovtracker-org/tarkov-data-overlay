@@ -437,6 +437,15 @@ function normalizeLocale(locale) {
   return available[0] || "en";
 }
 
+function parseViewParams(requestUrl) {
+  const view = normalizeView(
+    requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
+  );
+  const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+  const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
+  return { view, mode, locale, config: VIEW_CONFIG[view] };
+}
+
 function removeClient(key, client) {
   const clients = clientsByKey.get(key);
   if (!clients) {
@@ -1187,12 +1196,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/latest") {
-    const view = normalizeView(
-      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
-    );
-    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
-    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-    const config = VIEW_CONFIG[view];
+    const { view, mode, locale, config } = parseViewParams(requestUrl);
     refreshOverlayIfStale()
       .catch(() => {})
       .finally(() => {
@@ -1244,12 +1248,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    const view = normalizeView(
-      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
-    );
-    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
-    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-    const config = VIEW_CONFIG[view];
+    const { view, mode, locale, config } = parseViewParams(requestUrl);
     const key = getSummaryKey(
       view,
       config?.requiresLocale ? locale : config?.requiresMode ? mode : ""

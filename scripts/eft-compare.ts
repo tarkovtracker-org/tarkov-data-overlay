@@ -113,6 +113,25 @@ function asNumber(value: unknown): number | undefined {
 }
 
 /**
+ * First finite number produced by `value` for items where `matches` is true.
+ * Shared with eft-normalize, which extracts the same numeric quest fields from
+ * the raw reference shape.
+ */
+export function firstNumber<T>(
+  items: readonly T[] | undefined,
+  matches: (item: T) => boolean,
+  value: (item: T) => unknown
+): number | undefined {
+  if (!items) return undefined;
+  for (const item of items) {
+    if (!matches(item)) continue;
+    const n = asNumber(value(item));
+    if (n !== undefined) return n;
+  }
+  return undefined;
+}
+
+/**
  * Recursively collect quest-reference files (name matches `quest_list` /
  * `quest-list`, `.json`) under `dir`, including subdirectories so versioned
  * captures like `eft/eft-1.1-pve/` are discovered.
@@ -247,14 +266,17 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
     const start = q.conditions?.AvailableForStart ?? [];
     const finish = q.conditions?.AvailableForFinish ?? [];
 
-    const experience = q.rewards?.Success?.filter((r) => r.type === 'Experience')
-      .map((r) => asNumber(r.value))
-      .find((v) => v !== undefined);
+    const experience = firstNumber(
+      q.rewards?.Success,
+      (r) => r.type === 'Experience',
+      (r) => r.value
+    );
 
-    const minPlayerLevel = start
-      .filter((c) => c.conditionType === 'Level')
-      .map((c) => asNumber(c.value))
-      .find((v) => v !== undefined);
+    const minPlayerLevel = firstNumber(
+      start,
+      (c) => c.conditionType === 'Level',
+      (c) => c.value
+    );
 
     const counts = new Map<string, number>();
     for (const c of finish) {
@@ -631,8 +653,7 @@ async function main(): Promise<void> {
     printReport(discrepancies, matched, apiMissing);
 
     if (opts.jsonOut) {
-      writeFileSync(opts.jsonOut, JSON.stringify(discrepancies, null, 2));
-      printSuccess(`Wrote ${discrepancies.length} discrepancies to ${opts.jsonOut}`);
+      writeJsonOutput(opts.jsonOut, discrepancies, 'discrepancies');
     }
 
     process.exit(0);
@@ -669,6 +690,34 @@ export function loadEftTasks(eftDir: string, mode?: GameMode): Map<string, EftTa
     console.warn(`Warning: ignoring unusable quest reference '${refFile}': ${reason}`);
     return null;
   }
+}
+
+/**
+ * Load the quest reference for a CLI run and validate the mode match. Throws
+ * when no reference is present so callers can funnel the failure through their
+ * standard error path. Shared by eft:audit and eft:wiki, which previously
+ * duplicated this load + guard sequence.
+ */
+export function loadReferenceTasks(
+  opts: ModeCliOptions,
+  hint?: string
+): { tasks: Map<string, EftTask>; refMode: GameMode | null } {
+  const tasks = loadEftTasks(opts.eftDir, opts.mode);
+  if (!tasks) {
+    throw new Error(`No quest reference file found in ${opts.eftDir}${hint ? `. ${hint}` : ''}`);
+  }
+  const refMode = requireMatchingReferenceMode(opts.eftDir, opts.mode);
+  return { tasks, refMode };
+}
+
+/**
+ * Write result rows to `--json` output when requested. Shared by the eft:*
+ * CLI scripts so the write-file + success-message pattern stays in one place.
+ */
+export function writeJsonOutput(path: string | undefined, rows: unknown[], noun: string): void {
+  if (!path) return;
+  writeFileSync(path, JSON.stringify(rows, null, 2));
+  printSuccess(`Wrote ${rows.length} ${noun} to ${path}`);
 }
 
 /**
