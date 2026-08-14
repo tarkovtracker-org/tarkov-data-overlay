@@ -35,8 +35,10 @@ ALLOW_REBUILD=true npm run monitor
 ```
 
 Set `REBUILD_TOKEN` as well when exposing the rebuild API to another trusted
-service. Authenticated callers must pass it in an `Authorization: Bearer …`
-header. Rebuilds target the default `dist/overlay.json` output; custom local
+service. Authenticated callers should pass it in an `Authorization: Bearer …`
+header. For backwards compatibility, `?token=` is also accepted; use that only
+for trusted local clients because query strings can appear in logs and browser
+history. Rebuilds target the default `dist/overlay.json` output; custom local
 and HTTP(S) overlay targets remain read-only.
 
 ## Maintenance
