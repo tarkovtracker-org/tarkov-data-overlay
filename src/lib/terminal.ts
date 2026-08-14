@@ -106,14 +106,20 @@ export function formatCountLabel(label: string, count: number, color: keyof type
  * Print a "label (count) : status" header followed by one line per item, or a
  * dim "None" placeholder when the list is empty. This is the standard summary
  * section shape used by the maintenance reports.
+ *
+ * When `count` is supplied it is shown in the header instead of `items.length`.
+ * This lets callers display one line per entry (e.g. an entry title plus a
+ * nested detail line) while still reporting the true number of entries.
  */
 export function printCountSection(
   label: string,
   color: keyof typeof colors,
   items: string[],
-  icon?: string
+  icon?: string,
+  count?: number
 ): void {
-  console.log(`${formatCountLabel(label, items.length, color)}${icon ? ` : ${icon}` : ''}`);
+  const total = count ?? items.length;
+  console.log(`${formatCountLabel(label, total, color)}${icon ? ` : ${icon}` : ''}`);
   if (items.length > 0) {
     for (const item of items) {
       console.log(`  - ${item}`);

@@ -2,8 +2,16 @@
  * Tests for terminal formatting utilities
  */
 
-import { describe, it, expect } from 'vitest';
-import { colors, icons, colorize, bold, dim, formatCountLabel } from '../src/lib/index.js';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import {
+  colors,
+  icons,
+  colorize,
+  bold,
+  dim,
+  formatCountLabel,
+  printCountSection,
+} from '../src/lib/index.js';
 
 describe('colors', () => {
   it('contains expected color codes', () => {
@@ -80,5 +88,36 @@ describe('formatCountLabel', () => {
     const result = formatCountLabel('Empty', 0, 'yellow');
 
     expect(result).toContain('(0)');
+  });
+});
+
+describe('printCountSection', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('shows the override count in the header instead of the number of display lines', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Four display lines (entry title + nested detail), but only two entries.
+    printCountSection(
+      'Still needed',
+      'yellow',
+      ['entry-a', '   detail-a', 'entry-b', '   detail-b'],
+      undefined,
+      2
+    );
+
+    const header = String(logSpy.mock.calls[0][0]);
+    expect(header).toContain('Still needed (2)');
+  });
+
+  it('falls back to the number of items when no count override is provided', () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    printCountSection('Items', 'green', ['a', 'b', 'c']);
+
+    const header = String(logSpy.mock.calls[0][0]);
+    expect(header).toContain('Items (3)');
   });
 });
