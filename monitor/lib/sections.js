@@ -54,7 +54,22 @@ function formatValue(value, maxLength = 220) {
 function mergeTaskOverride(base = {}, next = {}) {
   const merged = { ...base, ...next };
   if (base.objectives || next.objectives) {
-    merged.objectives = { ...(base.objectives || {}), ...(next.objectives || {}) };
+    merged.objectives = { ...(base.objectives || {}) };
+    for (const [objectiveId, objectivePatch] of Object.entries(next.objectives || {})) {
+      const existingPatch = merged.objectives[objectiveId];
+      if (
+        existingPatch &&
+        typeof existingPatch === "object" &&
+        !Array.isArray(existingPatch) &&
+        objectivePatch &&
+        typeof objectivePatch === "object" &&
+        !Array.isArray(objectivePatch)
+      ) {
+        merged.objectives[objectiveId] = { ...existingPatch, ...objectivePatch };
+      } else {
+        merged.objectives[objectiveId] = objectivePatch;
+      }
+    }
   }
   if (base.objectivesAdd || next.objectivesAdd) {
     merged.objectivesAdd = [...(base.objectivesAdd || []), ...(next.objectivesAdd || [])];
@@ -265,7 +280,15 @@ function buildSeasonalPerkSections(perks = {}) {
     }
     const effects = Array.isArray(perk.effects) ? perk.effects : [];
     const effectSummary =
-      effects.length > 0 ? effects.map((effect) => effect.effectId || "?").join(", ") : "-";
+      effects.length > 0
+        ? effects
+            .map((effect) =>
+              effect && typeof effect === "object" && !Array.isArray(effect)
+                ? effect.effectId || "?"
+                : "?"
+            )
+            .join(", ")
+        : "-";
     pushRow(section, [
       perk.name || id,
       perk.id || id,
@@ -312,7 +335,7 @@ function buildCraftAddSections(crafts = {}) {
   return [section];
 }
 
-function buildTasksSections(overrides = {}, apiTasks = [], mode) {
+function buildTasksSections(overrides = {}, apiTasks = []) {
   const diffSection = createSection(
     "Task Overrides vs API",
     ["Task", "Field", "API", "Overlay", "Status"],

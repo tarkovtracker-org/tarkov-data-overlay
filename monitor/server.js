@@ -880,7 +880,7 @@ function buildSummary(view, mode, locale) {
     const mergedOverrides = mergeTaskOverrides(sharedOverrides, modeOverrides);
     const apiTasks = apiState[mode]?.data || [];
     return {
-      sections: buildTasksSections(mergedOverrides, apiTasks, mode),
+      sections: buildTasksSections(mergedOverrides, apiTasks),
       error: overlayState.error || apiState[mode]?.error || null,
     };
   }

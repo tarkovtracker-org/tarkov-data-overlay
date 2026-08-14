@@ -24,7 +24,11 @@ if (previousTargetOverlay === undefined) {
 } else {
   process.env.TARGET_OVERLAY = previousTargetOverlay;
 }
-const { readPositiveInteger, readPort } = require('../monitor/lib/config.js');
+const {
+  readPositiveInteger,
+  readPort,
+  readTimerMilliseconds,
+} = require('../monitor/lib/config.js');
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -107,7 +111,7 @@ const {
 
 describe('buildTasksSections', () => {
   it('returns 4 sections: diff, added-objectives, missing, disabled', () => {
-    const sections = buildTasksSections({}, [], 'regular');
+    const sections = buildTasksSections({}, []);
     expect(sections).toHaveLength(4);
     expect(sections.map((s: any) => s.title)).toEqual([
       'Task Overrides vs API',
@@ -118,11 +122,9 @@ describe('buildTasksSections', () => {
   });
 
   it('produces an "override" row when the value differs from the API', () => {
-    const sections = buildTasksSections(
-      { t1: { minPlayerLevel: 45 } },
-      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular'
-    );
+    const sections = buildTasksSections({ t1: { minPlayerLevel: 45 } }, [
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
+    ]);
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
     expect(row[2]).toBe('10');
@@ -131,28 +133,24 @@ describe('buildTasksSections', () => {
   });
 
   it('produces a "same" row when values match', () => {
-    const sections = buildTasksSections(
-      { t1: { minPlayerLevel: 10 } },
-      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular'
-    );
+    const sections = buildTasksSections({ t1: { minPlayerLevel: 10 } }, [
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
+    ]);
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
     expect(row[4]).toBe('same');
   });
 
   it('routes unknown task IDs to the missing section', () => {
-    const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, [], 'regular');
+    const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, []);
     expect(missing.rows).toHaveLength(1);
     expect(missing.rows[0]).toEqual(['Ghost', 'ghost']);
   });
 
   it('routes disabled tasks to the disabled section', () => {
-    const [, , , disabled] = buildTasksSections(
-      { t1: { disabled: true } },
-      [{ id: 't1', name: 'D', objectives: [] }],
-      'regular'
-    );
+    const [, , , disabled] = buildTasksSections({ t1: { disabled: true } }, [
+      { id: 't1', name: 'D', objectives: [] },
+    ]);
     expect(disabled.rows).toHaveLength(1);
     expect(disabled.rows[0][0]).toBe('D');
   });
@@ -160,8 +158,7 @@ describe('buildTasksSections', () => {
   it('routes objectivesAdd to the added-objectives section', () => {
     const [, added] = buildTasksSections(
       { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
-      [{ id: 't1', name: 'T', objectives: [] }],
-      'regular'
+      [{ id: 't1', name: 'T', objectives: [] }]
     );
     expect(added.rows).toHaveLength(1);
     expect(added.rows[0][0]).toBe('T');
@@ -169,11 +166,9 @@ describe('buildTasksSections', () => {
   });
 
   it('diffs individual objective field overrides', () => {
-    const [diff] = buildTasksSections(
-      { t1: { objectives: { o1: { description: 'Fixed' } } } },
-      [{ id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] }],
-      'regular'
-    );
+    const [diff] = buildTasksSections({ t1: { objectives: { o1: { description: 'Fixed' } } } }, [
+      { id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] },
+    ]);
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:o1.description');
     expect(row).toBeDefined();
     expect(row[2]).toBe('Orig');
@@ -182,18 +177,16 @@ describe('buildTasksSections', () => {
   });
 
   it('marks objectives missing from the API', () => {
-    const [diff] = buildTasksSections(
-      { t1: { objectives: { gone: { description: 'x' } } } },
-      [{ id: 't1', name: 'T', objectives: [] }],
-      'regular'
-    );
+    const [diff] = buildTasksSections({ t1: { objectives: { gone: { description: 'x' } } } }, [
+      { id: 't1', name: 'T', objectives: [] },
+    ]);
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:gone');
     expect(row).toBeDefined();
     expect(row[4]).toBe('missing');
   });
 
   it('skips null/non-object overrides', () => {
-    const sections = buildTasksSections({ t1: null }, [], 'regular');
+    const sections = buildTasksSections({ t1: null }, []);
     const total = sections.reduce((n: number, s: any) => n + s.rows.length, 0);
     expect(total).toBe(0);
   });
@@ -439,6 +432,10 @@ describe('buildSeasonalPerkSections', () => {
     const [sec] = buildSeasonalPerkSections({ p: { name: 'P' } });
     expect(sec.rows[0][4]).toBe('-');
   });
+  it('handles malformed effects', () => {
+    const [sec] = buildSeasonalPerkSections({ p: { name: 'P', effects: [null, 'bad'] } });
+    expect(sec.rows[0][4]).toBe('?, ?');
+  });
 });
 
 describe('buildCraftAddSections', () => {
@@ -548,6 +545,13 @@ describe('mergeTaskOverrides', () => {
     expect(m.t.objectives).toHaveProperty('o1');
     expect(m.t.objectives).toHaveProperty('o2');
   });
+  it('merges overlapping objective patches field-by-field', () => {
+    const m = mergeTaskOverrides(
+      { t: { objectives: { o1: { x: 1, shared: 'base' } } } },
+      { t: { objectives: { o1: { y: 2, shared: 'mode' } } } }
+    );
+    expect(m.t.objectives.o1).toEqual({ x: 1, y: 2, shared: 'mode' });
+  });
   it('concatenates objectivesAdd', () => {
     const m = mergeTaskOverrides(
       { t: { objectivesAdd: [{ id: 'a' }] } },
@@ -583,6 +587,8 @@ describe('monitor hardening', () => {
     expect(readPositiveInteger('1.5', 10)).toBe(10);
     expect(readPort('65535', 3000)).toBe(65535);
     expect(readPort('65536', 3000)).toBe(3000);
+    expect(readTimerMilliseconds('2147483647', 120000)).toBe(2147483647);
+    expect(readTimerMilliseconds('2147483648', 120000)).toBe(120000);
   });
 
   it('keeps static paths inside the configured public directory', () => {
