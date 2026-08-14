@@ -628,6 +628,7 @@ describe('monitor hardening', () => {
       destroyed: false,
       writableEnded: false,
       headersSent: false,
+      setHeaders: () => {},
       writeHead: (status: number) => sent.push({ status }),
       end: (body?: string) => sent.push({ body }),
       destroy: () => {
@@ -650,6 +651,7 @@ describe('monitor hardening', () => {
       destroyed: false,
       writableEnded: false,
       headersSent: false,
+      setHeaders: () => {},
       writeHead: () => {
         throw new Error('socket closed');
       },

@@ -373,8 +373,13 @@ function responseHeaders(contentType, extra = {}) {
   };
 }
 
+function applyResponseHeaders(res, contentType, extra = {}) {
+  res.setHeaders(new Headers(responseHeaders(contentType, extra)));
+}
+
 function send(res, status, body, contentType = "text/plain; charset=utf-8") {
-  res.writeHead(status, responseHeaders(contentType));
+  applyResponseHeaders(res, contentType);
+  res.writeHead(status);
   res.end(body);
 }
 
@@ -1226,17 +1231,7 @@ const server = http.createServer((req, res) => {
 
   if (pathname === "/events") {
     resolveViewParams(requestUrl).then(({ view, mode, locale, config, key }) => {
-      res.setHeader(
-        "Content-Security-Policy",
-        "default-src 'self'; base-uri 'none'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'"
-      );
-      res.setHeader("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
-      res.setHeader("Referrer-Policy", "no-referrer");
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-store");
-      res.setHeader("Connection", "keep-alive");
+      applyResponseHeaders(res, "text/event-stream", { Connection: "keep-alive" });
       res.writeHead(200);
       const clients = clientsByKey.get(key) || new Set();
       clientsByKey.set(key, clients);
