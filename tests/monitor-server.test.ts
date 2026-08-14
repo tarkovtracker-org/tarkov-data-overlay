@@ -58,6 +58,7 @@ describe('module import sanity', () => {
     expect(typeof mod.normalizeMode).toBe('function');
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
+    expect(typeof mod.isDefaultOverlayPath).toBe('function');
   });
 
   it('exports the real http.Server instance', () => {
@@ -603,6 +604,11 @@ describe('monitor hardening', () => {
     expect(readTimerMilliseconds('2147483648', 120000)).toBe(120000);
   });
 
+  it('only enables rebuilds for the default overlay path', () => {
+    expect(mod.isDefaultOverlayPath(path.resolve('dist/overlay.json'))).toBe(true);
+    expect(mod.isDefaultOverlayPath(path.resolve('custom-overlay.json'))).toBe(false);
+  });
+
   it('keeps static paths inside the configured public directory', () => {
     const publicDir = path.resolve('monitor/public');
     expect(safeJoin(publicDir, '/app.js')).toBe(path.join(publicDir, 'app.js'));
@@ -613,10 +619,8 @@ describe('monitor hardening', () => {
   it('requires explicit opt-in before enabling rebuilds', () => {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousAllowRebuild = process.env.ALLOW_REBUILD;
-    const previousTargetOverlay = process.env.TARGET_OVERLAY;
     try {
       process.env.NODE_ENV = 'development';
-      process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
       delete process.env.ALLOW_REBUILD;
       expect(isRebuildEnabled()).toBe(false);
       process.env.ALLOW_REBUILD = 'true';
@@ -627,11 +631,6 @@ describe('monitor hardening', () => {
         delete process.env.ALLOW_REBUILD;
       } else {
         process.env.ALLOW_REBUILD = previousAllowRebuild;
-      }
-      if (previousTargetOverlay === undefined) {
-        delete process.env.TARGET_OVERLAY;
-      } else {
-        process.env.TARGET_OVERLAY = previousTargetOverlay;
       }
     }
   });

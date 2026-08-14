@@ -189,12 +189,16 @@ function rebuildOverlay() {
   });
 }
 
+function isDefaultOverlayPath(targetPath) {
+  return path.resolve(targetPath) === DEFAULT_OVERLAY_PATH;
+}
+
 function isRebuildEnabled() {
   return (
     process.env.NODE_ENV !== "test" &&
     process.env.ALLOW_REBUILD === "true" &&
     !isRemotePath(OVERLAY_PATH) &&
-    path.resolve(OVERLAY_PATH) === DEFAULT_OVERLAY_PATH
+    isDefaultOverlayPath(OVERLAY_PATH)
   );
 }
 
@@ -207,13 +211,13 @@ function safeTokenEqual(actual, expected) {
   );
 }
 
-function getRequestToken(req) {
+function getRequestToken(req, requestUrl) {
   const authorization = req.headers.authorization || "";
   const schemeEnd = authorization.indexOf(" ");
   if (schemeEnd > 0 && authorization.slice(0, schemeEnd).toLowerCase() === "bearer") {
     return authorization.slice(schemeEnd + 1).trim();
   }
-  return "";
+  return requestUrl.searchParams.get("token") || "";
 }
 
 async function refreshOverlayIfStale() {
@@ -1147,7 +1151,7 @@ const server = http.createServer((req, res) => {
     }
     const token = process.env.REBUILD_TOKEN;
     if (typeof token === "string" && token.length > 0) {
-      const requestToken = getRequestToken(req);
+      const requestToken = getRequestToken(req, requestUrl);
       if (!requestToken || !safeTokenEqual(requestToken, token)) {
         send(
           res,
@@ -1376,6 +1380,7 @@ if (process.env.NODE_ENV === "test") {
     isVersionStale,
     rebuildOverlay,
     isRebuildEnabled,
+    isDefaultOverlayPath,
     safeJoin,
     createSection,
     pushRow,
