@@ -421,6 +421,11 @@ export async function fetchRawEntities(
 ): Promise<Map<string, Record<string, unknown>>> {
   const cache: EndpointCache = new Map();
   const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}`);
+  // Some endpoints (e.g. crafts) return the collection directly under `data`
+  // as a top-level array rather than an id-keyed object.
+  if (Array.isArray(envelope.data)) {
+    return toLookup(envelope.data);
+  }
   const data = isRecord(envelope.data) ? envelope.data : {};
   const collection = collectionKey ? data[collectionKey] : data;
   return toLookup(collection);

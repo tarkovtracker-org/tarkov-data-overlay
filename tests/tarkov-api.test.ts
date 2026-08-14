@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchTasks,
   fetchLocaleBundle,
+  fetchRawEntities,
   findTaskById,
   USER_AGENT,
   type TaskData,
@@ -448,5 +449,46 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
 
     expect(findTaskById(tasks, 'task-2')).toEqual({ id: 'task-2', name: 'Task 2' });
     expect(findTaskById(tasks, 'missing')).toBeUndefined();
+  });
+
+  describe('fetchRawEntities', () => {
+    it('indexes a top-level array collection by id (crafts endpoint shape)', async () => {
+      mockEndpoints({
+        'regular/crafts': {
+          data: [
+            { id: 'craft-a', station: 's1', level: 1 },
+            { id: 'craft-b', station: 's2', level: 2 },
+          ],
+        },
+      });
+
+      const entities = await fetchRawEntities('regular', 'crafts');
+
+      expect(entities.size).toBe(2);
+      expect(entities.get('craft-a')).toMatchObject({ id: 'craft-a', level: 1 });
+      expect(entities.get('craft-b')).toMatchObject({ id: 'craft-b', level: 2 });
+    });
+
+    it('drills into a nested collection when collectionKey is provided', async () => {
+      mockEndpoints({
+        'regular/items': { data: { items: { 'item-a': { id: 'item-a' } } } },
+      });
+
+      const entities = await fetchRawEntities('regular', 'items', 'items');
+
+      expect(entities.size).toBe(1);
+      expect(entities.get('item-a')).toBeDefined();
+    });
+
+    it('treats the data object itself as the collection when no key is provided', async () => {
+      mockEndpoints({
+        'regular/traders': { data: { 'trader-a': { id: 'trader-a' } } },
+      });
+
+      const entities = await fetchRawEntities('regular', 'traders');
+
+      expect(entities.size).toBe(1);
+      expect(entities.get('trader-a')).toBeDefined();
+    });
   });
 });
