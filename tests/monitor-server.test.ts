@@ -102,8 +102,16 @@ const {
   apiState,
   server,
   VIEW_CONFIG,
-  SECURITY_HEADERS,
 } = mod;
+
+const EXPECTED_SECURITY_HEADERS = {
+  'Content-Security-Policy':
+    "default-src 'self'; base-uri 'none'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'",
+  'Permissions-Policy': 'camera=(), geolocation=(), microphone=()',
+  'Referrer-Policy': 'no-referrer',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+} as const;
 
 // ---------------------------------------------------------------------------
 // buildTasksSections
@@ -699,10 +707,10 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(res.headers.get('content-type')).toContain('application/json');
     const csp = res.headers.get('content-security-policy');
     expect(csp).toBeDefined();
-    for (const directive of SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+    for (const directive of EXPECTED_SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
       expect(csp).toContain(directive);
     }
-    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    for (const [name, value] of Object.entries(EXPECTED_SECURITY_HEADERS)) {
       if (name === 'Content-Security-Policy') continue;
       expect(res.headers.get(name)).toBe(value);
     }
@@ -822,10 +830,10 @@ describe('HTTP — real monitor/server.js handlers', () => {
       expect(res.headers.get('content-type')).toContain('text/event-stream');
       const csp = res.headers.get('content-security-policy');
       expect(csp).toBeDefined();
-      for (const directive of SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+      for (const directive of EXPECTED_SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
         expect(csp).toContain(directive);
       }
-      for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+      for (const [name, value] of Object.entries(EXPECTED_SECURITY_HEADERS)) {
         if (name === 'Content-Security-Policy') continue;
         expect(res.headers.get(name)).toBe(value);
       }
