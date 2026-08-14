@@ -19,6 +19,7 @@ import {
   validateFile,
   validateLocaleEntityIds,
   validateSourceFiles,
+  validateTraderRequirementIds,
 } from '../scripts/validate.js';
 
 describe('scripts/validate helpers', () => {
@@ -199,6 +200,126 @@ describe('scripts/validate helpers', () => {
 
     try {
       const result = validateFile(filePath, 'overrides/tasks.json5', validators);
+
+      expect(result.errors).toBeUndefined();
+      expect(result.valid).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects synthetic ids whose embedded discriminator disagrees with the entry', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    // id says 'level >= 2' for task 657315e1...; the entry declares reputation >= 1
+    // under a different task key.
+    writeFileSync(
+      filePath,
+      `{
+        '59674cd986f7744ab26e32f2': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+              requirementType: 'reputation',
+              compareMethod: '>=',
+              value: 1,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTraderRequirementIds(filePath, 'overrides/tasks.json5');
+
+      expect(result.valid).toBe(false);
+      // compareMethod is the only segment that agrees, so four fields mismatch.
+      expect(result.errors).toHaveLength(4);
+      for (const field of ['task id', 'trader.id', 'requirementType', 'value']) {
+        expect(result.errors?.some((error) => error.includes(field))).toBe(true);
+      }
+      expect(result.errors?.some((error) => error.includes('compareMethod'))).toBe(false);
+      expect(
+        result.errors?.[0].startsWith('/59674cd986f7744ab26e32f2/traderRequirements/0/id:')
+      ).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects duplicate trader requirement ids within one task', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    // Patch-by-id would collapse these two entries into one.
+    writeFileSync(
+      filePath,
+      `{
+        '59674cd986f7744ab26e32f2': {
+          traderRequirements: [
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 2,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            },
+            {
+              id: '6a5672392ee61bd094c49e28',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 3,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTraderRequirementIds(filePath, 'overrides/tasks.json5');
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual([
+        "/59674cd986f7744ab26e32f2/traderRequirements/1/id: duplicate requirement id '6a5672392ee61bd094c49e28' within the same task",
+      ]);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts synthetic ids derived from the entry they label', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'validate-req-id-'));
+    const filePath = join(tempDir, 'tasks.json5');
+    writeFileSync(
+      filePath,
+      `{
+        '657315e1dccd301f1301416a': {
+          traderRequirements: [
+            {
+              id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.1',
+              requirementType: 'level',
+              compareMethod: '>=',
+              value: 1,
+              trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }
+            },
+            {
+              id: 'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.<=.-3',
+              requirementType: 'reputation',
+              compareMethod: '<=',
+              value: -3,
+              trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' }
+            }
+          ]
+        }
+      }`,
+      'utf-8'
+    );
+
+    try {
+      const result = validateTraderRequirementIds(filePath, 'overrides/tasks.json5');
 
       expect(result.errors).toBeUndefined();
       expect(result.valid).toBe(true);

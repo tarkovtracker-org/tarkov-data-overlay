@@ -285,7 +285,10 @@ function applyTraderRequirements(
   stable across builds. They never collide with an upstream id (`<24-hex>`, or
   the composite `<24-hex taskId>-<24-hex traderId>` tarkov.dev emits for some
   reputation gates), so they append instead of patch. Both id shapes are
-  enforced by the task schemas, so a malformed id fails `npm run validate`.
+  enforced by the task schemas, and `npm run validate` additionally checks that
+  each synthetic id is derived from the entry it labels (and that no two
+  requirements in one task share an id), so a malformed or drifted id fails
+  validation.
 - **Upstream-preserved requirements** keep their upstream `id`, so a correction
   patches the existing requirement in place.
 - **Clearing requirements** is expressed by an empty array
