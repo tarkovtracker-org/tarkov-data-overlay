@@ -1,0 +1,27 @@
+monitor/lib/sections.js
+  s_1c9ec2c6a3ee48::t_8da952befa4a9b 57-72,283-291,338
+monitor/lib/config.js
+  s_1c9ec2c6a3ee48::t_d8e5325f2e60e0 82-83,89-93,109-110,123
+monitor/server.js
+  s_1c9ec2c6a3ee48::t_771e1c88e0836f 883
+tests/monitor-server.test.ts
+  s_1c9ec2c6a3ee48::t_b3622490492f03 27-31,125-127,136-138,151-153,169-171,180-182
+  s_1c9ec2c6a3ee48::t_b98a80a226e049 114,435-438,548-554,590-591
+  s_1c9ec2c6a3ee48::t_49e7d7d88f04b0 145,161,189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e857ff096e3cbc1b31fb94fe5f7ad8abe430a8e6",
+  "prompts": {},
+  "sessions": {
+    "s_1c9ec2c6a3ee48": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fff23-5469-7edc-bc32-d42f84845297",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
