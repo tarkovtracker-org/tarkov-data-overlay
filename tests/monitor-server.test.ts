@@ -16,8 +16,15 @@ import path from 'node:path';
 process.env.NODE_ENV = 'test';
 
 const require = createRequire(import.meta.url);
+const previousTargetOverlay = process.env.TARGET_OVERLAY;
+process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
 const mod = require('../monitor/server.js');
-const { readPositiveInteger } = require('../monitor/lib/config.js');
+if (previousTargetOverlay === undefined) {
+  delete process.env.TARGET_OVERLAY;
+} else {
+  process.env.TARGET_OVERLAY = previousTargetOverlay;
+}
+const { readPositiveInteger, readPort } = require('../monitor/lib/config.js');
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -91,6 +98,7 @@ const {
   apiState,
   server,
   VIEW_CONFIG,
+  SECURITY_HEADERS,
 } = mod;
 
 // ---------------------------------------------------------------------------
@@ -573,6 +581,8 @@ describe('monitor hardening', () => {
     expect(readPositiveInteger('-1', 10)).toBe(10);
     expect(readPositiveInteger('Infinity', 10)).toBe(10);
     expect(readPositiveInteger('1.5', 10)).toBe(10);
+    expect(readPort('65535', 3000)).toBe(65535);
+    expect(readPort('65536', 3000)).toBe(3000);
   });
 
   it('keeps static paths inside the configured public directory', () => {
@@ -681,8 +691,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
     const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('application/json');
-    expect(res.headers.get('content-security-policy')).toContain("default-src 'self'");
-    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+    const csp = res.headers.get('content-security-policy');
+    expect(csp).toBeDefined();
+    for (const directive of SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+      expect(csp).toContain(directive);
+    }
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+      if (name === 'Content-Security-Policy') continue;
+      expect(res.headers.get(name)).toBe(value);
+    }
   });
 
   it('GET /latest — response shape includes overlay, api, sections', async () => {
@@ -797,6 +814,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
     try {
       expect(res.status).toBe(200);
       expect(res.headers.get('content-type')).toContain('text/event-stream');
+      const csp = res.headers.get('content-security-policy');
+      expect(csp).toBeDefined();
+      for (const directive of SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+        expect(csp).toContain(directive);
+      }
+      for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+        if (name === 'Content-Security-Policy') continue;
+        expect(res.headers.get(name)).toBe(value);
+      }
       expect(res.headers.get('cache-control')).toBe('no-store');
       expect(res.headers.get('connection')).toContain('keep-alive');
     } finally {

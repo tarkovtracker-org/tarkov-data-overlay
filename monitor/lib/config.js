@@ -79,6 +79,11 @@ function readPositiveInteger(value, fallback) {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function readPort(value, fallback) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 && parsed <= 65535 ? parsed : fallback;
+}
+
 function getModeLabel(mode) {
   if (MODE_LABELS[mode]) {
     return MODE_LABELS[mode];
@@ -90,7 +95,7 @@ function getModeLabel(mode) {
 }
 
 const config = Object.freeze({
-  port: readPositiveInteger(process.env.PORT, 3000),
+  port: readPort(process.env.PORT, 3000),
   publicDir: path.resolve(__dirname, "../public"),
   maxRows: readPositiveInteger(process.env.MAX_ROWS, 250),
   overlayPath: process.env.TARGET_OVERLAY || path.resolve(__dirname, "../../dist/overlay.json"),
@@ -107,4 +112,5 @@ module.exports = {
   config,
   getModeLabel,
   readPositiveInteger,
+  readPort,
 };

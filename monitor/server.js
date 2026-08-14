@@ -207,9 +207,9 @@ function safeTokenEqual(actual, expected) {
 
 function getRequestToken(req, requestUrl) {
   const authorization = req.headers.authorization || "";
-  const bearer = /^Bearer\s+(.+)$/i.exec(authorization);
-  if (bearer) {
-    return bearer[1];
+  const schemeEnd = authorization.indexOf(" ");
+  if (schemeEnd > 0 && authorization.slice(0, schemeEnd).toLowerCase() === "bearer") {
+    return authorization.slice(schemeEnd + 1).trim();
   }
   return requestUrl.searchParams.get("token") || "";
 }
@@ -1375,5 +1375,6 @@ if (process.env.NODE_ENV === "test") {
     apiState,
     server,
     VIEW_CONFIG,
+    SECURITY_HEADERS,
   };
 }
