@@ -262,6 +262,13 @@ describe('extractCount', () => {
     expect(extractCount('Visit 4 locations on Woods')).toBe(4);
   });
 
+  it.each(['items', 'pieces', 'packs', 'bottles', 'units'])(
+    'parses counts followed by the %s unit',
+    (unit) => {
+      expect(extractCount(`Required: 12 ${unit}`)).toBe(12);
+    }
+  );
+
   // Regression: the verb fallback used to treat any nearby number as the count,
   // so a duration qualifier like "for 5 minutes" produced a false count of 5.
   it('ignores numbers that belong to time/distance qualifiers', () => {

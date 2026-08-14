@@ -44,6 +44,26 @@ import {
 import { normalizeTaskName } from './api.js';
 import { extractCount } from './wiki.js';
 
+/**
+ * Log a set-difference summary when two name sets disagree. Shared by the
+ * prerequisite and next-task comparisons, which differ only in labels.
+ */
+function logTaskSetDiff(
+  verbose: boolean,
+  label: string,
+  wikiNames: string[],
+  apiNames: string[],
+  apiSet: Set<string>,
+  wikiSet: Set<string>
+): void {
+  if (!verbose) return;
+  const missing = wikiNames.filter((t) => !apiSet.has(normalizeTaskName(t)));
+  const extra = apiNames.filter((t) => !wikiSet.has(normalizeTaskName(t)));
+  if (missing.length > 0)
+    console.log(`${icons.warning} ${label} missing in API: ${missing.join(', ')}`);
+  if (extra.length > 0) console.log(`${icons.warning} ${label} extra in API: ${extra.join(', ')}`);
+}
+
 export function compareTasks(
   apiTask: ExtendedTaskData,
   wiki: WikiTaskData,
@@ -589,14 +609,7 @@ export function compareTasks(
           wikiEditDaysAgo,
           wikiEditedPost1_0,
         });
-        if (verbose) {
-          const missing = wiki.previousTasks.filter((t) => !apiSet.has(normalizeTaskName(t)));
-          const extra = apiReqNames.filter((t) => !wikiSet.has(normalizeTaskName(t)));
-          if (missing.length > 0)
-            console.log(`${icons.warning} prerequisites missing in API: ${missing.join(', ')}`);
-          if (extra.length > 0)
-            console.log(`${icons.warning} prerequisites extra in API: ${extra.join(', ')}`);
-        }
+        logTaskSetDiff(verbose, 'prerequisites', wiki.previousTasks, apiReqNames, apiSet, wikiSet);
       } else if (verbose) {
         console.log(`${icons.success} prerequisites match`);
       }
@@ -623,14 +636,7 @@ export function compareTasks(
           wikiEditDaysAgo,
           wikiEditedPost1_0,
         });
-        if (verbose) {
-          const missing = wiki.nextTasks.filter((t) => !apiSet.has(normalizeTaskName(t)));
-          const extra = apiNextNames.filter((t) => !wikiSet.has(normalizeTaskName(t)));
-          if (missing.length > 0)
-            console.log(`${icons.warning} next tasks missing in API: ${missing.join(', ')}`);
-          if (extra.length > 0)
-            console.log(`${icons.warning} next tasks extra in API: ${extra.join(', ')}`);
-        }
+        logTaskSetDiff(verbose, 'next tasks', wiki.nextTasks, apiNextNames, apiSet, wikiSet);
       } else if (verbose) {
         console.log(`${icons.success} next tasks match`);
       }

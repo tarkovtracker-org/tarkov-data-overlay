@@ -30,7 +30,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, isAbsolute } from 'path';
-import { findReferenceFile, modeFromRequestUrl } from './eft-compare.js';
+import { findReferenceFile, firstNumber, modeFromRequestUrl } from './eft-compare.js';
 import { isDirectExecution, printProgress, printSuccess, printError } from '../src/lib/index.js';
 import type { GameMode } from '../src/lib/types.js';
 
@@ -209,15 +209,17 @@ function normalizeQuest(raw: Record<string, any>, langs: string[] = []): CleanQu
     }
   }
 
-  const minPlayerLevel = start
-    .filter((c) => c?.conditionType === 'Level')
-    .map((c) => asNumber(c.value))
-    .find((v) => v !== undefined);
+  const minPlayerLevel = firstNumber(
+    start,
+    (c) => c?.conditionType === 'Level',
+    (c) => c.value
+  );
 
-  const experience = (raw.rewards?.Success ?? [])
-    .filter((r: any) => r?.type === 'Experience')
-    .map((r: any) => asNumber(r.value))
-    .find((v: number | undefined) => v !== undefined);
+  const experience = firstNumber(
+    (raw.rewards?.Success ?? []) as any[],
+    (r) => r?.type === 'Experience',
+    (r) => r.value
+  );
 
   const requires: CleanQuestRequirement[] = start
     .filter((c) => c?.conditionType === 'Quest')

@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  "ignorePatterns": [
+    // Static asset served by monitor/server.js and referenced from HTML
+    // <link rel="stylesheet" href="/styles.css">, not imported as a module.
+    "monitor/public/styles.css"
+  ],
+  "ignoreUnresolvedImports": [
+    // Browser asset reference in the monitor's HTML templates (root-absolute
+    // URL served by monitor/server.js), not a module specifier.
+    "/styles.css"
+  ]
+}

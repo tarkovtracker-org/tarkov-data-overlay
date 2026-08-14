@@ -30,6 +30,12 @@ import type {
   TaskRequirement,
   GameMode,
 } from './types.js';
+import {
+  adaptReward as adaptSharedReward,
+  buildTaskContext as buildSharedTaskContext,
+  fetchCached,
+  resolveReferenceMatrix,
+} from './tarkov-api-shared.cjs';
 
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const DEFAULT_MAX_RETRIES = 3;
@@ -74,7 +80,9 @@ function stringId(value: unknown): string | undefined {
  * Remove undefined values so adapted objects compare cleanly against overrides.
  */
 function compact<T extends JsonRecord>(value: T): T {
-  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined)) as T;
+  return Object.fromEntries(
+    Object.entries(value).filter(([key, entry]) => !UNSAFE_KEYS.has(key) && entry !== undefined)
+  ) as T;
 }
 
 /**
@@ -151,14 +159,7 @@ async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
 
 /** Fetch an endpoint envelope, deduping concurrent reads within one call. */
 function fetchEnvelope(cache: EndpointCache, path: string): Promise<Envelope> {
-  const existing = cache.get(path);
-  if (existing) return existing;
-  const promise = fetchEnvelopeOnce(path).catch((error) => {
-    cache.delete(path);
-    throw error;
-  });
-  cache.set(path, promise);
-  return promise;
+  return fetchCached(cache, path, fetchEnvelopeOnce);
 }
 
 /** Fetch an `_<locale>` endpoint and return its flat translation map. */
@@ -212,15 +213,7 @@ function resolveItemRefs(value: unknown, ctx: Context): TaskItemRef[] | undefine
 }
 
 function resolveItemRefMatrix(value: unknown, ctx: Context): TaskItemRef[][] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((group) => {
-      const list = Array.isArray(group) ? group : [group];
-      return list
-        .map((entry) => resolveItemRef(entry, ctx))
-        .filter((entry): entry is TaskItemRef => Boolean(entry));
-    })
-    .filter((group) => group.length > 0);
+  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
 }
 
 function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
@@ -305,29 +298,12 @@ function adaptObjective(raw: JsonRecord, ctx: Context): TaskObjective {
 }
 
 function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
-  if (!isRecord(raw)) return undefined;
-  return compact({
-    ...raw,
-    items: Array.isArray(raw.items)
-      ? raw.items
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, item: resolveItemRef(entry.item, ctx) }))
-      : undefined,
-    traderStanding: Array.isArray(raw.traderStanding)
-      ? raw.traderStanding
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) }))
-      : undefined,
-    offerUnlock: Array.isArray(raw.offerUnlock)
-      ? raw.offerUnlock.filter(isRecord).map((entry) =>
-          compact({
-            ...entry,
-            trader: resolveTraderRef(entry.trader, ctx),
-            item: resolveItemRef(entry.item, ctx),
-          })
-        )
-      : undefined,
-  }) as unknown as TaskRewards;
+  return adaptSharedReward<TaskRewards, Context>(raw, ctx, {
+    isRecord,
+    compact,
+    resolveItemRef,
+    resolveTraderRef,
+  });
 }
 
 function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
@@ -373,32 +349,12 @@ async function buildContext(
   mode: GameMode,
   tasksData: JsonRecord
 ): Promise<Context> {
-  const [itemsEnvelope, mapsEnvelope, tradersEnvelope, itemsEn, tasksEn, mapsEn, tradersEn] =
-    await Promise.all([
-      fetchEnvelope(cache, `${mode}/items`),
-      fetchEnvelope(cache, `${mode}/maps`),
-      fetchEnvelope(cache, `${mode}/traders`),
-      fetchTranslations(cache, mode, 'items'),
-      fetchTranslations(cache, mode, 'tasks'),
-      fetchTranslations(cache, mode, 'maps'),
-      fetchTranslations(cache, mode, 'traders'),
-    ]);
-
-  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
-  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
-
-  return {
-    itemsById: toLookup(itemsData.items),
-    questItemsById: toLookup(tasksData.questItems),
-    tasksById: toLookup(tasksData.tasks),
-    mapsById: toLookup(mapsData.maps),
-    tradersById: toLookup(tradersEnvelope.data),
-    prestigeById: toLookup(tasksData.prestige),
-    itemsEn,
-    tasksEn,
-    mapsEn,
-    tradersEn,
-  };
+  return buildSharedTaskContext<Envelope, GameMode>(cache, mode, tasksData, {
+    fetchEnvelope,
+    fetchTranslations,
+    isRecord,
+    toLookup,
+  });
 }
 
 /**

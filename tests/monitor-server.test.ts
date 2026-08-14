@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
+import vm from 'node:vm';
 
 // NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
@@ -32,7 +33,7 @@ try {
   }
 }
 
-const { readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
+const { buildViewParams, readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -56,6 +57,10 @@ describe('module import sanity', () => {
     expect(typeof mod.formatValue).toBe('function');
     expect(typeof mod.normalizeView).toBe('function');
     expect(typeof mod.normalizeMode).toBe('function');
+    expect(typeof mod.normalizeLocale).toBe('function');
+    expect(typeof mod.getSummaryKey).toBe('function');
+    expect(typeof mod.parseViewParams).toBe('function');
+    expect(typeof mod.handleResponseFailure).toBe('function');
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
@@ -97,6 +102,10 @@ const {
   formatValue,
   normalizeView,
   normalizeMode,
+  normalizeLocale,
+  getSummaryKey,
+  parseViewParams,
+  handleResponseFailure,
   getLatestTagVersion,
   isVersionStale,
   isRebuildEnabled,
@@ -499,6 +508,22 @@ describe('normalizeMode', () => {
   });
 });
 
+describe('locale request parsing', () => {
+  it('defers locale normalization until overlay locales are available', () => {
+    const previousData = overlayState.data;
+    try {
+      overlayState.data = null;
+      const parsed = parseViewParams(new URL('http://localhost/latest?view=locales&locale=fr'));
+      expect(parsed).not.toHaveProperty('locale');
+
+      overlayState.data = { locales: { fr: {} } };
+      expect(normalizeLocale('fr')).toBe('fr');
+    } finally {
+      overlayState.data = previousData;
+    }
+  });
+});
+
 describe('isVersionStale', () => {
   it('flags loaded builds behind the latest release', () => {
     expect(isVersionStale('1.0.0', '1.56')).toBe(true);
@@ -592,6 +617,66 @@ describe('createSection / pushRow', () => {
 });
 
 describe('monitor hardening', () => {
+  it('keeps mode and locale distinct in summary subscription keys', () => {
+    expect(getSummaryKey('locales', 'pve', 'fr')).toBe('locales:pve:fr');
+    expect(getSummaryKey('locales', '', 'fr')).toBe('locales::fr');
+  });
+
+  it('closes failed asynchronous responses without throwing', () => {
+    const sent: Array<{ status?: number; body?: string }> = [];
+    const unsentResponse = {
+      destroyed: false,
+      writableEnded: false,
+      headersSent: false,
+      setHeaders: () => {},
+      writeHead: (status: number) => sent.push({ status }),
+      end: (body?: string) => sent.push({ body }),
+      destroy: () => {
+        unsentResponse.destroyed = true;
+      },
+    };
+    handleResponseFailure(unsentResponse);
+    expect(sent).toEqual([{ status: 500 }, { body: 'Internal server error' }]);
+
+    const ended: Array<string | undefined> = [];
+    handleResponseFailure({
+      destroyed: false,
+      writableEnded: false,
+      headersSent: true,
+      end: (body?: string) => ended.push(body),
+    });
+    expect(ended).toEqual([undefined]);
+
+    const failedResponse = {
+      destroyed: false,
+      writableEnded: false,
+      headersSent: false,
+      setHeaders: () => {},
+      writeHead: () => {
+        throw new Error('socket closed');
+      },
+      end: () => {},
+      destroy: () => {
+        failedResponse.destroyed = true;
+      },
+    };
+    expect(() => handleResponseFailure(failedResponse)).not.toThrow();
+    expect(failedResponse.destroyed).toBe(true);
+
+    const closedCalls: string[] = [];
+    const closedResponse = {
+      destroyed: true,
+      writableEnded: false,
+      headersSent: false,
+      writeHead: () => closedCalls.push('writeHead'),
+      end: () => closedCalls.push('end'),
+      destroy: () => closedCalls.push('destroy'),
+    };
+    handleResponseFailure(closedResponse);
+    handleResponseFailure({ ...closedResponse, destroyed: false, writableEnded: true });
+    expect(closedCalls).toEqual([]);
+  });
+
   it('rejects unsafe numeric environment values', () => {
     expect(readPositiveInteger('25', 10)).toBe(25);
     expect(readPositiveInteger('0', 10)).toBe(10);
@@ -602,6 +687,12 @@ describe('monitor hardening', () => {
     expect(readPort('65536', 3000)).toBe(3000);
     expect(readTimerMilliseconds('2147483647', 120000)).toBe(2147483647);
     expect(readTimerMilliseconds('2147483648', 120000)).toBe(120000);
+  });
+
+  it('builds view-specific query parameters from the shared configuration', () => {
+    expect(buildViewParams('tasks', 'pve', 'en').toString()).toBe('view=tasks&mode=pve');
+    expect(buildViewParams('locales', 'regular', 'en').toString()).toBe('view=locales&locale=en');
+    expect(buildViewParams('items', 'pve', 'en').toString()).toBe('view=items');
   });
 
   it('only enables rebuilds for the default overlay path', () => {
@@ -707,6 +798,54 @@ describe('HTTP — real monitor/server.js handlers', () => {
     apiState['pvp-season'].updatedAt = null;
     apiState['pvp-season'].error = null;
     return new Promise<void>((resolve) => server.close(resolve));
+  });
+
+  // -- static assets ---------------------------------------------------------
+
+  it('GET /view-config.js — serves the shared browser configuration', async () => {
+    const res = await fetch(`${baseUrl}/view-config.js`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/javascript');
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+
+    const source = await res.text();
+    const context: {
+      window: { viewMeta?: typeof configModule };
+      module: { exports: typeof configModule | Record<string, never> };
+    } = { window: {}, module: { exports: {} } };
+    vm.runInNewContext(source, context);
+
+    expect(context.window.viewMeta).toBe(context.module.exports);
+    expect(context.window.viewMeta?.DEFAULT_MODES).toEqual(['regular', 'pve', 'pvp-season']);
+    expect(Object.keys(context.window.viewMeta?.VIEW_CONFIG ?? {})).toEqual(
+      Object.keys(VIEW_CONFIG)
+    );
+  });
+
+  it('GET /app.js — reports a visible error when shared configuration is unavailable', async () => {
+    const res = await fetch(`${baseUrl}/app.js`);
+    expect(res.status).toBe(200);
+    const source = await res.text();
+
+    const staleViewMeta = {
+      DEFAULT_MODES: ['regular', 'pve', 'pvp-season'],
+      MODE_LABELS: {},
+      VIEW_CONFIG: { tasks: { requiresMode: true } },
+    };
+    for (const viewMeta of [undefined, staleViewMeta]) {
+      const errorBanner = { textContent: '', style: { display: 'none' } };
+      const context = {
+        document: {
+          getElementById: (id: string) => (id === 'error-banner' ? errorBanner : null),
+        },
+        window: { viewMeta },
+      };
+
+      expect(() => vm.runInNewContext(source, context)).toThrow(/configuration failed to load/i);
+      expect(errorBanner.textContent).toMatch(/configuration failed to load/i);
+      expect(errorBanner.style.display).toBe('block');
+    }
   });
 
   // -- /latest ---------------------------------------------------------------

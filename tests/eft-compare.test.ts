@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mkdtempSync, writeFileSync, utimesSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, utimesSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -7,7 +7,10 @@ import {
   compare,
   crossCheckOverrides,
   findReferenceFile,
+  firstNumber,
+  loadReferenceTasks,
   requireMatchingReferenceMode,
+  writeJsonOutput,
 } from '../scripts/eft-compare.js';
 import type { TaskData } from '../src/lib/index.js';
 
@@ -66,6 +69,60 @@ describe('eft-compare', () => {
       },
     ];
     expect(compare(eft, api).discrepancies).toHaveLength(0);
+  });
+});
+
+describe('shared EFT helpers', () => {
+  it('returns the first finite number from a matching item', () => {
+    const rows = [
+      { kind: 'skip', value: 1 },
+      { kind: 'match', value: Number.NaN },
+      { kind: 'match', value: 'invalid' },
+      { kind: 'match', value: 7 },
+    ];
+    expect(
+      firstNumber(
+        undefined,
+        () => true,
+        () => 1
+      )
+    ).toBeUndefined();
+    expect(
+      firstNumber(
+        rows,
+        (row) => row.kind === 'missing',
+        (row) => row.value
+      )
+    ).toBeUndefined();
+    expect(
+      firstNumber(
+        rows,
+        (row) => row.kind === 'match',
+        (row) => row.value
+      )
+    ).toBe(7);
+  });
+
+  it('throws when the optional local reference is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-empty-'));
+    try {
+      expect(() =>
+        loadReferenceTasks({ eftDir: dir, mode: 'pve', flags: new Set() }, 'Capture quests first')
+      ).toThrow(/Capture quests first/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('serializes JSON output when a path is requested', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-output-'));
+    const output = join(dir, 'results.json');
+    try {
+      writeJsonOutput(output, [{ id: 'task1', count: 7 }], 'results');
+      expect(JSON.parse(readFileSync(output, 'utf8'))).toEqual([{ id: 'task1', count: 7 }]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 

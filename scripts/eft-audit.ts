@@ -38,7 +38,7 @@
  * --json for machine-readable output.
  */
 
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
 
 import {
@@ -59,12 +59,7 @@ import {
   type TaskData,
   type TaskOverride,
 } from '../src/lib/index.js';
-import {
-  loadEftTasks,
-  parseModeArgs,
-  requireMatchingReferenceMode,
-  type EftTask,
-} from './eft-compare.js';
+import { loadReferenceTasks, parseModeArgs, writeJsonOutput, type EftTask } from './eft-compare.js';
 
 type Verdict = 'GAP' | 'STALE' | 'CONFLICT' | 'OK';
 type Field = 'experience' | 'minPlayerLevel' | `objective[${string}].count`;
@@ -244,19 +239,14 @@ async function main(): Promise<void> {
     const opts = parseModeArgs(process.argv.slice(2));
 
     printProgress(`Loading quest reference file from ${opts.eftDir}...`);
-    const eftTasks = loadEftTasks(opts.eftDir, opts.mode);
-    if (!eftTasks) {
-      printError(
-        `No quest reference file found in ${opts.eftDir}`,
-        new Error('place a quest reference file in eft/ to run the audit')
-      );
-      process.exit(1);
-    }
+    const { tasks: eftTasks, refMode } = loadReferenceTasks(
+      opts,
+      'Place a quest reference file in eft/ to run the audit.'
+    );
     printSuccess(`Loaded ${eftTasks.size} quests from the reference file`);
 
     // The reference file is mode-specific; auditing across modes yields
     // false GAP/CONFLICT rows, so refuse a mismatch.
-    const refMode = requireMatchingReferenceMode(opts.eftDir, opts.mode);
     if (!refMode) {
       console.log(dim(`  (could not detect reference mode; trusting --mode ${opts.mode})`));
     }
@@ -272,8 +262,7 @@ async function main(): Promise<void> {
     printReport(rows, opts.mode);
 
     if (opts.jsonOut) {
-      writeFileSync(opts.jsonOut, JSON.stringify(rows, null, 2));
-      printSuccess(`Wrote ${rows.length} audit rows to ${opts.jsonOut}`);
+      writeJsonOutput(opts.jsonOut, rows, 'audit rows');
     }
 
     process.exit(0);

@@ -160,6 +160,24 @@ export function isObjectiveSuppressed(
 }
 
 /**
+ * Yield every (taskId, fields) pair across the overlay files that apply to
+ * `scope`, skipping entries whose value is not an object.
+ *
+ * Shared by {@link loadSuppressedFields} and
+ * {@link loadTaskRequirementOverrides} so the file-walking and skip logic
+ * stays in one place.
+ */
+function* overlayFields(scope: SuppressionScope): Generator<[string, Record<string, unknown>]> {
+  for (const overlayFile of taskOverlayFiles(scope)) {
+    const overlay = readOverlayFile(overlayFile);
+    for (const [taskId, fields] of Object.entries(overlay)) {
+      if (!fields || typeof fields !== 'object') continue;
+      yield [taskId, fields];
+    }
+  }
+}
+
+/**
  * Load suppressed fields from both:
  * 1. Tasks overlay (API was wrong, we corrected it)
  * 2. Wiki-incorrect suppressions (API is correct, wiki is wrong)
@@ -173,98 +191,91 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
   let wikiIncorrectCount = 0;
 
   // Load overlay files (corrections where API was wrong), base + in-scope modes.
-  for (const overlayFile of taskOverlayFiles(scope)) {
-    const overlay = readOverlayFile(overlayFile);
+  for (const [taskId, fields] of overlayFields(scope)) {
+    for (const field of Object.keys(fields)) {
+      const beforeSize = suppressed.size;
 
-    for (const [taskId, fields] of Object.entries(overlay)) {
-      if (!fields || typeof fields !== 'object') continue;
-      for (const field of Object.keys(fields)) {
-        const beforeSize = suppressed.size;
-
-        // Map overlay field names to discrepancy field names
-        if (field === 'objectives') {
-          const objectiveOverrides = (fields as Record<string, unknown>)[field];
-          if (objectiveOverrides && typeof objectiveOverrides === 'object') {
-            for (const objOverride of Object.values(
-              objectiveOverrides as Record<string, unknown>
-            )) {
-              if (!objOverride || typeof objOverride !== 'object') continue;
-              if ('count' in (objOverride as Record<string, unknown>)) {
-                suppressed.add(`${taskId}:objectives.count`);
-              }
-              if ('description' in (objOverride as Record<string, unknown>)) {
-                suppressed.add(`${taskId}:objectives.description`);
-              }
-              if ('maps' in (objOverride as Record<string, unknown>)) {
-                suppressed.add(`${taskId}:objectives.maps`);
-              }
-              const itemOverrideKeys = [
-                'items',
-                'usingWeapon',
-                'usingWeaponMods',
-                'useAny',
-                'containsAll',
-                'markerItem',
-                'questItem',
-                'item',
-                'requiredKeys',
-              ];
-              if (itemOverrideKeys.some((key) => key in (objOverride as Record<string, unknown>))) {
-                suppressed.add(`${taskId}:objectives.items`);
-              }
+      // Map overlay field names to discrepancy field names
+      if (field === 'objectives') {
+        const objectiveOverrides = (fields as Record<string, unknown>)[field];
+        if (objectiveOverrides && typeof objectiveOverrides === 'object') {
+          for (const objOverride of Object.values(objectiveOverrides as Record<string, unknown>)) {
+            if (!objOverride || typeof objOverride !== 'object') continue;
+            if ('count' in (objOverride as Record<string, unknown>)) {
+              suppressed.add(`${taskId}:objectives.count`);
             }
-          } else {
-            suppressed.add(`${taskId}:objectives.count`);
+            if ('description' in (objOverride as Record<string, unknown>)) {
+              suppressed.add(`${taskId}:objectives.description`);
+            }
+            if ('maps' in (objOverride as Record<string, unknown>)) {
+              suppressed.add(`${taskId}:objectives.maps`);
+            }
+            const itemOverrideKeys = [
+              'items',
+              'usingWeapon',
+              'usingWeaponMods',
+              'useAny',
+              'containsAll',
+              'markerItem',
+              'questItem',
+              'item',
+              'requiredKeys',
+            ];
+            if (itemOverrideKeys.some((key) => key in (objOverride as Record<string, unknown>))) {
+              suppressed.add(`${taskId}:objectives.items`);
+            }
           }
-        } else if (
-          field === 'experience' ||
-          field === 'minPlayerLevel' ||
-          field === 'taskRequirements' ||
-          field === 'reputation' ||
-          field === 'money' ||
-          field === 'finishRewards' ||
-          field === 'map'
-        ) {
-          suppressed.add(`${taskId}:${field}`);
+        } else {
+          suppressed.add(`${taskId}:objectives.count`);
+        }
+      } else if (
+        field === 'experience' ||
+        field === 'minPlayerLevel' ||
+        field === 'taskRequirements' ||
+        field === 'reputation' ||
+        field === 'money' ||
+        field === 'finishRewards' ||
+        field === 'map'
+      ) {
+        suppressed.add(`${taskId}:${field}`);
 
-          if (field === 'finishRewards' && fields && typeof fields === 'object') {
-            const finishRewards = (fields as Record<string, unknown>)[field];
-            if (finishRewards && typeof finishRewards === 'object') {
-              const rewards = finishRewards as Record<string, unknown>;
-              const items = Array.isArray(rewards.items) ? rewards.items : [];
-              const hasRoubles = items.some((item) => {
-                if (!item || typeof item !== 'object') return false;
-                const rewardItem = item as Record<string, unknown>;
-                const itemInfo = rewardItem.item as Record<string, unknown> | undefined;
-                const itemName = typeof itemInfo?.name === 'string' ? itemInfo.name : '';
-                const itemId = typeof itemInfo?.id === 'string' ? itemInfo.id : '';
-                return itemName === 'Roubles' || itemId === '5449016a4bdc2d6f028b456f';
-              });
-              if (hasRoubles) {
-                suppressed.add(`${taskId}:money`);
-              }
+        if (field === 'finishRewards' && fields && typeof fields === 'object') {
+          const finishRewards = (fields as Record<string, unknown>)[field];
+          if (finishRewards && typeof finishRewards === 'object') {
+            const rewards = finishRewards as Record<string, unknown>;
+            const items = Array.isArray(rewards.items) ? rewards.items : [];
+            const hasRoubles = items.some((item) => {
+              if (!item || typeof item !== 'object') return false;
+              const rewardItem = item as Record<string, unknown>;
+              const itemInfo = rewardItem.item as Record<string, unknown> | undefined;
+              const itemName = typeof itemInfo?.name === 'string' ? itemInfo.name : '';
+              const itemId = typeof itemInfo?.id === 'string' ? itemInfo.id : '';
+              return itemName === 'Roubles' || itemId === '5449016a4bdc2d6f028b456f';
+            });
+            if (hasRoubles) {
+              suppressed.add(`${taskId}:money`);
+            }
 
-              const traderStanding = Array.isArray(rewards.traderStanding)
-                ? rewards.traderStanding
-                : [];
-              for (const entry of traderStanding) {
-                if (!entry || typeof entry !== 'object') continue;
-                const traderEntry = entry as Record<string, unknown>;
-                const trader = traderEntry.trader as Record<string, unknown> | undefined;
-                const traderName = typeof trader?.name === 'string' ? trader.name : '';
-                if (traderName) {
-                  suppressed.add(`${taskId}:reputation.${traderName}`);
-                }
+            const traderStanding = Array.isArray(rewards.traderStanding)
+              ? rewards.traderStanding
+              : [];
+            for (const entry of traderStanding) {
+              if (!entry || typeof entry !== 'object') continue;
+              const traderEntry = entry as Record<string, unknown>;
+              const trader = traderEntry.trader as Record<string, unknown> | undefined;
+              const traderName = typeof trader?.name === 'string' ? trader.name : '';
+              if (traderName) {
+                suppressed.add(`${taskId}:reputation.${traderName}`);
               }
             }
           }
         }
-
-        // Also add the raw field name for flexibility
-        suppressed.add(`${taskId}:${field}`);
-
-        overlayCount += suppressed.size - beforeSize;
       }
+
+      // Also add the raw field name for flexibility
+      suppressed.add(`${taskId}:${field}`);
+
+      overlayCount += suppressed.size - beforeSize;
     }
   }
 
@@ -296,15 +307,10 @@ export function loadTaskRequirementOverrides(
   const overrides = new Map<string, TaskRequirement[]>();
 
   // Later files win, matching the documented base -> mode merge precedence.
-  for (const overlayFile of taskOverlayFiles(scope)) {
-    const overlay = readOverlayFile(overlayFile);
-
-    for (const [taskId, fields] of Object.entries(overlay)) {
-      if (!fields || typeof fields !== 'object') continue;
-      const reqs = (fields as Record<string, unknown>).taskRequirements;
-      if (Array.isArray(reqs)) {
-        overrides.set(taskId, reqs as TaskRequirement[]);
-      }
+  for (const [taskId, fields] of overlayFields(scope)) {
+    const reqs = fields.taskRequirements;
+    if (Array.isArray(reqs)) {
+      overrides.set(taskId, reqs as TaskRequirement[]);
     }
   }
 

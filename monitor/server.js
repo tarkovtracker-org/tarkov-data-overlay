@@ -22,6 +22,12 @@ const {
   pushRow,
   valuesEqual,
 } = require("./lib/sections.js");
+const {
+  adaptReward: adaptSharedReward,
+  buildTaskContext: buildSharedTaskContext,
+  fetchCached,
+  resolveReferenceMatrix,
+} = require("../src/lib/tarkov-api-shared.cjs");
 
 const PORT = config.port;
 const PUBLIC_DIR = config.publicDir;
@@ -48,7 +54,7 @@ const apiState = Object.fromEntries(
 
 const summaryByKey = new Map();
 const readLocks = {
-  overlay: { isReading: false, pendingRead: false },
+  overlay: { isReading: false, pendingRead: false, promise: null },
   ...Object.fromEntries(
     DEFAULT_MODES.map((mode) => [mode, { isReading: false, pendingRead: false }])
   ),
@@ -221,6 +227,9 @@ function getRequestToken(req, requestUrl) {
 
 async function refreshOverlayIfStale() {
   if (isRemotePath(OVERLAY_PATH)) {
+    if (!overlayState.data) {
+      await refreshOverlay();
+    }
     return;
   }
 
@@ -364,9 +373,31 @@ function responseHeaders(contentType, extra = {}) {
   };
 }
 
+function applyResponseHeaders(res, contentType, extra = {}) {
+  res.setHeaders(new Headers(responseHeaders(contentType, extra)));
+}
+
 function send(res, status, body, contentType = "text/plain; charset=utf-8") {
-  res.writeHead(status, responseHeaders(contentType));
+  applyResponseHeaders(res, contentType);
+  res.writeHead(status);
   res.end(body);
+}
+
+function handleResponseFailure(res) {
+  if (res.destroyed || res.writableEnded) {
+    return;
+  }
+  try {
+    if (res.headersSent) {
+      res.end();
+    } else {
+      send(res, 500, "Internal server error");
+    }
+  } catch {
+    if (!res.destroyed) {
+      res.destroy();
+    }
+  }
 }
 
 function safeJoin(base, requestPath) {
@@ -407,8 +438,8 @@ function serveStatic(res, requestPath) {
   });
 }
 
-function getSummaryKey(view, mode) {
-  return `${view}:${mode || ""}`;
+function getSummaryKey(view, mode = "", locale = "") {
+  return `${view}:${mode}:${locale}`;
 }
 
 function normalizeView(view) {
@@ -435,6 +466,26 @@ function normalizeLocale(locale) {
     return locale;
   }
   return available[0] || "en";
+}
+
+function parseViewParams(requestUrl) {
+  const view = normalizeView(
+    requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
+  );
+  const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+  return { view, mode, config: VIEW_CONFIG[view] };
+}
+
+async function resolveViewParams(requestUrl) {
+  const params = parseViewParams(requestUrl);
+  await refreshOverlayIfStale().catch(() => {});
+  const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
+  const scope = {
+    mode: params.config?.requiresMode ? params.mode : "",
+    locale: params.config?.requiresLocale ? locale : "",
+  };
+  const key = getSummaryKey(params.view, scope.mode, scope.locale);
+  return { ...params, locale, key };
 }
 
 function removeClient(key, client) {
@@ -496,20 +547,29 @@ async function refreshOverlay() {
   const lock = readLocks.overlay;
   if (lock.isReading) {
     lock.pendingRead = true;
+    await lock.promise;
     return;
   }
+
   lock.isReading = true;
+  lock.promise = (async () => {
+    try {
+      const { data, updatedAt } = await loadOverlay();
+      overlayState.data = data;
+      overlayState.updatedAt = updatedAt;
+      overlayState.error = null;
+      rebuildSummaries();
+    } catch (error) {
+      overlayState.error = error.message || "Unable to read overlay";
+      rebuildSummaries();
+    }
+  })();
+
   try {
-    const { data, updatedAt } = await loadOverlay();
-    overlayState.data = data;
-    overlayState.updatedAt = updatedAt;
-    overlayState.error = null;
-    rebuildSummaries();
-  } catch (error) {
-    overlayState.error = error.message || "Unable to read overlay";
-    rebuildSummaries();
+    await lock.promise;
   } finally {
     lock.isReading = false;
+    lock.promise = null;
     if (lock.pendingRead) {
       lock.pendingRead = false;
       refreshOverlay().catch(() => {});
@@ -618,14 +678,7 @@ async function fetchEnvelopeOnce(path) {
 // Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
 // within one refresh are deduped, while each poll cycle fetches fresh data.
 function fetchEnvelope(cache, path) {
-  const existing = cache.get(path);
-  if (existing) return existing;
-  const promise = fetchEnvelopeOnce(path).catch((error) => {
-    cache.delete(path);
-    throw error;
-  });
-  cache.set(path, promise);
-  return promise;
+  return fetchCached(cache, path, fetchEnvelopeOnce);
 }
 
 async function fetchTranslations(cache, mode, endpoint) {
@@ -653,13 +706,7 @@ function resolveItemRefs(value, ctx) {
 }
 
 function resolveItemRefMatrix(value, ctx) {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((group) => {
-      const list = Array.isArray(group) ? group : [group];
-      return list.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
-    })
-    .filter((group) => group.length > 0);
+  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
 }
 
 function resolveMapRef(value, ctx) {
@@ -730,29 +777,7 @@ function adaptObjective(raw, ctx) {
 }
 
 function adaptReward(raw, ctx) {
-  if (!isRecord(raw)) return undefined;
-  return compact({
-    ...raw,
-    items: Array.isArray(raw.items)
-      ? raw.items
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, item: resolveItemRef(entry.item, ctx) }))
-      : undefined,
-    traderStanding: Array.isArray(raw.traderStanding)
-      ? raw.traderStanding
-          .filter(isRecord)
-          .map((entry) => compact({ ...entry, trader: resolveTraderRef(entry.trader, ctx) }))
-      : undefined,
-    offerUnlock: Array.isArray(raw.offerUnlock)
-      ? raw.offerUnlock.filter(isRecord).map((entry) =>
-          compact({
-            ...entry,
-            trader: resolveTraderRef(entry.trader, ctx),
-            item: resolveItemRef(entry.item, ctx),
-          })
-        )
-      : undefined,
-  });
+  return adaptSharedReward(raw, ctx, { isRecord, compact, resolveItemRef, resolveTraderRef });
 }
 
 function adaptTaskRequirement(raw, ctx) {
@@ -794,32 +819,12 @@ function adaptTask(raw, ctx) {
 }
 
 async function buildTaskContext(cache, mode, tasksData) {
-  const [itemsEnvelope, mapsEnvelope, tradersEnvelope, itemsEn, tasksEn, mapsEn, tradersEn] =
-    await Promise.all([
-      fetchEnvelope(cache, `${mode}/items`),
-      fetchEnvelope(cache, `${mode}/maps`),
-      fetchEnvelope(cache, `${mode}/traders`),
-      fetchTranslations(cache, mode, "items"),
-      fetchTranslations(cache, mode, "tasks"),
-      fetchTranslations(cache, mode, "maps"),
-      fetchTranslations(cache, mode, "traders"),
-    ]);
-
-  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
-  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
-
-  return {
-    itemsById: toLookup(itemsData.items),
-    questItemsById: toLookup(tasksData.questItems),
-    tasksById: toLookup(tasksData.tasks),
-    mapsById: toLookup(mapsData.maps),
-    tradersById: toLookup(tradersEnvelope.data),
-    prestigeById: toLookup(tasksData.prestige),
-    itemsEn,
-    tasksEn,
-    mapsEn,
-    tradersEn,
-  };
+  return buildSharedTaskContext(cache, mode, tasksData, {
+    fetchEnvelope,
+    fetchTranslations,
+    isRecord,
+    toLookup,
+  });
 }
 
 async function fetchApiTasks(mode) {
@@ -976,45 +981,32 @@ function buildSummary(view, mode, locale) {
 function rebuildSummaries() {
   Object.keys(VIEW_CONFIG).forEach((view) => {
     const config = VIEW_CONFIG[view];
-    if (config.requiresMode) {
-      supportedModes.forEach((mode) => {
-        const key = getSummaryKey(view, mode);
-        const summary = buildSummary(view, mode);
-        summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, mode, ""));
-      });
-      return;
-    }
-    if (config.requiresLocale) {
-      const locales = getAvailableLocales();
-      if (locales.length === 0) {
-        const key = getSummaryKey(view, "en");
-        const summary = buildSummary(view, "", "en");
-        summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, "", "en"));
-        return;
-      }
+    const modes = config.requiresMode ? supportedModes : [""];
+    const availableLocales = getAvailableLocales();
+    const locales = config.requiresLocale
+      ? availableLocales.length > 0
+        ? availableLocales
+        : ["en"]
+      : [""];
+
+    modes.forEach((mode) => {
       locales.forEach((locale) => {
-        const key = getSummaryKey(view, locale);
-        const summary = buildSummary(view, "", locale);
+        const key = getSummaryKey(view, mode, locale);
+        const summary = buildSummary(view, mode, locale);
         summaryByKey.set(key, summary);
-        broadcast(key, "summary", getState(view, "", locale));
+        broadcast(key, "summary", getState(view, mode, locale));
       });
-      return;
-    }
-    const key = getSummaryKey(view, "");
-    const summary = buildSummary(view, "", "");
-    summaryByKey.set(key, summary);
-    broadcast(key, "summary", getState(view, "", ""));
+    });
   });
 }
 
 function getState(view, mode, locale) {
   const config = VIEW_CONFIG[view];
-  const key = getSummaryKey(
-    view,
-    config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
-  );
+  const scope = {
+    mode: config?.requiresMode ? mode : "",
+    locale: config?.requiresLocale ? locale : "",
+  };
+  const key = getSummaryKey(view, scope.mode, scope.locale);
   const summary = summaryByKey.get(key) || { sections: [], error: null };
   const meta = overlayState.data?.$meta || null;
   const latestVersion = getLatestTagVersion();
@@ -1187,15 +1179,8 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/latest") {
-    const view = normalizeView(
-      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
-    );
-    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
-    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-    const config = VIEW_CONFIG[view];
-    refreshOverlayIfStale()
-      .catch(() => {})
-      .finally(() => {
+    resolveViewParams(requestUrl)
+      .then(({ view, mode, locale, config }) => {
         send(
           res,
           200,
@@ -1204,7 +1189,8 @@ const server = http.createServer((req, res) => {
           ),
           "application/json; charset=utf-8"
         );
-      });
+      })
+      .catch(() => handleResponseFailure(res));
     return;
   }
 
@@ -1244,64 +1230,53 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    const view = normalizeView(
-      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
-    );
-    const mode = normalizeMode(requestUrl.searchParams.get("mode"));
-    const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-    const config = VIEW_CONFIG[view];
-    const key = getSummaryKey(
-      view,
-      config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
-    );
-    refreshOverlayIfStale()
-      .catch(() => {})
-      .finally(() => {
-        res.writeHead(200, responseHeaders("text/event-stream", { Connection: "keep-alive" }));
-        const clients = clientsByKey.get(key) || new Set();
-        clientsByKey.set(key, clients);
-        clients.add(res);
-        let closed = false;
-        let keepAlive = null;
-        const cleanup = () => {
-          if (closed) {
-            return;
-          }
-          closed = true;
-          if (keepAlive) {
-            clearInterval(keepAlive);
-          }
-          removeClient(key, res);
-          req.off("close", cleanup);
-          res.off("close", cleanup);
-          res.off("finish", cleanup);
-          res.off("error", cleanup);
-        };
-
-        req.on("close", cleanup);
-        res.on("close", cleanup);
-        res.on("finish", cleanup);
-        res.on("error", cleanup);
-
-        if (
-          !writeSse(
-            key,
-            res,
-            `event: summary\ndata: ${JSON.stringify(
-              getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
-            )}\n\n`
-          )
-        ) {
-          cleanup();
+    resolveViewParams(requestUrl).then(({ view, mode, locale, config, key }) => {
+      applyResponseHeaders(res, "text/event-stream", { Connection: "keep-alive" });
+      res.writeHead(200);
+      const clients = clientsByKey.get(key) || new Set();
+      clientsByKey.set(key, clients);
+      clients.add(res);
+      let closed = false;
+      let keepAlive = null;
+      const cleanup = () => {
+        if (closed) {
           return;
         }
+        closed = true;
+        if (keepAlive) {
+          clearInterval(keepAlive);
+        }
+        removeClient(key, res);
+        req.off("close", cleanup);
+        res.off("close", cleanup);
+        res.off("finish", cleanup);
+        res.off("error", cleanup);
+      };
 
-        keepAlive = setInterval(() => {
-          if (!writeSse(key, res, ": keep-alive\n\n")) {
-            cleanup();
-          }
-        }, 15000);
-      });
+      req.on("close", cleanup);
+      res.on("close", cleanup);
+      res.on("finish", cleanup);
+      res.on("error", cleanup);
+
+      if (
+        !writeSse(
+          key,
+          res,
+          `event: summary\ndata: ${JSON.stringify(
+            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+          )}\n\n`
+        )
+      ) {
+        cleanup();
+        return;
+      }
+
+      keepAlive = setInterval(() => {
+        if (!writeSse(key, res, ": keep-alive\n\n")) {
+          cleanup();
+        }
+      }, 15000);
+    }).catch(() => handleResponseFailure(res));
     return;
   }
 
@@ -1375,6 +1350,10 @@ if (process.env.NODE_ENV === "test") {
     formatValue,
     normalizeView,
     normalizeMode,
+    normalizeLocale,
+    getSummaryKey,
+    parseViewParams,
+    handleResponseFailure,
     getLatestTagVersion,
     isVersionStale,
     rebuildOverlay,

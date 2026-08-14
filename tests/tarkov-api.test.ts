@@ -110,6 +110,27 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(tasks[0].objectives?.[0].description).toBe('Visit the place');
   });
 
+  it('drops unsafe object keys while adapting tasks and rewards', async () => {
+    const unsafeTask = JSON.parse(
+      '{"id":"t1","name":"t1 name","__proto__":"remote","constructor":"remote","prototype":"remote","startRewards":{"__proto__":"remote","constructor":"remote","prototype":"remote"}}'
+    );
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': { data: { tasks: { t1: unsafeTask } } },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(Object.hasOwn(task, '__proto__')).toBe(false);
+    expect(Object.hasOwn(task, 'constructor')).toBe(false);
+    expect(Object.hasOwn(task, 'prototype')).toBe(false);
+    expect(Object.hasOwn(task.startRewards ?? {}, '__proto__')).toBe(false);
+    expect(Object.hasOwn(task.startRewards ?? {}, 'constructor')).toBe(false);
+    expect(Object.hasOwn(task.startRewards ?? {}, 'prototype')).toBe(false);
+  });
+
   it('expands item id refs to {id,name,shortName} and preserves nested matrices', async () => {
     mockEndpoints(
       baseRoutes('regular', {
