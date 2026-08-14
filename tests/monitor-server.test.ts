@@ -57,6 +57,8 @@ describe('module import sanity', () => {
     expect(typeof mod.formatValue).toBe('function');
     expect(typeof mod.normalizeView).toBe('function');
     expect(typeof mod.normalizeMode).toBe('function');
+    expect(typeof mod.normalizeLocale).toBe('function');
+    expect(typeof mod.parseViewParams).toBe('function');
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
@@ -98,6 +100,8 @@ const {
   formatValue,
   normalizeView,
   normalizeMode,
+  normalizeLocale,
+  parseViewParams,
   getLatestTagVersion,
   isVersionStale,
   isRebuildEnabled,
@@ -500,6 +504,22 @@ describe('normalizeMode', () => {
   });
 });
 
+describe('locale request parsing', () => {
+  it('defers locale normalization until overlay locales are available', () => {
+    const previousData = overlayState.data;
+    try {
+      overlayState.data = null;
+      const parsed = parseViewParams(new URL('http://localhost/latest?view=locales&locale=fr'));
+      expect(parsed).not.toHaveProperty('locale');
+
+      overlayState.data = { locales: { fr: {} } };
+      expect(normalizeLocale('fr')).toBe('fr');
+    } finally {
+      overlayState.data = previousData;
+    }
+  });
+});
+
 describe('isVersionStale', () => {
   it('flags loaded builds behind the latest release', () => {
     expect(isVersionStale('1.0.0', '1.56')).toBe(true);
@@ -737,6 +757,31 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(Object.keys(context.window.viewMeta?.VIEW_CONFIG ?? {})).toEqual(
       Object.keys(VIEW_CONFIG)
     );
+  });
+
+  it('GET /app.js — reports a visible error when shared configuration is unavailable', async () => {
+    const res = await fetch(`${baseUrl}/app.js`);
+    expect(res.status).toBe(200);
+    const source = await res.text();
+
+    const staleViewMeta = {
+      DEFAULT_MODES: ['regular', 'pve', 'pvp-season'],
+      MODE_LABELS: {},
+      VIEW_CONFIG: { tasks: { requiresMode: true } },
+    };
+    for (const viewMeta of [undefined, staleViewMeta]) {
+      const errorBanner = { textContent: '', style: { display: 'none' } };
+      const context = {
+        document: {
+          getElementById: (id: string) => (id === 'error-banner' ? errorBanner : null),
+        },
+        window: { viewMeta },
+      };
+
+      expect(() => vm.runInNewContext(source, context)).toThrow(/configuration failed to load/i);
+      expect(errorBanner.textContent).toMatch(/configuration failed to load/i);
+      expect(errorBanner.style.display).toBe('block');
+    }
   });
 
   // -- /latest ---------------------------------------------------------------

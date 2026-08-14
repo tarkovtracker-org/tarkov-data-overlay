@@ -54,7 +54,7 @@ const apiState = Object.fromEntries(
 
 const summaryByKey = new Map();
 const readLocks = {
-  overlay: { isReading: false, pendingRead: false },
+  overlay: { isReading: false, pendingRead: false, promise: null },
   ...Object.fromEntries(
     DEFAULT_MODES.map((mode) => [mode, { isReading: false, pendingRead: false }])
   ),
@@ -227,6 +227,9 @@ function getRequestToken(req, requestUrl) {
 
 async function refreshOverlayIfStale() {
   if (isRemotePath(OVERLAY_PATH)) {
+    if (!overlayState.data) {
+      await refreshOverlay();
+    }
     return;
   }
 
@@ -448,8 +451,18 @@ function parseViewParams(requestUrl) {
     requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
   );
   const mode = normalizeMode(requestUrl.searchParams.get("mode"));
+  return { view, mode, config: VIEW_CONFIG[view] };
+}
+
+async function resolveViewParams(requestUrl) {
+  const params = parseViewParams(requestUrl);
+  await refreshOverlayIfStale().catch(() => {});
   const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
-  return { view, mode, locale, config: VIEW_CONFIG[view] };
+  const key = getSummaryKey(
+    params.view,
+    params.config?.requiresLocale ? locale : params.config?.requiresMode ? params.mode : ""
+  );
+  return { ...params, locale, key };
 }
 
 function removeClient(key, client) {
@@ -511,20 +524,29 @@ async function refreshOverlay() {
   const lock = readLocks.overlay;
   if (lock.isReading) {
     lock.pendingRead = true;
+    await lock.promise;
     return;
   }
+
   lock.isReading = true;
+  lock.promise = (async () => {
+    try {
+      const { data, updatedAt } = await loadOverlay();
+      overlayState.data = data;
+      overlayState.updatedAt = updatedAt;
+      overlayState.error = null;
+      rebuildSummaries();
+    } catch (error) {
+      overlayState.error = error.message || "Unable to read overlay";
+      rebuildSummaries();
+    }
+  })();
+
   try {
-    const { data, updatedAt } = await loadOverlay();
-    overlayState.data = data;
-    overlayState.updatedAt = updatedAt;
-    overlayState.error = null;
-    rebuildSummaries();
-  } catch (error) {
-    overlayState.error = error.message || "Unable to read overlay";
-    rebuildSummaries();
+    await lock.promise;
   } finally {
     lock.isReading = false;
+    lock.promise = null;
     if (lock.pendingRead) {
       lock.pendingRead = false;
       refreshOverlay().catch(() => {});
@@ -1147,19 +1169,16 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/latest") {
-    const { view, mode, locale, config } = parseViewParams(requestUrl);
-    refreshOverlayIfStale()
-      .catch(() => {})
-      .finally(() => {
-        send(
-          res,
-          200,
-          JSON.stringify(
-            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
-          ),
-          "application/json; charset=utf-8"
-        );
-      });
+    resolveViewParams(requestUrl).then(({ view, mode, locale, config }) => {
+      send(
+        res,
+        200,
+        JSON.stringify(
+          getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+        ),
+        "application/json; charset=utf-8"
+      );
+    });
     return;
   }
 
@@ -1199,59 +1218,52 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    const { view, mode, locale, config } = parseViewParams(requestUrl);
-    const key = getSummaryKey(
-      view,
-      config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
-    );
-    refreshOverlayIfStale()
-      .catch(() => {})
-      .finally(() => {
-        res.writeHead(200, responseHeaders("text/event-stream", { Connection: "keep-alive" }));
-        const clients = clientsByKey.get(key) || new Set();
-        clientsByKey.set(key, clients);
-        clients.add(res);
-        let closed = false;
-        let keepAlive = null;
-        const cleanup = () => {
-          if (closed) {
-            return;
-          }
-          closed = true;
-          if (keepAlive) {
-            clearInterval(keepAlive);
-          }
-          removeClient(key, res);
-          req.off("close", cleanup);
-          res.off("close", cleanup);
-          res.off("finish", cleanup);
-          res.off("error", cleanup);
-        };
-
-        req.on("close", cleanup);
-        res.on("close", cleanup);
-        res.on("finish", cleanup);
-        res.on("error", cleanup);
-
-        if (
-          !writeSse(
-            key,
-            res,
-            `event: summary\ndata: ${JSON.stringify(
-              getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
-            )}\n\n`
-          )
-        ) {
-          cleanup();
+    resolveViewParams(requestUrl).then(({ view, mode, locale, config, key }) => {
+      res.writeHead(200, responseHeaders("text/event-stream", { Connection: "keep-alive" }));
+      const clients = clientsByKey.get(key) || new Set();
+      clientsByKey.set(key, clients);
+      clients.add(res);
+      let closed = false;
+      let keepAlive = null;
+      const cleanup = () => {
+        if (closed) {
           return;
         }
+        closed = true;
+        if (keepAlive) {
+          clearInterval(keepAlive);
+        }
+        removeClient(key, res);
+        req.off("close", cleanup);
+        res.off("close", cleanup);
+        res.off("finish", cleanup);
+        res.off("error", cleanup);
+      };
 
-        keepAlive = setInterval(() => {
-          if (!writeSse(key, res, ": keep-alive\n\n")) {
-            cleanup();
-          }
-        }, 15000);
-      });
+      req.on("close", cleanup);
+      res.on("close", cleanup);
+      res.on("finish", cleanup);
+      res.on("error", cleanup);
+
+      if (
+        !writeSse(
+          key,
+          res,
+          `event: summary\ndata: ${JSON.stringify(
+            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+          )}\n\n`
+        )
+      ) {
+        cleanup();
+        return;
+      }
+
+      keepAlive = setInterval(() => {
+        if (!writeSse(key, res, ": keep-alive\n\n")) {
+          cleanup();
+        }
+      }, 15000);
+    });
     return;
   }
 
@@ -1325,6 +1337,8 @@ if (process.env.NODE_ENV === "test") {
     formatValue,
     normalizeView,
     normalizeMode,
+    normalizeLocale,
+    parseViewParams,
     getLatestTagVersion,
     isVersionStale,
     rebuildOverlay,

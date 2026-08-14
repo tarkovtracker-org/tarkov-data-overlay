@@ -24,10 +24,25 @@ let lastState = null;
 let filterText = "";
 let renderedSections = [];
 
-const viewMeta = window.viewMeta || {};
-const fallbackModes = viewMeta.DEFAULT_MODES || [];
-const fallbackModeLabels = viewMeta.MODE_LABELS || {};
-const viewConfig = viewMeta.VIEW_CONFIG || {};
+const viewMeta = window.viewMeta;
+if (
+  !viewMeta ||
+  !Array.isArray(viewMeta.DEFAULT_MODES) ||
+  !viewMeta.MODE_LABELS ||
+  !viewMeta.VIEW_CONFIG?.tasks ||
+  typeof viewMeta.buildViewParams !== "function"
+) {
+  const message = "Monitor configuration failed to load. Refresh the page to try again.";
+  if (errorBannerEl) {
+    errorBannerEl.textContent = message;
+    errorBannerEl.style.display = "block";
+  }
+  throw new Error(message);
+}
+
+const fallbackModes = viewMeta.DEFAULT_MODES;
+const fallbackModeLabels = viewMeta.MODE_LABELS;
+const viewConfig = viewMeta.VIEW_CONFIG;
 const buildViewParams = viewMeta.buildViewParams;
 
 const viewRoutes = {
