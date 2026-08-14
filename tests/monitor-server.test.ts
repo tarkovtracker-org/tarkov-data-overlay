@@ -613,8 +613,10 @@ describe('monitor hardening', () => {
   it('requires explicit opt-in before enabling rebuilds', () => {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousAllowRebuild = process.env.ALLOW_REBUILD;
+    const previousTargetOverlay = process.env.TARGET_OVERLAY;
     try {
       process.env.NODE_ENV = 'development';
+      process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
       delete process.env.ALLOW_REBUILD;
       expect(isRebuildEnabled()).toBe(false);
       process.env.ALLOW_REBUILD = 'true';
@@ -625,6 +627,11 @@ describe('monitor hardening', () => {
         delete process.env.ALLOW_REBUILD;
       } else {
         process.env.ALLOW_REBUILD = previousAllowRebuild;
+      }
+      if (previousTargetOverlay === undefined) {
+        delete process.env.TARGET_OVERLAY;
+      } else {
+        process.env.TARGET_OVERLAY = previousTargetOverlay;
       }
     }
   });
@@ -822,6 +829,18 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(modes).toContain('regular');
     expect(modes).toContain('pve');
     expect(modes).toContain('pvp-season');
+  });
+
+  it('GET /health — reports not ok when any supported mode is unhealthy', async () => {
+    const previousError = apiState.pve.error;
+    try {
+      apiState.pve.error = 'API unavailable';
+      const res = await fetch(`${baseUrl}/health`);
+      const data = await res.json();
+      expect(data.ok).toBe(false);
+    } finally {
+      apiState.pve.error = previousError;
+    }
   });
 
   // -- /events ---------------------------------------------------------------

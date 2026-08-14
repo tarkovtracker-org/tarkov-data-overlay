@@ -139,6 +139,7 @@ function isVersionStale(metaVersion, latestVersion) {
 // dist/overlay.json instead of only warning that it is stale. This mutating
 // endpoint is opt-in via ALLOW_REBUILD=true; REBUILD_TOKEN adds authentication.
 const REPO_ROOT = path.resolve(__dirname, "..");
+const DEFAULT_OVERLAY_PATH = path.resolve(REPO_ROOT, "dist/overlay.json");
 const rebuildState = { running: false, lastRun: null, lastSuccess: null, error: null };
 
 function rebuildOverlay() {
@@ -192,7 +193,8 @@ function isRebuildEnabled() {
   return (
     process.env.NODE_ENV !== "test" &&
     process.env.ALLOW_REBUILD === "true" &&
-    !isRemotePath(OVERLAY_PATH)
+    !isRemotePath(OVERLAY_PATH) &&
+    path.resolve(OVERLAY_PATH) === DEFAULT_OVERLAY_PATH
   );
 }
 
@@ -205,13 +207,13 @@ function safeTokenEqual(actual, expected) {
   );
 }
 
-function getRequestToken(req, requestUrl) {
+function getRequestToken(req) {
   const authorization = req.headers.authorization || "";
   const schemeEnd = authorization.indexOf(" ");
   if (schemeEnd > 0 && authorization.slice(0, schemeEnd).toLowerCase() === "bearer") {
     return authorization.slice(schemeEnd + 1).trim();
   }
-  return requestUrl.searchParams.get("token") || "";
+  return "";
 }
 
 async function refreshOverlayIfStale() {
@@ -1144,14 +1146,17 @@ const server = http.createServer((req, res) => {
       return;
     }
     const token = process.env.REBUILD_TOKEN;
-    if (token && !safeTokenEqual(getRequestToken(req, requestUrl), token)) {
-      send(
-        res,
-        401,
-        JSON.stringify({ ok: false, error: "Invalid rebuild token" }),
-        "application/json; charset=utf-8"
-      );
-      return;
+    if (typeof token === "string" && token.length > 0) {
+      const requestToken = getRequestToken(req);
+      if (!requestToken || !safeTokenEqual(requestToken, token)) {
+        send(
+          res,
+          401,
+          JSON.stringify({ ok: false, error: "Invalid rebuild token" }),
+          "application/json; charset=utf-8"
+        );
+        return;
+      }
     }
     rebuildOverlay()
       .then((result) => {
@@ -1210,7 +1215,10 @@ const server = http.createServer((req, res) => {
       res,
       200,
       JSON.stringify({
-        ok: !overlayState.error && apiHealth.some((entry) => !entry.error && entry.updatedAt),
+        ok:
+          !overlayState.error &&
+          apiHealth.length > 0 &&
+          apiHealth.every((entry) => !entry.error && entry.updatedAt),
         uptime: process.uptime(),
         modes: supportedModes,
         rebuild: {

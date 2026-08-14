@@ -35,10 +35,9 @@ ALLOW_REBUILD=true npm run monitor
 ```
 
 Set `REBUILD_TOKEN` as well when exposing the rebuild API to another trusted
-service. Authenticated callers can pass it as a bearer token (preferred) or as
-the `?token=` query parameter. `TARGET_OVERLAY` can point the monitor at a local
-overlay file or an HTTP(S) URL; rebuilds remain disabled for remote overlay
-targets.
+service. Authenticated callers must pass it in an `Authorization: Bearer …`
+header. Rebuilds target the default `dist/overlay.json` output; custom local
+and HTTP(S) overlay targets remain read-only.
 
 ## Maintenance
 
