@@ -265,10 +265,13 @@ accidentally strip the `level`/`reputation` discriminator that was present
 upstream:
 
 ```typescript
+// Call only when `override.traderRequirements !== undefined`: an absent field
+// means "no change", an empty array means "clear".
 function applyTraderRequirements(
   baseReqs: TraderRequirement[],
   overrideReqs: TraderRequirement[]
 ): TraderRequirement[] {
+  if (overrideReqs.length === 0) return []; // clears the upstream requirements
   const byId = new Map(baseReqs.map((r) => [r.id, r]));
   for (const req of overrideReqs) {
     byId.set(req.id, { ...byId.get(req.id), ...req }); // patch existing, else append
@@ -279,12 +282,15 @@ function applyTraderRequirements(
 
 - **Overlay-only requirements** carry a synthetic id prefixed `overlay.` (e.g.
   `overlay.<taskId>.<traderId>.<type>.<method>.<value>`), deterministic and
-  stable across builds. They never collide with a tarkov.dev 24-hex id, so they
-  append instead of patch.
+  stable across builds. They never collide with an upstream id (`<24-hex>`, or
+  the composite `<24-hex taskId>-<24-hex traderId>` tarkov.dev emits for some
+  reputation gates), so they append instead of patch. Both id shapes are
+  enforced by the task schemas, so a malformed id fails `npm run validate`.
 - **Upstream-preserved requirements** keep their upstream `id`, so a correction
   patches the existing requirement in place.
 - **Clearing requirements** is expressed by an empty array
-  (`traderRequirements: []`), which replaces the upstream array.
+  (`traderRequirements: []`), which replaces the upstream array. An absent
+  `traderRequirements` field means "no change".
 - **Do not** re-derive the semantic from `trader` + `value`: Fence LL1 and Fence
   `reputation >= 1` are distinct requirements. Switch evaluation on
   `requirementType`, not on value range or trader identity.
