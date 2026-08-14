@@ -2,134 +2,55 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const { URL } = require("url");
 const { exec, execSync } = require("child_process");
+const { DEFAULT_MODES, VIEW_CONFIG, config, getModeLabel } = require("./lib/config.js");
+const {
+  buildCraftAddSections,
+  buildEditionsSections,
+  buildLocaleSections,
+  buildOverrideSections,
+  buildPrestigeSections,
+  buildSeasonalPerkSections,
+  buildStoryChapterSections,
+  buildTaskAdditionSections,
+  buildTasksSections,
+  createSection,
+  formatValue,
+  mergeTaskOverrides,
+  pushRow,
+  valuesEqual,
+} = require("./lib/sections.js");
 
-const PORT = Number(process.env.PORT) || 3000;
-const PUBLIC_DIR = path.resolve(__dirname, "public");
-const MAX_ROWS = Number(process.env.MAX_ROWS) || 250;
-
-const OVERLAY_PATH =
-  process.env.TARGET_OVERLAY ||
-  path.resolve(__dirname, "../dist/overlay.json");
-const API_POLL_MS = Number(process.env.API_POLL_MS) || 120000;
-const OVERLAY_POLL_MS = Number(process.env.OVERLAY_POLL_MS) || 30000;
-
-const REMOTE_FETCH_TIMEOUT_MS =
-  Number(process.env.REMOTE_FETCH_TIMEOUT_MS) || 10000;
-const REMOTE_FETCH_MAX_BYTES =
-  Number(process.env.REMOTE_FETCH_MAX_BYTES) || 5 * 1024 * 1024;
-
-const TARKOV_JSON_BASE =
-  process.env.TARKOV_JSON_BASE || "https://json.tarkov.dev";
+const PORT = config.port;
+const PUBLIC_DIR = config.publicDir;
+const MAX_ROWS = config.maxRows;
+const OVERLAY_PATH = config.overlayPath;
+const API_POLL_MS = config.apiPollMs;
+const OVERLAY_POLL_MS = config.overlayPollMs;
+const REMOTE_FETCH_TIMEOUT_MS = config.remoteFetchTimeoutMs;
+const REMOTE_FETCH_MAX_BYTES = config.remoteFetchMaxBytes;
+const TARKOV_JSON_BASE = config.tarkovJsonBase;
 
 // Game modes served by json.tarkov.dev. The list is refreshed at startup from
 // the live /endpoints `gameModes` payload (see startModeDiscovery) so the
 // monitor follows upstream renames automatically; these defaults apply when
 // discovery fails. pvp-season is BSG's Seasonal Character mode (EFT 1.1.0.0).
-const DEFAULT_MODES = ["regular", "pve", "pvp-season"];
-const MODE_LABELS = {
-  regular: "PvP",
-  pve: "PvE",
-  "pvp-season": "PvP PvE Seasonal",
-  "pvp-pve-seasonal": "PvP PvE Seasonal",
-};
-
 let supportedModes = [...DEFAULT_MODES];
 
-function getModeLabel(mode) {
-  if (MODE_LABELS[mode]) {
-    return MODE_LABELS[mode];
-  }
-  return mode
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-const VIEW_CONFIG = {
-  tasks: {
-    title: "Task Overrides",
-    lede: "Corrections from the overlay compared to tarkov.dev.",
-    requiresMode: true,
-  },
-  tasksAdd: {
-    title: "Task Additions",
-    lede: "Tasks added by the overlay that are missing from tarkov.dev.",
-    requiresMode: true,
-  },
-  items: {
-    title: "Item Overrides",
-    lede: "Item corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  hideout: {
-    title: "Hideout Overrides",
-    lede: "Hideout corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  traders: {
-    title: "Trader Overrides",
-    lede: "Trader corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  editions: {
-    title: "Editions",
-    lede: "Game editions defined by the overlay.",
-    requiresMode: false,
-  },
-  storyChapters: {
-    title: "Story Chapters",
-    lede: "Storyline chapter additions in the overlay.",
-    requiresMode: false,
-  },
-  itemsAdd: {
-    title: "Item Additions",
-    lede: "Items added by the overlay.",
-    requiresMode: false,
-  },
-  prestige: {
-    title: "Prestige Overrides",
-    lede: "Prestige-level corrections included in the overlay build.",
-    requiresMode: false,
-  },
-  locales: {
-    title: "Locale Corrections",
-    lede: "Per-locale translation corrections in the overlay.",
-    requiresMode: false,
-    requiresLocale: true,
-  },
-  seasonalPerks: {
-    title: "Seasonal Perks",
-    lede: "Seasonal (pvp-season) perks defined by the overlay.",
-    requiresMode: false,
-  },
-  craftsAdd: {
-    title: "Craft Additions",
-    lede: "Hideout crafts added by the overlay.",
-    requiresMode: false,
-  },
-};
-
 const DEFAULT_VIEW = "tasks";
-const DEFAULT_MODE = "regular";
 
 const overlayState = { data: null, updatedAt: null, error: null };
 const apiState = Object.fromEntries(
-  DEFAULT_MODES.map((mode) => [
-    mode,
-    { data: null, updatedAt: null, error: null },
-  ]),
+  DEFAULT_MODES.map((mode) => [mode, { data: null, updatedAt: null, error: null }])
 );
 
 const summaryByKey = new Map();
 const readLocks = {
   overlay: { isReading: false, pendingRead: false },
   ...Object.fromEntries(
-    DEFAULT_MODES.map((mode) => [
-      mode,
-      { isReading: false, pendingRead: false },
-    ]),
+    DEFAULT_MODES.map((mode) => [mode, { isReading: false, pendingRead: false }])
   ),
 };
 
@@ -167,8 +88,9 @@ function parseIsoDate(value) {
 // Latest release tag (e.g. "v1.56" -> "1.56") from git, the authority for
 // released overlay versions. Falls back to undefined when git is unavailable.
 let cachedTagVersion;
+let tagVersionLoaded = false;
 function getLatestTagVersion() {
-  if (cachedTagVersion !== undefined) {
+  if (tagVersionLoaded) {
     return cachedTagVersion;
   }
   try {
@@ -179,6 +101,7 @@ function getLatestTagVersion() {
       .toString()
       .trim();
     cachedTagVersion = tag.replace(/^v/, "");
+    tagVersionLoaded = true;
   } catch {
     cachedTagVersion = undefined;
   }
@@ -212,9 +135,10 @@ function isVersionStale(metaVersion, latestVersion) {
 }
 
 // Rebuild the overlay from sources (npm run build) so the monitor can refresh
-// dist/overlay.json instead of only warning that it is stale. Set REBUILD_TOKEN
-// to require ?token= on POST /rebuild.
+// dist/overlay.json instead of only warning that it is stale. This mutating
+// endpoint is opt-in via ALLOW_REBUILD=true; REBUILD_TOKEN adds authentication.
 const REPO_ROOT = path.resolve(__dirname, "..");
+const DEFAULT_OVERLAY_PATH = path.resolve(REPO_ROOT, "dist/overlay.json");
 const rebuildState = { running: false, lastRun: null, lastSuccess: null, error: null };
 
 function rebuildOverlay() {
@@ -264,8 +188,35 @@ function rebuildOverlay() {
   });
 }
 
+function isDefaultOverlayPath(targetPath) {
+  return path.resolve(targetPath) === DEFAULT_OVERLAY_PATH;
+}
+
 function isRebuildEnabled() {
-  return process.env.NODE_ENV !== "test";
+  return (
+    process.env.NODE_ENV !== "test" &&
+    process.env.ALLOW_REBUILD === "true" &&
+    !isRemotePath(OVERLAY_PATH) &&
+    isDefaultOverlayPath(OVERLAY_PATH)
+  );
+}
+
+function safeTokenEqual(actual, expected) {
+  const actualBuffer = Buffer.from(actual || "");
+  const expectedBuffer = Buffer.from(expected || "");
+  return (
+    actualBuffer.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(actualBuffer, expectedBuffer)
+  );
+}
+
+function getRequestToken(req, requestUrl) {
+  const authorization = req.headers.authorization || "";
+  const schemeEnd = authorization.indexOf(" ");
+  if (schemeEnd > 0 && authorization.slice(0, schemeEnd).toLowerCase() === "bearer") {
+    return authorization.slice(schemeEnd + 1).trim();
+  }
+  return requestUrl.searchParams.get("token") || "";
 }
 
 async function refreshOverlayIfStale() {
@@ -332,10 +283,7 @@ function fetchRemoteText(url) {
       if (parsedUrl.protocol === "http:") {
         client = http;
       } else if (parsedUrl.protocol !== "https:") {
-        settle(
-          reject,
-          new Error(`Unsupported URL protocol: ${parsedUrl.protocol}`),
-        );
+        settle(reject, new Error(`Unsupported URL protocol: ${parsedUrl.protocol}`));
         return;
       }
     } catch (error) {
@@ -345,10 +293,7 @@ function fetchRemoteText(url) {
 
     const request = client.get(url, (res) => {
       if (res.statusCode && res.statusCode >= 400) {
-        settle(
-          reject,
-          new Error(`Remote fetch failed with HTTP ${res.statusCode}: ${url}`),
-        );
+        settle(reject, new Error(`Remote fetch failed with HTTP ${res.statusCode}: ${url}`));
         res.resume();
         return;
       }
@@ -357,15 +302,12 @@ function fetchRemoteText(url) {
         ? res.headers["content-length"][0]
         : res.headers["content-length"];
       const expectedBytes = Number(contentLengthHeader);
-      if (
-        Number.isFinite(expectedBytes) &&
-        expectedBytes > REMOTE_FETCH_MAX_BYTES
-      ) {
+      if (Number.isFinite(expectedBytes) && expectedBytes > REMOTE_FETCH_MAX_BYTES) {
         settle(
           reject,
           new Error(
-            `Remote fetch exceeded max size (${expectedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`,
-          ),
+            `Remote fetch exceeded max size (${expectedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`
+          )
         );
         res.resume();
         return;
@@ -379,8 +321,8 @@ function fetchRemoteText(url) {
         if (receivedBytes > REMOTE_FETCH_MAX_BYTES) {
           res.destroy(
             new Error(
-              `Remote fetch exceeded max size (${receivedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`,
-            ),
+              `Remote fetch exceeded max size (${receivedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`
+            )
           );
           return;
         }
@@ -395,9 +337,7 @@ function fetchRemoteText(url) {
     });
     request.setTimeout(REMOTE_FETCH_TIMEOUT_MS, () => {
       request.destroy(
-        new Error(
-          `Remote fetch timed out after ${REMOTE_FETCH_TIMEOUT_MS}ms: ${url}`,
-        ),
+        new Error(`Remote fetch timed out after ${REMOTE_FETCH_TIMEOUT_MS}ms: ${url}`)
       );
     });
     request.on("error", (error) => {
@@ -406,20 +346,38 @@ function fetchRemoteText(url) {
   });
 }
 
-function send(res, status, body, contentType = "text/plain; charset=utf-8") {
-  res.writeHead(status, {
+const SECURITY_HEADERS = Object.freeze({
+  "Content-Security-Policy":
+    "default-src 'self'; base-uri 'none'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'",
+  "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+});
+
+function responseHeaders(contentType, extra = {}) {
+  return {
+    ...SECURITY_HEADERS,
     "Content-Type": contentType,
     "Cache-Control": "no-store",
-  });
+    ...extra,
+  };
+}
+
+function send(res, status, body, contentType = "text/plain; charset=utf-8") {
+  res.writeHead(status, responseHeaders(contentType));
   res.end(body);
 }
 
 function safeJoin(base, requestPath) {
-  const normalized = path.normalize(path.join(base, requestPath));
-  if (!normalized.startsWith(base)) {
+  const resolvedBase = path.resolve(base);
+  const relativeRequest = String(requestPath || "").replace(/^[/\\]+/, "");
+  const candidate = path.resolve(resolvedBase, relativeRequest);
+  const relative = path.relative(resolvedBase, candidate);
+  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
     return null;
   }
-  return normalized;
+  return candidate;
 }
 
 function serveStatic(res, requestPath) {
@@ -447,23 +405,6 @@ function serveStatic(res, requestPath) {
 
     send(res, 200, data, contentType);
   });
-}
-function createSection(title, columns, options = {}) {
-  return {
-    ...options,
-    title,
-    columns,
-    rows: [],
-    truncated: false,
-  };
-}
-
-function pushRow(section, row) {
-  if (section.rows.length >= MAX_ROWS) {
-    section.truncated = true;
-    return;
-  }
-  section.rows.push(row);
 }
 
 function getSummaryKey(view, mode) {
@@ -530,445 +471,6 @@ function getValueType(value) {
   if (value === null) return "null";
   if (Array.isArray(value)) return "array";
   return typeof value;
-}
-
-function normalizeCompareValue(value) {
-  if (Array.isArray(value)) {
-    // Preserve array order so reordering is treated as a real change.
-    return value.map(normalizeCompareValue);
-  }
-
-  if (value && typeof value === "object") {
-    const obj = value;
-    const keys = Object.keys(obj).sort();
-    const normalized = {};
-    for (const key of keys) {
-      normalized[key] = normalizeCompareValue(obj[key]);
-    }
-    return normalized;
-  }
-
-  return value;
-}
-
-function valuesEqual(a, b) {
-  if (a === undefined && b === undefined) return true;
-  return (
-    JSON.stringify(normalizeCompareValue(a)) ===
-    JSON.stringify(normalizeCompareValue(b))
-  );
-}
-
-function formatValue(value, maxLength = 220) {
-  if (value === undefined) return "undefined";
-  if (value === null) return "null";
-  if (typeof value === "string") return value;
-  const json = JSON.stringify(value);
-  if (!json) return String(value);
-  if (json.length <= maxLength) return json;
-  return `${json.slice(0, maxLength - 1)}…`;
-}
-
-function mergeTaskOverride(base = {}, next = {}) {
-  const merged = { ...base, ...next };
-  if (base.objectives || next.objectives) {
-    merged.objectives = { ...(base.objectives || {}), ...(next.objectives || {}) };
-  }
-  if (base.objectivesAdd || next.objectivesAdd) {
-    merged.objectivesAdd = [
-      ...(base.objectivesAdd || []),
-      ...(next.objectivesAdd || []),
-    ];
-  }
-  return merged;
-}
-
-function mergeTaskOverrides(shared = {}, modeSpecific = {}) {
-  const merged = { ...shared };
-  for (const [taskId, override] of Object.entries(modeSpecific)) {
-    merged[taskId] = mergeTaskOverride(merged[taskId], override);
-  }
-  return merged;
-}
-
-function buildOverrideSections(title, overrides = {}) {
-  const section = createSection(`${title} Overrides`, ["Entity", "Field", "Overlay"]);
-
-  for (const [entityId, override] of Object.entries(overrides)) {
-    if (!override || typeof override !== "object") {
-      pushRow(section, [entityId, "value", formatValue(override)]);
-      continue;
-    }
-    const entries = Object.entries(override);
-    if (entries.length === 0) {
-      pushRow(section, [entityId, "(empty)", "{}"]); 
-      continue;
-    }
-    for (const [field, value] of entries) {
-      pushRow(section, [entityId, field, formatValue(value)]);
-    }
-  }
-
-  return [section];
-}
-
-function buildEditionsSections(editions = {}) {
-  const section = createSection("Editions", [
-    "Edition",
-    "ID",
-    "Stash",
-    "Rep Bonus",
-    "Exclusive Tasks",
-    "Excluded Tasks",
-  ]);
-
-  for (const [key, edition] of Object.entries(editions)) {
-    if (!edition || typeof edition !== "object") {
-      pushRow(section, [key, key, "-", "-", "-", "-"]); 
-      continue;
-    }
-    const repCount = edition.traderRepBonus
-      ? Object.keys(edition.traderRepBonus).length
-      : 0;
-    const exclusiveCount = Array.isArray(edition.exclusiveTaskIds)
-      ? edition.exclusiveTaskIds.length
-      : 0;
-    const excludedCount = Array.isArray(edition.excludedTaskIds)
-      ? edition.excludedTaskIds.length
-      : 0;
-    pushRow(section, [
-      edition.title || key,
-      edition.id || key,
-      edition.defaultStashLevel ?? "-",
-      repCount ? `${repCount} traders` : "-",
-      exclusiveCount || "-",
-      excludedCount || "-",
-    ]);
-  }
-
-  return [section];
-}
-
-function buildStoryChapterSections(chapters = {}) {
-  const section = createSection("Story Chapters", [
-    "Chapter",
-    "ID",
-    "Order",
-    "Objectives",
-    "Wiki",
-  ]);
-
-  for (const [key, chapter] of Object.entries(chapters)) {
-    if (!chapter || typeof chapter !== "object") {
-      pushRow(section, [key, key, "-", "-", "-"]); 
-      continue;
-    }
-    const objectiveCount = Array.isArray(chapter.objectives)
-      ? chapter.objectives.length
-      : 0;
-    pushRow(section, [
-      chapter.name || key,
-      chapter.id || key,
-      chapter.order ?? "-",
-      objectiveCount,
-      chapter.wikiLink || "-",
-    ]);
-  }
-
-  return [section];
-}
-
-function buildTaskAdditionSections(tasksAdd = {}, mode) {
-  const section = createSection(`Task Additions (${getModeLabel(mode)})`, [
-    "Task",
-    "ID",
-    "Trader",
-    "Map",
-    "Wiki",
-  ]);
-
-  for (const [taskId, addition] of Object.entries(tasksAdd)) {
-    if (!addition || typeof addition !== "object") {
-      pushRow(section, [taskId, taskId, "-", "-", "-"]);
-      continue;
-    }
-    const traderName = addition.trader?.name || "-";
-    const mapName = addition.map?.name || "-";
-    pushRow(section, [
-      addition.name || taskId,
-      addition.id || taskId,
-      traderName,
-      mapName,
-      addition.wikiLink || "-",
-    ]);
-  }
-
-  return [section];
-}
-
-function buildPrestigeSections(prestige = {}) {
-  const section = createSection("Prestige Levels", [
-    "Level",
-    "ID",
-    "Name",
-    "Conditions",
-    "Story Requirements",
-  ]);
-
-  for (const [id, entry] of Object.entries(prestige)) {
-    if (!entry || typeof entry !== "object") {
-      pushRow(section, ["-", id, "-", "-", "-"]);
-      continue;
-    }
-    const conditionsCount = entry.conditions
-      ? Object.keys(entry.conditions).length
-      : 0;
-    const storyRequirements = Array.isArray(entry.storyRequirements)
-      ? entry.storyRequirements
-      : [];
-    const storySummary =
-      storyRequirements.length > 0
-        ? storyRequirements.map((req) => req.name || req.storyChapter).join("; ")
-        : "-";
-    pushRow(section, [
-      entry.prestigeLevel ?? "-",
-      entry.id || id,
-      entry.name || "-",
-      conditionsCount || "-",
-      storySummary,
-    ]);
-  }
-
-  return [section];
-}
-
-function buildLocaleSections(locales = {}, locale) {
-  const bundle = locales[locale] || {};
-  const sections = [];
-
-  for (const [entityType, entries] of Object.entries(bundle)) {
-    if (!entries || typeof entries !== "object") {
-      continue;
-    }
-    const section = createSection(`${entityType} (${locale})`, [
-      "Entity",
-      "Field",
-      "Overlay",
-    ]);
-
-    for (const [entityId, patch] of Object.entries(entries)) {
-      if (!patch || typeof patch !== "object") {
-        pushRow(section, [entityId, "value", formatValue(patch)]);
-        continue;
-      }
-      for (const [field, value] of Object.entries(patch)) {
-        if (value === undefined) continue;
-        if (field === "objectives" && value && typeof value === "object") {
-          for (const [objectiveId, objectivePatch] of Object.entries(value)) {
-            if (!objectivePatch || typeof objectivePatch !== "object") {
-              continue;
-            }
-            for (const [objectiveField, objectiveValue] of Object.entries(
-              objectivePatch,
-            )) {
-              if (objectiveValue === undefined) continue;
-              pushRow(section, [
-                entityId,
-                `objective:${objectiveId}.${objectiveField}`,
-                formatValue(objectiveValue),
-              ]);
-            }
-          }
-          continue;
-        }
-        pushRow(section, [entityId, field, formatValue(value)]);
-      }
-    }
-
-    if (section.rows.length > 0) {
-      sections.push(section);
-    }
-  }
-
-  if (sections.length === 0) {
-    const empty = createSection(`Locale ${locale}`, [
-      "Entity",
-      "Field",
-      "Overlay",
-    ]);
-    pushRow(empty, ["(no corrections)", "-", "-"]);
-    return [empty];
-  }
-  return sections;
-}
-
-function buildSeasonalPerkSections(perks = {}) {
-  const section = createSection("Seasonal Perks", [
-    "Perk",
-    "ID",
-    "Type",
-    "Points",
-    "Effects",
-  ]);
-
-  for (const [id, perk] of Object.entries(perks)) {
-    if (!perk || typeof perk !== "object") {
-      pushRow(section, [id, id, "-", "-", "-"]);
-      continue;
-    }
-    const effects = Array.isArray(perk.effects) ? perk.effects : [];
-    const effectSummary =
-      effects.length > 0
-        ? effects.map((effect) => effect.effectId || "?").join(", ")
-        : "-";
-    pushRow(section, [
-      perk.name || id,
-      perk.id || id,
-      perk.type || "-",
-      perk.points ?? "-",
-      effectSummary,
-    ]);
-  }
-
-  return [section];
-}
-
-function buildCraftAddSections(crafts = {}) {
-  const section = createSection("Craft Additions", [
-    "Craft",
-    "ID",
-    "Station",
-    "Level",
-    "Duration",
-    "Product",
-  ]);
-
-  for (const [id, craft] of Object.entries(crafts)) {
-    if (!craft || typeof craft !== "object") {
-      pushRow(section, [id, id, "-", "-", "-", "-"]);
-      continue;
-    }
-    const duration =
-      typeof craft.duration === "number"
-        ? `${Math.round(craft.duration / 60)} min`
-        : "-";
-    const product =
-      craft.productItem && typeof craft.productItem === "object"
-        ? craft.productItem.item || "-"
-        : "-";
-    pushRow(section, [
-      craft.id || id,
-      id,
-      craft.station || "-",
-      craft.level ?? "-",
-      duration,
-      product,
-    ]);
-  }
-
-  return [section];
-}
-
-function buildTasksSections(overrides = {}, apiTasks = [], mode) {
-  const diffSection = createSection("Task Overrides vs API", [
-    "Task",
-    "Field",
-    "API",
-    "Overlay",
-    "Status",
-  ], { statusColumnIndex: 4 });
-  const objectivesAddSection = createSection("Added Objectives", [
-    "Task",
-    "Objective",
-    "Overlay",
-  ]);
-  const missingSection = createSection("Tasks Missing From API", [
-    "Task",
-    "Task ID",
-  ]);
-  const disabledSection = createSection("Disabled Tasks", [
-    "Task",
-    "Task ID",
-  ]);
-
-  const apiById = new Map(apiTasks.map((task) => [task.id, task]));
-
-  for (const [taskId, override] of Object.entries(overrides)) {
-    if (!override || typeof override !== "object") {
-      continue;
-    }
-    const apiTask = apiById.get(taskId);
-    const taskName = apiTask?.name || override.name || `Task ID ${taskId}`;
-
-    if (!apiTask) {
-      pushRow(missingSection, [taskName, taskId]);
-      continue;
-    }
-
-    if (override.disabled === true) {
-      pushRow(disabledSection, [taskName, taskId]);
-    }
-
-    const { objectives, objectivesAdd, ...topLevel } = override;
-
-    Object.entries(topLevel).forEach(([field, value]) => {
-      if (value === undefined) return;
-      const apiValue = apiTask[field];
-      const status = valuesEqual(apiValue, value) ? "same" : "override";
-      pushRow(diffSection, [
-        taskName,
-        field,
-        formatValue(apiValue),
-        formatValue(value),
-        status,
-      ]);
-    });
-
-    if (objectives && typeof objectives === "object") {
-      for (const [objectiveId, objOverride] of Object.entries(objectives)) {
-        if (!objOverride || typeof objOverride !== "object") continue;
-        const apiObjective = apiTask.objectives?.find(
-          (objective) => objective.id === objectiveId,
-        );
-        if (!apiObjective) {
-          pushRow(diffSection, [
-            taskName,
-            `objective:${objectiveId}`,
-            "missing",
-            formatValue(objOverride),
-            "missing",
-          ]);
-          continue;
-        }
-        for (const [field, value] of Object.entries(objOverride)) {
-          if (value === undefined) continue;
-          const apiValue = apiObjective[field];
-          const status = valuesEqual(apiValue, value) ? "same" : "override";
-          pushRow(diffSection, [
-            taskName,
-            `objective:${objectiveId}.${field}`,
-            formatValue(apiValue),
-            formatValue(value),
-            status,
-          ]);
-        }
-      }
-    }
-
-    if (Array.isArray(objectivesAdd)) {
-      objectivesAdd.forEach((objective) => {
-        const label = objective.description || objective.id || "Added objective";
-        pushRow(objectivesAddSection, [
-          taskName,
-          label,
-          formatValue(objective),
-        ]);
-      });
-    }
-  }
-
-  const sections = [diffSection, objectivesAddSection, missingSection, disabledSection];
-  return sections;
 }
 
 async function loadOverlay() {
@@ -1053,11 +555,7 @@ function compact(value) {
 
 function toLookup(value) {
   const map = new Map();
-  const records = Array.isArray(value)
-    ? value
-    : isRecord(value)
-      ? Object.values(value)
-      : [];
+  const records = Array.isArray(value) ? value : isRecord(value) ? Object.values(value) : [];
   for (const entry of records) {
     if (isRecord(entry) && typeof entry.id === "string") map.set(entry.id, entry);
   }
@@ -1072,15 +570,13 @@ function translate(map, key) {
 
 function validateEnvelope(payload, path) {
   if (!isRecord(payload) || !("data" in payload) || payload.data == null) {
-    const error = new Error(
-      `Invalid json.tarkov.dev response for ${path}: missing data`,
-    );
+    const error = new Error(`Invalid json.tarkov.dev response for ${path}: missing data`);
     error.fatal = true;
     throw error;
   }
   if (payload.translations !== undefined && !Array.isArray(payload.translations)) {
     const error = new Error(
-      `Invalid json.tarkov.dev response for ${path}: translations is not an array`,
+      `Invalid json.tarkov.dev response for ${path}: translations is not an array`
     );
     error.fatal = true;
     throw error;
@@ -1103,7 +599,7 @@ async function fetchEnvelopeOnce(path) {
       });
       if (!response.ok) {
         throw new Error(
-          `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`,
+          `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
         );
       }
       return validateEnvelope(await response.json(), path);
@@ -1140,8 +636,7 @@ async function fetchTranslations(cache, mode, endpoint) {
 function resolveItemRef(value, ctx) {
   const id = stringId(value);
   const inline = isRecord(value) ? value : undefined;
-  const raw =
-    (id ? ctx.itemsById.get(id) || ctx.questItemsById.get(id) : undefined) || inline;
+  const raw = (id ? ctx.itemsById.get(id) || ctx.questItemsById.get(id) : undefined) || inline;
   if (!id && !raw) return undefined;
   const name =
     translate(ctx.itemsEn, raw && raw.name) ||
@@ -1227,9 +722,7 @@ function adaptObjective(raw, ctx) {
     requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
     wearing: resolveItemRefMatrix(raw.wearing, ctx),
     notWearing: resolveItemRefs(raw.notWearing, ctx),
-    zones: Array.isArray(raw.zones)
-      ? raw.zones.map((zone) => resolveZone(zone, ctx))
-      : undefined,
+    zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
     possibleLocations: Array.isArray(raw.possibleLocations)
       ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
       : undefined,
@@ -1256,7 +749,7 @@ function adaptReward(raw, ctx) {
             ...entry,
             trader: resolveTraderRef(entry.trader, ctx),
             item: resolveItemRef(entry.item, ctx),
-          }),
+          })
         )
       : undefined,
   });
@@ -1301,23 +794,16 @@ function adaptTask(raw, ctx) {
 }
 
 async function buildTaskContext(cache, mode, tasksData) {
-  const [
-    itemsEnvelope,
-    mapsEnvelope,
-    tradersEnvelope,
-    itemsEn,
-    tasksEn,
-    mapsEn,
-    tradersEn,
-  ] = await Promise.all([
-    fetchEnvelope(cache, `${mode}/items`),
-    fetchEnvelope(cache, `${mode}/maps`),
-    fetchEnvelope(cache, `${mode}/traders`),
-    fetchTranslations(cache, mode, "items"),
-    fetchTranslations(cache, mode, "tasks"),
-    fetchTranslations(cache, mode, "maps"),
-    fetchTranslations(cache, mode, "traders"),
-  ]);
+  const [itemsEnvelope, mapsEnvelope, tradersEnvelope, itemsEn, tasksEn, mapsEn, tradersEn] =
+    await Promise.all([
+      fetchEnvelope(cache, `${mode}/items`),
+      fetchEnvelope(cache, `${mode}/maps`),
+      fetchEnvelope(cache, `${mode}/traders`),
+      fetchTranslations(cache, mode, "items"),
+      fetchTranslations(cache, mode, "tasks"),
+      fetchTranslations(cache, mode, "maps"),
+      fetchTranslations(cache, mode, "traders"),
+    ]);
 
   const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
   const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
@@ -1346,8 +832,8 @@ async function fetchApiTasks(mode) {
   if (!tasksData || !isRecord(tasksData.tasks)) {
     throw new Error(
       `Invalid json.tarkov.dev response for ${gameMode}/tasks: expected data.tasks object, got ${getValueType(
-        tasksData && tasksData.tasks,
-      )}`,
+        tasksData && tasksData.tasks
+      )}`
     );
   }
   const ctx = await buildTaskContext(cache, gameMode, tasksData);
@@ -1399,7 +885,7 @@ function buildSummary(view, mode, locale) {
     const mergedOverrides = mergeTaskOverrides(sharedOverrides, modeOverrides);
     const apiTasks = apiState[mode]?.data || [];
     return {
-      sections: buildTasksSections(mergedOverrides, apiTasks, mode),
+      sections: buildTasksSections(mergedOverrides, apiTasks),
       error: overlayState.error || apiState[mode]?.error || null,
     };
   }
@@ -1527,7 +1013,7 @@ function getState(view, mode, locale) {
   const config = VIEW_CONFIG[view];
   const key = getSummaryKey(
     view,
-    config?.requiresLocale ? locale : config?.requiresMode ? mode : "",
+    config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
   );
   const summary = summaryByKey.get(key) || { sections: [], error: null };
   const meta = overlayState.data?.$meta || null;
@@ -1540,9 +1026,7 @@ function getState(view, mode, locale) {
     locale: config?.requiresLocale ? locale : null,
     locales: getAvailableLocales(),
     modes: supportedModes,
-    modeLabels: Object.fromEntries(
-      supportedModes.map((entry) => [entry, getModeLabel(entry)]),
-    ),
+    modeLabels: Object.fromEntries(supportedModes.map((entry) => [entry, getModeLabel(entry)])),
     title: config?.title || view,
     lede: config?.lede || "",
     overlay: {
@@ -1585,8 +1069,7 @@ function startOverlayWatcher() {
   const overlayFile = path.basename(OVERLAY_PATH);
   try {
     overlayFsWatcher = fs.watch(overlayDir, (eventType, filename) => {
-      const isOverlayFile =
-        typeof filename === "string" ? filename === overlayFile : true;
+      const isOverlayFile = typeof filename === "string" ? filename === overlayFile : true;
       if (!isOverlayFile) {
         return;
       }
@@ -1641,7 +1124,14 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+  let requestUrl;
+  try {
+    // A fixed base avoids treating the untrusted Host header as URL syntax.
+    requestUrl = new URL(req.url, "http://localhost");
+  } catch {
+    send(res, 400, "Bad request");
+    return;
+  }
   const pathname = requestUrl.pathname;
 
   if (pathname === "/rebuild") {
@@ -1654,19 +1144,22 @@ const server = http.createServer((req, res) => {
         res,
         503,
         JSON.stringify({ ok: false, error: "Rebuild is disabled" }),
-        "application/json; charset=utf-8",
+        "application/json; charset=utf-8"
       );
       return;
     }
     const token = process.env.REBUILD_TOKEN;
-    if (token && requestUrl.searchParams.get("token") !== token) {
-      send(
-        res,
-        401,
-        JSON.stringify({ ok: false, error: "Invalid rebuild token" }),
-        "application/json; charset=utf-8",
-      );
-      return;
+    if (typeof token === "string" && token.length > 0) {
+      const requestToken = getRequestToken(req, requestUrl);
+      if (!requestToken || !safeTokenEqual(requestToken, token)) {
+        send(
+          res,
+          401,
+          JSON.stringify({ ok: false, error: "Invalid rebuild token" }),
+          "application/json; charset=utf-8"
+        );
+        return;
+      }
     }
     rebuildOverlay()
       .then((result) => {
@@ -1674,7 +1167,7 @@ const server = http.createServer((req, res) => {
           res,
           200,
           JSON.stringify({ ok: true, output: result.output }),
-          "application/json; charset=utf-8",
+          "application/json; charset=utf-8"
         );
       })
       .catch((error) => {
@@ -1682,7 +1175,7 @@ const server = http.createServer((req, res) => {
           res,
           error.conflict ? 409 : 500,
           JSON.stringify({ ok: false, error: error.message }),
-          "application/json; charset=utf-8",
+          "application/json; charset=utf-8"
         );
       });
     return;
@@ -1695,8 +1188,7 @@ const server = http.createServer((req, res) => {
 
   if (pathname === "/latest") {
     const view = normalizeView(
-      requestUrl.searchParams.get("view") ||
-        requestUrl.searchParams.get("type"),
+      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
     );
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
     const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
@@ -1708,13 +1200,9 @@ const server = http.createServer((req, res) => {
           res,
           200,
           JSON.stringify(
-            getState(
-              view,
-              config?.requiresMode ? mode : "",
-              config?.requiresLocale ? locale : "",
-            ),
+            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
           ),
-          "application/json; charset=utf-8",
+          "application/json; charset=utf-8"
         );
       });
     return;
@@ -1732,7 +1220,8 @@ const server = http.createServer((req, res) => {
       JSON.stringify({
         ok:
           !overlayState.error &&
-          apiHealth.some((entry) => !entry.error && entry.updatedAt),
+          apiHealth.length > 0 &&
+          apiHealth.every((entry) => !entry.error && entry.updatedAt),
         uptime: process.uptime(),
         modes: supportedModes,
         rebuild: {
@@ -1749,35 +1238,26 @@ const server = http.createServer((req, res) => {
         },
         api: apiHealth,
       }),
-      "application/json; charset=utf-8",
+      "application/json; charset=utf-8"
     );
     return;
   }
 
   if (pathname === "/events") {
     const view = normalizeView(
-      requestUrl.searchParams.get("view") ||
-        requestUrl.searchParams.get("type"),
+      requestUrl.searchParams.get("view") || requestUrl.searchParams.get("type")
     );
     const mode = normalizeMode(requestUrl.searchParams.get("mode"));
     const locale = normalizeLocale(requestUrl.searchParams.get("locale"));
     const config = VIEW_CONFIG[view];
     const key = getSummaryKey(
       view,
-      config?.requiresLocale
-        ? locale
-        : config?.requiresMode
-          ? mode
-          : "",
+      config?.requiresLocale ? locale : config?.requiresMode ? mode : ""
     );
     refreshOverlayIfStale()
       .catch(() => {})
       .finally(() => {
-        res.writeHead(200, {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-store",
-          Connection: "keep-alive",
-        });
+        res.writeHead(200, responseHeaders("text/event-stream", { Connection: "keep-alive" }));
         const clients = clientsByKey.get(key) || new Set();
         clientsByKey.set(key, clients);
         clients.add(res);
@@ -1808,12 +1288,8 @@ const server = http.createServer((req, res) => {
             key,
             res,
             `event: summary\ndata: ${JSON.stringify(
-              getState(
-                view,
-                config?.requiresMode ? mode : "",
-                config?.requiresLocale ? locale : "",
-              ),
-            )}\n\n`,
+              getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+            )}\n\n`
           )
         ) {
           cleanup();
@@ -1858,8 +1334,7 @@ function startServer(port) {
   currentPort = port;
   server.listen(port, () => {
     const address = server.address();
-    const activePort =
-      typeof address === "object" && address !== null ? address.port : port;
+    const activePort = typeof address === "object" && address !== null ? address.port : port;
     // eslint-disable-next-line no-console
     console.log(`Overlay monitor running at http://localhost:${activePort}`);
   });
@@ -1868,9 +1343,7 @@ function startServer(port) {
 server.on("error", (error) => {
   if (error.code === "EADDRINUSE") {
     // eslint-disable-next-line no-console
-    console.warn(
-      `Port ${currentPort} in use, retrying on a random available port...`,
-    );
+    console.warn(`Port ${currentPort} in use, retrying on a random available port...`);
     // Retry on an ephemeral port assigned by the OS
     startServer(0);
     return;
@@ -1906,11 +1379,14 @@ if (process.env.NODE_ENV === "test") {
     isVersionStale,
     rebuildOverlay,
     isRebuildEnabled,
+    isDefaultOverlayPath,
+    safeJoin,
     createSection,
     pushRow,
     overlayState,
     apiState,
     server,
     VIEW_CONFIG,
+    SECURITY_HEADERS,
   };
 }

@@ -7,15 +7,32 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createRequire } from 'module';
+import path from 'node:path';
 
-// NODE_ENV must be "test" *before* require() so the module:
+// NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
 //   2. populates module.exports
 process.env.NODE_ENV = 'test';
 
-const require = createRequire(import.meta.url);
-const mod = require('../monitor/server.js');
+let mod: any;
+let configModule: any;
+const previousTargetOverlay = process.env.TARGET_OVERLAY;
+try {
+  process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
+  // These CommonJS monitor modules intentionally have no declaration files.
+  // @ts-expect-error Dynamic import of the JavaScript CommonJS server module.
+  mod = (await import('../monitor/server.js')).default;
+  // @ts-expect-error Dynamic import of the JavaScript CommonJS config module.
+  configModule = (await import('../monitor/lib/config.js')).default;
+} finally {
+  if (previousTargetOverlay === undefined) {
+    delete process.env.TARGET_OVERLAY;
+  } else {
+    process.env.TARGET_OVERLAY = previousTargetOverlay;
+  }
+}
+
+const { readPositiveInteger, readPort, readTimerMilliseconds } = configModule;
 
 // ---------------------------------------------------------------------------
 // Sanity: prove the import is the real module, not a stub
@@ -41,6 +58,7 @@ describe('module import sanity', () => {
     expect(typeof mod.normalizeMode).toBe('function');
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
+    expect(typeof mod.isDefaultOverlayPath).toBe('function');
   });
 
   it('exports the real http.Server instance', () => {
@@ -81,6 +99,8 @@ const {
   normalizeMode,
   getLatestTagVersion,
   isVersionStale,
+  isRebuildEnabled,
+  safeJoin,
   createSection,
   pushRow,
   overlayState,
@@ -89,13 +109,22 @@ const {
   VIEW_CONFIG,
 } = mod;
 
+const EXPECTED_SECURITY_HEADERS = {
+  'Content-Security-Policy':
+    "default-src 'self'; base-uri 'none'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'",
+  'Permissions-Policy': 'camera=(), geolocation=(), microphone=()',
+  'Referrer-Policy': 'no-referrer',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+} as const;
+
 // ---------------------------------------------------------------------------
 // buildTasksSections
 // ---------------------------------------------------------------------------
 
 describe('buildTasksSections', () => {
   it('returns 4 sections: diff, added-objectives, missing, disabled', () => {
-    const sections = buildTasksSections({}, [], 'regular');
+    const sections = buildTasksSections({}, []);
     expect(sections).toHaveLength(4);
     expect(sections.map((s: any) => s.title)).toEqual([
       'Task Overrides vs API',
@@ -106,11 +135,9 @@ describe('buildTasksSections', () => {
   });
 
   it('produces an "override" row when the value differs from the API', () => {
-    const sections = buildTasksSections(
-      { t1: { minPlayerLevel: 45 } },
-      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular'
-    );
+    const sections = buildTasksSections({ t1: { minPlayerLevel: 45 } }, [
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
+    ]);
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
     expect(row[2]).toBe('10');
@@ -119,28 +146,24 @@ describe('buildTasksSections', () => {
   });
 
   it('produces a "same" row when values match', () => {
-    const sections = buildTasksSections(
-      { t1: { minPlayerLevel: 10 } },
-      [{ id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] }],
-      'regular'
-    );
+    const sections = buildTasksSections({ t1: { minPlayerLevel: 10 } }, [
+      { id: 't1', name: 'T', minPlayerLevel: 10, objectives: [] },
+    ]);
     const row = sections[0].rows.find((r: string[]) => r[1] === 'minPlayerLevel');
     expect(row).toBeDefined();
     expect(row[4]).toBe('same');
   });
 
   it('routes unknown task IDs to the missing section', () => {
-    const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, [], 'regular');
+    const [, , missing] = buildTasksSections({ ghost: { name: 'Ghost' } }, []);
     expect(missing.rows).toHaveLength(1);
     expect(missing.rows[0]).toEqual(['Ghost', 'ghost']);
   });
 
   it('routes disabled tasks to the disabled section', () => {
-    const [, , , disabled] = buildTasksSections(
-      { t1: { disabled: true } },
-      [{ id: 't1', name: 'D', objectives: [] }],
-      'regular'
-    );
+    const [, , , disabled] = buildTasksSections({ t1: { disabled: true } }, [
+      { id: 't1', name: 'D', objectives: [] },
+    ]);
     expect(disabled.rows).toHaveLength(1);
     expect(disabled.rows[0][0]).toBe('D');
   });
@@ -148,8 +171,7 @@ describe('buildTasksSections', () => {
   it('routes objectivesAdd to the added-objectives section', () => {
     const [, added] = buildTasksSections(
       { t1: { objectivesAdd: [{ id: 'o', description: 'Plant' }] } },
-      [{ id: 't1', name: 'T', objectives: [] }],
-      'regular'
+      [{ id: 't1', name: 'T', objectives: [] }]
     );
     expect(added.rows).toHaveLength(1);
     expect(added.rows[0][0]).toBe('T');
@@ -157,11 +179,9 @@ describe('buildTasksSections', () => {
   });
 
   it('diffs individual objective field overrides', () => {
-    const [diff] = buildTasksSections(
-      { t1: { objectives: { o1: { description: 'Fixed' } } } },
-      [{ id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] }],
-      'regular'
-    );
+    const [diff] = buildTasksSections({ t1: { objectives: { o1: { description: 'Fixed' } } } }, [
+      { id: 't1', name: 'T', objectives: [{ id: 'o1', description: 'Orig' }] },
+    ]);
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:o1.description');
     expect(row).toBeDefined();
     expect(row[2]).toBe('Orig');
@@ -170,18 +190,16 @@ describe('buildTasksSections', () => {
   });
 
   it('marks objectives missing from the API', () => {
-    const [diff] = buildTasksSections(
-      { t1: { objectives: { gone: { description: 'x' } } } },
-      [{ id: 't1', name: 'T', objectives: [] }],
-      'regular'
-    );
+    const [diff] = buildTasksSections({ t1: { objectives: { gone: { description: 'x' } } } }, [
+      { id: 't1', name: 'T', objectives: [] },
+    ]);
     const row = diff.rows.find((r: string[]) => r[1] === 'objective:gone');
     expect(row).toBeDefined();
     expect(row[4]).toBe('missing');
   });
 
   it('skips null/non-object overrides', () => {
-    const sections = buildTasksSections({ t1: null }, [], 'regular');
+    const sections = buildTasksSections({ t1: null }, []);
     const total = sections.reduce((n: number, s: any) => n + s.rows.length, 0);
     expect(total).toBe(0);
   });
@@ -427,6 +445,10 @@ describe('buildSeasonalPerkSections', () => {
     const [sec] = buildSeasonalPerkSections({ p: { name: 'P' } });
     expect(sec.rows[0][4]).toBe('-');
   });
+  it('handles malformed effects', () => {
+    const [sec] = buildSeasonalPerkSections({ p: { name: 'P', effects: [null, 'bad'] } });
+    expect(sec.rows[0][4]).toBe('?, ?');
+  });
 });
 
 describe('buildCraftAddSections', () => {
@@ -536,6 +558,13 @@ describe('mergeTaskOverrides', () => {
     expect(m.t.objectives).toHaveProperty('o1');
     expect(m.t.objectives).toHaveProperty('o2');
   });
+  it('merges overlapping objective patches field-by-field', () => {
+    const m = mergeTaskOverrides(
+      { t: { objectives: { o1: { x: 1, shared: 'base' } } } },
+      { t: { objectives: { o1: { y: 2, shared: 'mode' } } } }
+    );
+    expect(m.t.objectives.o1).toEqual({ x: 1, y: 2, shared: 'mode' });
+  });
   it('concatenates objectivesAdd', () => {
     const m = mergeTaskOverrides(
       { t: { objectivesAdd: [{ id: 'a' }] } },
@@ -559,6 +588,51 @@ describe('createSection / pushRow', () => {
     for (let i = 0; i <= MAX_ROWS; i++) pushRow(s, [`v${i}`]);
     expect(s.rows).toHaveLength(MAX_ROWS);
     expect(s.truncated).toBe(true);
+  });
+});
+
+describe('monitor hardening', () => {
+  it('rejects unsafe numeric environment values', () => {
+    expect(readPositiveInteger('25', 10)).toBe(25);
+    expect(readPositiveInteger('0', 10)).toBe(10);
+    expect(readPositiveInteger('-1', 10)).toBe(10);
+    expect(readPositiveInteger('Infinity', 10)).toBe(10);
+    expect(readPositiveInteger('1.5', 10)).toBe(10);
+    expect(readPort('65535', 3000)).toBe(65535);
+    expect(readPort('65536', 3000)).toBe(3000);
+    expect(readTimerMilliseconds('2147483647', 120000)).toBe(2147483647);
+    expect(readTimerMilliseconds('2147483648', 120000)).toBe(120000);
+  });
+
+  it('only enables rebuilds for the default overlay path', () => {
+    expect(mod.isDefaultOverlayPath(path.resolve('dist/overlay.json'))).toBe(true);
+    expect(mod.isDefaultOverlayPath(path.resolve('custom-overlay.json'))).toBe(false);
+  });
+
+  it('keeps static paths inside the configured public directory', () => {
+    const publicDir = path.resolve('monitor/public');
+    expect(safeJoin(publicDir, '/app.js')).toBe(path.join(publicDir, 'app.js'));
+    expect(safeJoin(publicDir, '../publicity/secret.txt')).toBeNull();
+    expect(safeJoin(publicDir, 'nested/../../server.js')).toBeNull();
+  });
+
+  it('requires explicit opt-in before enabling rebuilds', () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousAllowRebuild = process.env.ALLOW_REBUILD;
+    try {
+      process.env.NODE_ENV = 'development';
+      delete process.env.ALLOW_REBUILD;
+      expect(isRebuildEnabled()).toBe(false);
+      process.env.ALLOW_REBUILD = 'true';
+      expect(isRebuildEnabled()).toBe(true);
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+      if (previousAllowRebuild === undefined) {
+        delete process.env.ALLOW_REBUILD;
+      } else {
+        process.env.ALLOW_REBUILD = previousAllowRebuild;
+      }
+    }
   });
 });
 
@@ -641,6 +715,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
     const res = await fetch(`${baseUrl}/latest?view=tasks&mode=regular`);
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('application/json');
+    const csp = res.headers.get('content-security-policy');
+    expect(csp).toBeDefined();
+    for (const directive of EXPECTED_SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+      expect(csp).toContain(directive);
+    }
+    for (const [name, value] of Object.entries(EXPECTED_SECURITY_HEADERS)) {
+      if (name === 'Content-Security-Policy') continue;
+      expect(res.headers.get(name)).toBe(value);
+    }
   });
 
   it('GET /latest — response shape includes overlay, api, sections', async () => {
@@ -747,6 +830,18 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(modes).toContain('pvp-season');
   });
 
+  it('GET /health — reports not ok when any supported mode is unhealthy', async () => {
+    const previousError = apiState.pve.error;
+    try {
+      apiState.pve.error = 'API unavailable';
+      const res = await fetch(`${baseUrl}/health`);
+      const data = await res.json();
+      expect(data.ok).toBe(false);
+    } finally {
+      apiState.pve.error = previousError;
+    }
+  });
+
   // -- /events ---------------------------------------------------------------
 
   it('GET /events — SSE headers', async () => {
@@ -755,6 +850,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
     try {
       expect(res.status).toBe(200);
       expect(res.headers.get('content-type')).toContain('text/event-stream');
+      const csp = res.headers.get('content-security-policy');
+      expect(csp).toBeDefined();
+      for (const directive of EXPECTED_SECURITY_HEADERS['Content-Security-Policy'].split('; ')) {
+        expect(csp).toContain(directive);
+      }
+      for (const [name, value] of Object.entries(EXPECTED_SECURITY_HEADERS)) {
+        if (name === 'Content-Security-Policy') continue;
+        expect(res.headers.get(name)).toBe(value);
+      }
       expect(res.headers.get('cache-control')).toBe('no-store');
       expect(res.headers.get('connection')).toContain('keep-alive');
     } finally {

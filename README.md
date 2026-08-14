@@ -13,7 +13,7 @@ The tarkov.dev API is an excellent resource, but game updates sometimes outpace 
 
 Fetch the overlay from jsDelivr CDN:
 
-```
+```text
 https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json
 ```
 
@@ -26,6 +26,20 @@ Browse the hosted monitor at [monitor.nivmizz7.fr](https://monitor.nivmizz7.fr),
 ```bash
 npm run monitor
 ```
+
+The monitor is read-only by default. To enable its local “Update overlay” action,
+explicitly opt in when starting it:
+
+```bash
+ALLOW_REBUILD=true npm run monitor
+```
+
+Set `REBUILD_TOKEN` as well when exposing the rebuild API to another trusted
+service. Authenticated callers should pass it in an `Authorization: Bearer …`
+header. For backwards compatibility, `?token=` is also accepted; use that only
+for trusted local clients because query strings can appear in logs and browser
+history. Rebuilds target the default `dist/overlay.json` output; custom local
+and HTTP(S) overlay targets remain read-only.
 
 ## Maintenance
 
