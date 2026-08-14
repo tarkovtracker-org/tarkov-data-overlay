@@ -682,6 +682,43 @@ describe('validateTaskOverride', () => {
       ).toBe(true);
     });
 
+    // Upstream currently ships an id on every trader requirement (361/361 across
+    // regular, pve and pvp-season). Should it ever omit one, the override is
+    // still redundant by value: its own id (synthetic or stale upstream) cannot
+    // address an id-less upstream entry, so patch-by-id would append a duplicate
+    // requirement rather than correct anything. FIXED (i.e. "remove it") is the
+    // correct guidance; flipping to NEEDED would ask maintainers to keep an
+    // override that duplicates the requirement for consumers.
+    it('returns FIXED when the API requirement omits its id but matches semantically', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      });
+      const override: TaskOverride = {
+        traderRequirements: [
+          {
+            id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
     it('returns no detail when both API and override requirements are empty', () => {
       const apiTask = createApiTask({ traderRequirements: [] });
       const override: TaskOverride = { traderRequirements: [] };

@@ -165,6 +165,11 @@ function traderRequirementKey(req: TraderRequirementLike): string {
  * `trader.id + requirementType + compareMethod + value` keeps Fence LL1 and
  * Fence reputation `>= 1` distinguishable while treating an id-only difference
  * as "already fixed upstream".
+ *
+ * This holds even if an upstream entry ever arrives without an id: an override
+ * cannot address an id-less upstream requirement, so keeping it would append a
+ * duplicate under a patch-by-id merge. `fixed` ("remove it") stays the correct
+ * verdict there.
  */
 const validateTraderRequirements: FieldValidator = (override, apiTask) => {
   if (override.traderRequirements === undefined) return null;
