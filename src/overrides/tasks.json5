@@ -111,6 +111,16 @@
     ],
   },
 
+  // Oil Run (renamed from BP Depot) - Change requirements
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
+  //
+  // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  '59c124d686f774189b3c843f': {
+    traderRequirements: [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 1 }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+  },
+
   // Debut - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
   //
