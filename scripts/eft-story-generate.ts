@@ -209,6 +209,9 @@ function main(): void {
     chapter.rewards = meta.rewards ?? null;
     chapter.mapUnlocks = meta.mapUnlocks ?? [];
     chapter.traderUnlocks = meta.traderUnlocks ?? [];
+    if (meta.questUnlocks) {
+      chapter.questUnlocks = meta.questUnlocks;
+    }
     out[chapterId] = chapter;
   }
 

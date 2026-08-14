@@ -3620,4 +3620,56 @@
   '666314b0acf8442f8b0531a1': {
     experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
   },
+
+  // Network Provider - Part 1 - missing task prerequisites
+  //
+  // tarkov.dev serves taskRequirements: [] (empty), so the quest appears
+  // available before any of its in-game prerequisites are met (issue #254).
+  // The wiki's Requirements section lists a Scav karma +2 gate (already
+  // correctly served as a traderRequirements reputation >= 2) plus a
+  // quest-completion unlock path:
+  //
+  //   A Big Loss, A Fuel Matter, Broadcast - Part 2,
+  //   Chemical - Part 4 *or* Out of Curiosity *or* Big Customer,
+  //   Courtesy Visit, Gifts from Tarkov, Gunsmith - AK-105, House Arrest,
+  //   Lost Contact, Seaside Vacation, The Cult,
+  //   The Huntsman Path - Forest Cleaning, The Punisher - Part 4
+  //
+  // The story-chapter unlock paths (Batya / The Ticket) are wired separately
+  // as storyChapters[].questUnlocks; consumers evaluate those as an
+  // ALTERNATIVE to this taskRequirements list (OR between the two paths).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
+  '625d6ff5ddc94657c21a1625': {
+    taskRequirements: [
+      { task: { id: '5ae4493d86f7744b8e15aa8f', name: 'A Big Loss' }, status: ['complete'] },
+      { task: { id: '608974d01a66564e74191fc0', name: 'A Fuel Matter' }, status: ['complete'] },
+      {
+        task: { id: '63913715f8e5dd32bf4e3aaa', name: 'Broadcast - Part 2' },
+        status: ['complete'],
+      },
+      // Chemical chain: wiki lists "Chemical - Part 4 or Out of Curiosity or
+      // Big Customer" (any one of the three). Modeled like tarkov.dev's
+      // Collector, which uses ['complete', 'failed'] on Chemical - Part 4 to
+      // mean "chain resolved to a terminal state".
+      {
+        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
+        status: ['complete', 'failed'],
+      },
+      { task: { id: '5d25e48186f77443e625e386', name: 'Courtesy Visit' }, status: ['complete'] },
+      { task: { id: '61958c366726521dd96828ec', name: 'Gifts from Tarkov' }, status: ['complete'] },
+      { task: { id: '5ae327c886f7745c7b3f2f3f', name: 'Gunsmith - AK-105' }, status: ['complete'] },
+      { task: { id: '639135c3744e452011470807', name: 'House Arrest' }, status: ['complete'] },
+      { task: { id: '6179afd0bca27a099552e040', name: 'Lost Contact' }, status: ['complete'] },
+      { task: { id: '6179ad56c760af5ad2053587', name: 'Seaside Vacation' }, status: ['complete'] },
+      { task: { id: '5a27b9de86f77464e5044585', name: 'The Cult' }, status: ['complete'] },
+      {
+        task: { id: '5d25e2cc86f77443e47ae019', name: 'The Huntsman Path - Forest Cleaning' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '59ca264786f77445a80ed044', name: 'The Punisher - Part 4' },
+        status: ['complete'],
+      },
+    ], // Was: []
+  },
 }

@@ -102,6 +102,19 @@
           "additionalProperties": false
         }
       },
+      "questUnlocks": {
+        "description": "Quests unlocked by progressing through this chapter (tarkov.dev task IDs). Consumers treat these as an alternative unlock path to the quest's taskRequirements.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
       "description": {
         "description": "Brief description or guidance for the chapter",
         "type": ["string", "null"]
