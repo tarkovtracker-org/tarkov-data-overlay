@@ -323,6 +323,8 @@ export interface StoryChapter {
   activation?: StoryChapterActivation;
   mapUnlocks?: Array<{ id: string; name: string }>;
   traderUnlocks?: Array<{ id: string; name: string }>;
+  /** Quests unlocked by progressing through this chapter (alternative to taskRequirements) */
+  questUnlocks?: Array<{ id: string; name: string }>;
   description?: string | null;
   notes?: string | null;
   objectives?: StoryObjective[];
