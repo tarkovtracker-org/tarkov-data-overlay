@@ -1,0 +1,20 @@
+src/overrides/tasks.json5
+  s_86b3709b0cc7df::t_d72ddc6ef3c1f0 3646-3649,3654-3657,3665-3672
+  s_86b3709b0cc7df::t_a1af590cd7cee5 3673
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d4e46b44d2ba34d7a6c8926b5f0e2066470e7bbd",
+  "prompts": {},
+  "sessions": {
+    "s_86b3709b0cc7df": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fffb2-c040-71bd-a99b-eac61fa2516d",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
