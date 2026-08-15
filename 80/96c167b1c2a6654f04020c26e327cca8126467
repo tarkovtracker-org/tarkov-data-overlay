@@ -1,0 +1,47 @@
+src/divergences/tasks.json5
+  s_04c9d20fefaecf::t_0c157f6058621c 11-12,112
+  s_04c9d20fefaecf::t_937d9d41e0dfda 14-18,113-114
+src/overrides/tasks.json5
+  s_2a8c14998f34be::t_c8b960b62b8124 58-64,187
+  s_8bf68331965082::t_b63d0b262ff563 208,212,222,253
+  s_8bf68331965082::t_55706ebd1bd36c 302,309,312,321,328,334,339-340,352,354-355,360,363,368,370-372,376,382,391,393-395,399,402,407,409-410,414,436
+  s_2a8c14998f34be::t_afdc086646343e 121,194,200
+  s_8bf68331965082::t_b0f8d4712705e2 56,130-133,136,139-143,155-157,160-162,165-167,170-172,176-178,181
+  s_2a8c14998f34be::t_1ae2c51b529763 86-89,92-93,95-97,100-104,107-111,115
+  s_8bf68331965082::t_d391de9ec34df0 217
+  s_2a8c14998f34be::t_515d469a44b728 42-43,45-52,69,73,79
+src/overrides/modes/regular/tasks.json5
+  s_8bf68331965082::t_c447df7d45fb9b 77,81-83,85,89,92,95,101,104,107,115,121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8096c167b1c2a6654f04020c26e327cca8126467",
+  "prompts": {},
+  "sessions": {
+    "s_04c9d20fefaecf": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a002db-6aa3-7c07-bd8a-e16cfca1b613",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    },
+    "s_2a8c14998f34be": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00437-5e50-75c1-b5b9-8e0b7755287e",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    },
+    "s_8bf68331965082": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00466-1331-71d8-af78-5b954cef4bf5",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
