@@ -1,0 +1,30 @@
+dist/overlay.json
+  ai_agent 6264-6265
+  s_04c9d20fefaecf::t_8579004742b9e4 4-19,22-40,42-62,65-101,103-123
+  s_04c9d20fefaecf::t_d782298604c5b0 2-3,127-134,136-141,143-196,198,200-240,242-244
+  s_2a8c14998f34be::t_4ce1636a922873 251,253-254,256-257,259-260,262-263,265-266,268-269,271-272
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9ad63852dd7d9c11916907251341b051f8393d13",
+  "prompts": {},
+  "sessions": {
+    "s_04c9d20fefaecf": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a002db-6aa3-7c07-bd8a-e16cfca1b613",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    },
+    "s_2a8c14998f34be": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00437-5e50-75c1-b5b9-8e0b7755287e",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
