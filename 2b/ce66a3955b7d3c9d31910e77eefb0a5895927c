@@ -1,0 +1,39 @@
+src/additions/seasonalPerks.json5
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 11,13
+src/overrides/tasks.json5
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 3,42,45-46,57,62,80,87,102,109,116,124,131,142,188,195,229,642
+  s_9d238acdd4c70d::t_dfdac900960e6c 14,19,48
+src/additions/craftsAdd.json5
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 24
+tests/divergence-registry.test.ts
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 54,57
+src/lib/types.ts
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 664
+tests/divergence-validator.test.ts
+  s_9d238acdd4c70d::t_b937a50f4c7166 43,186,233,283
+src/overrides/modes/regular/tasks.json5
+  s_9d238acdd4c70d::t_dfdac900960e6c 33
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 2,32,39,63,85,97-98,113,117-118
+src/overrides/modes/pve/tasks.json5
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 10,12,14,18-19,21,30,37,44,51,58,65,72,79,86,93,100,109
+src/divergences/tasks.json5
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 49-50,67-68,85-86,91,105-106,116,135,142,162,179,196,213,230,247,264,281,298,315,332-333,350-351,368-369,386-387,404-405,422-423,440-441,458-459,476-477,494-495,512-513,530-531,548-549,566-567,584-585
+src/schemas/task-divergence.schema.json
+  s_9d238acdd4c70d::t_a27c1a1ba7a699 36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2bce66a3955b7d3c9d31910e77eefb0a5895927c",
+  "prompts": {},
+  "sessions": {
+    "s_9d238acdd4c70d": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a00481-e1d4-7c8f-9b93-0c0280513e5e",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
