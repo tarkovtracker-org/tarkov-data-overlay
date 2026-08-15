@@ -1,0 +1,28 @@
+dist/overlay.json
+  s_2602a70699a9da::t_190d4b1b2a2cee 6249-6250
+  s_75ffd30dfe12f1::t_8aaca3f32316e3 188,204-242
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5c733f1b37b56fb086400f0103efdeb2f265894d",
+  "prompts": {},
+  "sessions": {
+    "s_2602a70699a9da": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0069c-7606-71db-9314-2b0997e103d5",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    },
+    "s_75ffd30dfe12f1": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0049e-9831-7da1-9a9c-3072c71d9dc7",
+        "model": "deepseek-v4-pro"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
