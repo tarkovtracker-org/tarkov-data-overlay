@@ -59,23 +59,24 @@ describe('taskOverlayFiles', () => {
 
 describe('loadSuppressedFields', () => {
   it('suppresses fields corrected in mode-specific files, not just the base file', () => {
-    // Anesthesia's active experience correction lives in the REGULAR mode file;
-    // the PvE entry is parked (commented out). Default scope reads both.
+    // Power of Persuasion's objective count correction lives in the REGULAR
+    // mode file (the base file only carries a provenance note). Default scope
+    // reads both, so the key must be suppressed.
     const { suppressed } = loadSuppressedFields();
-    expect(suppressed.has('5eda19f0edce541157209cee:experience')).toBe(true);
+    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
   });
 
   it('does not let a regular-mode correction suppress when scoped to pve', () => {
     // The regression this PR guards against: a correction present only in the
-    // regular file must not mask a pve comparison. Anesthesia is corrected in
-    // regular, so under pve scope its key must be absent.
+    // regular file must not mask a pve comparison. Power of Persuasion is
+    // corrected in regular, so under pve scope its key must be absent.
     const { suppressed } = loadSuppressedFields('pve');
-    expect(suppressed.has('5eda19f0edce541157209cee:experience')).toBe(false);
+    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(false);
   });
 
   it('still suppresses the regular correction under regular scope', () => {
     const { suppressed } = loadSuppressedFields('regular');
-    expect(suppressed.has('5eda19f0edce541157209cee:experience')).toBe(true);
+    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
   });
 });
 
@@ -83,12 +84,14 @@ describe('loadDivergentFieldKeys', () => {
   const keys = loadDivergentFieldKeys();
 
   it('returns taskId:field keys for registered divergences', () => {
-    expect(keys.has('5eda19f0edce541157209cee:experience')).toBe(true);
+    expect(keys.has('67d03be712fb5f8fd2096332:objective[67d03be712fb5f8fd2096334].count')).toBe(
+      true
+    );
   });
 
   it('excludes converged entries, which need no elevation', () => {
-    // A Fuel Matter is recorded as converged.
-    expect(keys.has('608974d01a66564e74191fc0:minPlayerLevel')).toBe(false);
+    // Dandies is recorded as converged.
+    expect(keys.has('65734c186dc1e402c80dc19e:experience')).toBe(false);
   });
 });
 

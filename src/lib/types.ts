@@ -641,7 +641,7 @@ export interface SchemaConfig {
 export type DivergenceConfidence = 'high' | 'medium' | 'low';
 
 /** Where a recorded per-mode value came from */
-export type DivergenceSource = 'wiki' | 'tarkov.dev' | 'in-game';
+export type DivergenceSource = 'wiki' | 'tarkov.dev' | 'in-game' | 'patch-notes';
 
 /**
  * Whether the two modes genuinely differ, currently agree, or the task only

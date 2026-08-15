@@ -18,19 +18,19 @@
               "type": ["number", "string", "boolean", "null"]
             },
             "pveSource": {
-              "enum": ["wiki", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
             },
             "pvp-season": {
               "type": ["number", "string", "boolean", "null"]
             },
             "pvpSeasonSource": {
-              "enum": ["wiki", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
             },
             "regular": {
               "type": ["number", "string", "boolean", "null"]
             },
             "regularSource": {
-              "enum": ["wiki", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
             },
             "verified": {
               "description": "Coarse reference to the data the values were last verified against (e.g. 1.1-pve); dates are deliberately not recorded.",

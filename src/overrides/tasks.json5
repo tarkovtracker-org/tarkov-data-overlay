@@ -1,7 +1,7 @@
 {
   // ---------------------------------------------------------------------------
-  // Provenance notes (kept from the capture-alignment pass, commit
-  // 6c3700f) for entries that were dropped or moved:
+  // Provenance notes for entries that were deliberately dropped or moved
+  // (recoverable from git history):
   //
   // Pathfinder - REMOVED: an objective description was mis-attributed to a
   // nonexistent quest ("Sales Night"); it rewrote a correct type=visit
@@ -89,10 +89,126 @@
     experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
   },
 
+  // -------------------------------------------------------------------------
+  // EFT 1.1.0.0 quest experience rework - WIKI LAGS on these pages.
+  //
+  // The 1.1.0.0 patch notes state the Season 1 task-reward rebalance applies
+  // to all game modes ("The following changes apply to all game modes: PvP
+  // Season, PvP Zone, and PvE Zone"), the 1.1-pve data carries a single
+  // mode-free value for each of these rewards (no gameMode splits; every
+  // reward lists regular + pve + pvp-season editions), and the wiki has
+  // already been updated to the consolidated 1.1 figures for the other
+  // reworked quests above - these pages simply have not caught up yet (they
+  // still show the pre-1.1 value for regular). tarkov.dev serves the stale
+  // pre-1.1 value in EVERY mode, so the correction is mode-uniform and lives
+  // here in the base overrides. See src/divergences/tasks.json5 (status:
+  // converged).
+  //
+  // These previously lived in src/overrides/modes/pve/tasks.json5 as
+  // PvE-only corrections while regular was still pinned to the (stale) wiki;
+  // moved here once the all-modes 1.1 rework was established.
+  // -------------------------------------------------------------------------
+
+  // Surveillance - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Surveillance
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '639135e8c115f907b14700aa': {
+    experience: 10000, // Was: 12000 (all modes, stale pre-1.1 value)
+  },
+
+  // Private Club - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '675c3582f6ddc329a90f9c6d': {
+    experience: 3000, // Was: 11000 (all modes, stale pre-1.1 value)
+  },
+
+  // Properties All Around - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Properties_All_Around
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '6573397ef3f8344c4575cd87': {
+    experience: 10000, // Was: 6600 (all modes, stale pre-1.1 value)
+  },
+
+  // Unique Experience - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '675c1ff1a757ddd00404f0aa': {
+    experience: 65000, // Was: 32000 (all modes, stale pre-1.1 value)
+  },
+
+  // Reconnaissance - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Reconnaissance
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '626bd75c71bd851e971b82a5': {
+    experience: 28000, // Was: 7500 (all modes, stale pre-1.1 value)
+  },
+
+  // Hell on Earth - Part 2 - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '666314b2a9290f9e0806cca3': {
+    experience: 28000, // Was: 16000 (all modes, stale pre-1.1 value)
+  },
+
+  // A Difficult Choice - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Difficult_Choice
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '5edac34d0bb72a50635c2bfa': {
+    experience: 65000, // Was: 27500 (all modes, stale pre-1.1 value)
+  },
+
+  // Beneath The Streets - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '66aba85403e0ee3101042877': {
+    experience: 65000, // Was: 24000 (all modes, stale pre-1.1 value)
+  },
+
+  // Crisis - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Crisis
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '60e71c48c1bfa3050473b8e5': {
+    experience: 65000, // Was: 34000 (all modes, stale pre-1.1 value)
+  },
+
+  // Job for a Patriot - quest XP reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
+  // Verified: the 1.1-pve data; wiki still shows the old value.
+  '64f5deac39e45b527a7c4232': {
+    experience: 10000, // Was: 18000 (all modes, stale pre-1.1 value)
+  },
+
+  // Collector - minimum player level in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //
+  // The 1.1-pve data carries a single mode-free Level condition (value 40);
+  // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
+  // lists no player level for Collector (only Scav karma + trader loyalties),
+  // so it cannot adjudicate. Previously shipped as a PvE-only correction.
+  '5c51aac186f77432ea65c552': {
+    minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
+  },
+
+  // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Long_Road
+  //
+  // The 1.1-pve data reads CounterCreator value 7 (single mode-free
+  // condition); tarkov.dev serves the stale pre-1.1 count (4) in every mode
+  // and the wiki still shows the old figure. Previously shipped as a PvE-only
+  // correction.
+  '6193850f60b34236ee0483de': {
+    objectives: {
+      '6193dabd5f6468204470571f': {
+        count: 7, // Was: 4 (all modes, stale pre-1.1 value)
+      },
+    },
+  },
+
   // Immunity - wikiLink points to the skill page instead of the quest page
   // Proof: https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)
   //
-  // tarkov.dev currently returns the Immunity skill page instead of the quest page.
+  // tarkov.dev returns the Immunity skill page instead of the quest page.
   '6663148ca9290f9e0806cca1': {
     wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)', // Was: https://escapefromtarkov.fandom.com/wiki/Immunity
   },
@@ -140,7 +256,7 @@
   // upstream; this patch supplies its zone (in-game verified, issue #246).
   // tarkov.dev dropped the third/fourth tank objectives entirely in the
   // 1.1.0.0 sync (matching the 1.1-pve data); the former fourth-tank zone patch
-  // (6926fcc872a6499d1fa29327) was removed with them (commit 6c3700f).
+  // (6926fcc872a6499d1fa29327) was removed with them.
   '5ae448f286f77448d73c0131': {
     objectives: {
       '5ae452de86f77450595c4333': {
@@ -200,7 +316,8 @@
   // Forester's Duty - Objective descriptions incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/Forester%27s_Duty
   //
-  // Recent wiki update (post-1.0)
+  // The wiki agrees with the corrected wording; tarkov.dev still serves the
+  // pre-1.1 descriptions.
   '66ab9da7eb102b9bcd08591c': {
     objectives: {
       '66ab9da7eb102b9bcd08591d': {
@@ -290,7 +407,8 @@
 
   // Hidden Layer - One objective map still shows 'Any' when it should say 'Shoreline'
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hidden_Layer
-  // After Labrys update; 2 of 3 objectives now fixed in API
+  // The two visit objectives are correct upstream; only the findItem
+  // objective ships with an empty maps list.
   '67a096577e86e067eb045733': {
     objectives: {
       '67dbdd819d8208bb2082480e': {
