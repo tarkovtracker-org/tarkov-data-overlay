@@ -182,65 +182,10 @@
               ]
             }
           }
-        },
-        "5eda19f0edce541157209cee": {
-          "experience": 18100
-        },
-        "6179b3a12153c15e937d52bc": {
-          "experience": 13000
-        },
-        "60896bca6ee58f38c417d4f2": {
-          "experience": 15300
-        },
-        "5edab4b1218d181e29451435": {
-          "experience": 16300
         }
       }
     },
-    "pve": {
-      "tasks": {
-        "639135e8c115f907b14700aa": {
-          "experience": 10000
-        },
-        "675c3582f6ddc329a90f9c6d": {
-          "experience": 3000
-        },
-        "6573397ef3f8344c4575cd87": {
-          "experience": 10000
-        },
-        "675c1ff1a757ddd00404f0aa": {
-          "experience": 65000
-        },
-        "626bd75c71bd851e971b82a5": {
-          "experience": 28000
-        },
-        "666314b2a9290f9e0806cca3": {
-          "experience": 28000
-        },
-        "5edac34d0bb72a50635c2bfa": {
-          "experience": 65000
-        },
-        "66aba85403e0ee3101042877": {
-          "experience": 65000
-        },
-        "60e71c48c1bfa3050473b8e5": {
-          "experience": 65000
-        },
-        "64f5deac39e45b527a7c4232": {
-          "experience": 10000
-        },
-        "5c51aac186f77432ea65c552": {
-          "minPlayerLevel": 40
-        },
-        "6193850f60b34236ee0483de": {
-          "objectives": {
-            "6193dabd5f6468204470571f": {
-              "count": 7
-            }
-          }
-        }
-      }
-    },
+    "pve": {},
     "pvp-season": {}
   },
   "tasks": {
@@ -255,6 +200,46 @@
     },
     "5c0d1c4cd0928202a02a6f5c": {
       "experience": 65000
+    },
+    "639135e8c115f907b14700aa": {
+      "experience": 10000
+    },
+    "675c3582f6ddc329a90f9c6d": {
+      "experience": 3000
+    },
+    "6573397ef3f8344c4575cd87": {
+      "experience": 10000
+    },
+    "675c1ff1a757ddd00404f0aa": {
+      "experience": 65000
+    },
+    "626bd75c71bd851e971b82a5": {
+      "experience": 28000
+    },
+    "666314b2a9290f9e0806cca3": {
+      "experience": 28000
+    },
+    "5edac34d0bb72a50635c2bfa": {
+      "experience": 65000
+    },
+    "66aba85403e0ee3101042877": {
+      "experience": 65000
+    },
+    "60e71c48c1bfa3050473b8e5": {
+      "experience": 65000
+    },
+    "64f5deac39e45b527a7c4232": {
+      "experience": 10000
+    },
+    "5c51aac186f77432ea65c552": {
+      "minPlayerLevel": 40
+    },
+    "6193850f60b34236ee0483de": {
+      "objectives": {
+        "6193dabd5f6468204470571f": {
+          "count": 7
+        }
+      }
     },
     "6663148ca9290f9e0806cca1": {
       "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Immunity_(quest)"
@@ -6261,7 +6246,7 @@
   },
   "$meta": {
     "version": "1.65",
-    "generated": "2026-08-15T08:31:58.973Z",
-    "sha256": "1f8b478ada7701de5c2f8f2add165a10600b2f4701e8c9dadf8d45eeed8c7397"
+    "generated": "2026-08-15T18:10:29.629Z",
+    "sha256": "8f6dd44b5ec0096c084f3e616063c9467ca2f12113c3ca2535bac2eb2a55f768"
   }
 }
