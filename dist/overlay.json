@@ -126,6 +126,9 @@
     "657315e1dccd301f1301416a": {
       "traderRequirements": [
         {
+          "id": "overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -137,6 +140,9 @@
     "59674cd986f7744ab26e32f2": {
       "traderRequirements": [
         {
+          "id": "overlay.59674cd986f7744ab26e32f2.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -148,6 +154,9 @@
     "5fd9fad9c1ce6b1a3b486d00": {
       "traderRequirements": [
         {
+          "id": "overlay.5fd9fad9c1ce6b1a3b486d00.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -159,6 +168,9 @@
     "5967530a86f77462ba22226b": {
       "traderRequirements": [
         {
+          "id": "overlay.5967530a86f77462ba22226b.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -170,6 +182,9 @@
     "5967725e86f774601a446662": {
       "traderRequirements": [
         {
+          "id": "overlay.5967725e86f774601a446662.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -181,6 +196,9 @@
     "5936da9e86f7742d65037edf": {
       "traderRequirements": [
         {
+          "id": "overlay.5936da9e86f7742d65037edf.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -192,6 +210,9 @@
     "675c3507a06634b5110e3c18": {
       "traderRequirements": [
         {
+          "id": "overlay.675c3507a06634b5110e3c18.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -203,6 +224,9 @@
     "59c124d686f774189b3c843f": {
       "traderRequirements": [
         {
+          "id": "overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -214,6 +238,9 @@
     "5936d90786f7742b1420ba5b": {
       "traderRequirements": [
         {
+          "id": "overlay.5936d90786f7742b1420ba5b.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -225,6 +252,9 @@
     "657315df034d76585f032e01": {
       "traderRequirements": [
         {
+          "id": "overlay.657315df034d76585f032e01.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -263,6 +293,9 @@
       },
       "traderRequirements": [
         {
+          "id": "overlay.63a5cf262964a7488f5243ce.54cb50c76803fa8b248b4571.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -274,6 +307,9 @@
     "6573397ef3f8344c4575cd87": {
       "traderRequirements": [
         {
+          "id": "overlay.6573397ef3f8344c4575cd87.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -285,6 +321,9 @@
     "5c0d190cd09282029f5390d8": {
       "traderRequirements": [
         {
+          "id": "6a268caf84124948db9ab8f0",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -296,6 +335,9 @@
     "6391359b9444fb141f4e6ee6": {
       "traderRequirements": [
         {
+          "id": "overlay.6391359b9444fb141f4e6ee6.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -308,6 +350,9 @@
       "name": "District Patrol",
       "traderRequirements": [
         {
+          "id": "overlay.64e7b9bffd30422ed03dad38.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -320,6 +365,9 @@
     "639136f086e646067c176a8b": {
       "traderRequirements": [
         {
+          "id": "overlay.639136f086e646067c176a8b.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -331,6 +379,9 @@
     "5eda19f0edce541157209cee": {
       "traderRequirements": [
         {
+          "id": "overlay.5eda19f0edce541157209cee.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -342,6 +393,9 @@
     "59675ea386f77414b32bded2": {
       "traderRequirements": [
         {
+          "id": "overlay.59675ea386f77414b32bded2.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -353,6 +407,9 @@
     "60e71b9bbd90872cb85440f3": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71b9bbd90872cb85440f3.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -364,6 +421,9 @@
     "59675d6c86f7740a842fc482": {
       "traderRequirements": [
         {
+          "id": "6a2692eb3290f881e29e6f72",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -376,6 +436,9 @@
       "name": "Glory to CPSU",
       "traderRequirements": [
         {
+          "id": "overlay.639135b04ed9512be67647d7.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -387,6 +450,9 @@
     "59674eb386f774539f14813a": {
       "traderRequirements": [
         {
+          "id": "overlay.59674eb386f774539f14813a.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -398,6 +464,9 @@
     "669fa399033a3ce9870338a8": {
       "traderRequirements": [
         {
+          "id": "overlay.669fa399033a3ce9870338a8.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -410,6 +479,9 @@
       "name": "Job for a Patriot",
       "traderRequirements": [
         {
+          "id": "overlay.64f5deac39e45b527a7c4232.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -422,6 +494,9 @@
       "name": "The Tarkov Import",
       "traderRequirements": [
         {
+          "id": "overlay.5c0bd94186f7747a727f09b2.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -445,6 +520,9 @@
       },
       "traderRequirements": [
         {
+          "id": "overlay.669fa3a40c828825de06d6a1.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -456,6 +534,9 @@
     "60896bca6ee58f38c417d4f2": {
       "traderRequirements": [
         {
+          "id": "6a32a71f7b1e24899a2ff53c",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -468,6 +549,9 @@
       "name": "Easy Job",
       "traderRequirements": [
         {
+          "id": "6a32a4304fa148829f895710",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -479,6 +563,9 @@
     "66ab970848ddbe9d4a0c49a8": {
       "traderRequirements": [
         {
+          "id": "overlay.66ab970848ddbe9d4a0c49a8.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -490,6 +577,9 @@
     "626bd75c71bd851e971b82a5": {
       "traderRequirements": [
         {
+          "id": "overlay.626bd75c71bd851e971b82a5.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -501,6 +591,9 @@
     "60896b7bfa70fc097863b8f5": {
       "traderRequirements": [
         {
+          "id": "overlay.60896b7bfa70fc097863b8f5.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -513,6 +606,9 @@
       "name": "The Bunker",
       "traderRequirements": [
         {
+          "id": "6a32a697feea519d9e9a827a",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -524,6 +620,9 @@
     "63a9ae24009ffc6a551631a5": {
       "traderRequirements": [
         {
+          "id": "overlay.63a9ae24009ffc6a551631a5.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -535,6 +634,9 @@
     "60e71bb4e456d449cd47ca75": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71bb4e456d449cd47ca75.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -546,6 +648,9 @@
     "67b45467814ab0ffa000c7e7": {
       "traderRequirements": [
         {
+          "id": "6a330d28962a6f96eba02bae",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -558,6 +663,9 @@
       "name": "Unique Experience",
       "traderRequirements": [
         {
+          "id": "overlay.675c1ff1a757ddd00404f0aa.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -569,6 +677,9 @@
     "5d4bec3486f7743cac246665": {
       "traderRequirements": [
         {
+          "id": "6a331835f78e12821f3a5c3e",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -580,6 +691,9 @@
     "60e71b62a0beca400d69efc4": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71b62a0beca400d69efc4.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -593,6 +707,9 @@
       "name": "Getting Some Air",
       "traderRequirements": [
         {
+          "id": "6a557a780d81c4218f264a21",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -604,6 +721,9 @@
     "59c50a9e86f7745fef66f4ff": {
       "traderRequirements": [
         {
+          "id": "overlay.59c50a9e86f7745fef66f4ff.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -615,6 +735,9 @@
     "59c50c8886f7745fed3193bf": {
       "traderRequirements": [
         {
+          "id": "6a70899e66497c811decb758",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -626,6 +749,9 @@
     "59c512ad86f7741f0d09de9b": {
       "traderRequirements": [
         {
+          "id": "overlay.59c512ad86f7741f0d09de9b.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -637,6 +763,9 @@
     "59ca264786f77445a80ed044": {
       "traderRequirements": [
         {
+          "id": "6a708cbfc256169e529e4f1c",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -648,6 +777,9 @@
     "59ca29fb86f77445ab465c87": {
       "traderRequirements": [
         {
+          "id": "overlay.59ca29fb86f77445ab465c87.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -659,6 +791,9 @@
     "59ca2eb686f77445a80ed049": {
       "traderRequirements": [
         {
+          "id": "overlay.59ca2eb686f77445a80ed049.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -670,6 +805,9 @@
     "597a171586f77405ba6887d3": {
       "traderRequirements": [
         {
+          "id": "overlay.597a171586f77405ba6887d3.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -681,6 +819,9 @@
     "69ce1de03e15cd80bd06f6c9": {
       "traderRequirements": [
         {
+          "id": "overlay.69ce1de03e15cd80bd06f6c9.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -692,6 +833,9 @@
     "6740a3f4eca8acb2d2055159": {
       "traderRequirements": [
         {
+          "id": "overlay.6740a3f4eca8acb2d2055159.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -703,6 +847,9 @@
     "6740a15566e6a521aa051b15": {
       "traderRequirements": [
         {
+          "id": "overlay.6740a15566e6a521aa051b15.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -714,6 +861,9 @@
     "6740a2c17e3818d5bb0648b6": {
       "traderRequirements": [
         {
+          "id": "overlay.6740a2c17e3818d5bb0648b6.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb50c76803fa8b248b4571",
             "name": "Prapor"
@@ -725,6 +875,9 @@
     "5969f9e986f7741dde183a50": {
       "traderRequirements": [
         {
+          "id": "overlay.5969f9e986f7741dde183a50.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -737,6 +890,9 @@
       "name": "Operation Aquarius",
       "traderRequirements": [
         {
+          "id": "overlay.59689fbd86f7740d137ebfc4.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -749,6 +905,9 @@
       "name": "Blood in the Water",
       "traderRequirements": [
         {
+          "id": "overlay.5968eb3186f7741dde183a4d.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -760,6 +919,9 @@
     "657315ddab5a49b71f098853": {
       "traderRequirements": [
         {
+          "id": "overlay.657315ddab5a49b71f098853.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -771,6 +933,9 @@
     "675c047fa46173572a0bd878": {
       "traderRequirements": [
         {
+          "id": "overlay.675c047fa46173572a0bd878.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -782,6 +947,9 @@
     "5967733e86f774602332fc84": {
       "traderRequirements": [
         {
+          "id": "overlay.5967733e86f774602332fc84.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -793,6 +961,9 @@
     "596a0e1686f7741ddf17dbee": {
       "traderRequirements": [
         {
+          "id": "overlay.596a0e1686f7741ddf17dbee.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -804,6 +975,9 @@
     "675c03d1f7da9792a405549a": {
       "traderRequirements": [
         {
+          "id": "overlay.675c03d1f7da9792a405549a.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -815,6 +989,9 @@
     "669fa39ee749756c920d02c8": {
       "traderRequirements": [
         {
+          "id": "6a5671eb45279d26d08058eb",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -826,6 +1003,9 @@
     "596a1e6c86f7741ddc2d3206": {
       "traderRequirements": [
         {
+          "id": "overlay.596a1e6c86f7741ddc2d3206.54cb57776803fa99248b456e.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -838,6 +1018,9 @@
       "name": "Sanitary Standards",
       "traderRequirements": [
         {
+          "id": "overlay.59689ee586f7740d1570bbd5.54cb57776803fa99248b456e.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -849,6 +1032,9 @@
     "639135d89444fb141f4e6eea": {
       "traderRequirements": [
         {
+          "id": "6a56728bf66db0e9f214d01f",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -860,6 +1046,9 @@
     "639135e0fa894f0a866afde6": {
       "traderRequirements": [
         {
+          "id": "overlay.639135e0fa894f0a866afde6.54cb57776803fa99248b456e.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -871,6 +1060,9 @@
     "60896e28e4a85c72ef3fa301": {
       "traderRequirements": [
         {
+          "id": "overlay.60896e28e4a85c72ef3fa301.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -882,6 +1074,9 @@
     "596a218586f77420d232807c": {
       "traderRequirements": [
         {
+          "id": "overlay.596a218586f77420d232807c.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -893,6 +1088,9 @@
     "626bd75b05f287031503c7f6": {
       "traderRequirements": [
         {
+          "id": "overlay.626bd75b05f287031503c7f6.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -905,6 +1103,9 @@
       "name": "Colleagues",
       "traderRequirements": [
         {
+          "id": "6a5685563580cb5f5777824a",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -917,6 +1118,9 @@
       "name": "Tarkov-Style Diplomacy",
       "traderRequirements": [
         {
+          "id": "overlay.5edaba7c0c502106f869bc02.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -931,6 +1135,9 @@
     "6179afd0bca27a099552e040": {
       "traderRequirements": [
         {
+          "id": "6a568cd5051e9fd6be55db27",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -942,6 +1149,9 @@
     "6179ad56c760af5ad2053587": {
       "traderRequirements": [
         {
+          "id": "overlay.6179ad56c760af5ad2053587.54cb57776803fa99248b456e.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -953,6 +1163,9 @@
     "66aba85403e0ee3101042877": {
       "traderRequirements": [
         {
+          "id": "6a5691e3b9e428b94e3559f9",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -964,6 +1177,9 @@
     "60e71c48c1bfa3050473b8e5": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71c48c1bfa3050473b8e5.54cb57776803fa99248b456e.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -975,6 +1191,9 @@
     "5c0d1c4cd0928202a02a6f5c": {
       "traderRequirements": [
         {
+          "id": "6a56918725d5f33f34942282",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "54cb57776803fa99248b456e",
             "name": "Therapist"
@@ -987,6 +1206,9 @@
     "6663148ed7f171c4c20226c1": {
       "traderRequirements": [
         {
+          "id": "overlay.6663148ed7f171c4c20226c1.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -998,6 +1220,9 @@
     "6663149196a9349baa021baa": {
       "traderRequirements": [
         {
+          "id": "overlay.6663149196a9349baa021baa.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -1009,6 +1234,9 @@
     "66631493312343839d032d22": {
       "traderRequirements": [
         {
+          "id": "overlay.66631493312343839d032d22.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -1025,20 +1253,12 @@
         }
       }
     },
-    "6672d9def1c88688a707d042": {
-      "traderRequirements": [
-        {
-          "trader": {
-            "id": "579dc571d53a0658a154fbec",
-            "name": "Fence"
-          },
-          "value": 1
-        }
-      ]
-    },
     "66631489acf8442f8b05319f": {
       "traderRequirements": [
         {
+          "id": "overlay.66631489acf8442f8b05319f.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -1050,6 +1270,9 @@
     "6663148ca9290f9e0806cca1": {
       "traderRequirements": [
         {
+          "id": "overlay.6663148ca9290f9e0806cca1.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -1062,28 +1285,9 @@
     "60effd818b669d08a35bfad5": {
       "traderRequirements": [
         {
-          "trader": {
-            "id": "579dc571d53a0658a154fbec",
-            "name": "Fence"
-          },
-          "value": 1
-        }
-      ]
-    },
-    "5c51aac186f77432ea65c552": {
-      "traderRequirements": [
-        {
-          "trader": {
-            "id": "579dc571d53a0658a154fbec",
-            "name": "Fence"
-          },
-          "value": 1
-        }
-      ]
-    },
-    "66d9cbb67b491f9d5304f6e6": {
-      "traderRequirements": [
-        {
+          "id": "overlay.60effd818b669d08a35bfad5.579dc571d53a0658a154fbec.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "579dc571d53a0658a154fbec",
             "name": "Fence"
@@ -1095,6 +1299,9 @@
     "596b36c586f77450d6045ad2": {
       "traderRequirements": [
         {
+          "id": "overlay.596b36c586f77450d6045ad2.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1106,6 +1313,9 @@
     "657315e270bb0b8dba00cc48": {
       "traderRequirements": [
         {
+          "id": "overlay.657315e270bb0b8dba00cc48.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1117,6 +1327,9 @@
     "5979eee086f774311955e614": {
       "traderRequirements": [
         {
+          "id": "overlay.5979eee086f774311955e614.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1128,6 +1341,9 @@
     "5b47926a86f7747ccc057c15": {
       "traderRequirements": [
         {
+          "id": "overlay.5b47926a86f7747ccc057c15.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1139,6 +1355,9 @@
     "596b43fb86f77457ca186186": {
       "traderRequirements": [
         {
+          "id": "overlay.596b43fb86f77457ca186186.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1150,6 +1369,9 @@
     "675c3582f6ddc329a90f9c6d": {
       "traderRequirements": [
         {
+          "id": "overlay.675c3582f6ddc329a90f9c6d.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1161,6 +1383,9 @@
     "658027799634223183395339": {
       "traderRequirements": [
         {
+          "id": "overlay.658027799634223183395339.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1173,6 +1398,9 @@
     "5979ed3886f77431307dc512": {
       "traderRequirements": [
         {
+          "id": "overlay.5979ed3886f77431307dc512.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1184,6 +1412,9 @@
     "5979f8bb86f7743ec214c7a6": {
       "traderRequirements": [
         {
+          "id": "overlay.5979f8bb86f7743ec214c7a6.58330581ace78e27b8b10cee.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1196,6 +1427,9 @@
       "name": "Beyond the Red Meat",
       "traderRequirements": [
         {
+          "id": "6a5a9410c2522cbbe5bcc808",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1208,6 +1442,9 @@
       "name": "The Secret Recipe",
       "traderRequirements": [
         {
+          "id": "overlay.64f6aafd67e11a7c6206e0d0.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1219,6 +1456,9 @@
     "5b4795fb86f7745876267770": {
       "traderRequirements": [
         {
+          "id": "6a5a944e5e12536882583b02",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1230,6 +1470,9 @@
     "5c1234c286f77406fa13baeb": {
       "traderRequirements": [
         {
+          "id": "overlay.5c1234c286f77406fa13baeb.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1355,6 +1598,9 @@
     "639dbaf17c898a131e1cffff": {
       "traderRequirements": [
         {
+          "id": "overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1368,6 +1614,9 @@
       "name": "Supplements",
       "traderRequirements": [
         {
+          "id": "overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1380,6 +1629,9 @@
       "name": "Vitamins",
       "traderRequirements": [
         {
+          "id": "overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1391,6 +1643,9 @@
     "669fa39c64ea11e84c0642a6": {
       "traderRequirements": [
         {
+          "id": "overlay.669fa39c64ea11e84c0642a6.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1402,6 +1657,9 @@
     "669fa395c4c5c04798002497": {
       "traderRequirements": [
         {
+          "id": "6a5a93c8db2687962b275371",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1414,6 +1672,9 @@
       "name": "Friend From the West",
       "traderRequirements": [
         {
+          "id": "overlay.5a27c99a86f7747d2c6bdd8e.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1425,6 +1686,9 @@
     "596b455186f77457cb50eccb": {
       "traderRequirements": [
         {
+          "id": "overlay.596b455186f77457cb50eccb.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1437,6 +1701,9 @@
       "name": "House Arrest",
       "traderRequirements": [
         {
+          "id": "overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1448,6 +1715,9 @@
     "6089743983426423753cd58a": {
       "traderRequirements": [
         {
+          "id": "overlay.6089743983426423753cd58a.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1459,6 +1729,9 @@
     "6179b4f16e9dd54ac275e407": {
       "traderRequirements": [
         {
+          "id": "6a5ab667f680e09c8c1bf5a3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1470,6 +1743,9 @@
     "5edabd13218d181e29451442": {
       "traderRequirements": [
         {
+          "id": "overlay.5edabd13218d181e29451442.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1481,6 +1757,9 @@
     "6572e876dc0d635f633a5714": {
       "traderRequirements": [
         {
+          "id": "overlay.6572e876dc0d635f633a5714.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1493,6 +1772,9 @@
     "626bd75d5bef5d7d590bd415": {
       "traderRequirements": [
         {
+          "id": "overlay.626bd75d5bef5d7d590bd415.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1504,6 +1786,9 @@
     "60896888e4a85c72ef3fa300": {
       "traderRequirements": [
         {
+          "id": "6a5ab6bf5d4ba3e1966dcd75",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1515,6 +1800,9 @@
     "6193850f60b34236ee0483de": {
       "traderRequirements": [
         {
+          "id": "overlay.6193850f60b34236ee0483de.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1526,6 +1814,9 @@
     "5c0bc91486f7746ab41857a2": {
       "traderRequirements": [
         {
+          "id": "6a5abc99e0f019d42e708621",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1537,6 +1828,9 @@
     "5c0bbaa886f7746941031d82": {
       "traderRequirements": [
         {
+          "id": "6a5abbce80de21369de9a336",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1548,6 +1842,9 @@
     "6764174c86addd02bc033d68": {
       "traderRequirements": [
         {
+          "id": "overlay.6764174c86addd02bc033d68.58330581ace78e27b8b10cee.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1559,6 +1856,9 @@
     "60e71c11d54b755a3b53eb65": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71c11d54b755a3b53eb65.58330581ace78e27b8b10cee.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "58330581ace78e27b8b10cee",
             "name": "Skier"
@@ -1570,6 +1870,9 @@
     "675c1d6d59b0575973008fc7": {
       "traderRequirements": [
         {
+          "id": "overlay.675c1d6d59b0575973008fc7.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1582,6 +1885,9 @@
       "name": "New Paths",
       "traderRequirements": [
         {
+          "id": "overlay.66aa58245ab22944110db6e9.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1593,6 +1899,9 @@
     "5a27b7a786f774579c3eb376": {
       "traderRequirements": [
         {
+          "id": "overlay.5a27b7a786f774579c3eb376.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1604,6 +1913,9 @@
     "669fa38fad7f1eac2607ed46": {
       "traderRequirements": [
         {
+          "id": "overlay.669fa38fad7f1eac2607ed46.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1615,6 +1927,9 @@
     "5a27b80086f774429a5d7e20": {
       "traderRequirements": [
         {
+          "id": "overlay.5a27b80086f774429a5d7e20.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1626,6 +1941,9 @@
     "5a27b75b86f7742e97191958": {
       "traderRequirements": [
         {
+          "id": "6a5ccb9c38a1dc09841e0002",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1638,6 +1956,9 @@
       "name": "Weapons Circulation",
       "traderRequirements": [
         {
+          "id": "overlay.5a27ba1c86f77461ea5a3c56.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1649,6 +1970,9 @@
     "639282134ed9512be67647ed": {
       "traderRequirements": [
         {
+          "id": "overlay.639282134ed9512be67647ed.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1660,6 +1984,9 @@
     "5a27b87686f77460de0252a8": {
       "traderRequirements": [
         {
+          "id": "overlay.5a27b87686f77460de0252a8.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1672,6 +1999,9 @@
       "name": "The Cult",
       "traderRequirements": [
         {
+          "id": "6a5ccc86a7c316d35f7b7c72",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1683,6 +2013,9 @@
     "639135f286e646067c176a87": {
       "traderRequirements": [
         {
+          "id": "overlay.639135f286e646067c176a87.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1694,6 +2027,9 @@
     "639135534b15ca31f76bc317": {
       "traderRequirements": [
         {
+          "id": "overlay.639135534b15ca31f76bc317.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1705,6 +2041,9 @@
     "5a27b7d686f77460d847e6a6": {
       "traderRequirements": [
         {
+          "id": "overlay.5a27b7d686f77460d847e6a6.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1717,6 +2056,9 @@
       "name": "Tracker",
       "traderRequirements": [
         {
+          "id": "6a5cd187f437270d2aaf9a78",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1729,6 +2071,9 @@
       "name": "Cargo X",
       "traderRequirements": [
         {
+          "id": "overlay.5a27bb1e86f7741f27621b7e.5935c25fb3acc3127c3d8cd9.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1740,6 +2085,9 @@
     "6179b4d1bca27a099552e04e": {
       "traderRequirements": [
         {
+          "id": "6a5cd322e269e5d058004aec",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1751,6 +2099,9 @@
     "60e71c9ad54b755a3b53eb66": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71c9ad54b755a3b53eb66.5935c25fb3acc3127c3d8cd9.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1763,6 +2114,9 @@
       "name": "Gifts from Tarkov",
       "traderRequirements": [
         {
+          "id": "overlay.61958c366726521dd96828ec.5935c25fb3acc3127c3d8cd9.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1774,6 +2128,9 @@
     "6086c852c945025d41566124": {
       "traderRequirements": [
         {
+          "id": "6a5cd3c28199bce8ef295232",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1785,6 +2142,9 @@
     "6179aff8f57fb279792c60a1": {
       "traderRequirements": [
         {
+          "id": "overlay.6179aff8f57fb279792c60a1.5935c25fb3acc3127c3d8cd9.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1796,6 +2156,9 @@
     "5c0d4e61d09282029f53920e": {
       "traderRequirements": [
         {
+          "id": "overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1807,6 +2170,9 @@
     "6179b5eabca27a099552e052": {
       "traderRequirements": [
         {
+          "id": "overlay.6179b5eabca27a099552e052.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1818,6 +2184,9 @@
     "5c0d4c12d09282029f539173": {
       "traderRequirements": [
         {
+          "id": "overlay.5c0d4c12d09282029f539173.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1829,6 +2198,9 @@
     "60e71ccb5688f6424c7bfec4": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71ccb5688f6424c7bfec4.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1840,6 +2212,9 @@
     "60e71ce009d7c801eb0c0ec6": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71ce009d7c801eb0c0ec6.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1851,6 +2226,9 @@
     "5edac020218d181e29451446": {
       "traderRequirements": [
         {
+          "id": "6a5cd66316983d568b203db2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1862,6 +2240,9 @@
     "5edac63b930f5454f51e128b": {
       "traderRequirements": [
         {
+          "id": "overlay.5edac63b930f5454f51e128b.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1873,6 +2254,9 @@
     "5c0bd01e86f7747cdd799e56": {
       "traderRequirements": [
         {
+          "id": "overlay.5c0bd01e86f7747cdd799e56.5935c25fb3acc3127c3d8cd9.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1884,6 +2268,9 @@
     "63a9b229813bba58a50c9ee5": {
       "traderRequirements": [
         {
+          "id": "6a5cd69e8fdc18585e3a8bc0",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
@@ -1895,6 +2282,9 @@
     "5ac3475486f7741d6224abd3": {
       "traderRequirements": [
         {
+          "id": "overlay.5ac3475486f7741d6224abd3.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1906,6 +2296,9 @@
     "6578ec473dbd035d04531a8d": {
       "traderRequirements": [
         {
+          "id": "overlay.6578ec473dbd035d04531a8d.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1917,6 +2310,9 @@
     "657315e4a6af4ab4b50f3459": {
       "traderRequirements": [
         {
+          "id": "overlay.657315e4a6af4ab4b50f3459.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1929,6 +2325,9 @@
       "name": "Gunsmith - MP-133",
       "traderRequirements": [
         {
+          "id": "overlay.5ac23c6186f7741247042bad.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1940,6 +2339,9 @@
     "60e71d6d7fcf9c556f325055": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71d6d7fcf9c556f325055.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1952,6 +2354,9 @@
       "name": "Farming",
       "traderRequirements": [
         {
+          "id": "overlay.5ac3462b86f7741d6118b983.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1964,6 +2369,9 @@
       "name": "Gunsmith - HK MP5",
       "traderRequirements": [
         {
+          "id": "overlay.5ac2428686f77412450b42bf.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1975,6 +2383,9 @@
     "675c1570526ff496850895d9": {
       "traderRequirements": [
         {
+          "id": "overlay.675c1570526ff496850895d9.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1987,6 +2398,9 @@
       "name": "Gunsmith - AKS-74U",
       "traderRequirements": [
         {
+          "id": "overlay.5ac2426c86f774138762edfe.5a7c2eca46aef81a7ca2145d.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -1999,6 +2413,9 @@
       "name": "Playing the Market",
       "traderRequirements": [
         {
+          "id": "overlay.5ac345dc86f774288030817f.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2011,6 +2428,9 @@
       "name": "Gunsmith - OP-SKS",
       "traderRequirements": [
         {
+          "id": "overlay.639872f9decada40426d3447.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2022,6 +2442,9 @@
     "639136fa9444fb141f4e6eee": {
       "traderRequirements": [
         {
+          "id": "6a3cecc813ad897eca91b196",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2034,6 +2457,9 @@
       "name": "The Secret to Productivity",
       "traderRequirements": [
         {
+          "id": "overlay.6573382e557ff128bf3da536.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2046,6 +2472,9 @@
       "name": "Gunsmith - Model 870",
       "traderRequirements": [
         {
+          "id": "overlay.5ae3267986f7742a413592fe.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2057,6 +2486,9 @@
     "639135e8c115f907b14700aa": {
       "traderRequirements": [
         {
+          "id": "overlay.639135e8c115f907b14700aa.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2069,6 +2501,9 @@
       "name": "Corporate Perks",
       "traderRequirements": [
         {
+          "id": "overlay.65733403eefc2c312a759ddb.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2080,6 +2515,9 @@
     "5ac3477486f7741d651d6885": {
       "traderRequirements": [
         {
+          "id": "overlay.5ac3477486f7741d651d6885.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2091,6 +2529,9 @@
     "669fa39b91b0a8c9680fc467": {
       "traderRequirements": [
         {
+          "id": "6a3cedd1bcb002ca9700efbd",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2103,6 +2544,9 @@
       "name": "Ill-Wisher",
       "traderRequirements": [
         {
+          "id": "overlay.5ac3467986f7741d6224abc2.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2114,6 +2558,9 @@
     "5f04886a3937dc337a6b8238": {
       "traderRequirements": [
         {
+          "id": "overlay.5f04886a3937dc337a6b8238.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2126,6 +2573,9 @@
       "name": "Rat Hunting",
       "traderRequirements": [
         {
+          "id": "6a3cedb67e670e5506046b67",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2137,6 +2587,9 @@
     "66aa74571e5e199ecd094f18": {
       "traderRequirements": [
         {
+          "id": "overlay.66aa74571e5e199ecd094f18.5a7c2eca46aef81a7ca2145d.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2149,6 +2602,9 @@
       "name": "Gunsmith - M4A1",
       "traderRequirements": [
         {
+          "id": "6a3cfb71dac73a85f11bab2c",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2161,6 +2617,9 @@
       "name": "Gunsmith - P226R",
       "traderRequirements": [
         {
+          "id": "overlay.639872fa9b4fb827b200d8e5.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2173,6 +2632,9 @@
       "name": "Semiconductor Crisis",
       "traderRequirements": [
         {
+          "id": "overlay.5ac3464c86f7741d651d6877.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2184,6 +2646,9 @@
     "6179b3bdc7560e13d23eeb8d": {
       "traderRequirements": [
         {
+          "id": "overlay.6179b3bdc7560e13d23eeb8d.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2196,6 +2661,9 @@
       "name": "Gunsmith - AK-105",
       "traderRequirements": [
         {
+          "id": "overlay.5ae327c886f7745c7b3f2f3f.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2207,6 +2675,9 @@
     "6089732b59b92115597ad789": {
       "traderRequirements": [
         {
+          "id": "6a3cfc0e2c779659e15e5796",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2218,6 +2689,9 @@
     "64ee9df4496db64f9b7a4432": {
       "traderRequirements": [
         {
+          "id": "overlay.64ee9df4496db64f9b7a4432.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2230,6 +2704,9 @@
       "name": "Gunsmith - MPX",
       "traderRequirements": [
         {
+          "id": "overlay.5b47799d86f7746c5d6a5fd8.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2241,6 +2718,9 @@
     "6179b3a12153c15e937d52bc": {
       "traderRequirements": [
         {
+          "id": "overlay.6179b3a12153c15e937d52bc.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2252,6 +2732,9 @@
     "5c139eb686f7747878361a6f": {
       "traderRequirements": [
         {
+          "id": "overlay.5c139eb686f7747878361a6f.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2264,6 +2747,9 @@
       "name": "Gunsmith - AKS-74N",
       "traderRequirements": [
         {
+          "id": "overlay.5ae3277186f7745973054106.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2276,6 +2762,9 @@
       "name": "Gunsmith - AKM",
       "traderRequirements": [
         {
+          "id": "6a3cfb55342c8e533a22b71d",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2288,6 +2777,9 @@
       "name": "Gunsmith - Vector 9x19",
       "traderRequirements": [
         {
+          "id": "overlay.639872fc93ae507d5858c3a6.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2299,6 +2791,9 @@
     "6089736efa70fc097863b8f6": {
       "traderRequirements": [
         {
+          "id": "6a3cfbc3a685e57869a07a84",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2311,6 +2806,9 @@
       "name": "Gunsmith - AS VAL",
       "traderRequirements": [
         {
+          "id": "overlay.5ae3280386f7742a41359364.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2322,6 +2820,9 @@
     "5c1128e386f7746565181106": {
       "traderRequirements": [
         {
+          "id": "overlay.5c1128e386f7746565181106.5a7c2eca46aef81a7ca2145d.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2333,6 +2834,9 @@
     "5c0be13186f7746f016734aa": {
       "traderRequirements": [
         {
+          "id": "6a3d2a5d0eb870511f3cb8d7",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2344,6 +2848,9 @@
     "60e71d23c1bfa3050473b8e6": {
       "traderRequirements": [
         {
+          "id": "6a3d29bc12904a2b7bd0d847",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2355,6 +2862,9 @@
     "6942b44f891369fc790e385a": {
       "traderRequirements": [
         {
+          "id": "6a58fd4c816f85805123ec55",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2367,6 +2877,9 @@
       "name": "Shooter Born in Heaven",
       "traderRequirements": [
         {
+          "id": "overlay.5c0bde0986f77479cf22c2f8.5a7c2eca46aef81a7ca2145d.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2379,6 +2892,9 @@
     "68db9c7557bc51a8c804c14b": {
       "traderRequirements": [
         {
+          "id": "overlay.68db9c7557bc51a8c804c14b.5a7c2eca46aef81a7ca2145d.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5a7c2eca46aef81a7ca2145d",
             "name": "Mechanic"
@@ -2426,6 +2942,9 @@
     "60e71dc0a94be721b065bbfc": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71dc0a94be721b065bbfc.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2437,6 +2956,9 @@
     "5ae448bf86f7744d733e55ee": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae448bf86f7744d733e55ee.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2449,6 +2971,9 @@
       "name": "Fuel Crisis",
       "traderRequirements": [
         {
+          "id": "overlay.5ae448f286f77448d73c0131.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2500,6 +3025,9 @@
       "name": "Inventory Files",
       "traderRequirements": [
         {
+          "id": "overlay.5ae4493486f7744efa289417.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2511,6 +3039,9 @@
     "5ae449b386f77446d8741719": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae449b386f77446d8741719.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2523,6 +3054,9 @@
       "name": "Small Things, Big Help",
       "traderRequirements": [
         {
+          "id": "overlay.5c10f94386f774227172c572.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2535,6 +3069,9 @@
       "name": "A Big Loss",
       "traderRequirements": [
         {
+          "id": "overlay.5ae4493d86f7744b8e15aa8f.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2546,6 +3083,9 @@
     "5ae4490786f7744ca822adcc": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae4490786f7744ca822adcc.5ac3b934156ae10c4430e83c.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2557,6 +3097,9 @@
     "5ae4498786f7744bde357695": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae4498786f7744bde357695.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2568,6 +3111,9 @@
     "675c085d59b0575973005f52": {
       "traderRequirements": [
         {
+          "id": "6a4b5f7495d81e2fd8289af6",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2579,6 +3125,9 @@
     "639135a7e705511c8a4a1b78": {
       "traderRequirements": [
         {
+          "id": "overlay.639135a7e705511c8a4a1b78.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2590,6 +3139,9 @@
     "638fcd23dc65553116701d33": {
       "traderRequirements": [
         {
+          "id": "6a4b5ee080698c997be313bf",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2601,6 +3153,9 @@
     "5ae448e586f7744dcf0c2a67": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae448e586f7744dcf0c2a67.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2612,6 +3167,9 @@
     "5b478d0f86f7744d190d91b5": {
       "traderRequirements": [
         {
+          "id": "overlay.5b478d0f86f7744d190d91b5.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2623,6 +3181,9 @@
     "65802b627b44fa5e14638899": {
       "traderRequirements": [
         {
+          "id": "6a4b5dd063041a7e3e50cfdc",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2634,6 +3195,9 @@
     "65734c186dc1e402c80dc19e": {
       "traderRequirements": [
         {
+          "id": "6a4b5e2b5c6c767b9b01063f",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2646,6 +3210,9 @@
     "5ae449d986f774453a54a7e1": {
       "traderRequirements": [
         {
+          "id": "overlay.5ae449d986f774453a54a7e1.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2657,6 +3224,9 @@
     "5b478b1886f7744d1b23c57d": {
       "traderRequirements": [
         {
+          "id": "overlay.5b478b1886f7744d1b23c57d.5ac3b934156ae10c4430e83c.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2669,6 +3239,9 @@
       "name": "Reserve Expert",
       "traderRequirements": [
         {
+          "id": "overlay.608974af4b05530f55550c21.5ac3b934156ae10c4430e83c.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2681,6 +3254,9 @@
       "name": "Living High is Not a Crime",
       "traderRequirements": [
         {
+          "id": "overlay.5b47891f86f7744d1b23c571.5ac3b934156ae10c4430e83c.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2692,6 +3268,9 @@
     "639135bbc115f907b14700a6": {
       "traderRequirements": [
         {
+          "id": "6a574f0b5627edb1421f8fc6",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2703,6 +3282,9 @@
     "608974d01a66564e74191fc0": {
       "traderRequirements": [
         {
+          "id": "6a57433f9ddb2c2e9c166039",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2714,6 +3296,9 @@
     "60e71dc67fcf9c556f325056": {
       "traderRequirements": [
         {
+          "id": "6a5743d21a9c025cfafd7d3b",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2725,6 +3310,9 @@
     "66aa61663aa37705c5024277": {
       "traderRequirements": [
         {
+          "id": "6a574f3e3bdeaece97631b3e",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2736,6 +3324,9 @@
     "5c112d7e86f7740d6f647486": {
       "traderRequirements": [
         {
+          "id": "overlay.5c112d7e86f7740d6f647486.5ac3b934156ae10c4430e83c.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2749,6 +3340,9 @@
       "name": "Antique Enthusiast",
       "traderRequirements": [
         {
+          "id": "6a59e2f1fd94c70162c713c1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5ac3b934156ae10c4430e83c",
             "name": "Ragman"
@@ -2760,6 +3354,9 @@
     "66b38c7bf85b8bf7250f9cb6": {
       "traderRequirements": [
         {
+          "id": "overlay.66b38c7bf85b8bf7250f9cb6.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2771,6 +3368,9 @@
     "5d25e2c386f77443e7549029": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e2c386f77443e7549029.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2782,6 +3382,9 @@
     "675c1cf4a757ddd00404f0a3": {
       "traderRequirements": [
         {
+          "id": "overlay.675c1cf4a757ddd00404f0a3.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2793,6 +3396,9 @@
     "5d25e43786f7740a212217fa": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e43786f7740a212217fa.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2805,6 +3411,9 @@
       "name": "Swift",
       "traderRequirements": [
         {
+          "id": "overlay.60e729cf5698ee7b05057439.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2816,6 +3425,9 @@
     "5d24b81486f77439c92d6ba8": {
       "traderRequirements": [
         {
+          "id": "overlay.5d24b81486f77439c92d6ba8.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2828,6 +3440,9 @@
       "name": "The Huntsman Path - Angry Watchman",
       "traderRequirements": [
         {
+          "id": "overlay.5d25e44386f77409453bce7b.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2839,6 +3454,9 @@
     "5d25e2ee86f77443e35162ea": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e2ee86f77443e35162ea.5c0647fdd443bc2504c2d371.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2850,6 +3468,9 @@
     "64e7b971f9d6fa49d6769b44": {
       "traderRequirements": [
         {
+          "id": "overlay.64e7b971f9d6fa49d6769b44.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2861,6 +3482,9 @@
     "66b38e144f2ab7cc530c3fe7": {
       "traderRequirements": [
         {
+          "id": "6a43d8b1623131daaf9057a2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2872,6 +3496,9 @@
     "639136e84ed9512be67647db": {
       "traderRequirements": [
         {
+          "id": "6a43d7d4c16d83bc7d80c7de",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2883,6 +3510,9 @@
     "5d25e4ad86f77443e625e387": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e4ad86f77443e625e387.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2894,6 +3524,9 @@
     "5d25e48186f77443e625e386": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e48186f77443e625e386.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2905,6 +3538,9 @@
     "6578eb36e5020875d64645cd": {
       "traderRequirements": [
         {
+          "id": "overlay.6578eb36e5020875d64645cd.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2916,6 +3552,9 @@
     "669fa3979b0ce3feae01a130": {
       "traderRequirements": [
         {
+          "id": "overlay.669fa3979b0ce3feae01a130.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2927,6 +3566,9 @@
     "63a88045abf76d719f42d715": {
       "traderRequirements": [
         {
+          "id": "overlay.63a88045abf76d719f42d715.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2938,6 +3580,9 @@
     "669fa3a08b4a64b332041ff7": {
       "traderRequirements": [
         {
+          "id": "6a43d84b37bd0f8cc668b0ee",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2949,6 +3594,9 @@
     "5d25e2e286f77444001e2e48": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e2e286f77444001e2e48.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2960,6 +3608,9 @@
     "60c0c018f7afb4354815096a": {
       "traderRequirements": [
         {
+          "id": "overlay.60c0c018f7afb4354815096a.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2971,6 +3622,9 @@
     "5d25e4d586f77443e625e388": {
       "traderRequirements": [
         {
+          "id": "6a451e72045194269adecd4a",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2982,6 +3636,9 @@
     "639136df4b15ca31f76bc31f": {
       "traderRequirements": [
         {
+          "id": "6a45201bed09b5a55dcbdc4f",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -2993,6 +3650,9 @@
     "61904daa7d0d857927447b9c": {
       "traderRequirements": [
         {
+          "id": "6a451ee1e2c6f800f3df8312",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3004,6 +3664,9 @@
     "5d25e4b786f77408251c4bfc": {
       "traderRequirements": [
         {
+          "id": "6a4520f8fcf629a7be63704c",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3016,6 +3679,9 @@
       "name": "The Huntsman Path - Liberation",
       "traderRequirements": [
         {
+          "id": "overlay.5d25e45e86f77408251c4bfa.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3027,6 +3693,9 @@
     "6179ad0a6e9dd54ac275e3f2": {
       "traderRequirements": [
         {
+          "id": "overlay.6179ad0a6e9dd54ac275e3f2.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3038,6 +3707,9 @@
     "5d25e2cc86f77443e47ae019": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e2cc86f77443e47ae019.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3049,6 +3721,9 @@
     "66ab9da7eb102b9bcd08591c": {
       "traderRequirements": [
         {
+          "id": "overlay.66ab9da7eb102b9bcd08591c.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3070,6 +3745,9 @@
     "5d25e2b486f77409de05bba0": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e2b486f77409de05bba0.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3081,6 +3759,9 @@
     "608a768d82e40b3c727fd17d": {
       "traderRequirements": [
         {
+          "id": "overlay.608a768d82e40b3c727fd17d.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3093,6 +3774,9 @@
       "name": "The Huntsman Path - Eraser",
       "traderRequirements": [
         {
+          "id": "overlay.5d25e44f86f77443e625e385.5c0647fdd443bc2504c2d371.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3104,6 +3788,9 @@
     "5edab4b1218d181e29451435": {
       "traderRequirements": [
         {
+          "id": "overlay.5edab4b1218d181e29451435.5c0647fdd443bc2504c2d371.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3115,6 +3802,9 @@
     "63a9b36cc31b00242d28a99f": {
       "traderRequirements": [
         {
+          "id": "6a453365b45317316addf45c",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3126,6 +3816,9 @@
     "60e71e8ed54b755a3b53eb67": {
       "traderRequirements": [
         {
+          "id": "overlay.60e71e8ed54b755a3b53eb67.5c0647fdd443bc2504c2d371.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3137,6 +3830,9 @@
     "626bdcc3a371ee3a7a3514c5": {
       "traderRequirements": [
         {
+          "id": "6a45324e58fc74327b5d0867",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3148,6 +3844,9 @@
     "5d25e2d886f77442734d335e": {
       "traderRequirements": [
         {
+          "id": "6a71c5b3fdd890dfd2f2c34d",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -3159,6 +3858,9 @@
     "5d25e4ca86f77409dd5cdf2c": {
       "traderRequirements": [
         {
+          "id": "overlay.5d25e4ca86f77409dd5cdf2c.5c0647fdd443bc2504c2d371.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
           "trader": {
             "id": "5c0647fdd443bc2504c2d371",
             "name": "Jaeger"
@@ -9318,8 +10020,8 @@
     }
   },
   "$meta": {
-    "version": "1.64",
-    "generated": "2026-08-14T16:51:02.982Z",
-    "sha256": "e5ba7010625db7ea61c63a8e353d9193ce31667b5380533677b1f861781d9fb4"
+    "version": "1.65",
+    "generated": "2026-08-15T00:04:51.288Z",
+    "sha256": "14fb9b2d332f7cb78518918a065e529fe726de937f577ac92ae85f0175a0b483"
   }
 }
