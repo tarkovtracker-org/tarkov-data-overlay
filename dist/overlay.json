@@ -10020,8 +10020,8 @@
     }
   },
   "$meta": {
-    "version": "1.65",
-    "generated": "2026-08-15T00:04:51.288Z",
-    "sha256": "14fb9b2d332f7cb78518918a065e529fe726de937f577ac92ae85f0175a0b483"
+    "version": "1.66",
+    "generated": "2026-08-15T08:45:06.002Z",
+    "sha256": "6d958b3390c606e5979aa3ccc0c3cf453a44bfbc5770c0693e99dbd48bd60db8"
   }
 }
