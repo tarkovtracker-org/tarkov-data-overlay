@@ -257,20 +257,6 @@
             }
           ]
         },
-        "59675d6c86f7740a842fc482": {
-          "traderRequirements": [
-            {
-              "id": "6a2692eb3290f881e29e6f72",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 2
-            }
-          ]
-        },
         "59675ea386f77414b32bded2": {
           "traderRequirements": [
             {
@@ -314,7 +300,6 @@
           ]
         },
         "59689ee586f7740d1570bbd5": {
-          "name": "Sanitary Standards",
           "traderRequirements": [
             {
               "id": "overlay.59689ee586f7740d1570bbd5.54cb57776803fa99248b456e.level.>=.2",
@@ -329,7 +314,6 @@
           ]
         },
         "59689fbd86f7740d137ebfc4": {
-          "name": "Operation Aquarius",
           "traderRequirements": [
             {
               "id": "overlay.59689fbd86f7740d137ebfc4.54cb57776803fa99248b456e.level.>=.1",
@@ -344,7 +328,6 @@
           ]
         },
         "5968eb3186f7741dde183a4d": {
-          "name": "Blood in the Water",
           "traderRequirements": [
             {
               "id": "overlay.5968eb3186f7741dde183a4d.54cb57776803fa99248b456e.level.>=.1",
@@ -568,26 +551,6 @@
             }
           ]
         },
-        "59c9392986f7742f6923add2": {
-          "name": "Aid Stations"
-        },
-        "59ca1a6286f774509a270942": {
-          "name": "Ironclad Proof"
-        },
-        "59ca264786f77445a80ed044": {
-          "traderRequirements": [
-            {
-              "id": "6a708cbfc256169e529e4f1c",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 4
-            }
-          ]
-        },
         "59ca29fb86f77445ab465c87": {
           "traderRequirements": [
             {
@@ -613,20 +576,6 @@
                 "name": "Prapor"
               },
               "value": 4
-            }
-          ]
-        },
-        "5a27b75b86f7742e97191958": {
-          "traderRequirements": [
-            {
-              "id": "6a5ccb9c38a1dc09841e0002",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 2
             }
           ]
         },
@@ -686,23 +635,7 @@
             }
           ]
         },
-        "5a27b9de86f77464e5044585": {
-          "name": "The Cult",
-          "traderRequirements": [
-            {
-              "id": "6a5ccc86a7c316d35f7b7c72",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 2
-            }
-          ]
-        },
         "5a27ba1c86f77461ea5a3c56": {
-          "name": "Weapons Circulation",
           "traderRequirements": [
             {
               "id": "overlay.5a27ba1c86f77461ea5a3c56.5935c25fb3acc3127c3d8cd9.level.>=.2",
@@ -717,7 +650,6 @@
           ]
         },
         "5a27bb1e86f7741f27621b7e": {
-          "name": "Cargo X",
           "traderRequirements": [
             {
               "id": "overlay.5a27bb1e86f7741f27621b7e.5935c25fb3acc3127c3d8cd9.level.>=.3",
@@ -731,23 +663,7 @@
             }
           ]
         },
-        "5a27bb3d86f77411ea361a21": {
-          "name": "Tracker",
-          "traderRequirements": [
-            {
-              "id": "6a5cd187f437270d2aaf9a78",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 3
-            }
-          ]
-        },
         "5a27c99a86f7747d2c6bdd8e": {
-          "name": "Friend From the West",
           "traderRequirements": [
             {
               "id": "overlay.5a27c99a86f7747d2c6bdd8e.58330581ace78e27b8b10cee.level.>=.2",
@@ -762,7 +678,6 @@
           ]
         },
         "5ac23c6186f7741247042bad": {
-          "name": "Gunsmith - MP-133",
           "traderRequirements": [
             {
               "id": "overlay.5ac23c6186f7741247042bad.5a7c2eca46aef81a7ca2145d.level.>=.1",
@@ -777,7 +692,6 @@
           ]
         },
         "5ac2426c86f774138762edfe": {
-          "name": "Gunsmith - AKS-74U",
           "traderRequirements": [
             {
               "id": "overlay.5ac2426c86f774138762edfe.5a7c2eca46aef81a7ca2145d.level.>=.1",
@@ -792,7 +706,6 @@
           ]
         },
         "5ac2428686f77412450b42bf": {
-          "name": "Gunsmith - HK MP5",
           "traderRequirements": [
             {
               "id": "overlay.5ac2428686f77412450b42bf.5a7c2eca46aef81a7ca2145d.level.>=.1",
@@ -806,29 +719,7 @@
             }
           ]
         },
-        "5ac242ab86f77412464f68b4": {
-          "name": "Gunsmith Master - Part 3"
-        },
-        "5ac244c486f77413e12cf945": {
-          "name": "Gunsmith Master - Part 2"
-        },
-        "5ac244eb86f7741356335af1": {
-          "name": "Gunsmith - M4A1",
-          "traderRequirements": [
-            {
-              "id": "6a3cfb71dac73a85f11bab2c",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 3
-            }
-          ]
-        },
         "5ac345dc86f774288030817f": {
-          "name": "Playing the Market",
           "traderRequirements": [
             {
               "id": "overlay.5ac345dc86f774288030817f.5a7c2eca46aef81a7ca2145d.level.>=.2",
@@ -843,7 +734,6 @@
           ]
         },
         "5ac3462b86f7741d6118b983": {
-          "name": "Farming",
           "traderRequirements": [
             {
               "id": "overlay.5ac3462b86f7741d6118b983.5a7c2eca46aef81a7ca2145d.level.>=.1",
@@ -858,7 +748,6 @@
           ]
         },
         "5ac3464c86f7741d651d6877": {
-          "name": "Semiconductor Crisis",
           "traderRequirements": [
             {
               "id": "overlay.5ac3464c86f7741d651d6877.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -873,25 +762,9 @@
           ]
         },
         "5ac3467986f7741d6224abc2": {
-          "name": "Ill-Wisher",
           "traderRequirements": [
             {
               "id": "overlay.5ac3467986f7741d6224abc2.5a7c2eca46aef81a7ca2145d.level.>=.2",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 2
-            }
-          ]
-        },
-        "5ac346a886f7744e1b083d67": {
-          "name": "Rat Hunting",
-          "traderRequirements": [
-            {
-              "id": "6a3cedb67e670e5506046b67",
               "requirementType": "level",
               "compareMethod": ">=",
               "trader": {
@@ -931,7 +804,6 @@
           ]
         },
         "5ae3267986f7742a413592fe": {
-          "name": "Gunsmith - Model 870",
           "traderRequirements": [
             {
               "id": "overlay.5ae3267986f7742a413592fe.5a7c2eca46aef81a7ca2145d.level.>=.2",
@@ -945,23 +817,7 @@
             }
           ]
         },
-        "5ae3270f86f77445ba41d4dd": {
-          "name": "Gunsmith - AKM",
-          "traderRequirements": [
-            {
-              "id": "6a3cfb55342c8e533a22b71d",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 3
-            }
-          ]
-        },
         "5ae3277186f7745973054106": {
-          "name": "Gunsmith - AKS-74N",
           "traderRequirements": [
             {
               "id": "overlay.5ae3277186f7745973054106.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -976,7 +832,6 @@
           ]
         },
         "5ae327c886f7745c7b3f2f3f": {
-          "name": "Gunsmith - AK-105",
           "traderRequirements": [
             {
               "id": "overlay.5ae327c886f7745c7b3f2f3f.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -991,7 +846,6 @@
           ]
         },
         "5ae3280386f7742a41359364": {
-          "name": "Gunsmith - AS VAL",
           "traderRequirements": [
             {
               "id": "overlay.5ae3280386f7742a41359364.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -1048,7 +902,6 @@
           ]
         },
         "5ae4493486f7744efa289417": {
-          "name": "Inventory Files",
           "traderRequirements": [
             {
               "id": "overlay.5ae4493486f7744efa289417.5ac3b934156ae10c4430e83c.level.>=.1",
@@ -1063,7 +916,6 @@
           ]
         },
         "5ae4493d86f7744b8e15aa8f": {
-          "name": "A Big Loss",
           "traderRequirements": [
             {
               "id": "overlay.5ae4493d86f7744b8e15aa8f.5ac3b934156ae10c4430e83c.level.>=.1",
@@ -1106,7 +958,6 @@
           ]
         },
         "5ae449c386f7744bde357697": {
-          "name": "Pathfinder",
           "objectives": {
             "5bb60cbc88a45011a8235cc5": {
               "description": "Survive and extract on Interchange 7 times"
@@ -1127,11 +978,7 @@
             }
           ]
         },
-        "5b47749f86f7746c5d6a5fd4": {
-          "name": "Gunsmith Master - Part 4"
-        },
         "5b47799d86f7746c5d6a5fd8": {
-          "name": "Gunsmith - MPX",
           "traderRequirements": [
             {
               "id": "overlay.5b47799d86f7746c5d6a5fd8.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -1145,17 +992,7 @@
             }
           ]
         },
-        "5b477b6f86f7747290681823": {
-          "name": "Gunsmith Master - Part 5"
-        },
-        "5b477f7686f7744d1b23c4d2": {
-          "name": "Gunsmith Master - Part 7"
-        },
-        "5b47825886f77468074618d3": {
-          "name": "Gunsmith Master - Part 9"
-        },
         "5b47891f86f7744d1b23c571": {
-          "name": "Living High is Not a Crime",
           "traderRequirements": [
             {
               "id": "overlay.5b47891f86f7744d1b23c571.5ac3b934156ae10c4430e83c.level.>=.3",
@@ -1198,7 +1035,6 @@
           ]
         },
         "5b478eca86f7744642012254": {
-          "name": "Vitamins",
           "traderRequirements": [
             {
               "id": "overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2",
@@ -1213,7 +1049,6 @@
           ]
         },
         "5b478ff486f7744d184ecbbf": {
-          "name": "Supplements",
           "traderRequirements": [
             {
               "id": "overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2",
@@ -1241,51 +1076,6 @@
             }
           ]
         },
-        "5b4794cb86f774598100d5d4": {
-          "name": "Metal Birds"
-        },
-        "5b4795fb86f7745876267770": {
-          "traderRequirements": [
-            {
-              "id": "6a5a944e5e12536882583b02",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 2
-            }
-          ]
-        },
-        "5c0bbaa886f7746941031d82": {
-          "traderRequirements": [
-            {
-              "id": "6a5abbce80de21369de9a336",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "5c0bc91486f7746ab41857a2": {
-          "traderRequirements": [
-            {
-              "id": "6a5abc99e0f019d42e708621",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 4
-            }
-          ]
-        },
         "5c0bd01e86f7747cdd799e56": {
           "traderRequirements": [
             {
@@ -1301,7 +1091,6 @@
           ]
         },
         "5c0bd94186f7747a727f09b2": {
-          "name": "The Tarkov Import",
           "traderRequirements": [
             {
               "id": "overlay.5c0bd94186f7747a727f09b2.54cb50c76803fa8b248b4571.level.>=.3",
@@ -1312,37 +1101,6 @@
                 "name": "Prapor"
               },
               "value": 3
-            }
-          ]
-        },
-        "5c0be13186f7746f016734aa": {
-          "traderRequirements": [
-            {
-              "id": "6a3d2a5d0eb870511f3cb8d7",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "5c0d0f1886f77457b8210226": {
-          "name": "From Hand to Hand"
-        },
-        "5c0d190cd09282029f5390d8": {
-          "traderRequirements": [
-            {
-              "id": "6a268caf84124948db9ab8f0",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 2
             }
           ]
         },
@@ -1375,7 +1133,6 @@
           ]
         },
         "5c10f94386f774227172c572": {
-          "name": "Small Things, Big Help",
           "traderRequirements": [
             {
               "id": "overlay.5c10f94386f774227172c572.5ac3b934156ae10c4430e83c.level.>=.1",
@@ -1400,21 +1157,6 @@
                 "name": "Mechanic"
               },
               "value": 3
-            }
-          ]
-        },
-        "5c1141f386f77430ff393792": {
-          "name": "Antique Enthusiast",
-          "traderRequirements": [
-            {
-              "id": "6a59e2f1fd94c70162c713c1",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 4
             }
           ]
         },
@@ -1559,7 +1301,6 @@
           ]
         },
         "5d25e44386f77409453bce7b": {
-          "name": "The Huntsman Path - Angry Watchman",
           "traderRequirements": [
             {
               "id": "overlay.5d25e44386f77409453bce7b.5c0647fdd443bc2504c2d371.level.>=.1",
@@ -1574,7 +1315,6 @@
           ]
         },
         "5d25e44f86f77443e625e385": {
-          "name": "The Huntsman Path - Eraser",
           "traderRequirements": [
             {
               "id": "overlay.5d25e44f86f77443e625e385.5c0647fdd443bc2504c2d371.level.>=.3",
@@ -1589,7 +1329,6 @@
           ]
         },
         "5d25e45e86f77408251c4bfa": {
-          "name": "The Huntsman Path - Liberation",
           "traderRequirements": [
             {
               "id": "overlay.5d25e45e86f77408251c4bfa.5c0647fdd443bc2504c2d371.level.>=.3",
@@ -1602,31 +1341,6 @@
               "value": 3
             }
           ]
-        },
-        "5d25e46e86f77409453bce7c": {
-          "name": "First Aid",
-          "experience": 3000,
-          "finishRewards": {
-            "traderStanding": [
-              {
-                "trader": {
-                  "id": "5c0647fdd443bc2504c2d371",
-                  "name": "Jaeger"
-                },
-                "standing": 0.1
-              }
-            ],
-            "items": [
-              {
-                "count": 80000,
-                "item": {
-                  "id": "5449016a4bdc2d6f028b456f",
-                  "name": "Roubles",
-                  "shortName": "RUB"
-                }
-              }
-            ]
-          }
         },
         "5d25e48186f77443e625e386": {
           "traderRequirements": [
@@ -1656,20 +1370,6 @@
             }
           ]
         },
-        "5d25e4b786f77408251c4bfc": {
-          "traderRequirements": [
-            {
-              "id": "6a4520f8fcf629a7be63704c",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 3
-            }
-          ]
-        },
         "5d25e4ca86f77409dd5cdf2c": {
           "traderRequirements": [
             {
@@ -1679,34 +1379,6 @@
               "trader": {
                 "id": "5c0647fdd443bc2504c2d371",
                 "name": "Jaeger"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "5d25e4d586f77443e625e388": {
-          "traderRequirements": [
-            {
-              "id": "6a451e72045194269adecd4a",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "5d4bec3486f7743cac246665": {
-          "traderRequirements": [
-            {
-              "id": "6a331835f78e12821f3a5c3e",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
               },
               "value": 4
             }
@@ -1740,23 +1412,7 @@
             }
           ]
         },
-        "5edab736cc183c769d778bc2": {
-          "name": "Colleagues",
-          "traderRequirements": [
-            {
-              "id": "6a5685563580cb5f5777824a",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
-              },
-              "value": 3
-            }
-          ]
-        },
         "5edaba7c0c502106f869bc02": {
-          "name": "Tarkov-Style Diplomacy",
           "traderRequirements": [
             {
               "id": "overlay.5edaba7c0c502106f869bc02.54cb57776803fa99248b456e.level.>=.3",
@@ -1784,20 +1440,6 @@
             }
           ]
         },
-        "5edac020218d181e29451446": {
-          "traderRequirements": [
-            {
-              "id": "6a5cd66316983d568b203db2",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 4
-            }
-          ]
-        },
         "5edac63b930f5454f51e128b": {
           "traderRequirements": [
             {
@@ -1809,21 +1451,6 @@
                 "name": "Peacekeeper"
               },
               "value": 4
-            }
-          ]
-        },
-        "5ede55112c95834b583f052a": {
-          "name": "The Bunker",
-          "traderRequirements": [
-            {
-              "id": "6a32a697feea519d9e9a827a",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 3
             }
           ]
         },
@@ -1855,55 +1482,10 @@
             }
           ]
         },
-        "600302d73b897b11364cd161": {
-          "name": "All This Filth..."
-        },
-        "6086c852c945025d41566124": {
-          "traderRequirements": [
-            {
-              "id": "6a5cd3c28199bce8ef295232",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "60896888e4a85c72ef3fa300": {
-          "traderRequirements": [
-            {
-              "id": "6a5ab6bf5d4ba3e1966dcd75",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 3
-            }
-          ]
-        },
         "60896b7bfa70fc097863b8f5": {
           "traderRequirements": [
             {
               "id": "overlay.60896b7bfa70fc097863b8f5.54cb50c76803fa8b248b4571.level.>=.3",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "60896bca6ee58f38c417d4f2": {
-          "traderRequirements": [
-            {
-              "id": "6a32a71f7b1e24899a2ff53c",
               "requirementType": "level",
               "compareMethod": ">=",
               "trader": {
@@ -1928,34 +1510,6 @@
             }
           ]
         },
-        "6089732b59b92115597ad789": {
-          "traderRequirements": [
-            {
-              "id": "6a3cfc0e2c779659e15e5796",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "6089736efa70fc097863b8f6": {
-          "traderRequirements": [
-            {
-              "id": "6a3cfbc3a685e57869a07a84",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 3
-            }
-          ]
-        },
         "6089743983426423753cd58a": {
           "traderRequirements": [
             {
@@ -1971,24 +1525,9 @@
           ]
         },
         "608974af4b05530f55550c21": {
-          "name": "Reserve Expert",
           "traderRequirements": [
             {
               "id": "overlay.608974af4b05530f55550c21.5ac3b934156ae10c4430e83c.level.>=.3",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "608974d01a66564e74191fc0": {
-          "traderRequirements": [
-            {
-              "id": "6a57433f9ddb2c2e9c166039",
               "requirementType": "level",
               "compareMethod": ">=",
               "trader": {
@@ -2111,20 +1650,6 @@
             }
           ]
         },
-        "60e71d23c1bfa3050473b8e6": {
-          "traderRequirements": [
-            {
-              "id": "6a3d29bc12904a2b7bd0d847",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 4
-            }
-          ]
-        },
         "60e71d6d7fcf9c556f325055": {
           "traderRequirements": [
             {
@@ -2153,20 +1678,6 @@
             }
           ]
         },
-        "60e71dc67fcf9c556f325056": {
-          "traderRequirements": [
-            {
-              "id": "6a5743d21a9c025cfafd7d3b",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 3
-            }
-          ]
-        },
         "60e71e8ed54b755a3b53eb67": {
           "traderRequirements": [
             {
@@ -2182,7 +1693,6 @@
           ]
         },
         "60e729cf5698ee7b05057439": {
-          "name": "Swift",
           "traderRequirements": [
             {
               "id": "overlay.60e729cf5698ee7b05057439.5c0647fdd443bc2504c2d371.level.>=.1",
@@ -2210,21 +1720,6 @@
             }
           ]
         },
-        "6179ac7511973d018217d0b9": {
-          "name": "Easy Job",
-          "traderRequirements": [
-            {
-              "id": "6a32a4304fa148829f895710",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 3
-            }
-          ]
-        },
         "6179ad0a6e9dd54ac275e3f2": {
           "traderRequirements": [
             {
@@ -2243,20 +1738,6 @@
           "traderRequirements": [
             {
               "id": "overlay.6179ad56c760af5ad2053587.54cb57776803fa99248b456e.level.>=.3",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "6179afd0bca27a099552e040": {
-          "traderRequirements": [
-            {
-              "id": "6a568cd5051e9fd6be55db27",
               "requirementType": "level",
               "compareMethod": ">=",
               "trader": {
@@ -2309,34 +1790,6 @@
             }
           ]
         },
-        "6179b4d1bca27a099552e04e": {
-          "traderRequirements": [
-            {
-              "id": "6a5cd322e269e5d058004aec",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "6179b4f16e9dd54ac275e407": {
-          "traderRequirements": [
-            {
-              "id": "6a5ab667f680e09c8c1bf5a3",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 3
-            }
-          ]
-        },
         "6179b5eabca27a099552e052": {
           "traderRequirements": [
             {
@@ -2351,22 +1804,7 @@
             }
           ]
         },
-        "61904daa7d0d857927447b9c": {
-          "traderRequirements": [
-            {
-              "id": "6a451ee1e2c6f800f3df8312",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 3
-            }
-          ]
-        },
         "61958c366726521dd96828ec": {
-          "name": "Gifts from Tarkov",
           "traderRequirements": [
             {
               "id": "overlay.61958c366726521dd96828ec.5935c25fb3acc3127c3d8cd9.level.>=.3",
@@ -2405,34 +1843,6 @@
                 "name": "Skier"
               },
               "value": 3
-            }
-          ]
-        },
-        "626bdcc3a371ee3a7a3514c5": {
-          "traderRequirements": [
-            {
-              "id": "6a45324e58fc74327b5d0867",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "638fcd23dc65553116701d33": {
-          "traderRequirements": [
-            {
-              "id": "6a4b5ee080698c997be313bf",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 2
             }
           ]
         },
@@ -2478,22 +1888,7 @@
             }
           ]
         },
-        "639135bbc115f907b14700a6": {
-          "traderRequirements": [
-            {
-              "id": "6a574f0b5627edb1421f8fc6",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 3
-            }
-          ]
-        },
         "639135c3744e452011470807": {
-          "name": "House Arrest",
           "traderRequirements": [
             {
               "id": "overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2",
@@ -2502,20 +1897,6 @@
               "trader": {
                 "id": "58330581ace78e27b8b10cee",
                 "name": "Skier"
-              },
-              "value": 2
-            }
-          ]
-        },
-        "639135d89444fb141f4e6eea": {
-          "traderRequirements": [
-            {
-              "id": "6a56728bf66db0e9f214d01f",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
               },
               "value": 2
             }
@@ -2549,34 +1930,6 @@
             }
           ]
         },
-        "639136df4b15ca31f76bc31f": {
-          "traderRequirements": [
-            {
-              "id": "6a45201bed09b5a55dcbdc4f",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 3
-            }
-          ]
-        },
-        "639136e84ed9512be67647db": {
-          "traderRequirements": [
-            {
-              "id": "6a43d7d4c16d83bc7d80c7de",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 2
-            }
-          ]
-        },
         "639136f086e646067c176a8b": {
           "traderRequirements": [
             {
@@ -2586,20 +1939,6 @@
               "trader": {
                 "id": "54cb50c76803fa8b248b4571",
                 "name": "Prapor"
-              },
-              "value": 2
-            }
-          ]
-        },
-        "639136fa9444fb141f4e6eee": {
-          "traderRequirements": [
-            {
-              "id": "6a3cecc813ad897eca91b196",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
               },
               "value": 2
             }
@@ -2620,7 +1959,6 @@
           ]
         },
         "639872f9decada40426d3447": {
-          "name": "Gunsmith - OP-SKS",
           "traderRequirements": [
             {
               "id": "overlay.639872f9decada40426d3447.5a7c2eca46aef81a7ca2145d.level.>=.2",
@@ -2635,7 +1973,6 @@
           ]
         },
         "639872fa9b4fb827b200d8e5": {
-          "name": "Gunsmith - P226R",
           "traderRequirements": [
             {
               "id": "overlay.639872fa9b4fb827b200d8e5.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -2650,7 +1987,6 @@
           ]
         },
         "639872fc93ae507d5858c3a6": {
-          "name": "Gunsmith - Vector 9x19",
           "traderRequirements": [
             {
               "id": "overlay.639872fc93ae507d5858c3a6.5a7c2eca46aef81a7ca2145d.level.>=.3",
@@ -2664,17 +2000,7 @@
             }
           ]
         },
-        "639872fe8871e1272b10ccf6": {
-          "name": "Gunsmith Master - Part 1"
-        },
-        "639873003693c63d86328f25": {
-          "name": "Gunsmith Master - Part 6"
-        },
-        "63987301e11ec11ff5504036": {
-          "name": "Gunsmith Master - Part 8"
-        },
         "63a5cf262964a7488f5243ce": {
-          "name": "Power of Persuasion",
           "traderRequirements": [
             {
               "id": "overlay.63a5cf262964a7488f5243ce.54cb50c76803fa8b248b4571.level.>=.1",
@@ -2716,34 +2042,6 @@
             }
           ]
         },
-        "63a9b229813bba58a50c9ee5": {
-          "traderRequirements": [
-            {
-              "id": "6a5cd69e8fdc18585e3a8bc0",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5935c25fb3acc3127c3d8cd9",
-                "name": "Peacekeeper"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "63a9b36cc31b00242d28a99f": {
-          "traderRequirements": [
-            {
-              "id": "6a453365b45317316addf45c",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 4
-            }
-          ]
-        },
         "64e7b971f9d6fa49d6769b44": {
           "traderRequirements": [
             {
@@ -2772,48 +2070,7 @@
             }
           ]
         },
-        "64f3176921045e77405d63b5": {
-          "name": "Paramedic",
-          "experience": 10000,
-          "finishRewards": {
-            "traderStanding": [
-              {
-                "trader": {
-                  "id": "54cb57776803fa99248b456e",
-                  "name": "Therapist"
-                },
-                "standing": 0.25
-              }
-            ],
-            "items": [
-              {
-                "count": 165000,
-                "item": {
-                  "id": "5449016a4bdc2d6f028b456f",
-                  "name": "Roubles",
-                  "shortName": "RUB"
-                }
-              }
-            ]
-          }
-        },
-        "64f5e20652fc01298e2c61e3": {
-          "name": "Beyond the Red Meat",
-          "traderRequirements": [
-            {
-              "id": "6a5a9410c2522cbbe5bcc808",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 2
-            }
-          ]
-        },
         "64f6aafd67e11a7c6206e0d0": {
-          "name": "The Secret Recipe",
           "traderRequirements": [
             {
               "id": "overlay.64f6aafd67e11a7c6206e0d0.58330581ace78e27b8b10cee.level.>=.2",
@@ -2826,18 +2083,6 @@
               "value": 2
             }
           ]
-        },
-        "64f731ab83cfca080a361e42": {
-          "name": "Pets Won't Need It"
-        },
-        "64f83bb69878a0569d6ecfbe": {
-          "name": "Gunsmith Master - Part 10"
-        },
-        "64f83bcdde58fc437700d8fa": {
-          "name": "Gunsmith Master - Part 11"
-        },
-        "64f83bd983cfca080a362c82": {
-          "name": "Gunsmith Master - Part 13"
         },
         "657315ddab5a49b71f098853": {
           "traderRequirements": [
@@ -2910,7 +2155,6 @@
           ]
         },
         "6573382e557ff128bf3da536": {
-          "name": "The Secret to Productivity",
           "traderRequirements": [
             {
               "id": "overlay.6573382e557ff128bf3da536.5a7c2eca46aef81a7ca2145d.level.>=.2",
@@ -2921,21 +2165,6 @@
                 "name": "Mechanic"
               },
               "value": 2
-            }
-          ]
-        },
-        "6574e0dedc0d635f633a5805": {
-          "name": "Getting Some Air",
-          "traderRequirements": [
-            {
-              "id": "6a557a780d81c4218f264a21",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 4
             }
           ]
         },
@@ -2964,20 +2193,6 @@
                 "name": "Mechanic"
               },
               "value": 1
-            }
-          ]
-        },
-        "65802b627b44fa5e14638899": {
-          "traderRequirements": [
-            {
-              "id": "6a4b5dd063041a7e3e50cfdc",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 2
             }
           ]
         },
@@ -3059,20 +2274,6 @@
             }
           ]
         },
-        "669fa395c4c5c04798002497": {
-          "traderRequirements": [
-            {
-              "id": "6a5a93c8db2687962b275371",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "58330581ace78e27b8b10cee",
-                "name": "Skier"
-              },
-              "value": 2
-            }
-          ]
-        },
         "669fa3979b0ce3feae01a130": {
           "traderRequirements": [
             {
@@ -3101,20 +2302,6 @@
             }
           ]
         },
-        "669fa39b91b0a8c9680fc467": {
-          "traderRequirements": [
-            {
-              "id": "6a3cedd1bcb002ca9700efbd",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 2
-            }
-          ]
-        },
         "669fa39c64ea11e84c0642a6": {
           "traderRequirements": [
             {
@@ -3129,36 +2316,7 @@
             }
           ]
         },
-        "669fa39ee749756c920d02c8": {
-          "traderRequirements": [
-            {
-              "id": "6a5671eb45279d26d08058eb",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
-              },
-              "value": 2
-            }
-          ]
-        },
-        "669fa3a08b4a64b332041ff7": {
-          "traderRequirements": [
-            {
-              "id": "6a43d84b37bd0f8cc668b0ee",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 2
-            }
-          ]
-        },
         "669fa3a40c828825de06d6a1": {
-          "name": "Easy-Breezy",
           "traderRequirements": [
             {
               "id": "overlay.669fa3a40c828825de06d6a1.54cb50c76803fa8b248b4571.level.>=.3",
@@ -3173,7 +2331,6 @@
           ]
         },
         "66aa58245ab22944110db6e9": {
-          "name": "New Paths",
           "traderRequirements": [
             {
               "id": "overlay.66aa58245ab22944110db6e9.5935c25fb3acc3127c3d8cd9.level.>=.1",
@@ -3184,20 +2341,6 @@
                 "name": "Peacekeeper"
               },
               "value": 1
-            }
-          ]
-        },
-        "66aa61663aa37705c5024277": {
-          "traderRequirements": [
-            {
-              "id": "6a574f3e3bdeaece97631b3e",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 3
             }
           ]
         },
@@ -3240,20 +2383,6 @@
                 "name": "Jaeger"
               },
               "value": 1
-            }
-          ]
-        },
-        "66b38e144f2ab7cc530c3fe7": {
-          "traderRequirements": [
-            {
-              "id": "6a43d8b1623131daaf9057a2",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5c0647fdd443bc2504c2d371",
-                "name": "Jaeger"
-              },
-              "value": 2
             }
           ]
         },
@@ -3327,20 +2456,6 @@
             }
           ]
         },
-        "675c085d59b0575973005f52": {
-          "traderRequirements": [
-            {
-              "id": "6a4b5f7495d81e2fd8289af6",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 2
-            }
-          ]
-        },
         "675c1570526ff496850895d9": {
           "traderRequirements": [
             {
@@ -3411,41 +2526,10 @@
             }
           ]
         },
-        "676529af9c90953d090882e7": {
-          "name": "Gunsmith Master - Part 12"
-        },
-        "67b45467814ab0ffa000c7e7": {
-          "traderRequirements": [
-            {
-              "id": "6a330d28962a6f96eba02bae",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb50c76803fa8b248b4571",
-                "name": "Prapor"
-              },
-              "value": 4
-            }
-          ]
-        },
         "68db9c7557bc51a8c804c14b": {
           "traderRequirements": [
             {
               "id": "overlay.68db9c7557bc51a8c804c14b.5a7c2eca46aef81a7ca2145d.level.>=.4",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5a7c2eca46aef81a7ca2145d",
-                "name": "Mechanic"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "6942b44f891369fc790e385a": {
-          "traderRequirements": [
-            {
-              "id": "6a58fd4c816f85805123ec55",
               "requirementType": "level",
               "compareMethod": ">=",
               "trader": {
@@ -3470,28 +2554,7 @@
             }
           ]
         },
-        "5a03153686f77442d90e2171": {
-          "name": "One-Way Ticket",
-          "experience": 10000
-        },
-        "5a0327ba86f77456b9154236": {
-          "name": "Fuel Shortage",
-          "experience": 3000
-        },
-        "5a03296886f774569778596a": {
-          "name": "I Need More Power",
-          "experience": 10000
-        },
-        "5a0449d586f77474e66227b7": {
-          "name": "Master Key",
-          "experience": 3000
-        },
-        "5a27bafb86f7741c73584017": {
-          "name": "Chemical Experiments",
-          "experience": 3000
-        },
         "5ae448f286f77448d73c0131": {
-          "name": "Fuel Crisis",
           "traderRequirements": [
             {
               "id": "overlay.5ae448f286f77448d73c0131.5ac3b934156ae10c4430e83c.level.>=.1",
@@ -3506,7 +2569,6 @@
           ]
         },
         "5c0bde0986f77479cf22c2f8": {
-          "name": "Shooter Born in Heaven",
           "traderRequirements": [
             {
               "id": "overlay.5c0bde0986f77479cf22c2f8.5a7c2eca46aef81a7ca2145d.level.>=.4",
@@ -3515,20 +2577,6 @@
               "trader": {
                 "id": "5a7c2eca46aef81a7ca2145d",
                 "name": "Mechanic"
-              },
-              "value": 4
-            }
-          ]
-        },
-        "5c0d1c4cd0928202a02a6f5c": {
-          "traderRequirements": [
-            {
-              "id": "6a56918725d5f33f34942282",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
               },
               "value": 4
             }
@@ -3547,9 +2595,6 @@
               "value": 3
             }
           ]
-        },
-        "5edac34d0bb72a50635c2bfa": {
-          "name": "A Difficult Choice"
         },
         "60e71b62a0beca400d69efc4": {
           "traderRequirements": [
@@ -3650,7 +2695,6 @@
           ]
         },
         "64e7b9bffd30422ed03dad38": {
-          "name": "District Patrol",
           "traderRequirements": [
             {
               "id": "overlay.64e7b9bffd30422ed03dad38.54cb50c76803fa8b248b4571.level.>=.2",
@@ -3665,7 +2709,6 @@
           ]
         },
         "64f5deac39e45b527a7c4232": {
-          "name": "Job for a Patriot",
           "traderRequirements": [
             {
               "id": "overlay.64f5deac39e45b527a7c4232.54cb50c76803fa8b248b4571.level.>=.2",
@@ -3721,20 +2764,6 @@
             }
           ]
         },
-        "65734c186dc1e402c80dc19e": {
-          "traderRequirements": [
-            {
-              "id": "6a4b5e2b5c6c767b9b01063f",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "5ac3b934156ae10c4430e83c",
-                "name": "Ragman"
-              },
-              "value": 2
-            }
-          ]
-        },
         "658027799634223183395339": {
           "traderRequirements": [
             {
@@ -3777,22 +2806,7 @@
             }
           ]
         },
-        "66aba85403e0ee3101042877": {
-          "traderRequirements": [
-            {
-              "id": "6a5691e3b9e428b94e3559f9",
-              "requirementType": "level",
-              "compareMethod": ">=",
-              "trader": {
-                "id": "54cb57776803fa99248b456e",
-                "name": "Therapist"
-              },
-              "value": 4
-            }
-          ]
-        },
         "675c1ff1a757ddd00404f0aa": {
-          "name": "Unique Experience",
           "traderRequirements": [
             {
               "id": "overlay.675c1ff1a757ddd00404f0aa.54cb50c76803fa8b248b4571.level.>=.4",
@@ -3819,15 +2833,6 @@
               "value": 1
             }
           ]
-        },
-        "68ee1c18b4e5bc9a68018cd7": {
-          "name": "Special Order",
-          "experience": 65000,
-          "objectives": {
-            "68ee1cc7e8b13097f525e6f2": {
-              "count": 1
-            }
-          }
         }
       }
     },
@@ -9890,8 +8895,8 @@
     }
   },
   "$meta": {
-    "version": "1.66",
-    "generated": "2026-08-15T08:45:06.002Z",
-    "sha256": "6d958b3390c606e5979aa3ccc0c3cf453a44bfbc5770c0693e99dbd48bd60db8"
+    "version": "1.65",
+    "generated": "2026-08-15T21:20:00.498Z",
+    "sha256": "1d50b44a9de1ac9b814f4da19e6998139d4319d151e38a43986da9f1343bf342"
   }
 }
