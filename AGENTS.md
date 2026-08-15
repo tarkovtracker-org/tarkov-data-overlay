@@ -42,10 +42,10 @@ Two mode lists live in `src/lib/types.ts`:
   other mode (`/{mode}/tasks`, `items`, `maps`, `traders`, `hideout`, ...).
   Everything that fetches/compares against tarkov.dev iterates this list, and
   `build.ts`/`validate.ts` iterate it for `src/overrides/modes/<mode>/` sections.
-- `DIVERGENCE_MODES` (`regular`, `pve`) — the pair the mode-divergence registry
-  adjudicates. Divergence is the artifact of tarkov.dev deriving one mode's
-  numbers from the other; it is scoped to regular↔pve. Extend only with proof of
-  a third-mode mirror.
+- `DIVERGENCE_MODES` aliases `SUPPORTED_GAME_MODES`, so divergence validation
+  can adjudicate `regular`, `pve`, and `pvp-season`. Registry fields may omit a
+  mode until its true value is independently verified; omission must not be
+  interpreted as equality with another mode.
 
 Seasonal-only data types tarkov.dev does not model at all live in dedicated
 additions, e.g. `src/additions/seasonalPerks.json5` (schema

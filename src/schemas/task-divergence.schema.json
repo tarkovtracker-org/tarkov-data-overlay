@@ -20,6 +20,12 @@
             "pveSource": {
               "enum": ["wiki", "tarkov.dev", "in-game"]
             },
+            "pvp-season": {
+              "type": ["number", "string", "boolean", "null"]
+            },
+            "pvpSeasonSource": {
+              "enum": ["wiki", "tarkov.dev", "in-game"]
+            },
             "regular": {
               "type": ["number", "string", "boolean", "null"]
             },
@@ -32,7 +38,11 @@
             }
           },
           "required": ["confidence", "verified"],
-          "anyOf": [{ "required": ["regular"] }, { "required": ["pve"] }],
+          "anyOf": [
+            { "required": ["regular"] },
+            { "required": ["pve"] },
+            { "required": ["pvp-season"] }
+          ],
           "type": "object"
         },
         "minProperties": 1,

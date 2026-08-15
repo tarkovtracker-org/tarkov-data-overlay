@@ -66,6 +66,7 @@ describe('divergence registry', () => {
       'confidence',
       'regularSource',
       'pveSource',
+      'pvpSeasonSource',
       'verified',
       'note',
     ]);
@@ -132,6 +133,9 @@ describe('divergence registry', () => {
         }
         if (def.pve !== undefined) {
           expect(def.pveSource, `${taskId}.${field}.pveSource`).toBeTruthy();
+        }
+        if (def['pvp-season'] !== undefined) {
+          expect(def.pvpSeasonSource, `${taskId}.${field}.pvpSeasonSource`).toBeTruthy();
         }
       }
     }
