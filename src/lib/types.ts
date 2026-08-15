@@ -661,7 +661,7 @@ export interface DivergenceField {
   regularSource?: DivergenceSource;
   pveSource?: DivergenceSource;
   pvpSeasonSource?: DivergenceSource;
-  /** ISO date (YYYY-MM-DD) the values were last verified */
+  /** Coarse reference to the data the values were last verified against (e.g. '1.1-pve'); dates are deliberately not recorded. */
   verified: string;
   note?: string;
 }

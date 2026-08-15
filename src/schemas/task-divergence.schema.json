@@ -33,7 +33,8 @@
               "enum": ["wiki", "tarkov.dev", "in-game"]
             },
             "verified": {
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "Coarse reference to the data the values were last verified against (e.g. 1.1-pve); dates are deliberately not recorded.",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*$",
               "type": "string"
             }
           },

@@ -1,6 +1,6 @@
 {
   // ---------------------------------------------------------------------------
-  // Provenance notes (kept from the 2026-08-12 capture-alignment pass, commit
+  // Provenance notes (kept from the capture-alignment pass, commit
   // 6c3700f) for entries that were dropped or moved:
   //
   // Pathfinder - REMOVED: an objective description was mis-attributed to a
@@ -11,12 +11,12 @@
   //
   // Power of Persuasion (aka "Test Drive - Part 2") - MOVED to
   // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 20 PMCs on Streets/GZ/Interchange; captures (PvE) = 5 on
+  // (regular) = 20 PMCs on Streets/GZ/Interchange; 1.1-pve data = 5 on
   // Woods/GZ/Interchange/Customs.
   //
   // Easy-Breezy (aka "Test Drive - Part 5") - MOVED to
   // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 50 targets on Factory; captures (PvE) = 30 on
+  // (regular) = 50 targets on Factory; 1.1-pve data = 30 on
   // Reserve/Lighthouse.
   //
   // Small Business - Part 3 - REMOVED: the two Woods objective descriptions
@@ -39,13 +39,13 @@
   //   https://escapefromtarkov.fandom.com/wiki/Is_This_a_Reference%3F (scav karma +1)
   //
   // minPlayerLevel overrides (A Fuel Matter, Inventory Check, Psycho Sniper,
-  // Bullshit, Chumming, ...) - REMOVED: the 1.1.0.0 capture carries no Level
+  // Bullshit, Chumming, ...) - REMOVED: the 1.1-pve data carries no Level
   // conditions for these quests.
   //
-  // Trader loyalty-level overrides (the 2026-08-10 LL1-LL4 batch) - REMOVED
-  // 2026-08-15: the 1.1.0.0 capture (eft/eft-1.1-pve) and json.tarkov.dev
+  // Trader loyalty-level overrides (the Season 1 LL1-LL4 batch) - REMOVED:
+  // the 1.1-pve data and json.tarkov.dev
   // agree that none of these quests carry a TraderLoyalty condition. Every
-  // quest that does have a real loyalty requirement in the capture is already
+  // quest that does have a real loyalty requirement in the 1.1-pve data is already
   // served correctly by the API; the rest are gated by story-chapter
   // variables or quest chains, not loyalty levels. The wiki pages cited by
   // the batch never documented loyalty level requirements, so those claims
@@ -54,12 +54,12 @@
 
   // District Patrol - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   //
   // The 1.1.0.0 patch consolidated quest XP to a small set of standard
   // values; tarkov.dev still serves stale pre-1.1 values for the tasks marked
   // "quest XP reworked in 1.1.0.0" in this file, in every mode. Both the wiki
-  // and the 2026-08-12 PvE capture (eft/eft-1.1-pve) agree on the corrected
+  // and the 1.1-pve data agree on the corrected
   // values, and each entry is recorded in src/divergences/tasks.json5
   // (status: converged).
   '64e7b9bffd30422ed03dad38': {
@@ -77,14 +77,14 @@
 
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '60e71b62a0beca400d69efc4': {
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Decontamination_Service
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '5c0d1c4cd0928202a02a6f5c': {
     experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
   },
@@ -99,21 +99,21 @@
 
   // No Swiping - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/No_Swiping
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '658027799634223183395339': {
     experience: 3000, // Was: 12000 (all modes, stale pre-1.1 value)
   },
 
   // Debtor - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '639dbaf17c898a131e1cffff': {
     experience: 10000, // Was: 13200 (all modes, stale pre-1.1 value)
   },
 
   // Pyramid Scheme - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '6572e876dc0d635f633a5714': {
     experience: 28000, // Was: 12400 (all modes, stale pre-1.1 value)
   },
@@ -121,14 +121,14 @@
   // Corporate Perks (old: Developer's Secrets - Part 1) - Renamed
   // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Perks
   //
-  // 2026-08-10: renamed in S1 (IT firm office objectives match)
+  // Renamed in S1 (IT firm office objectives match)
   '65733403eefc2c312a759ddb': {
     name: 'Corporate Perks', // Was: Developer's Secrets - Part 1
   },
 
   // Shooter Born in Heaven - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '5c0bde0986f77479cf22c2f8': {
     experience: 65000, // Was: 55000 (all modes, stale pre-1.1 value)
   },
@@ -139,7 +139,7 @@
   // The northern-territory fuel-tank objective ships with empty zones
   // upstream; this patch supplies its zone (in-game verified, issue #246).
   // tarkov.dev dropped the third/fourth tank objectives entirely in the
-  // 1.1.0.0 sync (matching the capture); the former fourth-tank zone patch
+  // 1.1.0.0 sync (matching the 1.1-pve data); the former fourth-tank zone patch
   // (6926fcc872a6499d1fa29327) was removed with them (commit 6c3700f).
   '5ae448f286f77448d73c0131': {
     objectives: {
@@ -185,14 +185,14 @@
 
   // Dandies - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Dandies
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '65734c186dc1e402c80dc19e': {
     experience: 10000, // Was: 11000 (all modes, stale pre-1.1 value)
   },
 
   // Scavenger - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Scavenger
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '5c112d7e86f7740d6f647486': {
     experience: 28000, // Was: 10000 (all modes, stale pre-1.1 value)
   },
@@ -226,7 +226,7 @@
 
   // New Beginning (Prestige 1)
   //
-  // REMOVED 2026-08-03: this override was a no-op targeting the wrong task's
+  // REMOVED: this override was a no-op targeting the wrong task's
   // objective. Objective 6848100b00afffa81f09e36b does not exist on Prestige 1
   // (6761f28a022f60bb320f3e95) - it belongs to Prestige 3
   // (6848100b00afffa81f09e365), where upstream reads exactly the "Was:" text
@@ -639,7 +639,7 @@
   },
   // Hell on Earth - Part 1 - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
-  // Verified: in-game PvE capture 2026-08-12; wiki agrees.
+  // Verified: the 1.1-pve data; wiki agrees.
   '666314b0acf8442f8b0531a1': {
     experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
   },

@@ -8,9 +8,9 @@
   // data tarkov.dev omits.
   //
   // Source: verified in-game (Seasonal Character perk selection screen).
-  // Proof: EFT patch 1.1.0.0 notes (Seasonal Character), 2026-08-03.
+  // Proof: EFT patch 1.1.0.0 notes (Seasonal Character).
   //   https://steamdb.info/patchnotes/24536010/
-  // Verified in-game: 2026-08-03.
+  // Verified in-game.
   //
   // Fields: id, type (tier: common|personal), name, description, points
   // (perk-point value shown on the selection screen; null = none),
