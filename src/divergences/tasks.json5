@@ -8,14 +8,14 @@
   // insufficient when the mirror reverses - which is exactly what happened to
   // the PvE experience overrides (see git history for src/overrides/modes/pve).
   //
-  // This registry records the TRUE value for BOTH modes so a flip in either
-  // direction is detectable. `npm run check-overrides` compares the effective
+  // This registry records verified TRUE values per upstream mode so a mirror
+  // flip is detectable. `npm run check-overrides` compares the effective
   // merged value per mode against these entries and reports which overrides are
-  // currently load-bearing versus currently redundant. Redundant entries are
-  // reported as intentional guards - never as "delete this".
-  //
-  // Values recorded here are never deleted when upstream agrees. That deletion
-  // policy is what allowed the regression to go unnoticed.
+  // currently load-bearing versus currently redundant. A converged entry is
+  // retained only while upstream is still wrong or an override actively guards
+  // the recorded truth. Once both authoritative sources and upstream agree and
+  // no override remains, the record is retired to git history rather than kept
+  // as inert registry data.
   //
   // SOURCES OF TRUTH
   //   pve      -> `in-game`: PvE values verified in-game on the PvE profile
@@ -26,8 +26,7 @@
   //
   // STATUS
   //   divergent      - the two modes genuinely differ in-game; both values pinned
-  //   converged      - modes currently share one value; kept as history so a
-  //                    future divergence is detectable
+  //   converged      - all recorded modes currently share one verified value
   //   mode-exclusive - task only exists in one mode; no cross-mode comparison
 
   // ---------------------------------------------------------------------------
@@ -110,70 +109,15 @@
   },
 
   // ---------------------------------------------------------------------------
-  // CONVERGED - EFT reference, wiki and upstream all agree on a single value in
-  // both modes. No override is needed in either mode. Recorded so that a future
-  // re-divergence is detectable rather than silent.
+  // CONVERGED - all recorded modes share one verified value, but upstream serves
+  // a different value and a base override is therefore required. Fully resolved
+  // records are removed from this registry and remain recoverable in git history.
   //
   // REMOVED 2026-08-10: the minPlayerLevel records (A Fuel Matter, Inventory
   // Check, Psycho Sniper) were dropped - the Season 1 patch replaced
   // player-level quest requirements with trader loyalty levels.
   // ---------------------------------------------------------------------------
 
-  // Counteraction
-  '6179b5eabca27a099552e052': {
-    name: 'Counteraction',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Counteraction',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 65000,
-        pve: 65000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 65000 for PvE and the wiki page has been updated to +65,000 EXP, so the pre-1.0 PvP figure of 22000 is obsolete. Upstream serves 65000 in both modes; the former regular override (22000) is parked.',
-      },
-    },
-  },
-
-  // Kings of the Rooftops
-  '639136f086e646067c176a8b': {
-    name: 'Kings of the Rooftops',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 10000,
-        pve: 10000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 10000 for PvE (superseding the 2026-06-30 figure of 7700), the wiki reads 10,000, and upstream serves 10000 in both modes. The former regular override (10000) is parked as redundant.',
-      },
-    },
-  },
-
-  // Ambulances Again
-  '64f3176921045e77405d63b5': {
-    name: 'Ambulances Again',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Ambulances_Again',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 10000,
-        pve: 10000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): PvE reads 10000 (superseding the 2026-06-30 figure of 7500) and upstream serves 10000 in both modes, so the pair is converged at 10000.',
-      },
-    },
-  },
-
-  // ---------------------------------------------------------------------------
   // MODE-EXCLUSIVE - task exists in only one mode, so no mirror can occur.
   // ---------------------------------------------------------------------------
 

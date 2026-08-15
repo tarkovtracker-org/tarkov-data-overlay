@@ -7,17 +7,6 @@
   // to detect a mirror-direction flip; superseded overrides are removed and
   // recoverable from git history.
 
-  // To Great Heights! - Part 5 [PVE ZONE] - objective text duplicates Part 6's
-  // Proof: https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_5
-  // tarkov.dev returns Part 6's "Win two matches in a row" objective for Part 5.
-  '68342265a8d674b5740b31f0': {
-    objectives: {
-      '68342265a8d674b5740b31f3': {
-        description: 'Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena', // Was: "Win two matches in a row in TeamFight, BlastGang, or CheckPoint mode in Arena"
-      },
-    },
-  },
-
   // REMOVED 2026-08-10: the Season 1 patch replaced player-level quest
   // requirements with trader loyalty levels, so minPlayerLevel no longer
   // applies to quests generally (confirmed against the 1.1.0.0 PvE capture:
@@ -42,10 +31,6 @@
   '639135e8c115f907b14700aa': {
     experience: 10000, // Was: 12000 (tarkov.dev mirrors regular-mode value)
   },
-
-  // REMOVED 2026-08-10: parked minPlayerLevel entries (A Fuel Matter, Inventory
-  // Check, Psycho Sniper) removed - Season 1 patch replaced player-level quest
-  // requirements with trader loyalty levels.
 
   // Private Club - PvE experience reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Private_Club
