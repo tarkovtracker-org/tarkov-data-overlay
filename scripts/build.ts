@@ -23,8 +23,7 @@ const { rootDir, srcDir, distDir } = getProjectPaths();
 /**
  * Load mode-specific override and addition files
  */
-function loadModeFiles():
-  Partial<Record<string, Record<string, Record<string, unknown>>>> | undefined {
+function loadModeFiles(): Record<string, Record<string, Record<string, unknown>>> {
   const modes: Record<string, Record<string, Record<string, unknown>>> = {};
 
   for (const mode of SUPPORTED_GAME_MODES) {
@@ -34,19 +33,20 @@ function loadModeFiles():
     Object.assign(modeData, loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', mode)));
     Object.assign(modeData, loadAllJson5FromDir(join(srcDir, 'additions', 'modes', mode), false));
 
-    if (Object.keys(modeData).length > 0) {
-      modes[mode] = modeData;
-    }
+    // Emit every upstream mode, even when its overlay is currently empty. This
+    // keeps the compiled contract aligned with json.tarkov.dev/endpoints and
+    // prevents consumers from treating pvp-season as an optional special case.
+    modes[mode] = modeData;
   }
 
-  return Object.keys(modes).length > 0 ? modes : undefined;
+  return modes;
 }
 
 /**
  * Load all source files from overrides and additions directories
  */
 function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
-  const output: Omit<OverlayOutput, '$meta'> = {};
+  const output = { modes: loadModeFiles() } as Omit<OverlayOutput, '$meta'>;
 
   // Load overrides (corrections to tarkov.dev data)
   const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
@@ -55,11 +55,6 @@ function loadSourceFiles(): Omit<OverlayOutput, '$meta'> {
   // Load additions (new data not in tarkov.dev)
   const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
   Object.assign(output, additions);
-
-  const modes = loadModeFiles();
-  if (modes) {
-    output.modes = modes;
-  }
 
   // Load per-locale corrections (one file per locale, filename = locale code)
   const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));

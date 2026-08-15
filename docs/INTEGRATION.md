@@ -58,28 +58,28 @@ async function fetchOverlay() {
       "name": "Tour"
     }
   },
-  "prestige": {
-    "<prestige-id>": {
-      "prestigeLevel": 5,
-      "conditions": {
-        "<condition-id>": {
-          "type": "taskStatus",
-          "task": "new_beginning_prestige_5",
-          "status": ["complete"]
-        }
-      },
-      "storyRequirements": [
-        {
-          "type": "storyChapterStatus",
-          "storyChapter": "tour",
-          "name": "Tour",
-          "status": ["complete"]
-        }
-      ]
-    }
-  },
   "modes": {
     "regular": {
+      "prestige": {
+        "<prestige-id>": {
+          "prestigeLevel": 5,
+          "conditions": {
+            "<condition-id>": {
+              "type": "taskStatus",
+              "task": "new_beginning_prestige_5",
+              "status": ["complete"]
+            }
+          },
+          "storyRequirements": [
+            {
+              "type": "storyChapterStatus",
+              "storyChapter": "tour",
+              "name": "Tour",
+              "status": ["complete"]
+            }
+          ]
+        }
+      },
       "tasks": {
         "<task-id>": {
           "objectives": {
@@ -319,7 +319,9 @@ consumer that switches on `requirementType` will not see them regress.
 ## Applying Mode-Specific Data (PVP vs PVE vs Seasonal)
 
 Some corrections differ by game mode. The overlay stores these under
-`modes.regular`, `modes.pve`, and `modes["pvp-season"]`.
+`modes.regular`, `modes.pve`, and `modes["pvp-season"]`. The compiled overlay
+always includes all three keys, matching `json.tarkov.dev/endpoints`; a mode with
+no current corrections is represented by an empty object.
 
 - Apply shared data first (`tasks`, `tasksAdd`)
 - Then apply mode-specific data (`modes[gameMode].tasks`, `modes[gameMode].tasksAdd`)
@@ -614,7 +616,7 @@ type Prestige = {
 };
 
 function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
-  const override = overlay.prestige?.[base.id];
+  const override = overlay.modes.regular.prestige?.[base.id];
   if (!override) return base;
 
   const { conditions: condPatches, ...topLevel } = override;
@@ -761,14 +763,13 @@ async function getTasksWithOverlay(gameMode: GameMode): Promise<Task[]> {
 interface Overlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
-  modes?: Partial<Record<GameMode, ModeOverlay>>;
+  modes: Record<GameMode, ModeOverlay>; // all upstream modes are always present
   items?: Record<string, ItemOverride>;
   itemsAdd?: Record<string, ItemAddition>;
   traders?: Record<string, TraderOverride>;
   hideout?: Record<string, HideoutOverride>;
   editions?: Record<string, Edition>;
   storyChapters?: Record<string, StoryChapter>;
-  prestige?: Record<string, PrestigeOverride>;
   // Seasonal (pvp-season) data tarkov.dev does not serve; see the sections above.
   seasonalPerks?: Record<string, SeasonalPerk>;
   craftsAdd?: Record<string, Craft>;
@@ -786,6 +787,7 @@ type GameMode = 'regular' | 'pve' | 'pvp-season';
 interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
+  prestige?: Record<string, PrestigeOverride>; // currently regular-only upstream
 }
 
 // Sparse fixes for one broken locale bundle; apply after data overrides,

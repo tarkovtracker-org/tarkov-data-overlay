@@ -35,9 +35,6 @@
     "itemsAdd": {
       "$ref": "item-additions.schema.json"
     },
-    "prestige": {
-      "$ref": "prestige-override.schema.json"
-    },
     "storyChapters": {
       "$ref": "story-chapter.schema.json"
     },
@@ -75,7 +72,8 @@
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
-            "tasksAdd": { "$ref": "task-additions.schema.json" }
+            "tasksAdd": { "$ref": "task-additions.schema.json" },
+            "prestige": { "$ref": "prestige-override.schema.json" }
           },
           "additionalProperties": false
         },
@@ -96,7 +94,8 @@
           "additionalProperties": false
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": ["regular", "pve", "pvp-season"]
     }
   },
   "title": "Tarkov Data Overlay",

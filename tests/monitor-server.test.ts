@@ -230,14 +230,17 @@ describe('buildSummary', () => {
       storyChapters: { ch1: { id: 'ch1', name: 'Ch1' } },
       itemsAdd: {},
       tasksAdd: { ct: { id: 'ct', name: 'Custom' } },
-      prestige: { p1: { prestigeLevel: 1, name: 'First' } },
       locales: {
         en: { tasks: { t1: { name: 'Renamed' } } },
       },
       seasonalPerks: {},
       craftsAdd: {},
       modes: {
-        regular: { tasks: {}, tasksAdd: {} },
+        regular: {
+          tasks: {},
+          tasksAdd: {},
+          prestige: { p1: { prestigeLevel: 1, name: 'First' } },
+        },
         pve: { tasks: {}, tasksAdd: {} },
         'pvp-season': { tasks: {}, tasksAdd: {} },
       },
@@ -745,12 +748,15 @@ describe('HTTP — real monitor/server.js handlers', () => {
       storyChapters: {},
       itemsAdd: {},
       tasksAdd: {},
-      prestige: { p1: { prestigeLevel: 1, name: 'First' } },
       locales: { en: { tasks: { t1: { name: 'Renamed' } } } },
       seasonalPerks: { perk1: { id: 'perk1', name: 'Perk One' } },
       craftsAdd: {},
       modes: {
-        regular: { tasks: {}, tasksAdd: {} },
+        regular: {
+          tasks: {},
+          tasksAdd: {},
+          prestige: { p1: { prestigeLevel: 1, name: 'First' } },
+        },
         pve: { tasks: {}, tasksAdd: {} },
         'pvp-season': { tasks: {}, tasksAdd: {} },
       },

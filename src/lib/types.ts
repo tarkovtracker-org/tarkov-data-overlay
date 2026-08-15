@@ -393,15 +393,16 @@ export type GameMode = (typeof SUPPORTED_GAME_MODES)[number];
  * intentionally scoped to that pair. Extend only with proof of a third-mode
  * mirror.
  */
-export const DIVERGENCE_MODES = ['regular', 'pve'] as const;
+export const DIVERGENCE_MODES = SUPPORTED_GAME_MODES;
 
 /** A game mode the divergence registry records per-mode values for. */
-export type DivergenceMode = (typeof DIVERGENCE_MODES)[number];
+export type DivergenceMode = GameMode;
 
 /** Mode-specific overlay data */
 export interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
+  prestige?: Record<string, PrestigeOverride>;
 }
 
 /**
@@ -599,12 +600,12 @@ export interface OverlayOutput {
   hideout?: Record<string, unknown>;
   editions?: Record<string, unknown>;
   storyChapters?: Record<string, StoryChapter>;
-  prestige?: Record<string, PrestigeOverride>;
   /** Seasonal perks (BSG Seasonal Character mechanic); absent from tarkov.dev. */
   seasonalPerks?: Record<string, SeasonalPerk>;
   /** Hideout crafts missing from tarkov.dev, in tarkov.dev's craft shape. */
   craftsAdd?: Record<string, CraftAddition>;
-  modes?: Partial<Record<GameMode, ModeOverlay>>;
+  /** One sparse overlay section for every mode advertised by tarkov.dev. */
+  modes: Record<GameMode, ModeOverlay>;
   /** Per-locale corrections keyed by tarkov.dev locale code (en, de, fr, ...) */
   locales?: Record<string, LocaleOverlay>;
   $meta: OverlayMeta;
@@ -652,11 +653,14 @@ export type DivergenceStatus = 'divergent' | 'converged' | 'mode-exclusive';
 export interface DivergenceField {
   /** True regular/PvP value. Omitted when the task does not exist in regular. */
   regular?: number | string | boolean | null;
-  /** True PvE value. Omitted when the task does not exist in PvE. */
+  /** True PvE value. Omitted when it has not been independently verified. */
   pve?: number | string | boolean | null;
+  /** True Seasonal Character value. Omitted until independently verified. */
+  'pvp-season'?: number | string | boolean | null;
   confidence: DivergenceConfidence;
   regularSource?: DivergenceSource;
   pveSource?: DivergenceSource;
+  pvpSeasonSource?: DivergenceSource;
   /** ISO date (YYYY-MM-DD) the values were last verified */
   verified: string;
   note?: string;
@@ -716,7 +720,10 @@ export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/craftsAdd.json5', schemaFile: 'craft-additions.schema.json' },
   { pattern: 'additions/storyChapters.json5', schemaFile: 'story-chapter.schema.json' },
   { pattern: 'additions/itemsAdd.json5', schemaFile: 'item-additions.schema.json' },
-  { pattern: 'overrides/prestige.json5', schemaFile: 'prestige-override.schema.json' },
+  {
+    pattern: 'overrides/modes/regular/prestige.json5',
+    schemaFile: 'prestige-override.schema.json',
+  },
   { pattern: 'overrides/locales/*.json5', schemaFile: 'locale-override.schema.json' },
   { pattern: 'suppressions/tasks.json5', schemaFile: 'task-suppressions.schema.json' },
   { pattern: 'divergences/tasks.json5', schemaFile: 'task-divergence.schema.json' },

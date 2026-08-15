@@ -33,8 +33,10 @@ const PRESTIGE_IDS = {
 
 function loadPrestigeOverride(): Record<string, PrestigeOverride> {
   const { srcDir } = getProjectPaths();
-  const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
-  return (overrides.prestige ?? {}) as Record<string, PrestigeOverride>;
+  return loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', 'regular')).prestige as Record<
+    string,
+    PrestigeOverride
+  >;
 }
 
 function storyNames(entry: PrestigeOverride | undefined): string[] {
@@ -45,7 +47,7 @@ function storyNames(entry: PrestigeOverride | undefined): string[] {
 describe('prestige override (issue #207)', () => {
   it('is registered with a schema validator', () => {
     const validators = initializeValidators();
-    expect(getValidator('overrides/prestige.json5', validators)).not.toBeNull();
+    expect(getValidator('overrides/modes/regular/prestige.json5', validators)).not.toBeNull();
   });
 
   it('records the in-game story requirements for each prestige level', () => {
