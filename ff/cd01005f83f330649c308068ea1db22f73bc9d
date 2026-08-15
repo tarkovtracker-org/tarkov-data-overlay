@@ -1,0 +1,42 @@
+tests/prestige-override.test.ts
+  s_04c9d20fefaecf::t_8ff9f5c971ec44 36-39
+  s_04c9d20fefaecf::t_7a59007c849b3a 50
+src/schemas/overlay.schema.json
+  s_04c9d20fefaecf::t_6945b029031e1a 75-76
+  s_04c9d20fefaecf::t_ea247a9eafc736 97-98
+scripts/validate.ts
+  s_04c9d20fefaecf::t_e8b398c2cecb9a 291
+src/lib/types.ts
+  s_04c9d20fefaecf::t_4ea3e54299b73b 396,399,607-608,656,658-659,663
+  s_04c9d20fefaecf::t_03cba66559c3b7 405,723-726
+scripts/build.ts
+  s_04c9d20fefaecf::t_ddec67eece52ed 49
+  s_04c9d20fefaecf::t_cb190bb54b23b3 26,36-39,42
+tests/overlay-schema.test.ts
+  s_04c9d20fefaecf::t_a8a9ccd07c4734 20,34
+  s_04c9d20fefaecf::t_c4377ff910b6a4 28
+  s_04c9d20fefaecf::t_9050b7adab60b7 59,62-64
+monitor/server.js
+  s_04c9d20fefaecf::t_56432a0993e53e 952
+tests/monitor-server.test.ts
+  s_04c9d20fefaecf::t_a1541eb6a88960 239-243,755-759
+docs/INTEGRATION.md
+  s_04c9d20fefaecf::t_88aa3a2abc8ba9 322-324,766
+  s_04c9d20fefaecf::t_ee7a98b4d15079 63-82,619,790
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ffcd01005f83f330649c308068ea1db22f73bc9d",
+  "prompts": {},
+  "sessions": {
+    "s_04c9d20fefaecf": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a002db-6aa3-7c07-bd8a-e16cfca1b613",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
