@@ -137,6 +137,109 @@ const validateMap: FieldValidator = (override, apiTask) => {
   };
 };
 
+type TraderRequirementLike = {
+  id?: string;
+  requirementType?: string;
+  compareMethod?: string;
+  value?: number;
+  trader?: { id?: string; name?: string };
+};
+
+/**
+ * Semantic identity of a trader requirement: everything a consumer uses to
+ * evaluate it, excluding the `id` (which differs between upstream and
+ * overlay-authored entries).
+ */
+function traderRequirementKey(req: TraderRequirementLike): string {
+  return [req.trader?.id ?? '', req.requirementType ?? '', req.compareMethod ?? '', req.value].join(
+    '|'
+  );
+}
+
+function formatTraderRequirement(req: TraderRequirementLike): string {
+  return `${req.trader?.name ?? req.trader?.id ?? '?'} ${req.requirementType} ${req.compareMethod} ${req.value}`;
+}
+
+/**
+ * Validate trader requirements by semantic identity.
+ *
+ * The `id` field is deliberately excluded from the comparison: overlay-authored
+ * requirements carry a synthetic `overlay.*` id that will never match upstream,
+ * and upstream-preserved ids are only merge identity, not semantics. Comparing
+ * `trader.id + requirementType + compareMethod + value` keeps Fence LL1 and
+ * Fence reputation `>= 1` distinguishable while treating an id-only difference
+ * as "already fixed upstream".
+ *
+ * This holds even if an upstream entry ever arrives without an id: an override
+ * cannot address an id-less upstream requirement, so keeping it would append a
+ * duplicate under a patch-by-id merge. `fixed` ("remove it") stays the correct
+ * verdict there.
+ */
+const validateTraderRequirements: FieldValidator = (override, apiTask) => {
+  if (override.traderRequirements === undefined) return null;
+
+  const apiReqs = apiTask.traderRequirements ?? [];
+  const overrideReqs = override.traderRequirements;
+
+  // An empty override array means "no requirements" and replaces upstream
+  // entries; surface it as needed rather than letting a vacuous subset match
+  // hide the fact that requirements are being cleared.
+  if (overrideReqs.length === 0) {
+    if (apiReqs.length === 0) return null;
+    return {
+      field: 'traderRequirements',
+      status: 'needed',
+      message: `traderRequirements: API has ${apiReqs.length} requirement(s), Override=[] (clears all) - STILL NEEDED`,
+    };
+  }
+
+  if (apiReqs.length === 0) {
+    return {
+      field: 'traderRequirements',
+      status: 'needed',
+      message: `traderRequirements: API=[] (empty), Override has ${overrideReqs.length} requirement(s) - STILL NEEDED`,
+    };
+  }
+
+  const remaining = [...apiReqs];
+  const unmatched: string[] = [];
+
+  for (const overrideReq of overrideReqs) {
+    const key = traderRequirementKey(overrideReq);
+    const index = remaining.findIndex((apiReq) => traderRequirementKey(apiReq) === key);
+    if (index === -1) {
+      unmatched.push(formatTraderRequirement(overrideReq));
+    } else {
+      remaining.splice(index, 1);
+    }
+  }
+
+  if (unmatched.length > 0) {
+    return {
+      field: 'traderRequirements',
+      status: 'needed',
+      message: `traderRequirements: ${unmatched.length} requirement(s) differ from API (${unmatched.join('; ')}) - STILL NEEDED`,
+    };
+  }
+
+  // A non-empty override remains a whole-array replacement for consumers that
+  // have not migrated to patch-by-id. Matching only a strict subset therefore
+  // intentionally clears the omitted API requirements and is still needed.
+  if (remaining.length > 0) {
+    return {
+      field: 'traderRequirements',
+      status: 'needed',
+      message: `traderRequirements: override omits ${remaining.length} API requirement(s) (${remaining.map(formatTraderRequirement).join('; ')}) - STILL NEEDED`,
+    };
+  }
+
+  return {
+    field: 'traderRequirements',
+    status: 'fixed',
+    message: 'traderRequirements: FIXED IN API',
+  };
+};
+
 /**
  * Validate task requirements field
  */
@@ -197,7 +300,7 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('kappaRequired'),
   createFieldValidator('lightkeeperRequired'),
   validateTaskRequirements,
-  createFieldValidator('traderRequirements', { arrayMode: 'subset' }),
+  validateTraderRequirements,
 ];
 
 /**

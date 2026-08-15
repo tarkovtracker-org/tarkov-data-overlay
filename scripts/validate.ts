@@ -16,6 +16,7 @@ import {
   listJson5Files,
   SCHEMA_CONFIGS,
   SUPPORTED_GAME_MODES,
+  SYNTHETIC_REQUIREMENT_ID_PREFIX,
   icons,
   type LocaleOverlay,
   type SchemaValidationResult,
@@ -82,6 +83,14 @@ export function initializeValidators(): ValidatorCache {
   const ajv = initializeAjv();
   const cache: ValidatorCache = new Map();
   const schemaCache = new Map<string, ReturnType<Ajv['compile']>>();
+
+  // Task source schemas share this contract. Register it once so both resolve
+  // the same constraints and cannot drift independently.
+  const traderRequirementSchemaFile = 'trader-requirement.schema.json';
+  ajv.addSchema(
+    loadJsonFile(join(schemasDir, traderRequirementSchemaFile)) as object,
+    traderRequirementSchemaFile
+  );
 
   for (const config of SCHEMA_CONFIGS) {
     let validator = schemaCache.get(config.schemaFile);
@@ -154,6 +163,111 @@ export function validateFile(
       errors: [(error as Error).message],
     };
   }
+}
+
+/** Task files whose `traderRequirements` may carry synthetic merge identities. */
+const TASK_REQUIREMENT_FILE_PATTERN =
+  /^(?:overrides|additions)\/(?:modes\/[^/]+\/)?(?:tasks|tasksAdd)\.json5$/;
+
+/**
+ * Cross-check synthetic trader-requirement ids against the entry they identify.
+ *
+ * The schema pattern proves a synthetic id's *shape*
+ * (`overlay.<taskId>.<traderId>.<type>.<method>.<value>`); this proves its
+ * *content*. The id is only a stable merge identity if it is derived from the
+ * requirement it labels - an id that encodes `level.>=.2` next to
+ * `requirementType: 'reputation'` would silently change identity the next time
+ * it is regenerated from the fields, turning a consumer's patch into an append.
+ * Duplicate ids within one task are rejected for the same reason: patch-by-id
+ * would collapse them into a single requirement.
+ */
+export function validateTraderRequirementIds(
+  filePath: string,
+  displayPath: string
+): SchemaValidationResult {
+  try {
+    const data = loadJson5File(filePath);
+    if (!isRecord(data)) return { file: displayPath, valid: true };
+
+    const errors: string[] = [];
+
+    for (const [taskId, task] of Object.entries(data)) {
+      if (!isRecord(task) || !Array.isArray(task.traderRequirements)) continue;
+
+      const seen = new Set<string>();
+      task.traderRequirements.forEach((requirement, index) => {
+        if (!isRecord(requirement) || typeof requirement.id !== 'string') return;
+        const { id } = requirement;
+        const path = `/${taskId}/traderRequirements/${index}/id`;
+
+        if (seen.has(id)) {
+          errors.push(`${path}: duplicate requirement id '${id}' within the same task`);
+        }
+        seen.add(id);
+
+        if (!id.startsWith(SYNTHETIC_REQUIREMENT_ID_PREFIX)) return;
+
+        // Remove the prefix before decoding fields. `value` is the last field
+        // and may itself contain a '.' (decimals).
+        const encodedFields = id.slice(SYNTHETIC_REQUIREMENT_ID_PREFIX.length);
+        const [encodedTaskId, encodedTraderId, encodedType, encodedMethod, ...valueParts] =
+          encodedFields.split('.');
+        if (
+          valueParts.length >= 3 &&
+          valueParts.at(-2) === 'occurrence' &&
+          /^\d+$/.test(valueParts.at(-1) ?? '')
+        ) {
+          valueParts.splice(-2);
+        }
+        const encodedValue = valueParts.join('.');
+        const traderId = isRecord(requirement.trader) ? requirement.trader.id : undefined;
+
+        const mismatches: Array<[string, unknown, string]> = [
+          ['task id', taskId, encodedTaskId],
+          ['trader.id', traderId, encodedTraderId],
+          ['requirementType', requirement.requirementType, encodedType],
+          ['compareMethod', requirement.compareMethod, encodedMethod],
+          ['value', requirement.value, encodedValue],
+        ];
+
+        for (const [field, actual, encoded] of mismatches) {
+          if (String(actual) !== encoded) {
+            errors.push(
+              `${path}: synthetic id encodes ${field} '${encoded}' but the entry declares '${String(actual)}'`
+            );
+          }
+        }
+      });
+    }
+
+    return {
+      file: displayPath,
+      valid: errors.length === 0,
+      errors: errors.length ? errors : undefined,
+    };
+  } catch (error) {
+    return {
+      file: displayPath,
+      valid: false,
+      errors: [(error as Error).message],
+    };
+  }
+}
+
+/**
+ * Validate a task source file against its schema, then cross-check the
+ * merge identities its trader requirements declare.
+ */
+export function validateTaskSourceFile(
+  filePath: string,
+  displayPath: string,
+  validators: ValidatorCache
+): SchemaValidationResult {
+  const result = validateFile(filePath, displayPath, validators);
+  if (!result.valid || !TASK_REQUIREMENT_FILE_PATTERN.test(displayPath)) return result;
+
+  const idResult = validateTraderRequirementIds(filePath, displayPath);
+  return idResult.valid ? result : idResult;
 }
 
 function addJson5Keys(index: Set<string>, relPath: string): void {
@@ -285,14 +399,14 @@ export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
   const overridesDir = join(srcDir, 'overrides');
   for (const file of listJson5Files(overridesDir)) {
     const filePath = join(overridesDir, file);
-    results.push(validateFile(filePath, `overrides/${file}`, validators));
+    results.push(validateTaskSourceFile(filePath, `overrides/${file}`, validators));
   }
 
   // Validate additions directory
   const additionsDir = join(srcDir, 'additions');
   for (const file of listJson5Files(additionsDir)) {
     const filePath = join(additionsDir, file);
-    results.push(validateFile(filePath, `additions/${file}`, validators));
+    results.push(validateTaskSourceFile(filePath, `additions/${file}`, validators));
   }
 
   // Validate per-locale overrides (one file per locale, filename = locale code)
@@ -324,13 +438,13 @@ export async function validateSourceFiles(): Promise<SchemaValidationResult[]> {
     const modeOverridesDir = join(srcDir, 'overrides', 'modes', mode);
     for (const file of listJson5Files(modeOverridesDir)) {
       const filePath = join(modeOverridesDir, file);
-      results.push(validateFile(filePath, `overrides/modes/${mode}/${file}`, validators));
+      results.push(validateTaskSourceFile(filePath, `overrides/modes/${mode}/${file}`, validators));
     }
 
     const modeAdditionsDir = join(srcDir, 'additions', 'modes', mode);
     for (const file of listJson5Files(modeAdditionsDir)) {
       const filePath = join(modeAdditionsDir, file);
-      results.push(validateFile(filePath, `additions/modes/${mode}/${file}`, validators));
+      results.push(validateTaskSourceFile(filePath, `additions/modes/${mode}/${file}`, validators));
     }
   }
 

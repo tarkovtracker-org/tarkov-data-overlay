@@ -22,12 +22,14 @@
  * once. Across calls the cache is not shared, mirroring the monitor's pattern.
  */
 
+import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
 import type {
   TaskData,
   TaskItemRef,
   TaskObjective,
   TaskRewards,
   TaskRequirement,
+  TraderRequirement,
   GameMode,
 } from './types.js';
 import {
@@ -311,13 +313,43 @@ function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) }) as unknown as TaskRequirement;
 }
 
-function adaptTraderRequirement(raw: unknown, ctx: Context): unknown {
-  if (!isRecord(raw)) return raw;
-  return compact({ ...raw, trader: resolveTraderRef(raw.trader, ctx) });
+function adaptTraderRequirement(
+  raw: unknown,
+  taskId: string,
+  ctx: Context,
+  syntheticIdOccurrences: Map<string, number>
+): TraderRequirement {
+  if (!isRecord(raw)) return raw as TraderRequirement;
+
+  const trader = resolveTraderRef(raw.trader, ctx);
+  const upstreamId = stringId(raw);
+  const syntheticIdBase = [
+    SYNTHETIC_REQUIREMENT_ID_PREFIX.slice(0, -1),
+    taskId,
+    trader?.id,
+    raw.requirementType,
+    raw.compareMethod,
+    raw.value,
+  ].join('.');
+  const occurrence = upstreamId ? 0 : (syntheticIdOccurrences.get(syntheticIdBase) ?? 0) + 1;
+  if (!upstreamId) syntheticIdOccurrences.set(syntheticIdBase, occurrence);
+  const generatedId =
+    occurrence <= 1 ? syntheticIdBase : `${syntheticIdBase}.occurrence.${occurrence}`;
+
+  // Preserve an upstream merge identity when present. If upstream regresses and
+  // omits it, derive a deterministic identity from its fields. Repeated id-less
+  // entries retain the original identity for the first occurrence and receive
+  // stable occurrence suffixes thereafter instead of collapsing during merge.
+  return compact({
+    ...raw,
+    id: upstreamId ?? generatedId,
+    trader,
+  }) as unknown as TraderRequirement;
 }
 
 function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   const id = stringId(raw) ?? '';
+  const syntheticRequirementIdOccurrences = new Map<string, number>();
   return compact({
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
@@ -334,7 +366,9 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
       ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
       : undefined,
     traderRequirements: Array.isArray(raw.traderRequirements)
-      ? raw.traderRequirements.map((req) => adaptTraderRequirement(req, ctx))
+      ? raw.traderRequirements.map((req) =>
+          adaptTraderRequirement(req, id, ctx, syntheticRequirementIdOccurrences)
+        )
       : undefined,
     objectives: Array.isArray(raw.objectives)
       ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))

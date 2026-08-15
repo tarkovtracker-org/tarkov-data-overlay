@@ -234,7 +234,15 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
               t1: {
                 id: 't1',
                 name: 't1 name',
-                traderRequirements: [{ trader: 'tr1', value: 2, compareMethod: '>=' }],
+                traderRequirements: [
+                  {
+                    id: 'req-1',
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: 'tr1',
+                  },
+                ],
                 finishRewards: {
                   traderStanding: [{ trader: 'tr1', standing: 0.05 }],
                   items: [{ item: 'i1', count: 3 }],
@@ -256,13 +264,85 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const tasks = await fetchTasks();
     const task = tasks[0];
 
-    expect(task.traderRequirements?.[0].trader).toEqual({ id: 'tr1', name: 'Prapor' });
+    expect(task.traderRequirements?.[0]).toEqual({
+      id: 'req-1',
+      requirementType: 'level',
+      compareMethod: '>=',
+      value: 2,
+      trader: { id: 'tr1', name: 'Prapor' },
+    });
     expect(task.finishRewards?.traderStanding?.[0].trader).toEqual({ id: 'tr1', name: 'Prapor' });
     expect(task.finishRewards?.items?.[0].item).toEqual({
       id: 'i1',
       name: 'Bandage',
       shortName: 'Band',
     });
+  });
+
+  it('generates stable, distinct ids for id-less trader requirements', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              '657315e1dccd301f1301416a': {
+                id: '657315e1dccd301f1301416a',
+                name: 'task name',
+                traderRequirements: [
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
+                  {
+                    requirementType: 'reputation',
+                    compareMethod: '>=',
+                    value: 1,
+                    trader: '579dc571d53a0658a154fbec',
+                  },
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
+                  {
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                    trader: '54cb50c76803fa8b248b4571',
+                  },
+                ],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 'task name': 'Task' } },
+        'regular/traders': {
+          data: {
+            '54cb50c76803fa8b248b4571': {
+              id: '54cb50c76803fa8b248b4571',
+              name: 'prapor name',
+            },
+            '579dc571d53a0658a154fbec': {
+              id: '579dc571d53a0658a154fbec',
+              name: 'fence name',
+            },
+          },
+        },
+        'regular/traders_en': { data: { 'prapor name': 'Prapor', 'fence name': 'Fence' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(task.traderRequirements?.map((requirement) => requirement.id)).toEqual([
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+      'overlay.657315e1dccd301f1301416a.579dc571d53a0658a154fbec.reputation.>=.1',
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2.occurrence.2',
+      'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2.occurrence.3',
+    ]);
   });
 
   it('resolves requiredPrestige from the prestige array', async () => {

@@ -572,21 +572,26 @@ describe('validateTaskOverride', () => {
   });
 
   describe('traderRequirements validation', () => {
-    it('returns FIXED when traderRequirements matches API', () => {
+    it('returns FIXED when traderRequirements matches API semantically', () => {
       const apiTask = createApiTask({
         traderRequirements: [
           {
-            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
-            value: 2,
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
             compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
           },
         ],
       });
       const override: TaskOverride = {
         traderRequirements: [
           {
-            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+            id: 'overlay.abc.54cb50c76803fa8b248b4571.level.>=.2',
+            requirementType: 'level',
+            compareMethod: '>=',
             value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
           },
         ],
       };
@@ -597,21 +602,26 @@ describe('validateTaskOverride', () => {
       ).toBe(true);
     });
 
-    it('returns NEEDED when traderRequirements differs from API', () => {
+    it('returns NEEDED when requirementType differs despite matching trader+value (Fence LL1 vs rep >= 1)', () => {
       const apiTask = createApiTask({
         traderRequirements: [
           {
-            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
-            value: 2,
+            id: '66dace4d03b34844877a50fc',
+            requirementType: 'reputation',
             compareMethod: '>=',
+            value: 1,
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
           },
         ],
       });
       const override: TaskOverride = {
         traderRequirements: [
           {
-            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
-            value: 3,
+            id: 'overlay.abc.579dc571d53a0658a154fbec.level.>=.1',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 1,
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
           },
         ],
       };
@@ -620,6 +630,140 @@ describe('validateTaskOverride', () => {
       expect(
         result.details.some((d) => d.field === 'traderRequirements' && d.status === 'needed')
       ).toBe(true);
+    });
+
+    it('returns NEEDED when the value differs from API', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '6a70899e66497c811decb758',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 3,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      });
+      const override: TaskOverride = {
+        traderRequirements: [
+          {
+            id: '6a70899e66497c811decb758',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 4,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'needed')
+      ).toBe(true);
+    });
+
+    it('returns NEEDED when a matching override omits an API requirement', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+          {
+            id: '66dace4d03b34844877a50fc',
+            requirementType: 'reputation',
+            compareMethod: '>=',
+            value: 1,
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
+          },
+        ],
+      });
+      const override: TaskOverride = {
+        traderRequirements: [
+          {
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+      const detail = result.details.find((d) => d.field === 'traderRequirements');
+
+      expect(detail?.status).toBe('needed');
+      expect(detail?.message).toContain(
+        'override omits 1 API requirement(s) (Fence reputation >= 1)'
+      );
+    });
+
+    it('returns NEEDED when an empty override clears non-empty API requirements', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '6a5672392ee61bd094c49e28',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      });
+      const override: TaskOverride = { traderRequirements: [] };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'needed')
+      ).toBe(true);
+    });
+
+    // Upstream currently ships an id on every trader requirement (361/361 across
+    // regular, pve and pvp-season). Should it ever omit one, the override is
+    // still redundant by value: its own id (synthetic or stale upstream) cannot
+    // address an id-less upstream entry, so patch-by-id would append a duplicate
+    // requirement rather than correct anything. FIXED (i.e. "remove it") is the
+    // correct guidance; flipping to NEEDED would ask maintainers to keep an
+    // override that duplicates the requirement for consumers.
+    it('returns FIXED when the API requirement omits its id but matches semantically', () => {
+      const apiTask = createApiTask({
+        traderRequirements: [
+          {
+            id: '',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      });
+      const override: TaskOverride = {
+        traderRequirements: [
+          {
+            id: 'overlay.657315e1dccd301f1301416a.54cb50c76803fa8b248b4571.level.>=.2',
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 2,
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+          },
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some((d) => d.field === 'traderRequirements' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
+    it('returns no detail when both API and override requirements are empty', () => {
+      const apiTask = createApiTask({ traderRequirements: [] });
+      const override: TaskOverride = { traderRequirements: [] };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.details.some((d) => d.field === 'traderRequirements')).toBe(false);
     });
   });
 

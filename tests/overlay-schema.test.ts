@@ -100,6 +100,7 @@ describe('overlay.schema.json', () => {
       'prestige-override.schema.json',
       'task-override.schema.json',
       'task-additions.schema.json',
+      'trader-requirement.schema.json',
       'story-chapter.schema.json',
       'locale-override.schema.json',
       'seasonal-perk.schema.json',

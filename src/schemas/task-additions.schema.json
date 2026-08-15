@@ -850,34 +850,9 @@
         "type": "array"
       },
       "traderRequirements": {
-        "description": "Trader loyalty requirements to start the task",
+        "description": "Trader requirements to start the task (loyalty level or reputation)",
         "items": {
-          "properties": {
-            "trader": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            },
-            "value": {
-              "description": "Required trader level/loyalty",
-              "maximum": 4,
-              "minimum": 0,
-              "type": "integer"
-            },
-            "compareMethod": {
-              "description": "Comparison method for the requirement (e.g., '>=')",
-              "type": "string"
-            }
-          },
-          "required": ["trader", "value"],
-          "type": "object"
+          "$ref": "trader-requirement.schema.json"
         },
         "type": "array"
       },
