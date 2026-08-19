@@ -2903,9 +2903,6 @@
     "6572e876dc0d635f633a5714": {
       "experience": 28000
     },
-    "65733403eefc2c312a759ddb": {
-      "name": "Corporate Perks"
-    },
     "5c0bde0986f77479cf22c2f8": {
       "experience": 65000
     },
@@ -8895,8 +8892,8 @@
     }
   },
   "$meta": {
-    "version": "1.65",
-    "generated": "2026-08-15T21:20:00.498Z",
-    "sha256": "1d50b44a9de1ac9b814f4da19e6998139d4319d151e38a43986da9f1343bf342"
+    "version": "1.66",
+    "generated": "2026-08-19T20:29:05.677Z",
+    "sha256": "cfe47a9e19663e2e4fa2049c689701e01e557969314608beab56eac474e9dfcd"
   }
 }
