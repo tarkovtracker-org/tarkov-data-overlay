@@ -1,0 +1,9 @@
+dist/overlay.json
+  ai_agent 8895-8897
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "dbf50d5fbae25fb35d83a81ec2ee6b9bd1d377d2",
+  "prompts": {}
+}
