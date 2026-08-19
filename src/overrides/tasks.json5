@@ -234,14 +234,6 @@
     experience: 28000, // Was: 12400 (all modes, stale pre-1.1 value)
   },
 
-  // Corporate Perks (old: Developer's Secrets - Part 1) - Renamed
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Corporate_Perks
-  //
-  // Renamed in S1 (IT firm office objectives match)
-  '65733403eefc2c312a759ddb': {
-    name: 'Corporate Perks', // Was: Developer's Secrets - Part 1
-  },
-
   // Shooter Born in Heaven - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shooter_Born_in_Heaven
   // Verified: the 1.1-pve data; wiki agrees.
