@@ -8,172 +8,36 @@
   // insufficient when the mirror reverses - which is exactly what happened to
   // the PvE experience overrides (see git history for src/overrides/modes/pve).
   //
-  // This registry records the TRUE value for BOTH modes so a flip in either
-  // direction is detectable. `npm run check-overrides` compares the effective
+  // This registry records verified TRUE values per upstream mode so a mirror
+  // flip is detectable. `npm run check-overrides` compares the effective
   // merged value per mode against these entries and reports which overrides are
-  // currently load-bearing versus currently redundant. Redundant entries are
-  // reported as intentional guards - never as "delete this".
-  //
-  // Values recorded here are never deleted when upstream agrees. That deletion
-  // policy is what allowed the regression to go unnoticed.
+  // currently load-bearing versus currently redundant. A converged entry is
+  // retained only while upstream is still wrong or an override actively guards
+  // the recorded truth. Once both authoritative sources and upstream agree and
+  // no override remains, the record is retired to git history rather than kept
+  // as inert registry data.
   //
   // SOURCES OF TRUTH
   //   pve      -> `in-game`: PvE values verified in-game on the PvE profile
   //               (read off the quest screens). PvE is the mode we verify
   //               directly, so it is treated as authoritative here.
-  //   regular  -> `wiki`: the EFT wiki documents PvP/regular values. Regular is
-  //               not verified in-game here, so the wiki is the best witness.
+  //   regular  -> `wiki` when the page is current, `patch-notes` when the
+  //               wiki still documents a pre-1.1 figure: the Season 1 patch
+  //               notes state the task-reward rebalance applies to ALL game
+  //               modes (PvP Season, PvP Zone, PvE Zone), and the 1.1-pve
+  //               data carries single mode-free values (gameMode filters in
+  //               quest data are edition gates only, never
+  //               regular/pve/pvp-season), so a 1.1 figure verified in PvE
+  //               applies to the other modes unless a per-mode split is
+  //               documented.
+  //   pvp-season -> `patch-notes`: same all-modes 1.1 rework evidence;
+  //               not independently verified in-game.
   //
   // STATUS
   //   divergent      - the two modes genuinely differ in-game; both values pinned
-  //   converged      - modes currently share one value; kept as history so a
-  //                    future divergence is detectable
+  //   converged      - all recorded modes currently share one verified value
   //   mode-exclusive - task only exists in one mode; no cross-mode comparison
 
-  // ---------------------------------------------------------------------------
-  // DIVERGENT - upstream currently mirrors the PvE value into regular, so
-  // regular-mode consumers get PvE experience. Regular overrides are required.
-  // ---------------------------------------------------------------------------
-
-  // Anesthesia
-  '5eda19f0edce541157209cee': {
-    name: 'Anesthesia',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Anesthesia',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 18100,
-        pve: 10000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 9800 is superseded by 10000, which upstream now serves for PvE. PvP=18100 still stands per the wiki (regular witness); tarkov.dev mirrors the PvE value into regular, so the regular override remains load-bearing.',
-      },
-    },
-  },
-
-  // Energy Crisis
-  '6179b3a12153c15e937d52bc': {
-    name: 'Energy Crisis',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Energy_Crisis',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 13000,
-        pve: 28000,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 8500 is superseded by 28000, which upstream now serves for PvE. PvP=13000 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
-      },
-    },
-  },
-
-  // No Place for Renegades
-  '60896bca6ee58f38c417d4f2': {
-    name: 'No Place for Renegades',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 15300,
-        pve: 28000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 10300 is superseded by 28000, which upstream now serves for PvE. PvP=15300 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
-      },
-    },
-  },
-
-  // Perfect Mediator - REMOVED 2026-08-10 on main: superseded by the Season 1
-  // trader-loyalty rework; see git history (commit 045c943).
-  // The Huntsman Path - Sadist
-  '5edab4b1218d181e29451435': {
-    name: 'The Huntsman Path - Sadist',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist',
-    status: 'divergent',
-    fields: {
-      experience: {
-        regular: 16300,
-        pve: 65000,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): the 2026-06-30 value of 12100 is superseded by 65000, which upstream now serves for PvE. PvP=16300 still stands per the wiki (regular witness), so the regular override remains load-bearing.',
-      },
-    },
-  },
-
-  // ---------------------------------------------------------------------------
-  // CONVERGED - EFT reference, wiki and upstream all agree on a single value in
-  // both modes. No override is needed in either mode. Recorded so that a future
-  // re-divergence is detectable rather than silent.
-  //
-  // REMOVED 2026-08-10: the minPlayerLevel records (A Fuel Matter, Inventory
-  // Check, Psycho Sniper) were dropped - the Season 1 patch replaced
-  // player-level quest requirements with trader loyalty levels.
-  // ---------------------------------------------------------------------------
-
-  // Counteraction
-  '6179b5eabca27a099552e052': {
-    name: 'Counteraction',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Counteraction',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 65000,
-        pve: 65000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 65000 for PvE and the wiki page has been updated to +65,000 EXP, so the pre-1.0 PvP figure of 22000 is obsolete. Upstream serves 65000 in both modes; the former regular override (22000) is parked.',
-      },
-    },
-  },
-
-  // Kings of the Rooftops
-  '639136f086e646067c176a8b': {
-    name: 'Kings of the Rooftops',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Kings_of_the_Rooftops',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 10000,
-        pve: 10000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'CONVERGED 2026-08-12: the 1.1.0.0 capture (eft/eft-1.1-pve) reads 10000 for PvE (superseding the 2026-06-30 figure of 7700), the wiki reads 10,000, and upstream serves 10000 in both modes. The former regular override (10000) is parked as redundant.',
-      },
-    },
-  },
-
-  // Ambulances Again
-  '64f3176921045e77405d63b5': {
-    name: 'Ambulances Again',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Ambulances_Again',
-    status: 'converged',
-    fields: {
-      experience: {
-        regular: 10000,
-        pve: 10000,
-        confidence: 'high',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Re-verified 2026-08-12 in the 1.1.0.0 capture (eft/eft-1.1-pve): PvE reads 10000 (superseding the 2026-06-30 figure of 7500) and upstream serves 10000 in both modes, so the pair is converged at 10000.',
-      },
-    },
-  },
-
-  // ---------------------------------------------------------------------------
   // MODE-EXCLUSIVE - task exists in only one mode, so no mirror can occur.
   // ---------------------------------------------------------------------------
 
@@ -188,19 +52,24 @@
         pve: 2900,
         confidence: 'high',
         pveSource: 'in-game',
-        verified: '2026-08-03',
+        verified: 'in-game',
       },
     },
   },
 
   // ---------------------------------------------------------------------------
   // EFT 1.1.0.0 (Seasonal Character) quest experience rework - verified
-  // 2026-08-12 against the fresh PvE client capture (eft/eft-1.1-pve) and
+  // against the 1.1-pve data and
   // cross-checked against the wiki. BSG consolidated quest XP to a small set of
   // standard values; tarkov.dev still serves the old per-quest value for these
-  // tasks in every mode. Entries whose wiki value matches the new figure are
-  // CONVERGED (base overrides); entries where the wiki still documents the old
-  // value are DIVERGENT (PvE-only overrides) pending a PvP capture.
+  // tasks in every mode. All entries are CONVERGED (base overrides): where the
+  // wiki already documents the new figure it is the regular witness, and where
+  // it still shows the old figure it is treated as stale because the 1.1 patch
+  // notes apply the rework to all game modes and the 1.1-pve data carries
+  // single mode-free values (see the SOURCES OF TRUTH header).
+  //
+  // Perfect Mediator - REMOVED on main: superseded by the Season 1
+  // trader-loyalty rework; see git history (commit 045c943).
   // ---------------------------------------------------------------------------
 
   // Dandies (converged, base override)
@@ -212,10 +81,12 @@
       experience: {
         regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -229,10 +100,12 @@
       experience: {
         regular: 3000,
         pve: 3000,
+        'pvp-season': 3000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -246,10 +119,12 @@
       experience: {
         regular: 28000,
         pve: 28000,
+        'pvp-season': 28000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -263,10 +138,12 @@
       experience: {
         regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -280,10 +157,12 @@
       experience: {
         regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -297,10 +176,12 @@
       experience: {
         regular: 28000,
         pve: 28000,
+        'pvp-season': 28000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -314,10 +195,12 @@
       experience: {
         regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -331,10 +214,12 @@
       experience: {
         regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -348,10 +233,12 @@
       experience: {
         regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
@@ -365,229 +252,263 @@
       experience: {
         regular: 3000,
         pve: 3000,
+        'pvp-season': 3000,
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
       },
     },
   },
 
-  // Surveillance (divergent, PvE-only override - wiki still documents the old value)
+  // Surveillance (converged, base override)
   '639135e8c115f907b14700aa': {
     name: 'Surveillance',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Surveillance',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 12000,
+        regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 12000. If a PvP capture confirms regular also changed, converge at 10000 and move the override to base.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Private Club (divergent, PvE-only override)
+  // Private Club (converged, base override)
   '675c3582f6ddc329a90f9c6d': {
     name: 'Private Club',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Private_Club',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 11000,
+        regular: 3000,
         pve: 3000,
+        'pvp-season': 3000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=3000 from the 1.1.0.0 capture; regular per the wiki still reads 11000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Properties All Around (divergent, PvE-only override)
+  // Properties All Around (converged, base override)
   '6573397ef3f8344c4575cd87': {
     name: 'Properties All Around',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Properties_All_Around',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 6600,
+        regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 6600.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Unique Experience (divergent, PvE-only override)
+  // Unique Experience (converged, base override)
   '675c1ff1a757ddd00404f0aa': {
     name: 'Unique Experience',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Unique_Experience',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 32000,
+        regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 32000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Reconnaissance (divergent, PvE-only override)
+  // Reconnaissance (converged, base override)
   '626bd75c71bd851e971b82a5': {
     name: 'Reconnaissance',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Reconnaissance',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 7500,
+        regular: 28000,
         pve: 28000,
+        'pvp-season': 28000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=28000 from the 1.1.0.0 capture; regular per the wiki still reads 7500.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Hell on Earth - Part 2 (divergent, PvE-only override)
+  // Hell on Earth - Part 2 (converged, base override)
   '666314b2a9290f9e0806cca3': {
     name: 'Hell on Earth - Part 2',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 16000,
+        regular: 28000,
         pve: 28000,
+        'pvp-season': 28000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=28000 from the 1.1.0.0 capture; regular per the wiki still reads 16000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // A Difficult Choice (divergent, PvE-only override)
+  // A Difficult Choice (converged, base override)
   '5edac34d0bb72a50635c2bfa': {
     name: 'A Difficult Choice',
     proof: 'https://escapefromtarkov.fandom.com/wiki/A_Difficult_Choice',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 27500,
+        regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 27500.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Beneath The Streets (divergent, PvE-only override)
+  // Beneath The Streets (converged, base override)
   '66aba85403e0ee3101042877': {
     name: 'Beneath The Streets',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Beneath_The_Streets',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 24000,
+        regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 24000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Crisis (divergent, PvE-only override)
+  // Crisis (converged, base override)
   '60e71c48c1bfa3050473b8e5': {
     name: 'Crisis',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Crisis',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 34000,
+        regular: 65000,
         pve: 65000,
+        'pvp-season': 65000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=65000 from the 1.1.0.0 capture; regular per the wiki still reads 34000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Job for a Patriot (divergent, PvE-only override)
+  // Job for a Patriot (converged, base override)
   '64f5deac39e45b527a7c4232': {
     name: 'Job for a Patriot',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       experience: {
-        regular: 18000,
+        regular: 10000,
         pve: 10000,
+        'pvp-season': 10000,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE=10000 from the 1.1.0.0 capture; regular per the wiki still reads 18000.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE value from the 1.1-pve data. 1.1 unified quest rewards across modes (patch notes: all game modes); the wiki still shows the pre-1.1 figure and is stale. tarkov.dev serves the old value in every mode; the base override corrects all of them.',
       },
     },
   },
 
-  // Collector (divergent, PvE-only minPlayerLevel - no regular witness)
+  // Collector (converged, base override - 1.1 unification)
   '5c51aac186f77432ea65c552': {
     name: 'Collector',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Collector',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       minPlayerLevel: {
-        regular: 42,
+        regular: 40,
         pve: 40,
+        'pvp-season': 40,
         confidence: 'medium',
-        regularSource: 'tarkov.dev',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE Level condition = 40 in the 1.1.0.0 capture. The wiki lists no player level for Collector (only Scav karma + trader loyalties), so regular is UNVERIFIED - 42 is the upstream value recorded as a placeholder so the pair is pinned for flip detection. Re-verify regular in-game.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE Level condition from the 1.1-pve data (single mode-free condition). 1.1 unified quest data across modes (patch notes: all game modes), so the pre-1.1 figure (42) tarkov.dev serves in every mode is stale; the wiki lists no player level and cannot adjudicate. The base override corrects all modes.',
       },
     },
   },
 
-  // Long Road (divergent, PvE-only objective count)
+  // Long Road (converged, base override - 1.1 unification)
   '6193850f60b34236ee0483de': {
     name: 'Long Road',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Long_Road',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       'objective[6193dabd5f6468204470571f].count': {
-        regular: 4,
+        regular: 7,
         pve: 7,
+        'pvp-season': 7,
         confidence: 'medium',
-        regularSource: 'wiki',
+        regularSource: 'patch-notes',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'PvE CounterCreator value = 7 in the 1.1.0.0 capture; the wiki still documents 4 for regular.',
+        pvpSeasonSource: 'patch-notes',
+        verified: '1.1-pve',
+        note: 'PvE count from the 1.1-pve data (single mode-free CounterCreator). 1.1 unified quest data across modes (patch notes: all game modes); the wiki still shows the pre-1.1 count (4) and is stale. tarkov.dev serves 4 in every mode; the base override corrects all of them.',
       },
     },
   },
+
+  // ---------------------------------------------------------------------------
+  // DIVERGENT - genuinely mode-specific objective variants. The wiki documents
+  // the mode split itself (or at least the regular variant), and the 1.1-pve
+  // data carries the PvE variant; tarkov.dev serves the PvE variant into every
+  // mode, so the regular-mode overrides remain load-bearing. Unlike the quest
+  // XP rework above, these splits are NOT unified by the 1.1 patch.
+  // ---------------------------------------------------------------------------
 
   // Vacate the Premises (divergent objective count + description)
   '67d03be712fb5f8fd2096332': {
@@ -601,8 +522,8 @@
         confidence: 'high',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'The wiki states it outright: "Eliminate 24 PMC operatives inside The Labyrinth. Note: The objective in the PvE mode is to eliminate any 36 targets in The Labyrinth instead." PvE count 36 confirmed in the 1.1.0.0 capture.',
+        verified: '1.1-pve',
+        note: 'The wiki documents a mode split for this objective; the PvE count is confirmed by the 1.1-pve data.',
       },
     },
   },
@@ -619,8 +540,8 @@
         confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Wiki (edited 2026-08-09) documents 20 PMCs with an MP5SD on Streets/Ground Zero/Interchange; both game captures (PvE) read 5 PMCs with an MP5SD on Woods/Ground Zero/Interchange/Customs. tarkov.dev serves the PvE variant in both modes.',
+        verified: '1.1-pve',
+        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
       },
     },
   },
@@ -637,8 +558,8 @@
         confidence: 'medium',
         regularSource: 'wiki',
         pveSource: 'in-game',
-        verified: '2026-08-12',
-        note: 'Wiki (edited 2026-08-05) documents 50 targets with an SR-2M on Factory; both game captures (PvE) read 30 targets on Reserve or Lighthouse. tarkov.dev serves the PvE variant in both modes.',
+        verified: '1.1-pve',
+        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
       },
     },
   },

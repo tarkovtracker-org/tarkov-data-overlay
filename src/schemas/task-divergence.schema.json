@@ -18,21 +18,47 @@
               "type": ["number", "string", "boolean", "null"]
             },
             "pveSource": {
-              "enum": ["wiki", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
+            },
+            "pvp-season": {
+              "type": ["number", "string", "boolean", "null"]
+            },
+            "pvpSeasonSource": {
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
             },
             "regular": {
               "type": ["number", "string", "boolean", "null"]
             },
             "regularSource": {
-              "enum": ["wiki", "tarkov.dev", "in-game"]
+              "enum": ["wiki", "tarkov.dev", "in-game", "patch-notes"]
             },
             "verified": {
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "Coarse reference to the data the values were last verified against (e.g. 1.1-pve); dates are deliberately not recorded.",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*$",
+              "not": { "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
               "type": "string"
             }
           },
           "required": ["confidence", "verified"],
-          "anyOf": [{ "required": ["regular"] }, { "required": ["pve"] }],
+          "allOf": [
+            {
+              "if": { "required": ["regular"] },
+              "then": { "required": ["regularSource"] }
+            },
+            {
+              "if": { "required": ["pve"] },
+              "then": { "required": ["pveSource"] }
+            },
+            {
+              "if": { "required": ["pvp-season"] },
+              "then": { "required": ["pvpSeasonSource"] }
+            }
+          ],
+          "anyOf": [
+            { "required": ["regular"] },
+            { "required": ["pve"] },
+            { "required": ["pvp-season"] }
+          ],
           "type": "object"
         },
         "minProperties": 1,

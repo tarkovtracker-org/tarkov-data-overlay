@@ -65,6 +65,10 @@ jobs:
       - name: Validate source files
         run: npm run validate
 
+      - name: Check overlay for data now supplied by tarkov.dev
+        timeout-minutes: 15
+        run: npm run check-overrides -- --fail-on-stale
+
       - name: Build overlay (repo version)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:

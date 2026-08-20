@@ -40,7 +40,7 @@ const registry = (
         regular: 18100,
         pve: 9800,
         confidence: 'high',
-        verified: '2026-08-03',
+        verified: 'in-game',
         ...overrides,
       },
     },
@@ -125,6 +125,27 @@ describe('validateDivergences', () => {
     expect(results.every((r) => r.verdict === 'UPSTREAM_CORRECT')).toBe(true);
   });
 
+  it('does not report mirroring when both API tasks omit the registered field', () => {
+    const taskWithoutExperience = {
+      id: TASK_ID,
+      name: 'Anesthesia',
+      minPlayerLevel: 10,
+      objectives: [],
+    } as unknown as TaskData;
+
+    const results = validateDivergences(
+      registry(),
+      {},
+      {
+        regular: { apiTasks: [taskWithoutExperience], modeOverrides: {} },
+        pve: { apiTasks: [taskWithoutExperience], modeOverrides: {} },
+      }
+    );
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.every((result) => result.mirrored === false)).toBe(true);
+  });
+
   it('reports OVERRIDE_ACTIVE when an override supplies the value upstream lacks', () => {
     const results = validateDivergences(
       registry(),
@@ -183,7 +204,7 @@ describe('validateDivergences', () => {
         proof: 'https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_2',
         status: 'mode-exclusive',
         fields: {
-          experience: { pve: 2900, confidence: 'high', verified: '2026-08-03' },
+          experience: { pve: 2900, confidence: 'high', verified: 'in-game' },
         },
       },
     };
@@ -230,7 +251,7 @@ describe('validateDivergences', () => {
         proof: 'https://escapefromtarkov.fandom.com/wiki/A_Fuel_Matter',
         status: 'converged',
         fields: {
-          minPlayerLevel: { regular: 15, pve: 15, confidence: 'high', verified: '2026-08-03' },
+          minPlayerLevel: { regular: 15, pve: 15, confidence: 'high', verified: 'in-game' },
         },
       },
     };
@@ -280,7 +301,7 @@ describe('validateDivergences', () => {
             regular: 4,
             pve: 7,
             confidence: 'medium',
-            verified: '2026-08-12',
+            verified: '1.1-pve',
           },
         },
       },

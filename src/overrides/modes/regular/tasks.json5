@@ -1,8 +1,8 @@
 {
-  // A Helping Hand - minPlayerLevel override REMOVED 2026-08-10: the Season 1
+  // A Helping Hand - minPlayerLevel override REMOVED: the Season 1
   // patch replaced player-level quest requirements with trader loyalty levels,
-  // so the field no longer applies to quests.
-  // (Old: PvP starts at character level 20; Was: 0 (tarkov.dev mirrors PvE data))
+  // so the field no longer applies to this quest.
+  // (Old: PvP started at character level 20; Was: 0 (tarkov.dev mirrors PvE data))
 
   // Vacate the Premises - PvP has 24 kills (differs from PvE's 36)
   // Change the objective
@@ -29,14 +29,14 @@
 
   // ---------------------------------------------------------------------------
   // Mode-divergent objective maps/counts - tarkov.dev mirrors the PvE text into
-  // regular. The wiki (regular witness, edited 2026-08-05/09) documents the
-  // PvP variant; both game captures (PvE) carry the other variant. See
+  // regular. The wiki (regular witness) documents the
+  // PvP variant; the 1.1-pve data carries the other variant. See
   // src/divergences/tasks.json5 for the recorded per-mode counts.
   // ---------------------------------------------------------------------------
 
   // Power of Persuasion - PvP: 20 PMCs with MP5SD on Streets/Ground Zero/
   // Interchange (wiki); PvE: 5 PMCs with MP5SD on Woods/Ground Zero/Interchange/
-  // Customs (captures). tarkov.dev serves the PvE variant in both modes.
+  // Customs (1.1-pve data). tarkov.dev serves the PvE variant in both modes.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
   '63a5cf262964a7488f5243ce': {
     objectives: {
@@ -60,7 +60,7 @@
   },
 
   // Easy-Breezy - PvP: 50 targets with SR-2M on Factory (wiki); PvE: 30 targets
-  // on Reserve or Lighthouse (captures). tarkov.dev serves the PvE variant in
+  // on Reserve or Lighthouse (1.1-pve data). tarkov.dev serves the PvE variant in
   // both modes.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
   '669fa3a40c828825de06d6a1': {
@@ -74,51 +74,16 @@
   },
 
   // ---------------------------------------------------------------------------
-  // Regular-mode experience: tarkov.dev now mirrors the PvE value into regular.
-  //
-  // These previously only needed a PvE override because upstream mirrored the
-  // REGULAR value into PvE. Upstream then fixed PvE by serving the PvE value in
-  // BOTH modes, which corrected PvE and broke regular. The PvE overrides are
-  // kept as guards (see src/overrides/modes/pve/tasks.json5) and both true
-  // values are recorded in src/divergences/tasks.json5 so a future flip in
-  // either direction is detected instead of silently shipping wrong data.
-  //
-  // PvE values verified in-game on the PvE profile (2026-06-30);
-  // regular values verified against the wiki, which documents PvP.
+  // Regular-mode experience overrides REMOVED (1.1.0.0 unification):
+  // Anesthesia, Energy Crisis, No Place for Renegades, and The Huntsman Path
+  // - Sadist previously corrected regular here because tarkov.dev mirrored
+  // the PvE value into regular and the wiki (PvP witness) documented a
+  // different figure. The Season 1 patch notes state the task-reward
+  // rebalance applies to ALL game modes, and the 1.1-pve data carries single
+  // mode-free values - so the 1.1 figures tarkov.dev serves for regular are
+  // now correct and the regular overrides were actively wrong. Their registry
+  // entries in src/divergences/tasks.json5 are converged; the wiki pages
+  // still show the pre-1.0 values and are treated as stale. Recover the
+  // overrides from git history if a PvP capture disproves the unification.
   // ---------------------------------------------------------------------------
-
-  // Anesthesia - PvP awards 18,100 EXP (PvE awards 9,800)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Anesthesia
-  '5eda19f0edce541157209cee': {
-    experience: 18100, // Was: 9800 (tarkov.dev mirrors PvE data)
-  },
-
-  // Energy Crisis - PvP awards 13,000 EXP (PvE awards 8,500)
-  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
-  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
-  // (edited 2025-04-14). Re-verify in-game on a PvP character.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Energy_Crisis
-  '6179b3a12153c15e937d52bc': {
-    experience: 13000, // Was: 8500 (tarkov.dev mirrors PvE data)
-  },
-
-  // No Place for Renegades - PvP awards 15,300 EXP (PvE awards 10,300)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/No_Place_for_Renegades
-  '60896bca6ee58f38c417d4f2': {
-    experience: 15300, // Was: 10300 (tarkov.dev mirrors PvE data)
-  },
-
-  // Perfect Mediator - removed from EFT in Season 1 (disabled in base overrides),
-  // so the regular-mode experience correction no longer applies.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Perfect_Mediator
-  // (removed 2026-08-10 with the Season 1 quest purge)
-
-  // The Huntsman Path - Sadist - PvP awards 16,300 EXP (PvE awards 12,100)
-  // MEDIUM CONFIDENCE: corroborated by the post-1.0 tarkov.dev regular snapshot
-  // (overlay commit adaa123, 2026-06-29); the wiki page predates EFT 1.0
-  // (edited 2025-10-12). Re-verify in-game on a PvP character.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Sadist
-  '5edab4b1218d181e29451435': {
-    experience: 16300, // Was: 12100 (tarkov.dev mirrors PvE data)
-  },
 }

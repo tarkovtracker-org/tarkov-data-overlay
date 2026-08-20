@@ -148,20 +148,6 @@ type EntityCheckSpec = {
 
 const ENTITY_OVERRIDE_SPECS: EntityCheckSpec[] = [
   {
-    label: 'prestige',
-    segments: ['overrides', 'prestige.json5'],
-    endpoint: 'tasks',
-    collectionKey: 'prestige',
-    config: {
-      // prestigeLevel identifies which prestige tier the entry patches.
-      identityFields: ['prestigeLevel'],
-      // tarkov.dev does not expose in-game story-chapter requirements at all.
-      additiveFields: ['storyRequirements'],
-      // conditions are keyed by condition ID; overlay_* keys are synthetic.
-      keyedFields: ['conditions'],
-    },
-  },
-  {
     label: 'items',
     segments: ['overrides', 'items.json5'],
     endpoint: 'items',
@@ -422,7 +408,10 @@ type ResultPrintOptions = {
   overridePath?: string;
 };
 
-function printResults(results: ValidationResult[], options: ResultPrintOptions = {}): void {
+function printResults(
+  results: ValidationResult[],
+  options: ResultPrintOptions = {}
+): { obsoleteEntries: number; staleFields: number } {
   const title = options.titlePrefix
     ? `${options.titlePrefix} OVERLAY VALIDATION REPORT`
     : 'OVERLAY VALIDATION REPORT';
@@ -450,6 +439,21 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
 
   printCountSection('Still need overrides', 'green', stillNeeded.map(line), icons.success);
   printCountSection('Fixed in API, can remove', 'yellow', fixed.map(line), icons.sync);
+
+  // Fully fixed and removed entries are already counted as obsolete below.
+  // Count field-level staleness only inside entries that still need at least
+  // one override, so each removable unit contributes exactly once.
+  const staleFields = stillNeeded.flatMap((result) =>
+    result.details
+      .filter((detail) => detail.status === 'fixed')
+      .map((detail) => `${result.name} (${result.id}) ${detail.field}: ${detail.message}`)
+  );
+  printCountSection(
+    'Individual fields fixed upstream (remove from otherwise-needed entries)',
+    'yellow',
+    staleFields,
+    icons.sync
+  );
   printCountSection(
     'Removed from API, delete from overlay',
     'red',
@@ -464,6 +468,8 @@ function printResults(results: ValidationResult[], options: ResultPrintOptions =
     console.log(`   Update ${overridePath} to remove ${obsoleteCount} obsolete override(s)`);
     console.log();
   }
+
+  return { obsoleteEntries: obsoleteCount, staleFields: staleFields.length };
 }
 
 const ADDITION_ICONS: Record<AdditionStatus, string> = {
@@ -478,7 +484,10 @@ const ADDITION_COLORS: Record<AdditionStatus, string> = {
   MISSING: colors.yellow,
 };
 
-function printAdditionResults(results: AdditionResult[], titlePrefix?: string): void {
+function printAdditionResults(
+  results: AdditionResult[],
+  titlePrefix?: string
+): { resolved: number } {
   const checkTitle = titlePrefix ? `${titlePrefix} ADDITIONS CHECK` : 'ADDITIONS CHECK';
   const summaryTitle = titlePrefix ? `${titlePrefix} ADDITIONS SUMMARY` : 'ADDITIONS SUMMARY';
 
@@ -505,6 +514,8 @@ function printAdditionResults(results: AdditionResult[], titlePrefix?: string): 
   );
   printCountSection('Still missing from API', 'yellow', byStatus('MISSING'), icons.warning);
   printCountSection('Needs review (name-only matches)', 'yellow', byStatus('CHECK'), icons.sync);
+
+  return { resolved: results.filter((result) => result.status === 'RESOLVED').length };
 }
 
 function printEditionReferenceResults(missing: EditionTaskReference[]): void {
@@ -587,12 +598,13 @@ export function printLocaleResults(locale: string, results: LocaleValidationResu
  * same locale. Locale bundles are shared across game modes, so 'regular' is
  * fetched once per locale.
  */
-async function checkLocaleOverrides(): Promise<void> {
+async function checkLocaleOverrides(): Promise<number> {
   const localesDir = join(srcDir, 'overrides', 'locales');
   const localeOverrides = loadAllJson5FromDir(localesDir);
   const locales = Object.keys(localeOverrides).sort();
-  if (locales.length === 0) return;
+  if (locales.length === 0) return 0;
 
+  let stale = 0;
   for (const locale of locales) {
     printProgress(`Fetching ${locale} locale bundle from tarkov.dev...`);
     const bundle = await fetchLocaleBundle('regular', locale);
@@ -604,7 +616,11 @@ async function checkLocaleOverrides(): Promise<void> {
       bundle
     );
     printLocaleResults(locale, results);
+    stale += results.filter(
+      (result) => result.verdict === 'STALE' || result.verdict === 'REMOVED'
+    ).length;
   }
+  return stale;
 }
 
 /**
@@ -784,13 +800,38 @@ function printBaseCrossModeSummary(resultsByMode: Partial<Record<GameMode, Valid
 }
 
 /**
- * Report the mode-divergence registry against both modes.
+ * Report the mode-divergence registry against every recorded upstream mode.
  *
  * This is the check that catches a mirror-direction flip. `OVERRIDE_MISSING`
  * means consumers of that mode are being served a value we know is wrong.
  * `OVERRIDE_REDUNDANT` entries are deliberate guards and are reported for
  * visibility only - retiring them is what let the last regression through.
  */
+function printDivergenceCoverage(registry: Record<string, TaskDivergence>): void {
+  printHeader('MODE-DIVERGENCE COVERAGE');
+
+  const missing: string[] = [];
+  for (const [taskId, entry] of Object.entries(registry)) {
+    if (entry.status === 'mode-exclusive') continue;
+    for (const [field, definition] of Object.entries(entry.fields)) {
+      for (const mode of SUPPORTED_GAME_MODES) {
+        if (!(mode in definition)) {
+          missing.push(
+            `${entry.name} (${taskId}) ${field}: ${mode} truth not independently verified`
+          );
+        }
+      }
+    }
+  }
+
+  printCountSection(
+    'Unverified mode values (capture/proof needed; not assumed from upstream)',
+    'yellow',
+    missing,
+    icons.warning
+  );
+}
+
 function printDivergenceReport(results: DivergenceResult[]): { actionable: number } {
   printHeader('MODE-DIVERGENCE REGISTRY');
 
@@ -883,7 +924,7 @@ function printEntityResults(
   label: string,
   filePath: string,
   results: EntityValidationResult[]
-): { errors: number } {
+): { errors: number; stale: number } {
   printHeader(`${label.toUpperCase()} OVERLAY CHECK`);
   console.log(dim(`  (${filePath})`));
   console.log();
@@ -891,7 +932,7 @@ function printEntityResults(
   if (results.length === 0) {
     console.log(dim('  Nothing to verify (file empty or comment-only).'));
     console.log();
-    return { errors: 0 };
+    return { errors: 0, stale: 0 };
   }
 
   const grouped = categorizeEntityResults(results);
@@ -931,7 +972,14 @@ function printEntityResults(
     printCountSection('Identity/consistency problems', 'red', identityErrors, icons.error);
   }
 
-  return { errors: grouped.removedFromApi.length + identityErrors.length };
+  const staleFieldsInNeededEntries = grouped.stillNeeded
+    .flatMap((result) => result.details)
+    .filter((detail) => detail.status === 'fixed').length;
+
+  return {
+    errors: grouped.removedFromApi.length + identityErrors.length,
+    stale: grouped.fixed.length + staleFieldsInNeededEntries,
+  };
 }
 
 /** Report story-chapter referential integrity problems. */
@@ -1082,9 +1130,12 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
  */
 async function main(): Promise<void> {
   const strict = process.argv.includes('--strict');
+  const failOnStale = process.argv.includes('--fail-on-stale');
   const getTasksForMode = createTaskFetcher();
   /** Problems that mean data is being served wrong or the overlay is inconsistent. */
   let actionable = 0;
+  /** Overlay entries or fields now supplied upstream and safe to remove. */
+  let staleProblems = 0;
 
   try {
     printProgress('Loading task overrides...');
@@ -1106,7 +1157,8 @@ async function main(): Promise<void> {
     printProgress('Validating overrides...\n');
     const results = validateAllOverrides(overrides, apiTasks);
 
-    printResults(results);
+    const baseTaskReport = printResults(results);
+    staleProblems += baseTaskReport.obsoleteEntries + baseTaskReport.staleFields;
 
     // Collect every override group for the reference cross-check below.
     const crossCheckGroups: Array<{ label: string; overrides: Record<string, TaskOverride> }> = [
@@ -1114,8 +1166,12 @@ async function main(): Promise<void> {
     ];
 
     printProgress('Checking additions against API...\n');
-    const additionResults = checkTaskAdditions(additions, apiTasks);
-    printAdditionResults(additionResults);
+    const staleSharedAdditionKeys = new Set<string>();
+    const regularAdditionResults = checkTaskAdditions(additions, apiTasks);
+    for (const result of regularAdditionResults) {
+      if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
+    }
+    printAdditionResults(regularAdditionResults);
 
     // Per-mode API data and overrides, reused by the divergence and
     // cross-mode passes so nothing is fetched twice.
@@ -1141,18 +1197,30 @@ async function main(): Promise<void> {
 
         printProgress(`Validating ${mode} mode overrides...\n`);
         const modeResults = validateAllOverrides(modeOverrides, modeApiTasks);
-        printResults(modeResults, {
+        const modeTaskReport = printResults(modeResults, {
           titlePrefix: mode.toUpperCase(),
           overridePath: `src/overrides/modes/${mode}/tasks.json5`,
         });
+        staleProblems += modeTaskReport.obsoleteEntries + modeTaskReport.staleFields;
       }
 
       if (modeAdditionCount > 0) {
         printProgress(`Checking ${mode} mode additions against API...\n`);
         const modeAdditionResults = checkTaskAdditions(modeAdditions, modeApiTasks);
-        printAdditionResults(modeAdditionResults, mode.toUpperCase());
+        staleProblems += printAdditionResults(modeAdditionResults, mode.toUpperCase()).resolved;
+      }
+
+      // Shared additions apply to every mode, so an entry appearing upstream in
+      // any one mode is stale as a shared addition and must be mode-scoped or removed.
+      if (mode !== 'regular') {
+        const sharedAdditionResults = checkTaskAdditions(additions, modeApiTasks);
+        for (const result of sharedAdditionResults) {
+          if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
+        }
+        printAdditionResults(sharedAdditionResults, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
       }
     }
+    staleProblems += staleSharedAdditionKeys.size;
 
     printRequirementTypeCounts(apiTasksByMode);
 
@@ -1171,6 +1239,7 @@ async function main(): Promise<void> {
 
     // Mode-divergence registry: the check that detects a mirror-direction flip.
     const divergences = loadDivergences();
+    printDivergenceCoverage(divergences);
     const divergenceResults = validateDivergences(divergences, overrides, {
       regular: apiTasksByMode.regular
         ? {
@@ -1181,36 +1250,75 @@ async function main(): Promise<void> {
       pve: apiTasksByMode.pve
         ? { apiTasks: apiTasksByMode.pve, modeOverrides: modeOverridesByMode.pve ?? {} }
         : undefined,
+      'pvp-season': apiTasksByMode['pvp-season']
+        ? {
+            apiTasks: apiTasksByMode['pvp-season'],
+            modeOverrides: modeOverridesByMode['pvp-season'] ?? {},
+          }
+        : undefined,
     });
     actionable += printDivergenceReport(divergenceResults).actionable;
 
-    // Entity types that previously had no validator at all.
+    // Prestige only exists in upstream regular mode, so its overlay is scoped
+    // to modes.regular rather than being applied to pve/pvp-season.
+    const prestigeSpec: EntityCheckSpec = {
+      label: 'regular prestige',
+      segments: ['overrides', 'modes', 'regular', 'prestige.json5'],
+      endpoint: 'tasks',
+      collectionKey: 'prestige',
+      config: {
+        identityFields: ['prestigeLevel'],
+        additiveFields: ['storyRequirements'],
+        keyedFields: ['conditions'],
+      },
+    };
+
     // Entity types that previously had no validator at all. Memoize by
-    // endpoint so specs that share one (e.g. items overrides and itemsAdd both
-    // read `items`) fetch it only once.
+    // endpoint and collection so specs that share one endpoint but select
+    // different collections cannot reuse an incompatible response.
     const entityCache = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
-    const getEntities = (spec: EntityCheckSpec) => {
-      const key = `regular/${spec.endpoint}`;
+    const getEntities = (mode: GameMode, spec: EntityCheckSpec) => {
+      const key = `${mode}/${spec.endpoint}/${spec.collectionKey ?? ''}`;
       let pending = entityCache.get(key);
       if (!pending) {
-        pending = fetchRawEntities('regular', spec.endpoint, spec.collectionKey);
+        pending = fetchRawEntities(mode, spec.endpoint, spec.collectionKey);
         entityCache.set(key, pending);
       }
       return pending;
     };
 
+    const prestigeOverrides = loadOptional(...prestigeSpec.segments);
+    if (Object.keys(prestigeOverrides).length > 0) {
+      printProgress('Fetching regular prestige data from tarkov.dev API...');
+      const apiEntities = await getEntities('regular', prestigeSpec);
+      printSuccess(`Fetched ${apiEntities.size} regular prestige record(s)\n`);
+      const report = printEntityResults(
+        prestigeSpec.label,
+        'src/overrides/modes/regular/prestige.json5',
+        validateEntityOverrides(prestigeOverrides, apiEntities, prestigeSpec.config)
+      );
+      actionable += report.errors;
+      staleProblems += report.stale;
+    }
+
     for (const spec of ENTITY_OVERRIDE_SPECS) {
       const entityOverrides = loadOptional(...spec.segments);
       const relPath = `src/${spec.segments.join('/')}`;
       if (Object.keys(entityOverrides).length === 0) {
-        actionable += printEntityResults(spec.label, relPath, []).errors;
+        const report = printEntityResults(spec.label, relPath, []);
+        actionable += report.errors;
+        staleProblems += report.stale;
         continue;
       }
-      printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
-      const apiEntities = await getEntities(spec);
-      printSuccess(`Fetched ${apiEntities.size} ${spec.label} record(s)\n`);
-      const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
-      actionable += printEntityResults(spec.label, relPath, entityResults).errors;
+      for (const mode of SUPPORTED_GAME_MODES) {
+        printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
+        const apiEntities = await getEntities(mode, spec);
+        printSuccess(`Fetched ${apiEntities.size} ${mode} ${spec.label} record(s)\n`);
+        const entityResults = validateEntityOverrides(entityOverrides, apiEntities, spec.config);
+        const report = printEntityResults(`${mode} ${spec.label}`, relPath, entityResults);
+        actionable += report.errors;
+        staleProblems += report.stale;
+      }
     }
 
     for (const spec of ENTITY_ADDITION_SPECS) {
@@ -1220,14 +1328,18 @@ async function main(): Promise<void> {
         printEntityResults(spec.label, relPath, []);
         continue;
       }
-      printProgress(`Fetching ${spec.label} data from tarkov.dev API...`);
-      const apiEntities = await getEntities(spec);
-      printSuccess(`Fetched ${apiEntities.size} record(s)\n`);
-      printEntityResults(
-        spec.label,
-        relPath,
-        validateEntityAdditions(entityAdditions, apiEntities)
-      );
+      for (const mode of SUPPORTED_GAME_MODES) {
+        printProgress(`Fetching ${mode} ${spec.label} data from tarkov.dev API...`);
+        const apiEntities = await getEntities(mode, spec);
+        printSuccess(`Fetched ${apiEntities.size} ${mode} record(s)\n`);
+        const report = printEntityResults(
+          `${mode} ${spec.label}`,
+          relPath,
+          validateEntityAdditions(entityAdditions, apiEntities)
+        );
+        actionable += report.errors;
+        staleProblems += report.stale;
+      }
     }
 
     // Story chapters: overlay-authored, so check references rather than values.
@@ -1285,7 +1397,7 @@ async function main(): Promise<void> {
     printReferenceCrossCheck(crossCheckGroups);
 
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
-    await checkLocaleOverrides();
+    staleProblems += await checkLocaleOverrides();
 
     if (strict && actionable > 0) {
       printError(
@@ -1293,6 +1405,14 @@ async function main(): Promise<void> {
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
       process.exit(2);
+    }
+
+    if (failOnStale && staleProblems > 0) {
+      printError(
+        `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
+          'Remove data now supplied upstream or scope it to the modes where it is still missing.'
+      );
+      process.exit(3);
     }
 
     process.exit(0);

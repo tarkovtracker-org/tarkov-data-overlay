@@ -2,13 +2,14 @@
  * Mode-divergence validation
  *
  * Checks the recorded true per-mode values in `src/divergences/tasks.json5`
- * against what consumers would actually receive for each game mode - that is,
+ * against what consumers would actually receive for each upstream game mode -
+ * `regular`, `pve`, and `pvp-season` - that is,
  * the tarkov.dev value with our overrides merged on top.
  *
  * This exists because tarkov.dev derives one mode's numbers from the other for
  * some tasks and the mirror direction can flip. Validating only the mode that
- * is broken today cannot detect a flip; validating both modes against a
- * recorded truth can.
+ * is broken today cannot detect a flip; validating every recorded mode against
+ * a recorded truth can.
  *
  * Merge precedence matches docs/INTEGRATION.md: base overrides apply to BOTH
  * modes, and mode-specific overrides shallow-merge on top.
@@ -136,14 +137,33 @@ function isMirrored(
   fieldDef: DivergenceField,
   contexts: Partial<Record<DivergenceMode, DivergenceModeContext>>
 ): boolean {
-  if (fieldDef.regular === undefined || fieldDef.pve === undefined) return false;
-  if (valuesEqual(fieldDef.regular, fieldDef.pve)) return false;
+  const recordedModes = (Object.keys(contexts) as DivergenceMode[]).filter(
+    (mode) => fieldDef[mode] !== undefined
+  );
 
-  const regularTask = contexts.regular?.apiTasks.find((t) => t.id === taskId);
-  const pveTask = contexts.pve?.apiTasks.find((t) => t.id === taskId);
-  if (!regularTask || !pveTask) return false;
+  for (let left = 0; left < recordedModes.length; left += 1) {
+    for (let right = left + 1; right < recordedModes.length; right += 1) {
+      const leftMode = recordedModes[left];
+      const rightMode = recordedModes[right];
+      if (valuesEqual(fieldDef[leftMode], fieldDef[rightMode])) continue;
 
-  return valuesEqual(apiFieldValue(regularTask, field), apiFieldValue(pveTask, field));
+      const leftTask = contexts[leftMode]?.apiTasks.find((task) => task.id === taskId);
+      const rightTask = contexts[rightMode]?.apiTasks.find((task) => task.id === taskId);
+      if (!leftTask || !rightTask) continue;
+
+      const leftValue = apiFieldValue(leftTask, field);
+      const rightValue = apiFieldValue(rightTask, field);
+      if (
+        leftValue !== undefined &&
+        rightValue !== undefined &&
+        valuesEqual(leftValue, rightValue)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**

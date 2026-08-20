@@ -51,10 +51,13 @@ describe('divergence registry', () => {
     }
   });
 
-  it('dates every field with an ISO day and a known confidence', () => {
+  it('records a verification reference and a known confidence', () => {
     for (const [taskId, entry] of entries) {
       for (const [field, def] of Object.entries(entry.fields)) {
-        expect(def.verified, `${taskId}.${field}`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(def.verified, `${taskId}.${field}`).toMatch(/^[A-Za-z0-9][A-Za-z0-9.-]*$/);
+        expect(def.verified, `${taskId}.${field} must not be a date`).not.toMatch(
+          /^\d{4}-\d{2}-\d{2}$/
+        );
         expect(['high', 'medium', 'low'], `${taskId}.${field}`).toContain(def.confidence);
       }
     }
@@ -66,6 +69,7 @@ describe('divergence registry', () => {
       'confidence',
       'regularSource',
       'pveSource',
+      'pvpSeasonSource',
       'verified',
       'note',
     ]);
@@ -132,6 +136,9 @@ describe('divergence registry', () => {
         }
         if (def.pve !== undefined) {
           expect(def.pveSource, `${taskId}.${field}.pveSource`).toBeTruthy();
+        }
+        if (def['pvp-season'] !== undefined) {
+          expect(def.pvpSeasonSource, `${taskId}.${field}.pvpSeasonSource`).toBeTruthy();
         }
       }
     }

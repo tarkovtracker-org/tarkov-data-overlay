@@ -17,7 +17,7 @@ function buildOverlayFixture(): OverlayOutput {
   const { srcDir } = getProjectPaths();
   const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'));
   const additions = loadAllJson5FromDir(join(srcDir, 'additions'), false);
-  const modes: NonNullable<OverlayOutput['modes']> = {};
+  const modes = {} as OverlayOutput['modes'];
 
   for (const mode of SUPPORTED_GAME_MODES) {
     const modeData = {
@@ -25,23 +25,18 @@ function buildOverlayFixture(): OverlayOutput {
       ...loadAllJson5FromDir(join(srcDir, 'additions', 'modes', mode), false),
     } as NonNullable<OverlayOutput['modes']>[typeof mode];
 
-    if (modeData && Object.keys(modeData).length > 0) {
-      modes[mode] = modeData;
-    }
+    modes[mode] = modeData ?? {};
   }
 
   const output: OverlayOutput = {
     ...overrides,
     ...additions,
+    modes,
     $meta: {
       version: 'test',
       generated: new Date(0).toISOString(),
     },
   };
-
-  if (Object.keys(modes).length > 0) {
-    output.modes = modes;
-  }
 
   const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));
   if (Object.keys(locales).length > 0) {
@@ -61,29 +56,22 @@ describe('overlay.schema.json', () => {
     expect(rootSchema.properties).toHaveProperty('storyChapters');
   });
 
-  it('includes mode-specific payload when mode files are present', () => {
-    const { srcDir } = getProjectPaths();
-    const regularSource = {
-      ...loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', 'regular')),
-      ...loadAllJson5FromDir(join(srcDir, 'additions', 'modes', 'regular'), false),
-    };
-    const pveSource = {
-      ...loadAllJson5FromDir(join(srcDir, 'overrides', 'modes', 'pve')),
-      ...loadAllJson5FromDir(join(srcDir, 'additions', 'modes', 'pve'), false),
-    };
+  it('always includes every game mode advertised by tarkov.dev', () => {
     const output = buildOverlayFixture();
 
-    if (Object.keys(regularSource).length > 0) {
-      expect(output.modes?.regular).toBeDefined();
-    } else {
-      expect(output.modes?.regular).toBeUndefined();
+    expect(Object.keys(output.modes)).toEqual([...SUPPORTED_GAME_MODES]);
+    for (const mode of SUPPORTED_GAME_MODES) {
+      expect(output.modes[mode]).toBeDefined();
     }
+  });
 
-    if (Object.keys(pveSource).length > 0) {
-      expect(output.modes?.pve).toBeDefined();
-    } else {
-      expect(output.modes?.pve).toBeUndefined();
-    }
+  it('requires the root modes object', () => {
+    const { schemasDir } = getProjectPaths();
+    const rootSchema = loadJsonFile(join(schemasDir, 'overlay.schema.json')) as {
+      required?: string[];
+    };
+
+    expect(rootSchema.required).toContain('modes');
   });
 
   it('validates generated overlay output', () => {

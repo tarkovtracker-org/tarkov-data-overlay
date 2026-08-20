@@ -949,7 +949,7 @@ function buildSummary(view, mode, locale) {
 
   if (view === "prestige") {
     return {
-      sections: buildPrestigeSections(overlay.prestige || {}),
+      sections: buildPrestigeSections(overlay.modes?.regular?.prestige || {}),
       error: overlayState.error || null,
     };
   }

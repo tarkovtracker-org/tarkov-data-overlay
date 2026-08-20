@@ -21,7 +21,7 @@
   // not active; they are omitted rather than shipped with a null station.
   //
   // Source: verified in-game (Seasonal Character hideout production screens).
-  // Proof: EFT patch 1.1.0.0 (Seasonal Character / Black Division), 2026-08-03.
+  // Proof: EFT patch 1.1.0.0 (Seasonal Character / Black Division).
   //   https://steamdb.info/patchnotes/24536010/
 
   // --- Lavatory (areaType 2) ---
