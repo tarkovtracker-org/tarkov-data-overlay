@@ -1,0 +1,32 @@
+tests/divergence-validator.test.ts
+  s_b3e049d56bd20d::t_74aecde15eef4c 145
+dist/overlay.json
+  s_b3e049d56bd20d::t_54b146c9166e3b 323-325,564,577,8442-8443
+docs/INTEGRATION.md
+  s_b3e049d56bd20d::t_d20b0cb8d1017e 597-607,625
+scripts/check-overrides.ts
+  s_b3e049d56bd20d::t_99efb0572ff57e 1410-1415
+tests/divergence-registry.test.ts
+  s_b3e049d56bd20d::t_3c9c9cbe2075ab 58-60
+src/schemas/task-divergence.schema.json
+  s_b3e049d56bd20d::t_09635a960e517e 38,43-56
+src/overrides/tasks.json5
+  s_b3e049d56bd20d::t_4ebd4efa3a8f4a 207-213
+  s_b3e049d56bd20d::t_59c2b930824cbb 525,539
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "74bf8a782e5c00d214c93155080c0808ab40feea",
+  "prompts": {},
+  "sessions": {
+    "s_b3e049d56bd20d": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a01c74-cf71-79c9-83b5-af3253567e66",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
