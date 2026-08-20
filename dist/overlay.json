@@ -8438,8 +8438,8 @@
     }
   },
   "$meta": {
-    "version": "1.66",
-    "generated": "2026-08-20T00:25:23.829Z",
-    "sha256": "7d7a0a2e642120df15bec48a519f6d14c3baa7014656eddec17cc87bc8b7724c"
+    "version": "1.67",
+    "generated": "2026-08-20T01:01:55.857Z",
+    "sha256": "ae52e8aefa94a67c26bd7cbd7f5884257f6c7018949cada18b1aef3d6dd818a0"
   }
 }
