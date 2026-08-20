@@ -1,0 +1,19 @@
+docs/INTEGRATION.md
+  s_b3e049d56bd20d::t_f22195662013a1 605-607
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e015a44d14bf9b22904ab2490c254cfa31717011",
+  "prompts": {},
+  "sessions": {
+    "s_b3e049d56bd20d": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a01c74-cf71-79c9-83b5-af3253567e66",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
