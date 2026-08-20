@@ -1,0 +1,21 @@
+src/overrides/tasks.json5
+  s_b3e049d56bd20d::t_756f398d7c9699 45-49,968-971
+dist/overlay.json
+  ai_agent 8440-8441
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "0fe2ca1b9401c06fecdc8fbf2c11901dfbad03f1",
+  "prompts": {},
+  "sessions": {
+    "s_b3e049d56bd20d": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a01c74-cf71-79c9-83b5-af3253567e66",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
