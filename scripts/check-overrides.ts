@@ -440,7 +440,10 @@ function printResults(
   printCountSection('Still need overrides', 'green', stillNeeded.map(line), icons.success);
   printCountSection('Fixed in API, can remove', 'yellow', fixed.map(line), icons.sync);
 
-  const staleFields = results.flatMap((result) =>
+  // Fully fixed and removed entries are already counted as obsolete below.
+  // Count field-level staleness only inside entries that still need at least
+  // one override, so each removable unit contributes exactly once.
+  const staleFields = stillNeeded.flatMap((result) =>
     result.details
       .filter((detail) => detail.status === 'fixed')
       .map((detail) => `${result.name} (${result.id}) ${detail.field}: ${detail.message}`)
@@ -969,9 +972,13 @@ function printEntityResults(
     printCountSection('Identity/consistency problems', 'red', identityErrors, icons.error);
   }
 
+  const staleFieldsInNeededEntries = grouped.stillNeeded
+    .flatMap((result) => result.details)
+    .filter((detail) => detail.status === 'fixed').length;
+
   return {
     errors: grouped.removedFromApi.length + identityErrors.length,
-    stale: grouped.fixed.length,
+    stale: grouped.fixed.length + staleFieldsInNeededEntries,
   };
 }
 
@@ -1159,10 +1166,12 @@ async function main(): Promise<void> {
     ];
 
     printProgress('Checking additions against API...\n');
-    const additionResultsByMode: Partial<Record<GameMode, AdditionResult[]>> = {
-      regular: checkTaskAdditions(additions, apiTasks),
-    };
-    staleProblems += printAdditionResults(additionResultsByMode.regular ?? []).resolved;
+    const staleSharedAdditionKeys = new Set<string>();
+    const regularAdditionResults = checkTaskAdditions(additions, apiTasks);
+    for (const result of regularAdditionResults) {
+      if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
+    }
+    printAdditionResults(regularAdditionResults);
 
     // Per-mode API data and overrides, reused by the divergence and
     // cross-mode passes so nothing is fetched twice.
@@ -1205,13 +1214,13 @@ async function main(): Promise<void> {
       // any one mode is stale as a shared addition and must be mode-scoped or removed.
       if (mode !== 'regular') {
         const sharedAdditionResults = checkTaskAdditions(additions, modeApiTasks);
-        additionResultsByMode[mode] = sharedAdditionResults;
-        staleProblems += printAdditionResults(
-          sharedAdditionResults,
-          `SHARED ADDITIONS VS ${mode.toUpperCase()}`
-        ).resolved;
+        for (const result of sharedAdditionResults) {
+          if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
+        }
+        printAdditionResults(sharedAdditionResults, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
       }
     }
+    staleProblems += staleSharedAdditionKeys.size;
 
     printRequirementTypeCounts(apiTasksByMode);
 
@@ -1265,11 +1274,11 @@ async function main(): Promise<void> {
     };
 
     // Entity types that previously had no validator at all. Memoize by
-    // endpoint so specs that share one (e.g. items overrides and itemsAdd both
-    // read `items`) fetch it only once.
+    // endpoint and collection so specs that share one endpoint but select
+    // different collections cannot reuse an incompatible response.
     const entityCache = new Map<string, Promise<Map<string, Record<string, unknown>>>>();
     const getEntities = (mode: GameMode, spec: EntityCheckSpec) => {
-      const key = `${mode}/${spec.endpoint}`;
+      const key = `${mode}/${spec.endpoint}/${spec.collectionKey ?? ''}`;
       let pending = entityCache.get(key);
       if (!pending) {
         pending = fetchRawEntities(mode, spec.endpoint, spec.collectionKey);

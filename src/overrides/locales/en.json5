@@ -14,13 +14,6 @@
   // Proof: https://json.tarkov.dev/regular/tasks_en (keys "<task-id> name")
 
   tasks: {
-    // New Beginning (Prestige 1)
-    // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-    '6761f28a022f60bb320f3e95': {
-      name: 'New Beginning', // Was: Neuanfang (German string in the en bundle)
-      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)', // Was: https://escapefromtarkov.fandom.com/wiki/Neuanfang
-    },
-
     // New Beginning (Prestige 2)
     // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
     '6761ff17cdc36bd66102e9d0': {

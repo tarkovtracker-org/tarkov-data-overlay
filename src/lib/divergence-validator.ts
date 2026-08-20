@@ -151,7 +151,13 @@ function isMirrored(
       const rightTask = contexts[rightMode]?.apiTasks.find((task) => task.id === taskId);
       if (!leftTask || !rightTask) continue;
 
-      if (valuesEqual(apiFieldValue(leftTask, field), apiFieldValue(rightTask, field))) {
+      const leftValue = apiFieldValue(leftTask, field);
+      const rightValue = apiFieldValue(rightTask, field);
+      if (
+        leftValue !== undefined &&
+        rightValue !== undefined &&
+        valuesEqual(leftValue, rightValue)
+      ) {
         return true;
       }
     }

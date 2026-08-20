@@ -65,6 +65,15 @@ describe('overlay.schema.json', () => {
     }
   });
 
+  it('requires the root modes object', () => {
+    const { schemasDir } = getProjectPaths();
+    const rootSchema = loadJsonFile(join(schemasDir, 'overlay.schema.json')) as {
+      required?: string[];
+    };
+
+    expect(rootSchema.required).toContain('modes');
+  });
+
   it('validates generated overlay output', () => {
     const { schemasDir } = getProjectPaths();
     const ajv = new Ajv({

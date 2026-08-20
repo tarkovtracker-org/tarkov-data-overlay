@@ -8420,10 +8420,6 @@
   "locales": {
     "en": {
       "tasks": {
-        "6761f28a022f60bb320f3e95": {
-          "name": "New Beginning",
-          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)"
-        },
         "6761ff17cdc36bd66102e9d0": {
           "name": "New Beginning",
           "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)"
@@ -8441,7 +8437,7 @@
   },
   "$meta": {
     "version": "1.66",
-    "generated": "2026-08-19T23:51:58.094Z",
-    "sha256": "a85b4a91c610ba53160f5c850da5c49dbb4e843821f651c0116547c0adc2753a"
+    "generated": "2026-08-20T00:01:19.082Z",
+    "sha256": "c7112d9e1d9ade4c3a3e61c6c60e59b16ce65cadb68eb228f404ec3e0343ce4e"
   }
 }

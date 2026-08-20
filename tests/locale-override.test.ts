@@ -40,7 +40,6 @@ function compileLocaleSchema() {
 }
 
 const NEW_BEGINNING_TASK_IDS = [
-  '6761f28a022f60bb320f3e95',
   '6761ff17cdc36bd66102e9d0',
   '6848100b00afffa81f09e365',
   '68481881f43abfdda2058369',
@@ -177,7 +176,7 @@ describe('locale source files', () => {
     }
   });
 
-  it('seeds en.json5 with the four New Beginning corrections', () => {
+  it('keeps the New Beginning corrections that remain broken upstream', () => {
     const en = loadJson5File<LocaleOverlay>(join(srcDir, 'overrides', 'locales', 'en.json5'));
 
     expect(en.tasks).toBeDefined();
@@ -187,7 +186,7 @@ describe('locale source files', () => {
       const patch = en.tasks?.[taskId];
       expect(patch?.name).toBe('New Beginning');
       expect(patch?.wikiLink).toMatch(
-        /^https:\/\/escapefromtarkov\.fandom\.com\/wiki\/New_Beginning_\(Prestige_[1-4]\)$/
+        /^https:\/\/escapefromtarkov\.fandom\.com\/wiki\/New_Beginning_\(Prestige_[2-4]\)$/
       );
     }
 

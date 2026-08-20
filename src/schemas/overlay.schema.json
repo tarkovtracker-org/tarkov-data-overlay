@@ -98,6 +98,7 @@
       "required": ["regular", "pve", "pvp-season"]
     }
   },
+  "required": ["modes"],
   "title": "Tarkov Data Overlay",
   "type": "object"
 }
