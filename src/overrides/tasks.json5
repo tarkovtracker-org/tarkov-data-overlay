@@ -42,14 +42,11 @@
   // Bullshit, Chumming, ...) - REMOVED: the 1.1-pve data carries no Level
   // conditions for these quests.
   //
-  // Trader loyalty-level overrides (the Season 1 LL1-LL4 batch) - REMOVED:
-  // the 1.1-pve data and json.tarkov.dev
-  // agree that none of these quests carry a TraderLoyalty condition. Every
-  // quest that does have a real loyalty requirement in the 1.1-pve data is already
-  // served correctly by the API; the rest are gated by story-chapter
-  // variables or quest chains, not loyalty levels. The wiki pages cited by
-  // the batch never documented loyalty level requirements, so those claims
-  // were unverified.
+  // The original Season 1 LL1-LL4 batch was removed after its requirement
+  // claims proved unreliable. The active traderRequirements later in this file
+  // are a separately re-audited set: entries already supplied upstream were
+  // retired, while the remaining corrections are verified against the current
+  // reference/API comparison and kept only where still load-bearing.
   // ---------------------------------------------------------------------------
 
   // District Patrol - quest XP reworked in 1.1.0.0
@@ -968,13 +965,10 @@
   // below still diverges from the live API and is load-bearing: 189
   // still-needed corrections, 0 stale (`npm run check-overrides -- --fail-on-stale`).
   //
-  // Power of Persuasion / Easy-Breezy / Setup keep only their name and/or
-  // traderRequirements here: the PvE variant objectives are already served
-  // correctly by the API (the PvP variants live in modes/regular/tasks.json5).
-  // Pathfinder keeps its rename and the "Survive and extract on Interchange
-  // 7 times" objective rewrite, ported as-is from s1. The Punisher - Part 3
-  // and The Huntsman Path - Controller keep their LL4 requirements while the
-  // API serves a lower level (6a70899e66497c811decb758 / 6a71c5b3fdd890dfd2f2c34d).
+  // Power of Persuasion / Easy-Breezy / Setup keep only their shared name
+  // and/or traderRequirements here; regular-mode objective variants live in
+  // modes/regular/tasks.json5. Pathfinder's name is now supplied upstream,
+  // while its PvE-only objective rewrite lives in modes/pve/tasks.json5.
   //
   // Entries below are ACTIVE corrections; `npm run check-overrides` verifies
   // them against the live API.
@@ -2997,5 +2991,4 @@
       }, // Was: [] (player level requirement, minPlayerLevel 29)
     ],
   },
-
 }
