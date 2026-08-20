@@ -594,11 +594,17 @@ The missing quests are provided in `tasksAdd` (`new_beginning_prestige_5` /
 authoritative `storyRequirements` array; an empty array means there are no
 story requirements for that prestige level.
 
-The overlay's `prestige` section is keyed by prestige ID. Each entry patches the
-matching prestige item; `conditions` is keyed by condition ID. Keys matching
-upstream condition IDs patch existing conditions, while overlay-only keys are
-synthetic conditions to append. Apply it by merging top-level fields, then
-patching/appending conditions by ID:
+The regular-mode `overlay.modes.regular.prestige` section is keyed by prestige
+ID. Each entry patches the matching prestige item; `conditions` is keyed by
+condition ID. Keys matching upstream condition IDs patch existing conditions,
+while overlay-only keys are synthetic conditions to append. Apply it by merging
+top-level fields, then patching/appending conditions by ID:
+
+> **Breaking change in overlay v1.66:** the former top-level
+> `overlay.prestige[id]` section was removed. Consumers must read regular-mode
+> prestige corrections from `overlay.modes?.regular?.prestige?.[id]`. Prestige
+> is not served for PvE or Seasonal Character mode, so no corresponding section
+> exists under those mode keys.
 
 ```typescript
 type PrestigeCondition = {
@@ -616,7 +622,7 @@ type Prestige = {
 };
 
 function applyPrestigeOverlay(base: Prestige, overlay: Overlay): Prestige {
-  const override = overlay.modes.regular.prestige?.[base.id];
+  const override = overlay.modes?.regular?.prestige?.[base.id];
   if (!override) return base;
 
   const { conditions: condPatches, ...topLevel } = override;

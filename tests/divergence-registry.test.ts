@@ -55,6 +55,9 @@ describe('divergence registry', () => {
     for (const [taskId, entry] of entries) {
       for (const [field, def] of Object.entries(entry.fields)) {
         expect(def.verified, `${taskId}.${field}`).toMatch(/^[A-Za-z0-9][A-Za-z0-9.-]*$/);
+        expect(def.verified, `${taskId}.${field} must not be a date`).not.toMatch(
+          /^\d{4}-\d{2}-\d{2}$/
+        );
         expect(['high', 'medium', 'low'], `${taskId}.${field}`).toContain(def.confidence);
       }
     }

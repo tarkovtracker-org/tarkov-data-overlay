@@ -204,6 +204,13 @@
     experience: 28000, // Was: 7500 (all modes, stale pre-1.1 value)
   },
 
+  // Hell on Earth - Part 1 - quest XP reworked in 1.1.0.0
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
+  // Verified: the 1.1-pve data; wiki agrees.
+  '666314b0acf8442f8b0531a1': {
+    experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
+  },
+
   // Hell on Earth - Part 2 - quest XP reworked in 1.1.0.0 (wiki lags)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_2
   // Verified: the 1.1-pve data; wiki still shows the old value.
@@ -515,7 +522,7 @@
     finishRewards: {
       traderStanding: [
         {
-          trader: { name: 'Ragman' },
+          trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
           standing: 0.1, // Was: 0.01
         },
       ],
@@ -529,7 +536,7 @@
     finishRewards: {
       traderStanding: [
         {
-          trader: { name: 'Ragman' },
+          trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
           standing: 0.1, // Was: 0.01
         },
       ],
@@ -897,13 +904,6 @@
   '5d25e2a986f77409dd5cdf2a': {
     disabled: true,
   },
-  // Hell on Earth - Part 1 - quest XP reworked in 1.1.0.0
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Hell_on_Earth_-_Part_1
-  // Verified: the 1.1-pve data; wiki agrees.
-  '666314b0acf8442f8b0531a1': {
-    experience: 3000, // Was: 2300 (all modes, stale pre-1.1 value)
-  },
-
   // Network Provider - Part 1 - missing task prerequisites
   //
   // tarkov.dev serves taskRequirements: [] (empty), so the quest appears

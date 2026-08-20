@@ -1399,20 +1399,20 @@ async function main(): Promise<void> {
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
 
-    if (failOnStale && staleProblems > 0) {
-      printError(
-        `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
-          'Remove data now supplied upstream or scope it to the modes where it is still missing.'
-      );
-      process.exit(3);
-    }
-
     if (strict && actionable > 0) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
       process.exit(2);
+    }
+
+    if (failOnStale && staleProblems > 0) {
+      printError(
+        `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
+          'Remove data now supplied upstream or scope it to the modes where it is still missing.'
+      );
+      process.exit(3);
     }
 
     process.exit(0);

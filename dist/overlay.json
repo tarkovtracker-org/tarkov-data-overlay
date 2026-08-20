@@ -320,6 +320,9 @@
       ],
       "experience": 28000
     },
+    "666314b0acf8442f8b0531a1": {
+      "experience": 3000
+    },
     "666314b2a9290f9e0806cca3": {
       "experience": 28000
     },
@@ -558,6 +561,7 @@
         "traderStanding": [
           {
             "trader": {
+              "id": "5ac3b934156ae10c4430e83c",
               "name": "Ragman"
             },
             "standing": 0.1
@@ -570,6 +574,7 @@
         "traderStanding": [
           {
             "trader": {
+              "id": "5ac3b934156ae10c4430e83c",
               "name": "Ragman"
             },
             "standing": 0.1
@@ -879,9 +884,6 @@
     },
     "5d25e2a986f77409dd5cdf2a": {
       "disabled": true
-    },
-    "666314b0acf8442f8b0531a1": {
-      "experience": 3000
     },
     "625d6ff5ddc94657c21a1625": {
       "taskRequirements": [
@@ -8437,7 +8439,7 @@
   },
   "$meta": {
     "version": "1.66",
-    "generated": "2026-08-20T00:03:44.689Z",
-    "sha256": "f068d5550caa2d44d62c7ea171f00d0ed2e82191b92c22241132518eecb13260"
+    "generated": "2026-08-20T00:25:23.829Z",
+    "sha256": "7d7a0a2e642120df15bec48a519f6d14c3baa7014656eddec17cc87bc8b7724c"
   }
 }

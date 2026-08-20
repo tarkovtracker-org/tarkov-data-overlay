@@ -142,6 +142,7 @@ describe('validateDivergences', () => {
       }
     );
 
+    expect(results.length).toBeGreaterThan(0);
     expect(results.every((result) => result.mirrored === false)).toBe(true);
   });
 
