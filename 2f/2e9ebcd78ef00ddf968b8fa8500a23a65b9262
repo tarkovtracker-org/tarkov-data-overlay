@@ -1,0 +1,33 @@
+tests/divergence-validator.test.ts
+  s_b3e049d56bd20d::t_7937bfc6dba919 128-147
+src/schemas/overlay.schema.json
+  s_b3e049d56bd20d::t_0bda8bb4506aea 101
+tests/overlay-schema.test.ts
+  s_b3e049d56bd20d::t_92ac449ac62d30 68-76
+scripts/check-overrides.ts
+  s_b3e049d56bd20d::t_0379e2c18e64d1 443-446,975-978,981,1169-1174,1217-1220,1223,1277-1278,1281
+src/lib/divergence-validator.ts
+  s_b3e049d56bd20d::t_72bc92d4d22713 154-160
+tests/locale-override.test.ts
+  s_b3e049d56bd20d::t_cf4f724f781a72 179,189
+dist/overlay.json
+  s_b3e049d56bd20d::t_6bb05d25f4a9de 8440-8441
+.github/workflows/ci.yml
+  s_b3e049d56bd20d::t_633c846d6fefd3 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2f2e9ebcd78ef00ddf968b8fa8500a23a65b9262",
+  "prompts": {},
+  "sessions": {
+    "s_b3e049d56bd20d": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a01c74-cf71-79c9-83b5-af3253567e66",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "DysektAI <33468668+DysektAI@users.noreply.github.com>"
+    }
+  }
+}
