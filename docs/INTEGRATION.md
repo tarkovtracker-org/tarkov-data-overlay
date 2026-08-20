@@ -602,9 +602,9 @@ top-level fields, then patching/appending conditions by ID:
 
 > **Breaking change in overlay v1.66:** the former top-level
 > `overlay.prestige[id]` section was removed. Consumers must read regular-mode
-> prestige corrections from `overlay.modes?.regular?.prestige?.[id]`. Prestige
-> is not served for PvE or Seasonal Character mode, so no corresponding section
-> exists under those mode keys.
+> prestige corrections from `overlay.modes?.regular?.prestige?.[id]`. This
+> overlay currently has no prestige corrections for PvE or Seasonal Character
+> mode, so no corresponding section exists under those mode keys.
 
 ```typescript
 type PrestigeCondition = {
