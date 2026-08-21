@@ -25,7 +25,8 @@
     "format": "prettier --write \"**/*.{ts,cts,json,json5,md}\"",
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "status:locale": "tsx scripts/status-locale.ts"
   },
   "keywords": [
     "tarkov",

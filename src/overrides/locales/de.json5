@@ -225,7 +225,7 @@
         },
         // Was: Hand over the items
         '59c50f1686f77412ef2c01e7': {
-          description: 'Übergebe die Halbmasken',
+          description: 'Übergib die Halbmasken',
         },
       },
     },
@@ -247,7 +247,7 @@
         },
         // Was: Hand over the items
         '59ca29ab86f77445ab431c86': {
-          description: 'Übergebe die Messer',
+          description: 'Übergib die Messer',
         },
       },
     },
@@ -375,19 +375,27 @@
       objectives: {
         // Was: Hand over any found in raid PMC figurine
         '6761ff17cdc36bd66102e9d8': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '6761ff17cdc36bd66102e9d9': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '6761ff17cdc36bd66102e9da': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '6761ff17cdc36bd66102e9e1': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
+        },
+        // Was: Eliminate PMC operatives
+        '6762015739c53fca8ac51336': {
+          description: 'Eliminiere PMCs',
+        },
+        // Was: Survive and extract from The Lab
+        '6761ff17cdc36bd66102e9d6': {
+          description: 'Überlebe und entkomme aus The Lab',
         },
       },
     },
@@ -398,19 +406,35 @@
       objectives: {
         // Was: Hand over any found in raid PMC figurine
         '6848100b00afffa81f09e36d': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '6848100b00afffa81f09e36e': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '6848100b00afffa81f09e36f': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '6848100b00afffa81f09e376': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
+        },
+        // Was: Eliminate PMC operatives
+        '6848100b00afffa81f09e369': {
+          description: 'Eliminiere PMCs',
+        },
+        // Was: Eliminate Raiders
+        '684812156189183883f13947': {
+          description: 'Eliminiere Raider',
+        },
+        // Was: Use the transit from The Lab to Streets of Tarkov
+        '6848100b00afffa81f09e36b': {
+          description: 'Benutze den Transit von The Lab nach Streets of Tarkov',
+        },
+        // Was: Survive and extract from Streets of Tarkov
+        '6848116061809d65b8503617': {
+          description: 'Überlebe und entkomme aus Streets of Tarkov',
         },
       },
     },
@@ -431,19 +455,411 @@
         },
         // Was: Hand over any found in raid PMC figurine
         '68481881f43abfdda2058371': {
-          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene PMC-Figur',
         },
         // Was: Hand over any found in raid Scav figurine
         '68481881f43abfdda2058372': {
-          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Scav-Figur',
         },
         // Was: Hand over any found in raid Boss figurine
         '68481881f43abfdda2058373': {
-          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Boss-Figur',
         },
         // Was: Hand over any found in raid Trader figurine
         '68481881f43abfdda205837a': {
-          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+          description: 'Übergib eine beliebige im Raid gefundene Händler-Figur',
+        },
+        // Was: Eliminate PMC operatives
+        '68481881f43abfdda205836d': {
+          description: 'Eliminiere PMCs',
+        },
+        // Was: Eliminate Rogues
+        '68481a8eda10b760b3b1a73f': {
+          description: 'Eliminiere Rogues',
+        },
+        // Was: Use the transit from The Lab to Streets of Tarkov
+        '68481881f43abfdda205836f': {
+          description: 'Benutze den Transit von The Lab nach Streets of Tarkov',
+        },
+        // Was: Use the transit from Streets of Tarkov to Interchange
+        '68483a05801f8d9e40ac05b1': {
+          description: 'Benutze den Transit von Streets of Tarkov nach Interchange',
+        },
+      },
+    },
+
+    // Was: Make ULTRA Great Again
+    '5ae448bf86f7744d733e55ee': {
+      name: 'Macht ULTRA wieder groß',
+      objectives: {
+        // Was: Eliminate any target on Interchange
+        '5ae44ecd86f77414a13c970e': {
+          description: 'Eliminiere ein beliebiges Ziel auf Interchange',
+        },
+      },
+    },
+
+    // Was: Fuel Crisis
+    '5ae448f286f77448d73c0131': {
+      name: 'Treibstoffkrise',
+      objectives: {
+        // Was: Locate and mark any fuel tank near the power station with an MS2000 Marker on Interchange
+        '5ae452c086f774336a397578': {
+          description: 'Markiere einen beliebigen Treibstofftank beim Kraftwerk auf Interchange mit einem MS2000 Marker',
+        },
+        // Was: Locate and mark any fuel tank in the northern territory with an MS2000 Marker on Interchange
+        '5ae452de86f77450595c4333': {
+          description: 'Markiere einen beliebigen Treibstofftank im nördlichen Gebiet auf Interchange mit einem MS2000 Marker',
+        },
+      },
+    },
+
+    // Dressed to Kill (Lv 0)
+    '5ae4490786f7744ca822adcc': {
+      objectives: {
+        // Was: Find the item in raid: Kinda Cowboy hat
+        '5fd89799c54dc00f463272d3': {
+          description: 'Finde Hüte nach Cowboy-Art im Raid',
+        },
+        // Was: Hand over the items
+        '5ae454a086f7742be909a81a': {
+          description: 'Übergib Hüte nach Cowboy-Art',
+        },
+        // Was: Find the item in raid: any Ushanka hat
+        '5fd89729a8c881276c560433': {
+          description: 'Finde beliebige Uschanka-Mützen im Raid',
+        },
+        // Was: Hand over the items
+        '5ae4543686f7742dc043c903': {
+          description: 'Übergib beliebige Uschanka-Mützen',
+        },
+      },
+    },
+
+    // Was: Inventory Files
+    '5ae4493486f7744efa289417': {
+      name: 'Bestandsakten',
+    },
+
+    // Was: A Big Loss
+    '5ae4493d86f7744b8e15aa8f': {
+      name: 'Ein großer Verlust',
+    },
+
+    // Sew it Good - Part 1 (Lv 0)
+    '5ae4495086f77443c122bc40': {
+      objectives: {
+        // Was: Find the item in raid: Ski hat with holes for eyes
+        '5ae4559386f7742dc043c95e': {
+          description: 'Finde eine Skimütze mit Augenlöchern im Raid',
+        },
+        // Was: Hand over the item
+        '5ae455be86f7742dc043c969': {
+          description: 'Übergib die Skimütze mit Augenlöchern',
+        },
+        // Was: Find the item in raid: Pilgrim tourist backpack
+        '5ae455fb86f7744dd8242380': {
+          description: 'Finde einen Pilgrim Wanderrucksack im Raid',
+        },
+        // Was: Hand over the item
+        '5ae4562086f774498b05e0dc': {
+          description: 'Übergib den Pilgrim Wanderrucksack',
+        },
+      },
+    },
+
+    // Was: Sew it Good - Part 3
+    '5ae4495c86f7744e87761355': {
+      name: 'Gut genäht – Teil 3',
+      objectives: {
+        // Was: Obtain the item: HighCom Trooper TFO body armor
+        '5ae9b77f86f77432c81e3074': {
+          description: 'Beschaffe HighCom Trooper TFO body armor (MultiCam)',
+        },
+        // Was: Obtain the item: BNTI Gzhel-K body armor
+        '5ae9b91386f77415a869b3f3': {
+          description: 'Beschaffe BNTI Gzhel-K Schutzwesten',
+        },
+        // Was: Hand over the items
+        '5ae9b7c886f774307c29df56': {
+          description: 'Übergib HighCom Trooper TFO body armor (MultiCam)',
+        },
+        // Was: Hand over the items
+        '5ae9b93b86f7746e0026221a': {
+          description: 'Übergib BNTI Gzhel-K Schutzwesten',
+        },
+      },
+    },
+
+    // Was: Sew it Good - Part 4
+    '5ae4496986f774459e77beb6': {
+      name: 'Gut genäht – Teil 4',
+    },
+
+    // Was: Sew it Good - Part 2
+    '5ae4497b86f7744cf402ed00': {
+      name: 'Gut genäht – Teil 2',
+      objectives: {
+        // Was: Find the item in raid: WARTECH TV-109 + TV-106 chest rig
+        '5ae45d7786f774178f237745': {
+          description: 'Finde WARTECH TV-109 + TV-106 Tragesysteme (A-TACS FG) im Raid',
+        },
+        // Was: Hand over the items
+        '5ae45d9386f774178f23774a': {
+          description: 'Übergib WARTECH TV-109 + TV-106 Tragesysteme (A-TACS FG)',
+        },
+        // Was: Find the item in raid: BlackRock chest rig
+        '5af079e486f77434693ad7f8': {
+          description: 'Finde BlackRock Tragesysteme (Grau) im Raid',
+        },
+        // Was: Hand over the items
+        '5af07a0286f7747dba10d8ac': {
+          description: 'Übergib BlackRock Tragesysteme (Grau)',
+        },
+      },
+    },
+
+    // Was: Pathfinder
+    '5ae449c386f7744bde357697': {
+      name: 'Ortskundig',
+      objectives: {
+        // Was: Visit the Railway Exfil exit on Interchange
+        '5bb60cbc88a45011a8235cc5': {
+          description: 'Finde den Ausgang Railway Exfil auf Interchange',
+        },
+        // Was: Visit the Emercom Checkpoint exit on Interchange
+        '6a60968c58aab7961885e537': {
+          description: 'Finde den Ausgang Emercom Checkpoint auf Interchange',
+        },
+        // Was: Visit the Power Station V-Ex exit on Interchange
+        '6a6096d81284478fd859003a': {
+          description: 'Finde den Ausgang Power Station V-Ex auf Interchange',
+        },
+      },
+    },
+
+    // Supervisor (Lv 0)
+    '5ae449d986f774453a54a7e1': {
+      objectives: {
+        // Was: Stash the Goshan cash register key at the BIZARRO store fitting rooms on Interchange
+        '6a60aab8ada1a08abcaa3649': {
+          description: 'Verstaue den „Goshan\"-Kassenschlüssel in den Umkleidekabinen des „BIZARRO\"-Geschäfts auf Interchange',
+        },
+        // Was: Stash the IDEA cash register key at Register #9 on Interchange
+        '6a60aaba4566667d4c8eefad': {
+          description: 'Verstaue den „IDEA\"-Kassenschlüssel an Kasse #9 auf Interchange',
+        },
+        // Was: Obtain the IDEA cash register key
+        '6a60ac2aa92d3737a04f252c': {
+          description: 'Besorge den „IDEA\"-Kassenschlüssel',
+        },
+        // Was: Stash the OLI cash register key at Register #7-8 on Interchange
+        '6a60aabcecee1ccc0876e5e6': {
+          description: 'Verstaue den „OLI\"-Kassenschlüssel an Kasse #7-8 auf Interchange',
+        },
+        // Was: Obtain the OLI cash register key
+        '6a60af31011aff00946731a7': {
+          description: 'Besorge den „OLI\"-Kassenschlüssel',
+        },
+      },
+    },
+
+    // Was: Living High is Not a Crime
+    '5b47891f86f7744d1b23c571': {
+      name: 'Luxus ist kein Verbrechen',
+      objectives: {
+        // Was: Hand over the found in raid item: Bronze lion figurine
+        '5b4789b586f7744d190d8f43': {
+          description: 'Übergib im Raid gefundene bronzene Löwen',
+        },
+        // Was: Hand over the found in raid item: Horse figurine
+        '5b478a0986f7744d190d8f46': {
+          description: 'Übergib im Raid gefundene Pferdefiguren',
+        },
+        // Was: Hand over the found in raid item: Golden rooster figurine
+        '6a576acbc13842ba359b767f': {
+          description: 'Übergib im Raid gefundene goldene Hahnfiguren',
+        },
+        // Was: Hand over the found in raid item: Cat figurine
+        '5b478a3786f77470315db7fa': {
+          description: 'Übergib im Raid gefundene Katzenfiguren',
+        },
+        // Was: Hand over the found in raid item: Golden egg
+        '62a70058ec21e50cad3b6709': {
+          description: 'Übergib im Raid gefundene goldene Eier',
+        },
+        // Was: Hand over the found in raid item: Roler Submariner gold wrist watch
+        '5b478a8486f7744d1c35328b': {
+          description: 'Übergib im Raid gefundene goldene Roler Submariner Armbanduhren',
+        },
+      },
+    },
+
+    // Hot Delivery (Lv 0)
+    '5b478b1886f7744d1b23c57d': {
+      objectives: {
+        // Was: Stash a ComTac II headset in the specified place on Interchange
+        '5b478c4c86f7744d1a393fac': {
+          description: 'Verstaue ein ComTac II Headset am angegebenen Ort auf Interchange',
+        },
+        // Was: Stash a 6B47 helmet (Olive Drab) in the specified place on Interchange
+        '5b478c7386f7744d1a393fb1': {
+          description: 'Verstaue einen 6B47-Helm (Olivgrün) am angegebenen Ort auf Interchange',
+        },
+      },
+    },
+
+    // Minibus (Lv 0)
+    '5b478d0f86f7744d190d91b5': {
+      objectives: {
+        // Was: Hand over any found in raid items from the Tools category
+        '6a60b0d2b5ca989d33e5b7e0': {
+          description: 'Übergib im Raid gefundene Werkzeuge',
+        },
+      },
+    },
+
+    // Was: Small Things, Big Help
+    '5c10f94386f774227172c572': {
+      name: 'Kleine Dinge, große Hilfe',
+    },
+
+    // Scavenger (Lv 0)
+    '5c112d7e86f7740d6f647486': {
+      objectives: {
+        // Was: Hand over any found in raid items from the Facecovers category
+        '6a57553be11c6adb225f69b3': {
+          description: 'Übergib im Raid gefundene Gesichtsbedeckungen',
+        },
+        // Was: Hand over any found in raid items from the Headgear category
+        '6a575543bb648e3e317d5bbf': {
+          description: 'Übergib im Raid gefundene Kopfbedeckungen',
+        },
+        // Was: Hand over any found in raid items from the Headsets category
+        '6a57554a8715a99f675a8191': {
+          description: 'Übergib im Raid gefundene Headsets',
+        },
+        // Was: Hand over any found in raid items from the Eyewear category
+        '6a5755579da173f9a707240f': {
+          description: 'Übergib im Raid gefundene Brillen',
+        },
+        // Was: Hand over any found in raid items from the Body Armor category
+        '6a575575a7263e4961397d13': {
+          description: 'Übergib im Raid gefundenen Körperschutz',
+        },
+      },
+    },
+
+    // Was: Reserve Expert
+    '608974af4b05530f55550c21': {
+      name: 'Reserve-Experte',
+      objectives: {
+        // Was: Check the first armory in the eastern barracks (Black Pawn) on Reserve
+        '608bd0a053b9dd01a116f474': {
+          description: 'Durchsuche die erste Waffenkammer in den östlichen Baracken (Schwarzer Bauer) auf Reserve',
+        },
+        // Was: Check the second armory in the eastern barracks (Black Pawn) on Reserve
+        '608bd0c20637f21f9934b6e4': {
+          description: 'Durchsuche die zweite Waffenkammer in den östlichen Baracken (Schwarzer Bauer) auf Reserve',
+        },
+        // Was: Check the first armory in the southern barracks (White Pawn) on Reserve
+        '608bd136c61c4b541b381da3': {
+          description: 'Durchsuche die erste Waffenkammer in den südlichen Baracken (Weißer Bauer) auf Reserve',
+        },
+        // Was: Check the second armory in the southern barracks (White Pawn) on Reserve
+        '608bd149f597ad0a33574d74': {
+          description: 'Durchsuche die zweite Waffenkammer in den südlichen Baracken (Weißer Bauer) auf Reserve',
+        },
+        // Was: Hand over the gear found in the rooms
+        '6a5761ff44baf1d1830bfa5c': {
+          description: 'Übergib die in den Räumen gefundene Ausrüstung',
+        },
+        // Was: Locate and obtain any Russian gear in the armory rooms
+        '6a6d0ec764f81ad96ce823eb': {
+          description: 'Beschaffe beliebige russische Ausrüstung aus den Waffenkammern',
+        },
+      },
+    },
+
+    // Long Line (Lv 0)
+    '60e71dc0a94be721b065bbfc': {
+      objectives: {
+        // Was: Eliminate PMC operatives on Interchange
+        '60e73ee8b567ff641b129570': {
+          description: 'Eliminiere PMCs auf Interchange',
+        },
+      },
+    },
+
+    // Was: Fresh Stock
+    '69ce21e990144e437802b1e0': {
+      name: 'Frische Ware',
+      objectives: {
+        // Was: Find the item in raid: Black Division plate carrier
+        '69ce21e990144e437802b1e2': {
+          description: 'Finde beliebige Black-Division-Plattenträger im Raid',
+        },
+        // Was: Hand over the items
+        '69ce21e990144e437802b1e3': {
+          description: 'Übergib beliebige Black-Division-Plattenträger',
+        },
+      },
+    },
+
+    // Was: New Beginning
+    '6761f28a022f60bb320f3e95': {
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Eliminate Scavs
+        '6761f93bc757eb8c228fa754': {
+          description: 'Eliminiere Scavs',
+        },
+        // Was: Survive and extract from The Lab
+        '6761f9d718fa62aac3264ff2': {
+          description: 'Überlebe und entkomme aus The Lab',
+        },
+        // Was: Hand over any PMC figurine
+        '6761f6f1bacf72169272e381': {
+          description: 'Übergib eine beliebige PMC-Figur',
+        },
+        // Was: Hand over any Scav figurine
+        '6761f7d086fd2d9c941b8aa3': {
+          description: 'Übergib eine beliebige Scav-Figur',
+        },
+        // Was: Hand over any Boss figurine
+        '6761f7f87b309912d6b5f2a9': {
+          description: 'Übergib eine beliebige Boss-Figur',
+        },
+        // Was: Hand over any Trader figurine
+        '6761f87227aeff895cef62c5': {
+          description: 'Übergib eine beliebige Händler-Figur',
+        },
+      },
+    },
+
+    // Was: Antique Enthusiast
+    '5c1141f386f77430ff393792': {
+      name: 'Antiquitätenliebhaber',
+      objectives: {
+        // Was: Hand over the found in raid item: Antique teapot
+        '5c11427386f77430ff393793': {
+          description: 'Übergib im Raid gefundene antike Teekannen',
+        },
+        // Was: Hand over the found in raid item: Gold skull ring
+        '6a59e2a8a6c70ef1422952ee': {
+          description: 'Übergib im Raid gefundene goldene Totenkopfringe',
+        },
+        // Was: Hand over the found in raid item: Antique vase
+        '5c122c5f86f77437e44bcb0e': {
+          description: 'Übergib im Raid gefundene antike Vasen',
+        },
+        // Was: Hand over the found in raid item: Axel parrot figurine
+        '62a70094ec21e50cad3b670b': {
+          description: 'Übergib im Raid gefundene Papageienfiguren von Axel',
+        },
+        // Was: Hand over the found in raid item: Raven figurine
+        '62a700c2ec21e50cad3b670c': {
+          description: 'Übergib im Raid gefundene Rabenfiguren',
         },
       },
     },

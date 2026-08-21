@@ -18,7 +18,11 @@ describe('getProjectPaths', () => {
   it('returns valid project paths', () => {
     const paths = getProjectPaths();
 
-    expect(paths.rootDir).toContain('tarkov-data-overlay');
+    // Identify the root by the manifest it holds, not by the checkout
+    // directory name: a fork or a renamed clone changes the directory but
+    // not the project.
+    const pkg = loadJsonFile(join(paths.rootDir, 'package.json')) as { name?: string };
+    expect(pkg.name).toBe('tarkov-data-overlay');
     expect(paths.srcDir).toContain('src');
     expect(paths.distDir).toContain('dist');
     expect(paths.schemasDir).toContain('schemas');
