@@ -15,6 +15,20 @@
   //   "Sniper Scavs"      -> "Scav-Scharfschützen"
   //   "body armor"        -> "Körperschutz"
   //   "Eliminate ..."     -> "Eliminiere ..."
+  //   "figurine"          -> "-Figur"
+  //   "equipment/gear"    -> "Ausrüstung"
+  //   "Fatigue"           -> "Erschöpfung"
+  //   "Survive and extract from X" -> "Überlebe und entkomme aus X"
+  //   "Win a match in X mode in Arena" -> "Gewinne ein Match im X-Modus in Arena"
+  //   "daytime Factory"   -> "Factory zur Tageszeit"
+  //
+  // Some of these entries are not plain German-missing gaps: the German
+  // bundle can hold an OLDER English string that upstream has since reworded
+  // (stale-English drift), a single wrong letter (casing), or — for the
+  // "New Beginning" prestige tasks — a swapped language field where the
+  // German bundle resolves to English while the English bundle resolves to
+  // German (see src/overrides/locales/en.json5 for the mirrored fix). Each
+  // affected block below explains which of these applies.
   //
   // Every entry carries the English source it replaces, so a reviewer can
   // judge the translation without looking anything up, and so
@@ -42,8 +56,7 @@
       objectives: {
         // EN: Eliminate PMC operatives from less than 25 meters away with a bolt-action rifle
         '5bc47e3e86f7741e6b2f3332': {
-          description:
-            'Eliminiere PMCs aus weniger als 25 Meter Entfernung mit einem Repetiergewehr',
+          description: 'Eliminiere PMCs aus weniger als 25 Meter Entfernung mit einem Repetiergewehr',
         },
       },
     },
@@ -67,6 +80,89 @@
       },
     },
 
+    // Dosenschießen / Shooting Cans (Lv 1)
+    '657315df034d76585f032e01': {
+      objectives: {
+        '6a54a310b22ea41cf1c54a20': {
+          // Was: Eliminate any target on Ground Zero
+          description: 'Eliminiere ein beliebiges Ziel auf Ground Zero',
+        },
+      },
+    },
+
+    // Grenadier (Lv 6)
+    '5c0d190cd09282029f5390d8': {
+      objectives: {
+        '5c1b760686f77412780211a3': {
+          // Was: Eliminate any target with hand grenades or grenade launchers
+          description: 'Eliminiere ein beliebiges Ziel mit Handgranaten oder Granatwerfern',
+        },
+      },
+    },
+
+    // Angelausrüstung / Fishing Gear (Lv 8)
+    '5a27b75b86f7742e97191958': {
+      objectives: {
+        '5a27d81a86f774472a6e0456': {
+          // Was: Stash an MF-UNTAR body armor in the boat
+          description: 'Verstaue eine MF-UNTAR-Schutzweste im Boot',
+        },
+      },
+    },
+
+    // Feuchte Angelegenheit – Teil 1 / A Shooting Position (Lv 8)
+    '5a27bb8386f7741c770d2d0a': {
+      objectives: {
+        '5c9de99286f7741ced54c902': {
+          // Was: Eliminate Scavs with an M4A1, M16, ADAR, or TX-15 on Shoreline
+          description: 'Eliminiere Scavs mit einer M4A1, M16, ADAR oder TX-15 auf Shoreline',
+        },
+      },
+    },
+
+    // One-Way Ticket (Lv 8)
+    '5a03153686f77442d90e2171': {
+      objectives: {
+        '5c9a17c686f7747dbe2da3c1': {
+          // Was: Eliminate 15 targets with headshots while using an AUG on Factory
+          description: 'Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt',
+        },
+      },
+    },
+
+    // Der Tarkov Schütze – Teil 2 / The Tarkov Shooter - Part 2 (Lv 9)
+    '5bc479e586f7747f376c7da3': {
+      objectives: {
+        '5bd983d886f7747ba73fc246': {
+          // Was: Shoot any target in the legs from over 40 meters away with a bolt-action rifle
+          description: 'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in die Beine',
+        },
+        '5bd9944f86f774035c4877f3': {
+          // Was: Shoot any target in the head from over 40 meters away with a bolt-action rifle
+          description: 'Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in den Kopf',
+        },
+      },
+    },
+
+    // Glory to CPSU (Lv 6) / Glory to CPSU
+    // One objective of this task has a German entry, the neighbouring one does
+    // not — the German bundle resolves per string, so a single missing entry
+    // leaves one line English while the rest of the task reads German.
+    // Wording mirrors the sibling objective that IS translated
+    // ("Finde den Arbeitsplatz von Prapors Freund in Streets of Tarkov").
+    //
+    // The task name itself is deliberately left alone: upstream established
+    // that BSG dropped the "- Part 1" suffix, so two tasks legitimately share
+    // the name "Glory to CPSU" (see src/overrides/tasks.json5).
+    '64f5aac4b63b74469b6c14c2': {
+      objectives: {
+        // EN: Locate the apartment of Prapor's friend on Streets of Tarkov
+        '6a26943d55478d73e6b4fadf': {
+          description: 'Finde die Wohnung von Prapors Freund in Streets of Tarkov',
+        },
+      },
+    },
+
     // The Survivalist Path - Unprotected but Dangerous
     // Weg des Überlebenskünstlers - Ungeschützt, aber gefährlich
     // Objective was left in English in the German bundle.
@@ -75,6 +171,279 @@
         // EN: Eliminate PMC operatives without wearing any body armor or plate carriers
         '5d25af3c86f77443ff46b9e7': {
           description: 'Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen',
+        },
+      },
+    },
+
+    // The Punisher / Der Peiniger
+    // Upstream only names this series "Der Peiniger – Teil N" from Part 4
+    // onwards; Parts 1-3 have no German name at all in the bundle. The names
+    // added here for Parts 1-3 follow that exact established pattern
+    // (en dash "–", as used upstream), so the whole series reads
+    // consistently.
+    //
+    // Part 4's item-handover objective (59ca293c86f91445a80ed047) looks
+    // translated at a glance — it isn't: the bundle has the English text with
+    // a typo ("knive" instead of "knife"), which slips past a naive
+    // "German == English" gap check. It is translated here too.
+    //
+    // German item names sourced from https://json.tarkov.dev/regular/items_de
+    // (not guessed).
+    '59c512ad86f7741f0d09de9b': {
+      // Was: The Punisher - Part 1
+      name: 'Der Peiniger – Teil 1',
+      objectives: {
+        // Was: Eliminate Scavs with AKS-74U on Customs
+        '59674d5186f77446b852d5f7': {
+          description: 'Eliminiere Scavs mit einer AKS-74U auf Customs',
+        },
+      },
+    },
+
+    '59c50a9e86f7745fef66f4ff': {
+      // Was: The Punisher - Part 2
+      name: 'Der Peiniger – Teil 2',
+      objectives: {
+        // Was: Eliminate Scavs with AKM series weapons on Shoreline
+        '59674d5186f00443b872d5f7': {
+          description: 'Eliminiere Scavs mit Waffen der AKM-Serie auf Shoreline',
+        },
+      },
+    },
+
+    '59c50c8886f7745fed3193bf': {
+      // Was: The Punisher - Part 3
+      name: 'Der Peiniger – Teil 3',
+      objectives: {
+        // Was: Eliminate Scavs with 9x39 caliber weapons on Reserve
+        '59624d5386f77446b872d5f7': {
+          description: 'Eliminiere Scavs mit Waffen im Kaliber 9x39 auf Reserve',
+        },
+        // Was: Find the item in raid: Lower half-mask
+        '5cb5e2ff86f7746ef64c979b': {
+          description: 'Finde Halbmasken im Raid',
+        },
+        // Was: Hand over the items
+        '59c50f1686f77412ef2c01e7': {
+          description: 'Übergebe die Halbmasken',
+        },
+      },
+    },
+
+    // Part 4 name is already German upstream; only its objectives are patched.
+    '59ca264786f77445a80ed044': {
+      objectives: {
+        // Was: Eliminate Scavs with an SVDS or TKPD on Lighthouse
+        '59674d5986f77446b872d5f7': {
+          description: 'Eliminiere Scavs mit einer SVDS oder TKPD auf Lighthouse',
+        },
+        // Was: Eliminate Scavs while wearing a Scav vest on Lighthouse
+        '59ca27f786f77445aa0ddc14': {
+          description: 'Eliminiere Scavs auf Lighthouse, während du eine Scav Weste trägst',
+        },
+        // Was: Find the item in raid: Bars A-2607 95Kh18 knife
+        '59ca293c86f91445a80ed047': {
+          description: 'Finde Bars A-2607 95Kh18 Messer im Raid',
+        },
+        // Was: Hand over the items
+        '59ca29ab86f77445ab431c86': {
+          description: 'Übergebe die Messer',
+        },
+      },
+    },
+
+    // Part 5 name is already German upstream; only its objectives are patched.
+    '59ca29fb86f77445ab465c87': {
+      objectives: {
+        // Was: Find the item in raid: Colt M4A1 assault rifle
+        '59ca2bdc86f77445a80ed148': {
+          description: 'Finde ein Colt M4A1-Sturmgewehr im Raid',
+        },
+        // Was: Find the item in raid: Makarov PM pistol
+        '59ca2c9e86f77428ea721232': {
+          description: 'Finde PM „Makarov“-Pistolen im Raid',
+        },
+        // Was: Eliminate PMC operatives with Light machine guns
+        '5c922dde86f77438500a0fec': {
+          description: 'Eliminiere PMCs mit leichten Maschinengewehren',
+        },
+        // Was: Eliminate Scavs with Light machine guns
+        '6a57a51fe5c2c08b474109fb': {
+          description: 'Eliminiere Scavs mit leichten Maschinengewehren',
+        },
+      },
+    },
+
+    // Part 6 name is already German upstream; only its objectives are patched.
+    '59ca2eb686f77445a80ed049': {
+      objectives: {
+        // Was: Eliminate PMC operatives with the specified weapons on Lighthouse, Shoreline, Reserve, Ground Zero, or The Lab
+        '59ca2fba86f77445e4732b25': {
+          description: 'Eliminiere PMCs mit den angegebenen Waffen auf Lighthouse, Shoreline, Reserve, Ground Zero oder The Lab',
+        },
+        // Was: Locate and neutralize any Boss
+        '6a57a60057699da0521e1c7b': {
+          description: 'Finde und eliminiere einen beliebigen Boss',
+        },
+        // Was: Hand over the item: Dogtag BEAR or Dogtag USEC
+        '5b0548e686f7740306753506': {
+          description: 'Übergib den Gegenstand: Dogtag BEAR oder Dogtag USEC',
+        },
+      },
+    },
+
+    // Secret Message / Geheime Nachricht
+    // Objective was left in English in the German bundle.
+    '6a5ccda873f06065630d61b0': {
+      objectives: {
+        // Was: Eliminate any target with headshots using a 12ga shotgun on Streets of Tarkov
+        '6a5ccda873f06065630d61b2': {
+          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine 12ga-Schrotflinte auf Streets of Tarkov benutzt',
+        },
+      },
+    },
+
+    // Setup / Vorbereitung
+    // Objective was left in English in the German bundle.
+    '5c1234c286f77406fa13baeb': {
+      objectives: {
+        // Was: Eliminate PMC operatives with common Scav weapons while wearing the specified gear on Customs
+        '5c1fa9c986f7740de474cb3d': {
+          description: 'Eliminiere PMCs mit gängigen Scav-Waffen auf Customs, während du die angegebene Ausrüstung trägst',
+        },
+      },
+    },
+
+    // Sanitary Standards / Hygienevorschriften
+    // Objective was left in English in the German bundle.
+    '59689ee586f7740d1570bbd5': {
+      objectives: {
+        // Was: Stash a Gas analyzer in the med lab on Daytime Factory
+        '6a576ccec23300f0309ab511': {
+          description: 'Verstaue ein Gasanalysegerät im Labor auf Factory zur Tageszeit',
+        },
+      },
+    },
+
+    // Health Care Privacy - Part 4 / Datenschutz im Gesundheitswesen – Teil 4
+    // Objective was left in English in the German bundle.
+    '5a68667486f7742607157d28': {
+      objectives: {
+        // Was: Gain the Fatigue status effect (by exhausting leg stamina) and maintain it for 8 minutes
+        '6a606eb43eb95a13ff6aa1f3': {
+          description: 'Überlebe für 8 Minuten, während du unter Erschöpfung leidest (durch Aufbrauchen der Bein-Ausdauer)',
+        },
+      },
+    },
+
+    // To Great Heights! - Part 3 / Zu neuen Höhen! – Teil 3
+    // Objective was left in English in the German bundle.
+    '66058cc5bb83da7ba474aba9': {
+      objectives: {
+        // Was: Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
+        '662ba61d3ed61b6b78187b71': {
+          description: 'Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena',
+        },
+      },
+    },
+
+    // New Beginning (Prestige 2, 3, 4) / Neuanfang
+    //
+    // Two distinct problems collapse into these three tasks:
+    //
+    // 1. Swapped language fields: the German bundle currently resolves these
+    //    task names to the English string "New Beginning" instead of
+    //    "Neuanfang". src/overrides/locales/en.json5 already fixes the
+    //    mirror-image bug on the English side (that bundle resolves to the
+    //    German "Neuanfang"). See that file's header for the full context and
+    //    proof link (https://json.tarkov.dev/regular/tasks_en).
+    //
+    // 2. Stale English in the figurine handover objectives: the German
+    //    bundle held an OLDER English phrasing of these objectives. Upstream
+    //    has since reworded the English side to "any ... figurine"; the
+    //    German bundle never picked up either the translation or the reword,
+    //    so it still reads plain English throughout.
+    //    Proof: https://json.tarkov.dev/regular/tasks_en
+    //
+    // Terminology: "figurine" -> "-Figur", matching the existing translated
+    // string "Finde eine Killa-Figur im Raid" elsewhere in this bundle.
+    // "Trader" -> "Händler" has no direct precedent in the data reviewed for
+    // this bundle; flagging for reviewer sign-off.
+    '6761ff17cdc36bd66102e9d0': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Hand over any found in raid PMC figurine
+        '6761ff17cdc36bd66102e9d8': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '6761ff17cdc36bd66102e9d9': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '6761ff17cdc36bd66102e9da': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '6761ff17cdc36bd66102e9e1': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+        },
+      },
+    },
+
+    '6848100b00afffa81f09e365': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Hand over any found in raid PMC figurine
+        '6848100b00afffa81f09e36d': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '6848100b00afffa81f09e36e': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '6848100b00afffa81f09e36f': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '6848100b00afffa81f09e376': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
+        },
+      },
+    },
+
+    '68481881f43abfdda2058369': {
+      // Was: New Beginning
+      name: 'Neuanfang',
+      objectives: {
+        // Was: Survive and extract from Interchange
+        //
+        // Data error, not a translation gap: the German bundle held an
+        // entirely different objective here ("Hand over any of the found in
+        // raid limited Labyrinth figurines"), not an older/mistranslated
+        // version of this one. Fixed here; also needs reporting upstream as
+        // a data bug, not a locale bug.
+        '68486a0eda4828c0772e337b': {
+          description: 'Überlebe und entkomme aus Interchange',
+        },
+        // Was: Hand over any found in raid PMC figurine
+        '68481881f43abfdda2058371': {
+          description: 'Übergebe eine beliebige im Raid gefundene PMC-Figur',
+        },
+        // Was: Hand over any found in raid Scav figurine
+        '68481881f43abfdda2058372': {
+          description: 'Übergebe eine beliebige im Raid gefundene Scav-Figur',
+        },
+        // Was: Hand over any found in raid Boss figurine
+        '68481881f43abfdda2058373': {
+          description: 'Übergebe eine beliebige im Raid gefundene Boss-Figur',
+        },
+        // Was: Hand over any found in raid Trader figurine
+        '68481881f43abfdda205837a': {
+          description: 'Übergebe eine beliebige im Raid gefundene Händler-Figur',
         },
       },
     },
