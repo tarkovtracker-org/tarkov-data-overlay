@@ -1,0 +1,82 @@
+{
+  // German (de) locale corrections.
+  //
+  // These patch strings that are wrong or missing in tarkov.dev's German
+  // translation bundle (regular/tasks_de). They are NOT data corrections:
+  // a regular override in src/overrides/tasks.json5 says "the canonical
+  // value is X regardless of locale", while an entry here says "the German
+  // bundle should read X". Consumers apply these only when rendering German,
+  // after the locale-neutral data overrides.
+  //
+  // Terminology follows the strings tarkov.dev already translates well, so
+  // these additions do not stand out:
+  //   "PMC operatives"    -> "PMCs"
+  //   "bolt-action rifle" -> "Repetiergewehr"
+  //   "Sniper Scavs"      -> "Scav-Scharfschützen"
+  //   "body armor"        -> "Körperschutz"
+  //   "Eliminate ..."     -> "Eliminiere ..."
+  //
+  // Every entry carries the English source it replaces, so a reviewer can
+  // judge the translation without looking anything up, and so
+  // `npm run check-overrides` can flag it once tarkov.dev fixes it itself.
+
+  tasks: {
+    // Burning Rubber / Heiße Reifen
+    // The German objective was grammatically wrong: "um Ground Zero zu
+    // entkommen" — "entkommen" takes the dative, so this reads as "to escape
+    // Ground Zero" with the wrong case, and it also drops the meaning of
+    // "vehicle extraction". The English is a plain extract instruction.
+    // Proof: https://json.tarkov.dev/regular/tasks_en (objective 65733e571b7e7ed95fcd2f0c)
+    '657315e270bb0b8dba00cc48': {
+      objectives: {
+        // EN: Use the paid vehicle extraction on Ground Zero
+        '65733e571b7e7ed95fcd2f0c': {
+          description: 'Nutze die kostenpflichtige Fahrzeug-Extraktion auf Ground Zero',
+        },
+      },
+    },
+
+    // The Tarkov Shooter - Part 3 / Der Tarkov Schütze – Teil 3
+    // Objective was left in English in the German bundle.
+    '5bc47dbf86f7741ee74e93b9': {
+      objectives: {
+        // EN: Eliminate PMC operatives from less than 25 meters away with a bolt-action rifle
+        '5bc47e3e86f7741e6b2f3332': {
+          description:
+            'Eliminiere PMCs aus weniger als 25 Meter Entfernung mit einem Repetiergewehr',
+        },
+      },
+    },
+
+    // The Tarkov Shooter - Part 5 / Der Tarkov Schütze – Teil 5
+    // Both the task name and its objective were left in English.
+    //
+    // NOTE for reviewers: task 5bc4826c86f774106d22d88b carries the same
+    // English name ("The Tarkov Shooter - Part 5"). That duplicate exists in
+    // the upstream data itself and is a separate, locale-independent question
+    // — not something this file should paper over. Translating the name here
+    // simply mirrors the English as-is.
+    '5bc4836986f7740c0152911c': {
+      // EN: The Tarkov Shooter - Part 5
+      name: 'Der Tarkov Schütze – Teil 5',
+      objectives: {
+        // EN: Eliminate Sniper Scavs with a bolt-action rifle
+        '5bc483ba86f77415034ba8d0': {
+          description: 'Eliminiere Scav-Scharfschützen mit einem Repetiergewehr',
+        },
+      },
+    },
+
+    // The Survivalist Path - Unprotected but Dangerous
+    // Weg des Überlebenskünstlers - Ungeschützt, aber gefährlich
+    // Objective was left in English in the German bundle.
+    '5d25aed386f77442734d25d2': {
+      objectives: {
+        // EN: Eliminate PMC operatives without wearing any body armor or plate carriers
+        '5d25af3c86f77443ff46b9e7': {
+          description: 'Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen',
+        },
+      },
+    },
+  },
+}
