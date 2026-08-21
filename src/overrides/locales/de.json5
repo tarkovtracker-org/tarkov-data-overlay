@@ -124,8 +124,8 @@
     '5a03153686f77442d90e2171': {
       objectives: {
         '5c9a17c686f7747dbe2da3c1': {
-          // Was: Eliminate 15 targets with headshots while using an AUG on Factory
-          description: 'Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt',
+          // Was: Eliminate any target with headshots using a Steyr AUG on Factory
+          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine Steyr AUG auf Factory benutzt',
         },
       },
     },

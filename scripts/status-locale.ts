@@ -66,7 +66,14 @@ export function readCoverage(file: string): Map<string, string> {
 }
 
 /**
- * Pair every "// Was: <english>" with the entry it documents.
+ * The file records the English a translation was written from with two
+ * prefixes: `// Was:` on newer entries, `// EN:` on older ones. Accepting only
+ * one leaves the other silently unchecked while the report still says "None".
+ */
+const SOURCE_COMMENT = /^\s*\/\/ (?:Was|EN): (.+)$/;
+
+/**
+ * Pair every recorded English source with the entry it documents.
  *
  * Textual because JSON5.parse drops comments. Both placements in the file are
  * handled: above the id, and inside the entry above `description`.
@@ -79,7 +86,7 @@ export function readWasComments(file: string): { id: string; was: string }[] {
   for (const line of readFileSync(file, 'utf-8').split('\n')) {
     const task = line.match(/^ {4}'([0-9a-f]{24})': \{$/);
     const nested = line.match(/^ {6,}'([0-9a-f]{24})': \{$/);
-    const comment = line.match(/^\s*\/\/ Was: (.+)$/);
+    const comment = line.match(SOURCE_COMMENT);
     if (comment) {
       pending = comment[1]!.trim();
       continue;
@@ -121,6 +128,90 @@ function traderName(bundle: Awaited<ReturnType<typeof fetchLocaleBundle>>, id: u
   return typeof nickname === 'string' && nickname ? nickname : id;
 }
 
+export interface AnalysisInput {
+  tasksById: Map<string, Record<string, unknown>>;
+  /** English bundle with en.json5 corrections applied — the drift baseline */
+  english: Record<string, unknown>;
+  /** English bundle as served, used to tell "still English" from "translated" */
+  englishRaw: Record<string, unknown>;
+  translated: Record<string, unknown>;
+  coverage: Map<string, string>;
+  wasComments: { id: string; was: string }[];
+  traderOf: (task: Record<string, unknown>) => string;
+}
+
+export interface Analysis {
+  rows: Map<string, TraderRow>;
+  noop: string[];
+  drifted: { id: string; was: string; now: string }[];
+}
+
+/**
+ * Decide, for every name and objective, whether it is open, covered, or covered
+ * by an override the bundle now matches on its own.
+ *
+ * Two distinctions this has to get right:
+ *
+ * A bundle that merely differs from English is not a translated entry. Wrong
+ * translation is still translation, and correcting it is what a locale override
+ * is for — so only an override the bundle matches verbatim is dead weight.
+ *
+ * Drift is measured against the corrected English, because the English bundle
+ * is itself wrong in places; otherwise those entries report as drift forever.
+ */
+export function analyse(input: AnalysisInput): Analysis {
+  const { tasksById, english, englishRaw, translated, coverage, wasComments, traderOf } = input;
+  const rows = new Map<string, TraderRow>();
+  const noop: string[] = [];
+
+  const classify = (key: string, onOpen: () => void, onCovered: () => void) => {
+    const ours = coverage.get(key);
+    const bundle = translated[key];
+    if (ours !== undefined) {
+      if (ours === bundle) noop.push(`${key} — bundle now says exactly this`);
+      onCovered();
+      return;
+    }
+    if (englishRaw[key] === bundle) onOpen();
+  };
+
+  for (const [taskId, task] of tasksById) {
+    const trader = traderOf(task);
+    const row = rows.get(trader) ?? {
+      trader,
+      tasks: 0,
+      objectives: 0,
+      openNames: 0,
+      openObjectives: 0,
+      covered: 0,
+    };
+    rows.set(trader, row);
+    row.tasks++;
+    classify(
+      `${taskId} name`,
+      () => row.openNames++,
+      () => row.covered++
+    );
+    const objectives = Array.isArray(task.objectives) ? task.objectives : [];
+    for (const objective of objectives) {
+      const id = (objective as { id?: unknown }).id;
+      if (typeof id !== 'string') continue;
+      row.objectives++;
+      classify(
+        id,
+        () => row.openObjectives++,
+        () => row.covered++
+      );
+    }
+  }
+
+  const drifted = wasComments
+    .filter(({ id, was }) => typeof english[id] === 'string' && english[id] !== was)
+    .map(({ id, was }) => ({ id, was, now: String(english[id]) }));
+
+  return { rows, noop, drifted };
+}
+
 export async function statusLocale(locale: string): Promise<number> {
   const { srcDir } = getProjectPaths();
   const overrideFile = join(srcDir, 'overrides', 'locales', `${locale}.json5`);
@@ -139,67 +230,20 @@ export async function statusLocale(locale: string): Promise<number> {
   const english: Record<string, unknown> = { ...en.tasksLocale };
   for (const [key, value] of englishFixes) english[key] = value;
 
-  const rows = new Map<string, TraderRow>();
-  const noop: string[] = [];
-
-  /**
-   * An entry is open when the bundle still shows the English string and we do
-   * not patch it. An override is a no-op when the bundle already says exactly
-   * what the override says - the bundle merely differing is not enough, since
-   * correcting wrong German is the whole point of a locale override.
-   */
-  const classify = (key: string, onOpen: () => void, onCovered: () => void) => {
-    const ours = coverage.get(key);
-    const bundle = translated.tasksLocale[key];
-    if (ours !== undefined && ours === bundle) {
-      noop.push(`${key} — bundle now says exactly this`);
-      onCovered();
-      return;
-    }
-    if (ours !== undefined) {
-      onCovered();
-      return;
-    }
-    if (en.tasksLocale[key] === bundle) onOpen();
-  };
-
-  for (const [taskId, task] of en.tasksById) {
-    const trader = traderName(en, task.trader);
-    const row = rows.get(trader) ?? {
-      trader,
-      tasks: 0,
-      objectives: 0,
-      openNames: 0,
-      openObjectives: 0,
-      covered: 0,
-    };
-    rows.set(trader, row);
-    row.tasks++;
-
-    const nameKey = `${taskId} name`;
-    classify(
-      nameKey,
-      () => row.openNames++,
-      () => row.covered++
-    );
-
-    const objectives = Array.isArray(task.objectives) ? task.objectives : [];
-    for (const objective of objectives) {
-      const id = (objective as { id?: unknown }).id;
-      if (typeof id !== 'string') continue;
-      row.objectives++;
-      classify(
-        id,
-        () => row.openObjectives++,
-        () => row.covered++
-      );
-    }
-  }
-
-  const drifted = readWasComments(overrideFile).filter(({ id, was }) => {
-    const current = english[id];
-    return typeof current === 'string' && current !== was;
+  const {
+    rows: rowMap,
+    noop,
+    drifted,
+  } = analyse({
+    tasksById: en.tasksById,
+    english,
+    englishRaw: en.tasksLocale,
+    translated: translated.tasksLocale,
+    coverage,
+    wasComments: readWasComments(overrideFile),
+    traderOf: (task) => traderName(en, task.trader),
   });
+  const rows = rowMap;
 
   printHeader(`TRANSLATION STATUS (${locale})`);
   const sorted = [...rows.values()].sort(
@@ -235,12 +279,14 @@ export async function statusLocale(locale: string): Promise<number> {
 
   printHeader('ENGLISH SOURCE CHANGED SINCE THE TRANSLATION');
   if (drifted.length === 0) {
-    console.log(colorize('  None — every "// Was:" still matches the English bundle.', 'green'));
+    console.log(
+      colorize('  None — every recorded English source still matches the English bundle.', 'green')
+    );
   } else {
-    for (const { id, was } of drifted) {
+    for (const { id, was, now } of drifted) {
       console.log(colorize(`  ${id}`, 'yellow'));
       console.log(`      was: ${was}`);
-      console.log(`      now: ${String(english[id])}`);
+      console.log(`      now: ${now}`);
     }
   }
 

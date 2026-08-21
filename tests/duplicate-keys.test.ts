@@ -1,18 +1,14 @@
 /**
- * Duplicate keys in the override sources.
+ * Duplicate keys in the override sources, and the scanner that finds them.
  *
- * JSON5 accepts a repeated key and keeps the last one. Nothing warns: the
- * file parses, validate passes, the build succeeds, and the earlier entry is
- * gone. That is how three task blocks lost a name and thirteen objectives
- * while every check stayed green.
- *
- * The scan is textual on purpose. Parsing first would collapse the duplicate
- * before it could be seen.
+ * JSON5 keeps the last of two identical keys and nothing warns, so a repeated
+ * key silently drops the earlier entry. Three task blocks lost a name and
+ * thirteen objectives that way while every check stayed green.
  */
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
-import { getProjectPaths } from '../src/lib/index.js';
+import { findDuplicateKeys, getProjectPaths } from '../src/lib/index.js';
 
 const { srcDir } = getProjectPaths();
 
@@ -24,31 +20,8 @@ function json5Files(dir: string): string[] {
   });
 }
 
-/**
- * Every quoted key by its full path. Depth alone is not enough: the same key
- * under two different parents sits at the same depth and is not a duplicate —
- * `pvp-season` legitimately appears once per task in the divergences file.
- */
-function duplicateKeys(source: string): string[] {
-  const counts = new Map<string, number>();
-  const stack: { key: string; depth: number }[] = [];
-  let depth = 0;
-  for (const raw of source.split('\n')) {
-    const line = raw.replace(/\/\/.*$/, '');
-    const key = line.match(/^\s*'([^']+)'\s*:/);
-    const delta = (line.match(/[{[]/g) ?? []).length - (line.match(/[}\]]/g) ?? []).length;
-    if (key) {
-      const path = [...stack.map((s) => s.key), key[1]].join('/');
-      counts.set(path, (counts.get(path) ?? 0) + 1);
-      if (delta > 0) stack.push({ key: key[1], depth });
-    }
-    depth += delta;
-    while (stack.length && stack[stack.length - 1]!.depth >= depth) stack.pop();
-  }
-  return [...counts]
-    .filter(([, n]) => n > 1)
-    .map(([path, n]) => `${path.split('/').pop()} (${n}x)`);
-}
+const lines = (...rows: string[]) => rows.join('\n');
+const keys = (source: string) => findDuplicateKeys(source).map((d) => `${d.key} (${d.count}x)`);
 
 describe('override sources', () => {
   const files = json5Files(srcDir);
@@ -60,53 +33,174 @@ describe('override sources', () => {
   it.each(files.map((f) => [f.slice(srcDir.length + 1), f]))(
     '%s has no duplicate keys',
     (_, file) => {
-      expect(duplicateKeys(readFileSync(file, 'utf-8'))).toEqual([]);
+      expect(findDuplicateKeys(readFileSync(file, 'utf-8'))).toEqual([]);
     }
   );
 });
 
-describe('the duplicate scan itself', () => {
-  it('sees a repeated key at the same level', () => {
-    const source = [
-      '{',
-      '  tasks: {',
-      "    'a': { x: 1 },",
-      "    'a': { x: 2 },",
-      '  },',
-      '}',
-    ].join('\n');
-    expect(duplicateKeys(source)).toEqual(['a (2x)']);
+describe('findDuplicateKeys', () => {
+  it('reports a repeated single-quoted key', () => {
+    expect(
+      keys(lines('{', '  tasks: {', "    'a': { x: 1 },", "    'a': { y: 2 },", '  },', '}'))
+    ).toEqual(['a (2x)']);
+  });
+
+  it('reports a repeated unquoted key — the form most keys in this repo use', () => {
+    expect(
+      keys(lines('{', '  task: {', "    name: 'one',", "    name: 'two',", '  },', '}'))
+    ).toEqual(['name (2x)']);
+  });
+
+  it('reports a repeated double-quoted key', () => {
+    expect(
+      keys(lines('{', '  tasks: {', '    "a": { x: 1 },', '    "a": { y: 2 },', '  },', '}'))
+    ).toEqual(['a (2x)']);
+  });
+
+  it('treats the three quoting styles as the same key', () => {
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { x: 1 },",
+          '    "a": { y: 2 },',
+          '    a: { z: 3 },',
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual(['a (3x)']);
   });
 
   it('leaves the same key under different parents alone', () => {
-    const source = [
-      '{',
-      '  tasks: {',
-      "    'a': {",
-      '      objectives: {',
-      "        'x': { d: 1 },",
-      '      },',
-      '    },',
-      "    'b': {",
-      '      objectives: {',
-      "        'x': { d: 2 },",
-      '      },',
-      '    },',
-      '  },',
-      '}',
-    ].join('\n');
-    expect(duplicateKeys(source)).toEqual([]);
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { objectives: { 'x': { d: 1 } } },",
+          "    'b': { objectives: { 'x': { d: 2 } } },",
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
   });
 
-  it('ignores a key that only appears inside a comment', () => {
-    const source = [
-      '{',
-      '  tasks: {',
-      "    'a': { x: 1 },",
-      "    // 'a': { x: 2 },",
-      '  },',
-      '}',
-    ].join('\n');
-    expect(duplicateKeys(source)).toEqual([]);
+  it('reports the full path so a duplicate can be located', () => {
+    const found = findDuplicateKeys(
+      lines(
+        '{',
+        '  tasks: {',
+        "    'a': {",
+        '      objectives: {',
+        "        'x': { d: 1 },",
+        "        'x': { e: 2 },",
+        '      },',
+        '    },',
+        '  },',
+        '}'
+      )
+    );
+    expect(found).toEqual([{ path: 'tasks/a/objectives/x', key: 'x', count: 2 }]);
+  });
+
+  it('ignores a key inside a line comment', () => {
+    expect(
+      keys(lines('{', '  tasks: {', "    'a': { x: 1 },", "    // 'a': { x: 2 },", '  },', '}'))
+    ).toEqual([]);
+  });
+
+  it('ignores a key inside a block comment, including across lines', () => {
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { x: 1 },",
+          '    /*',
+          "      'a': { x: 2 },",
+          '    */',
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('is not fooled by a value containing //', () => {
+    // wikiLink values hold "https://", which a naive comment strip would cut,
+    // taking the closing brace on that line with it.
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { wikiLink: 'https://example.com/wiki/X' },",
+          "    'b': { wikiLink: 'https://example.com/wiki/Y' },",
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('is not fooled by a brace inside a value', () => {
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { d: 'a { brace' },",
+          "    'b': { d: 'and } another' },",
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('is not fooled by a quote inside a value', () => {
+    expect(
+      keys(
+        lines(
+          '{',
+          '  tasks: {',
+          "    'a': { d: 'it\\'s fine' },",
+          "    'b': { d: 'so is this' },",
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('leaves repeated keys in separate array elements alone', () => {
+    // storyRequirements is a list of objects that each carry a type and a
+    // name. They are siblings in the text but not in the data, so the path
+    // has to include the element index.
+    expect(
+      keys(
+        lines(
+          '{',
+          '  prestige: {',
+          "    'p1': {",
+          '      storyRequirements: [',
+          "        { type: 'chapter', name: 'one' },",
+          "        { type: 'chapter', name: 'two' },",
+          '      ],',
+          '    },',
+          '  },',
+          '}'
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it('still reports a repeated key inside one array element', () => {
+    expect(keys(lines('{', '  list: [', "    { type: 'a', type: 'b' },", '  ],', '}'))).toEqual([
+      'type (2x)',
+    ]);
   });
 });
