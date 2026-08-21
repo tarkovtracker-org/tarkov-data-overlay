@@ -8420,6 +8420,39 @@
     }
   },
   "locales": {
+    "de": {
+      "tasks": {
+        "657315e270bb0b8dba00cc48": {
+          "objectives": {
+            "65733e571b7e7ed95fcd2f0c": {
+              "description": "Nutze die kostenpflichtige Fahrzeug-Extraktion auf Ground Zero"
+            }
+          }
+        },
+        "5bc47dbf86f7741ee74e93b9": {
+          "objectives": {
+            "5bc47e3e86f7741e6b2f3332": {
+              "description": "Eliminiere PMCs aus weniger als 25 Meter Entfernung mit einem Repetiergewehr"
+            }
+          }
+        },
+        "5bc4836986f7740c0152911c": {
+          "name": "Der Tarkov Schütze – Teil 5",
+          "objectives": {
+            "5bc483ba86f77415034ba8d0": {
+              "description": "Eliminiere Scav-Scharfschützen mit einem Repetiergewehr"
+            }
+          }
+        },
+        "5d25aed386f77442734d25d2": {
+          "objectives": {
+            "5d25af3c86f77443ff46b9e7": {
+              "description": "Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen"
+            }
+          }
+        }
+      }
+    },
     "en": {
       "tasks": {
         "6761ff17cdc36bd66102e9d0": {
@@ -8438,8 +8471,8 @@
     }
   },
   "$meta": {
-    "version": "1.67",
-    "generated": "2026-08-20T01:01:55.857Z",
-    "sha256": "ae52e8aefa94a67c26bd7cbd7f5884257f6c7018949cada18b1aef3d6dd818a0"
+    "version": "1.68",
+    "generated": "2026-08-21T09:40:59.303Z",
+    "sha256": "b58f8ffffb47330c7bec6034d1d00116e8fa664eb8beb041ed0a601d87c51264"
   }
 }
