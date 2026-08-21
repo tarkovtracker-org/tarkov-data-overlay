@@ -8444,10 +8444,226 @@
             }
           }
         },
+        "657315df034d76585f032e01": {
+          "objectives": {
+            "6a54a310b22ea41cf1c54a20": {
+              "description": "Eliminiere ein beliebiges Ziel auf Ground Zero"
+            }
+          }
+        },
+        "5c0d190cd09282029f5390d8": {
+          "objectives": {
+            "5c1b760686f77412780211a3": {
+              "description": "Eliminiere ein beliebiges Ziel mit Handgranaten oder Granatwerfern"
+            }
+          }
+        },
+        "5a27b75b86f7742e97191958": {
+          "objectives": {
+            "5a27d81a86f774472a6e0456": {
+              "description": "Verstaue eine MF-UNTAR-Schutzweste im Boot"
+            }
+          }
+        },
+        "5a27bb8386f7741c770d2d0a": {
+          "objectives": {
+            "5c9de99286f7741ced54c902": {
+              "description": "Eliminiere Scavs mit einer M4A1, M16, ADAR oder TX-15 auf Shoreline"
+            }
+          }
+        },
+        "5a03153686f77442d90e2171": {
+          "objectives": {
+            "5c9a17c686f7747dbe2da3c1": {
+              "description": "Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt"
+            }
+          }
+        },
+        "5bc479e586f7747f376c7da3": {
+          "objectives": {
+            "5bd983d886f7747ba73fc246": {
+              "description": "Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in die Beine"
+            },
+            "5bd9944f86f774035c4877f3": {
+              "description": "Triff ein beliebiges Ziel aus über 40 Meter Entfernung mit einem Repetiergewehr in den Kopf"
+            }
+          }
+        },
+        "64f5aac4b63b74469b6c14c2": {
+          "objectives": {
+            "6a26943d55478d73e6b4fadf": {
+              "description": "Finde die Wohnung von Prapors Freund in Streets of Tarkov"
+            }
+          }
+        },
         "5d25aed386f77442734d25d2": {
           "objectives": {
             "5d25af3c86f77443ff46b9e7": {
               "description": "Eliminiere PMCs, ohne Körperschutz oder Plattenträger zu tragen"
+            }
+          }
+        },
+        "59c512ad86f7741f0d09de9b": {
+          "name": "Der Peiniger – Teil 1",
+          "objectives": {
+            "59674d5186f77446b852d5f7": {
+              "description": "Eliminiere Scavs mit einer AKS-74U auf Customs"
+            }
+          }
+        },
+        "59c50a9e86f7745fef66f4ff": {
+          "name": "Der Peiniger – Teil 2",
+          "objectives": {
+            "59674d5186f00443b872d5f7": {
+              "description": "Eliminiere Scavs mit Waffen der AKM-Serie auf Shoreline"
+            }
+          }
+        },
+        "59c50c8886f7745fed3193bf": {
+          "name": "Der Peiniger – Teil 3",
+          "objectives": {
+            "59624d5386f77446b872d5f7": {
+              "description": "Eliminiere Scavs mit Waffen im Kaliber 9x39 auf Reserve"
+            },
+            "5cb5e2ff86f7746ef64c979b": {
+              "description": "Finde Halbmasken im Raid"
+            },
+            "59c50f1686f77412ef2c01e7": {
+              "description": "Übergebe die Halbmasken"
+            }
+          }
+        },
+        "59ca264786f77445a80ed044": {
+          "objectives": {
+            "59674d5986f77446b872d5f7": {
+              "description": "Eliminiere Scavs mit einer SVDS oder TKPD auf Lighthouse"
+            },
+            "59ca27f786f77445aa0ddc14": {
+              "description": "Eliminiere Scavs auf Lighthouse, während du eine Scav Weste trägst"
+            },
+            "59ca293c86f91445a80ed047": {
+              "description": "Finde Bars A-2607 95Kh18 Messer im Raid"
+            },
+            "59ca29ab86f77445ab431c86": {
+              "description": "Übergebe die Messer"
+            }
+          }
+        },
+        "59ca29fb86f77445ab465c87": {
+          "objectives": {
+            "59ca2bdc86f77445a80ed148": {
+              "description": "Finde ein Colt M4A1-Sturmgewehr im Raid"
+            },
+            "59ca2c9e86f77428ea721232": {
+              "description": "Finde PM „Makarov“-Pistolen im Raid"
+            },
+            "5c922dde86f77438500a0fec": {
+              "description": "Eliminiere PMCs mit leichten Maschinengewehren"
+            },
+            "6a57a51fe5c2c08b474109fb": {
+              "description": "Eliminiere Scavs mit leichten Maschinengewehren"
+            }
+          }
+        },
+        "59ca2eb686f77445a80ed049": {
+          "objectives": {
+            "59ca2fba86f77445e4732b25": {
+              "description": "Eliminiere PMCs mit den angegebenen Waffen auf Lighthouse, Shoreline, Reserve, Ground Zero oder The Lab"
+            },
+            "6a57a60057699da0521e1c7b": {
+              "description": "Finde und eliminiere einen beliebigen Boss"
+            },
+            "5b0548e686f7740306753506": {
+              "description": "Übergib den Gegenstand: Dogtag BEAR oder Dogtag USEC"
+            }
+          }
+        },
+        "6a5ccda873f06065630d61b0": {
+          "objectives": {
+            "6a5ccda873f06065630d61b2": {
+              "description": "Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine 12ga-Schrotflinte auf Streets of Tarkov benutzt"
+            }
+          }
+        },
+        "5c1234c286f77406fa13baeb": {
+          "objectives": {
+            "5c1fa9c986f7740de474cb3d": {
+              "description": "Eliminiere PMCs mit gängigen Scav-Waffen auf Customs, während du die angegebene Ausrüstung trägst"
+            }
+          }
+        },
+        "59689ee586f7740d1570bbd5": {
+          "objectives": {
+            "6a576ccec23300f0309ab511": {
+              "description": "Verstaue ein Gasanalysegerät im Labor auf Factory zur Tageszeit"
+            }
+          }
+        },
+        "5a68667486f7742607157d28": {
+          "objectives": {
+            "6a606eb43eb95a13ff6aa1f3": {
+              "description": "Überlebe für 8 Minuten, während du unter Erschöpfung leidest (durch Aufbrauchen der Bein-Ausdauer)"
+            }
+          }
+        },
+        "66058cc5bb83da7ba474aba9": {
+          "objectives": {
+            "662ba61d3ed61b6b78187b71": {
+              "description": "Gewinne 2 Matches und erreiche dabei mindestens den 3. Platz im TeamFight-, BlastGang- oder CheckPoint-Modus in Arena"
+            }
+          }
+        },
+        "6761ff17cdc36bd66102e9d0": {
+          "name": "Neuanfang",
+          "objectives": {
+            "6761ff17cdc36bd66102e9d8": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6761ff17cdc36bd66102e9d9": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6761ff17cdc36bd66102e9da": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6761ff17cdc36bd66102e9e1": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+            }
+          }
+        },
+        "6848100b00afffa81f09e365": {
+          "name": "Neuanfang",
+          "objectives": {
+            "6848100b00afffa81f09e36d": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "6848100b00afffa81f09e36e": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "6848100b00afffa81f09e36f": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "6848100b00afffa81f09e376": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
+            }
+          }
+        },
+        "68481881f43abfdda2058369": {
+          "name": "Neuanfang",
+          "objectives": {
+            "68486a0eda4828c0772e337b": {
+              "description": "Überlebe und entkomme aus Interchange"
+            },
+            "68481881f43abfdda2058371": {
+              "description": "Übergebe eine beliebige im Raid gefundene PMC-Figur"
+            },
+            "68481881f43abfdda2058372": {
+              "description": "Übergebe eine beliebige im Raid gefundene Scav-Figur"
+            },
+            "68481881f43abfdda2058373": {
+              "description": "Übergebe eine beliebige im Raid gefundene Boss-Figur"
+            },
+            "68481881f43abfdda205837a": {
+              "description": "Übergebe eine beliebige im Raid gefundene Händler-Figur"
             }
           }
         }
@@ -8471,8 +8687,8 @@
     }
   },
   "$meta": {
-    "version": "1.68",
-    "generated": "2026-08-21T09:40:59.303Z",
-    "sha256": "b58f8ffffb47330c7bec6034d1d00116e8fa664eb8beb041ed0a601d87c51264"
+    "version": "1.69",
+    "generated": "2026-08-21T12:07:11.226Z",
+    "sha256": "458a3b1d3e94c30770e88362b6e4b5517638885ecab213ac15af3222d5cb3c88"
   }
 }
