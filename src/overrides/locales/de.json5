@@ -52,6 +52,7 @@
 
     // The Tarkov Shooter - Part 3 / Der Tarkov Schütze – Teil 3
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc47dbf86f7741ee74e93b9)
     '5bc47dbf86f7741ee74e93b9': {
       objectives: {
         // EN: Eliminate PMC operatives from less than 25 meters away with a bolt-action rifle
@@ -69,6 +70,7 @@
     // the upstream data itself and is a separate, locale-independent question
     // — not something this file should paper over. Translating the name here
     // simply mirrors the English as-is.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4836986f7740c0152911c)
     '5bc4836986f7740c0152911c': {
       // EN: The Tarkov Shooter - Part 5
       name: 'Der Tarkov Schütze – Teil 5',
@@ -81,6 +83,7 @@
     },
 
     // Dosenschießen / Shooting Cans (Lv 1)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (657315df034d76585f032e01)
     '657315df034d76585f032e01': {
       objectives: {
         '6a54a310b22ea41cf1c54a20': {
@@ -91,6 +94,7 @@
     },
 
     // Grenadier (Lv 6)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c0d190cd09282029f5390d8)
     '5c0d190cd09282029f5390d8': {
       objectives: {
         '5c1b760686f77412780211a3': {
@@ -101,6 +105,7 @@
     },
 
     // Angelausrüstung / Fishing Gear (Lv 8)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27b75b86f7742e97191958)
     '5a27b75b86f7742e97191958': {
       objectives: {
         '5a27d81a86f774472a6e0456': {
@@ -111,6 +116,7 @@
     },
 
     // Feuchte Angelegenheit – Teil 1 / A Shooting Position (Lv 8)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a27bb8386f7741c770d2d0a)
     '5a27bb8386f7741c770d2d0a': {
       objectives: {
         '5c9de99286f7741ced54c902': {
@@ -121,6 +127,7 @@
     },
 
     // One-Way Ticket (Lv 8)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a03153686f77442d90e2171)
     '5a03153686f77442d90e2171': {
       objectives: {
         '5c9a17c686f7747dbe2da3c1': {
@@ -131,6 +138,7 @@
     },
 
     // Der Tarkov Schütze – Teil 2 / The Tarkov Shooter - Part 2 (Lv 9)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc479e586f7747f376c7da3)
     '5bc479e586f7747f376c7da3': {
       objectives: {
         '5bd983d886f7747ba73fc246': {
@@ -154,6 +162,7 @@
     // The task name itself is deliberately left alone: upstream established
     // that BSG dropped the "- Part 1" suffix, so two tasks legitimately share
     // the name "Glory to CPSU" (see src/overrides/tasks.json5).
+    // Proof: https://json.tarkov.dev/regular/tasks_de (64f5aac4b63b74469b6c14c2)
     '64f5aac4b63b74469b6c14c2': {
       objectives: {
         // EN: Locate the apartment of Prapor's friend on Streets of Tarkov
@@ -166,6 +175,7 @@
     // The Survivalist Path - Unprotected but Dangerous
     // Weg des Überlebenskünstlers - Ungeschützt, aber gefährlich
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5d25aed386f77442734d25d2)
     '5d25aed386f77442734d25d2': {
       objectives: {
         // EN: Eliminate PMC operatives without wearing any body armor or plate carriers
@@ -189,6 +199,7 @@
     //
     // German item names sourced from https://json.tarkov.dev/regular/items_de
     // (not guessed).
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59c512ad86f7741f0d09de9b)
     '59c512ad86f7741f0d09de9b': {
       // Was: The Punisher - Part 1
       name: 'Der Peiniger – Teil 1',
@@ -200,6 +211,7 @@
       },
     },
 
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59c50a9e86f7745fef66f4ff)
     '59c50a9e86f7745fef66f4ff': {
       // Was: The Punisher - Part 2
       name: 'Der Peiniger – Teil 2',
@@ -211,6 +223,7 @@
       },
     },
 
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59c50c8886f7745fed3193bf)
     '59c50c8886f7745fed3193bf': {
       // Was: The Punisher - Part 3
       name: 'Der Peiniger – Teil 3',
@@ -231,6 +244,7 @@
     },
 
     // Part 4 name is already German upstream; only its objectives are patched.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59ca264786f77445a80ed044)
     '59ca264786f77445a80ed044': {
       objectives: {
         // Was: Eliminate Scavs with an SVDS or TKPD on Lighthouse
@@ -253,6 +267,7 @@
     },
 
     // Part 5 name is already German upstream; only its objectives are patched.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59ca29fb86f77445ab465c87)
     '59ca29fb86f77445ab465c87': {
       objectives: {
         // Was: Find the item in raid: Colt M4A1 assault rifle
@@ -275,6 +290,7 @@
     },
 
     // Part 6 name is already German upstream; only its objectives are patched.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59ca2eb686f77445a80ed049)
     '59ca2eb686f77445a80ed049': {
       objectives: {
         // Was: Eliminate PMC operatives with the specified weapons on Lighthouse, Shoreline, Reserve, Ground Zero, or The Lab
@@ -294,6 +310,7 @@
 
     // Secret Message / Geheime Nachricht
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a5ccda873f06065630d61b0)
     '6a5ccda873f06065630d61b0': {
       objectives: {
         // Was: Eliminate any target with headshots using a 12ga shotgun on Streets of Tarkov
@@ -305,6 +322,7 @@
 
     // Setup / Vorbereitung
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c1234c286f77406fa13baeb)
     '5c1234c286f77406fa13baeb': {
       objectives: {
         // Was: Eliminate PMC operatives with common Scav weapons while wearing the specified gear on Customs
@@ -316,6 +334,7 @@
 
     // Sanitary Standards / Hygienevorschriften
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (59689ee586f7740d1570bbd5)
     '59689ee586f7740d1570bbd5': {
       objectives: {
         // Was: Stash a Gas analyzer in the med lab on Daytime Factory
@@ -327,6 +346,7 @@
 
     // Health Care Privacy - Part 4 / Datenschutz im Gesundheitswesen – Teil 4
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5a68667486f7742607157d28)
     '5a68667486f7742607157d28': {
       objectives: {
         // Was: Gain the Fatigue status effect (by exhausting leg stamina) and maintain it for 8 minutes
@@ -338,6 +358,7 @@
 
     // To Great Heights! - Part 3 / Zu neuen Höhen! – Teil 3
     // Objective was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (66058cc5bb83da7ba474aba9)
     '66058cc5bb83da7ba474aba9': {
       objectives: {
         // Was: Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena
@@ -369,6 +390,7 @@
     // string "Finde eine Killa-Figur im Raid" elsewhere in this bundle.
     // "Trader" -> "Händler" has no direct precedent in the data reviewed for
     // this bundle; flagging for reviewer sign-off.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6761ff17cdc36bd66102e9d0)
     '6761ff17cdc36bd66102e9d0': {
       // Was: New Beginning
       name: 'Neuanfang',
@@ -400,6 +422,7 @@
       },
     },
 
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6848100b00afffa81f09e365)
     '6848100b00afffa81f09e365': {
       // Was: New Beginning
       name: 'Neuanfang',
@@ -439,6 +462,7 @@
       },
     },
 
+    // Proof: https://json.tarkov.dev/regular/tasks_de (68481881f43abfdda2058369)
     '68481881f43abfdda2058369': {
       // Was: New Beginning
       name: 'Neuanfang',
@@ -489,6 +513,7 @@
     },
 
     // Was: Make ULTRA Great Again
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae448bf86f7744d733e55ee)
     '5ae448bf86f7744d733e55ee': {
       name: 'Macht ULTRA wieder groß',
       objectives: {
@@ -500,6 +525,7 @@
     },
 
     // Was: Fuel Crisis
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae448f286f77448d73c0131)
     '5ae448f286f77448d73c0131': {
       name: 'Treibstoffkrise',
       objectives: {
@@ -515,6 +541,7 @@
     },
 
     // Dressed to Kill (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4490786f7744ca822adcc)
     '5ae4490786f7744ca822adcc': {
       objectives: {
         // Was: Find the item in raid: Kinda Cowboy hat
@@ -537,16 +564,19 @@
     },
 
     // Was: Inventory Files
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4493486f7744efa289417)
     '5ae4493486f7744efa289417': {
       name: 'Bestandsakten',
     },
 
     // Was: A Big Loss
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4493d86f7744b8e15aa8f)
     '5ae4493d86f7744b8e15aa8f': {
       name: 'Ein großer Verlust',
     },
 
     // Sew it Good - Part 1 (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4495086f77443c122bc40)
     '5ae4495086f77443c122bc40': {
       objectives: {
         // Was: Find the item in raid: Ski hat with holes for eyes
@@ -569,6 +599,7 @@
     },
 
     // Was: Sew it Good - Part 3
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4495c86f7744e87761355)
     '5ae4495c86f7744e87761355': {
       name: 'Gut genäht – Teil 3',
       objectives: {
@@ -592,11 +623,13 @@
     },
 
     // Was: Sew it Good - Part 4
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4496986f774459e77beb6)
     '5ae4496986f774459e77beb6': {
       name: 'Gut genäht – Teil 4',
     },
 
     // Was: Sew it Good - Part 2
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae4497b86f7744cf402ed00)
     '5ae4497b86f7744cf402ed00': {
       name: 'Gut genäht – Teil 2',
       objectives: {
@@ -620,6 +653,7 @@
     },
 
     // Was: Pathfinder
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae449c386f7744bde357697)
     '5ae449c386f7744bde357697': {
       name: 'Ortskundig',
       objectives: {
@@ -639,6 +673,7 @@
     },
 
     // Supervisor (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5ae449d986f774453a54a7e1)
     '5ae449d986f774453a54a7e1': {
       objectives: {
         // Was: Stash the Goshan cash register key at the BIZARRO store fitting rooms on Interchange
@@ -665,6 +700,7 @@
     },
 
     // Was: Living High is Not a Crime
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5b47891f86f7744d1b23c571)
     '5b47891f86f7744d1b23c571': {
       name: 'Luxus ist kein Verbrechen',
       objectives: {
@@ -696,6 +732,7 @@
     },
 
     // Hot Delivery (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5b478b1886f7744d1b23c57d)
     '5b478b1886f7744d1b23c57d': {
       objectives: {
         // Was: Stash a ComTac II headset in the specified place on Interchange
@@ -710,6 +747,7 @@
     },
 
     // Minibus (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5b478d0f86f7744d190d91b5)
     '5b478d0f86f7744d190d91b5': {
       objectives: {
         // Was: Hand over any found in raid items from the Tools category
@@ -720,11 +758,13 @@
     },
 
     // Was: Small Things, Big Help
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c10f94386f774227172c572)
     '5c10f94386f774227172c572': {
       name: 'Kleine Dinge, große Hilfe',
     },
 
     // Scavenger (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c112d7e86f7740d6f647486)
     '5c112d7e86f7740d6f647486': {
       objectives: {
         // Was: Hand over any found in raid items from the Facecovers category
@@ -751,6 +791,7 @@
     },
 
     // Was: Reserve Expert
+    // Proof: https://json.tarkov.dev/regular/tasks_de (608974af4b05530f55550c21)
     '608974af4b05530f55550c21': {
       name: 'Reserve-Experte',
       objectives: {
@@ -782,6 +823,7 @@
     },
 
     // Long Line (Lv 0)
+    // Proof: https://json.tarkov.dev/regular/tasks_de (60e71dc0a94be721b065bbfc)
     '60e71dc0a94be721b065bbfc': {
       objectives: {
         // Was: Eliminate PMC operatives on Interchange
@@ -792,6 +834,7 @@
     },
 
     // Was: Fresh Stock
+    // Proof: https://json.tarkov.dev/regular/tasks_de (69ce21e990144e437802b1e0)
     '69ce21e990144e437802b1e0': {
       name: 'Frische Ware',
       objectives: {
@@ -807,6 +850,7 @@
     },
 
     // Was: New Beginning
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6761f28a022f60bb320f3e95)
     '6761f28a022f60bb320f3e95': {
       name: 'Neuanfang',
       objectives: {
@@ -838,6 +882,7 @@
     },
 
     // Was: Antique Enthusiast
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5c1141f386f77430ff393792)
     '5c1141f386f77430ff393792': {
       name: 'Antiquitätenliebhaber',
       objectives: {
