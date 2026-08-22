@@ -21,6 +21,9 @@ export interface DuplicateKey {
 const IDENT_START = /[\p{ID_Start}$_]/u;
 const IDENT_PART = /[\p{ID_Continue}$‌‍-]/u;
 
+const HEX_4 = /^[0-9a-fA-F]{4}$/;
+const HEX_2 = /^[0-9a-fA-F]{2}$/;
+
 const SINGLE_ESCAPES: Record<string, string> = {
   b: '\b',
   f: '\f',
@@ -53,7 +56,11 @@ function readString(source: string, start: number): { value: string; end: number
     if (escape === 'u' || escape === 'x') {
       const width = escape === 'u' ? 4 : 2;
       const digits = source.slice(i + 2, i + 2 + width);
-      if (new RegExp(`^[0-9a-fA-F]{${width}}$`).test(digits)) {
+      // Literal patterns rather than one built from `width`: nothing here is
+      // attacker-controlled, but a regex assembled at runtime is a sink worth
+      // not having.
+      const pattern = escape === 'u' ? HEX_4 : HEX_2;
+      if (pattern.test(digits)) {
         value += String.fromCharCode(parseInt(digits, 16));
         i += 2 + width;
         continue;
