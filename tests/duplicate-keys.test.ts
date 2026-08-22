@@ -203,4 +203,36 @@ describe('findDuplicateKeys', () => {
       'type (2x)',
     ]);
   });
+
+  it('gives each nested array its own element index', () => {
+    // Two sibling inner lists: without an index of their own both collapse to
+    // the same path and their keys look like duplicates.
+    expect(
+      keys(lines('{', '  matrix: [', '    [{ a: 1 }],', '    [{ a: 2 }],', '  ],', '}'))
+    ).toEqual([]);
+  });
+
+  it('advances the index for objects and nested arrays alike', () => {
+    expect(
+      keys(
+        lines('{', '  mixed: [', '    { a: 1 },', '    [{ a: 2 }],', '    { a: 3 },', '  ],', '}')
+      )
+    ).toEqual([]);
+  });
+
+  it('does not let a key containing the path separator alias another parent', () => {
+    expect(keys(lines('{', "  'a/b': { x: 1 },", "  'a': { 'b': { x: 2 } },", '}'))).toEqual([]);
+  });
+
+  it('sees a repeated key written with a unicode identifier', () => {
+    expect(keys(lines('{', '  entry: {', '    größe: 1,', '    größe: 2,', '  },', '}'))).toEqual([
+      'größe (2x)',
+    ]);
+  });
+
+  it('treats an escaped key as equal to its plain spelling', () => {
+    expect(
+      keys(lines('{', '  entry: {', "    'ab': 1,", "    'a\\u0062': 2,", '  },', '}'))
+    ).toEqual(['ab (2x)']);
+  });
 });

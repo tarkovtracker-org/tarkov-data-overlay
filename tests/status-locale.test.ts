@@ -11,7 +11,12 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { analyse, readCoverage, readWasComments } from '../scripts/status-locale.js';
+import {
+  analyse,
+  readCoverage,
+  readDataCorrections,
+  readWasComments,
+} from '../scripts/status-locale.js';
 
 let dir: string;
 const write = (body: string) => {
@@ -27,6 +32,8 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+const TASK_ID = 't'.repeat(24);
+const OBJ_ID = 'o'.repeat(24);
 const A = 'a'.repeat(24);
 const B = 'b'.repeat(24);
 
@@ -191,5 +198,69 @@ describe('analyse', () => {
       wasComments: [{ id: OBJ, was: EN }],
     });
     expect({ noop, drifted }).toEqual({ noop: [], drifted: [] });
+  });
+});
+
+describe('readDataCorrections', () => {
+  it('reads the English that overrides/tasks.json5 replaces outright', () => {
+    const file = join(dir, 'tasks.json5');
+    writeFileSync(
+      file,
+      [
+        '{',
+        `  '${A}': {`,
+        "    name: 'Corrected Name',",
+        '    objectives: {',
+        `      '${B}': { description: 'Eliminate 15 targets' },`,
+        '    },',
+        '  },',
+        '}',
+      ].join('\n'),
+      'utf-8'
+    );
+    expect([...readDataCorrections(file)]).toEqual([
+      [`${A} name`, 'Corrected Name'],
+      [B, 'Eliminate 15 targets'],
+    ]);
+  });
+
+  it('ignores entries that correct something other than the text', () => {
+    const file = join(dir, 'tasks.json5');
+    writeFileSync(
+      file,
+      [
+        '{',
+        `  '${A}': {`,
+        '    experience: 65000,',
+        '    objectives: {',
+        `      '${B}': { count: 2 },`,
+        '    },',
+        '  },',
+        '}',
+      ].join('\n'),
+      'utf-8'
+    );
+    expect([...readDataCorrections(file)]).toEqual([]);
+  });
+});
+
+describe('drift against corrected English', () => {
+  // The regression this guards: One-Way Ticket. The API says "any target",
+  // overrides/tasks.json5 corrects it to "15 targets", and the German follows
+  // the correction. Measuring drift against the raw bundle reported it as
+  // stale and invited "fixing" the German back to the uncorrected wording.
+  it('does not report drift when the translation follows a corrected English text', () => {
+    const corrected = 'Eliminate 15 targets with headshots while using an AUG on Factory';
+    const raw = 'Eliminate any target with headshots using a Steyr AUG on Factory';
+    const { drifted } = analyse({
+      tasksById: new Map([[TASK_ID, { trader: 'x', objectives: [{ id: OBJ_ID }] }]]),
+      english: { [OBJ_ID]: corrected },
+      englishRaw: { [OBJ_ID]: raw },
+      translated: { [OBJ_ID]: raw },
+      coverage: new Map([[OBJ_ID, 'Eliminiere 15 Ziele']]),
+      wasComments: [{ id: OBJ_ID, was: corrected }],
+      traderOf: () => 'Peacekeeper',
+    });
+    expect(drifted).toEqual([]);
   });
 });

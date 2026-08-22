@@ -131,8 +131,8 @@
     '5a03153686f77442d90e2171': {
       objectives: {
         '5c9a17c686f7747dbe2da3c1': {
-          // Was: Eliminate any target with headshots using a Steyr AUG on Factory
-          description: 'Eliminiere ein beliebiges Ziel mit Kopfschüssen, während du eine Steyr AUG auf Factory benutzt',
+          // Was: Eliminate 15 targets with headshots while using an AUG on Factory
+          description: 'Eliminiere 15 Ziele mit Kopfschüssen, während du eine AUG auf Factory benutzt',
         },
       },
     },
@@ -678,23 +678,23 @@
       objectives: {
         // Was: Stash the Goshan cash register key at the BIZARRO store fitting rooms on Interchange
         '6a60aab8ada1a08abcaa3649': {
-          description: 'Verstaue den „Goshan\"-Kassenschlüssel in den Umkleidekabinen des „BIZARRO\"-Geschäfts auf Interchange',
+          description: 'Verstaue den „Goshan“-Kassenschlüssel in den Umkleidekabinen des „BIZARRO“-Geschäfts auf Interchange',
         },
         // Was: Stash the IDEA cash register key at Register #9 on Interchange
         '6a60aaba4566667d4c8eefad': {
-          description: 'Verstaue den „IDEA\"-Kassenschlüssel an Kasse #9 auf Interchange',
+          description: 'Verstaue den „IDEA“-Kassenschlüssel an Kasse #9 auf Interchange',
         },
         // Was: Obtain the IDEA cash register key
         '6a60ac2aa92d3737a04f252c': {
-          description: 'Besorge den „IDEA\"-Kassenschlüssel',
+          description: 'Besorge den „IDEA“-Kassenschlüssel',
         },
         // Was: Stash the OLI cash register key at Register #7-8 on Interchange
         '6a60aabcecee1ccc0876e5e6': {
-          description: 'Verstaue den „OLI\"-Kassenschlüssel an Kasse #7-8 auf Interchange',
+          description: 'Verstaue den „OLI“-Kassenschlüssel an Kasse #7-8 auf Interchange',
         },
         // Was: Obtain the OLI cash register key
         '6a60af31011aff00946731a7': {
-          description: 'Besorge den „OLI\"-Kassenschlüssel',
+          description: 'Besorge den „OLI“-Kassenschlüssel',
         },
       },
     },

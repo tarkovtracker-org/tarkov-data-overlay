@@ -73,6 +73,31 @@ export function readCoverage(file: string): Map<string, string> {
 const SOURCE_COMMENT = /^\s*\/\/ (?:Was|EN): (.+)$/;
 
 /**
+ * English text that overrides/tasks.json5 corrects outright.
+ *
+ * These are data corrections, not translations: the API's English is wrong and
+ * the overlay replaces it. A translation follows the corrected wording, so the
+ * drift check has to compare against it. Comparing against the raw bundle
+ * reports every corrected objective as drifted - and "fixing" the German to
+ * match the raw English silently reverts a correction.
+ */
+export function readDataCorrections(file: string): Map<string, string> {
+  const parsed = JSON5.parse<
+    Record<string, { name?: string; objectives?: Record<string, { description?: string }> }>
+  >(readFileSync(file, 'utf-8'));
+  const corrections = new Map<string, string>();
+  for (const [taskId, entry] of Object.entries(parsed)) {
+    if (typeof entry?.name === 'string') corrections.set(`${taskId} name`, entry.name);
+    for (const [objectiveId, objective] of Object.entries(entry?.objectives ?? {})) {
+      if (typeof objective?.description === 'string') {
+        corrections.set(objectiveId, objective.description);
+      }
+    }
+  }
+  return corrections;
+}
+
+/**
  * Pair every recorded English source with the entry it documents.
  *
  * Textual because JSON5.parse drops comments. Both placements in the file are
@@ -223,12 +248,22 @@ export async function statusLocale(locale: string): Promise<number> {
     fetchLocaleBundle('regular', locale),
   ]);
 
-  // The English bundle is itself wrong in places - the New Beginning quests
-  // carry the German string. en.json5 records those fixes; apply them, or
-  // every one of them reports as drift forever.
-  const englishFixes = readCoverage(join(srcDir, 'overrides', 'locales', 'en.json5'));
+  // The English a translation was written from is not what the bundle serves.
+  // Two layers sit on top, and skipping either reports drift that is not there:
+  //
+  //   overrides/tasks.json5 corrects wrong English outright - One-Way Ticket
+  //   asks for 15 headshot kills where the API says "any target". A locale
+  //   file records the corrected wording, because that is what a reader sees.
+  //
+  //   locales/en.json5 fixes the English bundle itself, which carries the
+  //   German string for the New Beginning quests.
   const english: Record<string, unknown> = { ...en.tasksLocale };
-  for (const [key, value] of englishFixes) english[key] = value;
+  for (const [key, value] of readDataCorrections(join(srcDir, 'overrides', 'tasks.json5'))) {
+    english[key] = value;
+  }
+  for (const [key, value] of readCoverage(join(srcDir, 'overrides', 'locales', 'en.json5'))) {
+    english[key] = value;
+  }
 
   const {
     rows: rowMap,
