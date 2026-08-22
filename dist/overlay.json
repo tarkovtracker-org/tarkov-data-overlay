@@ -240,7 +240,12 @@
           "value": 4
         }
       ],
-      "experience": 65000
+      "experience": 65000,
+      "objectives": {
+        "65e09b343458a36a766837c7": {
+          "optional": true
+        }
+      }
     },
     "5c0d1c4cd0928202a02a6f5c": {
       "experience": 65000
@@ -9001,7 +9006,7 @@
   },
   "$meta": {
     "version": "1.69",
-    "generated": "2026-08-22T04:55:36.840Z",
-    "sha256": "abba92c160a7013ed397b1bef3f3986c26c833abf0d360338d767d937819731e"
+    "generated": "2026-08-22T05:04:54.327Z",
+    "sha256": "703908519a3eefcadf57e5a3d37cc2761141e3822cce4e89fde370ded604c0af"
   }
 }
