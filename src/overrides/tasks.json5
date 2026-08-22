@@ -95,6 +95,26 @@
       }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
+    objectives: {
+      // The wiki lists eight objectives, one per map, each for 2 PMCs. The API
+      // serves nine: this one duplicates 65e19abadf39d26751b3bb1e, which
+      // already covers Ground Zero and Ground Zero 21+ with a count of 2.
+      //
+      // It is not game data. tarkov-data-manager adds it by hand in
+      // data/changed_quests.json under objectivesAdded - one of only four in
+      // that file - alongside the same stale pre-1.1 experience value
+      // corrected above. Removing it there is the real fix; until then this
+      // keeps it out of the completion count instead of asking for four kills
+      // the quest never wanted.
+      //
+      // Marked optional rather than given count 2: the objective should not
+      // exist at all, and a plausible count would make it indistinguishable
+      // from the eight real ones.
+      // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+      '65e09b343458a36a766837c7': {
+        optional: true, // Was: false
+      },
+    },
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
