@@ -908,5 +908,32 @@
         },
       },
     },
+
+    // Escort
+    //
+    // "daytime Factory" is a map variant, not a time of day. The bundle
+    // renders it three ways: untranslated in Sanitary Standards, as "am
+    // Nachmittag" here, and correctly as "auf Factory zur Tageszeit" in the
+    // Jaeger melee objective. This follows the third.
+    //
+    // The Ground Zero objective below is the duplicate that
+    // suppressions/tasks.json5 documents: the API serves the same objective
+    // twice, once covering Ground Zero and Ground Zero 21+, once covering only
+    // 21+ with a different count. It cannot be removed through an override -
+    // the schema has no per-objective disable - so it stays visible, and
+    // leaving one line English while its twin reads German only looks broken.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (60e71b62a0beca400d69efc4)
+    '60e71b62a0beca400d69efc4': {
+      objectives: {
+        // Was: Eliminate PMC operatives on daytime Factory
+        '60ec07bcd7b7cb55e94c1760': {
+          description: 'Eliminiere PMCs auf Factory zur Tageszeit',
+        },
+        // Was: Eliminate PMC operatives on Ground Zero
+        '65e09b343458a36a766837c7': {
+          description: 'Eliminiere PMCs auf Ground Zero',
+        },
+      },
+    },
   },
 }

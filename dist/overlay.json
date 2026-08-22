@@ -8969,6 +8969,16 @@
               "description": "Übergib im Raid gefundene Rabenfiguren"
             }
           }
+        },
+        "60e71b62a0beca400d69efc4": {
+          "objectives": {
+            "60ec07bcd7b7cb55e94c1760": {
+              "description": "Eliminiere PMCs auf Factory zur Tageszeit"
+            },
+            "65e09b343458a36a766837c7": {
+              "description": "Eliminiere PMCs auf Ground Zero"
+            }
+          }
         }
       }
     },
@@ -8991,7 +9001,7 @@
   },
   "$meta": {
     "version": "1.69",
-    "generated": "2026-08-21T17:58:55.868Z",
-    "sha256": "2c54bc9251507bd3cc3193b5d3600e71efe37d8754fae3a82f8a70020b5e3854"
+    "generated": "2026-08-22T04:55:36.840Z",
+    "sha256": "abba92c160a7013ed397b1bef3f3986c26c833abf0d360338d767d937819731e"
   }
 }
