@@ -257,4 +257,4 @@ See `docs/MASTER_SAMPLES.md` for the comprehensive, copy-paste JSON5 master refe
 
 ## Questions?
 
-Open an issue or reach out on Discord.
+Open an issue or reach out on [Discord](https://discord.gg/PpdDwd2M6V).
