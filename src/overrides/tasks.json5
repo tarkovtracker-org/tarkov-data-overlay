@@ -993,6 +993,15 @@
   // Entries below are ACTIVE corrections; `npm run check-overrides` verifies
   // them against the live API.
 
+  // A Helping Hand - minimum player level to start
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
+  //
+  // The wiki's Requirements section states "Must be level 20 to start this
+  // quest." tarkov.dev serves minPlayerLevel 0 (no requirement) in every mode.
+  '6752f6d83038f7df520c83e8': {
+    minPlayerLevel: 20, // Was: 0
+  },
+
   // Debut - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
   //
