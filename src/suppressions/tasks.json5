@@ -7,4 +7,28 @@
       '65e09b343458a36a766837c7': true,
     },
   },
+
+  // The Tarkov Shooter - Part 5 (duplicate) — upstream duplicate of
+  // 5bc4836986f7740c0152911c whose name is literally its own task ID and which
+  // has no wiki page. Every compared field diverges because of the broken
+  // upstream data, so the whole task is suppressed from the wiki comparison.
+  // Proof: https://json.tarkov.dev/regular/tasks (5bc4826c86f774106d22d88b)
+  '5bc4826c86f774106d22d88b': {
+    name: true,
+    experience: true,
+    minPlayerLevel: true,
+    map: true,
+    taskRequirements: true,
+    traderRequirements: true,
+    wikiLink: true,
+    factionName: true,
+    kappaRequired: true,
+    lightkeeperRequired: true,
+    requiredPrestige: true,
+    startRewards: true,
+    finishRewards: true,
+    objectives: {
+      '5bc84f7a86f774294c2f6862': true,
+    },
+  },
 }
