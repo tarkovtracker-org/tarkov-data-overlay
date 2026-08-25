@@ -1015,6 +1015,9 @@
     "6752f6d83038f7df520c83e8": {
       "minPlayerLevel": 20
     },
+    "5ae4495086f77443c122bc40": {
+      "minPlayerLevel": 25
+    },
     "5936d90786f7742b1420ba5b": {
       "traderRequirements": [
         {
@@ -9065,8 +9068,8 @@
     }
   },
   "$meta": {
-    "version": "1.74",
-    "generated": "2026-08-25T11:20:36.662Z",
-    "sha256": "c01c9181f81ea60ac77b8749ab5cef0621b229624dcb3a17084a01fca30ca4ef"
+    "version": "1.75",
+    "generated": "2026-08-25T12:43:18.136Z",
+    "sha256": "f35d0f287240935bbf1ffa9f5bb4e876272943c0e1bffcb2be2034e26d929ae5"
   }
 }
