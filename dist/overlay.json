@@ -1962,7 +1962,13 @@
           },
           "value": 3
         }
-      ]
+      ],
+      "objectives": {
+        "5d2701b586f77469f1599fe2": {
+          "description": "Eliminate 50 Scavs all over the Tarkov territory",
+          "maps": []
+        }
+      }
     },
     "5d25e2ee86f77443e35162ea": {
       "traderRequirements": [
@@ -9005,8 +9011,8 @@
     }
   },
   "$meta": {
-    "version": "1.71",
-    "generated": "2026-08-24T18:29:57.966Z",
-    "sha256": "7d3be5fa45b1d14e9cd6a9065bc18b0f41f907299c32fbd5cdec29f659e935a1"
+    "version": "1.72",
+    "generated": "2026-08-25T09:46:06.773Z",
+    "sha256": "76bb000a291846011cf9fb774746d3d3bab5492bf6836b0b7d25aea640e87e75"
   }
 }
