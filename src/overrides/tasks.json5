@@ -1972,6 +1972,12 @@
         value: 3,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
+    objectives: {
+      // 2026-08-25: objective text reworded (any map, not the listed four)
+      '5d2701b586f77469f1599fe2': {
+        description: 'Eliminate 50 Scavs all over the Tarkov territory', // Was: Eliminate Scavs on Streets of Tarkov, Reserve, Lighthouse, or Shoreline
+      },
+    },
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Woods_Keeper
   //
