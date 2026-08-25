@@ -1002,6 +1002,13 @@
     minPlayerLevel: 20, // Was: 0
   },
 
+  // Sew it Good - Part 1 - minimum player level to start
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Sew_it_Good_-_Part_1
+  //
+  '5ae4495086f77443c122bc40': {
+    minPlayerLevel: 25, // Was: 0 (all modes, no level requirement served)
+  },
+
   // Debut - Change requirements
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debut
   //
