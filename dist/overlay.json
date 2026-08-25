@@ -2991,6 +2991,57 @@
           "value": 4
         }
       ]
+    },
+    "5bc4836986f7740c0152911c": {
+      "experience": 13100,
+      "finishRewards": {
+        "traderStanding": [
+          {
+            "trader": {
+              "id": "5c0647fdd443bc2504c2d371",
+              "name": "Jaeger"
+            },
+            "standing": 0.02
+          }
+        ],
+        "items": [
+          {
+            "count": 85000,
+            "item": {
+              "id": "5449016a4bdc2d6f028b456f",
+              "name": "Roubles",
+              "shortName": "RUB"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "5bbdb870d4351e00367fb67d",
+              "name": "Mosin Rifle ATI Monte Carlo stock"
+            }
+          },
+          {
+            "count": 1,
+            "item": {
+              "id": "5ab8f20c86f7745cdb629fb2",
+              "name": "Ski hat with holes for eyes"
+            }
+          }
+        ],
+        "offerUnlock": [
+          {
+            "level": 3,
+            "item": {
+              "id": "5bbdb870d4351e00367fb67d",
+              "name": "Mosin Rifle ATI Monte Carlo stock"
+            },
+            "trader": {
+              "id": "5c0647fdd443bc2504c2d371",
+              "name": "Jaeger"
+            }
+          }
+        ]
+      }
     }
   },
   "craftsAdd": {
@@ -9011,8 +9062,8 @@
     }
   },
   "$meta": {
-    "version": "1.72",
-    "generated": "2026-08-25T09:46:06.773Z",
-    "sha256": "76bb000a291846011cf9fb774746d3d3bab5492bf6836b0b7d25aea640e87e75"
+    "version": "1.73",
+    "generated": "2026-08-25T11:03:20.002Z",
+    "sha256": "16dabd4c6fa9fcafa668035dfc52f1844ba66dd290f0f4d8ef4aed428badf4af"
   }
 }
