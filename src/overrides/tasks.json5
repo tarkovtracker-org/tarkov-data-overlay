@@ -3031,8 +3031,8 @@
         compareMethod: '>=',
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 4,
-        }, // Was: [] (player level requirement, minPlayerLevel 29)
-      ],
+      }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
   },
 
   // The Tarkov Shooter - Part 5 - Rewards corrected
@@ -3048,8 +3048,14 @@
         { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
       ],
       items: [
-        { count: 85000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 275000
-        { count: 1, item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' } }, // Was: Mosin Archangel chassis x1
+        {
+          count: 85000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 275000
+        {
+          count: 1,
+          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
+        }, // Was: Mosin Archangel chassis x1
         { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
       ],
       offerUnlock: [

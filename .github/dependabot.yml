@@ -1,0 +1,24 @@
+# Dependabot configuration.
+#
+# Keeps the npm devDependencies and the SHA-pinned GitHub Actions up to date.
+# Security updates are always opened as individual PRs by GitHub, regardless of
+# the grouping below; the group only bundles routine (non-security) npm version
+# bumps into a single weekly PR to keep noise down.
+
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
