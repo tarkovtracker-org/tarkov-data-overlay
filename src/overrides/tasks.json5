@@ -3088,7 +3088,8 @@
   // even though they are faction-locked in-game. Faction-locked quests that
   // already had an entry in this file (Oil Run, Shaking Up the Teller,
   // Vitamins, Supplements, Debtor, House Arrest) carry their factionName there
-  // instead - duplicate keys are rejected by validation. Quests whose
+  // instead - duplicate keys are rejected by the duplicate-key test
+  // (tests/duplicate-keys.test.ts). Quests whose
   // factionName upstream already serves correctly (Textile - Part 1/2,
   // Drip-Out - Part 1/2, Our Own Land / Counteraction, Green Corridor /
   // Road Closed) need no override. Each lock is proven by the wiki
