@@ -403,6 +403,7 @@
       "experience": 3000
     },
     "639dbaf17c898a131e1cffff": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2",
@@ -1098,6 +1099,7 @@
       ]
     },
     "5967725e86f774601a446662": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5967725e86f774601a446662.54cb50c76803fa8b248b4571.level.>=.1",
@@ -1308,6 +1310,7 @@
       ]
     },
     "59c124d686f774189b3c843f": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1",
@@ -1770,6 +1773,7 @@
       ]
     },
     "5b478eca86f7744642012254": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2",
@@ -1784,6 +1788,7 @@
       ]
     },
     "5b478ff486f7744d184ecbbf": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2",
@@ -2518,6 +2523,7 @@
       ]
     },
     "639135c3744e452011470807": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2",
@@ -3043,6 +3049,30 @@
           }
         ]
       }
+    },
+    "639136df4b15ca31f76bc31f": {
+      "factionName": "BEAR"
+    },
+    "6a45208043b8d7604d00b8d5": {
+      "factionName": "USEC"
+    },
+    "67af4c1cc0e59d55e2010b97": {
+      "factionName": "BEAR"
+    },
+    "67af4c1a6c3ebfd8e6034916": {
+      "factionName": "BEAR"
+    },
+    "67af4c169d95ad16e004fd86": {
+      "factionName": "BEAR"
+    },
+    "67af4c1991ee75c6d7060a16": {
+      "factionName": "USEC"
+    },
+    "67af4c1405c58dc6f7056667": {
+      "factionName": "USEC"
+    },
+    "67af4c17f4f1fb58a907f8f6": {
+      "factionName": "USEC"
     }
   },
   "craftsAdd": {
@@ -9060,8 +9090,8 @@
     }
   },
   "$meta": {
-    "version": "1.76",
-    "generated": "2026-08-29T11:00:48.365Z",
-    "sha256": "87af6c933ae5406549efd55f2802d2c1c92ff1dc90dc4d506e86c7cc9eae80c5"
+    "version": "1.77",
+    "generated": "2026-08-29T11:03:48.729Z",
+    "sha256": "ba982967901acad7d120463a8fa2a5403bc7bea2debf4ad57df1659b3af39614"
   }
 }
