@@ -240,12 +240,7 @@
           "value": 4
         }
       ],
-      "experience": 65000,
-      "objectives": {
-        "65e09b343458a36a766837c7": {
-          "optional": true
-        }
-      }
+      "experience": 65000
     },
     "5c0d1c4cd0928202a02a6f5c": {
       "experience": 65000
@@ -9042,9 +9037,6 @@
           "objectives": {
             "60ec07bcd7b7cb55e94c1760": {
               "description": "Eliminiere PMCs auf Factory zur Tageszeit"
-            },
-            "65e09b343458a36a766837c7": {
-              "description": "Eliminiere PMCs auf Ground Zero"
             }
           }
         }
@@ -9068,8 +9060,8 @@
     }
   },
   "$meta": {
-    "version": "1.75",
-    "generated": "2026-08-25T12:43:18.136Z",
-    "sha256": "f35d0f287240935bbf1ffa9f5bb4e876272943c0e1bffcb2be2034e26d929ae5"
+    "version": "1.76",
+    "generated": "2026-08-29T11:00:48.365Z",
+    "sha256": "87af6c933ae5406549efd55f2802d2c1c92ff1dc90dc4d506e86c7cc9eae80c5"
   }
 }
