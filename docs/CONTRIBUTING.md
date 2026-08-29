@@ -10,6 +10,19 @@ Fix incorrect data in tarkov.dev (e.g., wrong task levels, incorrect maps).
 Corrections live in `src/overrides/` and should only include the fields you are
 changing.
 
+### Faction-locked Tasks
+
+Upstream models faction exclusivity with the task-level `factionName` field
+(`"Any"`, `"BEAR"`, or `"USEC"`). Faction variants of the same quest are
+separate task IDs (e.g. Textile - Part 1 BEAR/USEC, The Huntsman Path -
+Administrator Reserve/Lighthouse), so the correct fix for a wrong or missing
+faction is a `factionName` override on the existing task ID in
+`src/overrides/tasks.json5` — not a `modes/<mode>/` file, because a faction
+lock applies identically in every game mode, and not a parallel
+faction-split structure, so consumers can keep reading the upstream field.
+Proof is the wiki Requirements line ("This quest is only obtainable by
+BEAR/USEC PMCs") or the wiki's faction-exclusive objective lists.
+
 ### Data Additions
 
 Add new data that is missing from tarkov.dev (e.g., game editions, event tasks).
