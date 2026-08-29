@@ -84,6 +84,12 @@
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
   // Verified: the 1.1-pve data; wiki agrees.
+  //
+  // The optional:true patch for duplicate Ground Zero objective
+  // 65e09b343458a36a766837c7 was REMOVED: upstream deleted the hand-added
+  // tarkov-data-manager objective, so the API now serves the wiki's eight
+  // objectives and the patch (plus its suppression and de locale override)
+  // has nothing left to pin.
   '60e71b62a0beca400d69efc4': {
     traderRequirements: [
       {
@@ -95,10 +101,6 @@
       }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
-    // Note: the API used to serve a ninth objective (65e09b343458a36a766837c7)
-    // duplicating 65e19abadf39d26751b3bb1e's Ground Zero coverage, which this
-    // override marked optional. tarkov-data-manager has since removed it from
-    // changed_quests.json, so the override (and its suppression) is gone.
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
