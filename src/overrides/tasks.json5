@@ -95,26 +95,10 @@
       }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
-    objectives: {
-      // The wiki lists eight objectives, one per map, each for 2 PMCs. The API
-      // serves nine: this one duplicates 65e19abadf39d26751b3bb1e, which
-      // already covers Ground Zero and Ground Zero 21+ with a count of 2.
-      //
-      // It is not game data. tarkov-data-manager adds it by hand in
-      // data/changed_quests.json under objectivesAdded - one of only four in
-      // that file - alongside the same stale pre-1.1 experience value
-      // corrected above. Removing it there is the real fix; until then this
-      // keeps it out of the completion count instead of asking for four kills
-      // the quest never wanted.
-      //
-      // Marked optional rather than given count 2: the objective should not
-      // exist at all, and a plausible count would make it indistinguishable
-      // from the eight real ones.
-      // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
-      '65e09b343458a36a766837c7': {
-        optional: true, // Was: false
-      },
-    },
+    // Note: the API used to serve a ninth objective (65e09b343458a36a766837c7)
+    // duplicating 65e19abadf39d26751b3bb1e's Ground Zero coverage, which this
+    // override marked optional. tarkov-data-manager has since removed it from
+    // changed_quests.json, so the override (and its suppression) is gone.
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
@@ -3031,8 +3015,8 @@
         compareMethod: '>=',
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 4,
-        }, // Was: [] (player level requirement, minPlayerLevel 29)
-      ],
+      }, // Was: [] (player level requirement, minPlayerLevel 29)
+    ],
   },
 
   // The Tarkov Shooter - Part 5 - Rewards corrected
@@ -3048,8 +3032,14 @@
         { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
       ],
       items: [
-        { count: 85000, item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' } }, // Was: 275000
-        { count: 1, item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' } }, // Was: Mosin Archangel chassis x1
+        {
+          count: 85000,
+          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
+        }, // Was: 275000
+        {
+          count: 1,
+          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
+        }, // Was: Mosin Archangel chassis x1
         { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
       ],
       offerUnlock: [
