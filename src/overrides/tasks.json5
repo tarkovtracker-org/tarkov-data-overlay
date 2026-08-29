@@ -84,6 +84,12 @@
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
   // Verified: the 1.1-pve data; wiki agrees.
+  //
+  // The optional:true patch for duplicate Ground Zero objective
+  // 65e09b343458a36a766837c7 was REMOVED: upstream deleted the hand-added
+  // tarkov-data-manager objective, so the API now serves the wiki's eight
+  // objectives and the patch (plus its suppression and de locale override)
+  // has nothing left to pin.
   '60e71b62a0beca400d69efc4': {
     traderRequirements: [
       {
@@ -95,10 +101,6 @@
       }, // Was: [] (player level requirement, minPlayerLevel 46)
     ],
     experience: 65000, // Was: 155000 (all modes, stale pre-1.1 value)
-    // Note: the API used to serve a ninth objective (65e09b343458a36a766837c7)
-    // duplicating 65e19abadf39d26751b3bb1e's Ground Zero coverage, which this
-    // override marked optional. tarkov-data-manager has since removed it from
-    // changed_quests.json, so the override (and its suppression) is gone.
   },
 
   // Decontamination Service - quest XP reworked in 1.1.0.0
@@ -330,7 +332,10 @@
   // Debtor - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Debtor
   // Verified: the 1.1-pve data; wiki agrees.
+  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
+  // BEAR PMCs." (issues #288, #291)
   '639dbaf17c898a131e1cffff': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639dbaf17c898a131e1cffff.58330581ace78e27b8b10cee.level.>=.2',
@@ -1081,7 +1086,10 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Shaking_Up_the_Teller
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level (was LL2)
+  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
+  // USEC PMCs." (issues #288, #291)
   '5967725e86f774601a446662': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       // Was: [{ id: "59a9280b86f77477925e27cb", requirementType: "level", compareMethod: ">=", value: 2, trader: Prapor }]
       {
@@ -1295,7 +1303,10 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Run
   //
   // 2026-08-10 - S1: now requires Prapor LL1 instead of player level
+  // BEAR-only quest (issue #291): wiki Requirements - "This quest is only
+  // obtainable by BEAR PMCs."
   '59c124d686f774189b3c843f': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.59c124d686f774189b3c843f.54cb50c76803fa8b248b4571.level.>=.1',
@@ -1776,7 +1787,10 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // BEAR-only quest: wiki Requirements - "This quest is only obtainable by
+  // BEAR PMCs." (issues #288, #291)
   '5b478eca86f7744642012254': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2',
@@ -1791,7 +1805,10 @@
   //
   // 2026-08-10: renamed in S1
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
+  // USEC PMCs." (issues #288, #291)
   '5b478ff486f7744d184ecbbf': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5b478ff486f7744d184ecbbf.58330581ace78e27b8b10cee.level.>=.2',
@@ -2537,7 +2554,10 @@
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
+  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
+  // USEC PMCs." (issues #288, #291)
   '639135c3744e452011470807': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.639135c3744e452011470807.58330581ace78e27b8b10cee.level.>=.2',
@@ -3050,5 +3070,91 @@
         }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
       ],
     },
+  },
+
+  // ---------------------------------------------------------------------------
+  // FACTION-LOCKED QUESTS (issues #288, #291)
+  //
+  // Upstream models faction exclusivity with the task-level factionName field
+  // ("Any" | "BEAR" | "USEC"): faction variants of one quest are separate task
+  // IDs (Textile - Part 1/2, Drip-Out - Part 1/2, Our Own Land / Counteraction,
+  // Green Corridor / Road Closed, The Huntsman Path - Administrator), while
+  // single-faction quests carry a single ID. The overlay stays on that same
+  // field - a factionName override in this file - rather than a parallel
+  // faction split: the lock is identical in every game mode (regular, PvE,
+  // pvp-season), so nothing here belongs under modes/.
+  //
+  // The entries below correct quests tarkov.dev serves as factionName "Any"
+  // even though they are faction-locked in-game. Faction-locked quests that
+  // already had an entry in this file (Oil Run, Shaking Up the Teller,
+  // Vitamins, Supplements, Debtor, House Arrest) carry their factionName there
+  // instead - duplicate keys are rejected by the duplicate-key test
+  // (tests/duplicate-keys.test.ts). Quests whose
+  // factionName upstream already serves correctly (Textile - Part 1/2,
+  // Drip-Out - Part 1/2, Our Own Land / Counteraction, Green Corridor /
+  // Road Closed) need no override. Each lock is proven by the wiki
+  // Requirements section ("This quest is only obtainable by BEAR/USEC PMCs")
+  // or, for The Huntsman Path - Administrator, the wiki's BEAR/USEC Exclusive
+  // objective lists.
+  // ---------------------------------------------------------------------------
+
+  // The Huntsman Path - Administrator (BEAR variant) - faction-locked pair
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  // Issue #288: this quest is two faction variants sharing one name. The wiki
+  // lists the Reserve objectives (this ID) as BEAR Exclusive and the
+  // Lighthouse objectives (6a45208043b8d7604d00b8d5, below) as USEC Exclusive.
+  '639136df4b15ca31f76bc31f': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // The Huntsman Path - Administrator (USEC variant) - faction-locked pair
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Administrator
+  // Issue #288: Lighthouse objectives ("Launch a yellow signal flare at the
+  // train station on Lighthouse", "Eliminate any 6 targets at the train
+  // station territory on Lighthouse") are USEC Exclusive.
+  '6a45208043b8d7604d00b8d5': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // A Life Lesson - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Life_Lesson
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c1cc0e59d55e2010b97': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Profit Retention - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Profit_Retention
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c1a6c3ebfd8e6034916': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Safety Guarantee - BEAR-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Safety_Guarantee
+  // Wiki Requirements: "This quest is only obtainable by BEAR PMCs."
+  '67af4c169d95ad16e004fd86': {
+    factionName: 'BEAR', // Was: Any
+  },
+
+  // Get a Foothold - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Get_a_Foothold
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c1991ee75c6d7060a16': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // Profitable Venture - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Profitable_Venture
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c1405c58dc6f7056667': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // Never Too Late To Learn - USEC-only quest
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Never_Too_Late_To_Learn
+  // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
+  '67af4c17f4f1fb58a907f8f6': {
+    factionName: 'USEC', // Was: Any
   },
 }
