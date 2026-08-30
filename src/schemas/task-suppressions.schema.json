@@ -25,6 +25,18 @@
       "map": {
         "type": "boolean"
       },
+      "otherRequirements": {
+        "type": "boolean"
+      },
+      "neededKeys": {
+        "type": "boolean"
+      },
+      "availableDelaySecondsMin": {
+        "type": "boolean"
+      },
+      "availableDelaySecondsMax": {
+        "type": "boolean"
+      },
       "minPlayerLevel": {
         "type": "boolean"
       },

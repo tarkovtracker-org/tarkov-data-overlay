@@ -19,7 +19,12 @@ export interface TaskOverride {
   objectives?: Record<string, ObjectiveOverride>;
   objectivesAdd?: ObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  otherRequirements?: TaskOtherRequirement[];
+  neededKeys?: TaskKeyRequirement[];
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -40,7 +45,12 @@ export interface TaskRewards {
     level: number;
     skill?: { id: string; name: string; imageLink?: string };
   }>;
-  traderUnlock?: { id: string; name: string };
+  /** Traders unlocked by the task. json.tarkov.dev serves this as an array. */
+  traderUnlock?: Array<{ id: string; name: string }>;
+  /** Trader dialogue made available by the task. */
+  traderDialogueUnlock?: Array<{ id: string; name: string }>;
+  /** Maps/locations unlocked by the task. */
+  locationUnlock?: Array<{ id: string; name: string }>;
   achievement?: TaskAchievementReward[];
   customization?: TaskCustomizationReward[];
 }
@@ -148,7 +158,53 @@ export interface ObjectiveAdd extends Omit<
 export interface TaskRequirement {
   task: { id: string; name: string };
   status?: string[];
+  /** Optional upstream explanation/provenance for the requirement. */
+  notes?: string;
 }
+
+/**
+ * An OR group of task requirements. Entries in the normal `taskRequirements`
+ * array are ANDed; a group is used when one of several task IDs satisfies the
+ * same slot in an unlock path. The status array on each entry is itself an OR
+ * over the accepted statuses for that task.
+ */
+export type TaskRequirementGroup = TaskRequirement[];
+
+/** A map/key pair needed to enter a raid for a task objective. */
+export interface TaskKeyRequirement {
+  map: { id: string; name: string };
+  keys: TaskItemRef[];
+}
+
+/** A task's dialogue flag requirement as served by json.tarkov.dev. */
+export interface TaskDialogueRequirement {
+  id: string;
+  type: 'dialogue';
+  traders: Array<{ id: string; name: string }>;
+}
+
+/** A task's persistent numeric global-variable requirement. */
+export interface TaskGlobalVariableRequirement {
+  id: string;
+  type: 'globalVariable';
+  variableId: string;
+  compareMethod: TraderRequirementCompareMethod;
+  value: number;
+}
+
+/**
+ * Future/unknown upstream requirement types are retained instead of being
+ * silently discarded. The unlock evaluator treats them as unknown until a
+ * consumer supplies a state adapter for that type.
+ */
+export interface TaskUnknownOtherRequirement {
+  id: string;
+  type: string;
+  [key: string]: unknown;
+}
+
+export type TaskOtherRequirement =
+  TaskDialogueRequirement | TaskGlobalVariableRequirement | TaskUnknownOtherRequirement;
 
 /**
  * Comparison methods json.tarkov.dev serves for trader requirements. Loyalty
@@ -214,7 +270,12 @@ export interface TaskAddition {
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   objectives: TaskObjectiveAdd[];
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  otherRequirements?: TaskOtherRequirement[];
+  neededKeys?: TaskKeyRequirement[];
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   experience?: number;
   startRewards?: TaskRewards;
   finishRewards?: TaskRewards;
@@ -238,6 +299,8 @@ export interface TaskObjectiveAdd extends Omit<
 export interface TaskData {
   id: string;
   name: string;
+  /** Trader that offers the task. */
+  trader?: { id: string; name: string };
   minPlayerLevel?: number;
   wikiLink?: string;
   map?: { id: string; name: string } | null;
@@ -246,7 +309,15 @@ export interface TaskData {
   factionName?: string;
   requiredPrestige?: { id?: string; name: string; prestigeLevel: number };
   taskRequirements?: TaskRequirement[];
+  taskRequirementGroups?: TaskRequirementGroup[];
   traderRequirements?: TraderRequirement[];
+  /** Hidden start conditions (dialogue flags and global variables). */
+  otherRequirements?: TaskOtherRequirement[];
+  /** Keys needed for the task's raid/objective, not a task-unlock condition. */
+  neededKeys?: TaskKeyRequirement[];
+  /** Timing metadata for delayed availability after the start gate is met. */
+  availableDelaySecondsMin?: number;
+  availableDelaySecondsMax?: number;
   objectives?: TaskObjective[];
   experience?: number;
   startRewards?: TaskRewards;
@@ -369,6 +440,37 @@ export interface StoryChapter {
   notes?: string | null;
   objectives?: StoryObjective[];
   rewards?: StoryRewards | null;
+}
+
+/** Entry rules exposed by json.tarkov.dev for one map. */
+export interface MapAccessData {
+  id: string;
+  name: string;
+  minPlayerLevel?: number;
+  maxPlayerLevel?: number;
+  accessKeys?: string[];
+  accessKeysMinPlayerLevel?: number;
+}
+
+/** Loyalty-level thresholds exposed by json.tarkov.dev for one trader. */
+export interface TraderAccessLevel {
+  level: number;
+  requiredPlayerLevel?: number;
+  requiredReputation?: number;
+  requiredCommerce?: number;
+}
+
+/** Static trader data; account-specific unlock state is intentionally absent. */
+export interface TraderAccessData {
+  id: string;
+  name: string;
+  levels: TraderAccessLevel[];
+}
+
+/** Mode-scoped map/trader entry metadata used by the availability report. */
+export interface ModeAccessData {
+  maps: Record<string, MapAccessData>;
+  traders: Record<string, TraderAccessData>;
 }
 
 /**

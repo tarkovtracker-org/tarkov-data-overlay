@@ -299,6 +299,10 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('requiredPrestige'),
   createFieldValidator('kappaRequired'),
   createFieldValidator('lightkeeperRequired'),
+  createFieldValidator('otherRequirements'),
+  createFieldValidator('neededKeys'),
+  createFieldValidator('availableDelaySecondsMin'),
+  createFieldValidator('availableDelaySecondsMax'),
   validateTaskRequirements,
   validateTraderRequirements,
 ];

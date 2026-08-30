@@ -18,6 +18,8 @@ https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/over
 ```
 
 Then merge it with tarkov.dev responses. See [Integration Guide](docs/INTEGRATION.md) for details.
+For accurate task visibility and unlock-state tracking, see
+[Task availability and unlock tracking](docs/TASK_AVAILABILITY.md).
 
 ## Monitor
 

@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchTasks,
+  fetchModeAccessData,
   fetchLocaleBundle,
   fetchRawEntities,
   findTaskById,
@@ -279,6 +280,144 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     });
   });
 
+  it('adapts task unlock metadata, key requirements, and trader unlock rewards', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                trader: 'tr1',
+                availableDelaySecondsMin: 10,
+                availableDelaySecondsMax: 20,
+                otherRequirements: [
+                  { id: 'dialogue-1', type: 'dialogue', traders: ['tr1'] },
+                  {
+                    id: 'condition-1',
+                    type: 'globalVariable',
+                    variableId: 'variable-1',
+                    compareMethod: '>=',
+                    value: 3,
+                  },
+                ],
+                neededKeys: [{ map: 'map1', keys: ['key1'] }],
+                finishRewards: {
+                  traderUnlock: ['tr2'],
+                  traderDialogueUnlock: ['tr1'],
+                  locationUnlock: ['map1'],
+                },
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+        'regular/maps': { data: { maps: { map1: { id: 'map1', name: 'map1 name' } } } },
+        'regular/maps_en': { data: { 'map1 name': 'Customs' } },
+        'regular/items': {
+          data: { items: { key1: { id: 'key1', name: 'key1 name' } } },
+        },
+        'regular/items_en': { data: { 'key1 name': 'Customs Office Key' } },
+        'regular/traders': {
+          data: {
+            tr1: { id: 'tr1', name: 'tr1 name' },
+            tr2: { id: 'tr2', name: 'tr2 name' },
+          },
+        },
+        'regular/traders_en': { data: { 'tr1 name': 'Prapor', 'tr2 name': 'Ref' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(task.trader).toEqual({ id: 'tr1', name: 'Prapor' });
+    expect(task.otherRequirements).toEqual([
+      { id: 'dialogue-1', type: 'dialogue', traders: [{ id: 'tr1', name: 'Prapor' }] },
+      {
+        id: 'condition-1',
+        type: 'globalVariable',
+        variableId: 'variable-1',
+        compareMethod: '>=',
+        value: 3,
+      },
+    ]);
+    expect(task.neededKeys).toEqual([
+      { map: { id: 'map1', name: 'Customs' }, keys: [{ id: 'key1', name: 'Customs Office Key' }] },
+    ]);
+    expect(task.availableDelaySecondsMin).toBe(10);
+    expect(task.availableDelaySecondsMax).toBe(20);
+    expect(task.finishRewards?.traderUnlock).toEqual([{ id: 'tr2', name: 'Ref' }]);
+    expect(task.finishRewards?.traderDialogueUnlock).toEqual([{ id: 'tr1', name: 'Prapor' }]);
+    expect(task.finishRewards?.locationUnlock).toEqual([{ id: 'map1', name: 'Customs' }]);
+  });
+
+  it('fetchModeAccessData keeps map entry rules and trader level thresholds', async () => {
+    mockEndpoints(
+      baseRoutes('pve', {
+        'pve/maps': {
+          data: {
+            maps: {
+              map1: {
+                id: 'map1',
+                name: 'map1 name',
+                minPlayerLevel: 5,
+                maxPlayerLevel: 20,
+                accessKeys: ['key1'],
+                accessKeysMinPlayerLevel: 10,
+              },
+            },
+          },
+        },
+        'pve/maps_en': { data: { 'map1 name': 'Ground Zero' } },
+        'pve/traders': {
+          data: {
+            tr1: {
+              id: 'tr1',
+              name: 'tr1 name',
+              levels: [
+                {
+                  level: 2,
+                  requiredPlayerLevel: 6,
+                  requiredReputation: 0.7,
+                  requiredCommerce: 0,
+                },
+              ],
+            },
+          },
+        },
+        'pve/traders_en': { data: { 'tr1 name': 'Prapor' } },
+      })
+    );
+
+    await expect(fetchModeAccessData('pve')).resolves.toEqual({
+      maps: {
+        map1: {
+          id: 'map1',
+          name: 'Ground Zero',
+          minPlayerLevel: 5,
+          maxPlayerLevel: 20,
+          accessKeys: ['key1'],
+          accessKeysMinPlayerLevel: 10,
+        },
+      },
+      traders: {
+        tr1: {
+          id: 'tr1',
+          name: 'Prapor',
+          levels: [
+            {
+              level: 2,
+              requiredPlayerLevel: 6,
+              requiredReputation: 0.7,
+              requiredCommerce: 0,
+            },
+          ],
+        },
+      },
+    });
+  });
+
   it('generates stable, distinct ids for id-less trader requirements', async () => {
     mockEndpoints(
       baseRoutes('regular', {
@@ -410,6 +549,15 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const tasks = await fetchTasks();
 
     expect(tasks[0].name).toBe('t1 name');
+  });
+
+  it('continues when a mode is missing one translation endpoint', async () => {
+    const routes = baseRoutes('pvp-season');
+    delete routes['pvp-season/items_en'];
+
+    mockEndpoints(routes);
+
+    await expect(fetchTasks('pvp-season')).resolves.toEqual([]);
   });
 
   it('requests pve endpoints when pve mode is requested', async () => {

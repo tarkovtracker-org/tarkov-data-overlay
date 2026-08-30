@@ -34,6 +34,7 @@ export function adaptReward<T, TContext>(
     compact: (value: JsonRecord) => JsonRecord;
     resolveItemRef: (value: unknown, context: TContext) => unknown;
     resolveTraderRef: (value: unknown, context: TContext) => unknown;
+    resolveMapRef?: (value: unknown, context: TContext) => unknown;
   }
 ): T | undefined;
 

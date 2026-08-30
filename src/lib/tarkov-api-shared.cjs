@@ -28,7 +28,18 @@ function resolveReferenceMatrix(value, resolveReference) {
 }
 
 function adaptReward(raw, context, helpers) {
-  const { isRecord, compact, resolveItemRef, resolveTraderRef } = helpers;
+  const { isRecord, compact, resolveItemRef, resolveTraderRef, resolveMapRef } = helpers;
+  const adaptTraderUnlocks = (value) => {
+    if (value === undefined || value === null) return undefined;
+    const entries = Array.isArray(value) ? value : [value];
+    return entries.map((entry) => resolveTraderRef(entry, context)).filter(Boolean);
+  };
+  const adaptLocationUnlocks = (value) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof resolveMapRef !== 'function') return value;
+    const entries = Array.isArray(value) ? value : [value];
+    return entries.map((entry) => resolveMapRef(entry, context)).filter(Boolean);
+  };
   if (!isRecord(raw)) return undefined;
   return compact({
     ...raw,
@@ -51,6 +62,9 @@ function adaptReward(raw, context, helpers) {
           })
         )
       : undefined,
+    traderUnlock: adaptTraderUnlocks(raw.traderUnlock),
+    traderDialogueUnlock: adaptTraderUnlocks(raw.traderDialogueUnlock),
+    locationUnlock: adaptLocationUnlocks(raw.locationUnlock),
   });
 }
 

@@ -91,7 +91,7 @@ Notes:
           }, // Optional | Console-only (id + name required if provided)
         },
       ],
-      traderUnlock: { id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }, // Optional | Console-only
+      traderUnlock: [{ id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }], // Optional | Console-only; json.tarkov.dev shape
     }, // Optional | Console-only
     finishRewards: {
       items: [
@@ -132,7 +132,7 @@ Notes:
           }, // Optional | UI (shown as name even if skill object is missing)
         },
       ],
-      traderUnlock: { id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }, // Optional | UI
+      traderUnlock: [{ id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }], // Optional | UI; json.tarkov.dev shape
     }, // Optional | UI
     objectives: {
       'objective-id-1': {
@@ -305,7 +305,7 @@ Notes:
           },
         },
       ],
-      traderUnlock: { id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }, // Optional | Console-only
+      traderUnlock: [{ id: 'trader-unlock-id-1', name: 'Trader Unlock Name 1' }], // Optional | Console-only; json.tarkov.dev shape
     }, // Optional | Console-only
     finishRewards: {
       items: [
@@ -338,7 +338,7 @@ Notes:
           },
         },
       ],
-      traderUnlock: { id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }, // Optional | UI
+      traderUnlock: [{ id: 'trader-unlock-id-2', name: 'Trader Unlock Name 2' }], // Optional | UI; json.tarkov.dev shape
     }, // Optional | UI
     objectives: [
       {

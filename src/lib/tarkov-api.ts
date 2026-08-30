@@ -29,8 +29,13 @@ import type {
   TaskObjective,
   TaskRewards,
   TaskRequirement,
+  TaskKeyRequirement,
+  TaskOtherRequirement,
   TraderRequirement,
   GameMode,
+  MapAccessData,
+  ModeAccessData,
+  TraderAccessData,
 } from './types.js';
 import {
   adaptReward as adaptSharedReward,
@@ -171,8 +176,17 @@ async function fetchTranslations(
   endpoint: string,
   locale = 'en'
 ): Promise<TranslationMap> {
-  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`);
-  return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
+  try {
+    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`);
+    return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
+  } catch (error) {
+    // The endpoint registry currently advertises translations for every mode,
+    // but pvp-season/items_en is absent in production. A missing translation
+    // map is recoverable because adapters already fall back to the raw key;
+    // transport/server errors must still fail the fetch.
+    if (error instanceof Error && /request failed: 404\b/.test(error.message)) return {};
+    throw error;
+  }
 }
 
 /** Shared lookups + translation maps used by the adapters. */
@@ -244,6 +258,16 @@ function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: str
   return compact({ id, name }) as { id: string; name: string };
 }
 
+function resolveTraderRefs(
+  value: unknown,
+  ctx: Context
+): Array<{ id: string; name: string }> | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .map((entry) => resolveTraderRef(entry, ctx))
+    .filter((entry): entry is { id: string; name: string } => Boolean(entry));
+}
+
 function resolveTaskRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
   if (!id) return undefined;
@@ -305,12 +329,27 @@ function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
     compact,
     resolveItemRef,
     resolveTraderRef,
+    resolveMapRef,
   });
 }
 
 function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
   if (!isRecord(raw)) return raw as TaskRequirement;
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) }) as unknown as TaskRequirement;
+}
+
+function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement {
+  if (!isRecord(raw)) return raw as TaskOtherRequirement;
+  return compact({ ...raw, traders: resolveTraderRefs(raw.traders, ctx) }) as TaskOtherRequirement;
+}
+
+function adaptKeyRequirement(raw: unknown, ctx: Context): TaskKeyRequirement {
+  if (!isRecord(raw)) return raw as TaskKeyRequirement;
+  return compact({
+    ...raw,
+    map: resolveMapRef(raw.map, ctx),
+    keys: resolveItemRefs(raw.keys, ctx),
+  }) as unknown as TaskKeyRequirement;
 }
 
 function adaptTraderRequirement(
@@ -353,6 +392,7 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   return compact({
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
+    trader: resolveTraderRef(raw.trader, ctx),
     minPlayerLevel: typeof raw.minPlayerLevel === 'number' ? raw.minPlayerLevel : undefined,
     wikiLink: typeof raw.wikiLink === 'string' ? raw.wikiLink : undefined,
     map: raw.map === null ? null : resolveMapRef(raw.map, ctx),
@@ -370,6 +410,16 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
           adaptTraderRequirement(req, id, ctx, syntheticRequirementIdOccurrences)
         )
       : undefined,
+    otherRequirements: Array.isArray(raw.otherRequirements)
+      ? raw.otherRequirements.map((requirement) => adaptOtherRequirement(requirement, ctx))
+      : undefined,
+    neededKeys: Array.isArray(raw.neededKeys)
+      ? raw.neededKeys.map((requirement) => adaptKeyRequirement(requirement, ctx))
+      : undefined,
+    availableDelaySecondsMin:
+      typeof raw.availableDelaySecondsMin === 'number' ? raw.availableDelaySecondsMin : undefined,
+    availableDelaySecondsMax:
+      typeof raw.availableDelaySecondsMax === 'number' ? raw.availableDelaySecondsMax : undefined,
     objectives: Array.isArray(raw.objectives)
       ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
       : undefined,
@@ -427,6 +477,69 @@ export async function fetchRawEntities(
   const data = isRecord(envelope.data) ? envelope.data : {};
   const collection = collectionKey ? data[collectionKey] : data;
   return toLookup(collection);
+}
+
+function numberField(record: JsonRecord, key: string): number | undefined {
+  return typeof record[key] === 'number' ? (record[key] as number) : undefined;
+}
+
+function stringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter((entry): entry is string => typeof entry === 'string');
+}
+
+/**
+ * Fetch the static map-entry and trader-level metadata needed to explain why a
+ * task cannot currently be played. Account-specific map locks and trader
+ * unlock flags are deliberately not synthesized here: json.tarkov.dev does
+ * not serve those values in these static endpoints.
+ */
+export async function fetchModeAccessData(gameMode?: GameMode): Promise<ModeAccessData> {
+  const mode: GameMode = gameMode ?? 'regular';
+  const cache: EndpointCache = new Map();
+  const [mapsEnvelope, tradersEnvelope, mapsEn, tradersEn] = await Promise.all([
+    fetchEnvelope(cache, `${mode}/maps`),
+    fetchEnvelope(cache, `${mode}/traders`),
+    fetchTranslations(cache, mode, 'maps'),
+    fetchTranslations(cache, mode, 'traders'),
+  ]);
+
+  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
+  const maps = Object.fromEntries(
+    [...toLookup(mapsData.maps)].map(([id, raw]) => [
+      id,
+      compact({
+        id,
+        name: translate(mapsEn, raw.name) ?? id,
+        minPlayerLevel: numberField(raw, 'minPlayerLevel'),
+        maxPlayerLevel: numberField(raw, 'maxPlayerLevel'),
+        accessKeys: stringArray(raw.accessKeys),
+        accessKeysMinPlayerLevel: numberField(raw, 'accessKeysMinPlayerLevel'),
+      }) as MapAccessData,
+    ])
+  );
+
+  const traders = Object.fromEntries(
+    [...toLookup(tradersEnvelope.data)].map(([id, raw]) => [
+      id,
+      compact({
+        id,
+        name: translate(tradersEn, raw.name) ?? id,
+        levels: Array.isArray(raw.levels)
+          ? raw.levels.filter(isRecord).map((level) =>
+              compact({
+                level: numberField(level, 'level'),
+                requiredPlayerLevel: numberField(level, 'requiredPlayerLevel'),
+                requiredReputation: numberField(level, 'requiredReputation'),
+                requiredCommerce: numberField(level, 'requiredCommerce'),
+              })
+            )
+          : [],
+      }) as TraderAccessData,
+    ])
+  );
+
+  return { maps, traders };
 }
 
 /**

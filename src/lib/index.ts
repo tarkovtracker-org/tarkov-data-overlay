@@ -9,6 +9,7 @@ export * from './types.js';
 export * from './value-compare.js';
 export * from './tarkov-api.js';
 export * from './task-validator.js';
+export * from './task-unlocks.js';
 export * from './locale-validator.js';
 export * from './divergence-validator.js';
 export * from './entity-validator.js';

@@ -148,16 +148,43 @@
           },
           "traderUnlock": {
             "description": "Trader unlock rewards",
-            "properties": {
-              "id": {
-                "type": "string"
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
               },
-              "name": {
-                "type": "string"
-              }
+              "required": ["id", "name"],
+              "type": "object"
             },
-            "required": ["id", "name"],
-            "type": "object"
+            "type": "array"
+          },
+          "traderDialogueUnlock": {
+            "description": "Trader dialogue unlock rewards",
+            "items": {
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              },
+              "required": ["id", "name"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "locationUnlock": {
+            "description": "Map/location unlock rewards",
+            "items": {
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              },
+              "required": ["id", "name"],
+              "type": "object"
+            },
+            "type": "array"
           },
           "achievement": {
             "description": "Achievement rewards",
@@ -341,16 +368,19 @@
           },
           "traderUnlock": {
             "description": "Trader unlock rewards",
-            "properties": {
-              "id": {
-                "type": "string"
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
               },
-              "name": {
-                "type": "string"
-              }
+              "required": ["id", "name"],
+              "type": "object"
             },
-            "required": ["id", "name"],
-            "type": "object"
+            "type": "array"
           },
           "achievement": {
             "description": "Achievement rewards",
@@ -1150,12 +1180,123 @@
                 "type": "string"
               },
               "type": "array"
+            },
+            "notes": {
+              "description": "Optional upstream explanation for this prerequisite",
+              "type": "string"
             }
           },
           "required": ["task"],
           "type": "object"
         },
         "type": "array"
+      },
+      "taskRequirementGroups": {
+        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed",
+        "minItems": 1,
+        "items": {
+          "minItems": 1,
+          "items": {
+            "additionalProperties": true,
+            "properties": {
+              "task": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["id", "name"],
+                "type": "object"
+              },
+              "status": {
+                "items": {
+                  "enum": ["accepted", "active", "complete", "completed", "failed"],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "notes": {
+                "description": "Optional explanation for this prerequisite",
+                "type": "string"
+              }
+            },
+            "required": ["task"],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "type": "array"
+      },
+      "otherRequirements": {
+        "description": "Additional start gates such as dialogue flags or persistent global variables",
+        "items": {
+          "additionalProperties": true,
+          "properties": {
+            "id": { "type": "string" },
+            "type": { "type": "string" },
+            "traders": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" }
+                },
+                "required": ["id", "name"],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "variableId": { "type": "string" },
+            "compareMethod": { "enum": [">=", "<=", ">", "<", "="] },
+            "value": { "type": "number" }
+          },
+          "required": ["id", "type"],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "neededKeys": {
+        "description": "Keys required to enter the map for a task objective; not a task start gate",
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "map": {
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              },
+              "required": ["id", "name"],
+              "type": "object"
+            },
+            "keys": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortName": { "type": "string" }
+                },
+                "required": ["id", "name"],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": ["map", "keys"],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "availableDelaySecondsMin": {
+        "description": "Minimum delay before availability after other start gates are met",
+        "minimum": 0,
+        "type": "number"
+      },
+      "availableDelaySecondsMax": {
+        "description": "Maximum random delay before availability after other start gates are met",
+        "minimum": 0,
+        "type": "number"
       },
       "traderRequirements": {
         "description": "Trader requirements to start the task (loyalty level or reputation)",

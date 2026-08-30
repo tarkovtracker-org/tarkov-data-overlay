@@ -2,6 +2,9 @@
 
 How to use tarkov-data-overlay in your application.
 
+For the task unlock/availability contract, account-state adapter, and generated
+mode reports, see [Task availability and unlock tracking](TASK_AVAILABILITY.md).
+
 ---
 
 ## Fetching the Overlay
