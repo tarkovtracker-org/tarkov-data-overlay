@@ -9090,8 +9090,8 @@
     }
   },
   "$meta": {
-    "version": "1.77",
-    "generated": "2026-08-29T11:03:48.729Z",
-    "sha256": "ba982967901acad7d120463a8fa2a5403bc7bea2debf4ad57df1659b3af39614"
+    "version": "1.78",
+    "generated": "2026-08-31T12:28:27.244Z",
+    "sha256": "f7c53fd2b3b9d7c2ba8fbe68ddfea0fbeaf5e3d44b34b6e768bda12efae15c77"
   }
 }
