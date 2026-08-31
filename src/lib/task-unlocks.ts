@@ -385,10 +385,12 @@ function storyAlternativeConditions(
       continue;
     }
 
-    const chapterId =
-      typeof chapter.id === 'string' && chapter.id.length > 0
-        ? chapter.id
-        : `malformed-story-chapter:${taskId}`;
+    if (typeof chapter.id !== 'string' || chapter.id.length === 0) {
+      alternatives.push([unknownRequirementCondition(undefined, 'malformed-story-chapter')]);
+      continue;
+    }
+
+    const chapterId = chapter.id;
     const chapterName = typeof chapter.name === 'string' ? chapter.name : chapterId;
     if (seenChapterIds.has(chapterId)) continue;
 

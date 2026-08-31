@@ -397,8 +397,8 @@ function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
 }
 
 /** Adapt one hidden requirement and resolve any trader references. */
-function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement {
-  if (!isRecord(raw)) return raw as TaskOtherRequirement;
+function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement | undefined {
+  if (!isRecord(raw)) return undefined;
   return compact({ ...raw, traders: resolveTraderRefs(raw.traders, ctx) }) as TaskOtherRequirement;
 }
 
@@ -463,8 +463,12 @@ function optionalBoolean(value: unknown): boolean | undefined {
 }
 
 /** Map an optional endpoint array while preserving an absent field as undefined. */
-function mapOptionalArray<T>(value: unknown, mapper: (entry: unknown) => T): T[] | undefined {
-  return Array.isArray(value) ? value.map(mapper) : undefined;
+function mapOptionalArray<T>(
+  value: unknown,
+  mapper: (entry: unknown) => T | undefined
+): T[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.map(mapper).filter((entry): entry is T => entry !== undefined);
 }
 
 /** Adapt one nested task-requirement group, treating malformed groups as empty. */

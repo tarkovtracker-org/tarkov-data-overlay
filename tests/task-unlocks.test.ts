@@ -304,6 +304,47 @@ describe('task unlock model', () => {
     ).toBe('available');
   });
 
+  it('reports malformed story chapters as unknown alternatives', () => {
+    const task = makeTask({ id: 'story-unlocked-task' });
+    const definition = deriveTaskUnlockDefinition(task, {
+      storyChapters: {
+        malformedA: {
+          id: '' as unknown as string,
+          name: 'Malformed A',
+          questUnlocks: [{ id: task.id, name: task.name }],
+        },
+        malformedB: {
+          id: undefined as unknown as string,
+          name: 'Malformed B',
+          questUnlocks: [{ id: task.id, name: task.name }],
+        },
+      },
+    });
+
+    expect(definition.alternatives).toEqual([
+      [
+        {
+          type: 'unknown',
+          requirementId: 'malformed-requirement',
+          requirementType: 'malformed-story-chapter',
+        },
+      ],
+      [
+        {
+          type: 'unknown',
+          requirementId: 'malformed-requirement',
+          requirementType: 'malformed-story-chapter',
+        },
+      ],
+    ]);
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+      }).status
+    ).toBe('unknown');
+  });
+
   it('gates Lightkeeper-only tasks with account state', () => {
     const task = makeTask({ lightkeeperRequired: true });
     const definition = deriveTaskUnlockDefinition(task);

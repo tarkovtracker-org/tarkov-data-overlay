@@ -166,27 +166,37 @@ function formatTraderRequirement(req: TraderRequirementLike): string {
   return `${req.trader?.name ?? req.trader?.id ?? '?'} ${req.requirementType} ${req.compareMethod} ${req.value}`;
 }
 
-interface TraderRequirementMatches {
-  remaining: TraderRequirementLike[];
+interface RequirementMatches<T> {
+  remaining: T[];
   unmatched: string[];
 }
 
-/** Match override requirements to API requirements by semantic identity. */
-function matchTraderRequirements(
-  overrideReqs: readonly TraderRequirementLike[],
-  apiReqs: readonly TraderRequirementLike[]
-): TraderRequirementMatches {
+/** Match override requirements to API requirements by a semantic identity. */
+function matchByKey<T>(
+  overrideReqs: readonly T[],
+  apiReqs: readonly T[],
+  keyOf: (requirement: T) => string,
+  formatOf: (requirement: T) => string
+): RequirementMatches<T> {
   const remaining = [...apiReqs];
   const unmatched: string[] = [];
 
   for (const overrideReq of overrideReqs) {
-    const key = traderRequirementKey(overrideReq);
-    const index = remaining.findIndex((apiReq) => traderRequirementKey(apiReq) === key);
-    if (index === -1) unmatched.push(formatTraderRequirement(overrideReq));
+    const key = keyOf(overrideReq);
+    const index = remaining.findIndex((apiReq) => keyOf(apiReq) === key);
+    if (index === -1) unmatched.push(formatOf(overrideReq));
     else remaining.splice(index, 1);
   }
 
   return { remaining, unmatched };
+}
+
+/** Match trader requirements by the semantics consumed by the validator. */
+function matchTraderRequirements(
+  overrideReqs: readonly TraderRequirementLike[],
+  apiReqs: readonly TraderRequirementLike[]
+): RequirementMatches<TraderRequirementLike> {
+  return matchByKey(overrideReqs, apiReqs, traderRequirementKey, formatTraderRequirement);
 }
 
 /**
@@ -309,27 +319,12 @@ function formatTaskRequirement(requirement: TaskRequirementLike): string {
   return `${task} [${statuses}]`;
 }
 
-interface TaskRequirementMatches {
-  remaining: TaskRequirementLike[];
-  unmatched: string[];
-}
-
 /** Match task prerequisites by the semantics used by availability evaluation. */
 function matchTaskRequirements(
   overrideReqs: readonly TaskRequirementLike[],
   apiReqs: readonly TaskRequirementLike[]
-): TaskRequirementMatches {
-  const remaining = [...apiReqs];
-  const unmatched: string[] = [];
-
-  for (const overrideReq of overrideReqs) {
-    const key = taskRequirementKey(overrideReq);
-    const index = remaining.findIndex((apiReq) => taskRequirementKey(apiReq) === key);
-    if (index === -1) unmatched.push(formatTaskRequirement(overrideReq));
-    else remaining.splice(index, 1);
-  }
-
-  return { remaining, unmatched };
+): RequirementMatches<TaskRequirementLike> {
+  return matchByKey(overrideReqs, apiReqs, taskRequirementKey, formatTaskRequirement);
 }
 
 /** Validate task requirements without discarding active or accepted edges. */

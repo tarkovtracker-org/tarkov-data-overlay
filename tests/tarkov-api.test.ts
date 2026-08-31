@@ -352,6 +352,29 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(task.finishRewards?.locationUnlock).toEqual([{ id: 'map1', name: 'Customs' }]);
   });
 
+  it('drops malformed hidden requirements while preserving valid entries', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                otherRequirements: [null, { id: 'dialogue-1', type: 'dialogue', traders: [] }],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(task.otherRequirements).toEqual([{ id: 'dialogue-1', type: 'dialogue', traders: [] }]);
+  });
+
   it('fetchModeAccessData keeps map entry rules and trader level thresholds', async () => {
     mockEndpoints(
       baseRoutes('pve', {
@@ -555,7 +578,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(tasks[0].name).toBe('t1 name');
   });
 
-  it('continues when a mode is missing one translation endpoint', async () => {
+  it('continues without retrying when a mode is missing one translation endpoint', async () => {
     const routes = baseRoutes('pvp-season');
     delete routes['pvp-season/items_en'];
 
