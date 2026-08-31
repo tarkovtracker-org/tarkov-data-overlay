@@ -12,6 +12,7 @@ import {
 } from '../src/lib/index.js';
 
 describe('validateTaskOverride', () => {
+  /** Build the baseline API task fixture used by validator tests. */
   const createApiTask = (overrides: Partial<TaskData> = {}): TaskData => ({
     id: 'test-task-id',
     name: 'Test Task',

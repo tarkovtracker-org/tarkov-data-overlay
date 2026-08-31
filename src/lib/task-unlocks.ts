@@ -36,6 +36,20 @@ export const TASK_STATUS_NAMES: Readonly<Record<number, string>> = {
   9: 'active',
 };
 
+const STATUS_ALIASES: Readonly<Record<string, string>> = {
+  completed: 'complete',
+  success: 'complete',
+  accepted: 'active',
+  started: 'active',
+  availableforstart: 'active',
+  availableforfinish: 'active',
+  availableafter: 'active',
+  fail: 'failed',
+  failedrestartable: 'failed',
+  markedasfailed: 'failed',
+  expired: 'failed',
+};
+
 type TaskRef = { id: string; name: string };
 
 /** A single condition that must be evaluated against player state. */
@@ -141,9 +155,11 @@ export interface TaskUnlockTiming {
  *
  * `all` is always required. `taskRequirements` are also ANDed, and each
  * `anyOf` group requires one entry. `alternatives` are complete
- * task-prerequisite branches; with `alternativesExclusive: true` they replace
- * the ordinary task requirements/groups while the common `all` conditions
- * still apply. Statuses inside one taskStatus condition are ORed.
+ * task-prerequisite branches. When alternatives are present,
+ * `alternativesExclusive: false` ORs them with the ordinary task path, while
+ * `true` uses only the explicit alternatives; without alternatives, the
+ * ordinary path is always used. The common `all` conditions still apply.
+ * Statuses inside one taskStatus condition are ORed.
  */
 export interface TaskUnlockDefinition {
   all: TaskUnlockCondition[];
@@ -191,10 +207,12 @@ export interface TaskUnlockEvaluation {
 
 const DEFAULT_TASK_STATUSES = ['complete'];
 
+/** Deduplicate non-empty status names while preserving their first-seen order. */
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
 }
 
+/** Normalize the statuses accepted by one upstream task prerequisite. */
 function statusesFor(requirement: TaskRequirement): string[] {
   if (requirement.status === undefined) return [...DEFAULT_TASK_STATUSES];
   if (!Array.isArray(requirement.status)) return [];
@@ -204,6 +222,7 @@ function statusesFor(requirement: TaskRequirement): string[] {
   );
 }
 
+/** Convert one task prerequisite into a task-status unlock condition. */
 function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondition {
   return {
     type: 'taskStatus',
@@ -212,6 +231,7 @@ function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondi
   };
 }
 
+/** Convert one trader-level or trader-reputation prerequisite into a condition. */
 function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockCondition {
   if (requirement.requirementType === 'level') {
     return {
@@ -232,6 +252,7 @@ function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockC
   };
 }
 
+/** Convert a known or future hidden requirement into an unlock condition. */
 function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnlockCondition {
   if (requirement.type === 'dialogue') {
     const dialogue = requirement as TaskDialogueRequirement;
@@ -260,30 +281,34 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
   };
 }
 
-/**
- * Convert the fields published by json.tarkov.dev into an explicit unlock
- * definition. No dependency is inferred from task order, name, map, or
- * objective text.
- */
-export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition {
-  const all: TaskUnlockCondition[] = [];
+/** Derive the minimum-player-level condition when the task declares one. */
+function playerLevelCondition(task: TaskData): TaskUnlockCondition | undefined {
+  if (typeof task.minPlayerLevel !== 'number' || task.minPlayerLevel <= 0) return undefined;
+  return { type: 'playerLevel', compareMethod: '>=', value: task.minPlayerLevel };
+}
 
-  if (typeof task.minPlayerLevel === 'number' && task.minPlayerLevel > 0) {
-    all.push({ type: 'playerLevel', compareMethod: '>=', value: task.minPlayerLevel });
-  }
+/** Derive the faction condition when the task is faction-specific. */
+function factionCondition(task: TaskData): TaskUnlockCondition | undefined {
+  if (!task.factionName || task.factionName.toLowerCase() === 'any') return undefined;
+  return { type: 'faction', faction: task.factionName };
+}
 
-  if (task.factionName && task.factionName.toLowerCase() !== 'any') {
-    all.push({ type: 'faction', faction: task.factionName });
-  }
+/** Derive the prestige condition when the task requires a prestige level. */
+function prestigeCondition(task: TaskData): TaskUnlockCondition | undefined {
+  if (!task.requiredPrestige) return undefined;
+  return {
+    type: 'prestigeLevel',
+    prestige: task.requiredPrestige,
+    compareMethod: '>=',
+    value: task.requiredPrestige.prestigeLevel,
+  };
+}
 
-  if (task.requiredPrestige) {
-    all.push({
-      type: 'prestigeLevel',
-      prestige: task.requiredPrestige,
-      compareMethod: '>=',
-      value: task.requiredPrestige.prestigeLevel,
-    });
-  }
+/** Derive the task-level conditions shared by every unlock path. */
+function deriveCommonUnlockConditions(task: TaskData): TaskUnlockCondition[] {
+  const all = [playerLevelCondition(task), factionCondition(task), prestigeCondition(task)].filter(
+    (condition): condition is TaskUnlockCondition => condition !== undefined
+  );
 
   for (const requirement of task.traderRequirements ?? []) {
     all.push(traderRequirementCondition(requirement));
@@ -293,8 +318,26 @@ export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition
     all.push(otherRequirementCondition(requirement));
   }
 
+  return all;
+}
+
+/** Derive timing metadata only when the task declares a positive delay. */
+function deriveTaskTiming(task: TaskData): TaskUnlockTiming | undefined {
+  const minSeconds = task.availableDelaySecondsMin ?? 0;
+  const maxSeconds = task.availableDelaySecondsMax ?? 0;
+  if (minSeconds <= 0 && maxSeconds <= 0) return undefined;
+  return { minSeconds: task.availableDelaySecondsMin, maxSeconds: task.availableDelaySecondsMax };
+}
+
+/**
+ * Convert the fields published by json.tarkov.dev into an explicit unlock
+ * definition. No dependency is inferred from task order, name, map, or
+ * objective text.
+ */
+export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition {
+  const timing = deriveTaskTiming(task);
   const definition: TaskUnlockDefinition = {
-    all,
+    all: deriveCommonUnlockConditions(task),
     taskRequirements: (task.taskRequirements ?? []).map(taskRequirementCondition),
     anyOf: (task.taskRequirementGroups ?? []).map((group) => group.map(taskRequirementCondition)),
     context: {},
@@ -304,12 +347,7 @@ export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition
   if (task.map) definition.context.map = task.map;
   if (task.lightkeeperRequired === true) definition.context.lightkeeperRequired = true;
 
-  if ((task.availableDelaySecondsMin ?? 0) > 0 || (task.availableDelaySecondsMax ?? 0) > 0) {
-    definition.timing = {
-      minSeconds: task.availableDelaySecondsMin,
-      maxSeconds: task.availableDelaySecondsMax,
-    };
-  }
+  if (timing) definition.timing = timing;
 
   if (task.neededKeys?.length) {
     definition.completion = { neededKeys: task.neededKeys };
@@ -339,6 +377,7 @@ export function withTaskUnlockAlternatives(
   };
 }
 
+/** Apply a supported comparison operator to two numeric values. */
 function compare(actual: number, method: TaskUnlockCompareMethod, expected: number): boolean {
   switch (method) {
     case '>=':
@@ -354,31 +393,15 @@ function compare(actual: number, method: TaskUnlockCompareMethod, expected: numb
   }
 }
 
+/** Map numeric/profile status spellings to the evaluator's canonical names. */
 function canonicalStatus(status: TaskStatusValue): string {
   if (typeof status === 'number') return TASK_STATUS_NAMES[status] ?? `status:${status}`;
 
   const normalized = status.toLowerCase().replace(/[\s_-]/g, '');
-  if (normalized === 'completed' || normalized === 'success') return 'complete';
-  if (
-    normalized === 'accepted' ||
-    normalized === 'started' ||
-    normalized === 'availableforstart' ||
-    normalized === 'availableforfinish' ||
-    normalized === 'availableafter'
-  ) {
-    return 'active';
-  }
-  if (
-    normalized === 'fail' ||
-    normalized === 'failedrestartable' ||
-    normalized === 'markedasfailed' ||
-    normalized === 'expired'
-  ) {
-    return 'failed';
-  }
-  return normalized;
+  return STATUS_ALIASES[normalized] ?? normalized;
 }
 
+/** Evaluate a numeric comparison, treating missing or non-finite input as unknown. */
 function numberState(
   value: number | undefined,
   method: TaskUnlockCompareMethod,
@@ -388,122 +411,179 @@ function numberState(
   return compare(value, method, expected) ? 'met' : 'unmet';
 }
 
+type ConditionEvaluation = Pick<EvaluatedTaskUnlockCondition, 'state' | 'reason'>;
+
+/** Evaluate a numeric condition and format its human-readable explanation. */
+function evaluateNumericCondition(
+  value: number | undefined,
+  method: TaskUnlockCompareMethod,
+  expected: number,
+  label: string
+): ConditionEvaluation {
+  const result = numberState(value, method, expected);
+  return {
+    state: result,
+    reason: result === 'unknown' ? `${label} is not present` : `${label} ${method} ${expected}`,
+  };
+}
+
+/** Evaluate a player-level condition. */
+function evaluatePlayerLevelCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'playerLevel' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  return evaluateNumericCondition(
+    state.playerLevel,
+    condition.compareMethod,
+    condition.value,
+    'player level'
+  );
+}
+
+/** Evaluate a faction condition. */
+function evaluateFactionCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'faction' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  if (state.faction === undefined) return { state: 'unknown', reason: 'faction is not present' };
+  return {
+    state: state.faction.toLowerCase() === condition.faction.toLowerCase() ? 'met' : 'unmet',
+    reason: `faction is ${condition.faction}`,
+  };
+}
+
+/** Evaluate one task-status condition, including its accepted status aliases. */
+function evaluateTaskStatusCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'taskStatus' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  if (condition.statuses.length === 0) {
+    return { state: 'unknown', reason: 'task status requirement has no supported statuses' };
+  }
+  const actual = state.taskStatuses?.[condition.task.id];
+  if (actual === undefined) return { state: 'unknown', reason: 'task status is not present' };
+  const statuses = Array.isArray(actual) ? actual : [actual];
+  const accepted = new Set(condition.statuses.map(canonicalStatus));
+  const matches = statuses.some((status) => accepted.has(canonicalStatus(status)));
+  return {
+    state: matches ? 'met' : 'unmet',
+    reason: `task status is one of: ${condition.statuses.join(', ')}`,
+  };
+}
+
+/** Evaluate a trader level or reputation condition. */
+function evaluateTraderCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'traderLevel' | 'traderReputation' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  const values = condition.type === 'traderLevel' ? state.traderLevels : state.traderReputation;
+  const label = condition.type === 'traderLevel' ? 'trader level' : 'trader reputation';
+  return evaluateNumericCondition(
+    values?.[condition.trader.id],
+    condition.compareMethod,
+    condition.value,
+    label
+  );
+}
+
+/** Evaluate a persistent global-variable condition. */
+function evaluateGlobalVariableCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'globalVariable' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  return evaluateNumericCondition(
+    state.globalVariables?.[condition.variableId],
+    condition.compareMethod,
+    condition.value,
+    `global variable ${condition.variableId}`
+  );
+}
+
+/** Evaluate a trader-dialogue acknowledgement condition. */
+function evaluateDialogueCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'dialogue' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  const dialogueMap = state.dialogues;
+  const value =
+    dialogueMap && Object.prototype.hasOwnProperty.call(dialogueMap, condition.requirementId)
+      ? dialogueMap[condition.requirementId]
+      : state.completedConditionIds?.includes(condition.requirementId);
+  if (value === undefined) return { state: 'unknown', reason: 'dialogue flag is not present' };
+  return { state: value ? 'met' : 'unmet', reason: 'required trader dialogue is acknowledged' };
+}
+
+/** Evaluate a prestige-level condition. */
+function evaluatePrestigeCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'prestigeLevel' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  return evaluateNumericCondition(
+    state.prestigeLevel,
+    condition.compareMethod,
+    condition.value,
+    'prestige level'
+  );
+}
+
+/** Evaluate an explicit story-chapter progress condition. */
+function evaluateStoryChapterCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'storyChapterProgress' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  const value = state.storyChapters?.[condition.storyChapter.id];
+  if (value === undefined) {
+    return { state: 'unknown', reason: 'story chapter progress is not present' };
+  }
+  return {
+    state: value ? 'met' : 'unmet',
+    reason: 'story chapter has reached the unlock point',
+  };
+}
+
+/** Preserve unsupported conditions as unknown instead of guessing their state. */
+function evaluateUnknownCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'unknown' }>
+): ConditionEvaluation {
+  return {
+    state: 'unknown',
+    reason: `unsupported requirement type: ${condition.requirementType}`,
+  };
+}
+
+type ConditionHandlers = {
+  [Type in TaskUnlockCondition['type']]: (
+    condition: Extract<TaskUnlockCondition, { type: Type }>,
+    state: TaskUnlockState
+  ) => ConditionEvaluation;
+};
+
+const CONDITION_HANDLERS: ConditionHandlers = {
+  playerLevel: evaluatePlayerLevelCondition,
+  faction: evaluateFactionCondition,
+  taskStatus: evaluateTaskStatusCondition,
+  traderLevel: evaluateTraderCondition,
+  traderReputation: evaluateTraderCondition,
+  globalVariable: evaluateGlobalVariableCondition,
+  dialogue: evaluateDialogueCondition,
+  prestigeLevel: evaluatePrestigeCondition,
+  storyChapterProgress: evaluateStoryChapterCondition,
+  unknown: (condition) => evaluateUnknownCondition(condition),
+};
+
+/** Evaluate one static task-start condition against account state. */
 function evaluateCondition(
   condition: TaskUnlockCondition,
   state: TaskUnlockState
-): Pick<EvaluatedTaskUnlockCondition, 'state' | 'reason'> {
-  switch (condition.type) {
-    case 'playerLevel': {
-      const result = numberState(state.playerLevel, condition.compareMethod, condition.value);
-      return {
-        state: result,
-        reason:
-          result === 'unknown'
-            ? 'player level is not present'
-            : `player level ${condition.compareMethod} ${condition.value}`,
-      };
-    }
-    case 'faction': {
-      if (state.faction === undefined)
-        return { state: 'unknown', reason: 'faction is not present' };
-      return {
-        state: state.faction.toLowerCase() === condition.faction.toLowerCase() ? 'met' : 'unmet',
-        reason: `faction is ${condition.faction}`,
-      };
-    }
-    case 'taskStatus': {
-      if (condition.statuses.length === 0) {
-        return { state: 'unknown', reason: 'task status requirement has no supported statuses' };
-      }
-      const actual = state.taskStatuses?.[condition.task.id];
-      if (actual === undefined) return { state: 'unknown', reason: 'task status is not present' };
-      const statuses = Array.isArray(actual) ? actual : [actual];
-      const accepted = new Set(condition.statuses.map(canonicalStatus));
-      const matches = statuses.some((status) => accepted.has(canonicalStatus(status)));
-      return {
-        state: matches ? 'met' : 'unmet',
-        reason: `task status is one of: ${condition.statuses.join(', ')}`,
-      };
-    }
-    case 'traderLevel': {
-      const result = numberState(
-        state.traderLevels?.[condition.trader.id],
-        condition.compareMethod,
-        condition.value
-      );
-      return {
-        state: result,
-        reason:
-          result === 'unknown'
-            ? 'trader level is not present'
-            : `trader level ${condition.compareMethod} ${condition.value}`,
-      };
-    }
-    case 'traderReputation': {
-      const result = numberState(
-        state.traderReputation?.[condition.trader.id],
-        condition.compareMethod,
-        condition.value
-      );
-      return {
-        state: result,
-        reason:
-          result === 'unknown'
-            ? 'trader reputation is not present'
-            : `trader reputation ${condition.compareMethod} ${condition.value}`,
-      };
-    }
-    case 'globalVariable': {
-      const result = numberState(
-        state.globalVariables?.[condition.variableId],
-        condition.compareMethod,
-        condition.value
-      );
-      return {
-        state: result,
-        reason:
-          result === 'unknown'
-            ? `global variable ${condition.variableId} is not present`
-            : `global variable ${condition.variableId} ${condition.compareMethod} ${condition.value}`,
-      };
-    }
-    case 'dialogue': {
-      const dialogueMap = state.dialogues;
-      const value =
-        dialogueMap && Object.prototype.hasOwnProperty.call(dialogueMap, condition.requirementId)
-          ? dialogueMap[condition.requirementId]
-          : state.completedConditionIds?.includes(condition.requirementId);
-      if (value === undefined) return { state: 'unknown', reason: 'dialogue flag is not present' };
-      return { state: value ? 'met' : 'unmet', reason: 'required trader dialogue is acknowledged' };
-    }
-    case 'prestigeLevel': {
-      const result = numberState(state.prestigeLevel, condition.compareMethod, condition.value);
-      return {
-        state: result,
-        reason:
-          result === 'unknown'
-            ? 'prestige level is not present'
-            : `prestige level ${condition.compareMethod} ${condition.value}`,
-      };
-    }
-    case 'storyChapterProgress': {
-      const value = state.storyChapters?.[condition.storyChapter.id];
-      if (value === undefined) {
-        return { state: 'unknown', reason: 'story chapter progress is not present' };
-      }
-      return {
-        state: value ? 'met' : 'unmet',
-        reason: 'story chapter has reached the unlock point',
-      };
-    }
-    case 'unknown':
-      return {
-        state: 'unknown',
-        reason: `unsupported requirement type: ${condition.requirementType}`,
-      };
-  }
+): ConditionEvaluation {
+  const handler = CONDITION_HANDLERS[condition.type] as (
+    condition: TaskUnlockCondition,
+    state: TaskUnlockState
+  ) => ConditionEvaluation;
+  return handler(condition, state);
 }
 
+/** Evaluate a delayed-availability condition against the account clock state. */
 function evaluateTiming(
   taskId: string,
   timing: TaskUnlockTiming,
@@ -532,36 +612,69 @@ function evaluateTiming(
   return { state: 'met', reason: 'availability delay has elapsed' };
 }
 
+/** Evaluate a task-giver trader unlock condition. */
+function evaluateTraderUnlockedCondition(
+  condition: Extract<TaskContextCondition, { type: 'traderUnlocked' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  const value = state.traderUnlocked?.[condition.trader.id];
+  if (value === undefined)
+    return { state: 'unknown', reason: 'trader unlock state is not present' };
+  return { state: value ? 'met' : 'unmet', reason: 'task-giver trader is unlocked' };
+}
+
+/** Evaluate a Lightkeeper access condition. */
+function evaluateLightkeeperCondition(
+  _condition: Extract<TaskContextCondition, { type: 'lightkeeperAccess' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  if (state.lightkeeperUnlocked === undefined) {
+    return { state: 'unknown', reason: 'Lightkeeper unlock state is not present' };
+  }
+  return {
+    state: state.lightkeeperUnlocked ? 'met' : 'unmet',
+    reason: 'Lightkeeper access is unlocked',
+  };
+}
+
+/** Evaluate account-specific access to a task's map. */
+function evaluateMapAccessCondition(
+  condition: Extract<TaskContextCondition, { type: 'mapAccess' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  const value = state.mapAccess?.[condition.map.id];
+  if (value === undefined) return { state: 'unknown', reason: 'map access state is not present' };
+  return { state: value ? 'met' : 'unmet', reason: 'task map is accessible' };
+}
+
+type ContextConditionHandlers = {
+  [Type in TaskContextCondition['type']]: (
+    condition: Extract<TaskContextCondition, { type: Type }>,
+    state: TaskUnlockState
+  ) => ConditionEvaluation;
+};
+
+const CONTEXT_CONDITION_HANDLERS: ContextConditionHandlers = {
+  traderUnlocked: evaluateTraderUnlockedCondition,
+  lightkeeperAccess: evaluateLightkeeperCondition,
+  mapAccess: evaluateMapAccessCondition,
+  availabilityTiming: (condition, state) =>
+    evaluateTiming(condition.task.id, condition.timing, state),
+};
+
+/** Evaluate one account-context condition against profile state. */
 function evaluateContextCondition(
   condition: TaskContextCondition,
   state: TaskUnlockState
-): Pick<EvaluatedTaskUnlockCondition, 'state' | 'reason'> {
-  if (condition.type === 'traderUnlocked') {
-    const value = state.traderUnlocked?.[condition.trader.id];
-    if (value === undefined)
-      return { state: 'unknown', reason: 'trader unlock state is not present' };
-    return { state: value ? 'met' : 'unmet', reason: 'task-giver trader is unlocked' };
-  }
-
-  if (condition.type === 'lightkeeperAccess') {
-    if (state.lightkeeperUnlocked === undefined) {
-      return { state: 'unknown', reason: 'Lightkeeper unlock state is not present' };
-    }
-    return {
-      state: state.lightkeeperUnlocked ? 'met' : 'unmet',
-      reason: 'Lightkeeper access is unlocked',
-    };
-  }
-
-  if (condition.type === 'mapAccess') {
-    const value = state.mapAccess?.[condition.map.id];
-    if (value === undefined) return { state: 'unknown', reason: 'map access state is not present' };
-    return { state: value ? 'met' : 'unmet', reason: 'task map is accessible' };
-  }
-
-  return evaluateTiming(condition.task.id, condition.timing, state);
+): ConditionEvaluation {
+  const handler = CONTEXT_CONDITION_HANDLERS[condition.type] as (
+    condition: TaskContextCondition,
+    state: TaskUnlockState
+  ) => ConditionEvaluation;
+  return handler(condition, state);
 }
 
+/** Evaluate a list of task-definition conditions in order. */
 function evaluateConditionList(
   conditions: readonly TaskUnlockCondition[],
   state: TaskUnlockState
@@ -572,6 +685,7 @@ function evaluateConditionList(
   }));
 }
 
+/** Evaluate a list of derived context conditions in order. */
 function evaluateContextList(
   conditions: readonly TaskContextCondition[],
   state: TaskUnlockState
@@ -582,24 +696,28 @@ function evaluateContextList(
   }));
 }
 
+/** Combine condition states using AND semantics. */
 function allStatus(checks: readonly EvaluatedTaskUnlockCondition[]): TaskAvailabilityStatus {
   if (checks.some((check) => check.state === 'unmet')) return 'blocked';
   if (checks.some((check) => check.state === 'unknown')) return 'unknown';
   return 'available';
 }
 
+/** Combine path statuses using OR semantics. */
 function anyStatus(statuses: readonly TaskAvailabilityStatus[]): TaskAvailabilityStatus {
   if (statuses.some((status) => status === 'available')) return 'available';
   if (statuses.some((status) => status === 'unknown')) return 'unknown';
   return 'blocked';
 }
 
+/** Combine path statuses using AND semantics. */
 function andStatus(statuses: readonly TaskAvailabilityStatus[]): TaskAvailabilityStatus {
   if (statuses.some((status) => status === 'blocked')) return 'blocked';
   if (statuses.some((status) => status === 'unknown')) return 'unknown';
   return 'available';
 }
 
+/** Convert evaluated condition states into an OR-path status. */
 function anyStatusForChecks(
   checks: readonly EvaluatedTaskUnlockCondition[]
 ): TaskAvailabilityStatus {
@@ -616,6 +734,7 @@ interface PathEvaluation {
   unknown: EvaluatedTaskUnlockCondition[];
 }
 
+/** Evaluate the ordinary AND path, including each required OR group. */
 function evaluateAndPath(
   all: readonly EvaluatedTaskUnlockCondition[],
   anyOf: readonly (readonly EvaluatedTaskUnlockCondition[])[]
@@ -645,6 +764,7 @@ function evaluateAndPath(
   return { status, blockers, unknown };
 }
 
+/** Evaluate explicit alternative branches, where any complete branch succeeds. */
 function evaluateAlternativePaths(
   alternatives: readonly (readonly EvaluatedTaskUnlockCondition[])[]
 ): PathEvaluation {
@@ -674,6 +794,114 @@ function evaluateAlternativePaths(
   };
 }
 
+/** Build the task-giver trader gate when enabled by the caller. */
+function traderContextCondition(
+  definition: TaskUnlockDefinition,
+  options: TaskUnlockEvaluationOptions
+): TaskContextCondition | undefined {
+  if (options.checkTraderUnlock === false || !definition.context.trader) return undefined;
+  return { type: 'traderUnlocked', trader: definition.context.trader };
+}
+
+/** Build the Lightkeeper gate when enabled by the caller. */
+function lightkeeperContextCondition(
+  definition: TaskUnlockDefinition,
+  options: TaskUnlockEvaluationOptions
+): TaskContextCondition | undefined {
+  if (options.checkLightkeeperAccess === false || !definition.context.lightkeeperRequired) {
+    return undefined;
+  }
+  return { type: 'lightkeeperAccess' };
+}
+
+/** Build the account-specific map-access gate when enabled by the caller. */
+function mapContextCondition(
+  definition: TaskUnlockDefinition,
+  options: TaskUnlockEvaluationOptions
+): TaskContextCondition | undefined {
+  if (options.checkMapAccess === false || !definition.context.map) return undefined;
+  return { type: 'mapAccess', map: definition.context.map };
+}
+
+/** Build the delayed-availability gate when enabled and declared by the task. */
+function timingContextCondition(
+  task: TaskData,
+  definition: TaskUnlockDefinition,
+  options: TaskUnlockEvaluationOptions
+): TaskContextCondition | undefined {
+  const timing = definition.timing;
+  if (
+    options.checkTiming === false ||
+    !timing ||
+    ((timing.minSeconds ?? 0) <= 0 && (timing.maxSeconds ?? 0) <= 0)
+  ) {
+    return undefined;
+  }
+  return { type: 'availabilityTiming', task: { id: task.id, name: task.name }, timing };
+}
+
+/** Build the account-context gates enabled for one evaluation. */
+function contextConditionsForTask(
+  task: TaskData,
+  definition: TaskUnlockDefinition,
+  options: TaskUnlockEvaluationOptions
+): TaskContextCondition[] {
+  return [
+    traderContextCondition(definition, options),
+    lightkeeperContextCondition(definition, options),
+    mapContextCondition(definition, options),
+    timingContextCondition(task, definition, options),
+  ].filter((condition): condition is TaskContextCondition => condition !== undefined);
+}
+
+/** Select the ordinary or explicit alternative unlock path. */
+function evaluateUnlockPath(
+  definition: TaskUnlockDefinition,
+  basePath: PathEvaluation,
+  alternatives: readonly (readonly EvaluatedTaskUnlockCondition[])[]
+): PathEvaluation {
+  if (!definition.alternatives?.length) return basePath;
+
+  const alternativePath = evaluateAlternativePaths(alternatives);
+  const candidates =
+    definition.alternativesExclusive === false ? [basePath, alternativePath] : [alternativePath];
+  const status = anyStatus(candidates.map((candidate) => candidate.status));
+  if (status === 'blocked') {
+    return { status, blockers: candidates.flatMap((candidate) => candidate.blockers), unknown: [] };
+  }
+  if (status === 'unknown') {
+    return { status, blockers: [], unknown: candidates.flatMap((candidate) => candidate.unknown) };
+  }
+  return { status, blockers: [], unknown: [] };
+}
+
+/** Keep only the conditions that explain the final combined status. */
+function collectPathIssues(
+  status: TaskAvailabilityStatus,
+  commonPath: PathEvaluation,
+  unlockPath: PathEvaluation
+): Pick<PathEvaluation, 'blockers' | 'unknown'> {
+  if (status === 'blocked') {
+    return {
+      blockers: [
+        ...(commonPath.status === 'blocked' ? commonPath.blockers : []),
+        ...(unlockPath.status === 'blocked' ? unlockPath.blockers : []),
+      ],
+      unknown: [],
+    };
+  }
+  if (status === 'unknown') {
+    return {
+      blockers: [],
+      unknown: [
+        ...(commonPath.status === 'unknown' ? commonPath.unknown : []),
+        ...(unlockPath.status === 'unknown' ? unlockPath.unknown : []),
+      ],
+    };
+  }
+  return { blockers: [], unknown: [] };
+}
+
 /** Evaluate a normalized task definition against an account snapshot. */
 export function evaluateTaskUnlock(
   task: TaskData,
@@ -684,28 +912,7 @@ export function evaluateTaskUnlock(
   const all = evaluateConditionList(definition.all, state);
   const taskRequirements = evaluateConditionList(definition.taskRequirements, state);
   const anyOf = definition.anyOf.map((group) => evaluateConditionList(group, state));
-  const contextConditions: TaskContextCondition[] = [];
-
-  if (options.checkTraderUnlock !== false && definition.context.trader) {
-    contextConditions.push({ type: 'traderUnlocked', trader: definition.context.trader });
-  }
-  if (options.checkLightkeeperAccess !== false && definition.context.lightkeeperRequired) {
-    contextConditions.push({ type: 'lightkeeperAccess' });
-  }
-  if (options.checkMapAccess !== false && definition.context.map) {
-    contextConditions.push({ type: 'mapAccess', map: definition.context.map });
-  }
-  if (
-    options.checkTiming !== false &&
-    definition.timing &&
-    ((definition.timing.minSeconds ?? 0) > 0 || (definition.timing.maxSeconds ?? 0) > 0)
-  ) {
-    contextConditions.push({
-      type: 'availabilityTiming',
-      task: { id: task.id, name: task.name },
-      timing: definition.timing,
-    });
-  }
+  const contextConditions = contextConditionsForTask(task, definition, options);
   const context = evaluateContextList(contextConditions, state);
 
   const commonPath = evaluateAndPath([...all, ...context], []);
@@ -713,36 +920,10 @@ export function evaluateTaskUnlock(
   const alternatives = (definition.alternatives ?? []).map((branch) =>
     evaluateConditionList(branch, state)
   );
-  const alternativePath = evaluateAlternativePaths(alternatives);
-
-  let unlockPath = basePath;
-  if (definition.alternatives?.length) {
-    const candidates = [
-      ...(definition.alternativesExclusive === false ? [basePath] : []),
-      alternativePath,
-    ];
-    unlockPath = {
-      status: anyStatus(candidates.map((candidate) => candidate.status)),
-      blockers: [],
-      unknown: [],
-    };
-    if (unlockPath.status === 'blocked') {
-      unlockPath.blockers = candidates.flatMap((candidate) => candidate.blockers);
-    } else if (unlockPath.status === 'unknown') {
-      unlockPath.unknown = candidates.flatMap((candidate) => candidate.unknown);
-    }
-  }
+  const unlockPath = evaluateUnlockPath(definition, basePath, alternatives);
 
   const status = andStatus([commonPath.status, unlockPath.status]);
-  const blockers: EvaluatedTaskUnlockCondition[] = [];
-  const unknown: EvaluatedTaskUnlockCondition[] = [];
-  if (status === 'blocked') {
-    if (commonPath.status === 'blocked') blockers.push(...commonPath.blockers);
-    if (unlockPath.status === 'blocked') blockers.push(...unlockPath.blockers);
-  } else if (status === 'unknown') {
-    if (commonPath.status === 'unknown') unknown.push(...commonPath.unknown);
-    if (unlockPath.status === 'unknown') unknown.push(...unlockPath.unknown);
-  }
+  const { blockers, unknown } = collectPathIssues(status, commonPath, unlockPath);
 
   return {
     status,

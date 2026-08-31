@@ -67,16 +67,19 @@ export type TranslationMap = Record<string, string>;
 
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
+/** Return a stable type label for malformed endpoint payload diagnostics. */
 function getValueType(value: unknown): string {
   if (value === null) return 'null';
   if (Array.isArray(value)) return 'array';
   return typeof value;
 }
 
+/** Check whether a value is a non-array object record. */
 function isRecord(value: unknown): value is JsonRecord {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+/** Extract an entity ID from a string reference or inline record. */
 function stringId(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
   if (isRecord(value) && typeof value.id === 'string') return value.id;
@@ -119,6 +122,7 @@ function translate(map: TranslationMap, key: unknown): string | undefined {
   return typeof value === 'string' ? value : key;
 }
 
+/** Wait for the bounded retry backoff interval. */
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Per-call endpoint cache. Dedupes concurrent reads within one fetchTasks call. */
@@ -127,6 +131,7 @@ type EndpointCache = Map<string, Promise<Envelope>>;
 /** Thrown for malformed payloads; not worth retrying since a retry won't fix shape. */
 class EnvelopeValidationError extends Error {}
 
+/** Validate the common envelope shape returned by json.tarkov.dev. */
 function validateEnvelope(payload: unknown, path: string): Envelope {
   if (!isRecord(payload) || !('data' in payload) || payload.data == null) {
     throw new EnvelopeValidationError(`Invalid json.tarkov.dev response for ${path}: missing data`);
@@ -139,6 +144,19 @@ function validateEnvelope(payload: unknown, path: string): Envelope {
   return payload as Envelope;
 }
 
+/** Identify the expected HTTP 404 error used by optional translation endpoints. */
+function isNotFoundError(error: unknown): error is Error {
+  return error instanceof Error && /request failed: 404\b/.test(error.message);
+}
+
+/** Normalize retryable failures, rethrowing errors that should fail fast. */
+function normalizeFetchError(error: unknown, retryNotFound: boolean): Error {
+  if (error instanceof EnvelopeValidationError) throw error;
+  if (!retryNotFound && isNotFoundError(error)) throw error;
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+/** Fetch one endpoint with bounded retries, optionally failing fast on 404. */
 async function fetchEnvelopeOnce(path: string, retryNotFound = true): Promise<Envelope> {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= DEFAULT_MAX_RETRIES; attempt += 1) {
@@ -151,17 +169,10 @@ async function fetchEnvelopeOnce(path: string, retryNotFound = true): Promise<En
           `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
         );
       }
-      const payload = await response.json();
-      return validateEnvelope(payload, path);
+      return validateEnvelope(await response.json(), path);
     } catch (error) {
-      // Malformed payloads will not change on retry; fail fast.
-      if (error instanceof EnvelopeValidationError) throw error;
-      // Optional translation endpoints use 404 as a normal "not available"
-      // response. Do not spend the retry/backoff budget on that expected case.
-      if (!retryNotFound && error instanceof Error && /request failed: 404\b/.test(error.message)) {
-        throw error;
-      }
-      lastError = error instanceof Error ? error : new Error(String(error));
+      // Malformed payloads and expected missing optional translations fail fast.
+      lastError = normalizeFetchError(error, retryNotFound);
       if (attempt === DEFAULT_MAX_RETRIES) break;
       await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
     }
@@ -195,7 +206,7 @@ async function fetchTranslations(
     // but pvp-season/items_en is absent in production. A missing translation
     // map is recoverable because adapters already fall back to the raw key;
     // transport/server errors must still fail the fetch.
-    if (error instanceof Error && /request failed: 404\b/.test(error.message)) return {};
+    if (isNotFoundError(error)) return {};
     throw error;
   }
 }
@@ -214,6 +225,28 @@ type Context = {
   tradersEn: TranslationMap;
 };
 
+/** Select the upstream item record, falling back to an inline reference. */
+function resolveItemRecord(
+  id: string | undefined,
+  inline: JsonRecord | undefined,
+  ctx: Context
+): JsonRecord | undefined {
+  return (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
+}
+
+/** Translate one item display field and preserve an inline fallback value. */
+function resolveItemField(
+  field: 'name' | 'shortName',
+  raw: JsonRecord | undefined,
+  inline: JsonRecord | undefined,
+  ctx: Context
+): string | undefined {
+  return (
+    translate(ctx.itemsEn, raw?.[field]) ??
+    (typeof inline?.[field] === 'string' ? inline[field] : undefined)
+  );
+}
+
 /**
  * Resolve an item reference (string id or inline `{id,...}`) into the
  * `{id,name,shortName}` shape the validator compares against.
@@ -221,17 +254,14 @@ type Context = {
 function resolveItemRef(value: unknown, ctx: Context): TaskItemRef | undefined {
   const id = stringId(value);
   const inline = isRecord(value) ? value : undefined;
-  const raw = (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
+  const raw = resolveItemRecord(id, inline, ctx);
   if (!id && !raw) return undefined;
-  const name =
-    translate(ctx.itemsEn, raw?.name) ??
-    (typeof inline?.name === 'string' ? inline.name : undefined);
-  const shortName =
-    translate(ctx.itemsEn, raw?.shortName) ??
-    (typeof inline?.shortName === 'string' ? inline.shortName : undefined);
+  const name = resolveItemField('name', raw, inline, ctx);
+  const shortName = resolveItemField('shortName', raw, inline, ctx);
   return compact({ id: id ?? '', name, shortName }) as TaskItemRef;
 }
 
+/** Resolve a list of item references and drop entries that cannot be resolved. */
 function resolveItemRefs(value: unknown, ctx: Context): TaskItemRef[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value
@@ -239,10 +269,12 @@ function resolveItemRefs(value: unknown, ctx: Context): TaskItemRef[] | undefine
     .filter((entry): entry is TaskItemRef => Boolean(entry));
 }
 
+/** Resolve a nested item-reference matrix while preserving its groups. */
 function resolveItemRefMatrix(value: unknown, ctx: Context): TaskItemRef[][] | undefined {
   return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
 }
 
+/** Resolve one map reference and its translated display name. */
 function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
   if (!id) return undefined;
@@ -251,6 +283,7 @@ function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string
   return compact({ id, name }) as { id: string; name: string };
 }
 
+/** Resolve a list of map references and drop malformed entries. */
 function resolveMapRefs(
   value: unknown,
   ctx: Context
@@ -261,6 +294,7 @@ function resolveMapRefs(
     .filter((entry): entry is { id: string; name: string } => Boolean(entry));
 }
 
+/** Resolve one trader reference and its translated display name. */
 function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
   if (!id) return undefined;
@@ -269,6 +303,7 @@ function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: str
   return compact({ id, name }) as { id: string; name: string };
 }
 
+/** Resolve a list of trader references and drop malformed entries. */
 function resolveTraderRefs(
   value: unknown,
   ctx: Context
@@ -279,6 +314,7 @@ function resolveTraderRefs(
     .filter((entry): entry is { id: string; name: string } => Boolean(entry));
 }
 
+/** Resolve one task reference and its translated display name. */
 function resolveTaskRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
   if (!id) return undefined;
@@ -305,11 +341,13 @@ function resolveRequiredPrestige(
   return { id, name, prestigeLevel };
 }
 
+/** Resolve map data nested inside an objective zone or location. */
 function resolveZone(value: unknown, ctx: Context): unknown {
   if (!isRecord(value)) return value;
   return compact({ ...value, map: resolveMapRef(value.map, ctx) });
 }
 
+/** Adapt one objective and resolve its nested entity references. */
 function adaptObjective(raw: JsonRecord, ctx: Context): TaskObjective {
   return compact({
     ...raw,
@@ -334,6 +372,7 @@ function adaptObjective(raw: JsonRecord, ctx: Context): TaskObjective {
   }) as unknown as TaskObjective;
 }
 
+/** Adapt one reward object using the shared reward normalizer. */
 function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
   return adaptSharedReward<TaskRewards, Context>(raw, ctx, {
     isRecord,
@@ -344,16 +383,19 @@ function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
   });
 }
 
+/** Adapt one task prerequisite and resolve its referenced task. */
 function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
   if (!isRecord(raw)) return raw as TaskRequirement;
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) }) as unknown as TaskRequirement;
 }
 
+/** Adapt one hidden requirement and resolve any trader references. */
 function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement {
   if (!isRecord(raw)) return raw as TaskOtherRequirement;
   return compact({ ...raw, traders: resolveTraderRefs(raw.traders, ctx) }) as TaskOtherRequirement;
 }
 
+/** Adapt one map/key requirement and resolve its references. */
 function adaptKeyRequirement(raw: unknown, ctx: Context): TaskKeyRequirement {
   if (!isRecord(raw)) return raw as TaskKeyRequirement;
   return compact({
@@ -363,6 +405,7 @@ function adaptKeyRequirement(raw: unknown, ctx: Context): TaskKeyRequirement {
   }) as unknown as TaskKeyRequirement;
 }
 
+/** Adapt one trader requirement and assign a stable merge identity if needed. */
 function adaptTraderRequirement(
   raw: unknown,
   taskId: string,
@@ -397,6 +440,43 @@ function adaptTraderRequirement(
   }) as unknown as TraderRequirement;
 }
 
+/** Preserve a raw number only when the endpoint supplied a number. */
+function optionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined;
+}
+
+/** Preserve a raw string only when the endpoint supplied a string. */
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+/** Preserve a raw boolean only when the endpoint supplied a boolean. */
+function optionalBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+/** Map an optional endpoint array while preserving an absent field as undefined. */
+function mapOptionalArray<T>(value: unknown, mapper: (entry: unknown) => T): T[] | undefined {
+  return Array.isArray(value) ? value.map(mapper) : undefined;
+}
+
+/** Adapt one nested task-requirement group, treating malformed groups as empty. */
+function adaptTaskRequirementGroup(value: unknown, ctx: Context): TaskRequirement[] {
+  return Array.isArray(value) ? value.map((req) => adaptTaskRequirement(req, ctx)) : [];
+}
+
+/** Resolve a task's nullable top-level map reference. */
+function adaptTaskMap(value: unknown, ctx: Context): TaskData['map'] {
+  return value === null ? null : resolveMapRef(value, ctx);
+}
+
+/** Adapt task objectives while dropping malformed non-object entries. */
+function adaptObjectives(value: unknown, ctx: Context): TaskObjective[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(isRecord).map((objective) => adaptObjective(objective, ctx));
+}
+
+/** Adapt one raw task record into the validator's normalized task shape. */
 function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   const id = stringId(raw) ?? '';
   const syntheticRequirementIdOccurrences = new Map<string, number>();
@@ -404,46 +484,38 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
     trader: resolveTraderRef(raw.trader, ctx),
-    minPlayerLevel: typeof raw.minPlayerLevel === 'number' ? raw.minPlayerLevel : undefined,
-    wikiLink: typeof raw.wikiLink === 'string' ? raw.wikiLink : undefined,
-    map: raw.map === null ? null : resolveMapRef(raw.map, ctx),
-    kappaRequired: typeof raw.kappaRequired === 'boolean' ? raw.kappaRequired : undefined,
-    lightkeeperRequired:
-      typeof raw.lightkeeperRequired === 'boolean' ? raw.lightkeeperRequired : undefined,
-    factionName: typeof raw.factionName === 'string' ? raw.factionName : undefined,
+    minPlayerLevel: optionalNumber(raw.minPlayerLevel),
+    wikiLink: optionalString(raw.wikiLink),
+    map: adaptTaskMap(raw.map, ctx),
+    kappaRequired: optionalBoolean(raw.kappaRequired),
+    lightkeeperRequired: optionalBoolean(raw.lightkeeperRequired),
+    factionName: optionalString(raw.factionName),
     requiredPrestige: resolveRequiredPrestige(raw.requiredPrestige, ctx),
-    experience: typeof raw.experience === 'number' ? raw.experience : undefined,
-    taskRequirements: Array.isArray(raw.taskRequirements)
-      ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
-      : undefined,
-    taskRequirementGroups: Array.isArray(raw.taskRequirementGroups)
-      ? raw.taskRequirementGroups.map((group) =>
-          Array.isArray(group) ? group.map((req) => adaptTaskRequirement(req, ctx)) : []
-        )
-      : undefined,
-    traderRequirements: Array.isArray(raw.traderRequirements)
-      ? raw.traderRequirements.map((req) =>
-          adaptTraderRequirement(req, id, ctx, syntheticRequirementIdOccurrences)
-        )
-      : undefined,
-    otherRequirements: Array.isArray(raw.otherRequirements)
-      ? raw.otherRequirements.map((requirement) => adaptOtherRequirement(requirement, ctx))
-      : undefined,
-    neededKeys: Array.isArray(raw.neededKeys)
-      ? raw.neededKeys.map((requirement) => adaptKeyRequirement(requirement, ctx))
-      : undefined,
-    availableDelaySecondsMin:
-      typeof raw.availableDelaySecondsMin === 'number' ? raw.availableDelaySecondsMin : undefined,
-    availableDelaySecondsMax:
-      typeof raw.availableDelaySecondsMax === 'number' ? raw.availableDelaySecondsMax : undefined,
-    objectives: Array.isArray(raw.objectives)
-      ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
-      : undefined,
+    experience: optionalNumber(raw.experience),
+    taskRequirements: mapOptionalArray(raw.taskRequirements, (req) =>
+      adaptTaskRequirement(req, ctx)
+    ),
+    taskRequirementGroups: mapOptionalArray(raw.taskRequirementGroups, (group) =>
+      adaptTaskRequirementGroup(group, ctx)
+    ),
+    traderRequirements: mapOptionalArray(raw.traderRequirements, (req) =>
+      adaptTraderRequirement(req, id, ctx, syntheticRequirementIdOccurrences)
+    ),
+    otherRequirements: mapOptionalArray(raw.otherRequirements, (requirement) =>
+      adaptOtherRequirement(requirement, ctx)
+    ),
+    neededKeys: mapOptionalArray(raw.neededKeys, (requirement) =>
+      adaptKeyRequirement(requirement, ctx)
+    ),
+    availableDelaySecondsMin: optionalNumber(raw.availableDelaySecondsMin),
+    availableDelaySecondsMax: optionalNumber(raw.availableDelaySecondsMax),
+    objectives: adaptObjectives(raw.objectives, ctx),
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
   }) as unknown as TaskData;
 }
 
+/** Build the shared entity and translation context for task adaptation. */
 async function buildContext(
   cache: EndpointCache,
   mode: GameMode,
@@ -495,10 +567,13 @@ export async function fetchRawEntities(
   return toLookup(collection);
 }
 
+/** Read an optional finite numeric field from an endpoint record. */
 function numberField(record: JsonRecord, key: string): number | undefined {
-  return typeof record[key] === 'number' ? (record[key] as number) : undefined;
+  const value = record[key];
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
+/** Keep only string entries from an optional endpoint array field. */
 function stringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value.filter((entry): entry is string => typeof entry === 'string');

@@ -11,6 +11,7 @@ const trader = { id: 'trader-1', name: 'Prapor' };
 const map = { id: 'map-1', name: 'Customs' };
 const prerequisite = { id: 'task-1', name: 'Debut' };
 
+/** Build the smallest task fixture needed by the unlock-model tests. */
 function makeTask(overrides: Partial<TaskData> = {}): TaskData {
   return {
     id: 'task-2',

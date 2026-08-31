@@ -71,6 +71,7 @@ interface ModeAvailabilityReport {
 
 const DEFAULT_OUTPUT_DIR = 'data/task-availability';
 
+/** Parse and validate a comma-separated list of supported game modes. */
 function parseModes(value: string): GameMode[] {
   const requested = value
     .split(',')
@@ -87,6 +88,20 @@ function parseModes(value: string): GameMode[] {
   return modes;
 }
 
+/** Read the value that follows a command-line option. */
+function requiredOptionValue(argv: string[], index: number, option: string): string {
+  const value = argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    throw new Error(
+      option === '--mode'
+        ? '--mode requires a value'
+        : `${option} requires a file or directory path`
+    );
+  }
+  return value;
+}
+
+/** Parse command-line options for the availability report generator. */
 function parseArgs(argv: string[]): Options {
   let modes = [...SUPPORTED_GAME_MODES];
   let out = DEFAULT_OUTPUT_DIR;
@@ -96,29 +111,34 @@ function parseArgs(argv: string[]): Options {
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === '--mode') {
-      const value = argv[(index += 1)];
-      if (!value || value.startsWith('--')) throw new Error('--mode requires a value');
-      modes = parseModes(value);
-    } else if (arg === '--out' || arg === '--json') {
-      const value = argv[(index += 1)];
-      if (!value || value.startsWith('--'))
-        throw new Error(`${arg} requires a file or directory path`);
-      out = value;
-    } else if (arg === '--stdout') {
-      stdout = true;
-    } else if (arg === '--include-disabled') {
-      includeDisabled = true;
-    } else if (arg === '--no-overlay') {
-      applyOverlay = false;
-    } else if (arg.startsWith('--')) {
-      throw new Error(`Unknown option: ${arg}`);
+    switch (arg) {
+      case '--mode':
+        modes = parseModes(requiredOptionValue(argv, index, arg));
+        index += 1;
+        break;
+      case '--out':
+      case '--json':
+        out = requiredOptionValue(argv, index, arg);
+        index += 1;
+        break;
+      case '--stdout':
+        stdout = true;
+        break;
+      case '--include-disabled':
+        includeDisabled = true;
+        break;
+      case '--no-overlay':
+        applyOverlay = false;
+        break;
+      default:
+        if (arg.startsWith('--')) throw new Error(`Unknown option: ${arg}`);
     }
   }
 
   return { modes, out, stdout, includeDisabled, applyOverlay };
 }
 
+/** Load the built overlay unless the caller explicitly disables overlay use. */
 function loadOverlay(applyOverlay: boolean): OverlayOutput | undefined {
   if (!applyOverlay) return undefined;
   const { distDir } = getProjectPaths();
@@ -126,6 +146,7 @@ function loadOverlay(applyOverlay: boolean): OverlayOutput | undefined {
   return existsSync(path) ? loadJsonFile<OverlayOutput>(path) : undefined;
 }
 
+/** Apply shared then mode-specific task overrides to an API task. */
 function applyTaskOverlay(
   task: TaskData,
   overlay: OverlayOutput | undefined,
@@ -137,6 +158,7 @@ function applyTaskOverlay(
   return { ...task, ...shared, ...modeSpecific } as TaskData;
 }
 
+/** Convert an addition into the task shape consumed by the unlock model. */
 function additionAsTask(addition: TaskAddition): TaskData {
   const { trader, disabled: _disabled, ...data } = addition;
   return {
@@ -145,6 +167,7 @@ function additionAsTask(addition: TaskAddition): TaskData {
   } as TaskData;
 }
 
+/** Resolve a task addition with mode-specific data taking precedence. */
 function getTaskAddition(
   overlay: OverlayOutput | undefined,
   mode: GameMode,
@@ -153,6 +176,7 @@ function getTaskAddition(
   return overlay?.modes?.[mode]?.tasksAdd?.[taskId] ?? overlay?.tasksAdd?.[taskId];
 }
 
+/** Combine API tasks with shared and mode-specific additions for one mode. */
 function getTasksForMode(apiTasks: TaskData[], overlay: OverlayOutput | undefined, mode: GameMode) {
   const tasks = new Map(apiTasks.map((task) => [task.id, task]));
   const additions = {
@@ -165,6 +189,7 @@ function getTasksForMode(apiTasks: TaskData[], overlay: OverlayOutput | undefine
   return [...tasks.values()];
 }
 
+/** Build story-progress alternative branches keyed by the task they unlock. */
 function storyAlternatives(
   overlay: OverlayOutput | undefined
 ): Map<string, TaskUnlockCondition[][]> {
@@ -187,6 +212,7 @@ function storyAlternatives(
   return result;
 }
 
+/** Keep only map records that expose meaningful entry restrictions. */
 function relevantMaps(access: Awaited<ReturnType<typeof fetchModeAccessData>>['maps']) {
   return Object.fromEntries(
     Object.entries(access).filter(([, map]) => {
@@ -200,6 +226,7 @@ function relevantMaps(access: Awaited<ReturnType<typeof fetchModeAccessData>>['m
   );
 }
 
+/** Count hidden task requirements by their upstream discriminator. */
 function countHiddenRequirements(tasks: readonly TaskData[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const task of tasks) {
@@ -210,6 +237,67 @@ function countHiddenRequirements(tasks: readonly TaskData[]): Record<string, num
   return counts;
 }
 
+interface ReportTaskResult {
+  task?: ReportTask;
+  disabled: boolean;
+}
+
+/** Merge shared and mode-specific disabled flags for one task. */
+function taskOverrideFor(
+  taskId: string,
+  overlay: OverlayOutput | undefined,
+  mode: GameMode
+): { disabled?: boolean } {
+  return {
+    ...(overlay?.tasks?.[taskId] ?? {}),
+    ...(overlay?.modes?.[mode]?.tasks?.[taskId] ?? {}),
+  };
+}
+
+/** Add story alternatives to a task definition when the overlay declares them. */
+function addStoryAlternatives(
+  task: TaskData,
+  unlock: TaskUnlockDefinition,
+  alternatives: Map<string, TaskUnlockCondition[][]>
+): TaskUnlockDefinition {
+  const storyBranches = alternatives.get(task.id);
+  return storyBranches?.length ? withTaskUnlockAlternatives(unlock, storyBranches, true) : unlock;
+}
+
+/** Create the compact report entry for one adapted task. */
+function makeReportTask(
+  task: TaskData,
+  unlock: TaskUnlockDefinition,
+  disabled: boolean
+): ReportTask {
+  return {
+    id: task.id,
+    name: task.name,
+    unlock,
+    ...(disabled ? { disabled: true } : {}),
+  };
+}
+
+/** Build one report task and retain its disabled-state accounting. */
+function buildReportTask(
+  apiTask: TaskData,
+  overlay: OverlayOutput | undefined,
+  mode: GameMode,
+  alternatives: Map<string, TaskUnlockCondition[][]>,
+  includeDisabled: boolean
+): ReportTaskResult {
+  const override = taskOverrideFor(apiTask.id, overlay, mode);
+  const addition = getTaskAddition(overlay, mode, apiTask.id);
+  const disabled = override.disabled === true || addition?.disabled === true;
+  if (disabled && !includeDisabled) return { disabled };
+
+  const task = applyTaskOverlay(apiTask, overlay, mode);
+  const unlock = addStoryAlternatives(task, deriveTaskUnlockDefinition(task), alternatives);
+
+  return { disabled, task: makeReportTask(task, unlock, disabled) };
+}
+
+/** Fetch and assemble one mode's task availability report. */
 async function buildReport(
   mode: GameMode,
   overlay: OverlayOutput | undefined,
@@ -222,28 +310,9 @@ async function buildReport(
   let disabledTaskCount = 0;
 
   for (const apiTask of tasks) {
-    const override = {
-      ...(overlay?.tasks?.[apiTask.id] ?? {}),
-      ...(overlay?.modes?.[mode]?.tasks?.[apiTask.id] ?? {}),
-    };
-    const addition = getTaskAddition(overlay, mode, apiTask.id);
-    const disabled = override?.disabled === true;
-    const additionDisabled = addition?.disabled === true;
-    const isDisabled = disabled || additionDisabled;
-    if (isDisabled) disabledTaskCount += 1;
-    if (isDisabled && !includeDisabled) continue;
-
-    const task = applyTaskOverlay(apiTask, overlay, mode);
-    let unlock = deriveTaskUnlockDefinition(task);
-    const storyBranches = alternatives.get(task.id);
-    if (storyBranches?.length) unlock = withTaskUnlockAlternatives(unlock, storyBranches, true);
-
-    reportTasks[task.id] = {
-      id: task.id,
-      name: task.name,
-      unlock,
-      ...(isDisabled ? { disabled: true } : {}),
-    };
+    const result = buildReportTask(apiTask, overlay, mode, alternatives, includeDisabled);
+    if (result.disabled) disabledTaskCount += 1;
+    if (result.task) reportTasks[result.task.id] = result.task;
   }
 
   return {
@@ -259,9 +328,9 @@ async function buildReport(
       semantics: {
         all: 'Every entry in unlock.all and unlock.context must be met.',
         anyOf:
-          'Every unlock.anyOf group needs one met entry in the ordinary path; alternativesExclusive can replace that whole path.',
+          'Every unlock.anyOf group needs one met entry in the ordinary path; with alternatives present, alternativesExclusive=true omits that path, while false keeps it as an OR candidate.',
         taskRequirements:
-          'Every unlock.taskRequirements entry is required in the ordinary path; alternativesExclusive=true replaces it, while false keeps it as an OR path.',
+          'Every unlock.taskRequirements entry is required in the ordinary path; with alternatives present, alternativesExclusive=true uses only those alternatives, while false keeps the ordinary path as an OR candidate.',
         statuses: 'Statuses within one taskStatus condition are ORed.',
         unknown: 'Missing account state is unknown and must not be rendered as available.',
       },
@@ -274,12 +343,14 @@ async function buildReport(
   };
 }
 
+/** Resolve the output filename for one or several requested modes. */
 function outputPath(out: string, mode: GameMode, singleMode: boolean): string {
   const absolute = resolve(out);
   if (singleMode && absolute.endsWith('.json')) return absolute;
   return join(absolute, `${mode}.json`);
 }
 
+/** Parse options, build reports, and write them to stdout or disk. */
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const overlay = loadOverlay(options.applyOverlay);

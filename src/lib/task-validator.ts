@@ -24,6 +24,7 @@ const MAP_NAME_ALIASES: Record<string, string> = {
   'ground zero 21+': 'Ground Zero',
 };
 
+/** Return the comparison key for a map, including known display-name aliases. */
 function canonicalMapKey(map?: { id?: string; name?: string }): string | undefined {
   if (!map) return undefined;
   const name = map.name?.trim();
@@ -34,6 +35,7 @@ function canonicalMapKey(map?: { id?: string; name?: string }): string | undefin
   return map.id;
 }
 
+/** Collect all map keys referenced by a set of task objectives. */
 function collectObjectiveMapKeys(objectives: ObjectiveLike[]): Set<string> {
   const mapKeys = new Set<string>();
   for (const objective of objectives) {
@@ -45,6 +47,7 @@ function collectObjectiveMapKeys(objectives: ObjectiveLike[]): Set<string> {
   return mapKeys;
 }
 
+/** Determine whether a task spans more than one objective map. */
 function hasMultipleObjectiveMaps(override: TaskOverride, apiTask: TaskData): boolean {
   const apiObjectives = (apiTask.objectives ?? []) as ObjectiveLike[];
   const overrideObjectives = Object.values(override.objectives ?? {}) as ObjectiveLike[];
@@ -56,9 +59,7 @@ function hasMultipleObjectiveMaps(override: TaskOverride, apiTask: TaskData): bo
   return mapKeys.size > 1;
 }
 
-/**
- * Create a simple field comparison validator
- */
+/** Create a simple field comparison validator. */
 function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
   field: K,
   compareOptions?: CompareOptions
@@ -82,52 +83,50 @@ function createFieldValidator<K extends keyof TaskOverride & keyof TaskData>(
   };
 }
 
-/**
- * Validate map field with awareness of multi-map objectives
- */
-const validateMap: FieldValidator = (override, apiTask) => {
-  const overrideValue = override.map;
-  const apiValue = apiTask.map;
-  const hasMultiMaps = hasMultipleObjectiveMaps(override, apiTask);
-
-  if (hasMultiMaps) {
-    if (overrideValue === undefined) {
-      if (apiValue === null || apiValue === undefined) {
-        return null;
-      }
-      return {
-        field: 'map',
-        status: 'needed',
-        message: `map: task has multiple objective maps; add map: null to clear top-level map (API=${formatValue(
-          apiValue
-        )}) - STILL NEEDED`,
-      };
-    }
-
-    if (overrideValue !== null) {
-      return {
-        field: 'map',
-        status: 'needed',
-        message: `map: task has multiple objective maps; override should be null (API=${formatValue(
-          apiValue
-        )}, Override=${formatValue(overrideValue)}) - STILL NEEDED`,
-      };
-    }
-
-    const isMatch = compareSubset(overrideValue, apiValue);
+/** Validate an override for a task whose objectives span multiple maps. */
+function validateMultiMapOverride(
+  overrideValue: TaskOverride['map'],
+  apiValue: TaskData['map']
+): ValidationDetail | null {
+  if (overrideValue === undefined) {
+    if (apiValue === null || apiValue === undefined) return null;
     return {
       field: 'map',
-      status: isMatch ? 'fixed' : 'needed',
-      message: isMatch
-        ? 'map: null - FIXED IN API'
-        : `map: API=${formatValue(apiValue)}, Override=null - STILL NEEDED`,
+      status: 'needed',
+      message: `map: task has multiple objective maps; add map: null to clear top-level map (API=${formatValue(
+        apiValue
+      )}) - STILL NEEDED`,
     };
   }
 
+  if (overrideValue !== null) {
+    return {
+      field: 'map',
+      status: 'needed',
+      message: `map: task has multiple objective maps; override should be null (API=${formatValue(
+        apiValue
+      )}, Override=${formatValue(overrideValue)}) - STILL NEEDED`,
+    };
+  }
+
+  const isMatch = compareSubset(overrideValue, apiValue);
+  return {
+    field: 'map',
+    status: isMatch ? 'fixed' : 'needed',
+    message: isMatch
+      ? 'map: null - FIXED IN API'
+      : `map: API=${formatValue(apiValue)}, Override=null - STILL NEEDED`,
+  };
+}
+
+/** Validate an ordinary single-map override. */
+function validateSingleMapOverride(
+  overrideValue: TaskOverride['map'],
+  apiValue: TaskData['map']
+): ValidationDetail | null {
   if (overrideValue === undefined) return null;
 
   const isMatch = compareSubset(overrideValue, apiValue);
-
   return {
     field: 'map',
     status: isMatch ? 'fixed' : 'needed',
@@ -135,7 +134,13 @@ const validateMap: FieldValidator = (override, apiTask) => {
       ? `map: ${formatValue(apiValue)} - FIXED IN API`
       : `map: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - STILL NEEDED`,
   };
-};
+}
+
+/** Validate map field with awareness of multi-map objectives. */
+const validateMap: FieldValidator = (override, apiTask) =>
+  hasMultipleObjectiveMaps(override, apiTask)
+    ? validateMultiMapOverride(override.map, apiTask.map)
+    : validateSingleMapOverride(override.map, apiTask.map);
 
 type TraderRequirementLike = {
   id?: string;
@@ -156,8 +161,32 @@ function traderRequirementKey(req: TraderRequirementLike): string {
   );
 }
 
+/** Format a trader requirement for a validation diagnostic. */
 function formatTraderRequirement(req: TraderRequirementLike): string {
   return `${req.trader?.name ?? req.trader?.id ?? '?'} ${req.requirementType} ${req.compareMethod} ${req.value}`;
+}
+
+interface TraderRequirementMatches {
+  remaining: TraderRequirementLike[];
+  unmatched: string[];
+}
+
+/** Match override requirements to API requirements by semantic identity. */
+function matchTraderRequirements(
+  overrideReqs: readonly TraderRequirementLike[],
+  apiReqs: readonly TraderRequirementLike[]
+): TraderRequirementMatches {
+  const remaining = [...apiReqs];
+  const unmatched: string[] = [];
+
+  for (const overrideReq of overrideReqs) {
+    const key = traderRequirementKey(overrideReq);
+    const index = remaining.findIndex((apiReq) => traderRequirementKey(apiReq) === key);
+    if (index === -1) unmatched.push(formatTraderRequirement(overrideReq));
+    else remaining.splice(index, 1);
+  }
+
+  return { remaining, unmatched };
 }
 
 /**
@@ -201,18 +230,7 @@ const validateTraderRequirements: FieldValidator = (override, apiTask) => {
     };
   }
 
-  const remaining = [...apiReqs];
-  const unmatched: string[] = [];
-
-  for (const overrideReq of overrideReqs) {
-    const key = traderRequirementKey(overrideReq);
-    const index = remaining.findIndex((apiReq) => traderRequirementKey(apiReq) === key);
-    if (index === -1) {
-      unmatched.push(formatTraderRequirement(overrideReq));
-    } else {
-      remaining.splice(index, 1);
-    }
-  }
+  const { remaining, unmatched } = matchTraderRequirements(overrideReqs, apiReqs);
 
   if (unmatched.length > 0) {
     return {
@@ -308,6 +326,67 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   validateTraderRequirements,
 ];
 
+/** Validate field-level corrections for objectives already known to the API. */
+function validateObjectiveOverrides(override: TaskOverride, apiTask: TaskData): ValidationDetail[] {
+  const details: ValidationDetail[] = [];
+  if (!override.objectives) return details;
+
+  for (const [objId, objOverride] of Object.entries(override.objectives)) {
+    const apiObj = apiTask.objectives?.find((objective) => objective.id === objId);
+    if (!apiObj) {
+      details.push({
+        field: `objective:${objId}`,
+        status: 'check',
+        message: `objective ${objId}: Not found in API - CHECK MANUALLY`,
+      });
+      continue;
+    }
+
+    for (const [field, overrideValue] of Object.entries(objOverride)) {
+      if (overrideValue === undefined) continue;
+      const apiValue = (apiObj as unknown as Record<string, unknown>)[field];
+      const isMatch = compareSubset(overrideValue, apiValue);
+      details.push({
+        field: `objective:${objId}:${field}`,
+        status: isMatch ? 'fixed' : 'needed',
+        message: isMatch
+          ? `objective ${field}: ${formatValue(apiValue)} - FIXED IN API`
+          : `objective ${field}: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - STILL NEEDED`,
+      });
+    }
+  }
+
+  return details;
+}
+
+/** Check whether objectives added by the overlay have appeared upstream. */
+function validateObjectiveAdditions(override: TaskOverride, apiTask: TaskData): ValidationDetail[] {
+  const details: ValidationDetail[] = [];
+  if (!override.objectivesAdd) return details;
+
+  for (const added of override.objectivesAdd) {
+    const apiMatch = apiTask.objectives?.find(
+      (objective) => objective.id === added.id || objective.description === added.description
+    );
+    const field = `objectivesAdd:${added.id || added.description}`;
+    details.push(
+      apiMatch
+        ? {
+            field,
+            status: 'fixed',
+            message: `added objective '${added.description}': NOW IN API - MOVE TO OBJECTIVES OR REMOVE`,
+          }
+        : {
+            field,
+            status: 'needed',
+            message: `added objective '${added.description}': Still missing from API - STILL NEEDED`,
+          }
+    );
+  }
+
+  return details;
+}
+
 /**
  * Validate a single task override against API data
  *
@@ -366,55 +445,9 @@ export function validateTaskOverride(
     if (result) details.push(result);
   }
 
-  // Handle nested objective validations separately for full detail
-  if (override.objectives) {
-    for (const [objId, objOverride] of Object.entries(override.objectives)) {
-      const apiObj = apiTask.objectives?.find((o) => o.id === objId);
-
-      if (!apiObj) {
-        details.push({
-          field: `objective:${objId}`,
-          status: 'check',
-          message: `objective ${objId}: Not found in API - CHECK MANUALLY`,
-        });
-      } else {
-        for (const [field, overrideValue] of Object.entries(objOverride)) {
-          if (overrideValue === undefined) continue;
-          const apiValue = (apiObj as unknown as Record<string, unknown>)[field];
-          const isMatch = compareSubset(overrideValue, apiValue);
-          details.push({
-            field: `objective:${objId}:${field}`,
-            status: isMatch ? 'fixed' : 'needed',
-            message: isMatch
-              ? `objective ${field}: ${formatValue(apiValue)} - FIXED IN API`
-              : `objective ${field}: API=${formatValue(apiValue)}, Override=${formatValue(overrideValue)} - STILL NEEDED`,
-          });
-        }
-      }
-    }
-  }
-
-  // Check if added objectives have appeared in API
-  if (override.objectivesAdd) {
-    for (const added of override.objectivesAdd) {
-      const apiMatch = apiTask.objectives?.find(
-        (o) => o.id === added.id || o.description === added.description
-      );
-      if (apiMatch) {
-        details.push({
-          field: `objectivesAdd:${added.id || added.description}`,
-          status: 'fixed',
-          message: `added objective '${added.description}': NOW IN API - MOVE TO OBJECTIVES OR REMOVE`,
-        });
-      } else {
-        details.push({
-          field: `objectivesAdd:${added.id || added.description}`,
-          status: 'needed',
-          message: `added objective '${added.description}': Still missing from API - STILL NEEDED`,
-        });
-      }
-    }
-  }
+  // Handle nested objective validations separately for full detail.
+  details.push(...validateObjectiveOverrides(override, apiTask));
+  details.push(...validateObjectiveAdditions(override, apiTask));
 
   // Determine overall status
   const needsOverride = details.some((d) => d.status === 'needed' || d.status === 'check');
