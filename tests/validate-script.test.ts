@@ -35,9 +35,9 @@ describe('scripts/validate helpers', () => {
 
   it('requires payloads for known other requirements but preserves unknown types', () => {
     const validators = initializeValidators();
-    const invalidRequirements = [
-      { id: 'dialogue-condition', type: 'dialogue' },
-      { id: 'global-condition', type: 'globalVariable' },
+    const invalidRequirementSets = [
+      [{ id: 'dialogue-condition', type: 'dialogue' }],
+      [{ id: 'global-condition', type: 'globalVariable' }],
     ];
     const cases = [
       {
@@ -59,9 +59,9 @@ describe('scripts/validate helpers', () => {
     for (const { path, base } of cases) {
       const validator = getValidator(path, validators);
       expect(validator).not.toBeNull();
-      expect(validator?.({ task: { ...base, otherRequirements: invalidRequirements } })).toBe(
-        false
-      );
+      for (const otherRequirements of invalidRequirementSets) {
+        expect(validator?.({ task: { ...base, otherRequirements } })).toBe(false);
+      }
       expect(
         validator?.({
           task: { ...base, otherRequirements: [{ id: 'future-condition', type: 'futureType' }] },
