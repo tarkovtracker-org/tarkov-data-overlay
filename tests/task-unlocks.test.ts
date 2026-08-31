@@ -4,6 +4,9 @@ import {
   evaluateTaskUnlock,
   withTaskUnlockAlternatives,
   type TaskData,
+  type TaskRequirement,
+  type TaskRequirementGroup,
+  type TraderRequirement,
   type TaskUnlockCondition,
 } from '../src/lib/index.js';
 
@@ -252,6 +255,55 @@ describe('task unlock model', () => {
     ).toBe('blocked');
   });
 
+  it('derives exclusive story branches from overlay chapters', () => {
+    const task = makeTask({ id: 'story-unlocked-task' });
+    const definition = deriveTaskUnlockDefinition(task, {
+      storyChapters: {
+        batya: {
+          id: 'batya',
+          name: 'Batya',
+          questUnlocks: [{ id: task.id, name: task.name }],
+        },
+        'the-ticket': {
+          id: 'the-ticket',
+          name: 'The Ticket',
+          questUnlocks: [{ id: task.id, name: task.name }],
+        },
+        unrelated: {
+          id: 'unrelated',
+          name: 'Unrelated',
+          questUnlocks: [{ id: 'another-task', name: 'Another Task' }],
+        },
+      },
+    });
+    const state = {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+    };
+
+    expect(definition.alternatives).toEqual([
+      [{ type: 'storyChapterProgress', storyChapter: { id: 'batya', name: 'Batya' } }],
+      [
+        {
+          type: 'storyChapterProgress',
+          storyChapter: { id: 'the-ticket', name: 'The Ticket' },
+        },
+      ],
+    ]);
+    expect(definition.alternativesExclusive).toBe(true);
+    expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        ...state,
+        storyChapters: { batya: false, 'the-ticket': false },
+      }).status
+    ).toBe('blocked');
+    expect(
+      evaluateTaskUnlock(task, definition, { ...state, storyChapters: { 'the-ticket': true } })
+        .status
+    ).toBe('available');
+  });
+
   it('gates Lightkeeper-only tasks with account state', () => {
     const task = makeTask({ lightkeeperRequired: true });
     const definition = deriveTaskUnlockDefinition(task);
@@ -282,6 +334,22 @@ describe('task unlock model', () => {
 
     expect(result.status).toBe('unknown');
     expect(result.unknown).toHaveLength(1);
+  });
+
+  it('fails closed for malformed nested requirements', () => {
+    const task = makeTask({
+      taskRequirements: [null as unknown as TaskRequirement],
+      taskRequirementGroups: [null as unknown as TaskRequirementGroup],
+      traderRequirements: [null as unknown as TraderRequirement],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+    const state = {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+    };
+
+    expect(() => evaluateTaskUnlock(task, definition, state)).not.toThrow();
+    expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
   });
 
   it('allows callers to skip unavailable account feeds explicitly', () => {

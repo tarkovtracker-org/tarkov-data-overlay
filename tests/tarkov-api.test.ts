@@ -567,6 +567,21 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     ).toHaveLength(1);
   });
 
+  it('fails when a required translation endpoint is missing', async () => {
+    const routes = baseRoutes('regular');
+    delete routes['regular/tasks_en'];
+    mockEndpoints(routes);
+    vi.useFakeTimers();
+
+    try {
+      const request = expect(fetchTasks()).rejects.toThrow(/regular\/tasks_en/);
+      await vi.runAllTimersAsync();
+      await request;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('requests pve endpoints when pve mode is requested', async () => {
     const fetchMock = mockEndpoints(baseRoutes('pve'));
 

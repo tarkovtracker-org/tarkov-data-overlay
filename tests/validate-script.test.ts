@@ -70,6 +70,14 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('accepts suppressions for task requirement groups', () => {
+    const validators = initializeValidators();
+    const validator = getValidator('suppressions/tasks.json5', validators);
+
+    expect(validator).not.toBeNull();
+    expect(validator?.({ 'task-id': { taskRequirementGroups: true } })).toBe(true);
+  });
+
   it('validates all source files used by overlay data', async () => {
     const { srcDir } = getProjectPaths();
     const expectedFiles = [

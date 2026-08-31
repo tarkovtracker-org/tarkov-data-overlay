@@ -22,12 +22,10 @@ import {
   isDirectExecution,
   loadJsonFile,
   SUPPORTED_GAME_MODES,
-  withTaskUnlockAlternatives,
   type GameMode,
   type OverlayOutput,
   type TaskData,
   type TaskAddition,
-  type TaskUnlockCondition,
   type TaskUnlockDefinition,
 } from '../src/lib/index.js';
 
@@ -189,29 +187,6 @@ function getTasksForMode(apiTasks: TaskData[], overlay: OverlayOutput | undefine
   return [...tasks.values()];
 }
 
-/** Build story-progress alternative branches keyed by the task they unlock. */
-function storyAlternatives(
-  overlay: OverlayOutput | undefined
-): Map<string, TaskUnlockCondition[][]> {
-  const result = new Map<string, TaskUnlockCondition[][]>();
-  for (const chapter of Object.values(overlay?.storyChapters ?? {})) {
-    for (const quest of chapter.questUnlocks ?? []) {
-      const branch: TaskUnlockCondition[] = [
-        {
-          type: 'storyChapterProgress',
-          storyChapter: { id: chapter.id, name: chapter.name },
-        },
-      ];
-      const branches = result.get(quest.id) ?? [];
-      if (!branches.some((entry) => JSON.stringify(entry) === JSON.stringify(branch))) {
-        branches.push(branch);
-      }
-      result.set(quest.id, branches);
-    }
-  }
-  return result;
-}
-
 /** Keep only map records that expose meaningful entry restrictions. */
 function relevantMaps(access: Awaited<ReturnType<typeof fetchModeAccessData>>['maps']) {
   return Object.fromEntries(
@@ -254,16 +229,6 @@ function taskOverrideFor(
   };
 }
 
-/** Add story alternatives to a task definition when the overlay declares them. */
-function addStoryAlternatives(
-  task: TaskData,
-  unlock: TaskUnlockDefinition,
-  alternatives: Map<string, TaskUnlockCondition[][]>
-): TaskUnlockDefinition {
-  const storyBranches = alternatives.get(task.id);
-  return storyBranches?.length ? withTaskUnlockAlternatives(unlock, storyBranches, true) : unlock;
-}
-
 /** Create the compact report entry for one adapted task. */
 function makeReportTask(
   task: TaskData,
@@ -283,7 +248,6 @@ function buildReportTask(
   apiTask: TaskData,
   overlay: OverlayOutput | undefined,
   mode: GameMode,
-  alternatives: Map<string, TaskUnlockCondition[][]>,
   includeDisabled: boolean
 ): ReportTaskResult {
   const override = taskOverrideFor(apiTask.id, overlay, mode);
@@ -292,7 +256,9 @@ function buildReportTask(
   if (disabled && !includeDisabled) return { disabled };
 
   const task = applyTaskOverlay(apiTask, overlay, mode);
-  const unlock = addStoryAlternatives(task, deriveTaskUnlockDefinition(task), alternatives);
+  const unlock = deriveTaskUnlockDefinition(task, {
+    storyChapters: overlay?.storyChapters,
+  });
 
   return { disabled, task: makeReportTask(task, unlock, disabled) };
 }
@@ -305,12 +271,11 @@ async function buildReport(
 ): Promise<ModeAvailabilityReport> {
   const [apiTasks, access] = await Promise.all([fetchTasks(mode), fetchModeAccessData(mode)]);
   const tasks = getTasksForMode(apiTasks, overlay, mode);
-  const alternatives = storyAlternatives(overlay);
   const reportTasks: Record<string, ReportTask> = {};
   let disabledTaskCount = 0;
 
   for (const apiTask of tasks) {
-    const result = buildReportTask(apiTask, overlay, mode, alternatives, includeDisabled);
+    const result = buildReportTask(apiTask, overlay, mode, includeDisabled);
     if (result.disabled) disabledTaskCount += 1;
     if (result.task) reportTasks[result.task.id] = result.task;
   }
@@ -382,4 +347,4 @@ if (isDirectExecution(import.meta.url)) {
   });
 }
 
-export { buildReport, getTaskAddition, parseArgs, storyAlternatives };
+export { buildReport, getTaskAddition, parseArgs };

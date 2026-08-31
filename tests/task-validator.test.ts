@@ -431,7 +431,7 @@ describe('validateTaskOverride', () => {
       expect(result.stillNeeded).toBe(true);
     });
 
-    it('ignores accepted/active statuses when comparing requirements', () => {
+    it('preserves accepted and active status semantics when comparing requirements', () => {
       const apiTask = createApiTask({
         taskRequirements: [
           { task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['accepted'] },
@@ -440,12 +440,31 @@ describe('validateTaskOverride', () => {
         ],
       });
       const override: TaskOverride = {
-        taskRequirements: [{ task: { id: 'prereq-2', name: 'Completed Task' } }],
+        taskRequirements: [
+          { task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['active'] },
+          { task: { id: 'prereq-2', name: 'Completed Task' } },
+          { task: { id: 'prereq-3', name: 'Active Task' }, status: ['active'] },
+        ],
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
         result.details.some((d) => d.field === 'taskRequirements' && d.status === 'fixed')
+      ).toBe(true);
+    });
+
+    it('reports an omitted active prerequisite as still needed', () => {
+      const apiTask = createApiTask({
+        taskRequirements: [{ task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['active'] }],
+      });
+      const override: TaskOverride = {
+        taskRequirements: [{ task: { id: 'prereq-1', name: 'Prereq Task' } }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some((d) => d.field === 'taskRequirements' && d.status === 'needed')
       ).toBe(true);
     });
   });

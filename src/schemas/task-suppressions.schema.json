@@ -74,6 +74,9 @@
       "taskRequirements": {
         "type": "boolean"
       },
+      "taskRequirementGroups": {
+        "type": "boolean"
+      },
       "traderRequirements": {
         "type": "boolean"
       },

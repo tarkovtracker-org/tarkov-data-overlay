@@ -22,7 +22,9 @@ partially synchronized user.
 
 ## Definition semantics
 
-`deriveTaskUnlockDefinition(task)` produces this compact shape:
+`deriveTaskUnlockDefinition(task, { storyChapters })` produces this compact shape.
+The optional `storyChapters` value is the built overlay's `storyChapters` object;
+matching `questUnlocks` become exclusive story alternatives automatically.
 
 | Field                   | Meaning                                                                                                                                                                                                                                                    |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,12 +86,16 @@ than silently dropping a new BSG start condition.
 ## Account adapter
 
 The consumer should convert its synchronized profile into the small state
-contract used by `evaluateTaskUnlock`:
+contract used by `evaluateTaskUnlock`. The helpers are source-level exports in
+this repository rather than a published npm runtime package, so import them
+from the vendored or workspace source path used by your application:
 
 ```ts
-import { deriveTaskUnlockDefinition, evaluateTaskUnlock } from 'tarkov-data-overlay';
+import { deriveTaskUnlockDefinition, evaluateTaskUnlock } from '../src/lib/index.js';
 
-const definition = deriveTaskUnlockDefinition(task);
+const definition = deriveTaskUnlockDefinition(task, {
+  storyChapters: overlay?.storyChapters,
+});
 const result = evaluateTaskUnlock(task, definition, {
   playerLevel: profile.level,
   faction: profile.faction,

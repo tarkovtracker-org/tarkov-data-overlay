@@ -14,6 +14,7 @@ import type {
   TaskKeyRequirement,
   TaskOtherRequirement,
   TaskRequirement,
+  StoryChapter,
   TraderRequirement,
 } from './types.js';
 
@@ -51,6 +52,19 @@ const STATUS_ALIASES: Readonly<Record<string, string>> = {
 };
 
 type TaskRef = { id: string; name: string };
+
+/** Check the non-array object shape used by remote JSON records. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** Story-chapter fields needed to derive explicit task unlock alternatives. */
+export type TaskUnlockStoryChapter = Pick<StoryChapter, 'id' | 'name' | 'questUnlocks'>;
+
+/** Optional overlay data that contributes unlock paths beyond the API task. */
+export interface TaskUnlockDerivationOptions {
+  storyChapters?: Readonly<Record<string, TaskUnlockStoryChapter>>;
+}
 
 /** A single condition that must be evaluated against player state. */
 export type TaskUnlockCondition =
@@ -214,7 +228,9 @@ function uniqueStrings(values: readonly string[]): string[] {
 
 /** Normalize the statuses accepted by one upstream task prerequisite. */
 function statusesFor(requirement: TaskRequirement): string[] {
-  if (requirement.status === undefined) return [...DEFAULT_TASK_STATUSES];
+  if (!isRecord(requirement) || requirement.status === undefined) {
+    return [...DEFAULT_TASK_STATUSES];
+  }
   if (!Array.isArray(requirement.status)) return [];
 
   return uniqueStrings(
@@ -222,8 +238,52 @@ function statusesFor(requirement: TaskRequirement): string[] {
   );
 }
 
+/** Check the runtime shape needed by a task-status condition. */
+function isTaskRef(value: unknown): value is TaskRef {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    value.id.length > 0 &&
+    typeof value.name === 'string'
+  );
+}
+
+/** Check the comparison operators accepted by numeric unlock conditions. */
+function isCompareMethod(value: unknown): value is TaskUnlockCompareMethod {
+  return value === '>=' || value === '<=' || value === '>' || value === '<' || value === '=';
+}
+
+/** Check whether a value is a finite numeric requirement. */
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+/** Treat malformed upstream conditions as unknown so they cannot unlock a task. */
+function unknownRequirementCondition(
+  requirementId: unknown,
+  requirementType: unknown
+): TaskUnlockCondition {
+  return {
+    type: 'unknown',
+    requirementId:
+      typeof requirementId === 'string' && requirementId.length > 0
+        ? requirementId
+        : 'malformed-requirement',
+    requirementType:
+      typeof requirementType === 'string' && requirementType.length > 0
+        ? requirementType
+        : 'malformed',
+  };
+}
+
 /** Convert one task prerequisite into a task-status unlock condition. */
 function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondition {
+  if (!isRecord(requirement) || !isTaskRef(requirement.task)) {
+    return unknownRequirementCondition(
+      isRecord(requirement) ? requirement.id : undefined,
+      'taskRequirement'
+    );
+  }
   return {
     type: 'taskStatus',
     task: requirement.task,
@@ -233,6 +293,19 @@ function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondi
 
 /** Convert one trader-level or trader-reputation prerequisite into a condition. */
 function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockCondition {
+  if (
+    !isRecord(requirement) ||
+    !isTaskRef(requirement.trader) ||
+    !isFiniteNumber(requirement.value) ||
+    !isCompareMethod(requirement.compareMethod) ||
+    (requirement.requirementType !== 'level' && requirement.requirementType !== 'reputation')
+  ) {
+    return unknownRequirementCondition(
+      isRecord(requirement) ? requirement.id : undefined,
+      isRecord(requirement) ? requirement.requirementType : undefined
+    );
+  }
+
   if (requirement.requirementType === 'level') {
     return {
       type: 'traderLevel',
@@ -254,8 +327,18 @@ function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockC
 
 /** Convert a known or future hidden requirement into an unlock condition. */
 function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnlockCondition {
+  if (!isRecord(requirement) || typeof requirement.type !== 'string') {
+    return unknownRequirementCondition(
+      isRecord(requirement) ? requirement.id : undefined,
+      isRecord(requirement) ? requirement.type : undefined
+    );
+  }
+
   if (requirement.type === 'dialogue') {
-    const dialogue = requirement as TaskDialogueRequirement;
+    const dialogue = requirement as unknown as TaskDialogueRequirement;
+    if (typeof dialogue.id !== 'string' || !Array.isArray(dialogue.traders)) {
+      return unknownRequirementCondition(dialogue.id, dialogue.type);
+    }
     return {
       type: 'dialogue',
       requirementId: dialogue.id,
@@ -264,7 +347,15 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
   }
 
   if (requirement.type === 'globalVariable') {
-    const globalVariable = requirement as TaskGlobalVariableRequirement;
+    const globalVariable = requirement as unknown as TaskGlobalVariableRequirement;
+    if (
+      typeof globalVariable.id !== 'string' ||
+      typeof globalVariable.variableId !== 'string' ||
+      !isCompareMethod(globalVariable.compareMethod) ||
+      !isFiniteNumber(globalVariable.value)
+    ) {
+      return unknownRequirementCondition(globalVariable.id, globalVariable.type);
+    }
     return {
       type: 'globalVariable',
       requirementId: globalVariable.id,
@@ -274,11 +365,63 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
     };
   }
 
-  return {
-    type: 'unknown',
-    requirementId: requirement.id,
-    requirementType: requirement.type,
-  };
+  return unknownRequirementCondition(requirement.id, requirement.type);
+}
+
+/** Return the story branches that explicitly name a task as their unlock. */
+function storyAlternativeConditions(
+  taskId: string,
+  storyChapters: TaskUnlockDerivationOptions['storyChapters']
+): TaskUnlockCondition[][] {
+  const alternatives: TaskUnlockCondition[][] = [];
+  const seenChapterIds = new Set<string>();
+
+  for (const chapter of Object.values(storyChapters ?? {})) {
+    if (!isRecord(chapter)) continue;
+    if (
+      !Array.isArray(chapter.questUnlocks) ||
+      !chapter.questUnlocks.some((quest) => isRecord(quest) && quest.id === taskId)
+    ) {
+      continue;
+    }
+
+    const chapterId =
+      typeof chapter.id === 'string' && chapter.id.length > 0
+        ? chapter.id
+        : `malformed-story-chapter:${taskId}`;
+    const chapterName = typeof chapter.name === 'string' ? chapter.name : chapterId;
+    if (seenChapterIds.has(chapterId)) continue;
+
+    seenChapterIds.add(chapterId);
+    alternatives.push([
+      {
+        type: 'storyChapterProgress',
+        storyChapter: { id: chapterId, name: chapterName },
+      },
+    ]);
+  }
+
+  return alternatives;
+}
+
+/** Convert a possibly malformed task-requirement array without failing open. */
+function taskRequirementConditions(value: unknown): TaskUnlockCondition[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return [unknownRequirementCondition(undefined, 'taskRequirements')];
+  return value.map(taskRequirementCondition);
+}
+
+/** Convert OR groups while preserving an unknown state for malformed input. */
+function taskRequirementGroupConditions(value: unknown): TaskUnlockCondition[][] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    return [[unknownRequirementCondition(undefined, 'taskRequirementGroups')]];
+  }
+  return value.map((group) =>
+    Array.isArray(group)
+      ? group.map(taskRequirementCondition)
+      : [unknownRequirementCondition(undefined, 'taskRequirementGroup')]
+  );
 }
 
 /** Derive the minimum-player-level condition when the task declares one. */
@@ -310,12 +453,20 @@ function deriveCommonUnlockConditions(task: TaskData): TaskUnlockCondition[] {
     (condition): condition is TaskUnlockCondition => condition !== undefined
   );
 
-  for (const requirement of task.traderRequirements ?? []) {
-    all.push(traderRequirementCondition(requirement));
+  if (Array.isArray(task.traderRequirements)) {
+    for (const requirement of task.traderRequirements) {
+      all.push(traderRequirementCondition(requirement));
+    }
+  } else if (task.traderRequirements !== undefined) {
+    all.push(unknownRequirementCondition(undefined, 'traderRequirements'));
   }
 
-  for (const requirement of task.otherRequirements ?? []) {
-    all.push(otherRequirementCondition(requirement));
+  if (Array.isArray(task.otherRequirements)) {
+    for (const requirement of task.otherRequirements) {
+      all.push(otherRequirementCondition(requirement));
+    }
+  } else if (task.otherRequirements !== undefined) {
+    all.push(unknownRequirementCondition(undefined, 'otherRequirements'));
   }
 
   return all;
@@ -332,14 +483,18 @@ function deriveTaskTiming(task: TaskData): TaskUnlockTiming | undefined {
 /**
  * Convert the fields published by json.tarkov.dev into an explicit unlock
  * definition. No dependency is inferred from task order, name, map, or
- * objective text.
+ * objective text; story alternatives are taken only from explicit overlay
+ * `storyChapters` data supplied through options.
  */
-export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition {
+export function deriveTaskUnlockDefinition(
+  task: TaskData,
+  options: TaskUnlockDerivationOptions = {}
+): TaskUnlockDefinition {
   const timing = deriveTaskTiming(task);
   const definition: TaskUnlockDefinition = {
     all: deriveCommonUnlockConditions(task),
-    taskRequirements: (task.taskRequirements ?? []).map(taskRequirementCondition),
-    anyOf: (task.taskRequirementGroups ?? []).map((group) => group.map(taskRequirementCondition)),
+    taskRequirements: taskRequirementConditions(task.taskRequirements),
+    anyOf: taskRequirementGroupConditions(task.taskRequirementGroups),
     context: {},
   };
 
@@ -353,7 +508,10 @@ export function deriveTaskUnlockDefinition(task: TaskData): TaskUnlockDefinition
     definition.completion = { neededKeys: task.neededKeys };
   }
 
-  return definition;
+  const alternatives = storyAlternativeConditions(task.id, options.storyChapters);
+  return alternatives.length
+    ? withTaskUnlockAlternatives(definition, alternatives, true)
+    : definition;
 }
 
 /**

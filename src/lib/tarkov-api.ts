@@ -149,6 +149,11 @@ function isNotFoundError(error: unknown): error is Error {
   return error instanceof Error && /request failed: 404\b/.test(error.message);
 }
 
+/** Return true only for the translation endpoint known to be absent upstream. */
+function isOptionalTranslationEndpoint(mode: GameMode, endpoint: string, locale: string): boolean {
+  return mode === 'pvp-season' && endpoint === 'items' && locale === 'en';
+}
+
 /** Normalize retryable failures, rethrowing errors that should fail fast. */
 function normalizeFetchError(error: unknown, retryNotFound: boolean): Error {
   if (error instanceof EnvelopeValidationError) throw error;
@@ -198,15 +203,17 @@ async function fetchTranslations(
   endpoint: string,
   locale = 'en'
 ): Promise<TranslationMap> {
+  const optional = isOptionalTranslationEndpoint(mode, endpoint, locale);
   try {
-    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`, false);
+    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`, !optional);
     return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
   } catch (error) {
     // The endpoint registry currently advertises translations for every mode,
     // but pvp-season/items_en is absent in production. A missing translation
-    // map is recoverable because adapters already fall back to the raw key;
-    // transport/server errors must still fail the fetch.
-    if (isNotFoundError(error)) return {};
+    // map is recoverable because adapters already fall back to the raw key.
+    // Other translation endpoints are required so an upstream contract change
+    // cannot silently turn all names into raw keys.
+    if (optional && isNotFoundError(error)) return {};
     throw error;
   }
 }

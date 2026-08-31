@@ -258,21 +258,97 @@ const validateTraderRequirements: FieldValidator = (override, apiTask) => {
   };
 };
 
-/**
- * Validate task requirements field
- */
+type TaskRequirementLike = {
+  task?: { id?: string; name?: string };
+  status?: unknown;
+} | null;
+
+const TASK_STATUS_ALIASES: Readonly<Record<string, string>> = {
+  accepted: 'active',
+  availableafter: 'active',
+  availableforfinish: 'active',
+  availableforstart: 'active',
+  completed: 'complete',
+  expired: 'failed',
+  fail: 'failed',
+  failedrestartable: 'failed',
+  markedasfailed: 'failed',
+  started: 'active',
+  success: 'complete',
+};
+
+/** Normalize the status semantics used by the task unlock evaluator. */
+function normalizeTaskRequirementStatus(status: unknown): string {
+  if (typeof status !== 'string') return `invalid:${String(status)}`;
+  const normalized = status
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, '');
+  return TASK_STATUS_ALIASES[normalized] ?? normalized;
+}
+
+/** Build the semantic identity of one task prerequisite. */
+function taskRequirementKey(requirement: TaskRequirementLike): string {
+  if (!requirement || typeof requirement !== 'object') return 'malformed|taskRequirement';
+
+  const taskId = requirement.task?.id ?? '';
+  const statuses =
+    requirement.status === undefined
+      ? ['complete']
+      : Array.isArray(requirement.status)
+        ? [...new Set(requirement.status.map(normalizeTaskRequirementStatus))].sort()
+        : ['invalid-status'];
+  return `${taskId}|${statuses.join(',')}`;
+}
+
+/** Format a task prerequisite for a validation diagnostic. */
+function formatTaskRequirement(requirement: TaskRequirementLike): string {
+  if (!requirement || typeof requirement !== 'object') return 'malformed task requirement';
+  const task = requirement.task?.name ?? requirement.task?.id ?? '?';
+  const statuses = requirement.status === undefined ? 'complete' : formatValue(requirement.status);
+  return `${task} [${statuses}]`;
+}
+
+interface TaskRequirementMatches {
+  remaining: TaskRequirementLike[];
+  unmatched: string[];
+}
+
+/** Match task prerequisites by the semantics used by availability evaluation. */
+function matchTaskRequirements(
+  overrideReqs: readonly TaskRequirementLike[],
+  apiReqs: readonly TaskRequirementLike[]
+): TaskRequirementMatches {
+  const remaining = [...apiReqs];
+  const unmatched: string[] = [];
+
+  for (const overrideReq of overrideReqs) {
+    const key = taskRequirementKey(overrideReq);
+    const index = remaining.findIndex((apiReq) => taskRequirementKey(apiReq) === key);
+    if (index === -1) unmatched.push(formatTaskRequirement(overrideReq));
+    else remaining.splice(index, 1);
+  }
+
+  return { remaining, unmatched };
+}
+
+/** Validate task requirements without discarding active or accepted edges. */
 const validateTaskRequirements: FieldValidator = (override, apiTask) => {
   if (override.taskRequirements === undefined) return null;
 
-  const apiReqs = (apiTask.taskRequirements || []).filter(
-    (r) =>
-      !(r.status ?? []).some((status) =>
-        ['active', 'accepted'].includes(status.trim().toLowerCase())
-      )
-  );
-  const overrideReqs = override.taskRequirements;
+  const apiReqs = (apiTask.taskRequirements ?? []) as TaskRequirementLike[];
+  const overrideReqs = override.taskRequirements as TaskRequirementLike[];
 
-  if (apiReqs.length === 0 && overrideReqs.length > 0) {
+  if (overrideReqs.length === 0) {
+    if (apiReqs.length === 0) return null;
+    return {
+      field: 'taskRequirements',
+      status: 'needed',
+      message: `taskRequirements: API has ${apiReqs.length} requirement(s), Override=[] (clears all) - STILL NEEDED`,
+    };
+  }
+
+  if (apiReqs.length === 0) {
     return {
       field: 'taskRequirements',
       status: 'needed',
@@ -280,28 +356,28 @@ const validateTaskRequirements: FieldValidator = (override, apiTask) => {
     };
   }
 
-  if (apiReqs.length > 0) {
-    const apiReqIds = apiReqs.map((r) => r.task?.id).sort();
-    const overrideReqIds = overrideReqs.map((r) => r.task?.id).sort();
-
-    if (JSON.stringify(apiReqIds) !== JSON.stringify(overrideReqIds)) {
-      return {
-        field: 'taskRequirements',
-        status: 'needed',
-        message: `taskRequirements: API has different requirements (${apiReqIds.join(
-          ', '
-        )}) vs Override (${overrideReqIds.join(', ')}) - NEEDS REVIEW`,
-      };
-    }
-
+  const { remaining, unmatched } = matchTaskRequirements(overrideReqs, apiReqs);
+  if (unmatched.length > 0) {
     return {
       field: 'taskRequirements',
-      status: 'fixed',
-      message: 'taskRequirements: FIXED IN API',
+      status: 'needed',
+      message: `taskRequirements: ${unmatched.length} requirement(s) differ from API (${unmatched.join('; ')}) - STILL NEEDED`,
     };
   }
 
-  return null;
+  if (remaining.length > 0) {
+    return {
+      field: 'taskRequirements',
+      status: 'needed',
+      message: `taskRequirements: override omits ${remaining.length} API requirement(s) (${remaining.map(formatTaskRequirement).join('; ')}) - STILL NEEDED`,
+    };
+  }
+
+  return {
+    field: 'taskRequirements',
+    status: 'fixed',
+    message: 'taskRequirements: FIXED IN API',
+  };
 };
 
 /** All field validators in order */
