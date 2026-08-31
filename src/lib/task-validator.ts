@@ -303,6 +303,7 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('neededKeys'),
   createFieldValidator('availableDelaySecondsMin'),
   createFieldValidator('availableDelaySecondsMax'),
+  createFieldValidator('taskRequirementGroups'),
   validateTaskRequirements,
   validateTraderRequirements,
 ];

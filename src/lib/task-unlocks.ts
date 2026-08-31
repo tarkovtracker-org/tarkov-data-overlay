@@ -196,10 +196,12 @@ function uniqueStrings(values: readonly string[]): string[] {
 }
 
 function statusesFor(requirement: TaskRequirement): string[] {
-  const statuses = requirement.status?.filter(
-    (status): status is string => typeof status === 'string'
+  if (requirement.status === undefined) return [...DEFAULT_TASK_STATUSES];
+  if (!Array.isArray(requirement.status)) return [];
+
+  return uniqueStrings(
+    requirement.status.filter((status): status is string => typeof status === 'string')
   );
-  return uniqueStrings(statuses && statuses.length > 0 ? statuses : DEFAULT_TASK_STATUSES);
 }
 
 function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondition {
@@ -410,6 +412,9 @@ function evaluateCondition(
       };
     }
     case 'taskStatus': {
+      if (condition.statuses.length === 0) {
+        return { state: 'unknown', reason: 'task status requirement has no supported statuses' };
+      }
       const actual = state.taskStatuses?.[condition.task.id];
       if (actual === undefined) return { state: 'unknown', reason: 'task status is not present' };
       const statuses = Array.isArray(actual) ? actual : [actual];
@@ -712,10 +717,8 @@ export function evaluateTaskUnlock(
 
   let unlockPath = basePath;
   if (definition.alternatives?.length) {
-    const hasOrdinaryTaskPath =
-      definition.taskRequirements.length > 0 || definition.anyOf.length > 0;
     const candidates = [
-      ...(definition.alternativesExclusive === false || hasOrdinaryTaskPath ? [basePath] : []),
+      ...(definition.alternativesExclusive === false ? [basePath] : []),
       alternativePath,
     ];
     unlockPath = {

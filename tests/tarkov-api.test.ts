@@ -519,6 +519,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
                 id: 't1',
                 name: 't1 name',
                 taskRequirements: [{ task: 'prereq', status: ['complete'] }],
+                taskRequirementGroups: [[{ task: 'prereq', status: ['active'] }]],
               },
             },
           },
@@ -534,6 +535,9 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
       task: { id: 'prereq', name: 'Debut' },
       status: ['complete'],
     });
+    expect(t1?.taskRequirementGroups).toEqual([
+      [{ task: { id: 'prereq', name: 'Debut' }, status: ['active'] }],
+    ]);
   });
 
   it('falls back to the raw key when a name has no translation', async () => {
@@ -555,9 +559,12 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     const routes = baseRoutes('pvp-season');
     delete routes['pvp-season/items_en'];
 
-    mockEndpoints(routes);
+    const fetchMock = mockEndpoints(routes);
 
     await expect(fetchTasks('pvp-season')).resolves.toEqual([]);
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/pvp-season/items_en'))
+    ).toHaveLength(1);
   });
 
   it('requests pve endpoints when pve mode is requested', async () => {

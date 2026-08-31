@@ -918,6 +918,22 @@
             "compareMethod": { "enum": [">=", "<=", ">", "<", "="] },
             "value": { "type": "number" }
           },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "type": { "const": "dialogue" } },
+                "required": ["type"]
+              },
+              "then": { "required": ["traders"] }
+            },
+            {
+              "if": {
+                "properties": { "type": { "const": "globalVariable" } },
+                "required": ["type"]
+              },
+              "then": { "required": ["variableId", "compareMethod", "value"] }
+            }
+          ],
           "required": ["id", "type"],
           "type": "object"
         },

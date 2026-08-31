@@ -24,15 +24,15 @@ partially synchronized user.
 
 `deriveTaskUnlockDefinition(task)` produces this compact shape:
 
-| Field                   | Meaning                                                                                                                                                         |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `all`                   | Every condition is required: player level, faction, prestige, trader reputation/loyalty, and hidden requirements.                                               |
-| `taskRequirements`      | Every referenced task must be in one of its listed statuses. A missing `status` means `complete`.                                                               |
-| `anyOf`                 | Each group is required, but one task in that group is enough. This is the explicit format for an OR slot.                                                       |
-| `alternatives`          | Complete alternative task/story paths. With `alternativesExclusive: true`, these replace the normal `taskRequirements`/`anyOf` path while `all` remains common. |
-| `context`               | The task giver, assigned map, and `lightkeeperRequired` flag. These need account-state checks.                                                                  |
-| `timing`                | A minimum/maximum delay after the other start conditions become true.                                                                                           |
-| `completion.neededKeys` | Keys needed to enter a raid/objective; this is not a task-start prerequisite.                                                                                   |
+| Field                   | Meaning                                                                                                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `all`                   | Every condition is required: player level, faction, prestige, trader reputation/loyalty, and hidden requirements.                                                                               |
+| `taskRequirements`      | Every referenced task must be in one of its listed statuses. A missing `status` means `complete`.                                                                                               |
+| `anyOf`                 | Each group is required, but one task in that group is enough. This is the explicit format for an OR slot.                                                                                       |
+| `alternatives`          | Complete alternative task/story paths. With `alternativesExclusive: true`, these replace the normal `taskRequirements`/`anyOf` path; with `false`, they are ORed with it. `all` remains common. |
+| `context`               | The task giver, assigned map, and `lightkeeperRequired` flag. These need account-state checks.                                                                                                  |
+| `timing`                | A minimum/maximum delay after the other start conditions become true.                                                                                                                           |
+| `completion.neededKeys` | Keys needed to enter a raid/objective; this is not a task-start prerequisite.                                                                                                                   |
 
 The boolean algebra is:
 

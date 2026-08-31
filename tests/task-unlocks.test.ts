@@ -211,6 +211,26 @@ describe('task unlock model', () => {
     expect(
       evaluateTaskUnlock(task, definition, { ...state, storyChapters: { batya: true } }).status
     ).toBe('available');
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        ...state,
+        taskStatuses: { [prerequisite.id]: 'complete' },
+        storyChapters: { batya: false },
+      }).status
+    ).toBe('blocked');
+
+    const nonExclusiveDefinition = withTaskUnlockAlternatives(
+      deriveTaskUnlockDefinition(task),
+      [[storyCondition]],
+      false
+    );
+    expect(
+      evaluateTaskUnlock(task, nonExclusiveDefinition, {
+        ...state,
+        taskStatuses: { [prerequisite.id]: 'complete' },
+        storyChapters: { batya: false },
+      }).status
+    ).toBe('available');
   });
 
   it('does not treat an unmodeled ordinary path as available beside story branches', () => {
@@ -246,6 +266,50 @@ describe('task unlock model', () => {
     expect(
       evaluateTaskUnlock(task, definition, { ...state, lightkeeperUnlocked: true }).status
     ).toBe('available');
+  });
+
+  it('does not default malformed task status requirements to complete', () => {
+    const task = makeTask({
+      taskRequirements: [{ task: prerequisite, status: [123 as unknown as string] }],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+    const result = evaluateTaskUnlock(task, definition, {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+      taskStatuses: { [prerequisite.id]: 'complete' },
+    });
+
+    expect(result.status).toBe('unknown');
+    expect(result.unknown).toHaveLength(1);
+  });
+
+  it('allows callers to skip unavailable account feeds explicitly', () => {
+    const task = makeTask({
+      lightkeeperRequired: true,
+      availableDelaySecondsMin: 10,
+      availableDelaySecondsMax: 20,
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+    const result = evaluateTaskUnlock(
+      task,
+      definition,
+      {},
+      {
+        checkTraderUnlock: false,
+        checkLightkeeperAccess: false,
+        checkMapAccess: false,
+        checkTiming: false,
+      }
+    );
+
+    expect(result.status).toBe('available');
+    expect(result.context).toEqual([]);
+  });
+
+  it('rejects empty externally supplied alternative branches', () => {
+    expect(() => withTaskUnlockAlternatives(deriveTaskUnlockDefinition(makeTask()), [[]])).toThrow(
+      /at least one condition/
+    );
   });
 
   it('keeps a random availability window unknown until its upper bound elapses', () => {

@@ -33,6 +33,43 @@ describe('scripts/validate helpers', () => {
     expect(getValidator('unknown.json5', validators)).toBeNull();
   });
 
+  it('requires payloads for known other requirements but preserves unknown types', () => {
+    const validators = initializeValidators();
+    const invalidRequirements = [
+      { id: 'dialogue-condition', type: 'dialogue' },
+      { id: 'global-condition', type: 'globalVariable' },
+    ];
+    const cases = [
+      {
+        path: 'overrides/tasks.json5',
+        base: {},
+      },
+      {
+        path: 'additions/tasksAdd.json5',
+        base: {
+          id: 'task-id',
+          name: 'Task',
+          wikiLink: 'https://example.com/task',
+          trader: { name: 'Prapor' },
+          objectives: [],
+        },
+      },
+    ];
+
+    for (const { path, base } of cases) {
+      const validator = getValidator(path, validators);
+      expect(validator).not.toBeNull();
+      expect(validator?.({ task: { ...base, otherRequirements: invalidRequirements } })).toBe(
+        false
+      );
+      expect(
+        validator?.({
+          task: { ...base, otherRequirements: [{ id: 'future-condition', type: 'futureType' }] },
+        })
+      ).toBe(true);
+    }
+  });
+
   it('validates all source files used by overlay data', async () => {
     const { srcDir } = getProjectPaths();
     const expectedFiles = [

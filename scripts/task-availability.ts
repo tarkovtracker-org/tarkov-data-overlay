@@ -252,9 +252,9 @@ async function buildReport(
       semantics: {
         all: 'Every entry in unlock.all and unlock.context must be met.',
         anyOf:
-          'Every unlock.anyOf group needs one met entry; groups are ANDed unless an exclusive alternative path is selected.',
+          'Every unlock.anyOf group needs one met entry in the ordinary path; alternativesExclusive can replace that whole path.',
         taskRequirements:
-          'Every unlock.taskRequirements entry is required; alternatives may replace this path.',
+          'Every unlock.taskRequirements entry is required in the ordinary path; alternativesExclusive=true replaces it, while false keeps it as an OR path.',
         statuses: 'Statuses within one taskStatus condition are ORed.',
         unknown: 'Missing account state is unknown and must not be rendered as available.',
       },

@@ -139,7 +139,7 @@ function validateEnvelope(payload: unknown, path: string): Envelope {
   return payload as Envelope;
 }
 
-async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
+async function fetchEnvelopeOnce(path: string, retryNotFound = true): Promise<Envelope> {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= DEFAULT_MAX_RETRIES; attempt += 1) {
     try {
@@ -156,6 +156,11 @@ async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
     } catch (error) {
       // Malformed payloads will not change on retry; fail fast.
       if (error instanceof EnvelopeValidationError) throw error;
+      // Optional translation endpoints use 404 as a normal "not available"
+      // response. Do not spend the retry/backoff budget on that expected case.
+      if (!retryNotFound && error instanceof Error && /request failed: 404\b/.test(error.message)) {
+        throw error;
+      }
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt === DEFAULT_MAX_RETRIES) break;
       await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
@@ -165,8 +170,14 @@ async function fetchEnvelopeOnce(path: string): Promise<Envelope> {
 }
 
 /** Fetch an endpoint envelope, deduping concurrent reads within one call. */
-function fetchEnvelope(cache: EndpointCache, path: string): Promise<Envelope> {
-  return fetchCached(cache, path, fetchEnvelopeOnce);
+function fetchEnvelope(
+  cache: EndpointCache,
+  path: string,
+  retryNotFound = true
+): Promise<Envelope> {
+  return fetchCached(cache, path, (requestedPath) =>
+    fetchEnvelopeOnce(requestedPath, retryNotFound)
+  );
 }
 
 /** Fetch an `_<locale>` endpoint and return its flat translation map. */
@@ -177,7 +188,7 @@ async function fetchTranslations(
   locale = 'en'
 ): Promise<TranslationMap> {
   try {
-    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`);
+    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`, false);
     return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
   } catch (error) {
     // The endpoint registry currently advertises translations for every mode,
@@ -404,6 +415,11 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     experience: typeof raw.experience === 'number' ? raw.experience : undefined,
     taskRequirements: Array.isArray(raw.taskRequirements)
       ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
+      : undefined,
+    taskRequirementGroups: Array.isArray(raw.taskRequirementGroups)
+      ? raw.taskRequirementGroups.map((group) =>
+          Array.isArray(group) ? group.map((req) => adaptTaskRequirement(req, ctx)) : []
+        )
       : undefined,
     traderRequirements: Array.isArray(raw.traderRequirements)
       ? raw.traderRequirements.map((req) =>

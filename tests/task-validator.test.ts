@@ -449,6 +449,25 @@ describe('validateTaskOverride', () => {
     });
   });
 
+  describe('taskRequirementGroups validation', () => {
+    it('returns NEEDED when requirement groups differ from the API', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [[{ task: { id: 'prereq-1', name: 'Prereq Task' } }]],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [[{ task: { id: 'prereq-2', name: 'Other Task' } }]],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'needed'
+        )
+      ).toBe(true);
+    });
+  });
+
   describe('startRewards validation', () => {
     it('returns FIXED when override is a subset of API startRewards', () => {
       const apiTask = createApiTask({
