@@ -145,6 +145,14 @@ function additionAsTask(addition: TaskAddition): TaskData {
   } as TaskData;
 }
 
+function getTaskAddition(
+  overlay: OverlayOutput | undefined,
+  mode: GameMode,
+  taskId: string
+): TaskAddition | undefined {
+  return overlay?.modes?.[mode]?.tasksAdd?.[taskId] ?? overlay?.tasksAdd?.[taskId];
+}
+
 function getTasksForMode(apiTasks: TaskData[], overlay: OverlayOutput | undefined, mode: GameMode) {
   const tasks = new Map(apiTasks.map((task) => [task.id, task]));
   const additions = {
@@ -218,8 +226,7 @@ async function buildReport(
       ...(overlay?.tasks?.[apiTask.id] ?? {}),
       ...(overlay?.modes?.[mode]?.tasks?.[apiTask.id] ?? {}),
     };
-    const addition =
-      overlay?.tasksAdd?.[apiTask.id] ?? overlay?.modes?.[mode]?.tasksAdd?.[apiTask.id];
+    const addition = getTaskAddition(overlay, mode, apiTask.id);
     const disabled = override?.disabled === true;
     const additionDisabled = addition?.disabled === true;
     const isDisabled = disabled || additionDisabled;
@@ -304,4 +311,4 @@ if (isDirectExecution(import.meta.url)) {
   });
 }
 
-export { buildReport, parseArgs, storyAlternatives };
+export { buildReport, getTaskAddition, parseArgs, storyAlternatives };

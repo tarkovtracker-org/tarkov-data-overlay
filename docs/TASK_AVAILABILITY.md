@@ -37,11 +37,19 @@ partially synchronized user.
 The boolean algebra is:
 
 ```text
-all AND context AND (
-  taskRequirements AND every(anyOf group)
-  OR one(alternatives)                 # only when alternatives exist
-)
+ordinary = taskRequirements AND every(anyOf group)
+
+no alternatives:
+  all AND context AND ordinary
+alternativesExclusive = false:
+  all AND context AND (ordinary OR one(alternatives))
+alternativesExclusive = true:
+  all AND context AND one(alternatives)
 ```
+
+When alternatives are present, only the branch selected by
+`alternativesExclusive` is used: `false` keeps the ordinary path as an OR
+candidate, while `true` evaluates only the explicit alternatives.
 
 Status values inside one task requirement are ORed. For example, `['complete',
 'failed']` means either terminal state satisfies that one edge. A task edge with
