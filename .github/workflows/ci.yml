@@ -55,8 +55,49 @@ jobs:
         timeout-minutes: 15
         run: npm run check-overrides -- --fail-on-stale
 
+      - name: Compute next overlay version
+        id: version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git fetch --tags --force
+          latest_tag=""
+          while IFS= read -r candidate; do
+            if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+              latest_tag="$candidate"
+              break
+            fi
+          done < <(git tag --list 'v*' --sort=-v:refname)
+
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="v1.0"
+          else
+            version="${latest_tag#v}"
+            IFS='.' read -r major minor <<< "$version"
+            next_tag="v${major}.$((minor + 1))"
+          fi
+
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+
       - name: Check generated overlay
         run: npm run build:check
 
+      - name: Build overlay for release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          OVERLAY_VERSION: ${{ steps.version.outputs.next_tag }}
+        run: |
+          export OVERLAY_VERSION="${OVERLAY_VERSION#v}"
+          npm run build
+
       - name: Build overlay
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
         run: npm run build
+
+      - name: Upload validated release overlay
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: overlay-${{ github.sha }}
+          path: dist/overlay.json
+          if-no-files-found: error
+          retention-days: 7

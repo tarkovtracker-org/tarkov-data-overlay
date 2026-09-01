@@ -7,6 +7,7 @@ on:
     branches: [main]
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -27,26 +28,42 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
           persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24'
-          cache: 'npm'
+      - name: Download validated release overlay
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          artifact_dir="$(mktemp -d)"
+          trap 'rm -rf "$artifact_dir"' EXIT
+          gh run download "$RUN_ID" \
+            --repo "$REPOSITORY" \
+            --name "overlay-${HEAD_SHA}" \
+            --dir "$artifact_dir"
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
+          test -f "$artifact_dir/overlay.json"
+          mkdir -p dist
+          cp -- "$artifact_dir/overlay.json" dist/overlay.json
+
+      - name: Verify main still matches the validated CI run
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          git fetch origin main --no-tags
+          checked_out_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git rev-parse origin/main)"
+          if [[ "$checked_out_sha" != "$EXPECTED_SHA" || "$remote_sha" != "$EXPECTED_SHA" ]]; then
+            echo "main advanced after CI completed; refusing to release an unvalidated commit" >&2
+            exit 1
+          fi
 
       - name: Compute next tag
         id: version
         run: |
-          git fetch origin main --no-tags
-          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
-            echo "main advanced after CI completed; refusing to release an unvalidated commit" >&2
-            exit 1
-          fi
           git fetch --tags
           latest_tag=""
           while IFS= read -r candidate; do
@@ -65,12 +82,59 @@ jobs:
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Build overlay
+      - name: Verify release artifact
         env:
-          OVERLAY_VERSION: ${{ steps.version.outputs.next_tag }}
+          EXPECTED_VERSION: ${{ steps.version.outputs.next_tag }}
         run: |
-          export OVERLAY_VERSION="${OVERLAY_VERSION#v}"
-          npm run build
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+
+          const file = 'dist/overlay.json';
+          const maxBytes = 32 * 1024 * 1024;
+          const raw = fs.readFileSync(file);
+          if (raw.length > maxBytes) {
+            throw new Error(`Overlay exceeds ${maxBytes} bytes`);
+          }
+
+          let overlay;
+          try {
+            overlay = JSON.parse(raw.toString('utf8'));
+          } catch (error) {
+            throw new Error(`Overlay is not valid JSON: ${error.message}`);
+          }
+
+          if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
+            throw new Error('Overlay must be a JSON object');
+          }
+
+          const meta = overlay.$meta;
+          const expectedVersion = process.env.EXPECTED_VERSION.replace(/^v/, '');
+          if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
+            throw new Error('Overlay metadata is missing');
+          }
+          if (meta.version !== expectedVersion) {
+            throw new Error(
+              `Overlay version ${String(meta.version)} does not match ${expectedVersion}`
+            );
+          }
+          if (typeof meta.generated !== 'string' || !Number.isFinite(Date.parse(meta.generated))) {
+            throw new Error('Overlay generated timestamp is invalid');
+          }
+          if (typeof meta.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(meta.sha256)) {
+            throw new Error('Overlay SHA256 metadata is invalid');
+          }
+
+          const expectedDigest = meta.sha256;
+          delete meta.sha256;
+          const actualDigest = crypto
+            .createHash('sha256')
+            .update(JSON.stringify(overlay, null, 2))
+            .digest('hex');
+          if (actualDigest !== expectedDigest) {
+            throw new Error('Overlay SHA256 does not match its content');
+          }
+          NODE
 
       - name: Commit generated overlay
         id: commit
