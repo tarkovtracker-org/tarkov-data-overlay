@@ -8,6 +8,16 @@ export * from './terminal.js';
 export * from './types.js';
 export * from './value-compare.js';
 export * from './tarkov-api.js';
+export {
+  getLatestTagVersion,
+  indexTaskAdditions,
+  mapOptionalArray,
+  mergeTaskOverride,
+  readResponseJson,
+  resolveDialogueTraderRefs,
+  selectTaskAdditions,
+  verifyOverlaySha256,
+} from './tarkov-api-shared.cjs';
 export * from './task-validator.js';
 export * from './task-unlocks.js';
 export * from './locale-validator.js';

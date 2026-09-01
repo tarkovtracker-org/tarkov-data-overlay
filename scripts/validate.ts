@@ -14,6 +14,7 @@ import {
   loadJson5File,
   loadJsonFile,
   listJson5Files,
+  fetchTarkovEnvelope,
   SCHEMA_CONFIGS,
   SUPPORTED_GAME_MODES,
   SYNTHETIC_REQUIREMENT_ID_PREFIX,
@@ -307,21 +308,21 @@ function addRecordIds(index: Set<string>, value: unknown): void {
   }
 }
 
-async function fetchJsonData(path: string): Promise<Record<string, unknown>> {
-  const response = await fetch(`https://json.tarkov.dev/${path}`, {
-    headers: {
-      Accept: 'application/json',
-      'User-Agent':
-        'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)',
-    },
-  });
-  if (!response.ok) {
-    throw new Error(
-      `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
-    );
+function requireRecordCollection(
+  data: Record<string, unknown>,
+  key: string,
+  path: string
+): Record<string, unknown> {
+  const collection = data[key];
+  if (!isRecord(collection)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data.${key} object`);
   }
-  const payload = (await response.json()) as unknown;
-  if (!isRecord(payload) || !isRecord(payload.data)) {
+  return collection;
+}
+
+async function fetchJsonData(path: string): Promise<Record<string, unknown>> {
+  const payload = await fetchTarkovEnvelope(path);
+  if (!isRecord(payload.data)) {
     throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data object`);
   }
   return payload.data;
@@ -338,10 +339,10 @@ async function buildTarkovLocaleEntityIdIndex(): Promise<LocaleEntityIdIndex> {
       fetchJsonData(`${mode}/traders`),
     ]);
 
-    addRecordIds(index.tasks, tasksData.tasks);
+    addRecordIds(index.tasks, requireRecordCollection(tasksData, 'tasks', `${mode}/tasks`));
     addRecordIds(index.prestige, tasksData.prestige);
-    addRecordIds(index.items, itemsData.items);
-    addRecordIds(index.maps, mapsData.maps);
+    addRecordIds(index.items, requireRecordCollection(itemsData, 'items', `${mode}/items`));
+    addRecordIds(index.maps, requireRecordCollection(mapsData, 'maps', `${mode}/maps`));
     addRecordIds(index.traders, tradersData);
   }
 

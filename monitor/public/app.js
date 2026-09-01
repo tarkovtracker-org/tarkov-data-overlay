@@ -72,7 +72,7 @@ function getModeFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const mode = params.get("mode");
   const modes = lastState?.modes || fallbackModes;
-  return modes.includes(mode) ? mode : "regular";
+  return modes.includes(mode) ? mode : modes[0] || "regular";
 }
 
 function getLocaleFromUrl() {
@@ -111,6 +111,9 @@ function updateModeSwitch() {
 
   const modes = lastState?.modes || fallbackModes;
   const labels = lastState?.modeLabels || fallbackModeLabels;
+  if (!modes.includes(currentMode)) {
+    currentMode = modes[0] || "regular";
+  }
 
   modeSwitchEl.querySelectorAll("button[data-mode]").forEach((button) => {
     const isActive = button.dataset.mode === currentMode;
@@ -404,7 +407,14 @@ async function requestRebuild() {
     button.disabled = true;
   }
   try {
-    const response = await fetch("/rebuild", { method: "POST" });
+    const token = window.prompt("Enter the rebuild token");
+    if (!token) {
+      throw new Error("A rebuild token is required");
+    }
+    const response = await fetch("/rebuild", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(data.error || `Rebuild failed (${response.status})`);

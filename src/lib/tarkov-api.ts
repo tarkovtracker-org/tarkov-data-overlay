@@ -17,9 +17,9 @@
  * error to recover from.
  *
  * Note: resolving objective/reward item names requires the `items` payload,
- * which is large. Endpoint reads are deduped within a single `fetchTasks` call
- * so concurrent reads (items + items_en + tasks_en) only download each file
- * once. Across calls the cache is not shared, mirroring the monitor's pattern.
+ * which is large. Endpoint reads are deduped within a single `fetchTasks` or
+ * `fetchTaskModeData` call so concurrent reads only download each file once.
+ * Across calls the cache is not shared.
  */
 
 import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
@@ -31,6 +31,7 @@ import type {
   TaskRequirement,
   TaskKeyRequirement,
   TaskOtherRequirement,
+  TaskUnknownOtherRequirement,
   TraderRequirement,
   GameMode,
   MapAccessData,
@@ -41,12 +42,20 @@ import {
   adaptReward as adaptSharedReward,
   buildTaskContext as buildSharedTaskContext,
   fetchCached,
+  mapOptionalArray,
+  normalizeRequiredPrestige,
+  readResponseJson,
+  resolveDialogueTraderRefs as resolveSharedDialogueTraderRefs,
   resolveReferenceMatrix,
 } from './tarkov-api-shared.cjs';
 
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const DEFAULT_MAX_RETRIES = 3;
 const MAX_BACKOFF_MS = 5000;
+/** Bound one upstream exchange so maintenance commands cannot wait forever. */
+export const FETCH_TIMEOUT_MS = 30_000;
+/** Keep malformed or unexpectedly large upstream payloads from exhausting memory. */
+export const MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
 /**
  * Identify the overlay to json.tarkov.dev. A descriptive UA is required in
  * practice: Cloudflare challenges browser-mimicking UAs (e.g. "Mozilla/5.0")
@@ -57,10 +66,10 @@ export const USER_AGENT =
 
 type JsonRecord = Record<string, unknown>;
 
-type Envelope = {
+export interface TarkovEnvelope {
   data: unknown;
   translations?: string[];
-};
+}
 
 /** Flat translation map: key -> translated string for one locale. */
 export type TranslationMap = Record<string, string>;
@@ -126,13 +135,13 @@ function translate(map: TranslationMap, key: unknown): string | undefined {
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Per-call endpoint cache. Dedupes concurrent reads within one fetchTasks call. */
-type EndpointCache = Map<string, Promise<Envelope>>;
+type EndpointCache = Map<string, Promise<TarkovEnvelope>>;
 
 /** Thrown for malformed payloads; not worth retrying since a retry won't fix shape. */
 class EnvelopeValidationError extends Error {}
 
 /** Validate the common envelope shape returned by json.tarkov.dev. */
-function validateEnvelope(payload: unknown, path: string): Envelope {
+function validateEnvelope(payload: unknown, path: string): TarkovEnvelope {
   if (!isRecord(payload) || !('data' in payload) || payload.data == null) {
     throw new EnvelopeValidationError(`Invalid json.tarkov.dev response for ${path}: missing data`);
   }
@@ -141,7 +150,7 @@ function validateEnvelope(payload: unknown, path: string): Envelope {
       `Invalid json.tarkov.dev response for ${path}: translations is not an array`
     );
   }
-  return payload as Envelope;
+  return payload as unknown as TarkovEnvelope;
 }
 
 /** Identify the expected HTTP 404 error used by optional translation endpoints. */
@@ -157,29 +166,46 @@ function isOptionalTranslationEndpoint(mode: GameMode, endpoint: string, locale:
 /** Normalize retryable failures, rethrowing errors that should fail fast. */
 function normalizeFetchError(error: unknown, retryNotFound: boolean): Error {
   if (error instanceof EnvelopeValidationError) throw error;
+  if (isFatalResponseError(error)) throw new EnvelopeValidationError(error.message);
   if (!retryNotFound && isNotFoundError(error)) throw error;
   return error instanceof Error ? error : new Error(String(error));
 }
 
-/** Fetch one endpoint with bounded retries, optionally failing fast on 404. */
-async function fetchEnvelopeOnce(path: string, retryNotFound = true): Promise<Envelope> {
+/** Identify a fatal response-reader error that cannot be fixed by retrying. */
+function isFatalResponseError(error: unknown): error is Error & { fatal: true } {
+  return error instanceof Error && isRecord(error) && error.fatal === true;
+}
+
+/** Fetch one endpoint with bounded retries, timeout, and optional 404 handling. */
+async function fetchEnvelopeOnce(path: string, retryNotFound = true): Promise<TarkovEnvelope> {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= DEFAULT_MAX_RETRIES; attempt += 1) {
+    const controller = new AbortController();
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, FETCH_TIMEOUT_MS);
     try {
       const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
         headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
+        signal: controller.signal,
       });
       if (!response.ok) {
         throw new Error(
           `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
         );
       }
-      return validateEnvelope(await response.json(), path);
+      return validateEnvelope(await readResponseJson(response, path, MAX_RESPONSE_BYTES), path);
     } catch (error) {
       // Malformed payloads and expected missing optional translations fail fast.
-      lastError = normalizeFetchError(error, retryNotFound);
+      lastError = timedOut
+        ? new Error(`tarkov.dev request timed out after ${FETCH_TIMEOUT_MS}ms (${path})`)
+        : normalizeFetchError(error, retryNotFound);
       if (attempt === DEFAULT_MAX_RETRIES) break;
       await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
+    } finally {
+      clearTimeout(timeout);
     }
   }
   throw lastError ?? new Error(`Failed to fetch ${path}`);
@@ -190,10 +216,18 @@ function fetchEnvelope(
   cache: EndpointCache,
   path: string,
   retryNotFound = true
-): Promise<Envelope> {
+): Promise<TarkovEnvelope> {
   return fetchCached(cache, path, (requestedPath) =>
     fetchEnvelopeOnce(requestedPath, retryNotFound)
   );
+}
+
+/** Fetch one validated json.tarkov.dev envelope without sharing cache state. */
+export async function fetchTarkovEnvelope(
+  path: string,
+  retryNotFound = true
+): Promise<TarkovEnvelope> {
+  return fetchEnvelope(new Map(), path, retryNotFound);
 }
 
 /** Fetch an `_<locale>` endpoint and return its flat translation map. */
@@ -206,7 +240,12 @@ async function fetchTranslations(
   const optional = isOptionalTranslationEndpoint(mode, endpoint, locale);
   try {
     const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_${locale}`, !optional);
-    return isRecord(envelope.data) ? (envelope.data as TranslationMap) : {};
+    if (!isRecord(envelope.data)) {
+      throw new EnvelopeValidationError(
+        `Invalid json.tarkov.dev response for ${mode}/${endpoint}_${locale}: expected data object`
+      );
+    }
+    return envelope.data as TranslationMap;
   } catch (error) {
     // The endpoint registry currently advertises translations for every mode,
     // but pvp-season/items_en is absent in production. A missing translation
@@ -310,17 +349,6 @@ function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: str
   return compact({ id, name }) as { id: string; name: string };
 }
 
-/** Resolve a list of trader references and drop malformed entries. */
-function resolveTraderRefs(
-  value: unknown,
-  ctx: Context
-): Array<{ id: string; name: string }> | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((entry) => resolveTraderRef(entry, ctx))
-    .filter((entry): entry is { id: string; name: string } => Boolean(entry));
-}
-
 /** Resolve one task reference and its translated display name. */
 function resolveTaskRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
   const id = stringId(value);
@@ -339,13 +367,19 @@ function resolveRequiredPrestige(
   value: unknown,
   ctx: Context
 ): { id?: string; name: string; prestigeLevel: number } | undefined {
+  if (value === undefined) return undefined;
   const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.prestigeById.get(id);
-  if (!raw) return undefined;
-  const prestigeLevel = typeof raw.prestigeLevel === 'number' ? raw.prestigeLevel : 0;
-  const name = translate(ctx.tasksEn, raw.name) ?? id;
-  return { id, name, prestigeLevel };
+  const inline = isRecord(value) ? value : undefined;
+  const raw = (id ? ctx.prestigeById.get(id) : undefined) ?? inline;
+  // Preserve a declared but unresolved requirement so the availability model
+  // reports unknown instead of silently treating it as no requirement.
+  return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw?.name), raw);
+}
+
+/** Preserve a declared but unresolved task-giver reference as malformed data. */
+function adaptTaskTrader(value: unknown, ctx: Context): TaskData['trader'] {
+  if (value === undefined) return undefined;
+  return resolveTraderRef(value, ctx) ?? { id: '', name: 'Unknown trader' };
 }
 
 /** Resolve map data nested inside an objective zone or location. */
@@ -397,9 +431,16 @@ function adaptTaskRequirement(raw: unknown, ctx: Context): TaskRequirement {
 }
 
 /** Adapt one hidden requirement and resolve any trader references. */
-function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement | undefined {
-  if (!isRecord(raw)) return undefined;
-  return compact({ ...raw, traders: resolveTraderRefs(raw.traders, ctx) }) as TaskOtherRequirement;
+function adaptOtherRequirement(raw: unknown, ctx: Context): TaskOtherRequirement {
+  if (!isRecord(raw)) {
+    return { id: 'malformed-requirement', type: 'malformed' } as TaskUnknownOtherRequirement;
+  }
+  return compact({
+    ...raw,
+    id: typeof raw.id === 'string' ? raw.id : 'malformed-requirement',
+    type: typeof raw.type === 'string' ? raw.type : 'malformed',
+    traders: resolveSharedDialogueTraderRefs(raw.traders, ctx, resolveTraderRef),
+  }) as TaskOtherRequirement;
 }
 
 /** Adapt one map/key requirement and resolve its references. */
@@ -447,28 +488,30 @@ function adaptTraderRequirement(
   }) as unknown as TraderRequirement;
 }
 
-/** Preserve a raw number only when the endpoint supplied a number. */
-function optionalNumber(value: unknown): number | undefined {
-  return typeof value === 'number' ? value : undefined;
+/** Preserve malformed gate numbers as NaN so unlock evaluation fails closed. */
+function optionalNumber(value: unknown, preserveInvalid = false): number | undefined {
+  if (value === undefined) return undefined;
+  return typeof value === 'number' ? value : preserveInvalid ? Number.NaN : undefined;
 }
 
-/** Preserve a raw string only when the endpoint supplied a string. */
-function optionalString(value: unknown): string | undefined {
-  return typeof value === 'string' ? value : undefined;
+/** Preserve malformed gate strings as null so unlock evaluation fails closed. */
+function optionalString(value: unknown, preserveInvalid = false): string | undefined {
+  if (value === undefined) return undefined;
+  return typeof value === 'string'
+    ? value
+    : preserveInvalid
+      ? (null as unknown as string)
+      : undefined;
 }
 
-/** Preserve a raw boolean only when the endpoint supplied a boolean. */
-function optionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === 'boolean' ? value : undefined;
-}
-
-/** Map an optional endpoint array while preserving an absent field as undefined. */
-function mapOptionalArray<T>(
-  value: unknown,
-  mapper: (entry: unknown) => T | undefined
-): T[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.map(mapper).filter((entry): entry is T => entry !== undefined);
+/** Preserve malformed gate booleans as null so unlock evaluation fails closed. */
+function optionalBoolean(value: unknown, preserveInvalid = false): boolean | undefined {
+  if (value === undefined) return undefined;
+  return typeof value === 'boolean'
+    ? value
+    : preserveInvalid
+      ? (null as unknown as boolean)
+      : undefined;
 }
 
 /** Adapt one nested task-requirement group, treating malformed groups as empty. */
@@ -478,7 +521,9 @@ function adaptTaskRequirementGroup(value: unknown, ctx: Context): TaskRequiremen
 
 /** Resolve a task's nullable top-level map reference. */
 function adaptTaskMap(value: unknown, ctx: Context): TaskData['map'] {
-  return value === null ? null : resolveMapRef(value, ctx);
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  return resolveMapRef(value, ctx) ?? { id: '', name: 'Unknown map' };
 }
 
 /** Adapt task objectives while dropping malformed non-object entries. */
@@ -494,13 +539,13 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
   return compact({
     id,
     name: translate(ctx.tasksEn, raw.name) ?? id,
-    trader: resolveTraderRef(raw.trader, ctx),
-    minPlayerLevel: optionalNumber(raw.minPlayerLevel),
+    trader: adaptTaskTrader(raw.trader, ctx),
+    minPlayerLevel: optionalNumber(raw.minPlayerLevel, true),
     wikiLink: optionalString(raw.wikiLink),
     map: adaptTaskMap(raw.map, ctx),
     kappaRequired: optionalBoolean(raw.kappaRequired),
-    lightkeeperRequired: optionalBoolean(raw.lightkeeperRequired),
-    factionName: optionalString(raw.factionName),
+    lightkeeperRequired: optionalBoolean(raw.lightkeeperRequired, true),
+    factionName: optionalString(raw.factionName, true),
     requiredPrestige: resolveRequiredPrestige(raw.requiredPrestige, ctx),
     experience: optionalNumber(raw.experience),
     taskRequirements: mapOptionalArray(raw.taskRequirements, (req) =>
@@ -518,8 +563,8 @@ function adaptTask(raw: JsonRecord, ctx: Context): TaskData {
     neededKeys: mapOptionalArray(raw.neededKeys, (requirement) =>
       adaptKeyRequirement(requirement, ctx)
     ),
-    availableDelaySecondsMin: optionalNumber(raw.availableDelaySecondsMin),
-    availableDelaySecondsMax: optionalNumber(raw.availableDelaySecondsMax),
+    availableDelaySecondsMin: optionalNumber(raw.availableDelaySecondsMin, true),
+    availableDelaySecondsMax: optionalNumber(raw.availableDelaySecondsMax, true),
     objectives: adaptObjectives(raw.objectives, ctx),
     startRewards: adaptReward(raw.startRewards, ctx),
     finishRewards: adaptReward(raw.finishRewards, ctx),
@@ -532,7 +577,7 @@ async function buildContext(
   mode: GameMode,
   tasksData: JsonRecord
 ): Promise<Context> {
-  return buildSharedTaskContext<Envelope, GameMode>(cache, mode, tasksData, {
+  return buildSharedTaskContext<TarkovEnvelope, GameMode>(cache, mode, tasksData, {
     fetchEnvelope,
     fetchTranslations,
     isRecord,
@@ -573,8 +618,20 @@ export async function fetchRawEntities(
     }
     return toLookup(envelope.data);
   }
-  const data = isRecord(envelope.data) ? envelope.data : {};
+  if (!isRecord(envelope.data)) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/${endpoint}: expected data collection`
+    );
+  }
+  const data = envelope.data;
   const collection = collectionKey ? data[collectionKey] : data;
+  if (!isRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(
+      `Invalid json.tarkov.dev response for ${mode}/${endpoint}: expected ${
+        collectionKey ? `data.${collectionKey}` : 'data'
+      } collection`
+    );
+  }
   return toLookup(collection);
 }
 
@@ -596,9 +653,10 @@ function stringArray(value: unknown): string[] | undefined {
  * unlock flags are deliberately not synthesized here: json.tarkov.dev does
  * not serve those values in these static endpoints.
  */
-export async function fetchModeAccessData(gameMode?: GameMode): Promise<ModeAccessData> {
-  const mode: GameMode = gameMode ?? 'regular';
-  const cache: EndpointCache = new Map();
+async function fetchModeAccessDataWithCache(
+  mode: GameMode,
+  cache: EndpointCache
+): Promise<ModeAccessData> {
   const [mapsEnvelope, tradersEnvelope, mapsEn, tradersEn] = await Promise.all([
     fetchEnvelope(cache, `${mode}/maps`),
     fetchEnvelope(cache, `${mode}/traders`),
@@ -606,7 +664,13 @@ export async function fetchModeAccessData(gameMode?: GameMode): Promise<ModeAcce
     fetchTranslations(cache, mode, 'traders'),
   ]);
 
-  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
+  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : undefined;
+  if (!mapsData || !isRecord(tradersEnvelope.data)) {
+    throw new Error(`Invalid json.tarkov.dev response while loading ${mode} access data`);
+  }
+  if (!isRecord(mapsData.maps) && !Array.isArray(mapsData.maps)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${mode}/maps data.maps`);
+  }
   const maps = Object.fromEntries(
     [...toLookup(mapsData.maps)].map(([id, raw]) => [
       id,
@@ -644,14 +708,33 @@ export async function fetchModeAccessData(gameMode?: GameMode): Promise<ModeAcce
   return { maps, traders };
 }
 
+/** Fetch map-entry and trader metadata for one mode. */
+export async function fetchModeAccessData(gameMode?: GameMode): Promise<ModeAccessData> {
+  return fetchModeAccessDataWithCache(gameMode ?? 'regular', new Map());
+}
+
+/** Task data and static access metadata fetched with one shared endpoint cache. */
+export interface TaskModeData {
+  tasks: TaskData[];
+  access: ModeAccessData;
+}
+
+/** Fetch the task report inputs without downloading shared endpoints twice. */
+export async function fetchTaskModeData(gameMode?: GameMode): Promise<TaskModeData> {
+  const mode: GameMode = gameMode ?? 'regular';
+  const cache: EndpointCache = new Map();
+  const [tasks, access] = await Promise.all([
+    fetchTasksWithCache(mode, cache),
+    fetchModeAccessDataWithCache(mode, cache),
+  ]);
+  return { tasks, access };
+}
+
 /**
  * Fetch all tasks for a game mode from json.tarkov.dev and adapt them into
  * the `TaskData[]` shape used by the override validator.
  */
-export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
-  const mode: GameMode = gameMode ?? 'regular';
-  const cache: EndpointCache = new Map();
-
+async function fetchTasksWithCache(mode: GameMode, cache: EndpointCache): Promise<TaskData[]> {
   const tasksEnvelope = await fetchEnvelope(cache, `${mode}/tasks`);
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   if (!tasksData || !isRecord(tasksData.tasks)) {
@@ -663,10 +746,34 @@ export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
   }
 
   const ctx = await buildContext(cache, mode, tasksData);
+  const tasks: TaskData[] = [];
+  const seenIds = new Set<string>();
+  for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
+    if (!isRecord(rawTask)) {
+      throw new EnvelopeValidationError(
+        `Invalid json.tarkov.dev response for ${mode}/tasks: task '${sourceKey}' is not an object`
+      );
+    }
+    const id = stringId(rawTask);
+    if (!id) {
+      throw new EnvelopeValidationError(
+        `Invalid json.tarkov.dev response for ${mode}/tasks: task '${sourceKey}' has no id`
+      );
+    }
+    if (seenIds.has(id)) {
+      throw new EnvelopeValidationError(
+        `Invalid json.tarkov.dev response for ${mode}/tasks: duplicate task id '${id}'`
+      );
+    }
+    seenIds.add(id);
+    tasks.push(adaptTask(rawTask, ctx));
+  }
+  return tasks;
+}
 
-  return Object.values(tasksData.tasks)
-    .filter(isRecord)
-    .map((task) => adaptTask(task, ctx));
+/** Fetch all tasks for a game mode from json.tarkov.dev. */
+export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
+  return fetchTasksWithCache(gameMode ?? 'regular', new Map());
 }
 
 /**
@@ -721,9 +828,15 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
     fetchTranslations(cache, mode, 'traders', locale),
   ]);
 
-  const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : {};
-  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : {};
-  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : {};
+  const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
+  const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : undefined;
+  const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : undefined;
+  if (!tasksData || !itemsData || !mapsData || !isRecord(tradersEnvelope.data)) {
+    throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale data`);
+  }
+  if (!isRecord(tasksData.tasks) || !isRecord(itemsData.items) || !isRecord(mapsData.maps)) {
+    throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale collections`);
+  }
 
   return {
     locale,

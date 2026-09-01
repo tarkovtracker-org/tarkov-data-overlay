@@ -15,16 +15,59 @@ type TaskContext = {
   tradersEn: Record<string, string>;
 };
 
+export const MAX_RESPONSE_BYTES: number;
+
 export function fetchCached<T>(
   cache: EndpointCache<T>,
   path: string,
   load: (path: string) => Promise<T>
 ): Promise<T>;
 
+export function getLatestTagVersion(cwd?: string): string | undefined;
+
+export function indexTaskAdditions<T extends object & { id: string }>(
+  additions: Record<string, T> | undefined,
+  scope: string
+): Map<string, T>;
+
+export function mapOptionalArray<T>(
+  value: unknown,
+  mapper: (entry: unknown) => T | undefined
+): T[] | undefined;
+
+export function mergeTaskOverride<T extends object>(base?: T, next?: T): T;
+
 export function resolveReferenceMatrix<T>(
   value: unknown,
   resolveReference: (value: unknown) => T | undefined
 ): T[][] | undefined;
+
+export function normalizeRequiredPrestige(
+  id: string | undefined,
+  name: string | undefined,
+  raw: Record<string, unknown> | undefined
+): { id?: string; name: string; prestigeLevel: number } | undefined;
+
+export function readResponseJson(
+  response: Response,
+  path: string,
+  maxBytes?: number,
+  source?: string
+): Promise<unknown>;
+
+export function resolveDialogueTraderRefs<TContext>(
+  value: unknown,
+  context: TContext,
+  resolveTraderRef: (value: unknown, context: TContext) => { id: string; name: string } | undefined
+): Array<{ id: string; name: string }> | undefined;
+
+export function verifyOverlaySha256(value: unknown): boolean;
+
+export function selectTaskAdditions<T extends object & { id: string }>(
+  shared: Record<string, T> | undefined,
+  modeSpecific: Record<string, T> | undefined,
+  includeDisabled?: boolean
+): Map<string, T>;
 
 export function adaptReward<T, TContext>(
   raw: unknown,

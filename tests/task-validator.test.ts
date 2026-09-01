@@ -486,6 +486,26 @@ describe('validateTaskOverride', () => {
         )
       ).toBe(true);
     });
+
+    it('reports an empty override as needed when it clears API groups', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [[{ task: { id: 'prereq-1', name: 'Prereq Task' } }]],
+      });
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [] }, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'needed'
+        )
+      ).toBe(true);
+    });
+
+    it('accepts an empty override when API groups are already empty', () => {
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [] }, apiTasks);
+
+      expect(result.details.some((detail) => detail.field === 'taskRequirementGroups')).toBe(false);
+    });
   });
 
   describe('startRewards validation', () => {

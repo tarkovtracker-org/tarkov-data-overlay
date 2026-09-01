@@ -4,11 +4,16 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  deriveTaskUnlockDefinition,
+  evaluateTaskUnlock,
   fetchTasks,
   fetchModeAccessData,
+  fetchTaskModeData,
   fetchLocaleBundle,
   fetchRawEntities,
   findTaskById,
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
   USER_AGENT,
   type TaskData,
 } from '../src/lib/index.js';
@@ -23,19 +28,13 @@ function mockEndpoints(routes: Routes) {
   const fetchMock = vi.fn(async (url: string) => {
     const path = String(url).replace('https://json.tarkov.dev/', '');
     if (!(path in routes)) {
-      return {
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        json: async () => ({}),
-      };
+      return new Response('{}', { status: 404, statusText: 'Not Found' });
     }
-    return {
-      ok: true,
+    return new Response(JSON.stringify(routes[path]), {
       status: 200,
       statusText: 'OK',
-      json: async () => routes[path],
-    };
+      headers: { 'content-type': 'application/json' },
+    });
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
@@ -352,7 +351,7 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(task.finishRewards?.locationUnlock).toEqual([{ id: 'map1', name: 'Customs' }]);
   });
 
-  it('drops malformed hidden requirements while preserving valid entries', async () => {
+  it('preserves malformed hidden requirements so evaluation can fail closed', async () => {
     mockEndpoints(
       baseRoutes('regular', {
         'regular/tasks': {
@@ -361,7 +360,11 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
               t1: {
                 id: 't1',
                 name: 't1 name',
-                otherRequirements: [null, { id: 'dialogue-1', type: 'dialogue', traders: [] }],
+                otherRequirements: [
+                  null,
+                  { id: 'dialogue-1', type: 'dialogue', traders: [] },
+                  { id: 'dialogue-2', type: 'dialogue', traders: ['missing-trader'] },
+                ],
               },
             },
           },
@@ -372,7 +375,51 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
 
     const [task] = await fetchTasks();
 
-    expect(task.otherRequirements).toEqual([{ id: 'dialogue-1', type: 'dialogue', traders: [] }]);
+    expect(task.otherRequirements).toEqual([
+      { id: 'malformed-requirement', type: 'malformed' },
+      { id: 'dialogue-1', type: 'dialogue', traders: [] },
+      {
+        id: 'dialogue-2',
+        type: 'dialogue',
+        traders: [{ id: '', name: 'Unknown trader' }],
+      },
+    ]);
+  });
+
+  it('preserves malformed requirement containers for fail-closed evaluation', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                taskRequirements: {},
+                taskRequirementGroups: {},
+                traderRequirements: {},
+                otherRequirements: {},
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+
+    expect(task.taskRequirements).toEqual([{}]);
+    expect(task.taskRequirementGroups).toEqual([[]]);
+    expect(task.traderRequirements).toHaveLength(1);
+    expect(task.otherRequirements).toEqual([{ id: 'malformed-requirement', type: 'malformed' }]);
+    const definition = deriveTaskUnlockDefinition(task);
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        traderUnlocked: {},
+        mapAccess: {},
+      }).status
+    ).toBe('unknown');
   });
 
   it('fetchModeAccessData keeps map entry rules and trader level thresholds', async () => {
@@ -514,11 +561,22 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
           data: {
             tasks: {
               t1: { id: 't1', name: 't1 name', requiredPrestige: 'p1' },
+              t2: {
+                id: 't2',
+                name: 't2 name',
+                requiredPrestige: { name: 'inline prestige', prestigeLevel: 3 },
+              },
             },
             prestige: [{ id: 'p1', name: 'p1 name', prestigeLevel: 2 }],
           },
         },
-        'regular/tasks_en': { data: { 't1 name': 'New Beginning', 'p1 name': 'Prestige 2' } },
+        'regular/tasks_en': {
+          data: {
+            't1 name': 'New Beginning',
+            'p1 name': 'Prestige 2',
+            'inline prestige': 'Prestige 3',
+          },
+        },
       })
     );
 
@@ -529,6 +587,105 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
       name: 'Prestige 2',
       prestigeLevel: 2,
     });
+    expect(tasks[1].requiredPrestige).toEqual({
+      name: 'Prestige 3',
+      prestigeLevel: 3,
+    });
+  });
+
+  it('preserves an unresolved requiredPrestige as an invalid requirement', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: { id: 't1', name: 't1 name', requiredPrestige: 'missing-prestige' },
+              t2: { id: 't2', name: 't2 name', requiredPrestige: 'broken-prestige' },
+            },
+            prestige: [{ id: 'broken-prestige', name: 'broken name' }],
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One', 't2 name': 'Task Two' } },
+      })
+    );
+
+    const tasks = await fetchTasks();
+
+    expect(tasks[0]?.requiredPrestige).toEqual({
+      id: 'missing-prestige',
+      name: 'missing-prestige',
+      prestigeLevel: -1,
+    });
+    expect(tasks[1]?.requiredPrestige).toEqual({
+      id: 'broken-prestige',
+      name: 'broken name',
+      prestigeLevel: -1,
+    });
+  });
+
+  it('preserves malformed task gates so availability evaluation fails closed', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                trader: 'missing-trader',
+                map: 'missing-map',
+                minPlayerLevel: '10',
+                factionName: { value: 'USEC' },
+                lightkeeperRequired: 'false',
+                availableDelaySecondsMin: '10',
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const [task] = await fetchTasks();
+    expect(Number.isNaN(task.minPlayerLevel)).toBe(true);
+    expect(task.factionName).toBeNull();
+    expect(task.lightkeeperRequired).toBeNull();
+    expect(Number.isNaN(task.availableDelaySecondsMin)).toBe(true);
+
+    const definition = deriveTaskUnlockDefinition(task);
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        playerLevel: 100,
+        faction: 'USEC',
+        traderUnlocked: { 'missing-trader': true },
+        mapAccess: { 'missing-map': true },
+        nowSeconds: 100,
+        taskAvailableSince: { t1: 0 },
+      }).status
+    ).toBe('unknown');
+  });
+
+  it('rejects malformed and duplicate upstream task records', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': { data: { tasks: { t1: { id: 't1', name: 'Task' }, missing: {} } } },
+      })
+    );
+    await expect(fetchTasks()).rejects.toThrow(/task 'missing' has no id/);
+
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              first: { id: 'duplicate', name: 'First' },
+              second: { id: 'duplicate', name: 'Second' },
+            },
+          },
+        },
+      })
+    );
+    await expect(fetchTasks()).rejects.toThrow(/duplicate task id 'duplicate'/);
   });
 
   it('resolves taskRequirements task refs', async () => {
@@ -605,6 +762,30 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     }
   });
 
+  it('fails when a required translation endpoint has the wrong shape', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks_en': { data: [] },
+      })
+    );
+
+    await expect(fetchTasks()).rejects.toThrow(
+      'Invalid json.tarkov.dev response for regular/tasks_en: expected data object'
+    );
+  });
+
+  it('fails when a required entity collection is missing', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/items': { data: {} },
+      })
+    );
+
+    await expect(fetchTasks()).rejects.toThrow(
+      'Invalid json.tarkov.dev response for regular/items data.items: expected a collection'
+    );
+  });
+
   it('requests pve endpoints when pve mode is requested', async () => {
     const fetchMock = mockEndpoints(baseRoutes('pve'));
 
@@ -633,6 +814,22 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     for (const [url, count] of callsByUrl) {
       expect(count, url).toBe(1);
     }
+  });
+
+  it('shares endpoint reads when fetching tasks and access data together', async () => {
+    const fetchMock = mockEndpoints(baseRoutes('regular'));
+
+    await fetchTaskModeData('regular');
+
+    const callsByPath = new Map<string, number>();
+    for (const [url] of fetchMock.mock.calls) {
+      const path = String(url).replace('https://json.tarkov.dev/', '');
+      callsByPath.set(path, (callsByPath.get(path) ?? 0) + 1);
+    }
+    expect(callsByPath.get('regular/maps')).toBe(1);
+    expect(callsByPath.get('regular/maps_en')).toBe(1);
+    expect(callsByPath.get('regular/traders')).toBe(1);
+    expect(callsByPath.get('regular/traders_en')).toBe(1);
   });
 
   it('refetches on subsequent calls (no cross-call memo)', async () => {
@@ -666,6 +863,44 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     await vi.runAllTimersAsync();
     await assertion;
     vi.useRealTimers();
+  });
+
+  it('rejects a response whose declared body exceeds the size limit', async () => {
+    const json = vi.fn(async () => ({ data: { tasks: {} } }));
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: { get: () => String(MAX_RESPONSE_BYTES + 1) },
+      json,
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchTasks()).rejects.toThrow(/exceeds the .*byte limit/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(json).not.toHaveBeenCalled();
+  });
+
+  it('aborts and retries a stalled request before failing deterministically', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn(
+      async (_url: string, init?: { signal?: AbortSignal }) =>
+        new Promise<never>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    try {
+      const request = expect(fetchTasks()).rejects.toThrow(
+        `tarkov.dev request timed out after ${FETCH_TIMEOUT_MS}ms`
+      );
+      await vi.runAllTimersAsync();
+      await request;
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('throws when the tasks envelope is missing data', async () => {
@@ -793,6 +1028,14 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
 
       expect(entities.size).toBe(1);
       expect(entities.get('trader-a')).toBeDefined();
+    });
+
+    it('throws when a named collection is missing', async () => {
+      mockEndpoints({ 'regular/items': { data: {} } });
+
+      await expect(fetchRawEntities('regular', 'items', 'items')).rejects.toThrow(
+        /expected data\.items collection/
+      );
     });
   });
 });

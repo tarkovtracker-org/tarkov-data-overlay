@@ -860,8 +860,7 @@
         "type": "array"
       },
       "taskRequirementGroups": {
-        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed",
-        "minItems": 1,
+        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed. An empty array clears upstream groups.",
         "items": {
           "minItems": 1,
           "items": {

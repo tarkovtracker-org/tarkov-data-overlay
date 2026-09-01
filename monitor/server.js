@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { URL } = require("url");
-const { exec, execSync } = require("child_process");
+const { exec } = require("child_process");
 const { DEFAULT_MODES, VIEW_CONFIG, config, getModeLabel } = require("./lib/config.js");
 const {
   buildCraftAddSections,
@@ -18,15 +18,23 @@ const {
   buildTasksSections,
   createSection,
   formatValue,
+  mergeTaskAdditions,
   mergeTaskOverrides,
   pushRow,
   valuesEqual,
 } = require("./lib/sections.js");
 const {
+  MAX_RESPONSE_BYTES: TARKOV_JSON_MAX_BYTES,
   adaptReward: adaptSharedReward,
   buildTaskContext: buildSharedTaskContext,
   fetchCached,
+  getLatestTagVersion: getSharedLatestTagVersion,
+  mapOptionalArray,
+  normalizeRequiredPrestige,
+  readResponseJson,
+  resolveDialogueTraderRefs: resolveSharedDialogueTraderRefs,
   resolveReferenceMatrix,
+  verifyOverlaySha256,
 } = require("../src/lib/tarkov-api-shared.cjs");
 
 const PORT = config.port;
@@ -37,7 +45,7 @@ const API_POLL_MS = config.apiPollMs;
 const OVERLAY_POLL_MS = config.overlayPollMs;
 const REMOTE_FETCH_TIMEOUT_MS = config.remoteFetchTimeoutMs;
 const REMOTE_FETCH_MAX_BYTES = config.remoteFetchMaxBytes;
-const TARKOV_JSON_BASE = config.tarkovJsonBase;
+const TARKOV_JSON_BASE = "https://json.tarkov.dev";
 
 // Game modes served by json.tarkov.dev. The list is refreshed at startup from
 // the live /endpoints `gameModes` payload (see startModeDiscovery) so the
@@ -60,27 +68,48 @@ const readLocks = {
   ),
 };
 
-// Register additional game modes discovered at startup (apiState/readLocks are
+// Register the exact game modes discovered at startup (apiState/readLocks are
 // seeded from DEFAULT_MODES so the module works under test without I/O).
+const MAX_DISCOVERED_MODES = 32;
+const MAX_SSE_CONNECTIONS = 100;
+const MAX_SSE_CONNECTIONS_PER_KEY = 10;
+const RESERVED_MODE_NAMES = new Set(["__proto__", "constructor", "prototype"]);
+
+function isSafeModeName(mode) {
+  return (
+    typeof mode === "string" &&
+    !RESERVED_MODE_NAMES.has(mode) &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(mode)
+  );
+}
+
 function registerModes(modes) {
   if (!Array.isArray(modes)) {
     return;
   }
-  let changed = false;
-  modes.forEach((mode) => {
-    if (typeof mode !== "string" || mode in apiState) {
-      return;
-    }
-    apiState[mode] = { data: null, updatedAt: null, error: null };
-    readLocks[mode] = { isReading: false, pendingRead: false };
-    changed = true;
-  });
-  if (changed) {
-    supportedModes = Object.keys(apiState);
+  const discoveredModes = [...new Set(modes.filter(isSafeModeName))];
+  if (discoveredModes.length === 0 || discoveredModes.length > MAX_DISCOVERED_MODES) {
+    return;
   }
+
+  const discovered = new Set(discoveredModes);
+  for (const mode of Object.keys(apiState)) {
+    if (!discovered.has(mode)) {
+      delete apiState[mode];
+      delete readLocks[mode];
+    }
+  }
+  for (const mode of discoveredModes) {
+    if (!Object.prototype.hasOwnProperty.call(apiState, mode)) {
+      apiState[mode] = { data: null, updatedAt: null, error: null };
+      readLocks[mode] = { isReading: false, pendingRead: false };
+    }
+  }
+  supportedModes = discoveredModes;
 }
 
 const clientsByKey = new Map();
+let activeSseConnections = 0;
 let overlayFsWatcher = null;
 
 function parseIsoDate(value) {
@@ -91,27 +120,13 @@ function parseIsoDate(value) {
   return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
-// Latest release tag (e.g. "v1.56" -> "1.56") from git, the authority for
-// released overlay versions. Falls back to undefined when git is unavailable.
-let cachedTagVersion;
-let tagVersionLoaded = false;
+// Highest release tag (e.g. "v1.56" -> "1.56") from git, the authority for
+// released overlay versions. Read it once at startup so requests cannot spawn
+// a synchronous git process on the event loop.
+const STARTUP_TAG_VERSION = getSharedLatestTagVersion(__dirname);
+
 function getLatestTagVersion() {
-  if (tagVersionLoaded) {
-    return cachedTagVersion;
-  }
-  try {
-    const tag = execSync("git describe --tags --abbrev=0", {
-      cwd: __dirname,
-      stdio: ["ignore", "pipe", "ignore"],
-    })
-      .toString()
-      .trim();
-    cachedTagVersion = tag.replace(/^v/, "");
-    tagVersionLoaded = true;
-  } catch {
-    cachedTagVersion = undefined;
-  }
-  return cachedTagVersion;
+  return STARTUP_TAG_VERSION;
 }
 
 function versionNums(value) {
@@ -142,7 +157,7 @@ function isVersionStale(metaVersion, latestVersion) {
 
 // Rebuild the overlay from sources (npm run build) so the monitor can refresh
 // dist/overlay.json instead of only warning that it is stale. This mutating
-// endpoint is opt-in via ALLOW_REBUILD=true; REBUILD_TOKEN adds authentication.
+// endpoint is opt-in via ALLOW_REBUILD=true and a non-empty REBUILD_TOKEN.
 const REPO_ROOT = path.resolve(__dirname, "..");
 const DEFAULT_OVERLAY_PATH = path.resolve(REPO_ROOT, "dist/overlay.json");
 const rebuildState = { running: false, lastRun: null, lastSuccess: null, error: null };
@@ -203,7 +218,9 @@ function isRebuildEnabled() {
     process.env.NODE_ENV !== "test" &&
     process.env.ALLOW_REBUILD === "true" &&
     !isRemotePath(OVERLAY_PATH) &&
-    isDefaultOverlayPath(OVERLAY_PATH)
+    isDefaultOverlayPath(OVERLAY_PATH) &&
+    typeof process.env.REBUILD_TOKEN === "string" &&
+    process.env.REBUILD_TOKEN.length > 0
   );
 }
 
@@ -216,13 +233,12 @@ function safeTokenEqual(actual, expected) {
   );
 }
 
-function getRequestToken(req, requestUrl) {
+function getRequestToken(req) {
   const authorization = req.headers.authorization || "";
   const schemeEnd = authorization.indexOf(" ");
   if (schemeEnd > 0 && authorization.slice(0, schemeEnd).toLowerCase() === "bearer") {
     return authorization.slice(schemeEnd + 1).trim();
   }
-  return requestUrl.searchParams.get("token") || "";
 }
 
 async function refreshOverlayIfStale() {
@@ -278,11 +294,13 @@ function normalizeRemoteUrl(input) {
 function fetchRemoteText(url) {
   return new Promise((resolve, reject) => {
     let settled = false;
+    let deadlineTimer;
     const settle = (handler, value) => {
       if (settled) {
         return;
       }
       settled = true;
+      clearTimeout(deadlineTimer);
       handler(value);
     };
 
@@ -344,11 +362,14 @@ function fetchRemoteText(url) {
         settle(reject, error);
       });
     });
-    request.setTimeout(REMOTE_FETCH_TIMEOUT_MS, () => {
+    // ClientRequest.setTimeout() is an inactivity timeout: a peer can keep
+    // this promise alive indefinitely by trickling bytes. Use a total
+    // deadline so a remote overlay cannot stall monitor refresh forever.
+    deadlineTimer = setTimeout(() => {
       request.destroy(
         new Error(`Remote fetch timed out after ${REMOTE_FETCH_TIMEOUT_MS}ms: ${url}`)
       );
-    });
+    }, REMOTE_FETCH_TIMEOUT_MS);
     request.on("error", (error) => {
       settle(reject, error);
     });
@@ -450,7 +471,9 @@ function normalizeView(view) {
 }
 
 function normalizeMode(mode) {
-  return supportedModes.includes(mode) ? mode : DEFAULT_MODES[0];
+  if (supportedModes.includes(mode)) return mode;
+  if (supportedModes.includes(DEFAULT_MODES[0])) return DEFAULT_MODES[0];
+  return supportedModes[0] || DEFAULT_MODES[0];
 }
 
 function getAvailableLocales() {
@@ -494,6 +517,9 @@ function removeClient(key, client) {
     return;
   }
   clients.delete(client);
+  if (clients.size === 0) {
+    clientsByKey.delete(key);
+  }
 }
 
 function writeSse(key, client, message) {
@@ -502,12 +528,29 @@ function writeSse(key, client, message) {
     return false;
   }
   try {
-    client.write(message);
+    const accepted = client.write(message);
+    if (!accepted) {
+      removeClient(key, client);
+      if (typeof client.destroy === "function") client.destroy();
+      return false;
+    }
     return true;
   } catch {
     removeClient(key, client);
+    if (typeof client.destroy === "function") client.destroy();
     return false;
   }
+}
+
+function reserveSseConnection() {
+  if (activeSseConnections >= MAX_SSE_CONNECTIONS) return undefined;
+  activeSseConnections += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    activeSseConnections -= 1;
+  };
 }
 
 function broadcast(key, event, payload) {
@@ -540,6 +583,9 @@ async function loadOverlay() {
     updatedAt = stats.mtime.toISOString();
   }
   const parsed = JSON.parse(raw);
+  if (!verifyOverlaySha256(parsed)) {
+    throw new Error("Overlay is missing a valid build digest");
+  }
   return { data: parsed, updatedAt };
 }
 
@@ -589,6 +635,8 @@ const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const MAX_RETRIES = 3;
 const MAX_BACKOFF_MS = 5000;
 const TARKOV_JSON_TIMEOUT_MS = 30000;
+const TARKOV_USER_AGENT =
+  "tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -644,7 +692,7 @@ function validateEnvelope(payload, path) {
   return payload;
 }
 
-async function fetchEnvelopeOnce(path) {
+async function fetchEnvelopeOnce(path, retryNotFound = true) {
   if (typeof fetch !== "function") {
     throw new Error("Global fetch is not available. Node 22.0.0+ is required");
   }
@@ -654,7 +702,7 @@ async function fetchEnvelopeOnce(path) {
     const timer = setTimeout(() => controller.abort(), TARKOV_JSON_TIMEOUT_MS);
     try {
       const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
-        headers: { Accept: "application/json" },
+        headers: { Accept: "application/json", "User-Agent": TARKOV_USER_AGENT },
         signal: controller.signal,
       });
       if (!response.ok) {
@@ -662,9 +710,14 @@ async function fetchEnvelopeOnce(path) {
           `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
         );
       }
-      return validateEnvelope(await response.json(), path);
+      return validateEnvelope(await readResponseJson(response, path, TARKOV_JSON_MAX_BYTES), path);
     } catch (error) {
-      if (error && error.fatal) throw error;
+      if (
+        error &&
+        (error.fatal || (!retryNotFound && /request failed: 404\b/.test(error.message)))
+      ) {
+        throw error;
+      }
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt === MAX_RETRIES) break;
       await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
@@ -677,13 +730,30 @@ async function fetchEnvelopeOnce(path) {
 
 // Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
 // within one refresh are deduped, while each poll cycle fetches fresh data.
-function fetchEnvelope(cache, path) {
-  return fetchCached(cache, path, fetchEnvelopeOnce);
+function fetchEnvelope(cache, path, retryNotFound = true) {
+  return fetchCached(cache, path, (requestedPath) =>
+    fetchEnvelopeOnce(requestedPath, retryNotFound)
+  );
 }
 
 async function fetchTranslations(cache, mode, endpoint) {
-  const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`);
-  return isRecord(envelope.data) ? envelope.data : {};
+  const optional = mode === "pvp-season" && endpoint === "items";
+  try {
+    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`, !optional);
+    if (!isRecord(envelope.data)) {
+      const error = new Error(
+        `Invalid json.tarkov.dev response for ${mode}/${endpoint}_en: expected data object`
+      );
+      error.fatal = true;
+      throw error;
+    }
+    return envelope.data;
+  } catch (error) {
+    if (optional && error instanceof Error && /request failed: 404\b/.test(error.message)) {
+      return {};
+    }
+    throw error;
+  }
 }
 
 function resolveItemRef(value, ctx) {
@@ -736,15 +806,16 @@ function resolveTaskRef(value, ctx) {
 }
 
 function resolveRequiredPrestige(value, ctx) {
+  if (value === undefined) return undefined;
   const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.prestigeById.get(id);
-  if (!raw) return undefined;
-  return {
-    id,
-    name: translate(ctx.tasksEn, raw.name) || id,
-    prestigeLevel: typeof raw.prestigeLevel === "number" ? raw.prestigeLevel : 0,
-  };
+  const inline = isRecord(value) ? value : undefined;
+  const raw = ctx.prestigeById.get(id) || inline;
+  return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw && raw.name), raw);
+}
+
+function adaptTaskTrader(value, ctx) {
+  if (value === undefined) return undefined;
+  return resolveTraderRef(value, ctx) || { id: "", name: "Unknown trader" };
 }
 
 function resolveZone(value, ctx) {
@@ -785,9 +856,32 @@ function adaptTaskRequirement(raw, ctx) {
   return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) });
 }
 
+function adaptTaskRequirementGroup(value, ctx) {
+  return Array.isArray(value) ? value.map((req) => adaptTaskRequirement(req, ctx)) : [];
+}
+
 function adaptTraderRequirement(raw, ctx) {
   if (!isRecord(raw)) return raw;
   return compact({ ...raw, trader: resolveTraderRef(raw.trader, ctx) });
+}
+
+function adaptOtherRequirement(raw, ctx) {
+  if (!isRecord(raw)) return { id: "malformed-requirement", type: "malformed" };
+  return compact({
+    ...raw,
+    id: typeof raw.id === "string" ? raw.id : "malformed-requirement",
+    type: typeof raw.type === "string" ? raw.type : "malformed",
+    traders: resolveSharedDialogueTraderRefs(raw.traders, ctx, resolveTraderRef),
+  });
+}
+
+function adaptKeyRequirement(raw, ctx) {
+  if (!isRecord(raw)) return raw;
+  return compact({
+    ...raw,
+    map: resolveMapRef(raw.map, ctx),
+    keys: resolveItemRefs(raw.keys, ctx),
+  });
 }
 
 function adaptTask(raw, ctx) {
@@ -795,21 +889,37 @@ function adaptTask(raw, ctx) {
   return compact({
     id,
     name: translate(ctx.tasksEn, raw.name) || id,
-    minPlayerLevel: typeof raw.minPlayerLevel === "number" ? raw.minPlayerLevel : undefined,
+    trader: adaptTaskTrader(raw.trader, ctx),
+    minPlayerLevel: raw.minPlayerLevel,
     wikiLink: typeof raw.wikiLink === "string" ? raw.wikiLink : undefined,
-    map: raw.map === null ? null : resolveMapRef(raw.map, ctx),
+    map:
+      raw.map === undefined
+        ? undefined
+        : raw.map === null
+          ? null
+          : resolveMapRef(raw.map, ctx) || { id: "", name: "Unknown map" },
     kappaRequired: typeof raw.kappaRequired === "boolean" ? raw.kappaRequired : undefined,
-    lightkeeperRequired:
-      typeof raw.lightkeeperRequired === "boolean" ? raw.lightkeeperRequired : undefined,
-    factionName: typeof raw.factionName === "string" ? raw.factionName : undefined,
+    lightkeeperRequired: raw.lightkeeperRequired,
+    factionName: raw.factionName,
     requiredPrestige: resolveRequiredPrestige(raw.requiredPrestige, ctx),
+    taskRequirements: mapOptionalArray(raw.taskRequirements, (req) =>
+      adaptTaskRequirement(req, ctx)
+    ),
+    taskRequirementGroups: mapOptionalArray(raw.taskRequirementGroups, (group) =>
+      adaptTaskRequirementGroup(group, ctx)
+    ),
+    traderRequirements: mapOptionalArray(raw.traderRequirements, (req) =>
+      adaptTraderRequirement(req, ctx)
+    ),
+    otherRequirements: mapOptionalArray(raw.otherRequirements, (requirement) =>
+      adaptOtherRequirement(requirement, ctx)
+    ),
+    neededKeys: mapOptionalArray(raw.neededKeys, (requirement) =>
+      adaptKeyRequirement(requirement, ctx)
+    ),
+    availableDelaySecondsMin: raw.availableDelaySecondsMin,
+    availableDelaySecondsMax: raw.availableDelaySecondsMax,
     experience: typeof raw.experience === "number" ? raw.experience : undefined,
-    taskRequirements: Array.isArray(raw.taskRequirements)
-      ? raw.taskRequirements.map((req) => adaptTaskRequirement(req, ctx))
-      : undefined,
-    traderRequirements: Array.isArray(raw.traderRequirements)
-      ? raw.traderRequirements.map((req) => adaptTraderRequirement(req, ctx))
-      : undefined,
     objectives: Array.isArray(raw.objectives)
       ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
       : undefined,
@@ -842,9 +952,35 @@ async function fetchApiTasks(mode) {
     );
   }
   const ctx = await buildTaskContext(cache, gameMode, tasksData);
-  return Object.values(tasksData.tasks)
-    .filter(isRecord)
-    .map((task) => adaptTask(task, ctx));
+  const tasks = [];
+  const seenIds = new Set();
+  for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
+    if (!isRecord(rawTask)) {
+      const error = new Error(
+        `Invalid json.tarkov.dev response for ${gameMode}/tasks: task '${sourceKey}' is not an object`
+      );
+      error.fatal = true;
+      throw error;
+    }
+    const id = stringId(rawTask);
+    if (!id) {
+      const error = new Error(
+        `Invalid json.tarkov.dev response for ${gameMode}/tasks: task '${sourceKey}' has no id`
+      );
+      error.fatal = true;
+      throw error;
+    }
+    if (seenIds.has(id)) {
+      const error = new Error(
+        `Invalid json.tarkov.dev response for ${gameMode}/tasks: duplicate task id '${id}'`
+      );
+      error.fatal = true;
+      throw error;
+    }
+    seenIds.add(id);
+    tasks.push(adaptTask(rawTask, ctx));
+  }
+  return tasks;
 }
 
 async function refreshApiTasks(mode) {
@@ -898,7 +1034,7 @@ function buildSummary(view, mode, locale) {
   if (view === "tasksAdd") {
     const sharedAdditions = overlay.tasksAdd || {};
     const modeAdditions = overlay.modes?.[mode]?.tasksAdd || {};
-    const mergedAdditions = { ...sharedAdditions, ...modeAdditions };
+    const mergedAdditions = mergeTaskAdditions(sharedAdditions, modeAdditions);
     return {
       sections: buildTaskAdditionSections(mergedAdditions, mode),
       error: overlayState.error || null,
@@ -1142,7 +1278,7 @@ const server = http.createServer((req, res) => {
     }
     const token = process.env.REBUILD_TOKEN;
     if (typeof token === "string" && token.length > 0) {
-      const requestToken = getRequestToken(req, requestUrl);
+      const requestToken = getRequestToken(req);
       if (!requestToken || !safeTokenEqual(requestToken, token)) {
         send(
           res,
@@ -1230,53 +1366,93 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    resolveViewParams(requestUrl).then(({ view, mode, locale, config, key }) => {
-      applyResponseHeaders(res, "text/event-stream", { Connection: "keep-alive" });
-      res.writeHead(200);
-      const clients = clientsByKey.get(key) || new Set();
-      clientsByKey.set(key, clients);
-      clients.add(res);
-      let closed = false;
-      let keepAlive = null;
-      const cleanup = () => {
-        if (closed) {
+    const releaseSseSlot = reserveSseConnection();
+    if (!releaseSseSlot) {
+      send(
+        res,
+        503,
+        JSON.stringify({ ok: false, error: "Too many live event connections" }),
+        "application/json; charset=utf-8"
+      );
+      return;
+    }
+    req.once("close", releaseSseSlot);
+    res.once("close", releaseSseSlot);
+    res.once("finish", releaseSseSlot);
+    res.once("error", releaseSseSlot);
+
+    resolveViewParams(requestUrl)
+      .then(({ view, mode, locale, config, key }) => {
+        if (res.destroyed || res.writableEnded) {
+          releaseSseSlot();
           return;
         }
-        closed = true;
-        if (keepAlive) {
-          clearInterval(keepAlive);
+        const clients = clientsByKey.get(key) || new Set();
+        if (clients.size >= MAX_SSE_CONNECTIONS_PER_KEY) {
+          releaseSseSlot();
+          send(
+            res,
+            429,
+            JSON.stringify({ ok: false, error: "Too many event connections for this view" }),
+            "application/json; charset=utf-8"
+          );
+          return;
         }
-        removeClient(key, res);
-        req.off("close", cleanup);
-        res.off("close", cleanup);
-        res.off("finish", cleanup);
-        res.off("error", cleanup);
-      };
 
-      req.on("close", cleanup);
-      res.on("close", cleanup);
-      res.on("finish", cleanup);
-      res.on("error", cleanup);
+        applyResponseHeaders(res, "text/event-stream", { Connection: "keep-alive" });
+        res.writeHead(200);
+        clientsByKey.set(key, clients);
+        clients.add(res);
+        let closed = false;
+        let keepAlive = null;
+        const cleanup = () => {
+          if (closed) {
+            return;
+          }
+          closed = true;
+          if (keepAlive) {
+            clearInterval(keepAlive);
+          }
+          releaseSseSlot();
+          removeClient(key, res);
+          req.off("close", cleanup);
+          res.off("close", cleanup);
+          res.off("finish", cleanup);
+          res.off("error", cleanup);
+          req.off("close", releaseSseSlot);
+          res.off("close", releaseSseSlot);
+          res.off("finish", releaseSseSlot);
+          res.off("error", releaseSseSlot);
+        };
 
-      if (
-        !writeSse(
-          key,
-          res,
-          `event: summary\ndata: ${JSON.stringify(
-            getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
-          )}\n\n`
-        )
-      ) {
-        cleanup();
-        return;
-      }
+        req.on("close", cleanup);
+        res.on("close", cleanup);
+        res.on("finish", cleanup);
+        res.on("error", cleanup);
 
-      keepAlive = setInterval(() => {
-        if (!writeSse(key, res, ": keep-alive\n\n")) {
+        if (
+          !writeSse(
+            key,
+            res,
+            `event: summary\ndata: ${JSON.stringify(
+              getState(view, config?.requiresMode ? mode : "", config?.requiresLocale ? locale : "")
+            )}\n\n`
+          )
+        ) {
           cleanup();
+          return;
         }
-      }, 15000);
-    }).catch(() => handleResponseFailure(res));
+
+        keepAlive = setInterval(() => {
+          if (!writeSse(key, res, ": keep-alive\n\n")) {
+            cleanup();
+          }
+        }, 15000);
+      })
+      .catch(() => {
+        releaseSseSlot();
+        handleResponseFailure(res);
+      });
     return;
   }
 
@@ -1307,11 +1483,11 @@ let currentPort = PORT;
 
 function startServer(port) {
   currentPort = port;
-  server.listen(port, () => {
+  server.listen({ port, host: config.host }, () => {
     const address = server.address();
     const activePort = typeof address === "object" && address !== null ? address.port : port;
     // eslint-disable-next-line no-console
-    console.log(`Overlay monitor running at http://localhost:${activePort}`);
+    console.log(`Overlay monitor running at http://${config.host}:${activePort}`);
   });
 }
 
@@ -1334,6 +1510,9 @@ if (process.env.NODE_ENV !== "test") {
 if (process.env.NODE_ENV === "test") {
   module.exports = {
     MAX_ROWS,
+    MAX_DISCOVERED_MODES,
+    MAX_SSE_CONNECTIONS,
+    MAX_SSE_CONNECTIONS_PER_KEY,
     buildTasksSections,
     buildSummary,
     buildOverrideSections,
@@ -1344,6 +1523,7 @@ if (process.env.NODE_ENV === "test") {
     buildLocaleSections,
     buildSeasonalPerkSections,
     buildCraftAddSections,
+    mergeTaskAdditions,
     mergeTaskOverrides,
     rebuildSummaries,
     valuesEqual,
@@ -1356,10 +1536,13 @@ if (process.env.NODE_ENV === "test") {
     handleResponseFailure,
     getLatestTagVersion,
     isVersionStale,
+    registerModes,
     rebuildOverlay,
     isRebuildEnabled,
     isDefaultOverlayPath,
     safeJoin,
+    writeSse,
+    fetchRemoteText,
     createSection,
     pushRow,
     overlayState,

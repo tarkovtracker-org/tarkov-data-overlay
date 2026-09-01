@@ -19,6 +19,15 @@ export function isDirectExecution(importMetaUrl: string): boolean {
   return importMetaUrl === pathToFileURL(entryFile).href;
 }
 
+/** Run an async CLI entry point and convert failures into a nonzero exit. */
+export function runDirectly(importMetaUrl: string, main: () => Promise<void>): void {
+  if (!isDirectExecution(importMetaUrl)) return;
+  main().catch((error: unknown) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  });
+}
+
 /** Promise-based sleep, used for polite rate limiting and retry backoff. */
 export function sleep(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));

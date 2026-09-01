@@ -6,9 +6,10 @@
  * No test doubles, no local re-implementations.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import path from 'node:path';
 import vm from 'node:vm';
+import { createServer as createHttpServer } from 'node:http';
 
 // NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
@@ -18,8 +19,10 @@ process.env.NODE_ENV = 'test';
 let mod: any;
 let configModule: any;
 const previousTargetOverlay = process.env.TARGET_OVERLAY;
+const previousRemoteFetchTimeout = process.env.REMOTE_FETCH_TIMEOUT_MS;
 try {
   process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
+  process.env.REMOTE_FETCH_TIMEOUT_MS = '100';
   // These CommonJS monitor modules intentionally have no declaration files.
   // @ts-expect-error Dynamic import of the JavaScript CommonJS server module.
   mod = (await import('../monitor/server.js')).default;
@@ -30,6 +33,11 @@ try {
     delete process.env.TARGET_OVERLAY;
   } else {
     process.env.TARGET_OVERLAY = previousTargetOverlay;
+  }
+  if (previousRemoteFetchTimeout === undefined) {
+    delete process.env.REMOTE_FETCH_TIMEOUT_MS;
+  } else {
+    process.env.REMOTE_FETCH_TIMEOUT_MS = previousRemoteFetchTimeout;
   }
 }
 
@@ -64,6 +72,8 @@ describe('module import sanity', () => {
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
+    expect(typeof mod.fetchRemoteText).toBe('function');
+    expect(typeof mod.registerModes).toBe('function');
   });
 
   it('exports the real http.Server instance', () => {
@@ -77,6 +87,41 @@ describe('module import sanity', () => {
     expect(mod.apiState).toHaveProperty('regular');
     expect(mod.apiState).toHaveProperty('pve');
     expect(mod.apiState).toHaveProperty('pvp-season');
+  });
+});
+
+describe('mode discovery', () => {
+  it('removes retired defaults and falls back to a discovered mode', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(['pve']);
+      expect(Object.keys(apiState)).toEqual(['pve']);
+      expect(mod.normalizeMode('regular')).toBe('pve');
+    } finally {
+      mod.registerModes(originalModes);
+    }
+  });
+
+  it('rejects an unexpectedly large discovered mode list', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(
+        Array.from({ length: mod.MAX_DISCOVERED_MODES + 1 }, (_, index) => `mode-${index}`)
+      );
+      expect(Object.keys(apiState)).toEqual(originalModes);
+    } finally {
+      mod.registerModes(originalModes);
+    }
+  });
+
+  it('rejects discovered mode names that collide with object properties', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(['constructor', 'prototype']);
+      expect(Object.keys(apiState)).toEqual(originalModes);
+    } finally {
+      mod.registerModes(originalModes);
+    }
   });
 });
 
@@ -96,6 +141,7 @@ const {
   buildLocaleSections,
   buildSeasonalPerkSections,
   buildCraftAddSections,
+  mergeTaskAdditions,
   mergeTaskOverrides,
   rebuildSummaries,
   valuesEqual,
@@ -110,11 +156,13 @@ const {
   isVersionStale,
   isRebuildEnabled,
   safeJoin,
+  writeSse,
   createSection,
   pushRow,
   overlayState,
   apiState,
   server,
+  fetchRemoteText,
   VIEW_CONFIG,
 } = mod;
 
@@ -229,7 +277,7 @@ describe('buildSummary', () => {
       editions: { std: { id: 'std', title: 'Std' } },
       storyChapters: { ch1: { id: 'ch1', name: 'Ch1' } },
       itemsAdd: {},
-      tasksAdd: { ct: { id: 'ct', name: 'Custom' } },
+      tasksAdd: { ct: { id: 'ct', name: 'Custom', trader: { name: 'Prapor' } } },
       locales: {
         en: { tasks: { t1: { name: 'Renamed' } } },
       },
@@ -289,6 +337,45 @@ describe('buildSummary', () => {
     expect(s.sections[0].title).toContain('Task Additions');
   });
 
+  it('merges task additions by embedded ID before rendering a mode', () => {
+    const merged = mergeTaskAdditions(
+      { shared_key: { id: 'task-1', name: 'Shared', trader: { name: 'Prapor' } } },
+      { mode_key: { id: 'task-1', name: 'Mode', trader: { name: 'Prapor' } } }
+    );
+
+    expect(Object.keys(merged)).toEqual(['task-1']);
+    expect(merged['task-1'].name).toBe('Mode');
+  });
+
+  it('does not assign mode override keys through the object prototype', () => {
+    const merged = mergeTaskOverrides(
+      {},
+      JSON.parse('{"__proto__":{"polluted":true},"task-1":{"minPlayerLevel":2}}')
+    );
+
+    expect(({} as { polluted?: boolean }).polluted).toBeUndefined();
+    expect(Object.hasOwn(merged, '__proto__')).toBe(true);
+    expect(merged['task-1'].minPlayerLevel).toBe(2);
+  });
+
+  it('rejects malformed or duplicate task additions instead of silently dropping data', () => {
+    expect(() =>
+      mergeTaskAdditions(
+        {
+          first: { id: 'task-1', trader: { name: 'Prapor' } },
+          second: { id: 'task-1', trader: { name: 'Prapor' } },
+        },
+        {}
+      )
+    ).toThrow("contains duplicate id 'task-1'");
+    expect(() => mergeTaskAdditions({ broken: { name: 'Missing ID' } }, {})).toThrow(
+      "tasksAdd.broken' has no valid id"
+    );
+    expect(() => mergeTaskAdditions({}, { broken: null })).toThrow(
+      "mode tasksAdd.broken' has no valid id"
+    );
+  });
+
   it('returns 1 section for "editions"', () => {
     const s = buildSummary('editions', '');
     expect(s.sections).toHaveLength(1);
@@ -320,6 +407,31 @@ describe('buildSummary', () => {
   it('returns 1 section for "seasonalPerks" and "craftsAdd"', () => {
     expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perks');
     expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions');
+  });
+});
+
+describe('remote overlay loading', () => {
+  it('uses a total deadline instead of allowing a slow trickle to hang forever', async () => {
+    const httpServer = createHttpServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'text/plain' });
+      response.write('partial');
+      const interval = setInterval(() => response.write('.'), 20);
+      response.on('close', () => clearInterval(interval));
+    });
+
+    await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
+    const address = httpServer.address();
+    if (!address || typeof address === 'string') throw new Error('test server did not bind');
+
+    try {
+      await expect(
+        fetchRemoteText(`http://127.0.0.1:${address.port}/overlay.json`)
+      ).rejects.toThrow(/timed out after 100ms/);
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        httpServer.close((error) => (error ? reject(error) : resolve()))
+      );
+    }
   });
 });
 
@@ -713,11 +825,15 @@ describe('monitor hardening', () => {
   it('requires explicit opt-in before enabling rebuilds', () => {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousAllowRebuild = process.env.ALLOW_REBUILD;
+    const previousRebuildToken = process.env.REBUILD_TOKEN;
     try {
       process.env.NODE_ENV = 'development';
       delete process.env.ALLOW_REBUILD;
+      delete process.env.REBUILD_TOKEN;
       expect(isRebuildEnabled()).toBe(false);
       process.env.ALLOW_REBUILD = 'true';
+      expect(isRebuildEnabled()).toBe(false);
+      process.env.REBUILD_TOKEN = 'local-secret';
       expect(isRebuildEnabled()).toBe(true);
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
@@ -726,7 +842,24 @@ describe('monitor hardening', () => {
       } else {
         process.env.ALLOW_REBUILD = previousAllowRebuild;
       }
+      if (previousRebuildToken === undefined) {
+        delete process.env.REBUILD_TOKEN;
+      } else {
+        process.env.REBUILD_TOKEN = previousRebuildToken;
+      }
     }
+  });
+
+  it('closes an SSE client that applies backpressure', () => {
+    const client = {
+      destroyed: false,
+      writableEnded: false,
+      write: vi.fn(() => false),
+      destroy: vi.fn(),
+    };
+
+    expect(writeSse('test', client, 'event: summary\n\n')).toBe(false);
+    expect(client.destroy).toHaveBeenCalledOnce();
   });
 });
 

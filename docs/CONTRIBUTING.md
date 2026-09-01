@@ -256,6 +256,9 @@ npm run typecheck
 # Build the overlay locally (commit the regenerated dist/overlay.json for data changes)
 npm run build
 
+# Confirm the committed generated output still matches source data
+npm run build:check
+
 # Run the test suite (required when changing src/lib/, scripts/, or tests)
 npm test
 ```

@@ -10,9 +10,10 @@
 
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { isDirectExecution } from '../src/lib/index.js';
+import { isDirectExecution, MAX_RESPONSE_BYTES, readResponseJson } from '../src/lib/index.js';
 
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
+const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
 
 /** chapterId -> wiki page title */
 const PAGES: Record<string, string> = {
@@ -38,9 +39,19 @@ export interface WikiStoryObjective {
 }
 
 export async function fetchWikitext(title: string): Promise<string> {
-  const url = `${WIKI_API}?action=parse&page=${title}&prop=wikitext&format=json`;
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'tarkov-data-overlay story extractor' },
+  const params = new URLSearchParams({
+    action: 'parse',
+    page: title,
+    prop: 'wikitext',
+    format: 'json',
+  });
+  const response = await fetch(WIKI_API, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'tarkov-data-overlay story extractor',
+    },
+    body: params,
     // Match the original Python port's urlopen(req, timeout=30) so a hung
     // wiki request fails loudly instead of blocking the pipeline forever.
     signal: AbortSignal.timeout(30_000),
@@ -48,7 +59,7 @@ export async function fetchWikitext(title: string): Promise<string> {
   if (!response.ok) {
     throw new Error(`${title}: HTTP ${response.status}`);
   }
-  const data = (await response.json()) as {
+  const data = (await readResponseJson(response, WIKI_API, WIKI_MAX_RESPONSE_BYTES, 'wiki')) as {
     parse?: { wikitext?: { '*': string } };
     error?: { info?: string };
   };

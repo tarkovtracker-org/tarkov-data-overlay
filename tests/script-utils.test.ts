@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { pathToFileURL } from 'node:url';
-import { isDirectExecution, sleep } from '../src/lib/script-utils.js';
+import { isDirectExecution, runDirectly, sleep } from '../src/lib/script-utils.js';
 
 const originalArgv = [...process.argv];
 
@@ -44,5 +44,16 @@ describe('sleep', () => {
     await vi.advanceTimersByTimeAsync(1);
     await promise;
     expect(resolved).toBe(true);
+  });
+});
+
+describe('runDirectly', () => {
+  it('does not invoke the entry point when the module is imported', () => {
+    process.argv[1] = '/tmp/entry.ts';
+    const main = vi.fn(async () => {});
+
+    runDirectly(pathToFileURL('/tmp/imported.ts').href, main);
+
+    expect(main).not.toHaveBeenCalled();
   });
 });

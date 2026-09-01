@@ -362,6 +362,60 @@ describe('task unlock model', () => {
     ).toBe('available');
   });
 
+  it('fails closed for malformed account booleans, faction, and timing values', () => {
+    const baseState = {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+    };
+
+    const factionTask = makeTask({ factionName: 'USEC' });
+    expect(
+      evaluateTaskUnlock(factionTask, deriveTaskUnlockDefinition(factionTask), {
+        ...baseState,
+        faction: null,
+      } as unknown as Parameters<typeof evaluateTaskUnlock>[2]).status
+    ).toBe('unknown');
+
+    const lightkeeperTask = makeTask({ lightkeeperRequired: true });
+    expect(
+      evaluateTaskUnlock(lightkeeperTask, deriveTaskUnlockDefinition(lightkeeperTask), {
+        ...baseState,
+        lightkeeperUnlocked: 'false',
+      } as unknown as Parameters<typeof evaluateTaskUnlock>[2]).status
+    ).toBe('unknown');
+
+    const timedTask = makeTask({ availableDelaySecondsMin: 10 });
+    expect(
+      evaluateTaskUnlock(timedTask, deriveTaskUnlockDefinition(timedTask), {
+        ...baseState,
+        nowSeconds: null,
+        taskAvailableSince: { [timedTask.id]: null },
+      } as unknown as Parameters<typeof evaluateTaskUnlock>[2]).status
+    ).toBe('unknown');
+  });
+
+  it('fails closed for malformed task-level numeric definitions', () => {
+    const baseState = {
+      playerLevel: 100,
+      prestigeLevel: 100,
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+      nowSeconds: 100,
+      taskAvailableSince: { 'task-2': 0 },
+    };
+
+    for (const task of [
+      makeTask({ minPlayerLevel: -1 }),
+      makeTask({ requiredPrestige: { name: 'Broken', prestigeLevel: -1 } }),
+      makeTask({ requiredPrestige: { id: '', name: 'Broken', prestigeLevel: 1 } }),
+      makeTask({ availableDelaySecondsMin: -1 }),
+      makeTask({ availableDelaySecondsMin: 20, availableDelaySecondsMax: 10 }),
+    ]) {
+      const definition = deriveTaskUnlockDefinition(task);
+      expect(evaluateTaskUnlock(task, definition, baseState).status).toBe('unknown');
+    }
+  });
+
   it('does not default malformed task status requirements to complete', () => {
     const task = makeTask({
       taskRequirements: [{ task: prerequisite, status: [123 as unknown as string] }],
@@ -375,6 +429,186 @@ describe('task unlock model', () => {
 
     expect(result.status).toBe('unknown');
     expect(result.unknown).toHaveLength(1);
+  });
+
+  it('does not accept unknown future task statuses as satisfied', () => {
+    const task = makeTask({
+      taskRequirements: [{ task: prerequisite, status: ['future-status'] }],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+    const result = evaluateTaskUnlock(task, definition, {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+      taskStatuses: { [prerequisite.id]: 'future-status' },
+    });
+
+    expect(result.status).toBe('unknown');
+  });
+
+  it('fails closed instead of throwing for malformed definitions or state', () => {
+    const task = makeTask();
+    const malformedDefinition = {
+      all: [null],
+      taskRequirements: [],
+      anyOf: [[{ type: 'future-condition' }]],
+      context: {},
+      alternatives: [[]],
+    } as unknown as Parameters<typeof evaluateTaskUnlock>[1];
+    const malformedState = null as unknown as Parameters<typeof evaluateTaskUnlock>[2];
+
+    expect(() => evaluateTaskUnlock(task, malformedDefinition, malformedState)).not.toThrow();
+    expect(evaluateTaskUnlock(task, malformedDefinition, malformedState).status).toBe('unknown');
+  });
+
+  it('fails closed for malformed context, timing, task, and options values', () => {
+    const task = makeTask();
+    const definition = {
+      ...deriveTaskUnlockDefinition(task),
+      context: { trader: 'not-a-trader', map: [] },
+      timing: 'not-timing',
+      alternatives: [
+        [{ type: 'storyChapterProgress', storyChapter: { id: 'chapter', name: 'C' } }],
+      ],
+      alternativesExclusive: 'false',
+    } as unknown as Parameters<typeof evaluateTaskUnlock>[1];
+
+    expect(() =>
+      evaluateTaskUnlock(
+        null as unknown as Parameters<typeof evaluateTaskUnlock>[0],
+        definition,
+        {},
+        null as unknown as Parameters<typeof evaluateTaskUnlock>[3]
+      )
+    ).not.toThrow();
+    expect(
+      evaluateTaskUnlock(
+        null as unknown as Parameters<typeof evaluateTaskUnlock>[0],
+        definition,
+        {},
+        null as unknown as Parameters<typeof evaluateTaskUnlock>[3]
+      ).status
+    ).toBe('unknown');
+  });
+
+  it('fails closed for malformed known condition definitions', () => {
+    const state = {
+      faction: '',
+      taskStatuses: { prerequisite: 'complete' },
+      traderLevels: { [trader.id]: 4 },
+      globalVariables: { variable: 10 },
+      dialogues: { dialogue: true },
+      storyChapters: { chapter: true },
+    };
+    const invalidConditions: TaskUnlockCondition[] = [
+      { type: 'faction', faction: '' },
+      { type: 'taskStatus', task: { id: '', name: 'Broken' }, statuses: ['complete'] },
+      {
+        type: 'traderLevel',
+        requirementId: '',
+        trader,
+        compareMethod: '>=',
+        value: 1,
+      },
+      {
+        type: 'globalVariable',
+        requirementId: 'global',
+        variableId: '',
+        compareMethod: '>=',
+        value: 1,
+      },
+      { type: 'dialogue', requirementId: 'dialogue', traders: [] },
+      {
+        type: 'storyChapterProgress',
+        storyChapter: { id: '', name: 'Broken chapter' },
+      },
+    ];
+
+    for (const condition of invalidConditions) {
+      const definition = {
+        all: [condition],
+        taskRequirements: [],
+        anyOf: [],
+        context: {},
+      };
+      expect(evaluateTaskUnlock(makeTask(), definition, state).status).toBe('unknown');
+    }
+  });
+
+  it('fails closed for a task with an empty identity', () => {
+    const task = makeTask({ id: '', name: '' });
+    const definition = deriveTaskUnlockDefinition(task);
+
+    expect(evaluateTaskUnlock(task, definition, {}).status).toBe('unknown');
+  });
+
+  it.each([null, {}, [], ['', 'complete'], 123, Number.NaN])(
+    'returns unknown instead of throwing for malformed profile status %j',
+    (status) => {
+      const task = makeTask({ taskRequirements: [{ task: prerequisite }] });
+      const definition = deriveTaskUnlockDefinition(task);
+      const state = {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        taskStatuses: { [prerequisite.id]: status },
+      } as unknown as Parameters<typeof evaluateTaskUnlock>[2];
+
+      expect(() => evaluateTaskUnlock(task, definition, state)).not.toThrow();
+      expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
+    }
+  );
+
+  it('returns unknown for malformed completed condition state', () => {
+    const task = makeTask({
+      otherRequirements: [{ id: 'dialogue-1', type: 'dialogue', traders: [trader] }],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+    const state = {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+      completedConditionIds: { includes: () => true },
+    } as unknown as Parameters<typeof evaluateTaskUnlock>[2];
+
+    expect(() => evaluateTaskUnlock(task, definition, state)).not.toThrow();
+    expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
+  });
+
+  it('does not skip sparse malformed requirement or profile arrays', () => {
+    const sparseRequirements = new Array<TaskRequirement>(1);
+    const task = makeTask({ taskRequirements: sparseRequirements });
+    const definition = deriveTaskUnlockDefinition(task);
+    const state = {
+      traderUnlocked: { [trader.id]: true },
+      mapAccess: { [map.id]: true },
+      taskStatuses: {},
+    };
+
+    expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
+
+    const malformedStatus = new Array<string>(2);
+    malformedStatus[0] = 'complete';
+    const statusTask = makeTask({ taskRequirements: [{ task: prerequisite }] });
+    const statusDefinition = deriveTaskUnlockDefinition(statusTask);
+    expect(
+      evaluateTaskUnlock(statusTask, statusDefinition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        taskStatuses: { [prerequisite.id]: malformedStatus },
+      })
+    ).toMatchObject({ status: 'unknown' });
+
+    const dialogueTask = makeTask({
+      otherRequirements: [{ id: 'dialogue-1', type: 'dialogue', traders: [trader] }],
+    });
+    const dialogueDefinition = deriveTaskUnlockDefinition(dialogueTask);
+    const completedConditionIds = new Array<string>(2);
+    completedConditionIds[0] = 'dialogue-1';
+    expect(
+      evaluateTaskUnlock(dialogueTask, dialogueDefinition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        completedConditionIds,
+      })
+    ).toMatchObject({ status: 'unknown' });
   });
 
   it('fails closed for malformed nested requirements', () => {
@@ -420,6 +654,26 @@ describe('task unlock model', () => {
     expect(() => withTaskUnlockAlternatives(deriveTaskUnlockDefinition(makeTask()), [[]])).toThrow(
       /at least one condition/
     );
+    expect(() => withTaskUnlockAlternatives(deriveTaskUnlockDefinition(makeTask()), [])).toThrow(
+      /at least one branch/
+    );
+  });
+
+  it('does not treat an explicit empty alternatives definition as absent', () => {
+    const task = makeTask({ taskRequirements: [{ task: prerequisite }] });
+    const definition = {
+      ...deriveTaskUnlockDefinition(task),
+      alternatives: [],
+      alternativesExclusive: true,
+    };
+
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        taskStatuses: { [prerequisite.id]: 'complete' },
+      }).status
+    ).toBe('unknown');
   });
 
   it('keeps a random availability window unknown until its upper bound elapses', () => {

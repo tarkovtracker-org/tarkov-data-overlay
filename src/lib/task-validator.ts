@@ -375,6 +375,24 @@ const validateTaskRequirements: FieldValidator = (override, apiTask) => {
   };
 };
 
+/** Validate task-prerequisite groups while preserving explicit array clearing. */
+const validateTaskRequirementGroups: FieldValidator = (override, apiTask) => {
+  if (override.taskRequirementGroups === undefined) return null;
+
+  const apiGroups = apiTask.taskRequirementGroups ?? [];
+  const overrideGroups = override.taskRequirementGroups;
+  if (overrideGroups.length === 0) {
+    if (apiGroups.length === 0) return null;
+    return {
+      field: 'taskRequirementGroups',
+      status: 'needed',
+      message: `taskRequirementGroups: API has ${apiGroups.length} group(s), Override=[] (clears all) - STILL NEEDED`,
+    };
+  }
+
+  return createFieldValidator('taskRequirementGroups')(override, apiTask);
+};
+
 /** All field validators in order */
 const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('minPlayerLevel'),
@@ -392,7 +410,7 @@ const FIELD_VALIDATORS: FieldValidator[] = [
   createFieldValidator('neededKeys'),
   createFieldValidator('availableDelaySecondsMin'),
   createFieldValidator('availableDelaySecondsMax'),
-  createFieldValidator('taskRequirementGroups'),
+  validateTaskRequirementGroups,
   validateTaskRequirements,
   validateTraderRequirements,
 ];

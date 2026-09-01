@@ -6,21 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Validate & Build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           cache: 'npm'
@@ -33,22 +35,6 @@ jobs:
 
       - name: Run Fallow security analysis
         run: npm run fallow:security -- --gate new --changed-since "${{ github.event.pull_request.base.sha || github.event.before }}"
-
-      - name: Compute next tag
-        id: version
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          git fetch --tags
-          latest_tag=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+$' | head -n 1)
-          if [[ -z "$latest_tag" ]]; then
-            next_tag="v1.0"
-          else
-            version="${latest_tag#v}"
-            IFS='.' read -r major minor <<< "$version"
-            next_tag="v${major}.$((minor + 1))"
-          fi
-          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
-          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
       - name: Lint Markdown
         run: npm run lint:markdown
@@ -69,155 +55,8 @@ jobs:
         timeout-minutes: 15
         run: npm run check-overrides -- --fail-on-stale
 
-      - name: Build overlay (repo version)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        env:
-          OVERLAY_VERSION: ${{ steps.version.outputs.next_tag }}
-        run: |
-          export OVERLAY_VERSION="${OVERLAY_VERSION#v}"
-          npm run build
+      - name: Check generated overlay
+        run: npm run build:check
 
-      - name: Build overlay (default)
-        if: github.ref != 'refs/heads/main' || github.event_name != 'push'
-        run: |
-          npm run build
-
-      - name: Commit dist (main branch only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: commit
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add dist/
-          if git diff --staged --quiet; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          else
-            git commit -m "chore: build overlay [skip ci]"
-            git push
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build release notes
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
-        id: notes
-        run: |
-          latest_tag="${{ steps.version.outputs.latest_tag }}"
-
-          if [[ -z "$latest_tag" ]]; then
-            echo "Initial release" > /tmp/release-notes.txt
-          else
-            git show "$latest_tag:dist/overlay.json" > /tmp/overlay.prev.json 2>/dev/null || echo '{}' > /tmp/overlay.prev.json
-            
-            cat > /tmp/gen-notes.js << 'EOF'
-          const fs = require('fs');
-          const path = require('path');
-          const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
-          const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
-
-          delete current.$meta;
-          delete previous.$meta;
-
-          const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
-
-          const getFiles = (dir) => {
-            const files = [];
-            const walk = (p) => {
-              if (!fs.existsSync(p)) return;
-              fs.readdirSync(p).forEach(i => {
-                const f = path.join(p, i);
-                if (fs.statSync(f).isDirectory()) walk(f);
-                else if (i.endsWith('.json5') || i.endsWith('.json')) files.push(f);
-              });
-            };
-            walk(dir);
-            return files.sort();
-          };
-
-          // Map source files to their keys in the built overlay
-          // Note: itemsAdd and tasksAdd are stored under their own keys in overlay.json
-          const map = {
-            'items': 'items', 'itemsAdd': 'itemsAdd',
-            'tasks': 'tasks', 'tasksAdd': 'tasksAdd',
-            'traders': 'traders', 'hideout': 'hideout',
-            'editions': 'editions', 'storyChapters': 'storyChapters',
-            'prestige': 'prestige'
-          };
-
-          const lines = [];
-          let hasChanges = false;
-
-          getFiles('src').forEach(f => {
-            const rel = f.replace(/^src\//, '');
-            const name = path.basename(f, path.extname(f));
-            const section = map[name] || name;
-            const curr = isObject(current[section]) ? current[section] : {};
-            const prev = isObject(previous[section]) ? previous[section] : {};
-            
-            const added = [];
-            const modified = [];
-            const removed = [];
-            
-            Object.keys(curr).sort().forEach(id => {
-              const displayName = curr[id].name || curr[id].shortName || id;
-              if (!(id in prev)) {
-                added.push('  + ' + displayName + ' (' + id + ')');
-                hasChanges = true;
-              } else if (JSON.stringify(curr[id]) !== JSON.stringify(prev[id])) {
-                modified.push('  ~ ' + displayName + ' (' + id + ')');
-                hasChanges = true;
-              }
-            });
-            
-            Object.keys(prev).sort().forEach(id => {
-              if (!(id in curr)) {
-                const displayName = prev[id].name || prev[id].shortName || id;
-                removed.push('  - ' + displayName + ' (' + id + ')');
-                hasChanges = true;
-              }
-            });
-            
-            if (added.length > 0 || modified.length > 0 || removed.length > 0) {
-              lines.push('### ' + rel);
-              added.forEach(a => lines.push(a));
-              modified.forEach(m => lines.push(m));
-              removed.forEach(r => lines.push(r));
-              lines.push('');
-            }
-          });
-
-          if (!hasChanges) {
-            lines.push('No changes in source files');
-          }
-
-          fs.writeFileSync('/tmp/release-notes.txt', lines.join('\n'));
-          EOF
-            node /tmp/gen-notes.js
-          fi
-
-      - name: Create and push tag
-        id: tag
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.commit.outputs.has_changes == 'true'
-        env:
-          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
-        run: |
-          git fetch --tags
-          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
-            echo "Tag $NEXT_TAG already exists, skipping tag creation"
-            echo "tag_created=false" >> "$GITHUB_OUTPUT"
-          else
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git tag -a "$NEXT_TAG" -m "Overlay version $NEXT_TAG"
-            git push origin "$NEXT_TAG"
-            echo "tag_created=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create Release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.tag.outputs.tag_created == 'true'
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          tag_name: ${{ steps.version.outputs.next_tag }}
-          body_path: /tmp/release-notes.txt
-          files: dist/overlay.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build overlay
+        run: npm run build

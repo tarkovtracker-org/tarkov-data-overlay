@@ -13,7 +13,6 @@ import type {
   TaskGlobalVariableRequirement,
   TaskKeyRequirement,
   TaskOtherRequirement,
-  TaskRequirement,
   StoryChapter,
   TraderRequirement,
 } from './types.js';
@@ -51,11 +50,23 @@ const STATUS_ALIASES: Readonly<Record<string, string>> = {
   expired: 'failed',
 };
 
+const CANONICAL_TASK_STATUSES = new Set(['locked', 'active', 'complete', 'failed']);
+
 type TaskRef = { id: string; name: string };
 
 /** Check the non-array object shape used by remote JSON records. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** Check identifiers and labels that must contain a value at runtime. */
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+/** Materialize array holes as undefined so malformed entries cannot be skipped. */
+function denseArray<T>(values: readonly T[]): T[] {
+  return Array.from({ length: values.length }, (_, index) => values[index]);
 }
 
 /** Story-chapter fields needed to derive explicit task unlock alternatives. */
@@ -164,6 +175,24 @@ export interface TaskUnlockTiming {
   maxSeconds?: number;
 }
 
+/** Reject negative, non-finite, or contradictory delayed-availability bounds. */
+function isInvalidTiming(timing: TaskUnlockTiming): boolean {
+  return (
+    (timing.minSeconds !== undefined &&
+      (!isFiniteNumber(timing.minSeconds) || timing.minSeconds < 0)) ||
+    (timing.maxSeconds !== undefined &&
+      (!isFiniteNumber(timing.maxSeconds) || timing.maxSeconds < 0)) ||
+    (isFiniteNumber(timing.minSeconds) &&
+      isFiniteNumber(timing.maxSeconds) &&
+      timing.maxSeconds < timing.minSeconds)
+  );
+}
+
+/** Check whether valid timing bounds include a positive delay. */
+function hasPositiveTiming(timing: TaskUnlockTiming): boolean {
+  return (timing.minSeconds ?? 0) > 0 || (timing.maxSeconds ?? 0) > 0;
+}
+
 /**
  * Normalized task availability.
  *
@@ -227,25 +256,20 @@ function uniqueStrings(values: readonly string[]): string[] {
 }
 
 /** Normalize the statuses accepted by one upstream task prerequisite. */
-function statusesFor(requirement: TaskRequirement): string[] {
+function statusesFor(requirement: unknown): string[] | undefined {
   if (!isRecord(requirement) || requirement.status === undefined) {
     return [...DEFAULT_TASK_STATUSES];
   }
-  if (!Array.isArray(requirement.status)) return [];
+  if (!Array.isArray(requirement.status)) return undefined;
+  const statuses = denseArray(requirement.status);
+  if (statuses.some((status) => typeof status !== 'string')) return undefined;
 
-  return uniqueStrings(
-    requirement.status.filter((status): status is string => typeof status === 'string')
-  );
+  return uniqueStrings(statuses);
 }
 
 /** Check the runtime shape needed by a task-status condition. */
 function isTaskRef(value: unknown): value is TaskRef {
-  return (
-    isRecord(value) &&
-    typeof value.id === 'string' &&
-    value.id.length > 0 &&
-    typeof value.name === 'string'
-  );
+  return isRecord(value) && isNonEmptyString(value.id) && isNonEmptyString(value.name);
 }
 
 /** Check the comparison operators accepted by numeric unlock conditions. */
@@ -277,17 +301,21 @@ function unknownRequirementCondition(
 }
 
 /** Convert one task prerequisite into a task-status unlock condition. */
-function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondition {
+function taskRequirementCondition(requirement: unknown): TaskUnlockCondition {
   if (!isRecord(requirement) || !isTaskRef(requirement.task)) {
     return unknownRequirementCondition(
       isRecord(requirement) ? requirement.id : undefined,
       'taskRequirement'
     );
   }
+  const statuses = statusesFor(requirement);
+  if (statuses === undefined) {
+    return unknownRequirementCondition(requirement.id, 'taskRequirementStatus');
+  }
   return {
     type: 'taskStatus',
     task: requirement.task,
-    statuses: statusesFor(requirement),
+    statuses,
   };
 }
 
@@ -295,6 +323,7 @@ function taskRequirementCondition(requirement: TaskRequirement): TaskUnlockCondi
 function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockCondition {
   if (
     !isRecord(requirement) ||
+    !isNonEmptyString(requirement.id) ||
     !isTaskRef(requirement.trader) ||
     !isFiniteNumber(requirement.value) ||
     !isCompareMethod(requirement.compareMethod) ||
@@ -336,7 +365,12 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
 
   if (requirement.type === 'dialogue') {
     const dialogue = requirement as unknown as TaskDialogueRequirement;
-    if (typeof dialogue.id !== 'string' || !Array.isArray(dialogue.traders)) {
+    if (
+      !isNonEmptyString(dialogue.id) ||
+      !Array.isArray(dialogue.traders) ||
+      dialogue.traders.length === 0 ||
+      denseArray(dialogue.traders).some((trader) => !isTaskRef(trader))
+    ) {
       return unknownRequirementCondition(dialogue.id, dialogue.type);
     }
     return {
@@ -349,8 +383,8 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
   if (requirement.type === 'globalVariable') {
     const globalVariable = requirement as unknown as TaskGlobalVariableRequirement;
     if (
-      typeof globalVariable.id !== 'string' ||
-      typeof globalVariable.variableId !== 'string' ||
+      !isNonEmptyString(globalVariable.id) ||
+      !isNonEmptyString(globalVariable.variableId) ||
       !isCompareMethod(globalVariable.compareMethod) ||
       !isFiniteNumber(globalVariable.value)
     ) {
@@ -410,7 +444,7 @@ function storyAlternativeConditions(
 function taskRequirementConditions(value: unknown): TaskUnlockCondition[] {
   if (value === undefined) return [];
   if (!Array.isArray(value)) return [unknownRequirementCondition(undefined, 'taskRequirements')];
-  return value.map(taskRequirementCondition);
+  return denseArray(value).map(taskRequirementCondition);
 }
 
 /** Convert OR groups while preserving an unknown state for malformed input. */
@@ -419,33 +453,55 @@ function taskRequirementGroupConditions(value: unknown): TaskUnlockCondition[][]
   if (!Array.isArray(value)) {
     return [[unknownRequirementCondition(undefined, 'taskRequirementGroups')]];
   }
-  return value.map((group) =>
-    Array.isArray(group)
-      ? group.map(taskRequirementCondition)
+  return denseArray(value).map((group) =>
+    Array.isArray(group) && group.length > 0
+      ? denseArray(group).map(taskRequirementCondition)
       : [unknownRequirementCondition(undefined, 'taskRequirementGroup')]
   );
 }
 
 /** Derive the minimum-player-level condition when the task declares one. */
 function playerLevelCondition(task: TaskData): TaskUnlockCondition | undefined {
-  if (typeof task.minPlayerLevel !== 'number' || task.minPlayerLevel <= 0) return undefined;
+  if (task.minPlayerLevel === undefined) return undefined;
+  if (!isFiniteNumber(task.minPlayerLevel)) {
+    return unknownRequirementCondition(undefined, 'playerLevel');
+  }
+  if (task.minPlayerLevel === 0) return undefined;
+  if (task.minPlayerLevel < 0) return unknownRequirementCondition(undefined, 'playerLevel');
   return { type: 'playerLevel', compareMethod: '>=', value: task.minPlayerLevel };
 }
 
 /** Derive the faction condition when the task is faction-specific. */
 function factionCondition(task: TaskData): TaskUnlockCondition | undefined {
-  if (!task.factionName || task.factionName.toLowerCase() === 'any') return undefined;
+  if (task.factionName === undefined) return undefined;
+  if (typeof task.factionName !== 'string') {
+    return unknownRequirementCondition(undefined, 'faction');
+  }
+  if (task.factionName.toLowerCase() === 'any') return undefined;
+  if (task.factionName.length === 0) {
+    return unknownRequirementCondition(undefined, 'faction');
+  }
   return { type: 'faction', faction: task.factionName };
 }
 
 /** Derive the prestige condition when the task requires a prestige level. */
 function prestigeCondition(task: TaskData): TaskUnlockCondition | undefined {
-  if (!task.requiredPrestige) return undefined;
+  const prestige = task.requiredPrestige;
+  if (prestige === undefined) return undefined;
+  if (
+    !isRecord(prestige) ||
+    !isNonEmptyString(prestige.name) ||
+    (prestige.id !== undefined && !isNonEmptyString(prestige.id)) ||
+    !isFiniteNumber(prestige.prestigeLevel) ||
+    prestige.prestigeLevel < 0
+  ) {
+    return unknownRequirementCondition(undefined, 'prestigeLevel');
+  }
   return {
     type: 'prestigeLevel',
-    prestige: task.requiredPrestige,
+    prestige,
     compareMethod: '>=',
-    value: task.requiredPrestige.prestigeLevel,
+    value: prestige.prestigeLevel,
   };
 }
 
@@ -476,10 +532,12 @@ function deriveCommonUnlockConditions(task: TaskData): TaskUnlockCondition[] {
 
 /** Derive timing metadata only when the task declares a positive delay. */
 function deriveTaskTiming(task: TaskData): TaskUnlockTiming | undefined {
-  const minSeconds = task.availableDelaySecondsMin ?? 0;
-  const maxSeconds = task.availableDelaySecondsMax ?? 0;
-  if (minSeconds <= 0 && maxSeconds <= 0) return undefined;
-  return { minSeconds: task.availableDelaySecondsMin, maxSeconds: task.availableDelaySecondsMax };
+  const minSeconds = task.availableDelaySecondsMin;
+  const maxSeconds = task.availableDelaySecondsMax;
+  if (minSeconds === undefined && maxSeconds === undefined) return undefined;
+
+  const timing = { minSeconds, maxSeconds };
+  return isInvalidTiming(timing) || hasPositiveTiming(timing) ? timing : undefined;
 }
 
 /**
@@ -500,9 +558,19 @@ export function deriveTaskUnlockDefinition(
     context: {},
   };
 
-  if (task.trader) definition.context.trader = task.trader;
-  if (task.map) definition.context.map = task.map;
-  if (task.lightkeeperRequired === true) definition.context.lightkeeperRequired = true;
+  if (task.trader !== undefined) {
+    if (isTaskRef(task.trader)) definition.context.trader = task.trader;
+    else definition.all.push(unknownRequirementCondition(undefined, 'trader'));
+  }
+  if (task.map !== undefined && task.map !== null) {
+    if (isTaskRef(task.map)) definition.context.map = task.map;
+    else definition.all.push(unknownRequirementCondition(undefined, 'map'));
+  }
+  if (task.lightkeeperRequired === true) {
+    definition.context.lightkeeperRequired = true;
+  } else if (task.lightkeeperRequired !== undefined && task.lightkeeperRequired !== false) {
+    definition.all.push(unknownRequirementCondition(undefined, 'lightkeeperRequired'));
+  }
 
   if (timing) definition.timing = timing;
 
@@ -526,8 +594,14 @@ export function withTaskUnlockAlternatives(
   alternatives: TaskUnlockCondition[][],
   exclusive = true
 ): TaskUnlockDefinition {
-  if (alternatives.some((branch) => branch.length === 0)) {
-    throw new Error('Task unlock alternatives must contain at least one condition per branch');
+  if (
+    !Array.isArray(alternatives) ||
+    alternatives.length === 0 ||
+    denseArray(alternatives).some((branch) => !Array.isArray(branch) || branch.length === 0)
+  ) {
+    throw new Error(
+      'Task unlock alternatives must contain at least one branch and at least one condition per branch'
+    );
   }
 
   return {
@@ -553,12 +627,17 @@ function compare(actual: number, method: TaskUnlockCompareMethod, expected: numb
   }
 }
 
-/** Map numeric/profile status spellings to the evaluator's canonical names. */
-function canonicalStatus(status: TaskStatusValue): string {
-  if (typeof status === 'number') return TASK_STATUS_NAMES[status] ?? `status:${status}`;
+/** Map numeric/profile status spellings to canonical names when well-formed. */
+function canonicalStatus(status: unknown): string | undefined {
+  if (typeof status === 'number') {
+    return Number.isFinite(status) ? TASK_STATUS_NAMES[status] : undefined;
+  }
+  if (typeof status !== 'string') return undefined;
 
   const normalized = status.toLowerCase().replace(/[\s_-]/g, '');
-  return STATUS_ALIASES[normalized] ?? normalized;
+  if (normalized.length === 0) return undefined;
+  const canonical = STATUS_ALIASES[normalized] ?? normalized;
+  return CANONICAL_TASK_STATUSES.has(canonical) ? canonical : undefined;
 }
 
 /** Evaluate a numeric comparison, treating missing or non-finite input as unknown. */
@@ -567,7 +646,9 @@ function numberState(
   method: TaskUnlockCompareMethod,
   expected: number
 ): EvaluatedTaskUnlockCondition['state'] {
-  if (value === undefined || !Number.isFinite(value)) return 'unknown';
+  if (!isFiniteNumber(value) || !isFiniteNumber(expected) || !isCompareMethod(method)) {
+    return 'unknown';
+  }
   return compare(value, method, expected) ? 'met' : 'unmet';
 }
 
@@ -605,7 +686,9 @@ function evaluateFactionCondition(
   condition: Extract<TaskUnlockCondition, { type: 'faction' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
-  if (state.faction === undefined) return { state: 'unknown', reason: 'faction is not present' };
+  if (!isNonEmptyString(state.faction) || !isNonEmptyString(condition.faction)) {
+    return { state: 'unknown', reason: 'faction is not present or invalid' };
+  }
   return {
     state: state.faction.toLowerCase() === condition.faction.toLowerCase() ? 'met' : 'unmet',
     reason: `faction is ${condition.faction}`,
@@ -617,14 +700,30 @@ function evaluateTaskStatusCondition(
   condition: Extract<TaskUnlockCondition, { type: 'taskStatus' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
-  if (condition.statuses.length === 0) {
+  if (!isTaskRef(condition.task)) {
+    return { state: 'unknown', reason: 'task status requirement has an invalid task' };
+  }
+  if (!Array.isArray(condition.statuses) || condition.statuses.length === 0) {
     return { state: 'unknown', reason: 'task status requirement has no supported statuses' };
   }
   const actual = state.taskStatuses?.[condition.task.id];
   if (actual === undefined) return { state: 'unknown', reason: 'task status is not present' };
-  const statuses = Array.isArray(actual) ? actual : [actual];
-  const accepted = new Set(condition.statuses.map(canonicalStatus));
-  const matches = statuses.some((status) => accepted.has(canonicalStatus(status)));
+  const statuses = Array.isArray(actual) ? denseArray(actual) : [actual];
+  if (statuses.length === 0) {
+    return { state: 'unknown', reason: 'task status is empty' };
+  }
+
+  const acceptedStatuses = denseArray(condition.statuses).map(canonicalStatus);
+  const actualStatuses = statuses.map(canonicalStatus);
+  if (
+    acceptedStatuses.some((status) => status === undefined) ||
+    actualStatuses.some((status) => status === undefined)
+  ) {
+    return { state: 'unknown', reason: 'task status contains an invalid value' };
+  }
+
+  const accepted = new Set(acceptedStatuses);
+  const matches = actualStatuses.some((status) => accepted.has(status));
   return {
     state: matches ? 'met' : 'unmet',
     reason: `task status is one of: ${condition.statuses.join(', ')}`,
@@ -636,6 +735,14 @@ function evaluateTraderCondition(
   condition: Extract<TaskUnlockCondition, { type: 'traderLevel' | 'traderReputation' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
+  if (
+    !isNonEmptyString(condition.requirementId) ||
+    !isTaskRef(condition.trader) ||
+    !isCompareMethod(condition.compareMethod) ||
+    !isFiniteNumber(condition.value)
+  ) {
+    return { state: 'unknown', reason: 'trader requirement definition is invalid' };
+  }
   const values = condition.type === 'traderLevel' ? state.traderLevels : state.traderReputation;
   const label = condition.type === 'traderLevel' ? 'trader level' : 'trader reputation';
   return evaluateNumericCondition(
@@ -651,6 +758,14 @@ function evaluateGlobalVariableCondition(
   condition: Extract<TaskUnlockCondition, { type: 'globalVariable' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
+  if (
+    !isNonEmptyString(condition.requirementId) ||
+    !isNonEmptyString(condition.variableId) ||
+    !isCompareMethod(condition.compareMethod) ||
+    !isFiniteNumber(condition.value)
+  ) {
+    return { state: 'unknown', reason: 'global variable requirement definition is invalid' };
+  }
   return evaluateNumericCondition(
     state.globalVariables?.[condition.variableId],
     condition.compareMethod,
@@ -664,11 +779,27 @@ function evaluateDialogueCondition(
   condition: Extract<TaskUnlockCondition, { type: 'dialogue' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
+  if (
+    !isNonEmptyString(condition.requirementId) ||
+    !Array.isArray(condition.traders) ||
+    condition.traders.length === 0 ||
+    denseArray(condition.traders).some((trader) => !isTaskRef(trader))
+  ) {
+    return { state: 'unknown', reason: 'dialogue requirement definition is invalid' };
+  }
   const dialogueMap = state.dialogues;
+  const completedConditionIds = state.completedConditionIds;
+  const validCompletedConditionIds =
+    Array.isArray(completedConditionIds) &&
+    denseArray(completedConditionIds).every((id) => typeof id === 'string' && id.length > 0);
   const value =
     dialogueMap && Object.prototype.hasOwnProperty.call(dialogueMap, condition.requirementId)
-      ? dialogueMap[condition.requirementId]
-      : state.completedConditionIds?.includes(condition.requirementId);
+      ? typeof dialogueMap[condition.requirementId] === 'boolean'
+        ? dialogueMap[condition.requirementId]
+        : undefined
+      : validCompletedConditionIds
+        ? denseArray(completedConditionIds).includes(condition.requirementId)
+        : undefined;
   if (value === undefined) return { state: 'unknown', reason: 'dialogue flag is not present' };
   return { state: value ? 'met' : 'unmet', reason: 'required trader dialogue is acknowledged' };
 }
@@ -691,9 +822,12 @@ function evaluateStoryChapterCondition(
   condition: Extract<TaskUnlockCondition, { type: 'storyChapterProgress' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
+  if (!isTaskRef(condition.storyChapter)) {
+    return { state: 'unknown', reason: 'story chapter requirement definition is invalid' };
+  }
   const value = state.storyChapters?.[condition.storyChapter.id];
-  if (value === undefined) {
-    return { state: 'unknown', reason: 'story chapter progress is not present' };
+  if (typeof value !== 'boolean') {
+    return { state: 'unknown', reason: 'story chapter progress is not present or invalid' };
   }
   return {
     state: value ? 'met' : 'unmet',
@@ -750,8 +884,12 @@ function evaluateTiming(
   state: TaskUnlockState
 ): Pick<EvaluatedTaskUnlockCondition, 'state' | 'reason'> {
   const since = state.taskAvailableSince?.[taskId];
-  if (since === undefined || state.nowSeconds === undefined) {
+  if (!isFiniteNumber(since) || !isFiniteNumber(state.nowSeconds)) {
     return { state: 'unknown', reason: 'availability timing state is not present' };
+  }
+
+  if (isInvalidTiming(timing)) {
+    return { state: 'unknown', reason: 'availability timing definition is invalid' };
   }
 
   const min = Math.max(0, timing.minSeconds ?? 0);
@@ -778,8 +916,9 @@ function evaluateTraderUnlockedCondition(
   state: TaskUnlockState
 ): ConditionEvaluation {
   const value = state.traderUnlocked?.[condition.trader.id];
-  if (value === undefined)
-    return { state: 'unknown', reason: 'trader unlock state is not present' };
+  if (typeof value !== 'boolean') {
+    return { state: 'unknown', reason: 'trader unlock state is not present or invalid' };
+  }
   return { state: value ? 'met' : 'unmet', reason: 'task-giver trader is unlocked' };
 }
 
@@ -788,8 +927,8 @@ function evaluateLightkeeperCondition(
   _condition: Extract<TaskContextCondition, { type: 'lightkeeperAccess' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
-  if (state.lightkeeperUnlocked === undefined) {
-    return { state: 'unknown', reason: 'Lightkeeper unlock state is not present' };
+  if (typeof state.lightkeeperUnlocked !== 'boolean') {
+    return { state: 'unknown', reason: 'Lightkeeper unlock state is not present or invalid' };
   }
   return {
     state: state.lightkeeperUnlocked ? 'met' : 'unmet',
@@ -803,7 +942,9 @@ function evaluateMapAccessCondition(
   state: TaskUnlockState
 ): ConditionEvaluation {
   const value = state.mapAccess?.[condition.map.id];
-  if (value === undefined) return { state: 'unknown', reason: 'map access state is not present' };
+  if (typeof value !== 'boolean') {
+    return { state: 'unknown', reason: 'map access state is not present or invalid' };
+  }
   return { state: value ? 'met' : 'unmet', reason: 'task map is accessible' };
 }
 
@@ -836,13 +977,54 @@ function evaluateContextCondition(
 
 /** Evaluate a list of task-definition conditions in order. */
 function evaluateConditionList(
-  conditions: readonly TaskUnlockCondition[],
-  state: TaskUnlockState
+  conditions: unknown,
+  state: TaskUnlockState,
+  requirementType = 'unlock-condition'
 ): EvaluatedTaskUnlockCondition[] {
-  return conditions.map((condition) => ({
-    condition,
-    ...evaluateCondition(condition, state),
-  }));
+  if (!Array.isArray(conditions)) {
+    return [malformedConditionEvaluation(conditions, requirementType)];
+  }
+
+  return denseArray(conditions).map((value) => {
+    const condition = toTaskUnlockCondition(value);
+    if (!condition) return malformedConditionEvaluation(value, requirementType);
+    try {
+      return { condition, ...evaluateCondition(condition, state) };
+    } catch {
+      return malformedConditionEvaluation(value, requirementType);
+    }
+  });
+}
+
+/** Convert untrusted definition data into a known condition or an unknown marker. */
+function toTaskUnlockCondition(value: unknown): TaskUnlockCondition | undefined {
+  if (!isRecord(value) || typeof value.type !== 'string') return undefined;
+  return Object.prototype.hasOwnProperty.call(CONDITION_HANDLERS, value.type)
+    ? (value as unknown as TaskUnlockCondition)
+    : undefined;
+}
+
+/** Report malformed definition data without allowing it to unlock a task. */
+function malformedConditionEvaluation(
+  value: unknown,
+  requirementType: string
+): EvaluatedTaskUnlockCondition {
+  const condition = unknownRequirementCondition(
+    isRecord(value) ? (value.requirementId ?? value.id) : undefined,
+    isRecord(value) && typeof value.type === 'string' ? value.type : requirementType
+  );
+  return { condition, state: 'unknown', reason: 'unlock definition is malformed' };
+}
+
+/** Evaluate a required condition list, preserving a missing container as unknown. */
+function evaluateRequiredConditionList(
+  conditions: unknown,
+  state: TaskUnlockState,
+  requirementType: string
+): EvaluatedTaskUnlockCondition[] {
+  return conditions === undefined
+    ? [malformedConditionEvaluation(undefined, requirementType)]
+    : evaluateConditionList(conditions, state, requirementType);
 }
 
 /** Evaluate a list of derived context conditions in order. */
@@ -850,10 +1032,13 @@ function evaluateContextList(
   conditions: readonly TaskContextCondition[],
   state: TaskUnlockState
 ): EvaluatedTaskUnlockCondition[] {
-  return conditions.map((condition) => ({
-    condition,
-    ...evaluateContextCondition(condition, state),
-  }));
+  return conditions.map((condition) => {
+    try {
+      return { condition, ...evaluateContextCondition(condition, state) };
+    } catch {
+      return malformedConditionEvaluation(condition, 'context');
+    }
+  });
 }
 
 /** Combine condition states using AND semantics. */
@@ -990,11 +1175,10 @@ function timingContextCondition(
   options: TaskUnlockEvaluationOptions
 ): TaskContextCondition | undefined {
   const timing = definition.timing;
-  if (
-    options.checkTiming === false ||
-    !timing ||
-    ((timing.minSeconds ?? 0) <= 0 && (timing.maxSeconds ?? 0) <= 0)
-  ) {
+  if (options.checkTiming === false || !timing) {
+    return undefined;
+  }
+  if (!isNonEmptyString(task.id) || (!isInvalidTiming(timing) && !hasPositiveTiming(timing))) {
     return undefined;
   }
   return { type: 'availabilityTiming', task: { id: task.id, name: task.name }, timing };
@@ -1069,18 +1253,116 @@ export function evaluateTaskUnlock(
   state: TaskUnlockState,
   options: TaskUnlockEvaluationOptions = {}
 ): TaskUnlockEvaluation {
-  const all = evaluateConditionList(definition.all, state);
-  const taskRequirements = evaluateConditionList(definition.taskRequirements, state);
-  const anyOf = definition.anyOf.map((group) => evaluateConditionList(group, state));
-  const contextConditions = contextConditionsForTask(task, definition, options);
-  const context = evaluateContextList(contextConditions, state);
+  const taskRecord: Record<string, unknown> = isRecord(task) ? task : {};
+  const safeTask = taskRecord as unknown as TaskData;
+  const rawDefinition: Record<string, unknown> = isRecord(definition) ? definition : {};
+  const accountState: TaskUnlockState = isRecord(state) ? (state as TaskUnlockState) : {};
+  const evaluationOptions: TaskUnlockEvaluationOptions = isRecord(options)
+    ? (options as TaskUnlockEvaluationOptions)
+    : {};
+  const contextValue = rawDefinition.context;
+  const all = evaluateRequiredConditionList(rawDefinition.all, accountState, 'all');
+  const taskRequirements = evaluateRequiredConditionList(
+    rawDefinition.taskRequirements,
+    accountState,
+    'taskRequirements'
+  );
+  if (!isRecord(contextValue)) all.push(malformedConditionEvaluation(contextValue, 'context'));
+  if (!isNonEmptyString(taskRecord.id) || !isNonEmptyString(taskRecord.name)) {
+    all.push(malformedConditionEvaluation(task, 'task'));
+  }
+
+  let safeContext: TaskUnlockDefinition['context'] = {};
+  let malformedContext = false;
+  if (isRecord(contextValue)) {
+    if (
+      Object.keys(contextValue).some(
+        (key) => !['trader', 'map', 'lightkeeperRequired'].includes(key)
+      )
+    ) {
+      malformedContext = true;
+    }
+    if (contextValue.trader !== undefined) {
+      if (isTaskRef(contextValue.trader)) safeContext.trader = contextValue.trader;
+      else malformedContext = true;
+    }
+    if (contextValue.map !== undefined) {
+      if (isTaskRef(contextValue.map)) safeContext.map = contextValue.map;
+      else malformedContext = true;
+    }
+    if (contextValue.lightkeeperRequired !== undefined) {
+      if (contextValue.lightkeeperRequired === true) safeContext.lightkeeperRequired = true;
+      else malformedContext = true;
+    }
+  }
+  if (malformedContext) all.push(malformedConditionEvaluation(contextValue, 'context'));
+
+  const rawTiming = rawDefinition.timing;
+  if (rawTiming !== undefined && !isRecord(rawTiming)) {
+    all.push(malformedConditionEvaluation(rawTiming, 'timing'));
+  } else if (isRecord(rawTiming)) {
+    const timingKeys = Object.keys(rawTiming);
+    if (
+      timingKeys.length === 0 ||
+      timingKeys.some((key) => key !== 'minSeconds' && key !== 'maxSeconds')
+    ) {
+      all.push(malformedConditionEvaluation(rawTiming, 'timing'));
+    }
+  }
+
+  const anyOfValue = rawDefinition.anyOf;
+  const anyOf =
+    anyOfValue === undefined
+      ? [[malformedConditionEvaluation(undefined, 'anyOf')]]
+      : Array.isArray(anyOfValue)
+        ? denseArray(anyOfValue).map((group) =>
+            Array.isArray(group) && group.length === 0
+              ? [malformedConditionEvaluation(group, 'taskRequirementGroup')]
+              : evaluateConditionList(group, accountState, 'taskRequirementGroup')
+          )
+        : [[malformedConditionEvaluation(anyOfValue, 'anyOf')]];
+
+  const rawAlternatives = rawDefinition.alternatives;
+  const alternativesDefinition =
+    rawAlternatives === undefined
+      ? undefined
+      : Array.isArray(rawAlternatives)
+        ? rawAlternatives.length > 0
+          ? rawAlternatives
+          : [[unknownRequirementCondition(undefined, 'alternatives')]]
+        : [[unknownRequirementCondition(undefined, 'alternatives')]];
+  const alternatives =
+    rawAlternatives === undefined
+      ? []
+      : Array.isArray(rawAlternatives)
+        ? rawAlternatives.length === 0
+          ? [[malformedConditionEvaluation(rawAlternatives, 'alternatives')]]
+          : denseArray(rawAlternatives).map((branch) =>
+              Array.isArray(branch) && branch.length === 0
+                ? [malformedConditionEvaluation(branch, 'alternative')]
+                : evaluateConditionList(branch, accountState, 'alternative')
+            )
+        : [[malformedConditionEvaluation(rawAlternatives, 'alternatives')]];
+
+  const safeDefinition = {
+    ...rawDefinition,
+    context: safeContext,
+    timing: isRecord(rawTiming) ? rawTiming : undefined,
+    alternatives: alternativesDefinition,
+  } as unknown as TaskUnlockDefinition;
+  if (
+    alternativesDefinition &&
+    rawDefinition.alternativesExclusive !== undefined &&
+    typeof rawDefinition.alternativesExclusive !== 'boolean'
+  ) {
+    all.push(malformedConditionEvaluation(rawDefinition.alternativesExclusive, 'alternatives'));
+  }
+  const contextConditions = contextConditionsForTask(safeTask, safeDefinition, evaluationOptions);
+  const context = evaluateContextList(contextConditions, accountState);
 
   const commonPath = evaluateAndPath([...all, ...context], []);
   const basePath = evaluateAndPath(taskRequirements, anyOf);
-  const alternatives = (definition.alternatives ?? []).map((branch) =>
-    evaluateConditionList(branch, state)
-  );
-  const unlockPath = evaluateUnlockPath(definition, basePath, alternatives);
+  const unlockPath = evaluateUnlockPath(safeDefinition, basePath, alternatives);
 
   const status = andStatus([commonPath.status, unlockPath.status]);
   const { blockers, unknown } = collectPathIssues(status, commonPath, unlockPath);

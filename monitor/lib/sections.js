@@ -1,6 +1,7 @@
 "use strict";
 
 const { config, getModeLabel } = require("./config.js");
+const { mergeTaskOverride, selectTaskAdditions } = require("../../src/lib/tarkov-api-shared.cjs");
 
 function createSection(title, columns, options = {}) {
   return {
@@ -51,38 +52,19 @@ function formatValue(value, maxLength = 220) {
   return `${json.slice(0, maxLength - 1)}…`;
 }
 
-function mergeTaskOverride(base = {}, next = {}) {
-  const merged = { ...base, ...next };
-  if (base.objectives || next.objectives) {
-    merged.objectives = { ...(base.objectives || {}) };
-    for (const [objectiveId, objectivePatch] of Object.entries(next.objectives || {})) {
-      const existingPatch = merged.objectives[objectiveId];
-      if (
-        existingPatch &&
-        typeof existingPatch === "object" &&
-        !Array.isArray(existingPatch) &&
-        objectivePatch &&
-        typeof objectivePatch === "object" &&
-        !Array.isArray(objectivePatch)
-      ) {
-        merged.objectives[objectiveId] = { ...existingPatch, ...objectivePatch };
-      } else {
-        merged.objectives[objectiveId] = objectivePatch;
-      }
-    }
+function mergeTaskOverrides(shared = {}, modeSpecific = {}) {
+  const entries = Object.entries(shared);
+  for (const [taskId, override] of Object.entries(modeSpecific)) {
+    const sharedOverride = Object.prototype.hasOwnProperty.call(shared, taskId)
+      ? shared[taskId]
+      : undefined;
+    entries.push([taskId, mergeTaskOverride(sharedOverride, override)]);
   }
-  if (base.objectivesAdd || next.objectivesAdd) {
-    merged.objectivesAdd = [...(base.objectivesAdd || []), ...(next.objectivesAdd || [])];
-  }
-  return merged;
+  return Object.fromEntries(entries);
 }
 
-function mergeTaskOverrides(shared = {}, modeSpecific = {}) {
-  const merged = { ...shared };
-  for (const [taskId, override] of Object.entries(modeSpecific)) {
-    merged[taskId] = mergeTaskOverride(merged[taskId], override);
-  }
-  return merged;
+function mergeTaskAdditions(shared = {}, modeSpecific = {}) {
+  return Object.fromEntries(selectTaskAdditions(shared, modeSpecific, true));
 }
 
 function buildOverrideSections(title, overrides = {}) {
@@ -427,6 +409,7 @@ module.exports = {
   buildTasksSections,
   createSection,
   formatValue,
+  mergeTaskAdditions,
   mergeTaskOverrides,
   pushRow,
   valuesEqual,

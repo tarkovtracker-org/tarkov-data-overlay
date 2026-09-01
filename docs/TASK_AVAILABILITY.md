@@ -170,6 +170,12 @@ pipeable report, `--mode pve` for one mode, and `--no-overlay` to inspect only
 the upstream definition. The report intentionally omits objectives, rewards,
 dialogue text, and other payload noise.
 
+When the built overlay is present, its `$meta.sha256` digest is verified before
+any corrections or additions are applied. Use `--no-overlay` to generate a
+report from upstream data without an overlay. This detects stale or corrupted
+JSON but is not a cryptographic signature; loaders reject legacy or custom
+overlays that do not contain a valid build digest.
+
 ## Network Provider - Part 1
 
 The old 13-task override was removed. It was a plausible

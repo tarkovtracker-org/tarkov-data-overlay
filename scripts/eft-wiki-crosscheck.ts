@@ -33,6 +33,9 @@ import {
   dim,
   colors,
   icons,
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
+  readResponseJson,
   type TaskData,
 } from '../src/lib/index.js';
 import { loadReferenceTasks, parseModeArgs, writeJsonOutput, type EftTask } from './eft-compare.js';
@@ -40,7 +43,7 @@ import { parseWikiTask, buildMapAliasMap } from './wiki-compare.js';
 
 const WIKI_API = 'https://escapefromtarkov.fandom.com/api.php';
 const RATE_LIMIT_MS = 500;
-const FETCH_TIMEOUT_MS = 15000;
+const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
 
 type Field = 'minPlayerLevel' | 'experience';
 
@@ -73,21 +76,20 @@ async function fetchWikitext(title: string): Promise<string | undefined> {
     prop: 'wikitext',
     format: 'json',
   });
-  // Bound the request so a hung connection can't stall the whole run.
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  let res: Response;
-  try {
-    res = await fetch(`${WIKI_API}?${params.toString()}`, { signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+  // Bound both connection and body reads so a hung or oversized response
+  // cannot stall the whole run.
+  const res = await fetch('https://escapefromtarkov.fandom.com/api.php', {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: params,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   // A non-OK HTTP status is a fetch failure, not a "page has no wikitext";
   // surface it so the caller can tell the two apart.
   if (!res.ok) {
     throw new Error(`wiki request for "${title}" failed: HTTP ${res.status}`);
   }
-  const data = (await res.json()) as {
+  const data = (await readResponseJson(res, WIKI_API, WIKI_MAX_RESPONSE_BYTES, 'wiki')) as {
     parse?: { wikitext?: { '*': string } };
     error?: unknown;
   };

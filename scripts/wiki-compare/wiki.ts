@@ -4,11 +4,18 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import { printHeader, bold, dim, colorize } from '../../src/lib/index.js';
+import {
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
+  bold,
+  colorize,
+  dim,
+  printHeader,
+  readResponseJson,
+} from '../../src/lib/index.js';
 import {
   TARKOV_1_0_LAUNCH,
   TraderReputation,
-  WIKI_API,
   WikiObjective,
   WikiRelatedItem,
   WikiRewards,
@@ -38,6 +45,22 @@ export type WikiFetchResult = {
   };
 };
 
+const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
+const WIKI_API_URL = 'https://escapefromtarkov.fandom.com/api.php';
+
+async function fetchWikiJson(params: URLSearchParams): Promise<unknown> {
+  const response = await fetch(WIKI_API_URL, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: params,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(`Wiki request failed: ${response.status} ${response.statusText}`);
+  }
+  return readResponseJson(response, WIKI_API_URL, WIKI_MAX_RESPONSE_BYTES, 'wiki');
+}
+
 export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchResult> {
   // Fetch wikitext
   const parseParams = new URLSearchParams({
@@ -47,12 +70,7 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
     format: 'json',
   });
 
-  const parseResponse = await fetch(`${WIKI_API}?${parseParams.toString()}`);
-  if (!parseResponse.ok) {
-    throw new Error(`Wiki request failed: ${parseResponse.status} ${parseResponse.statusText}`);
-  }
-
-  const parseData = (await parseResponse.json()) as {
+  const parseData = (await fetchWikiJson(parseParams)) as {
     parse?: {
       title?: string;
       wikitext?: { '*': string };
@@ -83,34 +101,31 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
 
   let lastRevision: WikiFetchResult['lastRevision'];
   try {
-    const revResponse = await fetch(`${WIKI_API}?${revParams.toString()}`);
-    if (revResponse.ok) {
-      const revData = (await revResponse.json()) as {
-        query?: {
-          pages?: Record<
-            string,
-            {
-              revisions?: Array<{
-                timestamp?: string;
-                user?: string;
-                comment?: string;
-              }>;
-            }
-          >;
-        };
+    const revData = (await fetchWikiJson(revParams)) as {
+      query?: {
+        pages?: Record<
+          string,
+          {
+            revisions?: Array<{
+              timestamp?: string;
+              user?: string;
+              comment?: string;
+            }>;
+          }
+        >;
       };
+    };
 
-      const pages = revData.query?.pages;
-      if (pages) {
-        const page = Object.values(pages)[0];
-        const rev = page?.revisions?.[0];
-        if (rev?.timestamp) {
-          lastRevision = {
-            timestamp: rev.timestamp,
-            user: rev.user ?? 'unknown',
-            comment: rev.comment ?? '',
-          };
-        }
+    const pages = revData.query?.pages;
+    if (pages) {
+      const page = Object.values(pages)[0];
+      const rev = page?.revisions?.[0];
+      if (rev?.timestamp) {
+        lastRevision = {
+          timestamp: rev.timestamp,
+          user: rev.user ?? 'unknown',
+          comment: rev.comment ?? '',
+        };
       }
     }
   } catch {

@@ -16,16 +16,19 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import {
   deriveTaskUnlockDefinition,
-  fetchModeAccessData,
-  fetchTasks,
+  fetchTaskModeData,
   getProjectPaths,
-  isDirectExecution,
+  mergeTaskOverride,
+  selectTaskAdditions,
   loadJsonFile,
+  runDirectly,
   SUPPORTED_GAME_MODES,
+  verifyOverlaySha256,
   type GameMode,
   type OverlayOutput,
   type TaskData,
   type TaskAddition,
+  type TaskOverride,
   type TaskUnlockDefinition,
 } from '../src/lib/index.js';
 
@@ -129,7 +132,7 @@ function parseArgs(argv: string[]): Options {
         applyOverlay = false;
         break;
       default:
-        if (arg.startsWith('--')) throw new Error(`Unknown option: ${arg}`);
+        throw new Error(`Unknown argument: ${arg}`);
     }
   }
 
@@ -141,7 +144,14 @@ function loadOverlay(applyOverlay: boolean): OverlayOutput | undefined {
   if (!applyOverlay) return undefined;
   const { distDir } = getProjectPaths();
   const path = join(distDir, 'overlay.json');
-  return existsSync(path) ? loadJsonFile<OverlayOutput>(path) : undefined;
+  if (!existsSync(path)) {
+    throw new Error(`Overlay is missing at '${path}'; use --no-overlay to omit it explicitly`);
+  }
+  const overlay = loadJsonFile<OverlayOutput>(path);
+  if (!verifyOverlaySha256(overlay)) {
+    throw new Error(`Invalid or unverifiable overlay metadata in '${path}'`);
+  }
+  return overlay;
 }
 
 /** Apply shared then mode-specific task overrides to an API task. */
@@ -151,9 +161,11 @@ function applyTaskOverlay(
   mode: GameMode
 ): TaskData {
   if (!overlay) return task;
-  const shared = overlay.tasks?.[task.id] ?? {};
-  const modeSpecific = overlay.modes?.[mode]?.tasks?.[task.id] ?? {};
-  return { ...task, ...shared, ...modeSpecific } as TaskData;
+  const override = mergeTaskOverride(
+    overlay.tasks?.[task.id],
+    overlay.modes?.[mode]?.tasks?.[task.id]
+  );
+  return override ? ({ ...task, ...override } as TaskData) : task;
 }
 
 /** Convert an addition into the task shape consumed by the unlock model. */
@@ -161,34 +173,58 @@ function additionAsTask(addition: TaskAddition): TaskData {
   const { trader, disabled: _disabled, ...data } = addition;
   return {
     ...data,
-    ...(trader.id ? { trader: { id: trader.id, name: trader.name } } : {}),
+    // An addition without a trader ID cannot be checked against account state;
+    // retain it as a malformed reference so availability remains unknown.
+    trader: { id: trader.id ?? '', name: trader.name },
   } as TaskData;
 }
 
-/** Resolve a task addition with mode-specific data taking precedence. */
 function getTaskAddition(
   overlay: OverlayOutput | undefined,
   mode: GameMode,
   taskId: string
 ): TaskAddition | undefined {
-  return overlay?.modes?.[mode]?.tasksAdd?.[taskId] ?? overlay?.tasksAdd?.[taskId];
+  return selectTaskAdditions(overlay?.tasksAdd, overlay?.modes?.[mode]?.tasksAdd, true).get(taskId);
 }
 
 /** Combine API tasks with shared and mode-specific additions for one mode. */
-function getTasksForMode(apiTasks: TaskData[], overlay: OverlayOutput | undefined, mode: GameMode) {
-  const tasks = new Map(apiTasks.map((task) => [task.id, task]));
-  const additions = {
-    ...(overlay?.tasksAdd ?? {}),
-    ...(overlay?.modes?.[mode]?.tasksAdd ?? {}),
-  };
-  for (const addition of Object.values(additions)) {
-    if (!tasks.has(addition.id)) tasks.set(addition.id, additionAsTask(addition));
+function getTasksForMode(
+  apiTasks: TaskData[],
+  overlay: OverlayOutput | undefined,
+  mode: GameMode,
+  includeDisabled = false
+): TaskData[] {
+  const tasks = new Map<string, TaskData>();
+  for (const task of apiTasks) {
+    if (typeof task.id !== 'string' || task.id.length === 0) {
+      throw new Error('tarkov.dev returned a task without a valid id');
+    }
+    if (tasks.has(task.id)) {
+      throw new Error(`tarkov.dev returned duplicate task id '${task.id}'`);
+    }
+    tasks.set(task.id, task);
+  }
+  const allAdditions = selectTaskAdditions(
+    overlay?.tasksAdd,
+    overlay?.modes?.[mode]?.tasksAdd,
+    true
+  );
+  for (const id of allAdditions.keys()) {
+    if (tasks.has(id)) {
+      throw new Error(`Task addition '${id}' collides with a task served by tarkov.dev`);
+    }
+  }
+  const activeAdditions = includeDisabled
+    ? allAdditions
+    : selectTaskAdditions(overlay?.tasksAdd, overlay?.modes?.[mode]?.tasksAdd, false);
+  for (const [id, addition] of activeAdditions) {
+    tasks.set(id, additionAsTask(addition));
   }
   return [...tasks.values()];
 }
 
 /** Keep only map records that expose meaningful entry restrictions. */
-function relevantMaps(access: Awaited<ReturnType<typeof fetchModeAccessData>>['maps']) {
+function relevantMaps(access: Awaited<ReturnType<typeof fetchTaskModeData>>['access']['maps']) {
   return Object.fromEntries(
     Object.entries(access).filter(([, map]) => {
       return (
@@ -203,17 +239,25 @@ function relevantMaps(access: Awaited<ReturnType<typeof fetchModeAccessData>>['m
 
 /** Count hidden task requirements by their upstream discriminator. */
 function countHiddenRequirements(tasks: readonly TaskData[]): Record<string, number> {
-  const counts: Record<string, number> = {};
+  const counts = new Map<string, number>();
   for (const task of tasks) {
     for (const requirement of task.otherRequirements ?? []) {
-      counts[requirement.type] = (counts[requirement.type] ?? 0) + 1;
+      const type =
+        requirement &&
+        typeof requirement === 'object' &&
+        typeof requirement.type === 'string' &&
+        requirement.type.length > 0
+          ? requirement.type
+          : 'malformed';
+      counts.set(type, (counts.get(type) ?? 0) + 1);
     }
   }
-  return counts;
+  return Object.fromEntries(counts);
 }
 
 interface ReportTaskResult {
   task?: ReportTask;
+  effectiveTask: TaskData;
   disabled: boolean;
 }
 
@@ -223,10 +267,7 @@ function taskOverrideFor(
   overlay: OverlayOutput | undefined,
   mode: GameMode
 ): { disabled?: boolean } {
-  return {
-    ...(overlay?.tasks?.[taskId] ?? {}),
-    ...(overlay?.modes?.[mode]?.tasks?.[taskId] ?? {}),
-  };
+  return mergeTaskOverride(overlay?.tasks?.[taskId], overlay?.modes?.[mode]?.tasks?.[taskId]);
 }
 
 /** Create the compact report entry for one adapted task. */
@@ -253,14 +294,15 @@ function buildReportTask(
   const override = taskOverrideFor(apiTask.id, overlay, mode);
   const addition = getTaskAddition(overlay, mode, apiTask.id);
   const disabled = override.disabled === true || addition?.disabled === true;
-  if (disabled && !includeDisabled) return { disabled };
 
   const task = applyTaskOverlay(apiTask, overlay, mode);
+  if (disabled && !includeDisabled) return { disabled, effectiveTask: task };
+
   const unlock = deriveTaskUnlockDefinition(task, {
     storyChapters: overlay?.storyChapters,
   });
 
-  return { disabled, task: makeReportTask(task, unlock, disabled) };
+  return { disabled, effectiveTask: task, task: makeReportTask(task, unlock, disabled) };
 }
 
 /** Fetch and assemble one mode's task availability report. */
@@ -269,15 +311,17 @@ async function buildReport(
   overlay: OverlayOutput | undefined,
   includeDisabled: boolean
 ): Promise<ModeAvailabilityReport> {
-  const [apiTasks, access] = await Promise.all([fetchTasks(mode), fetchModeAccessData(mode)]);
-  const tasks = getTasksForMode(apiTasks, overlay, mode);
-  const reportTasks: Record<string, ReportTask> = {};
+  const { tasks: apiTasks, access } = await fetchTaskModeData(mode);
+  const tasks = getTasksForMode(apiTasks, overlay, mode, includeDisabled);
+  const reportTasks = new Map<string, ReportTask>();
+  const effectiveTasks: TaskData[] = [];
   let disabledTaskCount = 0;
 
   for (const apiTask of tasks) {
     const result = buildReportTask(apiTask, overlay, mode, includeDisabled);
+    effectiveTasks.push(result.effectiveTask);
     if (result.disabled) disabledTaskCount += 1;
-    if (result.task) reportTasks[result.task.id] = result.task;
+    if (result.task) reportTasks.set(result.task.id, result.task);
   }
 
   return {
@@ -287,9 +331,9 @@ async function buildReport(
       gameMode: mode,
       source: `https://json.tarkov.dev/${mode}/tasks`,
       overlayVersion: overlay?.$meta.version,
-      taskCount: Object.keys(reportTasks).length,
+      taskCount: reportTasks.size,
       disabledTaskCount,
-      hiddenRequirementCounts: countHiddenRequirements(tasks),
+      hiddenRequirementCounts: countHiddenRequirements(effectiveTasks),
       semantics: {
         all: 'Every entry in unlock.all and unlock.context must be met.',
         anyOf:
@@ -303,7 +347,7 @@ async function buildReport(
     maps: relevantMaps(access.maps),
     traders: access.traders,
     tasks: Object.fromEntries(
-      Object.entries(reportTasks).sort(([left], [right]) => left.localeCompare(right))
+      [...reportTasks.entries()].sort(([left], [right]) => left.localeCompare(right))
     ),
   };
 }
@@ -340,11 +384,6 @@ async function main(): Promise<void> {
   }
 }
 
-if (isDirectExecution(import.meta.url)) {
-  main().catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
-  });
-}
+runDirectly(import.meta.url, main);
 
-export { buildReport, getTaskAddition, parseArgs };
+export { buildReport, getTaskAddition, getTasksForMode, loadOverlay, parseArgs };
