@@ -25,6 +25,8 @@ export function fetchCached<T>(
 
 export function getLatestTagVersion(cwd?: string): string | undefined;
 
+export function getNextTagVersion(cwd?: string): string;
+
 export function indexTaskAdditions<T extends object & { id: string }>(
   additions: Record<string, T> | undefined,
   scope: string

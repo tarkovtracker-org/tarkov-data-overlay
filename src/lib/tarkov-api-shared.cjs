@@ -79,6 +79,21 @@ function getLatestTagVersion(cwd) {
   }
 }
 
+/** Return the next minor release tag, or the initial release tag when none exist. */
+function getNextTagVersion(cwd) {
+  const latest = getLatestTagVersion(cwd);
+  if (latest === undefined) return 'v1.0';
+
+  const match = /^(\d+)\.(\d+)/.exec(latest);
+  if (!match) throw new Error(`Unsupported latest release version: ${latest}`);
+
+  const minor = Number(match[2]);
+  if (!Number.isSafeInteger(minor) || minor === Number.MAX_SAFE_INTEGER) {
+    throw new Error(`Latest release minor version cannot be incremented: ${latest}`);
+  }
+  return `v${match[1]}.${minor + 1}`;
+}
+
 function fetchCached(cache, path, load) {
   const existing = cache.get(path);
   if (existing) return existing;
@@ -419,6 +434,7 @@ module.exports = {
   buildTaskContext,
   fetchCached,
   getLatestTagVersion,
+  getNextTagVersion,
   indexTaskAdditions,
   mapOptionalArray,
   mergeTaskOverride,

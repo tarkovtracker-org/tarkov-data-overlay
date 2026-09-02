@@ -60,50 +60,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git fetch --tags --force
-          TAG_LIST="$(git tag --list 'v*')" node <<'NODE' >> "$GITHUB_OUTPUT"
-          const tags = (process.env.TAG_LIST || '').split(/\r?\n/).filter(Boolean);
-          const parsed = tags.flatMap((tag) => {
-            const match = /^v(\d+)\.(\d+)(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?$/.exec(tag);
-            if (!match) return [];
-            const parts = [match[1], match[2], match[3] || '0'].map(Number);
-            return parts.every(Number.isSafeInteger)
-              ? [{
-                  major: parts[0],
-                  minor: parts[1],
-                  patch: parts[2],
-                  prerelease: match[4] ? match[4].split('.') : undefined,
-                }]
-              : [];
-          });
-          parsed.sort((left, right) => {
-            for (const key of ['major', 'minor', 'patch']) {
-              if (left[key] !== right[key]) return left[key] - right[key];
-            }
-            if (!left.prerelease && !right.prerelease) return 0;
-            if (!left.prerelease) return 1;
-            if (!right.prerelease) return -1;
-            const length = Math.max(left.prerelease.length, right.prerelease.length);
-            for (let index = 0; index < length; index += 1) {
-              const leftPart = left.prerelease[index];
-              const rightPart = right.prerelease[index];
-              if (leftPart === undefined) return -1;
-              if (rightPart === undefined) return 1;
-              const leftNumeric = /^\d+$/.test(leftPart);
-              const rightNumeric = /^\d+$/.test(rightPart);
-              if (leftNumeric && rightNumeric) {
-                const difference = Number(leftPart) - Number(rightPart);
-                if (difference !== 0) return difference;
-              } else if (leftNumeric !== rightNumeric) {
-                return leftNumeric ? -1 : 1;
-              } else if (leftPart !== rightPart) {
-                return leftPart < rightPart ? -1 : 1;
-              }
-            }
-            return 0;
-          });
-          const latest = parsed.at(-1);
-          console.log(`next_tag=${latest ? `v${latest.major}.${latest.minor + 1}` : 'v1.0'}`);
-          NODE
+          echo "next_tag=$(npm run --silent next-overlay-tag)" >> "$GITHUB_OUTPUT"
 
       - name: Check generated overlay
         run: npm run build:check
@@ -127,4 +84,5 @@ jobs:
           name: overlay-${{ github.sha }}
           path: dist/overlay.json
           if-no-files-found: error
+          overwrite: true
           retention-days: 7

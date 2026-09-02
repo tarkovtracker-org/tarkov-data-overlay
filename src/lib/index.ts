@@ -10,6 +10,7 @@ export * from './value-compare.js';
 export * from './tarkov-api.js';
 export {
   getLatestTagVersion,
+  getNextTagVersion,
   indexTaskAdditions,
   mapOptionalArray,
   mergeTaskOverride,

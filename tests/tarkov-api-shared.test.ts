@@ -1,11 +1,25 @@
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   fetchCached,
   adaptReward,
+  getNextTagVersion,
   mergeTaskOverride,
   readResponseJson,
   resolveReferenceMatrix,
 } from '../src/lib/tarkov-api-shared.cjs';
+
+function createGitRepo(): string {
+  const directory = mkdtempSync(join(tmpdir(), 'tarkov-overlay-tags-'));
+  execFileSync('git', ['-C', directory, 'init', '--quiet'], { stdio: 'ignore' });
+  execFileSync('git', ['-C', directory, 'config', 'user.email', 'test@example.com']);
+  execFileSync('git', ['-C', directory, 'config', 'user.name', 'Test']);
+  execFileSync('git', ['-C', directory, 'commit', '--quiet', '--allow-empty', '-m', 'init']);
+  return directory;
+}
 
 describe('fetchCached', () => {
   it('reuses in-flight requests and evicts rejected entries', async () => {
@@ -23,6 +37,30 @@ describe('fetchCached', () => {
 
     await expect(fetchCached(cache, 'items', load)).rejects.toThrow('boom');
     expect(calls).toBe(2);
+  });
+});
+
+describe('getNextTagVersion', () => {
+  it('uses the highest supported tag and ignores lower prereleases', () => {
+    const directory = createGitRepo();
+    try {
+      for (const tag of ['v1.9', 'v1.10.0-rc.2', 'v1.10.0', 'not-a-version']) {
+        execFileSync('git', ['-C', directory, 'tag', tag]);
+      }
+
+      expect(getNextTagVersion(directory)).toBe('v1.11');
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('starts with v1.0 when no supported tags exist', () => {
+    const directory = createGitRepo();
+    try {
+      expect(getNextTagVersion(directory)).toBe('v1.0');
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });
 
