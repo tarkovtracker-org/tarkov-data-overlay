@@ -70,6 +70,24 @@ describe('scripts/validate helpers', () => {
     }
   });
 
+  it('rejects contradictory task availability delay ranges', () => {
+    const validators = initializeValidators();
+    const additionsValidator = getValidator('additions/tasksAdd.json5', validators);
+    const overridesValidator = getValidator('overrides/tasks.json5', validators);
+    const base = {
+      id: 'task-id',
+      name: 'Task',
+      wikiLink: 'https://example.com/task',
+      trader: { name: 'Prapor' },
+      objectives: [],
+      availableDelaySecondsMin: 30,
+      availableDelaySecondsMax: 10,
+    };
+
+    expect(additionsValidator?.({ task: base })).toBe(false);
+    expect(overridesValidator?.({ 'task-id': base })).toBe(false);
+  });
+
   it('accepts suppressions for task requirement groups', () => {
     const validators = initializeValidators();
     const validator = getValidator('suppressions/tasks.json5', validators);

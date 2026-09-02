@@ -361,7 +361,8 @@ function getTaskOverrideForMode(taskId: string, overlay: Overlay, gameMode: Game
   const shared = overlay.tasks?.[taskId];
   const modeSpecific = overlay.modes?.[gameMode]?.tasks?.[taskId];
   if (!shared && !modeSpecific) return undefined;
-  return mergeTaskOverride(shared, modeSpecific);
+  const merged = mergeTaskOverride(shared, modeSpecific);
+  return Object.keys(merged).length > 0 ? merged : undefined;
 }
 
 function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddition[] {

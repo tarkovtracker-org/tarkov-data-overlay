@@ -665,7 +665,7 @@ async function fetchModeAccessDataWithCache(
   ]);
 
   const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : undefined;
-  if (!mapsData || !isRecord(tradersEnvelope.data)) {
+  if (!mapsData || (!isRecord(tradersEnvelope.data) && !Array.isArray(tradersEnvelope.data))) {
     throw new Error(`Invalid json.tarkov.dev response while loading ${mode} access data`);
   }
   if (!isRecord(mapsData.maps) && !Array.isArray(mapsData.maps)) {
@@ -831,10 +831,19 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : undefined;
   const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : undefined;
-  if (!tasksData || !itemsData || !mapsData || !isRecord(tradersEnvelope.data)) {
+  if (
+    !tasksData ||
+    !itemsData ||
+    !mapsData ||
+    (!isRecord(tradersEnvelope.data) && !Array.isArray(tradersEnvelope.data))
+  ) {
     throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale data`);
   }
-  if (!isRecord(tasksData.tasks) || !isRecord(itemsData.items) || !isRecord(mapsData.maps)) {
+  if (
+    (!isRecord(tasksData.tasks) && !Array.isArray(tasksData.tasks)) ||
+    (!isRecord(itemsData.items) && !Array.isArray(itemsData.items)) ||
+    (!isRecord(mapsData.maps) && !Array.isArray(mapsData.maps))
+  ) {
     throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale collections`);
   }
 

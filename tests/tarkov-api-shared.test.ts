@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   fetchCached,
+  adaptReward,
   mergeTaskOverride,
   readResponseJson,
   resolveReferenceMatrix,
@@ -46,6 +47,31 @@ describe('mergeTaskOverride', () => {
     expect(Object.hasOwn(merged.objectives, '__proto__')).toBe(true);
     expect(merged.objectives.__proto__).toEqual({ count: 1, foundInRaid: true });
     expect(Object.getPrototypeOf(merged.objectives)).toBe(Object.prototype);
+  });
+});
+
+describe('adaptReward', () => {
+  it('adds explicit names to unresolved trader and map references', () => {
+    const compact = (value: Record<string, unknown>) =>
+      Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined));
+    const result = adaptReward(
+      { traderUnlock: ['missing-trader'], locationUnlock: ['missing-map'] },
+      {},
+      {
+        isRecord: (value): value is Record<string, unknown> =>
+          value !== null && typeof value === 'object' && !Array.isArray(value),
+        compact,
+        resolveItemRef: () => undefined,
+        resolveTraderRef: (value) => ({ id: String(value) }),
+        resolveMapRef: (value) => ({ id: String(value) }),
+      }
+    ) as {
+      traderUnlock: Array<{ id: string; name: string }>;
+      locationUnlock: Array<{ id: string; name: string }>;
+    };
+
+    expect(result.traderUnlock).toEqual([{ id: 'missing-trader', name: 'Unknown trader' }]);
+    expect(result.locationUnlock).toEqual([{ id: 'missing-map', name: 'Unknown map' }]);
   });
 });
 

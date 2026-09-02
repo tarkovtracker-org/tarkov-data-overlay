@@ -311,6 +311,20 @@ function taskRequirementKey(requirement: TaskRequirementLike): string {
   return `${taskId}|${statuses.join(',')}`;
 }
 
+type TaskRequirementGroupLike = readonly TaskRequirementLike[] | null;
+
+/** Build a semantic identity for a group without display or provenance fields. */
+function taskRequirementGroupKey(group: TaskRequirementGroupLike): string {
+  if (!Array.isArray(group)) return 'malformed|taskRequirementGroup';
+  return JSON.stringify(group.map(taskRequirementKey).sort());
+}
+
+/** Format a task-prerequisite group for a validation diagnostic. */
+function formatTaskRequirementGroup(group: TaskRequirementGroupLike): string {
+  if (!Array.isArray(group)) return 'malformed task requirement group';
+  return `(${group.map(formatTaskRequirement).join(' OR ')})`;
+}
+
 /** Format a task prerequisite for a validation diagnostic. */
 function formatTaskRequirement(requirement: TaskRequirementLike): string {
   if (!requirement || typeof requirement !== 'object') return 'malformed task requirement';
@@ -325,6 +339,14 @@ function matchTaskRequirements(
   apiReqs: readonly TaskRequirementLike[]
 ): RequirementMatches<TaskRequirementLike> {
   return matchByKey(overrideReqs, apiReqs, taskRequirementKey, formatTaskRequirement);
+}
+
+/** Match task-prerequisite groups by their task IDs and normalized statuses. */
+function matchTaskRequirementGroups(
+  overrideGroups: readonly TaskRequirementGroupLike[],
+  apiGroups: readonly TaskRequirementGroupLike[]
+): RequirementMatches<TaskRequirementGroupLike> {
+  return matchByKey(overrideGroups, apiGroups, taskRequirementGroupKey, formatTaskRequirementGroup);
 }
 
 /** Validate task requirements without discarding active or accepted edges. */
@@ -379,8 +401,8 @@ const validateTaskRequirements: FieldValidator = (override, apiTask) => {
 const validateTaskRequirementGroups: FieldValidator = (override, apiTask) => {
   if (override.taskRequirementGroups === undefined) return null;
 
-  const apiGroups = apiTask.taskRequirementGroups ?? [];
-  const overrideGroups = override.taskRequirementGroups;
+  const apiGroups = (apiTask.taskRequirementGroups ?? []) as TaskRequirementGroupLike[];
+  const overrideGroups = override.taskRequirementGroups as TaskRequirementGroupLike[];
   if (overrideGroups.length === 0) {
     if (apiGroups.length === 0) return null;
     return {
@@ -390,7 +412,26 @@ const validateTaskRequirementGroups: FieldValidator = (override, apiTask) => {
     };
   }
 
-  return createFieldValidator('taskRequirementGroups')(override, apiTask);
+  const { remaining, unmatched } = matchTaskRequirementGroups(overrideGroups, apiGroups);
+  if (unmatched.length > 0) {
+    return {
+      field: 'taskRequirementGroups',
+      status: 'needed',
+      message: `taskRequirementGroups: ${unmatched.length} group(s) differ from API (${unmatched.join('; ')}) - STILL NEEDED`,
+    };
+  }
+  if (remaining.length > 0) {
+    return {
+      field: 'taskRequirementGroups',
+      status: 'needed',
+      message: `taskRequirementGroups: override omits ${remaining.length} API group(s) (${remaining.map(formatTaskRequirementGroup).join('; ')}) - STILL NEEDED`,
+    };
+  }
+  return {
+    field: 'taskRequirementGroups',
+    status: 'fixed',
+    message: 'taskRequirementGroups: FIXED IN API',
+  };
 };
 
 /** All field validators in order */

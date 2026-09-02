@@ -112,7 +112,10 @@ describe('task availability report helpers', () => {
         },
         'disabled-task': { disabled: true },
       },
-      tasksAdd: { sharedKey: sharedAddition },
+      tasksAdd: {
+        sharedKey: sharedAddition,
+        disabledKey: { ...sharedAddition, id: 'disabled-addition', disabled: true },
+      },
       modes: {
         regular: {
           tasks: { 'api-task': { factionName: 'USEC' } },
@@ -125,7 +128,7 @@ describe('task availability report helpers', () => {
 
     expect(report.$meta.gameMode).toBe('regular');
     expect(report.$meta.taskCount).toBe(3);
-    expect(report.$meta.disabledTaskCount).toBe(1);
+    expect(report.$meta.disabledTaskCount).toBe(2);
     expect(report.tasks['api-task'].unlock.all).toContainEqual({
       type: 'playerLevel',
       compareMethod: '>=',
@@ -143,6 +146,7 @@ describe('task availability report helpers', () => {
     expect(report.$meta.hiddenRequirementCounts).toEqual({ malformed: 1 });
     expect(report.tasks['task-id'].name).toBe('Mode addition');
     expect(report.tasks['disabled-task']).toBeUndefined();
+    expect(report.tasks['disabled-addition']).toBeUndefined();
     expect(report.maps).toEqual({
       'map-1': expect.objectContaining({ name: 'Customs', minPlayerLevel: 5 }),
     });
@@ -190,11 +194,8 @@ describe('task availability report helpers', () => {
     );
   });
 
-  it('includes disabled additions only when requested', () => {
-    expect(getTasksForMode([], overlay, 'pve')).toEqual([]);
-    expect(getTasksForMode([], overlay, 'pve', true).map((task) => task.id)).toEqual([
-      sharedAddition.id,
-    ]);
+  it('includes disabled additions for accounting before report filtering', () => {
+    expect(getTasksForMode([], overlay, 'pve').map((task) => task.id)).toEqual([sharedAddition.id]);
   });
 
   it('rejects duplicate upstream task IDs instead of silently dropping one', () => {

@@ -860,7 +860,7 @@
         "type": "array"
       },
       "taskRequirementGroups": {
-        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed. An empty array clears upstream groups.",
+        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed.",
         "items": {
           "minItems": 1,
           "items": {
@@ -1007,6 +1007,20 @@
         "type": "string"
       }
     },
+    "allOf": [
+      {
+        "if": {
+          "required": ["availableDelaySecondsMin", "availableDelaySecondsMax"]
+        },
+        "then": {
+          "properties": {
+            "availableDelaySecondsMax": {
+              "minimum": { "$data": "1/availableDelaySecondsMin" }
+            }
+          }
+        }
+      }
+    ],
     "required": ["id", "name", "wikiLink", "trader", "objectives"],
     "type": "object"
   },

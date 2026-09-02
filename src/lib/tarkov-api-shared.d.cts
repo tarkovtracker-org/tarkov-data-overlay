@@ -33,7 +33,7 @@ export function indexTaskAdditions<T extends object & { id: string }>(
 export function mapOptionalArray<T>(
   value: unknown,
   mapper: (entry: unknown) => T | undefined
-): T[] | undefined;
+): Array<T | null> | undefined;
 
 export function mergeTaskOverride<T extends object>(base?: T, next?: T): T;
 

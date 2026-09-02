@@ -467,6 +467,26 @@ describe('validateTaskOverride', () => {
         result.details.some((d) => d.field === 'taskRequirements' && d.status === 'needed')
       ).toBe(true);
     });
+
+    it('ignores task names and status aliases when comparing groups', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [
+          [{ task: { id: 'prereq-1', name: 'API name' }, status: ['accepted'] }],
+        ],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [
+          [{ task: { id: 'prereq-1', name: 'Translated name' }, status: ['active'] }],
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+    });
   });
 
   describe('taskRequirementGroups validation', () => {

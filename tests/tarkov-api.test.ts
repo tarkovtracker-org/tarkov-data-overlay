@@ -765,13 +765,39 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
   it('fails when a required translation endpoint has the wrong shape', async () => {
     mockEndpoints(
       baseRoutes('regular', {
-        'regular/tasks_en': { data: [] },
+        'regular/tasks_en': { data: 'not a translation map' },
       })
     );
 
     await expect(fetchTasks()).rejects.toThrow(
       'Invalid json.tarkov.dev response for regular/tasks_en: expected data object'
     );
+  });
+
+  it('accepts array-shaped entity collections in fetchLocaleBundle', async () => {
+    const fetchMock = mockEndpoints({
+      'regular/tasks': {
+        data: {
+          tasks: [{ id: 't1', name: 't1 name' }],
+          prestige: [{ id: 'p1', name: 'p1 name', prestigeLevel: 1 }],
+        },
+      },
+      'regular/items': { data: { items: [{ id: 'i1', name: 'i1 name' }] } },
+      'regular/maps': { data: { maps: [{ id: 'm1', name: 'm1 name' }] } },
+      'regular/traders': { data: [{ id: 'tr1', name: 'tr1 name' }] },
+      'regular/tasks_en': { data: {} },
+      'regular/items_en': { data: {} },
+      'regular/maps_en': { data: {} },
+      'regular/traders_en': { data: {} },
+    });
+
+    const bundle = await fetchLocaleBundle('regular', 'en');
+
+    expect(bundle.tasksById.has('t1')).toBe(true);
+    expect(bundle.itemsById.has('i1')).toBe(true);
+    expect(bundle.mapsById.has('m1')).toBe(true);
+    expect(bundle.tradersById.has('tr1')).toBe(true);
+    expect(fetchMock).toHaveBeenCalled();
   });
 
   it('fails when a required entity collection is missing', async () => {

@@ -247,7 +247,12 @@ async function fetchOverlay(): Promise<Overlay> {
   if (!response.ok) {
     throw new Error(`Overlay request failed: ${response.status} ${response.statusText}`);
   }
-  const overlay: unknown = await readResponseJson(response, OVERLAY_URL, MAX_RESPONSE_BYTES);
+  const overlay: unknown = await readResponseJson(
+    response,
+    OVERLAY_URL,
+    MAX_RESPONSE_BYTES,
+    'overlay'
+  );
   if (!verifyOverlaySha256(overlay)) {
     throw new Error('Overlay is missing a valid build digest');
   }

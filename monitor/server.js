@@ -73,6 +73,7 @@ const readLocks = {
 const MAX_DISCOVERED_MODES = 32;
 const MAX_SSE_CONNECTIONS = 100;
 const MAX_SSE_CONNECTIONS_PER_KEY = 10;
+const MAX_SSE_BUFFERED_BYTES = 1024 * 1024;
 const RESERVED_MODE_NAMES = new Set(["__proto__", "constructor", "prototype"]);
 
 function isSafeModeName(mode) {
@@ -528,8 +529,11 @@ function writeSse(key, client, message) {
     return false;
   }
   try {
-    const accepted = client.write(message);
-    if (!accepted) {
+    client.write(message);
+    if (
+      typeof client.writableLength === "number" &&
+      client.writableLength > MAX_SSE_BUFFERED_BYTES
+    ) {
       removeClient(key, client);
       if (typeof client.destroy === "function") client.destroy();
       return false;
@@ -1034,11 +1038,21 @@ function buildSummary(view, mode, locale) {
   if (view === "tasksAdd") {
     const sharedAdditions = overlay.tasksAdd || {};
     const modeAdditions = overlay.modes?.[mode]?.tasksAdd || {};
-    const mergedAdditions = mergeTaskAdditions(sharedAdditions, modeAdditions);
-    return {
-      sections: buildTaskAdditionSections(mergedAdditions, mode),
-      error: overlayState.error || null,
-    };
+    try {
+      const mergedAdditions = mergeTaskAdditions(sharedAdditions, modeAdditions);
+      return {
+        sections: buildTaskAdditionSections(mergedAdditions, mode),
+        error: overlayState.error || null,
+      };
+    } catch (error) {
+      return {
+        sections: [],
+        error:
+          overlayState.error ||
+          (error instanceof Error ? error.message : String(error)) ||
+          "Unable to build task additions summary",
+      };
+    }
   }
 
   if (view === "items") {
@@ -1513,6 +1527,7 @@ if (process.env.NODE_ENV === "test") {
     MAX_DISCOVERED_MODES,
     MAX_SSE_CONNECTIONS,
     MAX_SSE_CONNECTIONS_PER_KEY,
+    MAX_SSE_BUFFERED_BYTES,
     buildTasksSections,
     buildSummary,
     buildOverrideSections,

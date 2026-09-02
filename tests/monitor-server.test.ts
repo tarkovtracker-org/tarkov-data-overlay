@@ -74,6 +74,7 @@ describe('module import sanity', () => {
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
     expect(typeof mod.fetchRemoteText).toBe('function');
     expect(typeof mod.registerModes).toBe('function');
+    expect(typeof mod.MAX_SSE_BUFFERED_BYTES).toBe('number');
   });
 
   it('exports the real http.Server instance', () => {
@@ -131,6 +132,7 @@ describe('mode discovery', () => {
 
 const {
   MAX_ROWS,
+  MAX_SSE_BUFFERED_BYTES,
   buildTasksSections,
   buildSummary,
   buildOverrideSections,
@@ -335,6 +337,21 @@ describe('buildSummary', () => {
     const s = buildSummary('tasksAdd', 'regular');
     expect(s.sections).toHaveLength(1);
     expect(s.sections[0].title).toContain('Task Additions');
+  });
+
+  it('reports malformed task additions through the tasksAdd view error', () => {
+    const saved = overlayState.data;
+    try {
+      overlayState.data = {
+        ...saved,
+        tasksAdd: { broken: { name: 'Missing ID' } },
+      };
+      const summary = buildSummary('tasksAdd', 'regular');
+      expect(summary.sections).toEqual([]);
+      expect(summary.error).toContain('has no valid id');
+    } finally {
+      overlayState.data = saved;
+    }
   });
 
   it('merges task additions by embedded ID before rendering a mode', () => {
@@ -850,10 +867,24 @@ describe('monitor hardening', () => {
     }
   });
 
-  it('closes an SSE client that applies backpressure', () => {
+  it('keeps an SSE client when backpressure is within the buffer bound', () => {
     const client = {
       destroyed: false,
       writableEnded: false,
+      writableLength: MAX_SSE_BUFFERED_BYTES,
+      write: vi.fn(() => false),
+      destroy: vi.fn(),
+    };
+
+    expect(writeSse('test', client, 'event: summary\n\n')).toBe(true);
+    expect(client.destroy).not.toHaveBeenCalled();
+  });
+
+  it('closes an SSE client whose buffered data exceeds the bound', () => {
+    const client = {
+      destroyed: false,
+      writableEnded: false,
+      writableLength: MAX_SSE_BUFFERED_BYTES + 1,
       write: vi.fn(() => false),
       destroy: vi.fn(),
     };

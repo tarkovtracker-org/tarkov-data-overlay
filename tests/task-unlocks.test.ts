@@ -492,6 +492,7 @@ describe('task unlock model', () => {
 
   it('fails closed for malformed known condition definitions', () => {
     const state = {
+      prestigeLevel: 2,
       faction: '',
       taskStatuses: { prerequisite: 'complete' },
       traderLevels: { [trader.id]: 4 },
@@ -521,6 +522,24 @@ describe('task unlock model', () => {
         type: 'storyChapterProgress',
         storyChapter: { id: '', name: 'Broken chapter' },
       },
+      {
+        type: 'prestigeLevel',
+        prestige: { id: 'prestige-1', name: '', prestigeLevel: 2 },
+        compareMethod: '>=',
+        value: 2,
+      },
+      {
+        type: 'prestigeLevel',
+        prestige: { id: 'prestige-1', name: 'New Beginning', prestigeLevel: 1 },
+        compareMethod: '>=',
+        value: 2,
+      },
+      {
+        type: 'prestigeLevel',
+        prestige: { id: 'prestige-1', name: 'New Beginning', prestigeLevel: 2 },
+        compareMethod: '<',
+        value: 2,
+      } as unknown as TaskUnlockCondition,
     ];
 
     for (const condition of invalidConditions) {

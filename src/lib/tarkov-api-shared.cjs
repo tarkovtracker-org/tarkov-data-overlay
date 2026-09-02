@@ -15,18 +15,65 @@ function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Return the highest numeric release tag, or undefined when git is unavailable. */
+/** Parse the supported release-tag formats into comparable version parts. */
+function parseVersionTag(tag) {
+  const match = /^v(\d+)\.(\d+)(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?$/.exec(tag);
+  if (!match) return undefined;
+  const parts = [match[1], match[2], match[3] || '0'].map(Number);
+  if (!parts.every(Number.isSafeInteger)) return undefined;
+  return {
+    tag,
+    major: parts[0],
+    minor: parts[1],
+    patch: parts[2],
+    prerelease: match[4] ? match[4].split('.') : undefined,
+  };
+}
+
+/** Compare parsed release tags using semver precedence. */
+function compareVersionTags(left, right) {
+  for (const key of ['major', 'minor', 'patch']) {
+    if (left[key] !== right[key]) return left[key] - right[key];
+  }
+  if (!left.prerelease && !right.prerelease) return left.tag.localeCompare(right.tag);
+  if (!left.prerelease) return 1;
+  if (!right.prerelease) return -1;
+
+  const length = Math.max(left.prerelease.length, right.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = left.prerelease[index];
+    const rightPart = right.prerelease[index];
+    if (leftPart === undefined) return -1;
+    if (rightPart === undefined) return 1;
+    const leftNumeric = /^\d+$/.test(leftPart);
+    const rightNumeric = /^\d+$/.test(rightPart);
+    if (leftNumeric && rightNumeric) {
+      const difference = Number(leftPart) - Number(rightPart);
+      if (difference !== 0) return difference;
+    } else if (leftNumeric !== rightNumeric) {
+      return leftNumeric ? -1 : 1;
+    } else if (leftPart !== rightPart) {
+      return leftPart < rightPart ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
+/** Return the highest supported release tag, or undefined when git is unavailable. */
 function getLatestTagVersion(cwd) {
   try {
-    const tag = execSync("git tag --list 'v*' --sort=-v:refname", {
+    const tag = execSync("git tag --list 'v*'", {
       cwd: cwd || process.cwd(),
       stdio: ['ignore', 'pipe', 'ignore'],
     })
       .toString()
       .split('\n')
       .map((candidate) => candidate.trim())
-      .find((candidate) => /^v\d+\.\d+$/.test(candidate));
-    return tag ? tag.replace(/^v/, '') : undefined;
+      .map(parseVersionTag)
+      .filter(Boolean)
+      .sort(compareVersionTags)
+      .at(-1);
+    return tag ? tag.tag.replace(/^v/, '') : undefined;
   } catch {
     return undefined;
   }
@@ -276,16 +323,33 @@ function verifyOverlaySha256(value) {
 
 function adaptReward(raw, context, helpers) {
   const { isRecord, compact, resolveItemRef, resolveTraderRef, resolveMapRef } = helpers;
+  const resolveNamedReference = (value, resolveReference, fallbackName) => {
+    const resolved = resolveReference(value, context);
+    if (!isRecord(resolved) || typeof resolved.id !== 'string' || resolved.id.length === 0) {
+      return undefined;
+    }
+    return {
+      id: resolved.id,
+      name:
+        typeof resolved.name === 'string' && resolved.name.length > 0
+          ? resolved.name
+          : fallbackName,
+    };
+  };
   const adaptTraderUnlocks = (value) => {
     if (value === undefined || value === null) return undefined;
     const entries = Array.isArray(value) ? value : [value];
-    return entries.map((entry) => resolveTraderRef(entry, context)).filter(Boolean);
+    return entries
+      .map((entry) => resolveNamedReference(entry, resolveTraderRef, 'Unknown trader'))
+      .filter(Boolean);
   };
   const adaptLocationUnlocks = (value) => {
     if (value === undefined || value === null) return undefined;
     if (typeof resolveMapRef !== 'function') return value;
     const entries = Array.isArray(value) ? value : [value];
-    return entries.map((entry) => resolveMapRef(entry, context)).filter(Boolean);
+    return entries
+      .map((entry) => resolveNamedReference(entry, resolveMapRef, 'Unknown map'))
+      .filter(Boolean);
   };
   if (!isRecord(raw)) return undefined;
   return compact({
@@ -330,7 +394,8 @@ async function buildTaskContext(cache, mode, tasksData, helpers) {
 
   const itemsData = isRecord(itemsEnvelope.data) ? itemsEnvelope.data : undefined;
   const mapsData = isRecord(mapsEnvelope.data) ? mapsEnvelope.data : undefined;
-  if (!itemsData || !mapsData || !isRecord(tradersEnvelope.data)) {
+  const tradersData = tradersEnvelope.data;
+  if (!itemsData || !mapsData || (!isRecord(tradersData) && !Array.isArray(tradersData))) {
     throw new Error(`Invalid json.tarkov.dev response while loading ${mode} task context`);
   }
 
@@ -339,9 +404,7 @@ async function buildTaskContext(cache, mode, tasksData, helpers) {
     questItemsById: toLookup(tasksData.questItems),
     tasksById: toLookup(requireCollection(tasksData.tasks, `${mode}/tasks data.tasks`, isRecord)),
     mapsById: toLookup(requireCollection(mapsData.maps, `${mode}/maps data.maps`, isRecord)),
-    tradersById: toLookup(
-      requireCollection(tradersEnvelope.data, `${mode}/traders data`, isRecord)
-    ),
+    tradersById: toLookup(requireCollection(tradersData, `${mode}/traders data`, isRecord)),
     prestigeById: toLookup(tasksData.prestige),
     itemsEn,
     tasksEn,

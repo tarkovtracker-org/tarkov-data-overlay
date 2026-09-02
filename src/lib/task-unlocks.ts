@@ -282,6 +282,19 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
+/** Check the runtime shape of a prestige requirement and its level. */
+function isValidPrestigeRequirement(
+  value: unknown
+): value is { id?: string; name: string; prestigeLevel: number } {
+  return (
+    isRecord(value) &&
+    isNonEmptyString(value.name) &&
+    (value.id === undefined || isNonEmptyString(value.id)) &&
+    isFiniteNumber(value.prestigeLevel) &&
+    value.prestigeLevel >= 0
+  );
+}
+
 /** Treat malformed upstream conditions as unknown so they cannot unlock a task. */
 function unknownRequirementCondition(
   requirementId: unknown,
@@ -488,13 +501,7 @@ function factionCondition(task: TaskData): TaskUnlockCondition | undefined {
 function prestigeCondition(task: TaskData): TaskUnlockCondition | undefined {
   const prestige = task.requiredPrestige;
   if (prestige === undefined) return undefined;
-  if (
-    !isRecord(prestige) ||
-    !isNonEmptyString(prestige.name) ||
-    (prestige.id !== undefined && !isNonEmptyString(prestige.id)) ||
-    !isFiniteNumber(prestige.prestigeLevel) ||
-    prestige.prestigeLevel < 0
-  ) {
+  if (!isValidPrestigeRequirement(prestige)) {
     return unknownRequirementCondition(undefined, 'prestigeLevel');
   }
   return {
@@ -809,6 +816,13 @@ function evaluatePrestigeCondition(
   condition: Extract<TaskUnlockCondition, { type: 'prestigeLevel' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
+  if (
+    !isValidPrestigeRequirement(condition.prestige) ||
+    condition.compareMethod !== '>=' ||
+    condition.value !== condition.prestige.prestigeLevel
+  ) {
+    return { state: 'unknown', reason: 'prestige requirement is malformed' };
+  }
   return evaluateNumericCondition(
     state.prestigeLevel,
     condition.compareMethod,

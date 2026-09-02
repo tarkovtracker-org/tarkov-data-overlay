@@ -192,7 +192,7 @@ function getTasksForMode(
   apiTasks: TaskData[],
   overlay: OverlayOutput | undefined,
   mode: GameMode,
-  includeDisabled = false
+  additions = selectTaskAdditions(overlay?.tasksAdd, overlay?.modes?.[mode]?.tasksAdd, true)
 ): TaskData[] {
   const tasks = new Map<string, TaskData>();
   for (const task of apiTasks) {
@@ -204,20 +204,12 @@ function getTasksForMode(
     }
     tasks.set(task.id, task);
   }
-  const allAdditions = selectTaskAdditions(
-    overlay?.tasksAdd,
-    overlay?.modes?.[mode]?.tasksAdd,
-    true
-  );
-  for (const id of allAdditions.keys()) {
+  for (const id of additions.keys()) {
     if (tasks.has(id)) {
       throw new Error(`Task addition '${id}' collides with a task served by tarkov.dev`);
     }
   }
-  const activeAdditions = includeDisabled
-    ? allAdditions
-    : selectTaskAdditions(overlay?.tasksAdd, overlay?.modes?.[mode]?.tasksAdd, false);
-  for (const [id, addition] of activeAdditions) {
+  for (const [id, addition] of additions) {
     tasks.set(id, additionAsTask(addition));
   }
   return [...tasks.values()];
@@ -289,10 +281,11 @@ function buildReportTask(
   apiTask: TaskData,
   overlay: OverlayOutput | undefined,
   mode: GameMode,
-  includeDisabled: boolean
+  includeDisabled: boolean,
+  additions: ReadonlyMap<string, TaskAddition>
 ): ReportTaskResult {
   const override = taskOverrideFor(apiTask.id, overlay, mode);
-  const addition = getTaskAddition(overlay, mode, apiTask.id);
+  const addition = additions.get(apiTask.id);
   const disabled = override.disabled === true || addition?.disabled === true;
 
   const task = applyTaskOverlay(apiTask, overlay, mode);
@@ -312,13 +305,14 @@ async function buildReport(
   includeDisabled: boolean
 ): Promise<ModeAvailabilityReport> {
   const { tasks: apiTasks, access } = await fetchTaskModeData(mode);
-  const tasks = getTasksForMode(apiTasks, overlay, mode, includeDisabled);
+  const additions = selectTaskAdditions(overlay?.tasksAdd, overlay?.modes?.[mode]?.tasksAdd, true);
+  const tasks = getTasksForMode(apiTasks, overlay, mode, additions);
   const reportTasks = new Map<string, ReportTask>();
   const effectiveTasks: TaskData[] = [];
   let disabledTaskCount = 0;
 
   for (const apiTask of tasks) {
-    const result = buildReportTask(apiTask, overlay, mode, includeDisabled);
+    const result = buildReportTask(apiTask, overlay, mode, includeDisabled, additions);
     effectiveTasks.push(result.effectiveTask);
     if (result.disabled) disabledTaskCount += 1;
     if (result.task) reportTasks.set(result.task.id, result.task);

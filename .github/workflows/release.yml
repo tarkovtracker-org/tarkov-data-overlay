@@ -31,6 +31,11 @@ jobs:
           ref: main
           persist-credentials: false
 
+      - name: Sync trusted main branch
+        run: |
+          git fetch origin main --no-tags
+          git checkout --detach origin/main
+
       - name: Download validated release overlay
         env:
           GH_TOKEN: ${{ github.token }}
@@ -49,42 +54,8 @@ jobs:
           mkdir -p dist
           cp -- "$artifact_dir/overlay.json" dist/overlay.json
 
-      - name: Verify main still matches the validated CI run
-        env:
-          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          git fetch origin main --no-tags
-          checked_out_sha="$(git rev-parse HEAD)"
-          remote_sha="$(git rev-parse origin/main)"
-          if [[ "$checked_out_sha" != "$EXPECTED_SHA" || "$remote_sha" != "$EXPECTED_SHA" ]]; then
-            echo "main advanced after CI completed; refusing to release an unvalidated commit" >&2
-            exit 1
-          fi
-
-      - name: Compute next tag
-        id: version
-        run: |
-          git fetch --tags
-          latest_tag=""
-          while IFS= read -r candidate; do
-            if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+$ ]]; then
-              latest_tag="$candidate"
-              break
-            fi
-          done < <(git tag --list 'v*' --sort=-v:refname)
-          if [[ -z "$latest_tag" ]]; then
-            next_tag="v1.0"
-          else
-            version="${latest_tag#v}"
-            IFS='.' read -r major minor <<< "$version"
-            next_tag="v${major}.$((minor + 1))"
-          fi
-          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
-          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
-
       - name: Verify release artifact
-        env:
-          EXPECTED_VERSION: ${{ steps.version.outputs.next_tag }}
+        id: artifact
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -109,14 +80,14 @@ jobs:
           }
 
           const meta = overlay.$meta;
-          const expectedVersion = process.env.EXPECTED_VERSION.replace(/^v/, '');
           if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
             throw new Error('Overlay metadata is missing');
           }
-          if (meta.version !== expectedVersion) {
-            throw new Error(
-              `Overlay version ${String(meta.version)} does not match ${expectedVersion}`
-            );
+          if (
+            typeof meta.version !== 'string' ||
+            !/^\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(meta.version)
+          ) {
+            throw new Error(`Overlay version is invalid: ${String(meta.version)}`);
           }
           if (typeof meta.generated !== 'string' || !Number.isFinite(Date.parse(meta.generated))) {
             throw new Error('Overlay generated timestamp is invalid');
@@ -134,14 +105,118 @@ jobs:
           if (actualDigest !== expectedDigest) {
             throw new Error('Overlay SHA256 does not match its content');
           }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `artifact_tag=v${meta.version}\n`);
           NODE
+
+      - name: Verify branch state and determine release tag
+        id: version
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          ARTIFACT_TAG: ${{ steps.artifact.outputs.artifact_tag }}
+        run: |
+          git fetch origin main --no-tags
+          current_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git rev-parse origin/main)"
+          if [[ "$current_sha" != "$remote_sha" ]]; then
+            echo "main advanced during release preparation; refusing to release" >&2
+            exit 1
+          fi
+          git fetch --tags --force
+
+          if [[ "$current_sha" == "$EXPECTED_SHA" ]]; then
+            tag_output="$(mktemp)"
+            trap 'rm -f "$tag_output"' EXIT
+            TAG_LIST="$(git tag --list 'v*')" node <<'NODE' > "$tag_output"
+            const tags = (process.env.TAG_LIST || '').split(/\r?\n/).filter(Boolean);
+            const parsed = tags.flatMap((tag) => {
+              const match = /^v(\d+)\.(\d+)(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?$/.exec(tag);
+              if (!match) return [];
+              const parts = [match[1], match[2], match[3] || '0'].map(Number);
+              if (!parts.every(Number.isSafeInteger)) return [];
+              return {
+                major: parts[0],
+                minor: parts[1],
+                patch: parts[2],
+                prerelease: match[4] ? match[4].split('.') : undefined,
+              };
+            });
+            const compare = (left, right) => {
+              for (const key of ['major', 'minor', 'patch']) {
+                if (left[key] !== right[key]) return left[key] - right[key];
+              }
+              if (!left.prerelease && !right.prerelease) return 0;
+              if (!left.prerelease) return 1;
+              if (!right.prerelease) return -1;
+              const length = Math.max(left.prerelease.length, right.prerelease.length);
+              for (let index = 0; index < length; index += 1) {
+                const leftPart = left.prerelease[index];
+                const rightPart = right.prerelease[index];
+                if (leftPart === undefined) return -1;
+                if (rightPart === undefined) return 1;
+                const leftNumeric = /^\d+$/.test(leftPart);
+                const rightNumeric = /^\d+$/.test(rightPart);
+                if (leftNumeric && rightNumeric) {
+                  const difference = Number(leftPart) - Number(rightPart);
+                  if (difference !== 0) return difference;
+                } else if (leftNumeric !== rightNumeric) {
+                  return leftNumeric ? -1 : 1;
+                } else if (leftPart !== rightPart) {
+                  return leftPart < rightPart ? -1 : 1;
+                }
+              }
+              return 0;
+            };
+            parsed.sort(compare);
+            const latest = parsed.at(-1);
+            process.stdout.write(latest ? `v${latest.major}.${latest.minor + 1}` : 'v1.0');
+            NODE
+            next_tag="$(<"$tag_output")"
+            if [[ "$next_tag" != "$ARTIFACT_TAG" ]]; then
+              echo "Artifact tag $ARTIFACT_TAG does not match the next release tag $next_tag" >&2
+              exit 1
+            fi
+            recovery=false
+          else
+            parent_sha="$(git rev-parse "$current_sha^" 2>/dev/null || true)"
+            if [[ "$parent_sha" != "$EXPECTED_SHA" ]]; then
+              echo "main advanced beyond the validated release commit; refusing to release" >&2
+              exit 1
+            fi
+            if ! git show "$current_sha:dist/overlay.json" | cmp -s - dist/overlay.json; then
+              echo "The already-pushed commit does not contain the validated release artifact" >&2
+              exit 1
+            fi
+            changed_files="$(git diff-tree --no-commit-id --name-only -r "$current_sha")"
+            if [[ "$changed_files" != "dist/overlay.json" ]]; then
+              echo "The already-pushed recovery commit changed files besides dist/overlay.json" >&2
+              exit 1
+            fi
+            tag_sha="$(git rev-parse --verify "$ARTIFACT_TAG^{commit}" 2>/dev/null || true)"
+            if [[ "$tag_sha" != "$current_sha" ]]; then
+              echo "The existing release tag does not point at the already-pushed commit" >&2
+              exit 1
+            fi
+            next_tag="$ARTIFACT_TAG"
+            recovery=true
+          fi
+
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+          echo "recovery=$recovery" >> "$GITHUB_OUTPUT"
 
       - name: Commit generated overlay
         id: commit
+        env:
+          RECOVERY: ${{ steps.version.outputs.recovery }}
         run: |
+          if [[ "$RECOVERY" == "true" ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add dist/
+          git add -- dist/overlay.json
           if git diff --staged --quiet; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
@@ -149,161 +224,51 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build release notes
-        if: steps.commit.outputs.has_changes == 'true'
-        run: |
-          latest_tag="${{ steps.version.outputs.latest_tag }}"
-
-          if [[ -z "$latest_tag" ]]; then
-            echo "Initial release" > /tmp/release-notes.txt
-          else
-            git show "$latest_tag:dist/overlay.json" > /tmp/overlay.prev.json 2>/dev/null || echo '{}' > /tmp/overlay.prev.json
-
-            cat > /tmp/gen-notes.js << 'EOF'
-          const fs = require('fs');
-          const path = require('path');
-          const current = JSON.parse(fs.readFileSync('dist/overlay.json', 'utf8'));
-          const previous = JSON.parse(fs.readFileSync('/tmp/overlay.prev.json', 'utf8'));
-
-          delete current.$meta;
-          delete previous.$meta;
-
-          const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
-
-          const getFiles = (dir) => {
-            const files = [];
-            const walk = (p) => {
-              if (!fs.existsSync(p)) return;
-              fs.readdirSync(p).forEach(i => {
-                const f = path.join(p, i);
-                if (fs.statSync(f).isDirectory()) walk(f);
-                else if (i.endsWith('.json5') || i.endsWith('.json')) files.push(f);
-              });
-            };
-            walk(dir);
-            return files.sort();
-          };
-
-          const map = {
-            items: 'items', itemsAdd: 'itemsAdd',
-            tasks: 'tasks', tasksAdd: 'tasksAdd',
-            traders: 'traders', hideout: 'hideout',
-            craftsAdd: 'craftsAdd', editions: 'editions',
-            seasonalPerks: 'seasonalPerks', storyChapters: 'storyChapters',
-            prestige: 'prestige'
-          };
-
-          const getScopes = (rel) => {
-            const parts = rel.split('/');
-            const name = path.basename(rel, path.extname(rel));
-            const section = map[name];
-
-            if ((parts[0] === 'overrides' || parts[0] === 'additions') && parts[1] === 'modes' && parts.length === 4 && section) {
-              const mode = parts[2];
-              return [{
-                label: rel,
-                current: current.modes?.[mode]?.[section],
-                previous: previous.modes?.[mode]?.[section]
-              }];
-            }
-
-            if (parts[0] === 'overrides' && parts[1] === 'locales' && parts.length === 3) {
-              const locale = name;
-              const currentLocale = current.locales?.[locale] || {};
-              const previousLocale = previous.locales?.[locale] || {};
-              return Object.keys({ ...currentLocale, ...previousLocale }).sort().map(type => ({
-                label: `${rel}#${type}`,
-                current: currentLocale[type],
-                previous: previousLocale[type]
-              }));
-            }
-
-            if ((parts[0] === 'overrides' || parts[0] === 'additions') && parts.length === 2 && section) {
-              return [{ label: rel, current: current[section], previous: previous[section] }];
-            }
-
-            return [];
-          };
-
-          const lines = [];
-          let hasChanges = false;
-
-          getFiles('src').forEach(f => {
-            const rel = f.replace(/^src\//, '');
-            getScopes(rel).forEach(scope => {
-              const curr = isObject(scope.current) ? scope.current : {};
-              const prev = isObject(scope.previous) ? scope.previous : {};
-
-              const added = [];
-              const modified = [];
-              const removed = [];
-
-              Object.keys(curr).sort().forEach(id => {
-                const displayName = curr[id]?.name || curr[id]?.shortName || id;
-                if (!(id in prev)) {
-                  added.push('  + ' + displayName + ' (' + id + ')');
-                  hasChanges = true;
-                } else if (JSON.stringify(curr[id]) !== JSON.stringify(prev[id])) {
-                  modified.push('  ~ ' + displayName + ' (' + id + ')');
-                  hasChanges = true;
-                }
-              });
-
-              Object.keys(prev).sort().forEach(id => {
-                if (!(id in curr)) {
-                  const displayName = prev[id]?.name || prev[id]?.shortName || id;
-                  removed.push('  - ' + displayName + ' (' + id + ')');
-                  hasChanges = true;
-                }
-              });
-
-              if (added.length > 0 || modified.length > 0 || removed.length > 0) {
-                lines.push('### ' + scope.label);
-                added.forEach(a => lines.push(a));
-                modified.forEach(m => lines.push(m));
-                removed.forEach(r => lines.push(r));
-                lines.push('');
-              }
-            });
-          });
-
-          if (!hasChanges) {
-            lines.push('No changes in source files');
-          }
-
-          fs.writeFileSync('/tmp/release-notes.txt', lines.join('\n'));
-          EOF
-            node /tmp/gen-notes.js
-          fi
-
       - name: Create and push tag
         id: tag
         if: steps.commit.outputs.has_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+          RECOVERY: ${{ steps.version.outputs.recovery }}
         run: |
-          git fetch --tags
-          if git rev-parse "$NEXT_TAG" >/dev/null 2>&1; then
-            if [[ "$(git rev-list -n 1 "$NEXT_TAG")" != "$(git rev-parse HEAD)" ]]; then
+          if [[ "$RECOVERY" == "true" ]]; then
+            test "$(git rev-parse --verify "$NEXT_TAG^{commit}")" = "$(git rev-parse HEAD)"
+            echo "tag_ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --tags --force
+          if git rev-parse --verify "$NEXT_TAG^{commit}" >/dev/null 2>&1; then
+            if [[ "$(git rev-parse "$NEXT_TAG^{commit}")" != "$(git rev-parse HEAD)" ]]; then
               echo "Tag $NEXT_TAG already exists at a different commit; refusing to release" >&2
               exit 1
             fi
-            echo "Tag $NEXT_TAG already points at the generated commit"
           else
             git config --local user.email "github-actions[bot]@users.noreply.github.com"
             git config --local user.name "github-actions[bot]"
             git tag -a "$NEXT_TAG" -m "Overlay version $NEXT_TAG"
           fi
-          git push --atomic "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main "$NEXT_TAG"
-          echo "tag_created=true" >> "$GITHUB_OUTPUT"
+
+          git push --atomic \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            HEAD:main "$NEXT_TAG"
+          echo "tag_ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
-        if: steps.tag.outputs.tag_created == 'true'
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          tag_name: ${{ steps.version.outputs.next_tag }}
-          body_path: /tmp/release-notes.txt
-          files: dist/overlay.json
+        if: steps.tag.outputs.tag_ready == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          if gh release view "$NEXT_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $NEXT_TAG already exists; nothing to do"
+          else
+            gh release create "$NEXT_TAG" \
+              --repo "$REPOSITORY" \
+              --title "Overlay $NEXT_TAG" \
+              --generate-notes \
+              dist/overlay.json
+          fi

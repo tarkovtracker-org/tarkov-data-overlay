@@ -432,17 +432,17 @@ async function requestRebuild() {
       throw new Error("Rebuild finished but the overlay is still stale");
     }
   } catch (error) {
-    const bannerState = {
+    lastState = {
       ...(lastState || {}),
-      error: `Rebuild: ${error.message}`,
+      error: `Rebuild: ${error instanceof Error ? error.message : String(error)}`,
     };
-    updateErrorBanner(bannerState);
   } finally {
     rebuilding = false;
     setButtonLabel("Update overlay");
     if (button) {
       button.disabled = false;
     }
+    updateErrorBanner(lastState || {});
   }
 }
 

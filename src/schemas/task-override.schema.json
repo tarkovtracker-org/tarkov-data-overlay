@@ -1325,6 +1325,20 @@
         "type": "string"
       }
     },
+    "allOf": [
+      {
+        "if": {
+          "required": ["availableDelaySecondsMin", "availableDelaySecondsMax"]
+        },
+        "then": {
+          "properties": {
+            "availableDelaySecondsMax": {
+              "minimum": { "$data": "1/availableDelaySecondsMin" }
+            }
+          }
+        }
+      }
+    ],
     "type": "object"
   },
   "description": "Schema for task corrections in tarkov-data-overlay",

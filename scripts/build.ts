@@ -14,6 +14,7 @@ import {
   loadAllJson5FromDir,
   loadJsonFile,
   getPackageVersion,
+  isDirectExecution,
   SUPPORTED_GAME_MODES,
   icons,
   verifyOverlaySha256,
@@ -102,8 +103,30 @@ function hasValidBuildMetadata(value: unknown): boolean {
   );
 }
 
+interface BuildVersion {
+  value: string;
+  isAuthoritative: boolean;
+}
+
+/** Resolve the build version and record whether it came from a release source. */
+export function resolveBuildVersion(
+  rootDir: string,
+  findLatestTag: () => string | undefined = getLatestTagVersion
+): BuildVersion {
+  if (process.env.OVERLAY_VERSION) {
+    return { value: process.env.OVERLAY_VERSION, isAuthoritative: true };
+  }
+  const latestTag = findLatestTag();
+  if (latestTag) return { value: latestTag, isAuthoritative: true };
+  return { value: getPackageVersion(rootDir), isAuthoritative: false };
+}
+
 /** Compare an existing committed overlay with the freshly generated content. */
-function checkGeneratedOutput(output: OverlayOutput, outputPath: string): void {
+function checkGeneratedOutput(
+  output: OverlayOutput,
+  outputPath: string,
+  checkVersion: boolean
+): void {
   if (!existsSync(outputPath)) {
     throw new Error(`Generated overlay is missing: ${outputPath}`);
   }
@@ -117,6 +140,7 @@ function checkGeneratedOutput(output: OverlayOutput, outputPath: string): void {
     throw new Error(`Generated overlay has invalid build metadata: ${outputPath}`);
   }
   if (
+    checkVersion &&
     isRecord(existing) &&
     isRecord(existing.$meta) &&
     existing.$meta.version !== output.$meta.version
@@ -146,8 +170,7 @@ function checkGeneratedOutput(output: OverlayOutput, outputPath: string): void {
 function build(): void {
   console.log('Building overlay...\n');
 
-  const version =
-    process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
+  const { value: version, isAuthoritative: versionIsAuthoritative } = resolveBuildVersion(rootDir);
 
   // Load all source files
   const data = loadSourceFiles();
@@ -172,7 +195,7 @@ function build(): void {
   // Ensure dist directory exists
   const outputPath = join(distDir, 'overlay.json');
   if (process.argv.includes('--check')) {
-    checkGeneratedOutput(output, outputPath);
+    checkGeneratedOutput(output, outputPath, versionIsAuthoritative);
     console.log(`Generated overlay is current: ${outputPath}`);
     return;
   }
@@ -223,4 +246,6 @@ function build(): void {
   console.log(`\nOutput: ${outputPath}`);
 }
 
-build();
+if (isDirectExecution(import.meta.url)) {
+  build();
+}

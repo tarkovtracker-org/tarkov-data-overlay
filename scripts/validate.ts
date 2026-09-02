@@ -61,7 +61,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function initializeAjv(): Ajv {
-  const ajv = new Ajv({ allErrors: true, strict: false });
+  const ajv = new Ajv({ allErrors: true, strict: false, $data: true });
   ajv.addFormat('uri', {
     type: 'string',
     validate: (value: string) => {
@@ -301,6 +301,12 @@ export function buildLocalLocaleEntityIdIndex(): LocaleEntityIdIndex {
 }
 
 function addRecordIds(index: Set<string>, value: unknown): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (isRecord(entry) && typeof entry.id === 'string') index.add(entry.id);
+    }
+    return;
+  }
   if (!isRecord(value)) return;
   for (const [key, entry] of Object.entries(value)) {
     index.add(key);
@@ -308,22 +314,24 @@ function addRecordIds(index: Set<string>, value: unknown): void {
   }
 }
 
+type RecordCollection = Record<string, unknown> | unknown[];
+
 function requireRecordCollection(
   data: Record<string, unknown>,
   key: string,
   path: string
-): Record<string, unknown> {
+): RecordCollection {
   const collection = data[key];
-  if (!isRecord(collection)) {
-    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data.${key} object`);
+  if (!isRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data.${key} collection`);
   }
   return collection;
 }
 
-async function fetchJsonData(path: string): Promise<Record<string, unknown>> {
+async function fetchJsonData(path: string): Promise<unknown> {
   const payload = await fetchTarkovEnvelope(path);
-  if (!isRecord(payload.data)) {
-    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data object`);
+  if (!isRecord(payload.data) && !Array.isArray(payload.data)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data collection`);
   }
   return payload.data;
 }
@@ -338,6 +346,10 @@ async function buildTarkovLocaleEntityIdIndex(): Promise<LocaleEntityIdIndex> {
       fetchJsonData(`${mode}/maps`),
       fetchJsonData(`${mode}/traders`),
     ]);
+
+    if (!isRecord(tasksData) || !isRecord(itemsData) || !isRecord(mapsData)) {
+      throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale data`);
+    }
 
     addRecordIds(index.tasks, requireRecordCollection(tasksData, 'tasks', `${mode}/tasks`));
     addRecordIds(index.prestige, tasksData.prestige);
