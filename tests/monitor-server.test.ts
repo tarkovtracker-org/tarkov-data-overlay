@@ -669,6 +669,11 @@ describe('isVersionStale', () => {
     expect(isVersionStale('1.56', undefined)).toBe(false);
     expect(isVersionStale('1.56', null)).toBe(false);
   });
+  it('compares prerelease identifiers using semver precedence', () => {
+    expect(isVersionStale('1.56.0-alpha.1', '1.56.0-beta.1')).toBe(true);
+    expect(isVersionStale('1.56.0-beta.1', '1.56.0-alpha.1')).toBe(false);
+    expect(isVersionStale('1.56', '1.56.0')).toBe(false);
+  });
   it('reports the local git tag as a non-empty string', () => {
     const tag = getLatestTagVersion();
     if (tag !== undefined) {

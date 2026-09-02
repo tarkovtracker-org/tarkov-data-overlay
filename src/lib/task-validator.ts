@@ -316,7 +316,7 @@ type TaskRequirementGroupLike = readonly TaskRequirementLike[] | null;
 /** Build a semantic identity for a group without display or provenance fields. */
 function taskRequirementGroupKey(group: TaskRequirementGroupLike): string {
   if (!Array.isArray(group)) return 'malformed|taskRequirementGroup';
-  return JSON.stringify(group.map(taskRequirementKey).sort());
+  return JSON.stringify([...new Set(group.map(taskRequirementKey))].sort());
 }
 
 /** Format a task-prerequisite group for a validation diagnostic. */

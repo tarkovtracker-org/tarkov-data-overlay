@@ -29,6 +29,7 @@ const {
   buildTaskContext: buildSharedTaskContext,
   fetchCached,
   getLatestTagVersion: getSharedLatestTagVersion,
+  isVersionStale: isSharedVersionStale,
   mapOptionalArray,
   normalizeRequiredPrestige,
   readResponseJson,
@@ -128,32 +129,6 @@ const STARTUP_TAG_VERSION = getSharedLatestTagVersion(__dirname);
 
 function getLatestTagVersion() {
   return STARTUP_TAG_VERSION;
-}
-
-function versionNums(value) {
-  return String(value || "")
-    .replace(/^v/i, "")
-    .split(/[.\-]/)
-    .map((part) => Number.parseInt(part, 10) || 0);
-}
-
-function isVersionStale(metaVersion, latestVersion) {
-  if (!latestVersion) {
-    return false;
-  }
-  if (!metaVersion) {
-    return true;
-  }
-  const loaded = versionNums(metaVersion);
-  const latest = versionNums(latestVersion);
-  for (let i = 0; i < Math.max(loaded.length, latest.length); i += 1) {
-    const loadedPart = loaded[i] || 0;
-    const latestPart = latest[i] || 0;
-    if (loadedPart !== latestPart) {
-      return loadedPart < latestPart;
-    }
-  }
-  return false;
 }
 
 // Rebuild the overlay from sources (npm run build) so the monitor can refresh
@@ -1160,7 +1135,7 @@ function getState(view, mode, locale) {
   const summary = summaryByKey.get(key) || { sections: [], error: null };
   const meta = overlayState.data?.$meta || null;
   const latestVersion = getLatestTagVersion();
-  const stale = isVersionStale(meta && meta.version, latestVersion);
+  const stale = isSharedVersionStale(meta && meta.version, latestVersion);
 
   return {
     view,
@@ -1550,7 +1525,7 @@ if (process.env.NODE_ENV === "test") {
     parseViewParams,
     handleResponseFailure,
     getLatestTagVersion,
-    isVersionStale,
+    isVersionStale: isSharedVersionStale,
     registerModes,
     rebuildOverlay,
     isRebuildEnabled,

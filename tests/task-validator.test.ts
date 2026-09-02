@@ -487,6 +487,34 @@ describe('validateTaskOverride', () => {
         )
       ).toBe(true);
     });
+
+    it('treats duplicate members in an OR group as equivalent', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [
+          [
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-2', name: 'Second task' } },
+          ],
+        ],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [
+          [
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-2', name: 'Second task' } },
+          ],
+        ],
+      };
+
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+    });
   });
 
   describe('taskRequirementGroups validation', () => {

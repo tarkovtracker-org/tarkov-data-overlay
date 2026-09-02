@@ -35,7 +35,7 @@ function compareVersionTags(left, right) {
   for (const key of ['major', 'minor', 'patch']) {
     if (left[key] !== right[key]) return left[key] - right[key];
   }
-  if (!left.prerelease && !right.prerelease) return left.tag.localeCompare(right.tag);
+  if (!left.prerelease && !right.prerelease) return 0;
   if (!left.prerelease) return 1;
   if (!right.prerelease) return -1;
 
@@ -92,6 +92,22 @@ function getNextTagVersion(cwd) {
     throw new Error(`Latest release minor version cannot be incremented: ${latest}`);
   }
   return `v${match[1]}.${minor + 1}`;
+}
+
+function parseVersionString(value) {
+  if (value === undefined || value === null) return undefined;
+  const normalized = String(value).trim().replace(/^v/i, '');
+  return normalized ? parseVersionTag(`v${normalized}`) : undefined;
+}
+
+/** Return whether a loaded overlay is behind the latest release. */
+function isVersionStale(metaVersion, latestVersion) {
+  if (!latestVersion) return false;
+  if (!metaVersion) return true;
+
+  const loaded = parseVersionString(metaVersion);
+  const latest = parseVersionString(latestVersion);
+  return !loaded || !latest || compareVersionTags(loaded, latest) < 0;
 }
 
 function fetchCached(cache, path, load) {
@@ -435,6 +451,7 @@ module.exports = {
   fetchCached,
   getLatestTagVersion,
   getNextTagVersion,
+  isVersionStale,
   indexTaskAdditions,
   mapOptionalArray,
   mergeTaskOverride,

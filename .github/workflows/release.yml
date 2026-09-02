@@ -218,7 +218,11 @@ jobs:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
           if gh release view "$NEXT_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $NEXT_TAG already exists; nothing to do"
+            echo "Release $NEXT_TAG already exists; syncing overlay asset"
+            gh release upload "$NEXT_TAG" \
+              --repo "$REPOSITORY" \
+              --clobber \
+              dist/overlay.json
           else
             gh release create "$NEXT_TAG" \
               --repo "$REPOSITORY" \

@@ -11,6 +11,7 @@ export * from './tarkov-api.js';
 export {
   getLatestTagVersion,
   getNextTagVersion,
+  isVersionStale,
   indexTaskAdditions,
   mapOptionalArray,
   mergeTaskOverride,
