@@ -171,7 +171,7 @@ function findWrongIds(references: EntityReference[], registry: Registry): string
     })
     .map(
       ({ id, name, location }) =>
-        `${location}: ${name} is ${registry.idsByName.get(name as string)}, referenced as ${id}`
+        `${location}: ${registry.label} ${name} is ${registry.idsByName.get(name as string)}, referenced as ${id}`
     );
 }
 
@@ -234,8 +234,16 @@ describe.each(REGISTRIES)('$label reference validation', (registry) => {
 
   it('flags a canonical name carried by another entity\u2019s ID', () => {
     const refs = [{ id: secondId, name: firstName, location: 'src/overrides/tasks.json5' }];
-    expect(findNameMismatches(refs, registry)).toHaveLength(1);
-    expect(findWrongIds(refs, registry)).toHaveLength(1);
+    const secondName = registry.namesById.get(secondId);
+    // Pinned to the exact text, not just the count: these strings are the only
+    // thing a contributor sees when the guard fires, so a silent format change
+    // that drops the ID or the label would still "pass" a length assertion.
+    expect(findNameMismatches(refs, registry)).toEqual([
+      `src/overrides/tasks.json5: ${registry.label} id ${secondId} is ${secondName}, labelled ${firstName}`,
+    ]);
+    expect(findWrongIds(refs, registry)).toEqual([
+      `src/overrides/tasks.json5: ${registry.label} ${firstName} is ${firstId}, referenced as ${secondId}`,
+    ]);
   });
 
   it('accepts a translated name on a canonical ID in locale data', () => {
@@ -260,12 +268,16 @@ describe.each(REGISTRIES)('$label reference validation', (registry) => {
         location: join('src', 'overrides', 'locales', 'de.json5'),
       },
     ];
-    expect(findUnknownIds(refs, registry)).toHaveLength(1);
+    expect(findUnknownIds(refs, registry)).toEqual([
+      `${join('src', 'overrides', 'locales', 'de.json5')}: unknown ${registry.label} id cafebabecafebabecafebabe (Uebersetzt)`,
+    ]);
   });
 
   it('reports an unknown ID on a reference with no name', () => {
     const refs = [{ id: 'deadbeefdeadbeefdeadbeef', location: 'src/overrides/tasks.json5' }];
-    expect(findUnknownIds(refs, registry)).toHaveLength(1);
+    expect(findUnknownIds(refs, registry)).toEqual([
+      `src/overrides/tasks.json5: unknown ${registry.label} id deadbeefdeadbeefdeadbeef`,
+    ]);
   });
 
   it('accepts every canonical pairing', () => {
