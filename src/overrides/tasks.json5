@@ -1304,8 +1304,9 @@
     ],
   },
   // Tigr Safari - S1 (2026-08-10) replaced the player-level gate with
-  // Peacekeeper LL1; wiki lists Fishing Gear as the prerequisite and limits
-  // the quest to USEC PMCs (issue #320)
+  // Peacekeeper LL1, and the quest is USEC-only (issue #320). No
+  // `taskRequirements`: the wiki names Fishing Gear as `previous`, but that is
+  // narrative order - the client's only start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
   '5a27b7a786f774579c3eb376': {
     factionName: 'USEC', // Was: Any
@@ -1317,11 +1318,6 @@
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 10)
-    ],
-    taskRequirements: [
-      {
-        task: { id: '5a27b75b86f7742e97191958', name: 'Fishing Gear' },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal
@@ -1874,21 +1870,31 @@
       }, // Was: [] (player level requirement, minPlayerLevel 30)
     ],
   },
+  // The Guide
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
   //
-  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level.
-  // Wiki Requirements list only "Must be Loyalty Level 4 to start this quest",
-  // so the level 32 gate upstream still serves is stale, and the wiki gives
-  // Wet Job - Part 6 as the prerequisite upstream omits. The Peacekeeper LL4
-  // requirement below carries the real gate, so dropping 32 does not widen
-  // availability.
+  // 2026-08-10 - S1: requires Peacekeeper LL4 instead of a player level. The
+  // wiki Requirements section lists exactly "Must be Loyalty Level 4 to start
+  // this quest" and no player level.
+  //
+  // Patch 1.1.0.0 expresses trader-loyalty gates as GlobalVariableValue start
+  // conditions rather than TraderLoyalty conditions, which is why upstream serves
+  // this as an opaque `otherRequirements` globalVariable entry and why the
+  // loyalty level has to be restored here, exactly as the other 150+ entries in
+  // this file do. The variable this task is gated on also gates six other
+  // Peacekeeper quests, and every one of them is Peacekeeper LL4.
+  //
+  // minPlayerLevel 0 rather than a number: upstream's 32 is neither an explicit
+  // client `Level` condition (the task has none) nor the LL4 tier floor
+  // (Peacekeeper LL4 requires level 37), so it is a stale pre-S1 leftover rather
+  // than the derived floor upstream computes for loyalty-gated tasks. The
+  // Peacekeeper LL4 requirement below carries the real gate.
+  //
+  // No `taskRequirements` entry: the wiki's `previous = Wet Job - Part 6` is
+  // narrative order, and this task's only start condition is the loyalty
+  // variable, not a Quest condition.
   '5c0d4e61d09282029f53920e': {
-    minPlayerLevel: 0, // Was: 32 (stale player-level gate)
-    taskRequirements: [
-      {
-        task: { id: '5a27bc8586f7741b543d8ea4', name: 'Wet Job - Part 6' },
-      }, // Was: []
-    ],
+    minPlayerLevel: 0, // Was: 32 (stale pre-S1 player-level gate)
     traderRequirements: [
       {
         id: 'overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4',
@@ -1972,8 +1978,9 @@
     ],
   },
   // The Huntsman Path - Trophy - S1 (2026-08-10) replaced the player-level gate
-  // with Jaeger LL1; wiki lists Secured Perimeter as the prerequisite that
-  // upstream omits, which is why the task never unlocks (issue #286)
+  // with Jaeger LL1 (issue #286). No `taskRequirements`: the wiki names Secured
+  // Perimeter as `previous`, but that is narrative order - the client's only
+  // start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
   '5d25e2c386f77443e7549029': {
     traderRequirements: [
@@ -1984,14 +1991,6 @@
         trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
-    ],
-    taskRequirements: [
-      {
-        task: {
-          id: '5d25e2b486f77409de05bba0',
-          name: 'The Huntsman Path - Secured Perimeter',
-        },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Forest_Cleaning
@@ -2890,8 +2889,9 @@
     ],
   },
   // The Walls Have Eyes - S1 (2026-08-10) replaced the player-level gate with
-  // Skier LL2; wiki lists Exit Here as the prerequisite upstream omits, which is
-  // why the task shows as never unlocked (issue #330)
+  // Skier LL2 (issue #330). No `taskRequirements`: the wiki names Exit Here as
+  // `previous`, but that is narrative order - the client's only start condition
+  // is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
   '669fa39c64ea11e84c0642a6': {
     traderRequirements: [
@@ -2902,11 +2902,6 @@
         trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
         value: 2,
       }, // Was: [] (player level requirement, minPlayerLevel 12)
-    ],
-    taskRequirements: [
-      {
-        task: { id: '669fa395c4c5c04798002497', name: 'Exit Here' },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
@@ -3107,102 +3102,57 @@
   // the links even though the corresponding quest pages document them.
   // ---------------------------------------------------------------------------
 
-  // The Tarkov Shooter - Part 1 - follows Acquaintance (issue #295)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_1
-  '5bc4776586f774512d07cf05': {
-    taskRequirements: [
-      {
-        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
-      }, // Was: []
-    ],
-  },
+  // NOTE (issue #328, The Survivalist Path - Unprotected but Dangerous,
+  // 5d25aed386f77442734d25d2): no override belongs here.
+  //
+  // A previous revision repointed this task's prerequisite to Acquaintance and
+  // restricted its kill objective to Woods, both taken from the wiki. The client
+  // disagrees on both counts: its only AvailableForStart condition is a Quest
+  // condition on Zhivchik (which upstream already serves), and the objective's
+  // kill counter carries only Kills + Equipment conditions - there is no
+  // Location condition, so the objective is not map-restricted and upstream's
+  // empty `maps` is correct.
+  //
+  // Issue #328 reports a completed task not registering from a Seasonal profile.
+  // That symptom is not explained by the unlock graph, which matches the client
+  // here, so it needs a separate root cause.
 
-  // The Survivalist Path - Unprotected but Dangerous - follows Acquaintance,
-  // not Zhivchik, and its objective is Woods-only. Issue #328 reports the
-  // symptom (a completed task not registering from a Seasonal profile); the
-  // prerequisite and map values below come from the wiki, which is the authority
-  // for them. A wrong prerequisite edge is a plausible cause of that symptom
-  // because it misplaces the task in the unlock graph.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Unprotected_but_Dangerous
-  '5d25aed386f77442734d25d2': {
-    taskRequirements: [
-      {
-        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
-      }, // Was: The Survivalist Path - Zhivchik
-    ],
-    objectives: {
-      '5d25af3c86f77443ff46b9e7': {
-        maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }], // Was: []
-      },
-    },
-  },
-
-  // The Good Times - Part 1 - follows Shooting Cans and requires level 27.
-  // Issue #343 reports its successor Quality Standard (666314b696a9349baa021bac)
-  // appearing at level 21; the successor's own gate is right, so the fix belongs
-  // on this predecessor whose level 27 gate upstream understates as 12.
+  // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
+  // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
+  // successor's own gate is right, so the fix belongs on this predecessor whose
+  // level 27 gate upstream understates as 12. No `taskRequirements`: the client
+  // gates this task with five TraderLoyalty LL2 conditions that upstream already
+  // serves, not with a Quest condition on Shooting Cans.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
   '666314b4d7f171c4c20226c3': {
     minPlayerLevel: 27, // Was: 12
-    taskRequirements: [
-      {
-        task: { id: '657315df034d76585f032e01', name: 'Shooting Cans' },
-      }, // Was: []
-    ],
   },
 
-  // Acquaintance - the Jaeger chain's root. Upstream serves no prerequisite, so
-  // the whole Jaeger tree appears reachable from nothing; the wiki gives
-  // Mechanic's Introduction, which is also what unlocks Jaeger as a trader
-  // ("To get access to Jaeger you need to complete the quest Introduction from
-  // Mechanic" - wiki Jaeger page).
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Acquaintance
-  '5d24b81486f77439c92d6ba8': {
-    taskRequirements: [
-      {
-        task: { id: '5d2495a886f77425cd51e403', name: 'Introduction' },
-      }, // Was: []
-    ],
-  },
-
-  // Introduction - Mechanic's quest that unlocks Jaeger. Wiki Requirements:
-  // "Must be level 2 to start this quest."; upstream serves 0.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Introduction
-  '5d2495a886f77425cd51e403': {
-    minPlayerLevel: 2, // Was: 0
-  },
-
-  // The Survivalist Path - Thrifty - upstream serves no prerequisite, which left
-  // it a second root of the Survivalist chain once Unprotected but Dangerous was
-  // repointed to Acquaintance. The wiki gives Unprotected but Dangerous, and a
-  // zero-prerequisite Jaeger task is impossible in-game because Jaeger must be
-  // unlocked through Mechanic's Introduction first.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Thrifty
-  '5d25b6be86f77444001e1b89': {
-    taskRequirements: [
-      {
-        task: {
-          id: '5d25aed386f77442734d25d2',
-          name: 'The Survivalist Path - Unprotected but Dangerous',
-        },
-      }, // Was: []
-    ],
-  },
-
-  // The Survivalist Path - Wounded Beast - upstream chains it straight off
-  // Unprotected but Dangerous, skipping Thrifty and Zhivchik. The wiki gives
-  // Zhivchik, which restores the documented order
-  // Acquaintance -> Unprotected but Dangerous -> Thrifty -> Zhivchik ->
-  // Wounded Beast. Zhivchik's own prerequisite (Thrifty) is already correct
-  // upstream, so it needs no entry.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Wounded_Beast
-  '5d25c81b86f77443e625dd71': {
-    taskRequirements: [
-      {
-        task: { id: '5d25bfd086f77442734d3007', name: 'The Survivalist Path - Zhivchik' },
-      }, // Was: The Survivalist Path - Unprotected but Dangerous
-    ],
-  },
+  // NOTE (Survivalist / Jaeger chain): no overrides belong here.
+  //
+  // The wiki infobox `previous` field describes narrative progression, not the
+  // client's `AvailableForStart` conditions, and for this chain the two
+  // disagree. Patch 1.1.0.0 (S1) replaced most quest-chain prerequisites with
+  // TraderLoyalty and GlobalVariableValue gates, and tarkov.dev already serves
+  // those (`traderRequirements` / `otherRequirements`). The in-game order is:
+  //
+  //   Thrifty (Jaeger LL2, no quest prerequisite)
+  //     -> Zhivchik -> Unprotected but Dangerous -> Wounded Beast
+  //
+  // Acquaintance has no start conditions at all, and The Tarkov Shooter - Part 1
+  // is gated by a loyalty variable rather than by Acquaintance. Upstream matches
+  // the client on every one of these, so overriding `taskRequirements` here would
+  // introduce edges the client does not have.
+  //
+  // Introduction (5d2495a886f77425cd51e403) has no override either, and note that
+  // its wiki Requirements section still reads "Must be level 2 to start this
+  // quest": that is pre-S1: the client carries no `Level` condition for it, its
+  // gate is a GlobalVariableValue that upstream serves as an `otherRequirements`
+  // dialogue entry, and upstream's minPlayerLevel is already 0. Do not re-add a
+  // level gate from that wiki line.
+  //
+  // See docs/CONTRIBUTING.md for why `previous` is not proof for
+  // `taskRequirements`.
 
   // ---------------------------------------------------------------------------
   // FACTION-LOCKED QUESTS (issues #288, #291)

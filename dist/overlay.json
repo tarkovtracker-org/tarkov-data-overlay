@@ -1225,14 +1225,6 @@
           },
           "value": 1
         }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5a27b75b86f7742e97191958",
-            "name": "Fishing Gear"
-          }
-        }
       ]
     },
     "5a27b7d686f77460d847e6a6": {
@@ -1768,14 +1760,6 @@
     },
     "5c0d4e61d09282029f53920e": {
       "minPlayerLevel": 0,
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5a27bc8586f7741b543d8ea4",
-            "name": "Wet Job - Part 6"
-          }
-        }
-      ],
       "traderRequirements": [
         {
           "id": "overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4",
@@ -1870,14 +1854,6 @@
             "name": "Jaeger"
           },
           "value": 1
-        }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d25e2b486f77409de05bba0",
-            "name": "The Huntsman Path - Secured Perimeter"
-          }
         }
       ]
     },
@@ -2769,14 +2745,6 @@
           },
           "value": 2
         }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "669fa395c4c5c04798002497",
-            "name": "Exit Here"
-          }
-        }
       ]
     },
     "669fa3a40c828825de06d6a1": {
@@ -2984,79 +2952,8 @@
         ]
       }
     },
-    "5bc4776586f774512d07cf05": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d24b81486f77439c92d6ba8",
-            "name": "Acquaintance"
-          }
-        }
-      ]
-    },
-    "5d25aed386f77442734d25d2": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d24b81486f77439c92d6ba8",
-            "name": "Acquaintance"
-          }
-        }
-      ],
-      "objectives": {
-        "5d25af3c86f77443ff46b9e7": {
-          "maps": [
-            {
-              "id": "5704e3c2d2720bac5b8b4567",
-              "name": "Woods"
-            }
-          ]
-        }
-      }
-    },
     "666314b4d7f171c4c20226c3": {
-      "minPlayerLevel": 27,
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "657315df034d76585f032e01",
-            "name": "Shooting Cans"
-          }
-        }
-      ]
-    },
-    "5d24b81486f77439c92d6ba8": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d2495a886f77425cd51e403",
-            "name": "Introduction"
-          }
-        }
-      ]
-    },
-    "5d2495a886f77425cd51e403": {
-      "minPlayerLevel": 2
-    },
-    "5d25b6be86f77444001e1b89": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d25aed386f77442734d25d2",
-            "name": "The Survivalist Path - Unprotected but Dangerous"
-          }
-        }
-      ]
-    },
-    "5d25c81b86f77443e625dd71": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d25bfd086f77442734d3007",
-            "name": "The Survivalist Path - Zhivchik"
-          }
-        }
-      ]
+      "minPlayerLevel": 27
     },
     "639136df4b15ca31f76bc31f": {
       "factionName": "BEAR"
@@ -9099,7 +8996,7 @@
   },
   "$meta": {
     "version": "1.82",
-    "generated": "2026-09-03T05:55:57.187Z",
-    "sha256": "69cf7ef4e8bd07ccf4f51a3338ead1e4c3e50d36b455e11d395cd4ab3ebfc684"
+    "generated": "2026-09-03T08:29:35.581Z",
+    "sha256": "792f56f147d8ea5de48ed8d64d7daf44c54b4945eb5bd2373f7a2accb6d6eea5"
   }
 }
