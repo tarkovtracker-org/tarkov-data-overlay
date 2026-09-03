@@ -17,7 +17,7 @@ const MAP_REFERENCE_KEYS = new Set(['map', 'maps', 'mapUnlocks']);
 
 interface MapReference {
   id: string;
-  /** Absent when upstream shipped a bare ID with no sibling name. */
+  /** Absent when a reference ships a bare ID with no sibling name. */
   name?: string;
   location: string;
 }
@@ -38,7 +38,7 @@ function collectPair(value: unknown, location: string, into: MapReference[]): vo
 }
 
 /**
- * Walk a parsed source tree and collect every map reference under a
+ * Walk a parsed tree and collect every map reference under a
  * `MAP_REFERENCE_KEYS` key, recording a JSON-path-ish location for diagnostics.
  */
 function collectMapReferences(node: unknown, path: string, into: MapReference[]): void {
@@ -62,49 +62,85 @@ function collectMapReferences(node: unknown, path: string, into: MapReference[])
 }
 
 /**
- * Every JSON5 source file, found recursively so a new data directory is covered
- * by default rather than needing to be remembered here. `src/overrides/modes/`
- * already nests one level, so a hardcoded list is a standing coverage gap.
+ * Locale data legitimately carries translated names ("Zollhof" for Customs), so
+ * a locale reference's ID must still be canonical while its name must not be
+ * compared. Covers both the `src/overrides/locales/` sources and the built
+ * overlay's `locales` section.
  */
-function sourceFiles(): string[] {
-  const { srcDir } = getProjectPaths();
-  return readdirSync(srcDir, { recursive: true })
-    .map((entry) => String(entry))
-    .filter((entry) => entry.endsWith('.json5'))
-    .map((entry) => join(srcDir, entry))
-    .sort();
+function isLocalized(location: string): boolean {
+  return (
+    location.includes(`${sep}locales${sep}`) ||
+    location.includes('/locales/') ||
+    location.startsWith('locales.') ||
+    location.includes('.locales.')
+  );
 }
-
-/**
- * Locale files legitimately carry translated names ("Zollhof" for Customs), so
- * their map IDs must still be canonical while their names must not be compared.
- */
-function isLocaleFile(location: string): boolean {
-  return location.includes(`${sep}locales${sep}`) || location.includes('/locales/');
-}
-
-function referencesFromSources(): { file: string; references: MapReference[] }[] {
-  const { rootDir } = getProjectPaths();
-  return sourceFiles().map((file) => {
-    const references: MapReference[] = [];
-    const location = relative(rootDir, file);
-    collectMapReferences(loadJson5File(file), location, references);
-    return { file: location, references };
-  });
-}
-
-const scanned = referencesFromSources();
-const allReferences = scanned.flatMap(({ references }) => references);
-const nameCheckable = allReferences.filter(({ location }) => !isLocaleFile(location));
 
 const canonicalIdsByName = new Map(
   Object.entries(TARKOV_MAP_NAMES_BY_ID).map(([id, name]) => [name, id])
 );
 
+/** An ID that is known but carries the wrong name. Skipped for localized names. */
+function findNameMismatches(references: MapReference[]): string[] {
+  return references
+    .filter(({ id, name, location }) => {
+      if (name === undefined || isLocalized(location)) return false;
+      const canonical = TARKOV_MAP_NAMES_BY_ID[id];
+      return canonical !== undefined && canonical !== name;
+    })
+    .map(
+      ({ id, name, location }) =>
+        `${location}: id ${id} is ${TARKOV_MAP_NAMES_BY_ID[id]}, labelled ${name}`
+    );
+}
+
+/** A known name carried by an ID that belongs to a different map. */
+function findWrongIds(references: MapReference[]): string[] {
+  return references
+    .filter(({ id, name, location }) => {
+      if (name === undefined || isLocalized(location)) return false;
+      const expectedId = canonicalIdsByName.get(name);
+      return expectedId !== undefined && expectedId !== id;
+    })
+    .map(
+      ({ id, name, location }) =>
+        `${location}: ${name} is ${canonicalIdsByName.get(name as string)}, referenced as ${id}`
+    );
+}
+
+/** An ID absent from the registry. Applies to localized references too. */
+function findUnknownIds(references: MapReference[]): string[] {
+  return references
+    .filter(({ id }) => TARKOV_MAP_NAMES_BY_ID[id] === undefined)
+    .map(({ id, name, location }) => `${location}: ${id}${name ? ` (${name})` : ''}`);
+}
+
+/**
+ * Every JSON5 source file, found recursively so a new data directory is covered
+ * by default rather than needing to be remembered here. `src/overrides/modes/`
+ * already nests one level, so a hardcoded list is a standing coverage gap.
+ */
+function json5SourceFiles(): string[] {
+  const { srcDir } = getProjectPaths();
+  return readdirSync(srcDir, { recursive: true })
+    .map((entry) => String(entry))
+    .filter((entry) => entry.endsWith('.json5'))
+    .sort();
+}
+
+const { srcDir, rootDir, distDir } = getProjectPaths();
+const scanned = json5SourceFiles().map((entry) => {
+  const references: MapReference[] = [];
+  const file = relative(rootDir, join(srcDir, entry));
+  collectMapReferences(loadJson5File(join(srcDir, entry)), file, references);
+  return { file, references };
+});
+const sourceReferences = scanned.flatMap(({ references }) => references);
+
 describe('map reference registry', () => {
   it('maps every ID to a distinct name', () => {
-    // The reverse lookup below is only sound while names are unique; a duplicate
-    // would silently drop an ID and flag correct references as wrong.
+    // The reverse lookup is only sound while names are unique; a duplicate would
+    // silently drop an ID and flag correct references as wrong.
     expect(canonicalIdsByName.size).toBe(Object.keys(TARKOV_MAP_NAMES_BY_ID).length);
   });
 
@@ -116,17 +152,63 @@ describe('map reference registry', () => {
   });
 });
 
-describe('map references', () => {
+describe('map reference validation', () => {
+  // Exercises the rules directly, including the localized-name exemption that
+  // no committed data triggers yet. Without this, adding the first localized map
+  // reference would be the moment the exemption is first executed.
+  const customs = '56f40101d2720b2a4d8b45d6';
+  const lighthouse = '5704e4dad2720bb55b8b4567';
+
+  it('flags a canonical name carried by another map\u2019s ID', () => {
+    const refs = [{ id: lighthouse, name: 'Customs', location: 'src/overrides/tasks.json5' }];
+    expect(findNameMismatches(refs)).toEqual([
+      'src/overrides/tasks.json5: id 5704e4dad2720bb55b8b4567 is Lighthouse, labelled Customs',
+    ]);
+    expect(findWrongIds(refs)).toHaveLength(1);
+  });
+
+  it('accepts a translated name on a canonical ID in locale data', () => {
+    const refs = [
+      { id: customs, name: 'Zollhof', location: join('src', 'overrides', 'locales', 'de.json5') },
+      { id: customs, name: 'Zollhof', location: 'dist/overlay.json.locales.de.tasks' },
+    ];
+    expect(findNameMismatches(refs)).toEqual([]);
+    expect(findWrongIds(refs)).toEqual([]);
+    expect(findUnknownIds(refs)).toEqual([]);
+  });
+
+  it('still rejects an unknown ID in locale data', () => {
+    const refs = [
+      {
+        id: 'cafebabecafebabecafebabe',
+        name: 'Zollhof',
+        location: join('src', 'overrides', 'locales', 'de.json5'),
+      },
+    ];
+    expect(findUnknownIds(refs)).toHaveLength(1);
+  });
+
+  it('reports an unknown ID on a reference with no name', () => {
+    const refs = [{ id: 'deadbeefdeadbeefdeadbeef', location: 'src/overrides/tasks.json5' }];
+    expect(findUnknownIds(refs)).toEqual(['src/overrides/tasks.json5: deadbeefdeadbeefdeadbeef']);
+  });
+
+  it('ignores map: null and the map: true suppression flag', () => {
+    const collected: MapReference[] = [];
+    collectMapReferences(
+      { a: { map: null }, b: { map: true }, c: { maps: [] } },
+      'probe',
+      collected
+    );
+    expect(collected).toEqual([]);
+  });
+});
+
+describe('map references in source data', () => {
   it('scans every JSON5 source file', () => {
     // Guards against the walker going blind after a refactor or a moved file.
-    const { srcDir, rootDir } = getProjectPaths();
-    const onDisk = readdirSync(srcDir, { recursive: true })
-      .map((entry) => String(entry))
-      .filter((entry) => entry.endsWith('.json5')).length;
-
-    expect(scanned).toHaveLength(onDisk);
-    expect(scanned.some(({ file }) => file === join('src', 'overrides', 'tasks.json5'))).toBe(true);
-    expect(relative(rootDir, srcDir)).toBe('src');
+    expect(scanned).toHaveLength(json5SourceFiles().length);
+    expect(scanned.length).toBeGreaterThanOrEqual(19);
   });
 
   it('finds the map references it is meant to validate', () => {
@@ -150,71 +232,35 @@ describe('map references', () => {
     // A map reference resolves by `id`, so a correct-looking `name` beside the
     // wrong `id` renders the objective on the wrong map. The schema only
     // type-checks both as strings; this is the only guard for that mismatch.
-    const mismatched = nameCheckable
-      .filter(({ id, name }) => {
-        const canonical = TARKOV_MAP_NAMES_BY_ID[id];
-        return name !== undefined && canonical !== undefined && canonical !== name;
-      })
-      .map(
-        ({ id, name, location }) =>
-          `${location}: id ${id} is ${TARKOV_MAP_NAMES_BY_ID[id]}, labelled ${name}`
-      );
-
-    expect(mismatched).toEqual([]);
+    expect(findNameMismatches(sourceReferences)).toEqual([]);
   });
 
   it('uses the canonical ID for every map name', () => {
-    // Catches the inverse slip: the right name carried by an ID belonging to a
-    // different map, or to no known map at all.
-    const wrongId = nameCheckable
-      .filter(({ id, name }) => {
-        const expectedId = name === undefined ? undefined : canonicalIdsByName.get(name);
-        return expectedId !== undefined && expectedId !== id;
-      })
-      .map(
-        ({ id, name, location }) =>
-          `${location}: ${name} is ${canonicalIdsByName.get(name as string)}, referenced as ${id}`
-      );
-
-    expect(wrongId).toEqual([]);
+    expect(findWrongIds(sourceReferences)).toEqual([]);
   });
 
-  it('references only known tarkov.dev map IDs, including in locale files', () => {
-    // Applies to locale files too: names there are translated, but the ID is the
-    // join key and must still be canonical. An unknown ID is a typo or a new
-    // upstream map - verify against json.tarkov.dev/regular/maps and add it.
-    const unknown = allReferences
-      .filter(({ id }) => TARKOV_MAP_NAMES_BY_ID[id] === undefined)
-      .map(({ id, name, location }) => `${location}: ${id}${name ? ` (${name})` : ''}`);
-
-    expect(unknown).toEqual([]);
+  it('references only known tarkov.dev map IDs', () => {
+    // An unknown ID is a typo or a genuinely new upstream map - verify it against
+    // json.tarkov.dev/regular/maps and add it to the registry.
+    expect(findUnknownIds(sourceReferences)).toEqual([]);
   });
+});
 
-  it('keeps the built overlay consistent with the registry', () => {
-    // The published artifact is what consumers read, so assert it directly
-    // rather than trusting that the build faithfully copied the sources.
-    const { distDir } = getProjectPaths();
+describe('map references in the built overlay', () => {
+  it('keeps the published artifact consistent with the registry', () => {
+    // The artifact is what consumers read, so assert it directly rather than
+    // trusting that the build faithfully copied the sources.
     const overlayPath = join(distDir, 'overlay.json');
     expect(existsSync(overlayPath), 'dist/overlay.json must be built before this runs').toBe(true);
 
-    const overlay = loadJsonFile<Record<string, unknown>>(overlayPath);
-    const { locales, ...localeNeutral } = overlay;
-
     const built: MapReference[] = [];
-    collectMapReferences(localeNeutral, 'dist/overlay.json', built);
-    const localized: MapReference[] = [];
-    collectMapReferences(locales, 'dist/overlay.json.locales', localized);
+    collectMapReferences(loadJsonFile(overlayPath), 'dist/overlay.json', built);
+    expect(built.length).toBeGreaterThan(0);
 
-    const problems = built
-      .filter(({ id, name }) => name !== undefined && TARKOV_MAP_NAMES_BY_ID[id] !== name)
-      .map(
-        ({ id, name, location }) =>
-          `${location}: id ${id} is ${TARKOV_MAP_NAMES_BY_ID[id] ?? 'unknown'}, labelled ${name}`
-      );
-    const unknownIds = [...built, ...localized]
-      .filter(({ id }) => TARKOV_MAP_NAMES_BY_ID[id] === undefined)
-      .map(({ id, location }) => `${location}: unknown map id ${id}`);
-
-    expect([...problems, ...unknownIds]).toEqual([]);
+    expect([
+      ...findNameMismatches(built),
+      ...findWrongIds(built),
+      ...findUnknownIds(built),
+    ]).toEqual([]);
   });
 });
