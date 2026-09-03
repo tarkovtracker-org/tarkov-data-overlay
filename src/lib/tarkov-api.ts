@@ -96,14 +96,18 @@ function stringId(value: unknown): string | undefined {
 }
 
 /**
- * Narrow an upstream identifier to a usable merge identity: a whitespace-only id
- * carries no identity, so it counts as absent. The adapter (which substitutes a
- * synthetic `overlay.*` id) and the `check-overrides` diagnostic (which counts
- * absent ids) share this predicate so they cannot disagree on "missing".
+ * Resolve a trader requirement's upstream merge identity, or `undefined` when it
+ * has none. A missing, non-string or whitespace-only `id` all count as absent.
+ *
+ * The adapter's synthetic-`overlay.*`-ID fallback and the `check-overrides`
+ * diagnostic both call this on the same requirement record, so they cannot
+ * disagree about what "missing" means. It deliberately does not reuse
+ * `stringId`, whose "string, or record with a string `id`" leniency made a
+ * nested `{ id: { id } }` read as an identity at one call site and not the other.
  */
-function usableId(value: unknown): string | undefined {
-  const id = stringId(value);
-  return id !== undefined && id.trim().length > 0 ? id : undefined;
+function traderRequirementId(raw: unknown): string | undefined {
+  if (!isRecord(raw) || typeof raw.id !== 'string') return undefined;
+  return raw.id.trim().length > 0 ? raw.id : undefined;
 }
 
 /**
@@ -478,7 +482,7 @@ function adaptTraderRequirement(
   if (!isRecord(raw)) return raw as TraderRequirement;
 
   const trader = resolveTraderRef(raw.trader, ctx);
-  const upstreamId = usableId(raw);
+  const upstreamId = traderRequirementId(raw);
   const syntheticIdBase = [
     SYNTHETIC_REQUIREMENT_ID_PREFIX.slice(0, -1),
     taskId,
@@ -822,7 +826,7 @@ export function countTraderRequirementIds(tasksData: unknown): TraderRequirement
     if (!isRecord(task)) continue;
     for (const requirement of mapOptionalArray(task.traderRequirements, (entry) => entry) ?? []) {
       total += 1;
-      if (!isRecord(requirement) || usableId(requirement.id) === undefined) missing += 1;
+      if (traderRequirementId(requirement) === undefined) missing += 1;
     }
   }
   return { total, missing };

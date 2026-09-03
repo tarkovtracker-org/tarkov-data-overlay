@@ -111,6 +111,18 @@ describe('countTraderRequirementIds', () => {
       countTraderRequirementIds({ tasks: { task: { traderRequirements: { id: 'upstream-id' } } } })
     ).toEqual({ total: 1, missing: 0 });
   });
+
+  it('treats every non-string id shape as missing, matching the adapter', () => {
+    // The upstream contract is a string id. A nested record, a number, blank
+    // whitespace and an absent field all leave the requirement without a merge
+    // identity, which is precisely when adaptTraderRequirement() synthesizes an
+    // `overlay.*` id. tests/tarkov-api.test.ts pins the adapter side.
+    const idShapes = [{ id: { id: 'upstream-id' } }, { id: 123 }, { id: '   ' }, {}];
+
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: idShapes } } })
+    ).toEqual({ total: 4, missing: 4 });
+  });
 });
 
 describe('normalizeWikiLink', () => {

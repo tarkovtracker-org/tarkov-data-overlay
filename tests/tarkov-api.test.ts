@@ -909,6 +909,40 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(snapshot.tasks[0]?.traderRequirements?.[0]?.id).toBe('overlay.t1..level.>=.2');
   });
 
+  it('synthesizes an ID for a nested non-string upstream ID and counts it missing', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                traderRequirements: [
+                  {
+                    id: { id: 'upstream-id' },
+                    requirementType: 'level',
+                    compareMethod: '>=',
+                    value: 2,
+                  },
+                ],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const snapshot = await fetchTasksWithRequirementCounts();
+
+    // Upstream's contract is a string id. A nested record is not an identity, so
+    // the adapter must fall back to a synthetic ID and the diagnostic must report
+    // the entry as missing - neither side may claim the nested value as an ID.
+    expect(snapshot.traderRequirementIds).toEqual({ total: 1, missing: 1 });
+    expect(snapshot.tasks[0]?.traderRequirements?.[0]?.id).toBe('overlay.t1..level.>=.2');
+  });
+
   it('fetches each endpoint exactly once per call', async () => {
     const fetchMock = mockEndpoints(baseRoutes('regular'));
 
