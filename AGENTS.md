@@ -162,6 +162,17 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
   `tests/entity-references.test.ts` enforces the pairing.
 - Run `npm run validate` and `npm run build` before submitting.
 
+## Issue Triage
+
+Use [docs/TRIAGE.md](docs/TRIAGE.md) when reviewing GitHub issues. Verify
+reports against the latest `main`, the applicable live tarkov.dev mode(s), and
+the field-appropriate proof before marking them confirmed, fixed, duplicate,
+or won't fix. Fail closed: missing or conflicting evidence gets
+`status:needs-info` or `status:needs-investigation`, not a guessed verdict.
+Record the checked commit, modes, evidence, and next action in the triage
+comment. Keep only one lifecycle label and use the `type:*` / `status:*`
+taxonomy defined in the guide.
+
 ## Fetching Wiki Data
 
 The EFT Fandom wiki serves rendered HTML page paths (`https://escapefromtarkov.fandom.com/wiki/...`) behind a Cloudflare managed challenge. Non-browser clients (curl, agent fetch tools, scripts) get `HTTP 403` with a `cf-mitigated: challenge` header instead of content, regardless of User-Agent. Do not scrape `/wiki/` HTML.
