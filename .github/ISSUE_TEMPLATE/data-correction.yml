@@ -1,0 +1,142 @@
+name: Data correction
+description: Report data in tarkov.dev that is incorrect, incomplete, or scoped to the wrong mode.
+title: '[CORRECTION] '
+labels:
+  - type:correction
+  - status:needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when tarkov.dev serves an entity but one or more values are wrong.
+        For data that does not exist in tarkov.dev at all, use **New data request**.
+
+  - type: dropdown
+    id: entity_type
+    attributes:
+      label: Entity type
+      description: Choose the type of entity containing the incorrect value.
+      options:
+        - Task
+        - Item
+        - Trader
+        - Hideout
+        - Locale
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: entity_name
+    attributes:
+      label: Entity name
+      description: Use the name shown by tarkov.dev or in the game.
+      placeholder: 'Example: Grenadier'
+    validations:
+      required: true
+
+  - type: input
+    id: entity_id
+    attributes:
+      label: Entity ID
+      description: Provide the tarkov.dev or upstream ID, not only a URL or name.
+      placeholder: 'Example: 5936d90786f7742b1420ba5b'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: game_mode
+    attributes:
+      label: Affected concrete mode(s)
+      description: Select each concrete mode affected. Select all three when the correction applies across every supported mode. Leave this blank only when Mode scope is Unknown / needs investigation.
+      multiple: true
+      options:
+        - regular
+        - pve
+        - pvp-season
+
+  - type: dropdown
+    id: mode_scope
+    attributes:
+      label: Mode scope
+      description: Use Specific mode(s) selected above for one or more selected modes, including all three when every supported mode is affected.
+      options:
+        - Specific mode(s) selected above
+        - Unknown / needs investigation
+    validations:
+      required: true
+
+  - type: input
+    id: field_path
+    attributes:
+      label: Incorrect field or path
+      description: Give the tarkov.dev field name, including objective IDs for nested fields.
+      placeholder: 'Example: minPlayerLevel or objectives.<objective-id>.count'
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed_value
+    attributes:
+      label: Current value
+      description: Quote or describe exactly what tarkov.dev currently returns.
+      placeholder: 'Example: tarkov.dev returns 20'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_value
+    attributes:
+      label: Expected value
+      description: State the complete value that should be returned and any mode-specific differences.
+      placeholder: 'Example: The value should be 10 in regular, PvE, and PvP-season.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact or reproduction
+      description: Explain what a consumer or player sees and how the problem can be reproduced.
+      placeholder: 'Example: The task is hidden until level 20 even though the in-game requirement is level 10.'
+    validations:
+      required: true
+
+  - type: input
+    id: game_version
+    attributes:
+      label: Game or API version
+      description: Include the patch, wipe, or date when the value was observed.
+      placeholder: 'Example: EFT 1.1.0.0 / json.tarkov.dev checked 2026-09-03'
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add at least one link or explain what the attached screenshot proves. Prefer official patch notes, the EFT wiki, or an in-game capture.
+      placeholder: |
+        - Source URL:
+        - What this source proves:
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add related issue links, consumer impact, or anything else that helps verification.
+      placeholder: 'Optional: related issues, screenshots, API responses, or notes.'
+
+  - type: checkboxes
+    id: submission_checklist
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I provided an entity ID and a specific field or path.
+          required: true
+        - label: I provided the current value, expected value, affected mode, and version/date.
+          required: true
+        - label: I provided evidence or explained why evidence is unavailable.
+          required: true

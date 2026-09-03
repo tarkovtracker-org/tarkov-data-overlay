@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Issue triage and evidence guide
+    url: https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/TRIAGE.md
+    about: Read how reports are verified, labeled, and resolved.
+  - name: Questions and discussion
+    url: https://discord.gg/PpdDwd2M6V
+    about: Ask questions that are not actionable data corrections or additions.

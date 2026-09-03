@@ -78,6 +78,7 @@ npm test
 ## Contributing
 
 Found incorrect data? See [Contributing Guide](docs/CONTRIBUTING.md).
+For issue requirements and maintainer triage, see the [Issue Triage Guide](docs/TRIAGE.md).
 
 ## Data Governance
 
