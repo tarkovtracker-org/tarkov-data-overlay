@@ -730,8 +730,9 @@ function printReferenceCrossCheck(
  *
  * @returns the number of upstream requirements lacking a merge ID. Synthetic
  *   `overlay.*` IDs keep consumers working, so without a gate this would report
- *   silently forever; the caller feeds it to both `--strict` and
- *   `--fail-on-stale`, the latter being what CI actually runs.
+ *   silently forever; the caller gates on it under both `--strict` and
+ *   `--fail-on-stale` (the latter being what CI runs) with a dedicated exit
+ *   code.
  */
 function printRequirementTypeCounts(
   snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>>
@@ -1169,10 +1170,11 @@ async function main(): Promise<void> {
   let staleProblems = 0;
   /**
    * Upstream data-quality regressions, currently trader requirements arriving
-   * without a merge identity (issue #276). Counted separately because it is
-   * neither an overlay inconsistency nor a stale overlay field, yet it must fail
-   * both gates: CI runs `--fail-on-stale` without `--strict`, so folding this
-   * into `actionable` alone would leave the signal unenforced.
+   * without a merge identity (issue #276). Deliberately kept out of
+   * `actionable` and `staleProblems`: it is neither an overlay inconsistency nor
+   * a stale overlay field, and it gets its own exit code so automation can tell
+   * "our overlay is out of date" from "upstream regressed". It must fail both
+   * gates, since CI runs `--fail-on-stale` without `--strict`.
    */
   let upstreamProblems = 0;
 
@@ -1268,9 +1270,7 @@ async function main(): Promise<void> {
 
     // The mode loop covers `regular` too, so every supported mode's raw
     // diagnostic is already recorded here.
-    const { missingRequirementIds } = printRequirementTypeCounts(snapshotsByMode);
-    actionable += missingRequirementIds;
-    upstreamProblems += missingRequirementIds;
+    upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
@@ -1447,6 +1447,20 @@ async function main(): Promise<void> {
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
 
+    // Checked before the other two gates so the most specific classification
+    // wins: an upstream regression is neither an overlay inconsistency (exit 2)
+    // nor a stale overlay field (exit 3), and automation should be able to tell
+    // them apart. Gated on --fail-on-stale as well as --strict because CI runs
+    // only the former.
+    if ((strict || failOnStale) && upstreamProblems > 0) {
+      printError(
+        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
+          'Trader requirements arrived without a merge id; overlay entries keyed on ' +
+          'synthetic overlay.* ids may no longer match upstream.'
+      );
+      process.exit(4);
+    }
+
     if (strict && actionable > 0) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
@@ -1461,18 +1475,6 @@ async function main(): Promise<void> {
           'Remove data now supplied upstream or scope it to the modes where it is still missing.'
       );
       process.exit(3);
-    }
-
-    // Distinct exit code so automation can tell "our overlay is out of date"
-    // apart from "upstream regressed". Gated on --fail-on-stale as well as
-    // --strict because CI runs only the former.
-    if ((strict || failOnStale) && upstreamProblems > 0) {
-      printError(
-        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
-          'Trader requirements arrived without a merge id; overlay entries keyed on ' +
-          'synthetic overlay.* ids may no longer match upstream.'
-      );
-      process.exit(4);
     }
 
     process.exit(0);
