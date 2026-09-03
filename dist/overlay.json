@@ -1767,6 +1767,15 @@
       ]
     },
     "5c0d4e61d09282029f53920e": {
+      "minPlayerLevel": 0,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5a27bc8586f7741b543d8ea4",
+            "name": "Wet Job - Part 6"
+          }
+        }
+      ],
       "traderRequirements": [
         {
           "id": "overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4",
@@ -3012,6 +3021,39 @@
           "task": {
             "id": "657315df034d76585f032e01",
             "name": "Shooting Cans"
+          }
+        }
+      ]
+    },
+    "5d24b81486f77439c92d6ba8": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d2495a886f77425cd51e403",
+            "name": "Introduction"
+          }
+        }
+      ]
+    },
+    "5d2495a886f77425cd51e403": {
+      "minPlayerLevel": 2
+    },
+    "5d25b6be86f77444001e1b89": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d25aed386f77442734d25d2",
+            "name": "The Survivalist Path - Unprotected but Dangerous"
+          }
+        }
+      ]
+    },
+    "5d25c81b86f77443e625dd71": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d25bfd086f77442734d3007",
+            "name": "The Survivalist Path - Zhivchik"
           }
         }
       ]
@@ -9057,7 +9099,7 @@
   },
   "$meta": {
     "version": "1.82",
-    "generated": "2026-09-03T05:23:53.376Z",
-    "sha256": "613639528ea9d7ca71494254fc0bc5880a524566439a2588602431cb959bc2d3"
+    "generated": "2026-09-03T05:55:57.187Z",
+    "sha256": "69cf7ef4e8bd07ccf4f51a3338ead1e4c3e50d36b455e11d395cd4ab3ebfc684"
   }
 }

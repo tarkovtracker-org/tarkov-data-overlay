@@ -1,8 +1,11 @@
 {
-  // The Tarkov Shooter - Part 5 (duplicate) — upstream duplicate of
-  // 5bc4836986f7740c0152911c whose name is literally its own task ID and which
-  // has no wiki page. Every compared field diverges because of the broken
-  // upstream data, so the whole task is suppressed from the wiki comparison.
+  // The Tarkov Shooter - Part 5 (duplicate) — upstream serves two tasks under
+  // this name in every mode. This one is the orphan: Part 6 chains from
+  // 5bc4836986f7740c0152911c, so nothing depends on this ID and the wiki page
+  // documents the surviving task, not this one. Every compared field therefore
+  // diverges against that page, so the whole task is suppressed from the wiki
+  // comparison. It is also disabled in src/overrides/tasks.json5, which controls
+  // consumer visibility independently of this suppression.
   // Proof: https://json.tarkov.dev/regular/tasks (5bc4826c86f774106d22d88b)
   '5bc4826c86f774106d22d88b': {
     name: true,
