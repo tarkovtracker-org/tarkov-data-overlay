@@ -164,13 +164,19 @@ override the field.
 
 ### `minPlayerLevel` — absence of a `Level` condition does not mean `0`
 
-The reference is the unfiltered quest-template list, so its `Level` conditions are
-complete: only 8 of 644 quests carry one. But tarkov.dev also _derives_
-`minPlayerLevel` from the loyalty tier's `requiredPlayerLevel` when a task is
-loyalty-gated, and for all 91 such tasks upstream's value equals that floor
-exactly. Zeroing those would throw away a correct derived floor.
+The reference lists **explicit** level gates completely: only 8 of 644 quests carry
+a `Level` condition, and that is the whole set rather than a filtered view — the
+list is unfiltered quest templates, and a trivially-satisfied `Level >= 1`
+condition survives in a capture taken on a level-55 profile, which could not
+happen if satisfied conditions were stripped.
 
-So only correct `minPlayerLevel` when upstream's value matches neither an explicit
+The other 636 quests still often have a real floor. tarkov.dev _derives_
+`minPlayerLevel` from the loyalty tier's `requiredPlayerLevel` when a task is
+loyalty-gated, and across all 91 such tasks upstream equals that floor exactly.
+So "no `Level` condition" means "no explicit gate", not "no gate", and zeroing
+those would throw away a correct derived floor.
+
+Only correct `minPlayerLevel` when upstream's value matches neither an explicit
 `Level` condition nor the loyalty-tier floor — that is the case where it is a
 genuine stale leftover. Corroborate with the wiki Requirements section, and use
 `0` to mean "no level gate" (see `src/lib/task-unlocks.ts`).

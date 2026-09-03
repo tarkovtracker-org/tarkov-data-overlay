@@ -103,14 +103,19 @@ resulting JSON5 corrections plus proof links.
     gate is a loyalty variable instead. The wiki's infobox `previous` field is
     narrative order, **not** proof of an unlock edge.
   - `minPlayerLevel` — the reference tells you whether an **explicit** level gate
-    exists, but absence does **not** license setting `0`. The list is unfiltered
-    quest templates (every entry has `status: 0`) and a `Level >= 1` condition
-    survives in it, so nothing is stripped: only 8 of 644 quests carry a `Level`
-    condition. However, tarkov.dev _derives_ `minPlayerLevel` from the loyalty
-    tier's `requiredPlayerLevel` when a task is loyalty-gated — for all 91 such
-    tasks upstream's value equals that floor exactly. Zeroing those would discard
-    a correct derived floor. Only correct `minPlayerLevel` when upstream's value
-    matches neither an explicit `Level` condition nor the loyalty-tier floor, and
+    exists, and absence does **not** license setting `0`. Two separate facts:
+    (1) the 8 quests carrying a `Level` condition are the complete set of
+    _explicit_ gates — the list is unfiltered quest templates (every entry has
+    `status: 0`) and nothing is pruned, proven by a trivially-satisfied
+    `Level >= 1` condition surviving in a capture taken on a level-55 profile,
+    which could not happen if satisfied conditions were stripped; (2) for the
+    other 636 quests tarkov.dev still reports a non-zero `minPlayerLevel` in many
+    cases, because it _derives_ the value from the loyalty tier's
+    `requiredPlayerLevel` when a task is loyalty-gated — across all 91 such tasks
+    upstream equals that floor exactly. So a missing `Level` condition means "no
+    explicit gate", not "no gate", and zeroing those would discard a correct
+    derived floor. Only correct `minPlayerLevel` when upstream's value matches
+    neither an explicit `Level` condition nor the loyalty-tier floor, and
     corroborate with the wiki Requirements section.
   - `traderRequirements` — **not** auditable against the reference, which is why
     `eft:audit` deliberately does not cover it. Because the gate lives in a
