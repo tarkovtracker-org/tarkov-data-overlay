@@ -103,6 +103,18 @@ interface EftTask {
   minPlayerLevel?: number;
   /** objective id -> required count */
   counts: Map<string, number>;
+  /**
+   * Task IDs named by `AvailableForStart` `Quest` conditions - the client's own
+   * prerequisite edges, and therefore the authority for `taskRequirements`.
+   *
+   * Unlike `minPlayerLevel`, this is populated densely enough to adjudicate by
+   * absence: an empty set means the client really has no quest prerequisite (it
+   * gates the task some other way, typically `TraderLoyalty` or
+   * `GlobalVariableValue`), not that the reference is silent. Patch 1.1.0.0
+   * moved many chains onto those other condition types, so a wiki `previous`
+   * entry is not evidence of a `Quest` condition.
+   */
+  prerequisites: Set<string>;
   /** objective (condition) id -> canonical English objective text, when the
    * reference file carries a `localization.en` block. Empty otherwise. */
   descriptions: Map<string, string>;
@@ -286,6 +298,16 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
       }
     }
 
+    // `Quest` start conditions are the client's prerequisite edges. `target` is
+    // a single task id; the enriched reference variant may wrap it as
+    // `[<id> name]`, which unwrapId normalizes.
+    const prerequisites = new Set<string>();
+    for (const c of start) {
+      if (c.conditionType !== 'Quest') continue;
+      if (typeof c.target !== 'string') continue;
+      prerequisites.add(unwrapId(c.target));
+    }
+
     const descriptions = new Map<string, string>();
     const en = q.localization?.en;
     if (en) {
@@ -298,7 +320,7 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
       }
     }
 
-    out.set(id, { id, experience, minPlayerLevel, counts, descriptions });
+    out.set(id, { id, experience, minPlayerLevel, counts, prerequisites, descriptions });
   }
   return out;
 }

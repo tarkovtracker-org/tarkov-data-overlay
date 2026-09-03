@@ -62,15 +62,15 @@ import {
 import { loadReferenceTasks, parseModeArgs, writeJsonOutput, type EftTask } from './eft-compare.js';
 
 type Verdict = 'GAP' | 'STALE' | 'CONFLICT' | 'OK';
-type Field = 'experience' | 'minPlayerLevel' | `objective[${string}].count`;
+type Field = 'experience' | 'minPlayerLevel' | 'taskRequirements' | `objective[${string}].count`;
 
 interface Row {
   taskId: string;
   taskName: string;
   field: Field;
-  reference: number;
-  api: number | undefined;
-  override: number | undefined;
+  reference: number | string;
+  api: number | string | undefined;
+  override: number | string | undefined;
   verdict: Verdict;
 }
 
@@ -108,10 +108,10 @@ function effectiveOverrides(mode: GameMode): Record<string, TaskOverride> {
 }
 
 /** Classify one (task, field) across the three sources. */
-function classify(
-  reference: number,
-  api: number | undefined,
-  override: number | undefined
+function classify<T extends number | string>(
+  reference: T,
+  api: T | undefined,
+  override: T | undefined
 ): Verdict | null {
   const apiCorrect = api !== undefined && api === reference;
   const hasOverride = override !== undefined;
@@ -124,6 +124,16 @@ function classify(
   if (override !== reference) return 'CONFLICT'; // our override is wrong
   if (apiCorrect) return 'STALE'; // API caught up; override redundant
   return 'OK'; // API still wrong, override fixes it
+}
+
+/**
+ * Canonical, comparable form of an unordered requirement set: sorted members
+ * joined with `+`, or `(none)` when empty. Order in the source data is not
+ * meaningful, so sorting keeps a reordering from reading as a difference.
+ */
+function canonicalJoin(members: Iterable<string>): string {
+  const sorted = [...new Set(members)].sort();
+  return sorted.length === 0 ? '(none)' : sorted.join('+');
 }
 
 function buildRows(
@@ -159,6 +169,30 @@ function buildRows(
     };
     scalar('experience', eft.experience);
     scalar('minPlayerLevel', eft.minPlayerLevel);
+
+    // Prerequisite edges. The reference adjudicates by absence here (see
+    // EftTask.prerequisites), so an empty reference set is a real "no quest
+    // prerequisite" and an override that adds one is a CONFLICT.
+    const referenceEdges = canonicalJoin(eft.prerequisites);
+    const apiEdges = canonicalJoin(
+      (api.taskRequirements ?? []).flatMap((r) => (r.task?.id ? [r.task.id] : []))
+    );
+    const overrideEdges =
+      ov?.taskRequirements === undefined
+        ? undefined
+        : canonicalJoin(ov.taskRequirements.flatMap((r) => (r.task?.id ? [r.task.id] : [])));
+    const edgeVerdict = classify(referenceEdges, apiEdges, overrideEdges);
+    if (edgeVerdict) {
+      rows.push({
+        taskId: eft.id,
+        taskName: name,
+        field: 'taskRequirements',
+        reference: referenceEdges,
+        api: apiEdges,
+        override: overrideEdges,
+        verdict: edgeVerdict,
+      });
+    }
 
     // Objective counts (keyed by objective/condition id).
     const apiObjectives = new Map((api.objectives ?? []).map((o) => [o.id, o]));
