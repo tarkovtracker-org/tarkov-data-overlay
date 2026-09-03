@@ -267,6 +267,10 @@ describe('extractCount', () => {
     const links = Array.from({ length: 300 }, (_, index) => `Item ${index}`);
     expect(extractCount('Find 5 Scavs', links)).toBe(5);
 
+    const lateNumericLink = Array.from({ length: 256 }, (_, index) => `Item ${index + 100}`);
+    lateNumericLink.push('Item 7');
+    expect(extractCount('Find [[Item 7]]', lateNumericLink)).toBeUndefined();
+
     const tooManyLinks = Array.from(
       { length: MAX_LINK_PATTERN_COUNT + 1 },
       (_, index) => `Item ${index}`

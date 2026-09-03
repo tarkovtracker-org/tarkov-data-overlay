@@ -226,17 +226,12 @@ export function extractCount(text: string, links: string[] = []): number | undef
 
   // Remove linked item names to avoid pulling numbers from item titles. The
   // bounded matcher scans the line once and never treats page data as regex.
-  const boundedLinks = links.slice(0, 256);
-  if (boundedLinks.some((link) => link.trim().length > MAX_LINK_PATTERN_LENGTH)) {
+  if (links.some((link) => link.trim().length > MAX_LINK_PATTERN_LENGTH)) {
     return undefined;
   }
-  const linkPatterns = [
-    ...new Set(
-      boundedLinks
-        .map((link) => link.trim().toLowerCase())
-        .filter((link) => link.length > 0 && link.length <= MAX_LINK_PATTERN_LENGTH)
-    ),
-  ].sort((left, right) => right.length - left.length);
+  const linkPatterns = [...new Set(links.map((link) => link.trim().toLowerCase()))]
+    .filter((link) => link.length > 0)
+    .sort((left, right) => right.length - left.length);
   const linkedNamesRemoved = removeLinkedNames(scrubbed, linkPatterns);
   if (linkedNamesRemoved === undefined) return undefined;
   scrubbed = linkedNamesRemoved;
