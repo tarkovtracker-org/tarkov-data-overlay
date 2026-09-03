@@ -50,7 +50,6 @@ import {
   type TaskAddition,
   type TaskData,
   type TaskDataWithRequirementCounts,
-  type TraderRequirementIdCounts,
   type GameMode,
   type ValidationResult,
   type ValidationDetail,
@@ -723,28 +722,39 @@ function printReferenceCrossCheck(
  * Report upstream trader-requirement counts by semantic type and mode.
  *
  * Surfaces the level/reputation split so a consumer's requirement evaluation
- * can be kept in sync with the discriminated upstream schema.
+ * can be kept in sync with the discriminated upstream schema, and reports how
+ * many requirements arrive without a merge identity (issue #276).
+ *
+ * Takes one snapshot per mode rather than parallel task/count maps so a mode
+ * cannot be present in one and absent from the other.
+ *
+ * @returns the number of upstream requirements lacking a merge ID, counted as
+ *   actionable: synthetic `overlay.*` IDs keep consumers working, so without
+ *   this the `--strict` gate would stay green on exactly the upstream
+ *   regression the diagnostic exists to surface.
  */
 function printRequirementTypeCounts(
-  apiTasksByMode: Partial<Record<GameMode, TaskData[]>>,
-  requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>>
-): void {
+  snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>>
+): { actionable: number } {
   printHeader('TRADER REQUIREMENT TYPE COUNTS (UPSTREAM)');
+  const missing: string[] = [];
+  let actionable = 0;
+
   for (const mode of SUPPORTED_GAME_MODES) {
-    const tasks = apiTasksByMode[mode];
-    if (!tasks) continue;
-    const counts = countRequirementTypes(tasks);
-    const ids = requirementIdCountsByMode[mode];
-    const idSummary = ids
-      ? `, ${ids.missing} missing ID(s) of ${ids.total}`
-      : ', missing-ID count unavailable';
-    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation${idSummary}`);
+    const snapshot = snapshotsByMode[mode];
+    if (!snapshot) continue;
+    const counts = countRequirementTypes(snapshot.tasks);
+    const ids = snapshot.traderRequirementIds;
+    console.log(
+      `  ${mode}: ${counts.level} level, ${counts.reputation} reputation, ` +
+        `${ids.missing} missing ID(s) of ${ids.total}`
+    );
+    if (ids.missing > 0) {
+      actionable += ids.missing;
+      missing.push(`${mode}: ${ids.missing} trader requirement(s) lack an upstream id`);
+    }
   }
 
-  const missing = SUPPORTED_GAME_MODES.flatMap((mode) => {
-    const count = requirementIdCountsByMode[mode]?.missing ?? 0;
-    return count > 0 ? [`${mode}: ${count} trader requirement(s) lack an upstream id`] : [];
-  });
   if (missing.length > 0) {
     console.log(
       `${colors.yellow}WARNING: upstream trader requirements lack merge IDs${colors.reset}`
@@ -752,6 +762,7 @@ function printRequirementTypeCounts(
     for (const line of missing) console.log(`  ${line}`);
   }
   console.log();
+  return { actionable };
 }
 
 /**
@@ -1197,7 +1208,9 @@ async function main(): Promise<void> {
     // cross-mode passes so nothing is fetched twice.
     const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
     const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
-    const requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>> = {};
+    // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
+    // counts together, so the diagnostic cannot see one without the other.
+    const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
 
     // Validate mode-specific overrides and additions
     for (const mode of SUPPORTED_GAME_MODES) {
@@ -1206,9 +1219,10 @@ async function main(): Promise<void> {
       modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const { tasks: modeApiTasks, traderRequirementIds } = await getTasksForMode(mode);
+      const modeSnapshot = await getTasksForMode(mode);
+      const modeApiTasks = modeSnapshot.tasks;
       apiTasksByMode[mode] = modeApiTasks;
-      requirementIdCountsByMode[mode] = traderRequirementIds;
+      snapshotsByMode[mode] = modeSnapshot;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       const modeOverrideCount = Object.keys(modeOverrides).length;
@@ -1246,7 +1260,7 @@ async function main(): Promise<void> {
 
     // The mode loop covers `regular` too, so every supported mode's raw
     // diagnostic is already recorded here.
-    printRequirementTypeCounts(apiTasksByMode, requirementIdCountsByMode);
+    actionable += printRequirementTypeCounts(snapshotsByMode).actionable;
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};

@@ -795,10 +795,15 @@ async function fetchTaskSnapshot(
     taskEntries.push([sourceKey, rawTask]);
   }
 
+  // Counted before any adaptation runs, so `adaptTask()`'s synthetic
+  // `overlay.*` IDs cannot influence the reading. Evaluating this first makes
+  // that ordering structural rather than a property of object-literal
+  // evaluation order.
+  const traderRequirementIds = countTraderRequirementIds(tasksData);
   const ctx = await buildContext(cache, mode, tasksData);
   return {
     tasks: taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx)),
-    traderRequirementIds: countTraderRequirementIds(tasksData),
+    traderRequirementIds,
   };
 }
 
