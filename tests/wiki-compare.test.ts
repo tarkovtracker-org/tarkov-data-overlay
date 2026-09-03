@@ -15,7 +15,11 @@ import {
   type TaskSuppressionEntry,
 } from '../scripts/wiki-compare/overlay.js';
 import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
-import { extractCount, parseObjectives } from '../scripts/wiki-compare/wiki.js';
+import {
+  extractCount,
+  MAX_LINK_PATTERN_COUNT,
+  parseObjectives,
+} from '../scripts/wiki-compare/wiki.js';
 import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
@@ -255,6 +259,26 @@ describe('extractCount', () => {
   it('parses counts from count-word patterns', () => {
     expect(extractCount('Eliminate 5 Scavs on Customs')).toBe(5);
     expect(extractCount('Find 3 dogtags')).toBe(3);
+  });
+
+  it('removes every linked item name and fails closed for unsafe matcher input', () => {
+    expect(extractCount('Find [[Item 7]]', ['Item 7'])).toBeUndefined();
+
+    const links = Array.from({ length: 300 }, (_, index) => `Item ${index}`);
+    expect(extractCount('Find 5 Scavs', links)).toBe(5);
+
+    const lateNumericLink = Array.from({ length: 256 }, (_, index) => `Item ${index + 100}`);
+    lateNumericLink.push('Item 7');
+    expect(extractCount('Find [[Item 7]]', lateNumericLink)).toBeUndefined();
+
+    const tooManyLinks = Array.from(
+      { length: MAX_LINK_PATTERN_COUNT + 1 },
+      (_, index) => `Item ${index}`
+    );
+    expect(extractCount('Find 5 Scavs', tooManyLinks)).toBeUndefined();
+
+    const oversizedLink = `7 ${'x'.repeat(256)}`;
+    expect(extractCount(`Find [[${oversizedLink}]]`, [oversizedLink])).toBeUndefined();
   });
 
   it('parses counts from the verb fallback', () => {

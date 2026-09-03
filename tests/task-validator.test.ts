@@ -12,6 +12,7 @@ import {
 } from '../src/lib/index.js';
 
 describe('validateTaskOverride', () => {
+  /** Build the baseline API task fixture used by validator tests. */
   const createApiTask = (overrides: Partial<TaskData> = {}): TaskData => ({
     id: 'test-task-id',
     name: 'Test Task',
@@ -430,7 +431,7 @@ describe('validateTaskOverride', () => {
       expect(result.stillNeeded).toBe(true);
     });
 
-    it('ignores accepted/active statuses when comparing requirements', () => {
+    it('preserves accepted and active status semantics when comparing requirements', () => {
       const apiTask = createApiTask({
         taskRequirements: [
           { task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['accepted'] },
@@ -439,13 +440,142 @@ describe('validateTaskOverride', () => {
         ],
       });
       const override: TaskOverride = {
-        taskRequirements: [{ task: { id: 'prereq-2', name: 'Completed Task' } }],
+        taskRequirements: [
+          { task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['active'] },
+          { task: { id: 'prereq-2', name: 'Completed Task' } },
+          { task: { id: 'prereq-3', name: 'Active Task' }, status: ['active'] },
+        ],
       };
       const result = validateTaskOverride('test-task-id', override, [apiTask]);
 
       expect(
         result.details.some((d) => d.field === 'taskRequirements' && d.status === 'fixed')
       ).toBe(true);
+    });
+
+    it('reports an omitted active prerequisite as still needed', () => {
+      const apiTask = createApiTask({
+        taskRequirements: [{ task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['active'] }],
+      });
+      const override: TaskOverride = {
+        taskRequirements: [{ task: { id: 'prereq-1', name: 'Prereq Task' } }],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some((d) => d.field === 'taskRequirements' && d.status === 'needed')
+      ).toBe(true);
+    });
+
+    it('ignores task names and status aliases when comparing groups', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [
+          [{ task: { id: 'prereq-1', name: 'API name' }, status: ['accepted'] }],
+        ],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [
+          [{ task: { id: 'prereq-1', name: 'Translated name' }, status: ['active'] }],
+        ],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+    });
+
+    it('treats duplicate members in an OR group as equivalent', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [
+          [
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-2', name: 'Second task' } },
+          ],
+        ],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [
+          [
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-1', name: 'First task' } },
+            { task: { id: 'prereq-2', name: 'Second task' } },
+          ],
+        ],
+      };
+
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+    });
+
+    it('treats duplicate equivalent groups as equivalent', () => {
+      const group = [{ task: { id: 'prereq-1', name: 'Prereq Task' } }];
+      const apiTask = createApiTask({ taskRequirementGroups: [group, group] });
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [group] }, [
+        apiTask,
+      ]);
+
+      expect(result.status).toBe('FIXED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+
+      const reverseResult = validateTaskOverride(
+        'test-task-id',
+        { taskRequirementGroups: [group, group] },
+        [createApiTask({ taskRequirementGroups: [group] })]
+      );
+
+      expect(reverseResult.status).toBe('FIXED');
+    });
+  });
+
+  describe('taskRequirementGroups validation', () => {
+    it('returns NEEDED when requirement groups differ from the API', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [[{ task: { id: 'prereq-1', name: 'Prereq Task' } }]],
+      });
+      const override: TaskOverride = {
+        taskRequirementGroups: [[{ task: { id: 'prereq-2', name: 'Other Task' } }]],
+      };
+      const result = validateTaskOverride('test-task-id', override, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'needed'
+        )
+      ).toBe(true);
+    });
+
+    it('reports an empty override as needed when it clears API groups', () => {
+      const apiTask = createApiTask({
+        taskRequirementGroups: [[{ task: { id: 'prereq-1', name: 'Prereq Task' } }]],
+      });
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [] }, [apiTask]);
+
+      expect(result.status).toBe('NEEDED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'needed'
+        )
+      ).toBe(true);
+    });
+
+    it('accepts an empty override when API groups are already empty', () => {
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [] }, apiTasks);
+
+      expect(result.details.some((detail) => detail.field === 'taskRequirementGroups')).toBe(false);
     });
   });
 

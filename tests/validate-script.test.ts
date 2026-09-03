@@ -33,6 +33,69 @@ describe('scripts/validate helpers', () => {
     expect(getValidator('unknown.json5', validators)).toBeNull();
   });
 
+  it('requires payloads for known other requirements but preserves unknown types', () => {
+    const validators = initializeValidators();
+    const invalidRequirementSets = [
+      [{ id: 'dialogue-condition', type: 'dialogue' }],
+      [{ id: 'global-condition', type: 'globalVariable' }],
+    ];
+    const cases = [
+      {
+        path: 'overrides/tasks.json5',
+        base: {},
+      },
+      {
+        path: 'additions/tasksAdd.json5',
+        base: {
+          id: 'task-id',
+          name: 'Task',
+          wikiLink: 'https://example.com/task',
+          trader: { name: 'Prapor' },
+          objectives: [],
+        },
+      },
+    ];
+
+    for (const { path, base } of cases) {
+      const validator = getValidator(path, validators);
+      expect(validator).not.toBeNull();
+      for (const otherRequirements of invalidRequirementSets) {
+        expect(validator?.({ task: { ...base, otherRequirements } })).toBe(false);
+      }
+      expect(
+        validator?.({
+          task: { ...base, otherRequirements: [{ id: 'future-condition', type: 'futureType' }] },
+        })
+      ).toBe(true);
+    }
+  });
+
+  it('rejects contradictory task availability delay ranges', () => {
+    const validators = initializeValidators();
+    const additionsValidator = getValidator('additions/tasksAdd.json5', validators);
+    const overridesValidator = getValidator('overrides/tasks.json5', validators);
+    const base = {
+      id: 'task-id',
+      name: 'Task',
+      wikiLink: 'https://example.com/task',
+      trader: { name: 'Prapor' },
+      objectives: [],
+      availableDelaySecondsMin: 30,
+      availableDelaySecondsMax: 10,
+    };
+
+    expect(additionsValidator?.({ task: base })).toBe(false);
+    expect(overridesValidator?.({ 'task-id': base })).toBe(false);
+  });
+
+  it('accepts suppressions for task requirement groups', () => {
+    const validators = initializeValidators();
+    const validator = getValidator('suppressions/tasks.json5', validators);
+
+    expect(validator).not.toBeNull();
+    expect(validator?.({ 'task-id': { taskRequirementGroups: true } })).toBe(true);
+  });
+
   it('validates all source files used by overlay data', async () => {
     const { srcDir } = getProjectPaths();
     const expectedFiles = [

@@ -4,11 +4,18 @@
  * Extracted from the former single-file scripts/wiki-compare.ts.
  */
 
-import { printHeader, bold, dim, colorize } from '../../src/lib/index.js';
+import {
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
+  bold,
+  colorize,
+  dim,
+  printHeader,
+  readResponseJson,
+} from '../../src/lib/index.js';
 import {
   TARKOV_1_0_LAUNCH,
   TraderReputation,
-  WIKI_API,
   WikiObjective,
   WikiRelatedItem,
   WikiRewards,
@@ -38,6 +45,25 @@ export type WikiFetchResult = {
   };
 };
 
+const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
+const WIKI_API_URL = 'https://escapefromtarkov.fandom.com/api.php';
+const MAX_LINK_PATTERN_LENGTH = 256;
+export const MAX_LINK_PATTERN_COUNT = 4096;
+const MAX_LINK_MATCHER_NODES = 1_000_000;
+
+async function fetchWikiJson(params: URLSearchParams): Promise<unknown> {
+  const response = await fetch(WIKI_API_URL, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: params,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(`Wiki request failed: ${response.status} ${response.statusText}`);
+  }
+  return readResponseJson(response, WIKI_API_URL, WIKI_MAX_RESPONSE_BYTES, 'wiki');
+}
+
 export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchResult> {
   // Fetch wikitext
   const parseParams = new URLSearchParams({
@@ -47,12 +73,7 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
     format: 'json',
   });
 
-  const parseResponse = await fetch(`${WIKI_API}?${parseParams.toString()}`);
-  if (!parseResponse.ok) {
-    throw new Error(`Wiki request failed: ${parseResponse.status} ${parseResponse.statusText}`);
-  }
-
-  const parseData = (await parseResponse.json()) as {
+  const parseData = (await fetchWikiJson(parseParams)) as {
     parse?: {
       title?: string;
       wikitext?: { '*': string };
@@ -83,34 +104,31 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
 
   let lastRevision: WikiFetchResult['lastRevision'];
   try {
-    const revResponse = await fetch(`${WIKI_API}?${revParams.toString()}`);
-    if (revResponse.ok) {
-      const revData = (await revResponse.json()) as {
-        query?: {
-          pages?: Record<
-            string,
-            {
-              revisions?: Array<{
-                timestamp?: string;
-                user?: string;
-                comment?: string;
-              }>;
-            }
-          >;
-        };
+    const revData = (await fetchWikiJson(revParams)) as {
+      query?: {
+        pages?: Record<
+          string,
+          {
+            revisions?: Array<{
+              timestamp?: string;
+              user?: string;
+              comment?: string;
+            }>;
+          }
+        >;
       };
+    };
 
-      const pages = revData.query?.pages;
-      if (pages) {
-        const page = Object.values(pages)[0];
-        const rev = page?.revisions?.[0];
-        if (rev?.timestamp) {
-          lastRevision = {
-            timestamp: rev.timestamp,
-            user: rev.user ?? 'unknown',
-            comment: rev.comment ?? '',
-          };
-        }
+    const pages = revData.query?.pages;
+    if (pages) {
+      const page = Object.values(pages)[0];
+      const rev = page?.revisions?.[0];
+      if (rev?.timestamp) {
+        lastRevision = {
+          timestamp: rev.timestamp,
+          user: rev.user ?? 'unknown',
+          comment: rev.comment ?? '',
+        };
       }
     }
   } catch {
@@ -130,19 +148,93 @@ export function parseMinLevel(requirements: string[]): number | undefined {
   return undefined;
 }
 
+/** Remove linked names with a bounded Aho-Corasick matcher. */
+function removeLinkedNames(value: string, patterns: string[]): string | undefined {
+  if (patterns.length === 0) return value;
+  if (patterns.some((pattern) => pattern.length > MAX_LINK_PATTERN_LENGTH)) return undefined;
+
+  const nodes: Array<{
+    children: Map<string, number>;
+    failure: number;
+    outputLength: number;
+  }> = [{ children: new Map(), failure: 0, outputLength: 0 }];
+
+  for (const pattern of patterns) {
+    let nodeIndex = 0;
+    for (let index = 0; index < pattern.length; index += 1) {
+      const character = pattern[index];
+      let nextIndex = nodes[nodeIndex].children.get(character);
+      if (nextIndex === undefined) {
+        if (nodes.length >= MAX_LINK_MATCHER_NODES) return undefined;
+        nextIndex = nodes.length;
+        nodes[nodeIndex].children.set(character, nextIndex);
+        nodes.push({ children: new Map(), failure: 0, outputLength: 0 });
+      }
+      nodeIndex = nextIndex;
+    }
+    nodes[nodeIndex].outputLength = Math.max(nodes[nodeIndex].outputLength, pattern.length);
+  }
+
+  const queue: number[] = [...nodes[0].children.values()];
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex += 1) {
+    const nodeIndex = queue[queueIndex];
+    for (const [character, childIndex] of nodes[nodeIndex].children) {
+      let fallback = nodes[nodeIndex].failure;
+      while (fallback !== 0 && !nodes[fallback].children.has(character)) {
+        fallback = nodes[fallback].failure;
+      }
+      nodes[childIndex].failure = nodes[fallback].children.get(character) ?? 0;
+      nodes[childIndex].outputLength = Math.max(
+        nodes[childIndex].outputLength,
+        nodes[nodes[childIndex].failure].outputLength
+      );
+      queue.push(childIndex);
+    }
+  }
+
+  const removalRanges = new Int32Array(value.length + 1);
+  let nodeIndex = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index];
+    while (nodeIndex !== 0 && !nodes[nodeIndex].children.has(character)) {
+      nodeIndex = nodes[nodeIndex].failure;
+    }
+    nodeIndex = nodes[nodeIndex].children.get(character) ?? 0;
+    const matchLength = nodes[nodeIndex].outputLength;
+    if (matchLength > 0) {
+      removalRanges[index - matchLength + 1] += 1;
+      removalRanges[index + 1] -= 1;
+    }
+  }
+
+  const characters: string[] = [];
+  let activeRanges = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    activeRanges += removalRanges[index];
+    if (activeRanges === 0) characters.push(value[index]);
+  }
+  return characters.join('');
+}
+
 export function extractCount(text: string, links: string[] = []): number | undefined {
+  if (links.length > MAX_LINK_PATTERN_COUNT) return undefined;
+
   const normalized = stripWikiMarkup(text).toLowerCase();
   if (!/\d/.test(normalized)) return undefined;
 
   let scrubbed = normalized;
 
-  // Remove linked item names to avoid pulling numbers from item titles.
-  for (const link of links) {
-    const linkText = link.trim().toLowerCase();
-    if (linkText.length === 0) continue;
-    const escaped = linkText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    scrubbed = scrubbed.replace(new RegExp(escaped, 'g'), '');
+  // Remove linked item names to avoid pulling numbers from item titles. The
+  // bounded matcher scans the line once and never treats page data as regex.
+  if (links.some((link) => link.trim().length > MAX_LINK_PATTERN_LENGTH)) {
+    return undefined;
   }
+  const linkPatterns = [...new Set(links.map((link) => link.trim().toLowerCase()))]
+    .filter((link) => link.length > 0)
+    .sort((left, right) => right.length - left.length);
+  const linkedNamesRemoved = removeLinkedNames(scrubbed, linkPatterns);
+  if (linkedNamesRemoved === undefined) return undefined;
+  scrubbed = linkedNamesRemoved;
 
   // Remove distance patterns like "75 meters".
   scrubbed = scrubbed.replace(/\b\d+\s*meters?\b/gi, '');

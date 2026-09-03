@@ -8,13 +8,16 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
-import { execSync } from 'child_process';
 import {
+  getLatestTagVersion,
   getProjectPaths,
   loadAllJson5FromDir,
+  loadJsonFile,
   getPackageVersion,
+  isDirectExecution,
   SUPPORTED_GAME_MODES,
   icons,
+  verifyOverlaySha256,
   type OverlayOutput,
 } from '../src/lib/index.js';
 
@@ -72,21 +75,92 @@ function generateSha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
-/**
- * Latest release tag (e.g. "v1.55" -> "1.55"), or undefined when git is not
- * available. Matches the CI version source: releases are tags, package.json
- * stays at the initial 1.0.0.
- */
-function getLatestTagVersion(): string | undefined {
-  try {
-    const tag = execSync('git describe --tags --abbrev=0', {
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .toString()
-      .trim();
-    return tag.replace(/^v/, '');
-  } catch {
-    return undefined;
+/** Return a stable representation for semantic generated-output comparison. */
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([key, entry]) => [key, canonicalize(entry)])
+    );
+  }
+  return value;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasValidBuildMetadata(value: unknown): boolean {
+  if (!isRecord(value) || !isRecord(value.$meta)) return false;
+  const { version, generated } = value.$meta;
+  return (
+    typeof version === 'string' &&
+    version.length > 0 &&
+    typeof generated === 'string' &&
+    Number.isFinite(Date.parse(generated))
+  );
+}
+
+interface BuildVersion {
+  value: string;
+  isAuthoritative: boolean;
+}
+
+/** Resolve the build version and record whether it came from a release source. */
+export function resolveBuildVersion(
+  rootDir: string,
+  findLatestTag: () => string | undefined = getLatestTagVersion
+): BuildVersion {
+  if (process.env.OVERLAY_VERSION) {
+    return { value: process.env.OVERLAY_VERSION, isAuthoritative: true };
+  }
+  const latestTag = findLatestTag();
+  if (latestTag) return { value: latestTag, isAuthoritative: true };
+  return { value: getPackageVersion(rootDir), isAuthoritative: false };
+}
+
+/** Compare an existing committed overlay with the freshly generated content. */
+function checkGeneratedOutput(
+  output: OverlayOutput,
+  outputPath: string,
+  checkVersion: boolean
+): void {
+  if (!existsSync(outputPath)) {
+    throw new Error(`Generated overlay is missing: ${outputPath}`);
+  }
+
+  const existing = loadJsonFile<unknown>(outputPath);
+  if (!verifyOverlaySha256(existing)) {
+    throw new Error(`Generated overlay has an invalid or missing digest: ${outputPath}`);
+  }
+
+  if (!hasValidBuildMetadata(existing)) {
+    throw new Error(`Generated overlay has invalid build metadata: ${outputPath}`);
+  }
+  if (
+    checkVersion &&
+    isRecord(existing) &&
+    isRecord(existing.$meta) &&
+    existing.$meta.version !== output.$meta.version
+  ) {
+    throw new Error(
+      `Generated overlay has version '${String(existing.$meta.version)}', expected '${output.$meta.version}'`
+    );
+  }
+
+  const withoutMetadata = (value: unknown): unknown => {
+    // The generated timestamp is intentionally volatile; source data is
+    // compared below while the digest and metadata shape are checked above.
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+    const { $meta: _metadata, ...data } = value as Record<string, unknown>;
+    return data;
+  };
+  const expected = JSON.stringify(canonicalize(withoutMetadata(output)));
+  const actual = JSON.stringify(canonicalize(withoutMetadata(existing)));
+  if (expected !== actual) {
+    throw new Error(`Generated overlay is stale: run 'npm run build' and commit ${outputPath}`);
   }
 }
 
@@ -96,8 +170,7 @@ function getLatestTagVersion(): string | undefined {
 function build(): void {
   console.log('Building overlay...\n');
 
-  const version =
-    process.env.OVERLAY_VERSION || getLatestTagVersion() || getPackageVersion(rootDir);
+  const { value: version, isAuthoritative: versionIsAuthoritative } = resolveBuildVersion(rootDir);
 
   // Load all source files
   const data = loadSourceFiles();
@@ -120,12 +193,15 @@ function build(): void {
   const finalContent = JSON.stringify(output, null, 2);
 
   // Ensure dist directory exists
-  if (!existsSync(distDir)) {
-    mkdirSync(distDir, { recursive: true });
+  const outputPath = join(distDir, 'overlay.json');
+  if (process.argv.includes('--check')) {
+    checkGeneratedOutput(output, outputPath, versionIsAuthoritative);
+    console.log(`Generated overlay is current: ${outputPath}`);
+    return;
   }
+  if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });
 
   // Write output
-  const outputPath = join(distDir, 'overlay.json');
   writeFileSync(outputPath, finalContent);
 
   // Summary
@@ -170,4 +246,6 @@ function build(): void {
   console.log(`\nOutput: ${outputPath}`);
 }
 
-build();
+if (isDirectExecution(import.meta.url)) {
+  build();
+}

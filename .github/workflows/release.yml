@@ -1,0 +1,271 @@
+name: Release overlay
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  # Required to download the CI-validated overlay artifact from the triggering run.
+  actions: read
+  contents: write
+
+concurrency:
+  group: overlay-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout trusted main branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: main
+          persist-credentials: false
+
+      - name: Sync trusted main branch
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          git checkout --detach origin/main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download validated release overlay
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          artifact_dir="$(mktemp -d)"
+          trap 'rm -rf "$artifact_dir"' EXIT
+          gh run download "$RUN_ID" \
+            --repo "$REPOSITORY" \
+            --name "overlay-${HEAD_SHA}" \
+            --dir "$artifact_dir"
+
+          test -f "$artifact_dir/overlay.json"
+          mkdir -p dist
+          cp -- "$artifact_dir/overlay.json" dist/overlay.json
+
+      - name: Verify release artifact
+        id: artifact
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+
+          const file = 'dist/overlay.json';
+          const maxBytes = 32 * 1024 * 1024;
+          const raw = fs.readFileSync(file);
+          if (raw.length > maxBytes) {
+            throw new Error(`Overlay exceeds ${maxBytes} bytes`);
+          }
+
+          let overlay;
+          try {
+            overlay = JSON.parse(raw.toString('utf8'));
+          } catch (error) {
+            throw new Error(`Overlay is not valid JSON: ${error.message}`);
+          }
+
+          if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
+            throw new Error('Overlay must be a JSON object');
+          }
+
+          const meta = overlay.$meta;
+          if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
+            throw new Error('Overlay metadata is missing');
+          }
+          if (
+            typeof meta.version !== 'string' ||
+            !/^\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.test(meta.version)
+          ) {
+            throw new Error(`Overlay version is invalid: ${String(meta.version)}`);
+          }
+          if (typeof meta.generated !== 'string' || !Number.isFinite(Date.parse(meta.generated))) {
+            throw new Error('Overlay generated timestamp is invalid');
+          }
+          if (typeof meta.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(meta.sha256)) {
+            throw new Error('Overlay SHA256 metadata is invalid');
+          }
+
+          const expectedDigest = meta.sha256;
+          delete meta.sha256;
+          const actualDigest = crypto
+            .createHash('sha256')
+            .update(JSON.stringify(overlay, null, 2))
+            .digest('hex');
+          if (actualDigest !== expectedDigest) {
+            throw new Error('Overlay SHA256 does not match its content');
+          }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `artifact_tag=v${meta.version}\n`);
+          NODE
+
+      - name: Verify artifact against trusted source
+        env:
+          ARTIFACT_TAG: ${{ steps.artifact.outputs.artifact_tag }}
+        run: |
+          export OVERLAY_VERSION="${ARTIFACT_TAG#v}"
+          npm run build:check
+
+      - name: Verify branch state and determine release tag
+        id: version
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          ARTIFACT_TAG: ${{ steps.artifact.outputs.artifact_tag }}
+        run: |
+          git fetch origin main --no-tags
+          current_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git rev-parse origin/main)"
+          if [[ "$current_sha" != "$remote_sha" ]]; then
+            echo "main advanced during release preparation; refusing to release" >&2
+            exit 1
+          fi
+          git fetch --tags --force
+
+          if [[ "$current_sha" == "$EXPECTED_SHA" ]]; then
+            next_tag="$(npm run --silent next-overlay-tag)"
+            if [[ "$next_tag" != "$ARTIFACT_TAG" ]]; then
+              echo "Artifact tag $ARTIFACT_TAG does not match the next release tag $next_tag" >&2
+              exit 1
+            fi
+            recovery=false
+          else
+            parent_sha="$(git rev-parse "$current_sha^" 2>/dev/null || true)"
+            if [[ "$parent_sha" != "$EXPECTED_SHA" ]]; then
+              echo "main advanced beyond the validated release commit; refusing to release" >&2
+              exit 1
+            fi
+            if ! git show "$current_sha:dist/overlay.json" | cmp -s - dist/overlay.json; then
+              echo "The already-pushed commit does not contain the validated release artifact" >&2
+              exit 1
+            fi
+            changed_files="$(git diff-tree --no-commit-id --name-only -r "$current_sha")"
+            if [[ "$changed_files" != "dist/overlay.json" ]]; then
+              echo "The already-pushed recovery commit changed files besides dist/overlay.json" >&2
+              exit 1
+            fi
+            tag_sha="$(git rev-parse --verify "$ARTIFACT_TAG^{commit}" 2>/dev/null || true)"
+            if [[ "$tag_sha" != "$current_sha" ]]; then
+              echo "The existing release tag does not point at the already-pushed commit" >&2
+              exit 1
+            fi
+            next_tag="$ARTIFACT_TAG"
+            recovery=true
+          fi
+
+          echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
+          echo "recovery=$recovery" >> "$GITHUB_OUTPUT"
+
+      - name: Commit generated overlay
+        id: commit
+        env:
+          RECOVERY: ${{ steps.version.outputs.recovery }}
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          set -euo pipefail
+          if [[ "$RECOVERY" == "true" ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -- dist/overlay.json
+          if git diff --staged --quiet; then
+            if git rev-parse --verify "$NEXT_TAG^{commit}" >/dev/null 2>&1; then
+              if [[ "$(git rev-parse "$NEXT_TAG^{commit}")" != "$(git rev-parse HEAD)" ]]; then
+                echo "Tag $NEXT_TAG already exists at a different commit; refusing to release" >&2
+                exit 1
+              fi
+              echo "has_changes=false" >> "$GITHUB_OUTPUT"
+              echo "release_ready=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "No overlay changes to commit; continuing to tag $NEXT_TAG"
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            git commit -m "chore: build overlay [skip ci]"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push tag
+        id: tag
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+          RECOVERY: ${{ steps.version.outputs.recovery }}
+        run: |
+          if [[ "$RECOVERY" == "true" ]]; then
+            test "$(git rev-parse --verify "$NEXT_TAG^{commit}")" = "$(git rev-parse HEAD)"
+            echo "tag_ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --tags --force
+          if git rev-parse --verify "$NEXT_TAG^{commit}" >/dev/null 2>&1; then
+            if [[ "$(git rev-parse "$NEXT_TAG^{commit}")" != "$(git rev-parse HEAD)" ]]; then
+              echo "Tag $NEXT_TAG already exists at a different commit; refusing to release" >&2
+              exit 1
+            fi
+          else
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git tag -a "$NEXT_TAG" -m "Overlay version $NEXT_TAG"
+          fi
+
+          git push --atomic \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            HEAD:main "$NEXT_TAG"
+          echo "tag_ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: steps.commit.outputs.release_ready == 'true' || steps.tag.outputs.tag_ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          if gh release view "$NEXT_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            artifact_digest="$(sha256sum dist/overlay.json | awk '{print $1}')"
+            existing_digest="$(gh api \
+              "repos/${REPOSITORY}/releases/tags/${NEXT_TAG}/assets" \
+              --paginate \
+              --jq '.[] | select(.name == "overlay.json") | .digest')"
+            if [[ "$existing_digest" == "sha256:$artifact_digest" ]]; then
+              echo "Release $NEXT_TAG already has the validated overlay asset"
+            else
+              echo "Release $NEXT_TAG is missing or has a different overlay asset; syncing it"
+              gh release upload "$NEXT_TAG" \
+                --repo "$REPOSITORY" \
+                --clobber \
+                dist/overlay.json
+            fi
+          else
+            gh release create "$NEXT_TAG" \
+              --repo "$REPOSITORY" \
+              --title "Overlay $NEXT_TAG" \
+              --generate-notes \
+              dist/overlay.json
+          fi

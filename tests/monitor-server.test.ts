@@ -6,9 +6,10 @@
  * No test doubles, no local re-implementations.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import path from 'node:path';
 import vm from 'node:vm';
+import { createServer as createHttpServer } from 'node:http';
 
 // NODE_ENV must be "test" *before* importing the module so it:
 //   1. skips startOverlayWatcher / startApiPolling / startServer
@@ -18,8 +19,10 @@ process.env.NODE_ENV = 'test';
 let mod: any;
 let configModule: any;
 const previousTargetOverlay = process.env.TARGET_OVERLAY;
+const previousRemoteFetchTimeout = process.env.REMOTE_FETCH_TIMEOUT_MS;
 try {
   process.env.TARGET_OVERLAY = path.resolve('dist/overlay.json');
+  process.env.REMOTE_FETCH_TIMEOUT_MS = '100';
   // These CommonJS monitor modules intentionally have no declaration files.
   // @ts-expect-error Dynamic import of the JavaScript CommonJS server module.
   mod = (await import('../monitor/server.js')).default;
@@ -30,6 +33,11 @@ try {
     delete process.env.TARGET_OVERLAY;
   } else {
     process.env.TARGET_OVERLAY = previousTargetOverlay;
+  }
+  if (previousRemoteFetchTimeout === undefined) {
+    delete process.env.REMOTE_FETCH_TIMEOUT_MS;
+  } else {
+    process.env.REMOTE_FETCH_TIMEOUT_MS = previousRemoteFetchTimeout;
   }
 }
 
@@ -64,6 +72,9 @@ describe('module import sanity', () => {
     expect(typeof mod.createSection).toBe('function');
     expect(typeof mod.pushRow).toBe('function');
     expect(typeof mod.isDefaultOverlayPath).toBe('function');
+    expect(typeof mod.fetchRemoteText).toBe('function');
+    expect(typeof mod.registerModes).toBe('function');
+    expect(typeof mod.MAX_SSE_BUFFERED_BYTES).toBe('number');
   });
 
   it('exports the real http.Server instance', () => {
@@ -80,12 +91,49 @@ describe('module import sanity', () => {
   });
 });
 
+describe('mode discovery', () => {
+  it('removes retired defaults and falls back to a discovered mode', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(['pve']);
+      expect(Object.keys(apiState)).toEqual(['pve']);
+      expect(mod.normalizeMode('regular')).toBe('pve');
+    } finally {
+      mod.registerModes(originalModes);
+    }
+  });
+
+  it('rejects an unexpectedly large discovered mode list', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(
+        Array.from({ length: mod.MAX_DISCOVERED_MODES + 1 }, (_, index) => `mode-${index}`)
+      );
+      expect(Object.keys(apiState)).toEqual(originalModes);
+    } finally {
+      mod.registerModes(originalModes);
+    }
+  });
+
+  it('rejects discovered mode names that collide with object properties', () => {
+    const originalModes = Object.keys(apiState);
+    try {
+      mod.registerModes(['constructor', 'prototype']);
+      expect(Object.keys(apiState)).toEqual(originalModes);
+    } finally {
+      mod.registerModes(originalModes);
+    }
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Destructure for convenience (all references point to the real module)
 // ---------------------------------------------------------------------------
 
 const {
   MAX_ROWS,
+  MAX_SSE_CONNECTIONS_PER_ADDRESS,
+  MAX_SSE_BUFFERED_BYTES,
   buildTasksSections,
   buildSummary,
   buildOverrideSections,
@@ -96,6 +144,7 @@ const {
   buildLocaleSections,
   buildSeasonalPerkSections,
   buildCraftAddSections,
+  mergeTaskAdditions,
   mergeTaskOverrides,
   rebuildSummaries,
   valuesEqual,
@@ -109,12 +158,20 @@ const {
   getLatestTagVersion,
   isVersionStale,
   isRebuildEnabled,
+  isLoopbackHost,
+  isTrustedRebuildTransport,
+  getSseClientAddress,
+  publicOverlaySource,
+  redactErrorMessage,
   safeJoin,
+  writeSse,
+  reserveSseConnection,
   createSection,
   pushRow,
   overlayState,
   apiState,
   server,
+  fetchRemoteText,
   VIEW_CONFIG,
 } = mod;
 
@@ -229,7 +286,7 @@ describe('buildSummary', () => {
       editions: { std: { id: 'std', title: 'Std' } },
       storyChapters: { ch1: { id: 'ch1', name: 'Ch1' } },
       itemsAdd: {},
-      tasksAdd: { ct: { id: 'ct', name: 'Custom' } },
+      tasksAdd: { ct: { id: 'ct', name: 'Custom', trader: { name: 'Prapor' } } },
       locales: {
         en: { tasks: { t1: { name: 'Renamed' } } },
       },
@@ -289,6 +346,60 @@ describe('buildSummary', () => {
     expect(s.sections[0].title).toContain('Task Additions');
   });
 
+  it('reports malformed task additions through the tasksAdd view error', () => {
+    const saved = overlayState.data;
+    try {
+      overlayState.data = {
+        ...saved,
+        tasksAdd: { broken: { name: 'Missing ID' } },
+      };
+      const summary = buildSummary('tasksAdd', 'regular');
+      expect(summary.sections).toEqual([]);
+      expect(summary.error).toContain('has no valid id');
+    } finally {
+      overlayState.data = saved;
+    }
+  });
+
+  it('merges task additions by embedded ID before rendering a mode', () => {
+    const merged = mergeTaskAdditions(
+      { shared_key: { id: 'task-1', name: 'Shared', trader: { name: 'Prapor' } } },
+      { mode_key: { id: 'task-1', name: 'Mode', trader: { name: 'Prapor' } } }
+    );
+
+    expect(Object.keys(merged)).toEqual(['task-1']);
+    expect(merged['task-1'].name).toBe('Mode');
+  });
+
+  it('does not assign mode override keys through the object prototype', () => {
+    const merged = mergeTaskOverrides(
+      {},
+      JSON.parse('{"__proto__":{"polluted":true},"task-1":{"minPlayerLevel":2}}')
+    );
+
+    expect(({} as { polluted?: boolean }).polluted).toBeUndefined();
+    expect(Object.hasOwn(merged, '__proto__')).toBe(true);
+    expect(merged['task-1'].minPlayerLevel).toBe(2);
+  });
+
+  it('rejects malformed or duplicate task additions instead of silently dropping data', () => {
+    expect(() =>
+      mergeTaskAdditions(
+        {
+          first: { id: 'task-1', trader: { name: 'Prapor' } },
+          second: { id: 'task-1', trader: { name: 'Prapor' } },
+        },
+        {}
+      )
+    ).toThrow("contains duplicate id 'task-1'");
+    expect(() => mergeTaskAdditions({ broken: { name: 'Missing ID' } }, {})).toThrow(
+      "tasksAdd.broken' has no valid id"
+    );
+    expect(() => mergeTaskAdditions({}, { broken: null })).toThrow(
+      "mode tasksAdd.broken' has no valid id"
+    );
+  });
+
   it('returns 1 section for "editions"', () => {
     const s = buildSummary('editions', '');
     expect(s.sections).toHaveLength(1);
@@ -320,6 +431,56 @@ describe('buildSummary', () => {
   it('returns 1 section for "seasonalPerks" and "craftsAdd"', () => {
     expect(buildSummary('seasonalPerks', '').sections[0].title).toBe('Seasonal Perks');
     expect(buildSummary('craftsAdd', '').sections[0].title).toBe('Craft Additions');
+  });
+});
+
+describe('remote overlay loading', () => {
+  it('uses a total deadline instead of allowing a slow trickle to hang forever', async () => {
+    const httpServer = createHttpServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'text/plain' });
+      response.write('partial');
+      const interval = setInterval(() => response.write('.'), 20);
+      response.on('close', () => clearInterval(interval));
+    });
+
+    await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
+    const address = httpServer.address();
+    if (!address || typeof address === 'string') throw new Error('test server did not bind');
+
+    try {
+      await expect(
+        fetchRemoteText(`http://127.0.0.1:${address.port}/overlay.json`)
+      ).rejects.toThrow(/timed out after 100ms/);
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        httpServer.close((error) => (error ? reject(error) : resolve()))
+      );
+    }
+  });
+});
+
+describe('monitor public diagnostics', () => {
+  it('does not expose configured overlay paths or URLs in public messages', () => {
+    expect(publicOverlaySource()).toBe('local overlay');
+    expect(publicOverlaySource('https://user:secret@example.test/overlay.json')).toBe(
+      'remote overlay'
+    );
+    const secret = 'secret-value';
+    const message = redactErrorMessage(
+      new Error(
+        `Remote fetch failed: https://user:${secret}@example.test/overlay.json?token=${secret}`
+      )
+    );
+
+    expect(message).not.toContain(secret);
+    expect(message).toContain('[remote overlay]');
+  });
+
+  it('only treats loopback listener addresses as local rebuild transports', () => {
+    expect(isLoopbackHost('127.0.0.1')).toBe(true);
+    expect(isLoopbackHost('::1')).toBe(true);
+    expect(isLoopbackHost('0.0.0.0')).toBe(false);
+    expect(isTrustedRebuildTransport()).toBe(true);
   });
 });
 
@@ -540,6 +701,11 @@ describe('isVersionStale', () => {
     expect(isVersionStale('1.56', undefined)).toBe(false);
     expect(isVersionStale('1.56', null)).toBe(false);
   });
+  it('compares prerelease identifiers using semver precedence', () => {
+    expect(isVersionStale('1.56.0-alpha.1', '1.56.0-beta.1')).toBe(true);
+    expect(isVersionStale('1.56.0-beta.1', '1.56.0-alpha.1')).toBe(false);
+    expect(isVersionStale('1.56', '1.56.0')).toBe(false);
+  });
   it('reports the local git tag as a non-empty string', () => {
     const tag = getLatestTagVersion();
     if (tag !== undefined) {
@@ -713,11 +879,15 @@ describe('monitor hardening', () => {
   it('requires explicit opt-in before enabling rebuilds', () => {
     const previousNodeEnv = process.env.NODE_ENV;
     const previousAllowRebuild = process.env.ALLOW_REBUILD;
+    const previousRebuildToken = process.env.REBUILD_TOKEN;
     try {
       process.env.NODE_ENV = 'development';
       delete process.env.ALLOW_REBUILD;
+      delete process.env.REBUILD_TOKEN;
       expect(isRebuildEnabled()).toBe(false);
       process.env.ALLOW_REBUILD = 'true';
+      expect(isRebuildEnabled()).toBe(false);
+      process.env.REBUILD_TOKEN = 'local-secret';
       expect(isRebuildEnabled()).toBe(true);
     } finally {
       process.env.NODE_ENV = previousNodeEnv;
@@ -726,7 +896,78 @@ describe('monitor hardening', () => {
       } else {
         process.env.ALLOW_REBUILD = previousAllowRebuild;
       }
+      if (previousRebuildToken === undefined) {
+        delete process.env.REBUILD_TOKEN;
+      } else {
+        process.env.REBUILD_TOKEN = previousRebuildToken;
+      }
     }
+  });
+
+  it('uses forwarded SSE client addresses only behind a trusted proxy', () => {
+    const previousTrustedProxy = process.env.TRUSTED_HTTPS_PROXY;
+    const request = (headers: Record<string, string>) => ({
+      socket: { remoteAddress: '10.0.0.5' },
+      headers,
+    });
+    try {
+      delete process.env.TRUSTED_HTTPS_PROXY;
+      expect(getSseClientAddress(request({ 'x-forwarded-for': '203.0.113.10' }))).toBe('10.0.0.5');
+
+      process.env.TRUSTED_HTTPS_PROXY = 'true';
+      expect(getSseClientAddress(request({ 'x-forwarded-for': '203.0.113.10, 10.0.0.5' }))).toBe(
+        '203.0.113.10'
+      );
+      expect(getSseClientAddress(request({ 'x-forwarded-for': 'not-an-ip' }))).toBe('10.0.0.5');
+    } finally {
+      if (previousTrustedProxy === undefined) {
+        delete process.env.TRUSTED_HTTPS_PROXY;
+      } else {
+        process.env.TRUSTED_HTTPS_PROXY = previousTrustedProxy;
+      }
+    }
+  });
+
+  it('keeps an SSE client when backpressure is within the buffer bound', () => {
+    const client = {
+      destroyed: false,
+      writableEnded: false,
+      writableLength: MAX_SSE_BUFFERED_BYTES,
+      write: vi.fn(() => false),
+      destroy: vi.fn(),
+    };
+
+    expect(writeSse('test', client, 'event: summary\n\n')).toBe(true);
+    expect(client.destroy).not.toHaveBeenCalled();
+  });
+
+  it('closes an SSE client whose buffered data exceeds the bound', () => {
+    const client = {
+      destroyed: false,
+      writableEnded: false,
+      writableLength: MAX_SSE_BUFFERED_BYTES + 1,
+      write: vi.fn(() => false),
+      destroy: vi.fn(),
+    };
+
+    expect(writeSse('test', client, 'event: summary\n\n')).toBe(false);
+    expect(client.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('limits SSE connections per client address and releases the quota idempotently', () => {
+    const address = 'quota-test-client';
+    const releases = Array.from({ length: MAX_SSE_CONNECTIONS_PER_ADDRESS }, () =>
+      reserveSseConnection(address)
+    );
+
+    expect(releases.every(Boolean)).toBe(true);
+    expect(reserveSseConnection(address)).toBeUndefined();
+
+    releases.forEach((release) => release?.());
+    releases[0]?.();
+    const replacement = reserveSseConnection(address);
+    expect(replacement).toEqual(expect.any(Function));
+    replacement?.();
   });
 });
 
@@ -969,6 +1210,7 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.ok).toBe(true);
+    expect(data.rebuild.error).toBeNull();
     const modes = data.api.map((entry: any) => entry.mode);
     expect(modes).toContain('regular');
     expect(modes).toContain('pve');

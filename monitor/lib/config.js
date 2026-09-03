@@ -39,6 +39,7 @@ function getModeLabel(mode) {
 
 const config = Object.freeze({
   port: readPort(process.env.PORT, 3000),
+  host: process.env.HOST || "127.0.0.1",
   publicDir: path.resolve(__dirname, "../public"),
   maxRows: readPositiveInteger(process.env.MAX_ROWS, 250),
   overlayPath: process.env.TARGET_OVERLAY || path.resolve(__dirname, "../../dist/overlay.json"),
@@ -46,7 +47,6 @@ const config = Object.freeze({
   overlayPollMs: readTimerMilliseconds(process.env.OVERLAY_POLL_MS, 30000),
   remoteFetchTimeoutMs: readPositiveInteger(process.env.REMOTE_FETCH_TIMEOUT_MS, 10000),
   remoteFetchMaxBytes: readPositiveInteger(process.env.REMOTE_FETCH_MAX_BYTES, 5 * 1024 * 1024),
-  tarkovJsonBase: process.env.TARKOV_JSON_BASE || "https://json.tarkov.dev",
 });
 
 module.exports = {

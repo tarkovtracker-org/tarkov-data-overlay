@@ -2,6 +2,9 @@
 
 How to use tarkov-data-overlay in your application.
 
+For the task unlock/availability contract, account-state adapter, and generated
+mode reports, see [Task availability and unlock tracking](TASK_AVAILABILITY.md).
+
 ---
 
 ## Fetching the Overlay
@@ -12,17 +15,38 @@ The overlay is distributed via jsDelivr CDN:
 https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json
 ```
 
-### Example (JavaScript/TypeScript)
+The `@main` URL is convenient for development but moves with repository commits. Production
+consumers should replace it with an immutable release tag or commit and keep the digest check; the
+digest detects corruption or stale data but does not prove the CDN response's authenticity.
+
+### Example (Node.js JavaScript/TypeScript)
 
 ```typescript
+import {
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
+  readResponseJson,
+  verifyOverlaySha256,
+} from '../src/lib/index.js';
+
 const OVERLAY_URL =
   'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
 
 async function fetchOverlay() {
-  const response = await fetch(OVERLAY_URL);
-  return response.json();
+  const response = await fetch(OVERLAY_URL, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`Overlay request failed: ${response.status}`);
+  const overlay = await readResponseJson(response, 'overlay', MAX_RESPONSE_BYTES);
+  if (!verifyOverlaySha256(overlay)) throw new Error('Overlay digest verification failed');
+  return overlay;
 }
 ```
+
+This example uses the repository's Node.js helpers. Browser consumers should use equivalent
+`AbortSignal` and Web Crypto APIs; the digest detects stale or corrupted JSON, but does not prove
+that a CDN response is authentic.
 
 ---
 
@@ -203,9 +227,10 @@ const activeTasks = tasks
 For tasks with objective-level corrections:
 
 ```typescript
-function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task {
+function applyTaskOverlay(baseTask: Task, overlay: Overlay): Task | null {
   const taskOverride = overlay.tasks?.[baseTask.id];
   if (!taskOverride) return baseTask;
+  if (taskOverride.disabled === true) return null;
 
   const result = { ...baseTask };
 
@@ -328,19 +353,21 @@ no current corrections is represented by an empty object.
 - Use the same `gameMode` value for both the tarkov.dev data fetch and overlay merge
 
 ```typescript
+import { mergeTaskOverride, selectTaskAdditions } from '../src/lib/index.js';
+
 type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 function getTaskOverrideForMode(taskId: string, overlay: Overlay, gameMode: GameMode) {
-  const shared = overlay.tasks?.[taskId] ?? {};
-  const modeSpecific = overlay.modes?.[gameMode]?.tasks?.[taskId] ?? {};
-  const merged = { ...shared, ...modeSpecific };
+  const shared = overlay.tasks?.[taskId];
+  const modeSpecific = overlay.modes?.[gameMode]?.tasks?.[taskId];
+  if (!shared && !modeSpecific) return undefined;
+  const merged = mergeTaskOverride(shared, modeSpecific);
   return Object.keys(merged).length > 0 ? merged : undefined;
 }
 
 function getTaskAdditionsForMode(overlay: Overlay, gameMode: GameMode): TaskAddition[] {
   return [
-    ...Object.values(overlay.tasksAdd ?? {}),
-    ...Object.values(overlay.modes?.[gameMode]?.tasksAdd ?? {}),
+    ...selectTaskAdditions(overlay.tasksAdd, overlay.modes?.[gameMode]?.tasksAdd, false).values(),
   ];
 }
 ```
@@ -668,7 +695,7 @@ Tasks that are not present in tarkov.dev are provided under `tasksAdd`. Consumer
 should treat these as new tasks and append them to the API task list.
 
 ```typescript
-const addedTasks = Object.values(overlay.tasksAdd ?? {});
+const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
 const allTasks = [...tasksFromApi, ...addedTasks];
 ```
 
@@ -677,6 +704,13 @@ const allTasks = [...tasksFromApi, ...addedTasks];
 ## Full Integration Example
 
 ```typescript
+import {
+  fetchTarkovEnvelope,
+  FETCH_TIMEOUT_MS,
+  MAX_RESPONSE_BYTES,
+  readResponseJson,
+  verifyOverlaySha256,
+} from '../src/lib/index.js';
 import type { Task, Overlay } from './types';
 
 // The legacy api.tarkov.dev/graphql endpoint has been superseded by static
@@ -685,22 +719,17 @@ import type { Task, Overlay } from './types';
 // strings resolve through a sibling `_en` endpoint. This example resolves only
 // the task name + map; a full consumer resolves items/traders/prestige/rewards
 // the same way (see src/lib/tarkov-api.ts for the complete adapter).
-const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
 const OVERLAY_URL =
   'https://cdn.jsdelivr.net/gh/tarkovtracker-org/tarkov-data-overlay@main/dist/overlay.json';
 type GameMode = 'regular' | 'pve' | 'pvp-season';
 
 async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
   const get = async (path: string): Promise<Record<string, unknown>> => {
-    const response = await fetch(`${TARKOV_JSON_BASE}/${gameMode}/${path}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (!response.ok) throw new Error(`tarkov.dev request failed: ${response.status} (${path})`);
-    const payload = await response.json();
+    const payload = await fetchTarkovEnvelope(`${gameMode}/${path}`);
     const isRecord = (value: unknown): value is Record<string, unknown> =>
       typeof value === 'object' && value !== null && !Array.isArray(value);
     // Translation endpoints (*_en) may be empty; core endpoints must carry data.
-    const data = isRecord(payload) ? payload.data : undefined;
+    const data = payload.data;
     if (!isRecord(data)) {
       if (path.endsWith('_en')) return {};
       throw new Error(`tarkov.dev response for "${path}" had no "data" object`);
@@ -731,11 +760,17 @@ async function fetchTasks(gameMode: GameMode): Promise<Task[]> {
 }
 
 async function fetchOverlay(): Promise<Overlay> {
-  const response = await fetch(OVERLAY_URL);
-  return response.json();
+  const response = await fetch(OVERLAY_URL, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`Overlay request failed: ${response.status}`);
+  const overlay = await readResponseJson(response, 'overlay', MAX_RESPONSE_BYTES);
+  if (!verifyOverlaySha256(overlay)) throw new Error('Overlay digest verification failed');
+  return overlay as Overlay;
 }
 
-function applyTaskOverlayForMode(task: Task, overlay: Overlay, gameMode: GameMode): Task {
+function applyTaskOverlayForMode(task: Task, overlay: Overlay, gameMode: GameMode): Task | null {
   const taskOverride = getTaskOverrideForMode(task.id, overlay, gameMode);
   if (!taskOverride) return task;
 
@@ -746,9 +781,16 @@ function applyTaskOverlayForMode(task: Task, overlay: Overlay, gameMode: GameMod
 async function getTasksWithOverlay(gameMode: GameMode): Promise<Task[]> {
   const [tasks, overlay] = await Promise.all([fetchTasks(gameMode), fetchOverlay()]);
 
-  const patchedTasks = tasks.map((task) => applyTaskOverlayForMode(task, overlay, gameMode));
+  const patchedTasks = tasks
+    .map((task) => applyTaskOverlayForMode(task, overlay, gameMode))
+    .filter((task): task is Task => task !== null);
 
   const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
+  const apiTaskIds = new Set(tasks.map((task) => task.id));
+  const collidingAddition = addedTasks.find((task) => apiTaskIds.has(task.id));
+  if (collidingAddition) {
+    throw new Error(`Task addition '${collidingAddition.id}' collides with an API task`);
+  }
   return [...patchedTasks, ...addedTasks];
 }
 ```
@@ -784,7 +826,7 @@ interface Overlay {
   $meta: {
     version: string;
     generated: string;
-    sha256?: string;
+    sha256: string;
   };
 }
 
@@ -847,6 +889,7 @@ interface TaskAddition {
   trader: { id?: string; name: string };
   map?: { id: string; name: string } | null;
   objectives: TaskObjectiveAdd[];
+  disabled?: boolean;
   // ... other fields
 }
 

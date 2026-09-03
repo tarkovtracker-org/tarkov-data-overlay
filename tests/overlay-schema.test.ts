@@ -79,6 +79,7 @@ describe('overlay.schema.json', () => {
     const ajv = new Ajv({
       allErrors: true,
       strict: false,
+      $data: true,
       validateFormats: false,
     });
 

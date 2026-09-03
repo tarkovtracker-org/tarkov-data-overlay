@@ -886,128 +886,6 @@
     "5d25e2a986f77409dd5cdf2a": {
       "disabled": true
     },
-    "625d6ff5ddc94657c21a1625": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5ae4493d86f7744b8e15aa8f",
-            "name": "A Big Loss"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "608974d01a66564e74191fc0",
-            "name": "A Fuel Matter"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "63913715f8e5dd32bf4e3aaa",
-            "name": "Broadcast - Part 2"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "597a0f5686f774273b74f676",
-            "name": "Chemical - Part 4"
-          },
-          "status": [
-            "complete",
-            "failed"
-          ]
-        },
-        {
-          "task": {
-            "id": "5d25e48186f77443e625e386",
-            "name": "Courtesy Visit"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "61958c366726521dd96828ec",
-            "name": "Gifts from Tarkov"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5ae327c886f7745c7b3f2f3f",
-            "name": "Gunsmith - AK-105"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "639135c3744e452011470807",
-            "name": "House Arrest"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "6179afd0bca27a099552e040",
-            "name": "Lost Contact"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "6179ad56c760af5ad2053587",
-            "name": "Seaside Vacation"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5a27b9de86f77464e5044585",
-            "name": "The Cult"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "5d25e2cc86f77443e47ae019",
-            "name": "The Huntsman Path - Forest Cleaning"
-          },
-          "status": [
-            "complete"
-          ]
-        },
-        {
-          "task": {
-            "id": "59ca264786f77445a80ed044",
-            "name": "The Punisher - Part 4"
-          },
-          "status": [
-            "complete"
-          ]
-        }
-      ]
-    },
     "6752f6d83038f7df520c83e8": {
       "minPlayerLevel": 20
     },
@@ -9091,7 +8969,7 @@
   },
   "$meta": {
     "version": "1.80",
-    "generated": "2026-08-31T12:31:16.695Z",
-    "sha256": "a06b42f1e84632d12d3f3602a3a41cfb50595fad5252694e099c0cf9471fd204"
+    "generated": "2026-09-01T23:19:32.653Z",
+    "sha256": "ec0bab7e1aad5a87fbfd6dc4eaaf267ca92bcf77c88dd208668e27bc224ee62b"
   }
 }

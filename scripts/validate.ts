@@ -14,6 +14,7 @@ import {
   loadJson5File,
   loadJsonFile,
   listJson5Files,
+  fetchTarkovEnvelope,
   SCHEMA_CONFIGS,
   SUPPORTED_GAME_MODES,
   SYNTHETIC_REQUIREMENT_ID_PREFIX,
@@ -60,7 +61,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function initializeAjv(): Ajv {
-  const ajv = new Ajv({ allErrors: true, strict: false });
+  const ajv = new Ajv({ allErrors: true, strict: false, $data: true });
   ajv.addFormat('uri', {
     type: 'string',
     validate: (value: string) => {
@@ -300,6 +301,12 @@ export function buildLocalLocaleEntityIdIndex(): LocaleEntityIdIndex {
 }
 
 function addRecordIds(index: Set<string>, value: unknown): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (isRecord(entry) && typeof entry.id === 'string') index.add(entry.id);
+    }
+    return;
+  }
   if (!isRecord(value)) return;
   for (const [key, entry] of Object.entries(value)) {
     index.add(key);
@@ -307,22 +314,24 @@ function addRecordIds(index: Set<string>, value: unknown): void {
   }
 }
 
-async function fetchJsonData(path: string): Promise<Record<string, unknown>> {
-  const response = await fetch(`https://json.tarkov.dev/${path}`, {
-    headers: {
-      Accept: 'application/json',
-      'User-Agent':
-        'tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)',
-    },
-  });
-  if (!response.ok) {
-    throw new Error(
-      `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
-    );
+type RecordCollection = Record<string, unknown> | unknown[];
+
+function requireRecordCollection(
+  data: Record<string, unknown>,
+  key: string,
+  path: string
+): RecordCollection {
+  const collection = data[key];
+  if (!isRecord(collection) && !Array.isArray(collection)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data.${key} collection`);
   }
-  const payload = (await response.json()) as unknown;
-  if (!isRecord(payload) || !isRecord(payload.data)) {
-    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data object`);
+  return collection;
+}
+
+async function fetchJsonData(path: string): Promise<unknown> {
+  const payload = await fetchTarkovEnvelope(path);
+  if (!isRecord(payload.data) && !Array.isArray(payload.data)) {
+    throw new Error(`Invalid json.tarkov.dev response for ${path}: missing data collection`);
   }
   return payload.data;
 }
@@ -338,10 +347,14 @@ async function buildTarkovLocaleEntityIdIndex(): Promise<LocaleEntityIdIndex> {
       fetchJsonData(`${mode}/traders`),
     ]);
 
-    addRecordIds(index.tasks, tasksData.tasks);
+    if (!isRecord(tasksData) || !isRecord(itemsData) || !isRecord(mapsData)) {
+      throw new Error(`Invalid json.tarkov.dev response while loading ${mode} locale data`);
+    }
+
+    addRecordIds(index.tasks, requireRecordCollection(tasksData, 'tasks', `${mode}/tasks`));
     addRecordIds(index.prestige, tasksData.prestige);
-    addRecordIds(index.items, itemsData.items);
-    addRecordIds(index.maps, mapsData.maps);
+    addRecordIds(index.items, requireRecordCollection(itemsData, 'items', `${mode}/items`));
+    addRecordIds(index.maps, requireRecordCollection(mapsData, 'maps', `${mode}/maps`));
     addRecordIds(index.traders, tradersData);
   }
 
