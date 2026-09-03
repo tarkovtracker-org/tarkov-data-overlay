@@ -61,7 +61,7 @@
 
   // Easy-Breezy - PvP: 50 targets with SR-2M on Factory (wiki); PvE: 30 targets
   // on Reserve or Lighthouse (1.1-pve data). tarkov.dev serves the PvE variant in
-  // both modes.
+  // both modes, which is what issue #352 reports from a PvP profile.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
   '669fa3a40c828825de06d6a1': {
     objectives: {

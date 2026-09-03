@@ -31,7 +31,7 @@ import {
   printError,
   formatCountLabel,
   printCountSection,
-  fetchTasks,
+  fetchTasksWithRequirementCounts,
   fetchLocaleBundle,
   fetchRawEntities,
   SUPPORTED_GAME_MODES,
@@ -49,6 +49,8 @@ import {
   type TaskOverride,
   type TaskAddition,
   type TaskData,
+  type TaskDataWithRequirementCounts,
+  type TraderRequirementIdCounts,
   type GameMode,
   type ValidationResult,
   type ValidationDetail,
@@ -723,13 +725,31 @@ function printReferenceCrossCheck(
  * Surfaces the level/reputation split so a consumer's requirement evaluation
  * can be kept in sync with the discriminated upstream schema.
  */
-function printRequirementTypeCounts(apiTasksByMode: Partial<Record<GameMode, TaskData[]>>): void {
+function printRequirementTypeCounts(
+  apiTasksByMode: Partial<Record<GameMode, TaskData[]>>,
+  requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>>
+): void {
   printHeader('TRADER REQUIREMENT TYPE COUNTS (UPSTREAM)');
   for (const mode of SUPPORTED_GAME_MODES) {
     const tasks = apiTasksByMode[mode];
     if (!tasks) continue;
     const counts = countRequirementTypes(tasks);
-    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation`);
+    const ids = requirementIdCountsByMode[mode];
+    const idSummary = ids
+      ? `, ${ids.missing} missing ID(s) of ${ids.total}`
+      : ', missing-ID count unavailable';
+    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation${idSummary}`);
+  }
+
+  const missing = SUPPORTED_GAME_MODES.flatMap((mode) => {
+    const count = requirementIdCountsByMode[mode]?.missing ?? 0;
+    return count > 0 ? [`${mode}: ${count} trader requirement(s) lack an upstream id`] : [];
+  });
+  if (missing.length > 0) {
+    console.log(
+      `${colors.yellow}WARNING: upstream trader requirements lack merge IDs${colors.reset}`
+    );
+    for (const line of missing) console.log(`  ${line}`);
   }
   console.log();
 }
@@ -1110,12 +1130,12 @@ function printSuppressionResults(results: SuppressionStaleness[]): { stale: numb
  * regular-mode data; without memoization the (large) regular-mode payloads
  * would be downloaded twice in a single run.
  */
-function createTaskFetcher(): (mode?: GameMode) => Promise<TaskData[]> {
-  const cache = new Map<GameMode, Promise<TaskData[]>>();
+function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequirementCounts> {
+  const cache = new Map<GameMode, Promise<TaskDataWithRequirementCounts>>();
   return (mode: GameMode = 'regular') => {
     let tasks = cache.get(mode);
     if (!tasks) {
-      tasks = fetchTasks(mode).catch((error) => {
+      tasks = fetchTasksWithRequirementCounts(mode).catch((error) => {
         cache.delete(mode);
         throw error;
       });
@@ -1151,7 +1171,7 @@ async function main(): Promise<void> {
     printSuccess(`Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`);
 
     printProgress('Fetching current data from tarkov.dev API...');
-    const apiTasks = await getTasksForMode();
+    const { tasks: apiTasks } = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
     printProgress('Validating overrides...\n');
@@ -1177,6 +1197,7 @@ async function main(): Promise<void> {
     // cross-mode passes so nothing is fetched twice.
     const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
     const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
+    const requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>> = {};
 
     // Validate mode-specific overrides and additions
     for (const mode of SUPPORTED_GAME_MODES) {
@@ -1185,8 +1206,9 @@ async function main(): Promise<void> {
       modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const modeApiTasks = await getTasksForMode(mode);
+      const { tasks: modeApiTasks, traderRequirementIds } = await getTasksForMode(mode);
       apiTasksByMode[mode] = modeApiTasks;
+      requirementIdCountsByMode[mode] = traderRequirementIds;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       const modeOverrideCount = Object.keys(modeOverrides).length;
@@ -1222,7 +1244,9 @@ async function main(): Promise<void> {
     }
     staleProblems += staleSharedAdditionKeys.size;
 
-    printRequirementTypeCounts(apiTasksByMode);
+    // The mode loop covers `regular` too, so every supported mode's raw
+    // diagnostic is already recorded here.
+    printRequirementTypeCounts(apiTasksByMode, requirementIdCountsByMode);
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};

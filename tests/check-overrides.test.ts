@@ -9,6 +9,7 @@ import {
   checkEditionTaskReferences,
   countRequirementTypes,
 } from '../scripts/check-overrides.js';
+import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
 
 function createTaskAddition(overrides: Partial<TaskAddition> = {}): TaskAddition {
@@ -72,6 +73,55 @@ describe('countRequirementTypes', () => {
 
   it('returns zeros for tasks without trader requirements', () => {
     expect(countRequirementTypes([createApiTask()])).toEqual({ level: 0, reputation: 0 });
+  });
+});
+
+describe('countTraderRequirementIds', () => {
+  it('counts missing IDs from the raw payload before adapter normalization', () => {
+    const counts = countTraderRequirementIds({
+      tasks: {
+        taskA: {
+          traderRequirements: [{ id: 'upstream-id' }, { id: '' }, {}],
+        },
+        taskB: {
+          traderRequirements: [{ id: '  ' }],
+        },
+      },
+    });
+
+    expect(counts).toEqual({ total: 4, missing: 3 });
+  });
+
+  it('ignores tasks without a trader requirement collection', () => {
+    expect(countTraderRequirementIds({ tasks: { task: {} } })).toEqual({
+      total: 0,
+      missing: 0,
+    });
+  });
+
+  it('counts a defined non-array collection as the single requirement the adapter emits', () => {
+    // adaptTask() runs traderRequirements through mapOptionalArray, which wraps a
+    // defined non-array value into one entry. Skipping it here would let a
+    // malformed upstream payload pass the diagnostic unreported.
+    expect(countTraderRequirementIds({ tasks: { task: { traderRequirements: {} } } })).toEqual({
+      total: 1,
+      missing: 1,
+    });
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: { id: 'upstream-id' } } } })
+    ).toEqual({ total: 1, missing: 0 });
+  });
+
+  it('treats every non-string id shape as missing, matching the adapter', () => {
+    // The upstream contract is a string id. A nested record, a number, blank
+    // whitespace and an absent field all leave the requirement without a merge
+    // identity, which is precisely when adaptTraderRequirement() synthesizes an
+    // `overlay.*` id. tests/tarkov-api.test.ts pins the adapter side.
+    const idShapes = [{ id: { id: 'upstream-id' } }, { id: 123 }, { id: '   ' }, {}];
+
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: idShapes } } })
+    ).toEqual({ total: 4, missing: 4 });
   });
 });
 

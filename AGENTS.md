@@ -121,6 +121,10 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 
 - Edit the correct JSON5 file in `src/overrides/` or `src/additions/`.
 - Provide proof (wiki link, screenshot, or patch notes).
+- For map references, look the ID up in `TARKOV_MAP_NAMES_BY_ID` (`src/lib/types.ts`)
+  rather than copying a nearby entry. Consumers resolve maps by `id`, so a correct
+  `name` beside the wrong `id` silently points at another map;
+  `tests/map-references.test.ts` enforces the pairing.
 - Run `npm run validate` and `npm run build` before submitting.
 
 ## Fetching Wiki Data
