@@ -38,13 +38,15 @@ jobs:
         # not gate pull requests (CI deliberately omits the flag). Here it only
         # sets an output that decides whether an issue gets opened.
         #
-        # `|| true` keeps the job green so the issue-creation step still runs; the
-        # exit code is captured explicitly instead. 3 = stale overlay data,
-        # 4 = upstream regression (see the exit-code table in README.md).
+        # `|| status=$?` captures the code and keeps the step green so the
+        # issue-creation step still runs. Do not use `|| true` here: it makes
+        # `true` the last command, so both `$?` and `PIPESTATUS[0]` become 0 and
+        # every failure looks like a pass. 3 = stale overlay data, 4 = upstream
+        # regression (see the exit-code table in README.md).
         run: |
-          set -o pipefail
-          npm run check-overrides -- --fail-on-stale --fail-on-upstream > check-output.txt 2>&1 || true
-          status="${PIPESTATUS[0]:-0}"
+          status=0
+          npm run check-overrides -- --fail-on-stale --fail-on-upstream \
+            > check-output.txt 2>&1 || status=$?
           cat check-output.txt
           echo "status=$status" >> "$GITHUB_OUTPUT"
 
