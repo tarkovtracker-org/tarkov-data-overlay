@@ -261,6 +261,35 @@ export function countRequirementTypes(tasks: TaskData[]): RequirementTypeCounts 
   return counts;
 }
 
+export type ValidationExitCode = 0 | 2 | 3 | 4;
+
+export type ValidationGateCounts = {
+  strict: boolean;
+  failOnStale: boolean;
+  actionable: number;
+  staleProblems: number;
+  upstreamProblems: number;
+};
+
+/**
+ * Select the exit code for the validation gates.
+ *
+ * Upstream data-quality regressions take precedence because they are distinct
+ * from overlay inconsistencies and stale overlay fields.
+ */
+export function getValidationExitCode({
+  strict,
+  failOnStale,
+  actionable,
+  staleProblems,
+  upstreamProblems,
+}: ValidationGateCounts): ValidationExitCode {
+  if ((strict || failOnStale) && upstreamProblems > 0) return 4;
+  if (strict && actionable > 0) return 2;
+  if (failOnStale && staleProblems > 0) return 3;
+  return 0;
+}
+
 function buildApiIndexes(apiTasks: TaskData[]) {
   const byWikiLink = new Map<string, TaskData>();
   const byName = new Map<string, TaskData[]>();
@@ -1452,7 +1481,15 @@ async function main(): Promise<void> {
     // nor a stale overlay field (exit 3), and automation should be able to tell
     // them apart. Gated on --fail-on-stale as well as --strict because CI runs
     // only the former.
-    if ((strict || failOnStale) && upstreamProblems > 0) {
+    const exitCode = getValidationExitCode({
+      strict,
+      failOnStale,
+      actionable,
+      staleProblems,
+      upstreamProblems,
+    });
+
+    if (exitCode === 4) {
       printError(
         `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
           'Trader requirements arrived without a merge id; overlay entries keyed on ' +
@@ -1461,7 +1498,7 @@ async function main(): Promise<void> {
       process.exit(4);
     }
 
-    if (strict && actionable > 0) {
+    if (exitCode === 2) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
@@ -1469,7 +1506,7 @@ async function main(): Promise<void> {
       process.exit(2);
     }
 
-    if (failOnStale && staleProblems > 0) {
+    if (exitCode === 3) {
       printError(
         `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
           'Remove data now supplied upstream or scope it to the modes where it is still missing.'
@@ -1477,7 +1514,7 @@ async function main(): Promise<void> {
       process.exit(3);
     }
 
-    process.exit(0);
+    process.exit(exitCode);
   } catch (error) {
     printError('Error during validation:', error as Error);
     process.exit(1);

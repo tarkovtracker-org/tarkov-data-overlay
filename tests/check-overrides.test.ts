@@ -8,6 +8,7 @@ import {
   checkTaskAdditions,
   checkEditionTaskReferences,
   countRequirementTypes,
+  getValidationExitCode,
 } from '../scripts/check-overrides.js';
 import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
@@ -122,6 +123,49 @@ describe('countTraderRequirementIds', () => {
     expect(
       countTraderRequirementIds({ tasks: { task: { traderRequirements: idShapes } } })
     ).toEqual({ total: 4, missing: 4 });
+  });
+});
+
+describe('getValidationExitCode', () => {
+  const base = {
+    strict: false,
+    failOnStale: false,
+    actionable: 0,
+    staleProblems: 0,
+    upstreamProblems: 0,
+  };
+
+  it('returns zero when no enabled gate has a problem', () => {
+    expect(getValidationExitCode({ ...base, upstreamProblems: 1 })).toBe(0);
+  });
+
+  it('returns the strict code for actionable problems', () => {
+    expect(getValidationExitCode({ ...base, strict: true, actionable: 1 })).toBe(2);
+  });
+
+  it('returns the stale code for stale problems', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, staleProblems: 1 })).toBe(3);
+  });
+
+  it('gates upstream problems under strict alone', () => {
+    expect(getValidationExitCode({ ...base, strict: true, upstreamProblems: 1 })).toBe(4);
+  });
+
+  it('gates upstream problems under fail-on-stale alone', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, upstreamProblems: 1 })).toBe(4);
+  });
+
+  it('prioritizes upstream problems over both downstream gates', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        actionable: 1,
+        staleProblems: 1,
+        upstreamProblems: 1,
+      })
+    ).toBe(4);
   });
 });
 
