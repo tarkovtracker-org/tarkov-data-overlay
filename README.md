@@ -45,8 +45,11 @@ reverse proxy or network boundary is configured; a non-empty token is always
 required for rebuilds, and callers must pass it in an `Authorization: Bearer …`
 header. When `HOST` is not loopback, set `TRUSTED_HTTPS_PROXY=true` only when
 HTTPS is terminated by a trusted reverse proxy; otherwise rebuilds remain
-disabled. Rebuilds target the default `dist/overlay.json` output; custom local
-and HTTP(S) overlay targets remain read-only.
+disabled. In that mode the monitor also uses the first valid `X-Forwarded-For`
+address for per-client SSE quotas, so the proxy must overwrite that header.
+Without the trusted-proxy setting, quotas use the direct socket address.
+Rebuilds target the default `dist/overlay.json` output; custom local and HTTP(S)
+overlay targets remain read-only.
 
 ## Maintenance
 

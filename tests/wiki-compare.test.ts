@@ -257,9 +257,14 @@ describe('extractCount', () => {
     expect(extractCount('Find 3 dogtags')).toBe(3);
   });
 
-  it('removes linked item names in one bounded pass before extracting counts', () => {
-    expect(extractCount('Find [[Item 7]] and 3 dogtags', ['Item 7'])).toBe(3);
-    expect(extractCount('Find 3 dogtags', ['x'.repeat(257)])).toBe(3);
+  it('removes every linked item name and fails closed for unsafe matcher input', () => {
+    expect(extractCount('Find [[Item 7]]', ['Item 7'])).toBeUndefined();
+
+    const links = Array.from({ length: 300 }, (_, index) => `Item ${index}`);
+    expect(extractCount('Find [[Item 299]]', links)).toBeUndefined();
+
+    const oversizedLink = `7 ${'x'.repeat(256)}`;
+    expect(extractCount(`Find [[${oversizedLink}]]`, [oversizedLink])).toBeUndefined();
   });
 
   it('parses counts from the verb fallback', () => {

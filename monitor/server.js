@@ -3,6 +3,7 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { isIP } = require("net");
 const { URL } = require("url");
 const { exec } = require("child_process");
 const { DEFAULT_MODES, VIEW_CONFIG, config, getModeLabel } = require("./lib/config.js");
@@ -551,6 +552,21 @@ function writeSse(key, client, message) {
     if (typeof client.destroy === "function") client.destroy();
     return false;
   }
+}
+
+/** Use the original client address only when a trusted proxy is configured. */
+function getSseClientAddress(req) {
+  const socketAddress = req.socket?.remoteAddress || "unknown";
+  if (process.env.TRUSTED_HTTPS_PROXY !== "true") return socketAddress;
+
+  const forwardedFor = req.headers?.["x-forwarded-for"];
+  const firstForwarded = Array.isArray(forwardedFor)
+    ? forwardedFor[0]
+    : typeof forwardedFor === "string"
+      ? forwardedFor.split(",", 1)[0]
+      : undefined;
+  const candidate = firstForwarded?.trim();
+  return candidate && isIP(candidate) ? candidate : socketAddress;
 }
 
 function reserveSseConnection(address = "unknown") {
@@ -1385,7 +1401,7 @@ const server = http.createServer((req, res) => {
           running: rebuildState.running,
           lastRun: rebuildState.lastRun,
           lastSuccess: rebuildState.lastSuccess,
-          error: redactErrorMessage(rebuildState.error, ""),
+          error: rebuildState.error ? redactErrorMessage(rebuildState.error, "") : null,
         },
         overlay: {
           updatedAt: overlayState.updatedAt,
@@ -1400,7 +1416,7 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    const clientAddress = req.socket?.remoteAddress || "unknown";
+    const clientAddress = getSseClientAddress(req);
     const releaseSseSlot = reserveSseConnection(clientAddress);
     if (!releaseSseSlot) {
       send(
@@ -1579,6 +1595,7 @@ if (process.env.NODE_ENV === "test") {
     isDefaultOverlayPath,
     isLoopbackHost,
     isTrustedRebuildTransport,
+    getSseClientAddress,
     publicOverlaySource,
     redactErrorMessage,
     safeJoin,

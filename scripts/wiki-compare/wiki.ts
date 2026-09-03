@@ -47,6 +47,8 @@ export type WikiFetchResult = {
 
 const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
 const WIKI_API_URL = 'https://escapefromtarkov.fandom.com/api.php';
+const MAX_LINK_PATTERN_LENGTH = 256;
+const MAX_LINK_MATCHER_NODES = 1_000_000;
 
 async function fetchWikiJson(params: URLSearchParams): Promise<unknown> {
   const response = await fetch(WIKI_API_URL, {
@@ -145,19 +147,70 @@ export function parseMinLevel(requirements: string[]): number | undefined {
   return undefined;
 }
 
-/** Remove bounded linked names without constructing a regex from page data. */
-function removeLinkedNames(value: string, patterns: string[]): string {
+/** Remove linked names with a bounded Aho-Corasick matcher. */
+function removeLinkedNames(value: string, patterns: string[]): string | undefined {
   if (patterns.length === 0) return value;
+  if (patterns.some((pattern) => pattern.length > MAX_LINK_PATTERN_LENGTH)) return undefined;
+
+  const nodes: Array<{
+    children: Map<string, number>;
+    failure: number;
+    outputLength: number;
+  }> = [{ children: new Map(), failure: 0, outputLength: 0 }];
+
+  for (const pattern of patterns) {
+    let nodeIndex = 0;
+    for (let index = 0; index < pattern.length; index += 1) {
+      const character = pattern[index];
+      let nextIndex = nodes[nodeIndex].children.get(character);
+      if (nextIndex === undefined) {
+        if (nodes.length >= MAX_LINK_MATCHER_NODES) return undefined;
+        nextIndex = nodes.length;
+        nodes[nodeIndex].children.set(character, nextIndex);
+        nodes.push({ children: new Map(), failure: 0, outputLength: 0 });
+      }
+      nodeIndex = nextIndex;
+    }
+    nodes[nodeIndex].outputLength = Math.max(nodes[nodeIndex].outputLength, pattern.length);
+  }
+
+  const queue: number[] = [...nodes[0].children.values()];
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex += 1) {
+    const nodeIndex = queue[queueIndex];
+    for (const [character, childIndex] of nodes[nodeIndex].children) {
+      let fallback = nodes[nodeIndex].failure;
+      while (fallback !== 0 && !nodes[fallback].children.has(character)) {
+        fallback = nodes[fallback].failure;
+      }
+      nodes[childIndex].failure = nodes[fallback].children.get(character) ?? 0;
+      nodes[childIndex].outputLength = Math.max(
+        nodes[childIndex].outputLength,
+        nodes[nodes[childIndex].failure].outputLength
+      );
+      queue.push(childIndex);
+    }
+  }
+
+  const removalRanges = new Int32Array(value.length + 1);
+  let nodeIndex = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index];
+    while (nodeIndex !== 0 && !nodes[nodeIndex].children.has(character)) {
+      nodeIndex = nodes[nodeIndex].failure;
+    }
+    nodeIndex = nodes[nodeIndex].children.get(character) ?? 0;
+    const matchLength = nodes[nodeIndex].outputLength;
+    if (matchLength > 0) {
+      removalRanges[index - matchLength + 1] += 1;
+      removalRanges[index + 1] -= 1;
+    }
+  }
 
   const characters: string[] = [];
-  for (let index = 0; index < value.length;) {
-    const match = patterns.find((pattern) => value.startsWith(pattern, index));
-    if (match) {
-      index += match.length;
-    } else {
-      characters.push(value[index]);
-      index += 1;
-    }
+  let activeRanges = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    activeRanges += removalRanges[index];
+    if (activeRanges === 0) characters.push(value[index]);
   }
   return characters.join('');
 }
@@ -170,16 +223,12 @@ export function extractCount(text: string, links: string[] = []): number | undef
 
   // Remove linked item names to avoid pulling numbers from item titles. The
   // bounded matcher scans the line once and never treats page data as regex.
-  const linkPatterns = [
-    ...new Set(
-      links
-        .map((link) => link.trim().toLowerCase())
-        .filter((link) => link.length > 0 && link.length <= 256)
-    ),
-  ]
-    .sort((left, right) => right.length - left.length)
-    .slice(0, 256);
-  scrubbed = removeLinkedNames(scrubbed, linkPatterns);
+  const linkPatterns = [...new Set(links.map((link) => link.trim().toLowerCase()))].filter(
+    (link) => link.length > 0
+  );
+  const linkedNamesRemoved = removeLinkedNames(scrubbed, linkPatterns);
+  if (linkedNamesRemoved === undefined) return undefined;
+  scrubbed = linkedNamesRemoved;
 
   // Remove distance patterns like "75 meters".
   scrubbed = scrubbed.replace(/\b\d+\s*meters?\b/gi, '');

@@ -160,6 +160,7 @@ const {
   isRebuildEnabled,
   isLoopbackHost,
   isTrustedRebuildTransport,
+  getSseClientAddress,
   publicOverlaySource,
   redactErrorMessage,
   safeJoin,
@@ -903,6 +904,30 @@ describe('monitor hardening', () => {
     }
   });
 
+  it('uses forwarded SSE client addresses only behind a trusted proxy', () => {
+    const previousTrustedProxy = process.env.TRUSTED_HTTPS_PROXY;
+    const request = (headers: Record<string, string>) => ({
+      socket: { remoteAddress: '10.0.0.5' },
+      headers,
+    });
+    try {
+      delete process.env.TRUSTED_HTTPS_PROXY;
+      expect(getSseClientAddress(request({ 'x-forwarded-for': '203.0.113.10' }))).toBe('10.0.0.5');
+
+      process.env.TRUSTED_HTTPS_PROXY = 'true';
+      expect(getSseClientAddress(request({ 'x-forwarded-for': '203.0.113.10, 10.0.0.5' }))).toBe(
+        '203.0.113.10'
+      );
+      expect(getSseClientAddress(request({ 'x-forwarded-for': 'not-an-ip' }))).toBe('10.0.0.5');
+    } finally {
+      if (previousTrustedProxy === undefined) {
+        delete process.env.TRUSTED_HTTPS_PROXY;
+      } else {
+        process.env.TRUSTED_HTTPS_PROXY = previousTrustedProxy;
+      }
+    }
+  });
+
   it('keeps an SSE client when backpressure is within the buffer bound', () => {
     const client = {
       destroyed: false,
@@ -1185,6 +1210,7 @@ describe('HTTP — real monitor/server.js handlers', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.ok).toBe(true);
+    expect(data.rebuild.error).toBeNull();
     const modes = data.api.map((entry: any) => entry.mode);
     expect(modes).toContain('regular');
     expect(modes).toContain('pve');
