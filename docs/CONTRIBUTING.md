@@ -170,6 +170,12 @@ condition. `npm run eft:audit` reports this per task (`CONFLICT` means the
 override disagrees with the client). If you cannot check the client data, do not
 override the field.
 
+If the client names a prerequisite task that is absent from the selected
+tarkov.dev task endpoint, the audit reports `UNRESOLVED`. Do not add that edge to
+an override: it would create a dangling prerequisite for consumers. Track the
+missing task separately as an upstream-ingestion or data-addition investigation
+until the task can be represented safely.
+
 ### `minPlayerLevel` — absence of a `Level` condition does not mean `0`
 
 The reference lists **explicit** level gates completely: only 8 of 644 quests carry

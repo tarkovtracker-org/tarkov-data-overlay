@@ -308,8 +308,30 @@
   // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
   // lists no player level for Collector (only Scav karma + trader loyalties),
   // so it cannot adjudicate. Previously shipped as a PvE-only correction.
+  // The same client capture also requires Chemical - Part 4, Shooter Born in
+  // Heaven, The Tarkov Shooter - Part 4, and Sew it Good - Part 2. The live API
+  // has Chemical - Part 3 and an extra Postman Pat - Part 2 edge in all modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
     minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
+    taskRequirements: [
+      {
+        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
+        status: ['complete', 'failed'],
+      },
+      {
+        task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5bc480a686f7741af0342e29', name: 'The Tarkov Shooter - Part 4' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
+        status: ['complete'],
+      },
+    ], // Was: Chemical - Part 3 + Postman Pat - Part 2 (and the three shared edges)
   },
 
   // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)
@@ -3061,46 +3083,12 @@
     ],
   },
 
-  // The Tarkov Shooter - Part 5 - Rewards corrected
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
-  // Exp 13100 (was 28000); Roubles 85000 (was 275000); the Mosin Archangel
-  // chassis reward + its Jaeger LL3 barter are replaced by the ATI Monte Carlo
-  // stock (which is also barter-unlocked at Jaeger LL3), plus a Ski hat; Jaeger
-  // reputation +0.02.
-  //
-  // DISPUTED (issue #356): `npm run eft:audit` reports this as a CONFLICT. The
-  // game client serves 28000 exp / 275000 roubles, matching upstream and this
-  // entry's own `Was:` values, while the wiki Rewards section reads 13,100 /
-  // 85,000. AGENTS.md names the reference the authority for `experience`, so this
-  // may be a regression rather than a correction. Left as-is pending the
-  // verification pass in #356, because the whole rewards block was derived from
-  // the same wiki revision and has to be re-checked together, not field by field.
-  '5bc4836986f7740c0152911c': {
-    experience: 13100, // Was: 28000
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
-      ],
-      items: [
-        {
-          count: 85000,
-          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
-        }, // Was: 275000
-        {
-          count: 1,
-          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
-        }, // Was: Mosin Archangel chassis x1
-        { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
-      ],
-      offerUnlock: [
-        {
-          level: 3,
-          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
-          trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
-        }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
-      ],
-    },
-  },
+  // The Tarkov Shooter - Part 5 - old reward correction removed (issue #356)
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  // The 1.1.0.0 client reference and regular, pve, and pvp-season API payloads
+  // agree on 28000 experience, 275000 roubles, two copies of the same reward
+  // item, and its Jaeger LL3 offer. The previous wiki-based patch supplied a
+  // different reward block, so it must not override the matching upstream data.
 
   // ---------------------------------------------------------------------------
   // TASK AVAILABILITY CORRECTIONS
@@ -3134,6 +3122,57 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
   '666314b4d7f171c4c20226c3': {
     minPlayerLevel: 27, // Was: 12
+  },
+
+  // The Hermit - the client has no Quest AvailableForStart condition, while
+  // the API incorrectly adds Tough Guy in all three modes. Keep the explicit
+  // empty array so the upstream edge is cleared.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '61904daa7d0d857927447b9c': {
+    taskRequirements: [], // Was: The Survivalist Path - Tough Guy
+  },
+
+  // Offensive Reconnaissance - the client has no Quest AvailableForStart
+  // condition, while the API incorrectly adds Hidden Layer in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '67a0970744893b9f3f0d9b68': {
+    taskRequirements: [], // Was: Hidden Layer
+  },
+
+  // Hot Wheels - the client roots this task at A Helping Hand; the API instead
+  // points at Shipping Delay - Part 1 in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f4e956f1b89c7bc0f56ef': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Shipping Delay - Part 1
+  },
+
+  // Building Foundations - the client roots this task at A Helping Hand; the
+  // API instead points at Swift Retribution in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f629c5b555b53460cf827': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Swift Retribution
+  },
+
+  // The Higher They Fly - the client roots this task at A Helping Hand; the
+  // API instead points at Building Foundations in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '6745fae369a58fceba10343d': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Building Foundations
   },
 
   // NOTE (Survivalist / Jaeger chain): no overrides belong here.

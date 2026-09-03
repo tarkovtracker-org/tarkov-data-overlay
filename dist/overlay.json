@@ -372,7 +372,46 @@
       "experience": 10000
     },
     "5c51aac186f77432ea65c552": {
-      "minPlayerLevel": 40
+      "minPlayerLevel": 40,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "597a0f5686f774273b74f676",
+            "name": "Chemical - Part 4"
+          },
+          "status": [
+            "complete",
+            "failed"
+          ]
+        },
+        {
+          "task": {
+            "id": "5c0bde0986f77479cf22c2f8",
+            "name": "Shooter Born in Heaven"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5bc480a686f7741af0342e29",
+            "name": "The Tarkov Shooter - Part 4"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5ae4497b86f7744cf402ed00",
+            "name": "Sew it Good - Part 2"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     },
     "6193850f60b34236ee0483de": {
       "traderRequirements": [
@@ -2901,59 +2940,53 @@
         }
       ]
     },
-    "5bc4836986f7740c0152911c": {
-      "experience": 13100,
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            },
-            "standing": 0.02
-          }
-        ],
-        "items": [
-          {
-            "count": 85000,
-            "item": {
-              "id": "5449016a4bdc2d6f028b456f",
-              "name": "Roubles",
-              "shortName": "RUB"
-            }
-          },
-          {
-            "count": 1,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            }
-          },
-          {
-            "count": 1,
-            "item": {
-              "id": "5ab8f20c86f7745cdb629fb2",
-              "name": "Ski hat with holes for eyes"
-            }
-          }
-        ],
-        "offerUnlock": [
-          {
-            "level": 3,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            },
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            }
-          }
-        ]
-      }
-    },
     "666314b4d7f171c4c20226c3": {
       "minPlayerLevel": 27
+    },
+    "61904daa7d0d857927447b9c": {
+      "taskRequirements": []
+    },
+    "67a0970744893b9f3f0d9b68": {
+      "taskRequirements": []
+    },
+    "673f4e956f1b89c7bc0f56ef": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "673f629c5b555b53460cf827": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "6745fae369a58fceba10343d": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     },
     "639136df4b15ca31f76bc31f": {
       "factionName": "BEAR"
@@ -8996,7 +9029,7 @@
   },
   "$meta": {
     "version": "1.83",
-    "generated": "2026-09-03T11:50:27.507Z",
-    "sha256": "9665103ae29f612f1984e803a7be30b72201ac5160a7f99d13e284f10c81dc0e"
+    "generated": "2026-09-03T15:27:55.306Z",
+    "sha256": "17c9d97be6885555e1184773a960842da333390f1b48c22fdf16be3a57977fd9"
   }
 }
