@@ -173,25 +173,37 @@ function buildRows(
     // Prerequisite edges. The reference adjudicates by absence here (see
     // EftTask.prerequisites), so an empty reference set is a real "no quest
     // prerequisite" and an override that adds one is a CONFLICT.
-    const referenceEdges = canonicalJoin(eft.prerequisites);
-    const apiEdges = canonicalJoin(
-      (api.taskRequirements ?? []).flatMap((r) => (r.task?.id ? [r.task.id] : []))
-    );
-    const overrideEdges =
-      ov?.taskRequirements === undefined
-        ? undefined
-        : canonicalJoin(ov.taskRequirements.flatMap((r) => (r.task?.id ? [r.task.id] : [])));
-    const edgeVerdict = classify(referenceEdges, apiEdges, overrideEdges);
-    if (edgeVerdict) {
-      rows.push({
-        taskId: eft.id,
-        taskName: name,
-        field: 'taskRequirements',
-        reference: referenceEdges,
-        api: apiEdges,
-        override: overrideEdges,
-        verdict: edgeVerdict,
-      });
+    //
+    // Skipped entirely when either side carries `taskRequirementGroups`. Those
+    // are OR groups, while `prerequisites` is a flat AND set, so folding grouped
+    // IDs into one set would compare different semantics and invent a verdict.
+    // Nothing uses the field today (it is absent upstream and unused in the
+    // overlay), but silently mis-auditing the first entry that does is worse
+    // than declining to audit it.
+    const hasGroups =
+      (api.taskRequirementGroups?.length ?? 0) > 0 || (ov?.taskRequirementGroups?.length ?? 0) > 0;
+
+    if (!hasGroups) {
+      const referenceEdges = canonicalJoin(eft.prerequisites);
+      const apiEdges = canonicalJoin(
+        (api.taskRequirements ?? []).flatMap((r) => (r.task?.id ? [r.task.id] : []))
+      );
+      const overrideEdges =
+        ov?.taskRequirements === undefined
+          ? undefined
+          : canonicalJoin(ov.taskRequirements.flatMap((r) => (r.task?.id ? [r.task.id] : [])));
+      const edgeVerdict = classify(referenceEdges, apiEdges, overrideEdges);
+      if (edgeVerdict) {
+        rows.push({
+          taskId: eft.id,
+          taskName: name,
+          field: 'taskRequirements',
+          reference: referenceEdges,
+          api: apiEdges,
+          override: overrideEdges,
+          verdict: edgeVerdict,
+        });
+      }
     }
 
     // Objective counts (keyed by objective/condition id).
