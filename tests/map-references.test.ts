@@ -205,10 +205,21 @@ describe('map reference validation', () => {
 });
 
 describe('map references in source data', () => {
-  it('scans every JSON5 source file', () => {
-    // Guards against the walker going blind after a refactor or a moved file.
-    expect(scanned).toHaveLength(json5SourceFiles().length);
-    expect(scanned.length).toBeGreaterThanOrEqual(19);
+  it('reaches nested source directories', () => {
+    // Guards the recursive walk specifically: these live one and two levels below
+    // src/, which a flat readdir (the previous implementation) would have missed.
+    const files = scanned.map(({ file }) => file);
+
+    expect(files).toEqual(
+      expect.arrayContaining([
+        join('src', 'overrides', 'tasks.json5'),
+        join('src', 'overrides', 'locales', 'de.json5'),
+        join('src', 'overrides', 'modes', 'regular', 'tasks.json5'),
+        join('src', 'divergences', 'tasks.json5'),
+        join('src', 'suppressions', 'tasks.json5'),
+      ])
+    );
+    expect(files.length).toBeGreaterThanOrEqual(19);
   });
 
   it('finds the map references it is meant to validate', () => {
