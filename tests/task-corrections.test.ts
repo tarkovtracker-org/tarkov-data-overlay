@@ -177,8 +177,8 @@ describe('mode-specific task correction consumption', () => {
           description: 'PvE objective',
           count: 30,
           maps: [
-            { id: '54490bb74bdc2d5f4b8b4567', name: 'Reserve' },
-            { id: '5b0bc9b5e7f0fa3f5c0b4567', name: 'Lighthouse' },
+            { id: '5704e5fad2720bc05b8b4567', name: 'Reserve' },
+            { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
           ],
         },
       ],
