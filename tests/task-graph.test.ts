@@ -467,18 +467,41 @@ describe('committed task prerequisite graph', () => {
     }
 
     const overlay = loadJsonFile<Record<string, unknown>>(overlayPath);
-    const builtSources: TaskSource[] = [];
+    const builtBase: TaskSource[] = [];
+    const builtModeSections: TaskSource[] = [];
 
-    if (isRecord(overlay.tasks))
-      builtSources.push(toSource('dist/overlay.json:tasks', overlay.tasks));
+    if (isRecord(overlay.tasks)) builtBase.push(toSource('dist/overlay.json:tasks', overlay.tasks));
     if (isRecord(overlay.modes)) {
       for (const [mode, modeOverlay] of Object.entries(overlay.modes)) {
         if (isRecord(modeOverlay) && isRecord(modeOverlay.tasks)) {
-          builtSources.push(toSource(`dist/overlay.json:modes.${mode}.tasks`, modeOverlay.tasks));
+          builtModeSections.push(
+            toSource(`dist/overlay.json:modes.${mode}.tasks`, modeOverlay.tasks)
+          );
         }
       }
     }
 
-    expect([...findSelfReferences(builtSources), ...findCycles(builtSources)]).toEqual([]);
+    // Cycles are checked on the composed per-mode graphs for the same reason as
+    // the sources: a ring can span the shared `tasks` section and a
+    // `modes.<mode>.tasks` section, and neither section contains it alone. The
+    // built overlay is what consumers download, so this must not be the weaker
+    // check. Each effective graph already contains the base section, so the base
+    // is only checked on its own when the overlay ships no mode sections.
+    const builtGraphs =
+      builtModeSections.length > 0
+        ? builtModeSections.map((section) =>
+            buildEffectiveSource(
+              section.file.replace(':modes.', ':effective:').replace('.tasks', ''),
+              builtBase,
+              section
+            )
+          )
+        : builtBase;
+
+    expect([
+      // Reported against the raw sections so the failure names the real file.
+      ...findSelfReferences([...builtBase, ...builtModeSections]),
+      ...findCycles(builtGraphs),
+    ]).toEqual([]);
   });
 });
