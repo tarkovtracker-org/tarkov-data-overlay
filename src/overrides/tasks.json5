@@ -3067,6 +3067,14 @@
   // chassis reward + its Jaeger LL3 barter are replaced by the ATI Monte Carlo
   // stock (which is also barter-unlocked at Jaeger LL3), plus a Ski hat; Jaeger
   // reputation +0.02.
+  //
+  // DISPUTED (issue #356): `npm run eft:audit` reports this as a CONFLICT. The
+  // game client serves 28000 exp / 275000 roubles, matching upstream and this
+  // entry's own `Was:` values, while the wiki Rewards section reads 13,100 /
+  // 85,000. AGENTS.md names the reference the authority for `experience`, so this
+  // may be a regression rather than a correction. Left as-is pending the
+  // verification pass in #356, because the whole rewards block was derived from
+  // the same wiki revision and has to be re-checked together, not field by field.
   '5bc4836986f7740c0152911c': {
     experience: 13100, // Was: 28000
     finishRewards: {
