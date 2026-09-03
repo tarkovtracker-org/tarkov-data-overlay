@@ -1,0 +1,122 @@
+name: New data request
+description: Request data that is missing from tarkov.dev and should be added to the overlay.
+title: '[NEW DATA] '
+labels:
+  - type:addition
+  - status:needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when the requested entity or data type is not served by tarkov.dev.
+        If tarkov.dev serves it with an incorrect value, use **Data correction**.
+
+  - type: dropdown
+    id: data_type
+    attributes:
+      label: Data type
+      description: Choose the closest addition type; explain Other in the description.
+      options:
+        - Task
+        - Item
+        - Edition
+        - Seasonal perk
+        - Craft
+        - Story chapter
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: game_mode
+    attributes:
+      label: Game mode or scope
+      description: Select the mode the addition belongs to, or state if it is mode-independent.
+      options:
+        - regular
+        - pve
+        - pvp-season
+        - Mode-independent
+        - Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: entity_name
+    attributes:
+      label: Entity or dataset name
+      description: Give the name players or consumers will recognize.
+      placeholder: 'Example: Seasonal faction perks'
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What is missing?
+      description: Describe the data, where it belongs, and how you determined it is absent upstream.
+      placeholder: 'Explain what consumers cannot currently obtain from tarkov.dev.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_structure
+    attributes:
+      label: Proposed data structure
+      description: Show a representative object or fields. A complete implementation is not required in the issue.
+      render: json
+      placeholder: |
+        {
+          "id": "example",
+          "name": "Example"
+        }
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and evidence
+      description: Add at least one proof link or explain what an in-game capture proves. Prefer official patch notes, the EFT wiki, or an in-game capture.
+      placeholder: |
+        - Source URL:
+        - What this source proves:
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Consumer use case
+      description: Explain who needs this data and what it enables.
+      placeholder: 'Example: Task trackers need this to show seasonal objectives and rewards.'
+    validations:
+      required: true
+
+  - type: input
+    id: game_version
+    attributes:
+      label: Game or API version
+      description: Include the patch, wipe, or date when the absence was observed.
+      placeholder: 'Example: EFT 1.1.0.0 / json.tarkov.dev checked 2026-09-03'
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add upstream IDs, related issues, consumer links, or implementation notes.
+      placeholder: 'Optional: related issues, screenshots, or notes.'
+
+  - type: checkboxes
+    id: submission_checklist
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I checked that this data is not already served by tarkov.dev.
+          required: true
+        - label: I described the affected mode or scope and the version/date checked.
+          required: true
+        - label: I provided evidence or explained why evidence is unavailable.
+          required: true

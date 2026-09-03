@@ -41,6 +41,13 @@ Additions live in `src/additions/` and should include the full object.
 
 ## How to Submit a Correction
 
+To report a problem before preparing a change, open the GitHub **Data
+correction** issue form and include the entity ID, exact field, current and
+expected values, affected mode, version/date, reproduction details, and proof.
+See the [Issue Triage Guide](TRIAGE.md) for the evidence and verification rules
+maintainers use. Use **New data request** when the data is absent from
+tarkov.dev rather than incorrect in it.
+
 ### 1. Find the Entity ID
 
 Get the tarkov.dev ID for the entity you're correcting:
