@@ -130,6 +130,7 @@ describe('getValidationExitCode', () => {
   const base = {
     strict: false,
     failOnStale: false,
+    failOnUpstream: false,
     actionable: 0,
     staleProblems: 0,
     upstreamProblems: 0,
@@ -147,15 +148,37 @@ describe('getValidationExitCode', () => {
     expect(getValidationExitCode({ ...base, failOnStale: true, staleProblems: 1 })).toBe(3);
   });
 
-  it('gates upstream problems under strict alone', () => {
-    expect(getValidationExitCode({ ...base, strict: true, upstreamProblems: 1 })).toBe(4);
+  it('gates upstream problems only under their own opt-in flag', () => {
+    expect(getValidationExitCode({ ...base, failOnUpstream: true, upstreamProblems: 1 })).toBe(4);
   });
 
-  it('gates upstream problems under fail-on-stale alone', () => {
-    expect(getValidationExitCode({ ...base, failOnStale: true, upstreamProblems: 1 })).toBe(4);
+  /**
+   * The CI gate must not fail on a problem originating in tarkov.dev's data:
+   * nobody working in this repo can fix one, so it would block every PR.
+   */
+  it('does not fail the CI gate on an upstream-only regression', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, upstreamProblems: 1 })).toBe(0);
+    expect(getValidationExitCode({ ...base, strict: true, upstreamProblems: 1 })).toBe(0);
+    expect(
+      getValidationExitCode({ ...base, strict: true, failOnStale: true, upstreamProblems: 1 })
+    ).toBe(0);
   });
 
-  it('prioritizes upstream problems over both downstream gates', () => {
+  it('prioritizes upstream problems over both downstream gates when opted in', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        failOnUpstream: true,
+        actionable: 1,
+        staleProblems: 1,
+        upstreamProblems: 1,
+      })
+    ).toBe(4);
+  });
+
+  it('prefers the strict code over the stale code', () => {
     expect(
       getValidationExitCode({
         ...base,
@@ -163,9 +186,8 @@ describe('getValidationExitCode', () => {
         failOnStale: true,
         actionable: 1,
         staleProblems: 1,
-        upstreamProblems: 1,
       })
-    ).toBe(4);
+    ).toBe(2);
   });
 });
 

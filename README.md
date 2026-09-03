@@ -64,8 +64,24 @@ This command compares all overrides against current API data and reports:
 - ✅ Overrides that are still needed
 - 🔄 Corrections that have been fixed upstream (can be removed)
 - 🗑️ Tasks that have been removed from the API (can be deleted)
+- ⚠️ Upstream data-quality regressions (reported for escalation, not actionable here)
 
 Run this periodically to keep the overlay lean and accurate.
+
+By default the command only reports. Each gate is opt-in:
+
+| Flag                 | Fails on                                                            | Exit code |
+| -------------------- | ------------------------------------------------------------------- | --------- |
+| `--strict`           | Overlay inconsistency, or data served incorrectly                   | 2         |
+| `--fail-on-stale`    | Overlay carries data tarkov.dev now supplies (this is what CI runs) | 3         |
+| `--fail-on-upstream` | Upstream data-quality regression                                    | 4         |
+
+Exit `0` means no enabled gate found a problem; exit `1` is a script or network
+error. `--fail-on-upstream` is intentionally excluded from CI: those problems
+originate in tarkov.dev's data, so no change in this repository can clear one and
+gating pull requests on it would block every merge until upstream recovered. The
+diagnostic is printed either way. When several gates would fail, every summary is
+printed and the most specific code wins (4, then 2, then 3).
 
 For local checks:
 

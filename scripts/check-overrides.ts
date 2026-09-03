@@ -8,10 +8,33 @@
  *
  * Usage:
  *   npm run check-overrides
+ *   npm run check-overrides -- --fail-on-stale
+ *   npm run check-overrides -- --strict --fail-on-upstream
+ *
+ * Flags (all off by default; without them the script only reports):
+ *   --strict            Fail when the overlay is inconsistent or data is being
+ *                       served incorrectly (see `actionable` in main()).
+ *   --fail-on-stale     Fail when the overlay carries data tarkov.dev now
+ *                       supplies itself. This is what CI runs.
+ *   --fail-on-upstream  Fail on upstream data-quality regressions. Off by
+ *                       default and deliberately NOT part of the CI gate: these
+ *                       problems originate in tarkov.dev's data, so no
+ *                       contributor can fix one, and gating PRs on it would
+ *                       block every merge until upstream repaired their data.
+ *                       Intended for the scheduled monitoring job, which opens
+ *                       an issue instead of failing a PR. The diagnostic is
+ *                       always printed regardless of this flag.
  *
  * Exit codes:
- *   0 - All overrides validated successfully
- *   1 - Error occurred during validation
+ *   0 - Ran to completion with no problem that an enabled gate fails on
+ *   1 - Error occurred during validation (network, parse, unexpected throw)
+ *   2 - Overlay inconsistency / data served incorrectly  (--strict)
+ *   3 - Overlay carries data now supplied upstream       (--fail-on-stale)
+ *   4 - Upstream data-quality regression                 (--fail-on-upstream)
+ *
+ * When more than one gate would fail, every applicable summary is printed and
+ * the most specific classification wins: 4 (upstream's problem) before
+ * 2 (our overlay is wrong) before 3 (our overlay is merely redundant).
  */
 
 import { join } from 'path';
@@ -266,6 +289,8 @@ export type ValidationExitCode = 0 | 2 | 3 | 4;
 export type ValidationGateCounts = {
   strict: boolean;
   failOnStale: boolean;
+  /** Opt-in; see the `--fail-on-upstream` note in this file's header. */
+  failOnUpstream: boolean;
   actionable: number;
   staleProblems: number;
   upstreamProblems: number;
@@ -275,16 +300,20 @@ export type ValidationGateCounts = {
  * Select the exit code for the validation gates.
  *
  * Upstream data-quality regressions take precedence because they are distinct
- * from overlay inconsistencies and stale overlay fields.
+ * from overlay inconsistencies and stale overlay fields: they describe a problem
+ * in tarkov.dev's data rather than in ours. They are gated behind their own
+ * opt-in flag so that a regression nobody here can fix cannot block every PR;
+ * the caller prints the diagnostic either way.
  */
 export function getValidationExitCode({
   strict,
   failOnStale,
+  failOnUpstream,
   actionable,
   staleProblems,
   upstreamProblems,
 }: ValidationGateCounts): ValidationExitCode {
-  if ((strict || failOnStale) && upstreamProblems > 0) return 4;
+  if (failOnUpstream && upstreamProblems > 0) return 4;
   if (strict && actionable > 0) return 2;
   if (failOnStale && staleProblems > 0) return 3;
   return 0;
@@ -757,11 +786,12 @@ function printReferenceCrossCheck(
  * Takes one snapshot per mode rather than parallel task/count maps so a mode
  * cannot be present in one and absent from the other.
  *
- * @returns the number of upstream requirements lacking a merge ID. Synthetic
- *   `overlay.*` IDs keep consumers working, so without a gate this would report
- *   silently forever; the caller gates on it under both `--strict` and
- *   `--fail-on-stale` (the latter being what CI runs) with a dedicated exit
- *   code.
+ * @returns the number of upstream requirements lacking a merge ID, summed across
+ *   modes. The adapter mints a synthetic `overlay.*` ID for these, which keeps
+ *   consumers working but is the same shape our own additions use, so a silent
+ *   collision is possible. The caller always prints the diagnostic and gates on
+ *   it only under the opt-in `--fail-on-upstream` (exit 4), because nothing in
+ *   this repository can fix an upstream data problem.
  */
 function printRequirementTypeCounts(
   snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>>
@@ -1192,6 +1222,7 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequireme
 async function main(): Promise<void> {
   const strict = process.argv.includes('--strict');
   const failOnStale = process.argv.includes('--fail-on-stale');
+  const failOnUpstream = process.argv.includes('--fail-on-upstream');
   const getTasksForMode = createTaskFetcher();
   /** Problems that mean data is being served wrong or the overlay is inconsistent. */
   let actionable = 0;
@@ -1202,8 +1233,11 @@ async function main(): Promise<void> {
    * without a merge identity (issue #276). Deliberately kept out of
    * `actionable` and `staleProblems`: it is neither an overlay inconsistency nor
    * a stale overlay field, and it gets its own exit code so automation can tell
-   * "our overlay is out of date" from "upstream regressed". It must fail both
-   * gates, since CI runs `--fail-on-stale` without `--strict`.
+   * "our overlay is out of date" from "upstream regressed".
+   *
+   * Always reported; gated only under the opt-in `--fail-on-upstream`. Nobody
+   * working in this repo can fix an upstream data problem, so wiring it into the
+   * CI gate would block every PR for the duration of someone else's outage.
    */
   let upstreamProblems = 0;
 
@@ -1476,42 +1510,46 @@ async function main(): Promise<void> {
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
 
-    // Checked before the other two gates so the most specific classification
-    // wins: an upstream regression is neither an overlay inconsistency (exit 2)
-    // nor a stale overlay field (exit 3), and automation should be able to tell
-    // them apart. Gated on --fail-on-stale as well as --strict because CI runs
-    // only the former.
+    // Every problem that has a count gets its summary printed, so enabling one
+    // gate never hides another's findings in a multi-thousand-line log. Only the
+    // exit code is exclusive, and the most specific classification wins: an
+    // upstream regression (4) is neither an overlay inconsistency (2) nor a
+    // stale overlay field (3).
     const exitCode = getValidationExitCode({
       strict,
       failOnStale,
+      failOnUpstream,
       actionable,
       staleProblems,
       upstreamProblems,
     });
 
-    if (exitCode === 4) {
+    // Printed whenever the count is non-zero, gate or no gate: the whole point
+    // of issue #276 is that this must not pass silently. Only the exit code is
+    // opt-in.
+    if (upstreamProblems > 0) {
       printError(
         `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
-          'Trader requirements arrived without a merge id; overlay entries keyed on ' +
-          'synthetic overlay.* ids may no longer match upstream.'
+          'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
+          'an overlay.* id for them - the same shape our own additions use. An overlay ' +
+          'addition can therefore collide with a real upstream requirement instead of ' +
+          'being added alongside it. Nothing here can fix it; report it upstream.' +
+          (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
       );
-      process.exit(4);
     }
 
-    if (exitCode === 2) {
+    if (actionable > 0 && strict) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
-      process.exit(2);
     }
 
-    if (exitCode === 3) {
+    if (staleProblems > 0 && failOnStale) {
       printError(
         `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
           'Remove data now supplied upstream or scope it to the modes where it is still missing.'
       );
-      process.exit(3);
     }
 
     process.exit(exitCode);
