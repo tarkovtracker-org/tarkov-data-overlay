@@ -416,7 +416,7 @@
       "minPlayerLevel": {
         "description": "Minimum PMC level required to start the task",
         "maximum": 79,
-        "minimum": 1,
+        "minimum": 0,
         "type": "integer"
       },
       "map": {
