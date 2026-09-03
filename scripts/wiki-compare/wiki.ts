@@ -48,6 +48,7 @@ export type WikiFetchResult = {
 const WIKI_MAX_RESPONSE_BYTES = Math.min(MAX_RESPONSE_BYTES, 8 * 1024 * 1024);
 const WIKI_API_URL = 'https://escapefromtarkov.fandom.com/api.php';
 const MAX_LINK_PATTERN_LENGTH = 256;
+export const MAX_LINK_PATTERN_COUNT = 4096;
 const MAX_LINK_MATCHER_NODES = 1_000_000;
 
 async function fetchWikiJson(params: URLSearchParams): Promise<unknown> {
@@ -216,6 +217,8 @@ function removeLinkedNames(value: string, patterns: string[]): string | undefine
 }
 
 export function extractCount(text: string, links: string[] = []): number | undefined {
+  if (links.length > MAX_LINK_PATTERN_COUNT) return undefined;
+
   const normalized = stripWikiMarkup(text).toLowerCase();
   if (!/\d/.test(normalized)) return undefined;
 

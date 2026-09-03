@@ -191,6 +191,17 @@ function matchByKey<T>(
   return { remaining, unmatched };
 }
 
+/** Remove duplicate entries while preserving the first occurrence of each key. */
+function uniqueByKey<T>(values: readonly T[], keyOf: (value: T) => string): T[] {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const key = keyOf(value);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /** Match trader requirements by the semantics consumed by the validator. */
 function matchTraderRequirements(
   overrideReqs: readonly TraderRequirementLike[],
@@ -412,7 +423,12 @@ const validateTaskRequirementGroups: FieldValidator = (override, apiTask) => {
     };
   }
 
-  const { remaining, unmatched } = matchTaskRequirementGroups(overrideGroups, apiGroups);
+  const uniqueApiGroups = uniqueByKey(apiGroups, taskRequirementGroupKey);
+  const uniqueOverrideGroups = uniqueByKey(overrideGroups, taskRequirementGroupKey);
+  const { remaining, unmatched } = matchTaskRequirementGroups(
+    uniqueOverrideGroups,
+    uniqueApiGroups
+  );
   if (unmatched.length > 0) {
     return {
       field: 'taskRequirementGroups',

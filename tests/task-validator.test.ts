@@ -515,6 +515,29 @@ describe('validateTaskOverride', () => {
         )
       ).toBe(true);
     });
+
+    it('treats duplicate equivalent groups as equivalent', () => {
+      const group = [{ task: { id: 'prereq-1', name: 'Prereq Task' } }];
+      const apiTask = createApiTask({ taskRequirementGroups: [group, group] });
+      const result = validateTaskOverride('test-task-id', { taskRequirementGroups: [group] }, [
+        apiTask,
+      ]);
+
+      expect(result.status).toBe('FIXED');
+      expect(
+        result.details.some(
+          (detail) => detail.field === 'taskRequirementGroups' && detail.status === 'fixed'
+        )
+      ).toBe(true);
+
+      const reverseResult = validateTaskOverride(
+        'test-task-id',
+        { taskRequirementGroups: [group, group] },
+        [createApiTask({ taskRequirementGroups: [group] })]
+      );
+
+      expect(reverseResult.status).toBe('FIXED');
+    });
   });
 
   describe('taskRequirementGroups validation', () => {

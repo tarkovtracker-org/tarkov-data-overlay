@@ -15,7 +15,11 @@ import {
   type TaskSuppressionEntry,
 } from '../scripts/wiki-compare/overlay.js';
 import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
-import { extractCount, parseObjectives } from '../scripts/wiki-compare/wiki.js';
+import {
+  extractCount,
+  MAX_LINK_PATTERN_COUNT,
+  parseObjectives,
+} from '../scripts/wiki-compare/wiki.js';
 import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
@@ -261,7 +265,13 @@ describe('extractCount', () => {
     expect(extractCount('Find [[Item 7]]', ['Item 7'])).toBeUndefined();
 
     const links = Array.from({ length: 300 }, (_, index) => `Item ${index}`);
-    expect(extractCount('Find [[Item 299]]', links)).toBeUndefined();
+    expect(extractCount('Find 5 Scavs', links)).toBe(5);
+
+    const tooManyLinks = Array.from(
+      { length: MAX_LINK_PATTERN_COUNT + 1 },
+      (_, index) => `Item ${index}`
+    );
+    expect(extractCount('Find 5 Scavs', tooManyLinks)).toBeUndefined();
 
     const oversizedLink = `7 ${'x'.repeat(256)}`;
     expect(extractCount(`Find [[${oversizedLink}]]`, [oversizedLink])).toBeUndefined();

@@ -13,12 +13,22 @@ import {
   resolveReferenceMatrix,
 } from '../src/lib/tarkov-api-shared.cjs';
 
+const isolatedGitEnv: NodeJS.ProcessEnv = {
+  ...process.env,
+  GIT_CONFIG_GLOBAL: '/dev/null',
+  GIT_CONFIG_SYSTEM: '/dev/null',
+};
+
+function runGit(directory: string, args: string[]) {
+  return execFileSync('git', ['-C', directory, ...args], { env: isolatedGitEnv });
+}
+
 function createGitRepo(): string {
   const directory = mkdtempSync(join(tmpdir(), 'tarkov-overlay-tags-'));
-  execFileSync('git', ['-C', directory, 'init', '--quiet'], { stdio: 'ignore' });
-  execFileSync('git', ['-C', directory, 'config', 'user.email', 'test@example.com']);
-  execFileSync('git', ['-C', directory, 'config', 'user.name', 'Test']);
-  execFileSync('git', ['-C', directory, 'commit', '--quiet', '--allow-empty', '-m', 'init']);
+  runGit(directory, ['init', '--quiet']);
+  runGit(directory, ['config', 'user.email', 'test@example.com']);
+  runGit(directory, ['config', 'user.name', 'Test']);
+  runGit(directory, ['commit', '--quiet', '--no-gpg-sign', '--allow-empty', '-m', 'init']);
   return directory;
 }
 
@@ -46,7 +56,7 @@ describe('getNextTagVersion', () => {
     const directory = createGitRepo();
     try {
       for (const tag of ['v1.9', 'v1.10.0-rc.2', 'v1.10.0', 'not-a-version']) {
-        execFileSync('git', ['-C', directory, 'tag', tag]);
+        runGit(directory, ['tag', tag]);
       }
 
       expect(getNextTagVersion(directory)).toBe('v1.11');
@@ -67,19 +77,11 @@ describe('getNextTagVersion', () => {
   it('ignores canonical-looking tags that are not reachable from HEAD', () => {
     const directory = createGitRepo();
     try {
-      execFileSync('git', ['-C', directory, 'tag', 'v1.0']);
-      execFileSync('git', ['-C', directory, 'checkout', '--quiet', '-b', 'unmerged-release']);
-      execFileSync('git', [
-        '-C',
-        directory,
-        'commit',
-        '--quiet',
-        '--allow-empty',
-        '-m',
-        'unmerged',
-      ]);
-      execFileSync('git', ['-C', directory, 'tag', 'v99.99']);
-      execFileSync('git', ['-C', directory, 'checkout', '--quiet', '-']);
+      runGit(directory, ['tag', 'v1.0']);
+      runGit(directory, ['checkout', '--quiet', '-b', 'unmerged-release']);
+      runGit(directory, ['commit', '--quiet', '--no-gpg-sign', '--allow-empty', '-m', 'unmerged']);
+      runGit(directory, ['tag', 'v99.99']);
+      runGit(directory, ['checkout', '--quiet', '-']);
 
       expect(getNextTagVersion(directory)).toBe('v1.1');
     } finally {
@@ -95,7 +97,7 @@ describe('getNextTagVersion', () => {
     const directory = createGitRepo();
     try {
       for (const tag of ['v1.0', 'v99.99.0-01', 'v99.99.0-123_']) {
-        execFileSync('git', ['-C', directory, 'tag', tag]);
+        runGit(directory, ['tag', tag]);
       }
 
       expect(getNextTagVersion(directory)).toBe('v1.1');
