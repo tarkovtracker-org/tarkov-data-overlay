@@ -98,6 +98,19 @@ describe('countTraderRequirementIds', () => {
       missing: 0,
     });
   });
+
+  it('counts a defined non-array collection as the single requirement the adapter emits', () => {
+    // adaptTask() runs traderRequirements through mapOptionalArray, which wraps a
+    // defined non-array value into one entry. Skipping it here would let a
+    // malformed upstream payload pass the diagnostic unreported.
+    expect(countTraderRequirementIds({ tasks: { task: { traderRequirements: {} } } })).toEqual({
+      total: 1,
+      missing: 1,
+    });
+    expect(
+      countTraderRequirementIds({ tasks: { task: { traderRequirements: { id: 'upstream-id' } } } })
+    ).toEqual({ total: 1, missing: 0 });
+  });
 });
 
 describe('normalizeWikiLink', () => {

@@ -808,6 +808,10 @@ export interface TraderRequirementIdCounts {
  * runs on the raw payload before `adaptTask()` substitutes synthetic IDs: those
  * IDs keep consumers safe but must not hide an upstream data-quality regression
  * from maintenance checks (issue #276).
+ *
+ * `mapOptionalArray` is the same normalization `adaptTask()` applies, so a
+ * defined non-array value counts as the one requirement the adapter emits for it
+ * rather than being skipped.
  */
 export function countTraderRequirementIds(tasksData: unknown): TraderRequirementIdCounts {
   if (!isRecord(tasksData) || !isRecord(tasksData.tasks)) return { total: 0, missing: 0 };
@@ -815,8 +819,8 @@ export function countTraderRequirementIds(tasksData: unknown): TraderRequirement
   let total = 0;
   let missing = 0;
   for (const task of Object.values(tasksData.tasks)) {
-    if (!isRecord(task) || !Array.isArray(task.traderRequirements)) continue;
-    for (const requirement of task.traderRequirements) {
+    if (!isRecord(task)) continue;
+    for (const requirement of mapOptionalArray(task.traderRequirements, (entry) => entry) ?? []) {
       total += 1;
       if (!isRecord(requirement) || usableId(requirement.id) === undefined) missing += 1;
     }
