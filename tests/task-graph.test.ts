@@ -39,8 +39,15 @@ interface TaskReference {
 interface TaskSource {
   /** Repo-relative path, used in failure messages. */
   file: string;
-  /** Task ID -> prerequisite references declared by this source. */
-  tasks: Map<string, TaskReference[]>;
+  /**
+   * Task ID -> prerequisite references declared by this source.
+   *
+   * `undefined` means the entry does not declare `taskRequirements` at all,
+   * which is distinct from declaring it empty. `mergeTaskOverride` spreads
+   * fields, so an absent key leaves the base entry's edges intact while an
+   * explicit `[]` clears them.
+   */
+  tasks: Map<string, TaskReference[] | undefined>;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -51,10 +58,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * Collect the `task: { id, name }` references inside one task entry's
  * `taskRequirements`, tolerating shapes the schema would reject (schema
  * validation owns shape enforcement; this test owns graph semantics).
+ *
+ * Returns `undefined` when the entry declares no `taskRequirements` key, so the
+ * caller can tell "inherits the base edges" from "declares no edges".
  */
-function collectPrerequisites(entry: unknown, location: string): TaskReference[] {
-  if (!isRecord(entry)) return [];
+function collectPrerequisites(entry: unknown, location: string): TaskReference[] | undefined {
+  if (!isRecord(entry)) return undefined;
+  if (!('taskRequirements' in entry)) return undefined;
+
   const requirements = entry.taskRequirements;
+  // A declared but malformed value still replaces the base value on merge, so it
+  // reports as "declared, no usable edges" rather than as absent.
   if (!Array.isArray(requirements)) return [];
 
   const refs: TaskReference[] = [];
@@ -77,7 +91,7 @@ function collectPrerequisites(entry: unknown, location: string): TaskReference[]
 export function findSelfReferences(sources: readonly TaskSource[]): string[] {
   return sources.flatMap((source) =>
     [...source.tasks].flatMap(([taskId, refs]) =>
-      refs
+      (refs ?? [])
         .filter((ref) => ref.id === taskId)
         .map((ref) => `${source.file}: ${ref.location} requires its own task ${taskId}`)
     )
@@ -89,7 +103,7 @@ export function findDuplicatePrerequisites(sources: readonly TaskSource[]): stri
   return sources.flatMap((source) =>
     [...source.tasks].flatMap(([taskId, refs]) => {
       const seen = new Set<string>();
-      return refs.flatMap((ref) => {
+      return (refs ?? []).flatMap((ref) => {
         if (seen.has(ref.id)) {
           return [`${source.file}: ${taskId} lists prerequisite ${ref.id} more than once`];
         }
@@ -113,7 +127,9 @@ export function findCycles(sources: readonly TaskSource[]): string[] {
   const cycles: string[] = [];
 
   for (const source of sources) {
-    const edges = new Map([...source.tasks].map(([id, refs]) => [id, refs.map((r) => r.id)]));
+    const edges = new Map(
+      [...source.tasks].map(([id, refs]) => [id, (refs ?? []).map((r) => r.id)])
+    );
     const state = new Map<string, 'visiting' | 'done'>();
 
     const walk = (taskId: string, path: string[]): void => {
@@ -150,7 +166,7 @@ export function findInconsistentReferences(sources: readonly TaskSource[]): stri
 
   for (const source of sources) {
     for (const refs of source.tasks.values()) {
-      for (const ref of refs) {
+      for (const ref of refs ?? []) {
         if (ref.name === undefined) continue;
         const where = `${source.file}: ${ref.location}`;
 
@@ -180,7 +196,7 @@ export function findInconsistentReferences(sources: readonly TaskSource[]): stri
 
 /** Build a source from a plain object, as the JSON5 loaders produce. */
 function toSource(file: string, entries: Record<string, unknown>): TaskSource {
-  const tasks = new Map<string, TaskReference[]>();
+  const tasks = new Map<string, TaskReference[] | undefined>();
   for (const [taskId, entry] of Object.entries(entries)) {
     if (taskId.startsWith('$')) continue;
     tasks.set(taskId, collectPrerequisites(entry, taskId));
@@ -203,13 +219,21 @@ export function buildEffectiveSource(
   base: readonly TaskSource[],
   modeSpecific?: TaskSource
 ): TaskSource {
-  const tasks = new Map<string, TaskReference[]>();
+  const tasks = new Map<string, TaskReference[] | undefined>();
   for (const source of base) {
     for (const [taskId, refs] of source.tasks) tasks.set(taskId, refs);
   }
-  // Mode entries win per task, matching mergeTaskOverride's field-level spread.
+
   if (modeSpecific) {
-    for (const [taskId, refs] of modeSpecific.tasks) tasks.set(taskId, refs);
+    for (const [taskId, refs] of modeSpecific.tasks) {
+      // Merge per field, not per task. A mode entry that only patches, say,
+      // `minPlayerLevel` carries no `taskRequirements` key, and
+      // `{ ...shared, ...modeSpecific }` leaves the base edges in place. Taking
+      // the mode entry wholesale would silently delete those edges and could
+      // hide the very cross-mode cycle this composition exists to find.
+      if (refs === undefined && tasks.has(taskId)) continue;
+      tasks.set(taskId, refs);
+    }
   }
   return { file: label, tasks };
 }
@@ -341,6 +365,36 @@ describe('task prerequisite graph rules', () => {
     const effective = buildEffectiveSource('effective:regular', base, mode);
 
     expect(effective.tasks.get('a')?.map((r) => r.id)).toEqual(['c']);
+    expect(findCycles([effective])).toEqual([]);
+  });
+
+  /**
+   * A mode entry that patches an unrelated field carries no `taskRequirements`
+   * key, and `mergeTaskOverride` leaves the base edges in place. Taking the mode
+   * entry wholesale would delete them and hide the ring.
+   */
+  it('keeps base edges when a mode entry patches an unrelated field', () => {
+    const base = [toSource('base', { a: { taskRequirements: [edge('b')] } })];
+    const mode = toSource('mode', {
+      a: { minPlayerLevel: 5 },
+      b: { taskRequirements: [edge('a')] },
+    });
+    const effective = buildEffectiveSource('effective:regular', base, mode);
+
+    expect(effective.tasks.get('a')?.map((r) => r.id)).toEqual(['b']);
+    expect(findCycles([effective])).toHaveLength(1);
+    expect(findCycles([effective])[0]).toContain('a -> b -> a');
+  });
+
+  it('lets a mode entry clear base edges with an explicit empty array', () => {
+    const base = [toSource('base', { a: { taskRequirements: [edge('b')] } })];
+    const mode = toSource('mode', {
+      a: { taskRequirements: [] },
+      b: { taskRequirements: [edge('a')] },
+    });
+    const effective = buildEffectiveSource('effective:regular', base, mode);
+
+    expect(effective.tasks.get('a')).toEqual([]);
     expect(findCycles([effective])).toEqual([]);
   });
 
