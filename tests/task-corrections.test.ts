@@ -84,7 +84,7 @@ describe('task correction data', () => {
       taskRequirements: [{ task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' } }],
       objectives: {
         '5d25af3c86f77443ff46b9e7': {
-          maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Woods' }],
+          maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
         },
       },
     });
@@ -115,7 +115,7 @@ describe('task correction data', () => {
     expect(overrides[TASK_IDS.supplements]).toMatchObject({
       objectives: {
         '6a5ab1920a2a6d86771ee14a': {
-          maps: [{ id: '5704e4dad2720bb55b8b4567', name: 'Customs' }],
+          maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
           possibleLocations: [],
         },
       },
