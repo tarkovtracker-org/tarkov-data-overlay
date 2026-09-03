@@ -92,6 +92,7 @@ describe('task correction data', () => {
       taskRequirements: [{ task: { id: '669fa395c4c5c04798002497', name: 'Exit Here' } }],
     });
     expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({
+      factionName: 'USEC',
       taskRequirements: [{ task: { id: '5a27b75b86f7742e97191958', name: 'Fishing Gear' } }],
     });
     expect(overrides[TASK_IDS.trophy]).toMatchObject({

@@ -1213,6 +1213,7 @@
       ]
     },
     "5a27b7a786f774579c3eb376": {
+      "factionName": "USEC",
       "traderRequirements": [
         {
           "id": "overlay.5a27b7a786f774579c3eb376.5935c25fb3acc3127c3d8cd9.level.>=.1",
@@ -9056,7 +9057,7 @@
   },
   "$meta": {
     "version": "1.81",
-    "generated": "2026-09-03T02:55:37.210Z",
-    "sha256": "0c06624e8932a38fefb5c866dcc7c8852c846f4d84d391b4b24550d853b775a1"
+    "generated": "2026-09-03T03:52:57.589Z",
+    "sha256": "cc3d61826b3fda46cc88559763b189202b2f008d52e18a77c9f901b7440bf403"
   }
 }

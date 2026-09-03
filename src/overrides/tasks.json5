@@ -1299,9 +1299,11 @@
     ],
   },
   // Tigr Safari - S1 (2026-08-10) replaced the player-level gate with
-  // Peacekeeper LL1; wiki lists Fishing Gear as the prerequisite (issue #320)
+  // Peacekeeper LL1; wiki lists Fishing Gear as the prerequisite and limits
+  // the quest to USEC PMCs (issue #320)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
   '5a27b7a786f774579c3eb376': {
+    factionName: 'USEC', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5a27b7a786f774579c3eb376.5935c25fb3acc3127c3d8cd9.level.>=.1',
