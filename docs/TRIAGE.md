@@ -93,12 +93,26 @@ checked out. A local verification can start with:
 
 ```bash
 git fetch origin main --no-tags
-git rev-parse origin/main
+triage_worktree="../tarkov-data-overlay-triage"
+git worktree add --detach "$triage_worktree" origin/main
+cd "$triage_worktree"
+git rev-parse HEAD
 npm ci
 npm run validate
 npm run build:check
 npm test
 ```
+
+Use a unique path that is not an existing worktree, and run every subsequent
+inspection and check from this detached `origin/main` worktree. Remove the
+temporary worktree after triage with:
+
+```bash
+git worktree remove "$triage_worktree"
+```
+
+This prevents uncommitted changes or an issue-fix branch from being mistaken
+for the latest published repository state.
 
 Use the smallest relevant checks while investigating, but run the full checks
 before calling a data report fixed by a repository change. Inspect the source
