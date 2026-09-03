@@ -9,6 +9,7 @@ import {
   checkEditionTaskReferences,
   countRequirementTypes,
 } from '../scripts/check-overrides.js';
+import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
 
 function createTaskAddition(overrides: Partial<TaskAddition> = {}): TaskAddition {
@@ -72,6 +73,30 @@ describe('countRequirementTypes', () => {
 
   it('returns zeros for tasks without trader requirements', () => {
     expect(countRequirementTypes([createApiTask()])).toEqual({ level: 0, reputation: 0 });
+  });
+});
+
+describe('countTraderRequirementIds', () => {
+  it('counts missing IDs from the raw payload before adapter normalization', () => {
+    const counts = countTraderRequirementIds({
+      tasks: {
+        taskA: {
+          traderRequirements: [{ id: 'upstream-id' }, { id: '' }, {}],
+        },
+        taskB: {
+          traderRequirements: [{ id: '  ' }],
+        },
+      },
+    });
+
+    expect(counts).toEqual({ total: 4, missing: 3 });
+  });
+
+  it('ignores tasks without a trader requirement collection', () => {
+    expect(countTraderRequirementIds({ tasks: { task: {} } })).toEqual({
+      total: 0,
+      missing: 0,
+    });
   });
 });
 

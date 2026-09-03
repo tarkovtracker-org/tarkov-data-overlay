@@ -72,13 +72,14 @@
     experience: 10000, // Was: 8300 (all modes, stale pre-1.1 value)
   },
 
-  // Glory to CPSU (old: Glory to CPSU - Part 1) - Renamed
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU
-  // The old "Glory to CPSU - Part 1" page is historical; the S1 quest is a
-  // single "Glory to CPSU" (dropped "- Part 1") with reworked optional
-  // objectives.
+  // Glory to CPSU - Part 1 (obsolete duplicate)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
+  // The old Part 1 task was removed from the 1.1 release; retain the disabled
+  // marker so consumers do not show the duplicate while upstream still serves it.
+  // The replacement task's Prapor LL2 requirement is now supplied upstream, so
+  // its temporary requirement override is intentionally not retained.
   '639135b04ed9512be67647d7': {
-    name: 'Glory to CPSU', // Was: Glory to CPSU - Part 1
+    disabled: true, // Was: active
   },
 
   // Escort - quest XP reworked in 1.1.0.0
@@ -108,6 +109,26 @@
   // Verified: the 1.1-pve data; wiki agrees.
   '5c0d1c4cd0928202a02a6f5c': {
     experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
+  },
+
+  // Gendarmerie - Mall Cop (historical task removed from EFT)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Mall_Cop
+  '64e7b99017ab941a6f7bf9d7': {
+    disabled: true, // Was: active
+  },
+
+  // Gendarmerie - Tickets, Please (historical task removed from EFT)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Tickets%2C_Please
+  '64e7b9a4aac4cd0a726562cb': {
+    disabled: true, // Was: active
+  },
+
+  // The Tarkov Shooter - Part 5 (obsolete duplicate)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
+  // Keep the comparison suppression in src/suppressions/tasks.json5; this
+  // disabled marker controls consumer visibility independently.
+  '5bc4826c86f774106d22d88b': {
+    disabled: true, // Was: active
   },
 
   // -------------------------------------------------------------------------
@@ -1211,6 +1232,7 @@
   //
   // 2026-08-10 - S1: now requires Skier LL1 instead of player level
   '5979ed3886f77431307dc512': {
+    name: "What's on the Flash Drive?", // Was: What’s on the Flash Drive?
     traderRequirements: [
       {
         id: 'overlay.5979ed3886f77431307dc512.58330581ace78e27b8b10cee.level.>=.1',
@@ -1278,6 +1300,11 @@
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 10)
+    ],
+    taskRequirements: [
+      {
+        task: { id: '5a27b75b86f7742e97191958', name: 'Fishing Gear' },
+      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal
@@ -1767,6 +1794,12 @@
         value: 2,
       }, // Was: [] (player level requirement, minPlayerLevel 22)
     ],
+    objectives: {
+      '6a5ab1920a2a6d86771ee14a': {
+        maps: [{ id: '5704e4dad2720bb55b8b4567', name: 'Customs' }], // Was: Interchange
+        possibleLocations: [], // Was: Interchange coordinates (unverified)
+      },
+    },
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Informed_Means_Armed
   //
@@ -1923,6 +1956,14 @@
         trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
+    ],
+    taskRequirements: [
+      {
+        task: {
+          id: '5d25e2b486f77409de05bba0',
+          name: 'The Huntsman Path - Secured Perimeter',
+        },
+      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Forest_Cleaning
@@ -2319,6 +2360,7 @@
   //
   // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
   '60e71e8ed54b755a3b53eb67': {
+    minPlayerLevel: 0, // Was: 55 (stale player-level gate)
     traderRequirements: [
       {
         id: 'overlay.60e71e8ed54b755a3b53eb67.5c0647fdd443bc2504c2d371.level.>=.4',
@@ -2830,6 +2872,11 @@
         value: 2,
       }, // Was: [] (player level requirement, minPlayerLevel 12)
     ],
+    taskRequirements: [
+      {
+        task: { id: '669fa395c4c5c04798002497', name: 'Exit Here' },
+      }, // Was: []
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
   //
@@ -3019,6 +3066,52 @@
         }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
       ],
     },
+  },
+
+  // ---------------------------------------------------------------------------
+  // TASK AVAILABILITY CORRECTIONS
+  //
+  // These prerequisite/level/map fields are required for consumers that build
+  // the task unlock graph from tarkov.dev. The API omits or misstates some of
+  // the links even though the corresponding quest pages document them.
+  // ---------------------------------------------------------------------------
+
+  // The Tarkov Shooter - Part 1 - follows Acquaintance (issue #295)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_1
+  '5bc4776586f774512d07cf05': {
+    taskRequirements: [
+      {
+        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
+      }, // Was: []
+    ],
+  },
+
+  // The Survivalist Path - Unprotected but Dangerous - objective takes place
+  // on Woods (issue #328)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Unprotected_but_Dangerous
+  '5d25aed386f77442734d25d2': {
+    taskRequirements: [
+      {
+        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
+      }, // Was: The Survivalist Path - Zhivchik
+    ],
+    objectives: {
+      '5d25af3c86f77443ff46b9e7': {
+        maps: [{ id: '5704e554d2720bac5b8b456e', name: 'Woods' }], // Was: []
+      },
+    },
+  },
+
+  // The Good Times - Part 1 - follows Shooting Cans and requires level 27
+  // (issue #343)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
+  '666314b4d7f171c4c20226c3': {
+    minPlayerLevel: 27, // Was: 12
+    taskRequirements: [
+      {
+        task: { id: '657315df034d76585f032e01', name: 'Shooting Cans' },
+      }, // Was: []
+    ],
   },
 
   // ---------------------------------------------------------------------------

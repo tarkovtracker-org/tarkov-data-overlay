@@ -7,6 +7,7 @@ import {
   deriveTaskUnlockDefinition,
   evaluateTaskUnlock,
   fetchTasks,
+  fetchTasksWithRequirementCounts,
   fetchModeAccessData,
   fetchTaskModeData,
   fetchLocaleBundle,
@@ -853,6 +854,30 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(requested).toContain('https://json.tarkov.dev/pve/tasks');
     expect(requested).toContain('https://json.tarkov.dev/pve/items_en');
     expect(requested.every((url) => !url.includes('/regular/'))).toBe(true);
+  });
+
+  it('reports raw missing trader-requirement IDs before adapter normalization', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                traderRequirements: [{ requirementType: 'level', value: 2 }],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const snapshot = await fetchTasksWithRequirementCounts();
+
+    expect(snapshot.traderRequirementIds).toEqual({ total: 1, missing: 1 });
+    expect(snapshot.tasks[0]?.traderRequirements?.[0]?.id).toMatch(/^overlay\.t1\./);
   });
 
   it('fetches each endpoint exactly once per call', async () => {

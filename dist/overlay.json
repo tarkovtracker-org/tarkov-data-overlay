@@ -225,7 +225,7 @@
       "experience": 10000
     },
     "639135b04ed9512be67647d7": {
-      "name": "Glory to CPSU"
+      "disabled": true
     },
     "60e71b62a0beca400d69efc4": {
       "traderRequirements": [
@@ -244,6 +244,15 @@
     },
     "5c0d1c4cd0928202a02a6f5c": {
       "experience": 65000
+    },
+    "64e7b99017ab941a6f7bf9d7": {
+      "disabled": true
+    },
+    "64e7b9a4aac4cd0a726562cb": {
+      "disabled": true
+    },
+    "5bc4826c86f774106d22d88b": {
+      "disabled": true
     },
     "639135e8c115f907b14700aa": {
       "traderRequirements": [
@@ -1146,6 +1155,7 @@
       ]
     },
     "5979ed3886f77431307dc512": {
+      "name": "What's on the Flash Drive?",
       "traderRequirements": [
         {
           "id": "overlay.5979ed3886f77431307dc512.58330581ace78e27b8b10cee.level.>=.1",
@@ -1213,6 +1223,14 @@
             "name": "Peacekeeper"
           },
           "value": 1
+        }
+      ],
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5a27b75b86f7742e97191958",
+            "name": "Fishing Gear"
+          }
         }
       ]
     },
@@ -1678,7 +1696,18 @@
           },
           "value": 2
         }
-      ]
+      ],
+      "objectives": {
+        "6a5ab1920a2a6d86771ee14a": {
+          "maps": [
+            {
+              "id": "5704e4dad2720bb55b8b4567",
+              "name": "Customs"
+            }
+          ],
+          "possibleLocations": []
+        }
+      }
     },
     "5b47926a86f7747ccc057c15": {
       "traderRequirements": [
@@ -1831,6 +1860,14 @@
             "name": "Jaeger"
           },
           "value": 1
+        }
+      ],
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d25e2b486f77409de05bba0",
+            "name": "The Huntsman Path - Secured Perimeter"
+          }
         }
       ]
     },
@@ -2219,6 +2256,7 @@
       ]
     },
     "60e71e8ed54b755a3b53eb67": {
+      "minPlayerLevel": 0,
       "traderRequirements": [
         {
           "id": "overlay.60e71e8ed54b755a3b53eb67.5c0647fdd443bc2504c2d371.level.>=.4",
@@ -2721,6 +2759,14 @@
           },
           "value": 2
         }
+      ],
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "669fa395c4c5c04798002497",
+            "name": "Exit Here"
+          }
+        }
       ]
     },
     "669fa3a40c828825de06d6a1": {
@@ -2927,6 +2973,47 @@
           }
         ]
       }
+    },
+    "5bc4776586f774512d07cf05": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d24b81486f77439c92d6ba8",
+            "name": "Acquaintance"
+          }
+        }
+      ]
+    },
+    "5d25aed386f77442734d25d2": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "5d24b81486f77439c92d6ba8",
+            "name": "Acquaintance"
+          }
+        }
+      ],
+      "objectives": {
+        "5d25af3c86f77443ff46b9e7": {
+          "maps": [
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Woods"
+            }
+          ]
+        }
+      }
+    },
+    "666314b4d7f171c4c20226c3": {
+      "minPlayerLevel": 27,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "657315df034d76585f032e01",
+            "name": "Shooting Cans"
+          }
+        }
+      ]
     },
     "639136df4b15ca31f76bc31f": {
       "factionName": "BEAR"
@@ -8969,7 +9056,7 @@
   },
   "$meta": {
     "version": "1.81",
-    "generated": "2026-09-03T02:01:35.299Z",
-    "sha256": "bd3545fc518027fa4f2330e1373d6b97a9756296336f68e4ede2ba379e291e8e"
+    "generated": "2026-09-03T02:55:37.210Z",
+    "sha256": "0c06624e8932a38fefb5c866dcc7c8852c846f4d84d391b4b24550d853b775a1"
   }
 }
