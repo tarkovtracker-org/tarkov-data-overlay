@@ -118,4 +118,33 @@ describe('eft-audit buildRows', () => {
     const rows = buildRows(eft, [apiTask({ id: 'cccccccccccccccccccccccc' })], {});
     expect(rows).toHaveLength(0);
   });
+
+  it('reports a client edge to an API-missing task as unresolved', () => {
+    const reference = parseEftTasks([
+      {
+        _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        conditions: {
+          AvailableForStart: [
+            {
+              id: 'cccccccccccccccccccccccc',
+              conditionType: 'Quest',
+              target: 'dddddddddddddddddddddddd',
+            },
+          ],
+        },
+      },
+    ] as never);
+
+    const rows = buildRows(reference, [apiTask({ taskRequirements: [] })], {});
+
+    expect(rows).toEqual([
+      expect.objectContaining({
+        field: 'taskRequirements',
+        reference: 'dddddddddddddddddddddddd',
+        api: '(none)',
+        verdict: 'UNRESOLVED',
+        note: expect.stringContaining('dddddddddddddddddddddddd'),
+      }),
+    ]);
+  });
 });

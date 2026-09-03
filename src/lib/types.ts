@@ -507,15 +507,20 @@ export type DivergenceMode = GameMode;
  * `id` is the join key a consumer resolves. A pair whose name reads correctly
  * while its ID points at a different map is therefore silently wrong: the schema
  * only type-checks both as strings, so nothing else catches it.
- * `tests/map-references.test.ts` validates every map reference in `src/` against
- * this registry, which is why a corrected map must be looked up rather than
- * copied from a nearby entry.
+ * `tests/entity-references.test.ts` validates every map reference in `src/`
+ * against this registry, which is why a corrected map must be looked up rather
+ * than copied from a nearby entry.
  *
  * Captured from `json.tarkov.dev/regular/maps` + `/regular/maps_en` (v1.81).
  * When upstream adds a map the guard fails with the unknown ID; verify the new
  * ID against those endpoints and add it here.
+ *
+ * Typed `Partial` so indexing an unknown ID yields `string | undefined` rather
+ * than a bare `string`. Prefer looking up through a `Map` built from these
+ * entries when the key is data-derived, so an inherited key like `constructor`
+ * cannot resolve to a prototype value.
  */
-export const TARKOV_MAP_NAMES_BY_ID: Readonly<Record<string, string>> = {
+export const TARKOV_MAP_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> = {
   '56f40101d2720b2a4d8b45d6': 'Customs',
   '55f2d3fd4bdc2d5f408b4567': 'Factory',
   '653e6760052c01c1c805532f': 'Ground Zero',
@@ -533,7 +538,39 @@ export const TARKOV_MAP_NAMES_BY_ID: Readonly<Record<string, string>> = {
   '6a294a5b5eb5f9a1700417b7': 'The Lab (Dark)',
   '6733700029c367a3d40b02af': 'The Labyrinth',
   '5704e3c2d2720bac5b8b4567': 'Woods',
-} as const;
+};
+
+/**
+ * Canonical tarkov.dev trader IDs mapped to their English names.
+ *
+ * Same hazard as `TARKOV_MAP_NAMES_BY_ID`: `trader: { id, name }` pairs appear
+ * throughout the task overrides (every `traderRequirements` entry carries one),
+ * consumers resolve them by `id`, and the schemas only type-check both as
+ * strings. A right-looking name beside the wrong ID would attribute a loyalty
+ * gate to the wrong trader. `tests/entity-references.test.ts` validates these.
+ *
+ * Captured from `json.tarkov.dev/regular/traders` + `/regular/traders_en`
+ * (v1.81). When upstream adds a trader the guard fails with the unknown ID;
+ * verify against those endpoints and add it here.
+ */
+export const TARKOV_TRADER_NAMES_BY_ID: Readonly<Partial<Record<string, string>>> = {
+  '656f0f98d80a697f855d34b1': 'BTR Driver',
+  '579dc571d53a0658a154fbec': 'Fence',
+  '5c0647fdd443bc2504c2d371': 'Jaeger',
+  '638f541a29ffd1183d187f57': 'Lightkeeper',
+  '5a7c2eca46aef81a7ca2145d': 'Mechanic',
+  '688246518448b05efd61d461': 'Mr. Kerman',
+  '5935c25fb3acc3127c3d8cd9': 'Peacekeeper',
+  '54cb50c76803fa8b248b4571': 'Prapor',
+  '68fe15990f29ba3fdbba9d55': 'Radio station',
+  '5ac3b934156ae10c4430e83c': 'Ragman',
+  '6617beeaa9cfa777ca915b7c': 'Ref',
+  '58330581ace78e27b8b10cee': 'Skier',
+  '69e0d6cc77b63940375b9173': 'Survivor',
+  '68fe15910f29ba3fdbba9d54': 'Taran',
+  '54cb57776803fa99248b456e': 'Therapist',
+  '688246958448b05efd61d462': 'Voevoda',
+};
 
 /** Mode-specific overlay data */
 export interface ModeOverlay {

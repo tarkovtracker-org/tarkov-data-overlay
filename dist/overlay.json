@@ -372,7 +372,46 @@
       "experience": 10000
     },
     "5c51aac186f77432ea65c552": {
-      "minPlayerLevel": 40
+      "minPlayerLevel": 40,
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "597a0f5686f774273b74f676",
+            "name": "Chemical - Part 4"
+          },
+          "status": [
+            "complete",
+            "failed"
+          ]
+        },
+        {
+          "task": {
+            "id": "5c0bde0986f77479cf22c2f8",
+            "name": "Shooter Born in Heaven"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5bc480a686f7741af0342e29",
+            "name": "The Tarkov Shooter - Part 4"
+          },
+          "status": [
+            "complete"
+          ]
+        },
+        {
+          "task": {
+            "id": "5ae4497b86f7744cf402ed00",
+            "name": "Sew it Good - Part 2"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
     },
     "6193850f60b34236ee0483de": {
       "traderRequirements": [
@@ -1225,14 +1264,6 @@
           },
           "value": 1
         }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5a27b75b86f7742e97191958",
-            "name": "Fishing Gear"
-          }
-        }
       ]
     },
     "5a27b7d686f77460d847e6a6": {
@@ -1767,6 +1798,7 @@
       ]
     },
     "5c0d4e61d09282029f53920e": {
+      "minPlayerLevel": 0,
       "traderRequirements": [
         {
           "id": "overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4",
@@ -1861,14 +1893,6 @@
             "name": "Jaeger"
           },
           "value": 1
-        }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "5d25e2b486f77409de05bba0",
-            "name": "The Huntsman Path - Secured Perimeter"
-          }
         }
       ]
     },
@@ -2760,14 +2784,6 @@
           },
           "value": 2
         }
-      ],
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "669fa395c4c5c04798002497",
-            "name": "Exit Here"
-          }
-        }
       ]
     },
     "669fa3a40c828825de06d6a1": {
@@ -2924,95 +2940,51 @@
         }
       ]
     },
-    "5bc4836986f7740c0152911c": {
-      "experience": 13100,
-      "finishRewards": {
-        "traderStanding": [
-          {
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            },
-            "standing": 0.02
-          }
-        ],
-        "items": [
-          {
-            "count": 85000,
-            "item": {
-              "id": "5449016a4bdc2d6f028b456f",
-              "name": "Roubles",
-              "shortName": "RUB"
-            }
-          },
-          {
-            "count": 1,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            }
-          },
-          {
-            "count": 1,
-            "item": {
-              "id": "5ab8f20c86f7745cdb629fb2",
-              "name": "Ski hat with holes for eyes"
-            }
-          }
-        ],
-        "offerUnlock": [
-          {
-            "level": 3,
-            "item": {
-              "id": "5bbdb870d4351e00367fb67d",
-              "name": "Mosin Rifle ATI Monte Carlo stock"
-            },
-            "trader": {
-              "id": "5c0647fdd443bc2504c2d371",
-              "name": "Jaeger"
-            }
-          }
-        ]
-      }
+    "666314b4d7f171c4c20226c3": {
+      "minPlayerLevel": 27
     },
-    "5bc4776586f774512d07cf05": {
+    "61904daa7d0d857927447b9c": {
+      "taskRequirements": []
+    },
+    "67a0970744893b9f3f0d9b68": {
+      "taskRequirements": []
+    },
+    "673f4e956f1b89c7bc0f56ef": {
       "taskRequirements": [
         {
           "task": {
-            "id": "5d24b81486f77439c92d6ba8",
-            "name": "Acquaintance"
-          }
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
         }
       ]
     },
-    "5d25aed386f77442734d25d2": {
+    "673f629c5b555b53460cf827": {
       "taskRequirements": [
         {
           "task": {
-            "id": "5d24b81486f77439c92d6ba8",
-            "name": "Acquaintance"
-          }
-        }
-      ],
-      "objectives": {
-        "5d25af3c86f77443ff46b9e7": {
-          "maps": [
-            {
-              "id": "5704e3c2d2720bac5b8b4567",
-              "name": "Woods"
-            }
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
           ]
         }
-      }
+      ]
     },
-    "666314b4d7f171c4c20226c3": {
-      "minPlayerLevel": 27,
+    "6745fae369a58fceba10343d": {
       "taskRequirements": [
         {
           "task": {
-            "id": "657315df034d76585f032e01",
-            "name": "Shooting Cans"
-          }
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
         }
       ]
     },
@@ -9057,7 +9029,7 @@
   },
   "$meta": {
     "version": "1.83",
-    "generated": "2026-09-03T11:36:36.027Z",
-    "sha256": "dc0c25b0a63cb31bf02e2f58ba3246470d3b0a0488ddfb37caf3a69a3e52f2f5"
+    "generated": "2026-09-03T15:27:55.306Z",
+    "sha256": "17c9d97be6885555e1184773a960842da333390f1b48c22fdf16be3a57977fd9"
   }
 }

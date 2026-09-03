@@ -8,6 +8,7 @@ import {
   checkTaskAdditions,
   checkEditionTaskReferences,
   countRequirementTypes,
+  getValidationExitCode,
 } from '../scripts/check-overrides.js';
 import { countTraderRequirementIds } from '../src/lib/index.js';
 import type { TaskAddition, TaskData } from '../src/lib/index.js';
@@ -122,6 +123,71 @@ describe('countTraderRequirementIds', () => {
     expect(
       countTraderRequirementIds({ tasks: { task: { traderRequirements: idShapes } } })
     ).toEqual({ total: 4, missing: 4 });
+  });
+});
+
+describe('getValidationExitCode', () => {
+  const base = {
+    strict: false,
+    failOnStale: false,
+    failOnUpstream: false,
+    actionable: 0,
+    staleProblems: 0,
+    upstreamProblems: 0,
+  };
+
+  it('returns zero when no enabled gate has a problem', () => {
+    expect(getValidationExitCode({ ...base, upstreamProblems: 1 })).toBe(0);
+  });
+
+  it('returns the strict code for actionable problems', () => {
+    expect(getValidationExitCode({ ...base, strict: true, actionable: 1 })).toBe(2);
+  });
+
+  it('returns the stale code for stale problems', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, staleProblems: 1 })).toBe(3);
+  });
+
+  it('gates upstream problems only under their own opt-in flag', () => {
+    expect(getValidationExitCode({ ...base, failOnUpstream: true, upstreamProblems: 1 })).toBe(4);
+  });
+
+  /**
+   * The CI gate must not fail on a problem originating in tarkov.dev's data:
+   * nobody working in this repo can fix one, so it would block every PR.
+   */
+  it('does not fail the CI gate on an upstream-only regression', () => {
+    expect(getValidationExitCode({ ...base, failOnStale: true, upstreamProblems: 1 })).toBe(0);
+    expect(getValidationExitCode({ ...base, strict: true, upstreamProblems: 1 })).toBe(0);
+    expect(
+      getValidationExitCode({ ...base, strict: true, failOnStale: true, upstreamProblems: 1 })
+    ).toBe(0);
+  });
+
+  it('prioritizes upstream problems over both downstream gates when opted in', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        failOnUpstream: true,
+        actionable: 1,
+        staleProblems: 1,
+        upstreamProblems: 1,
+      })
+    ).toBe(4);
+  });
+
+  it('prefers the strict code over the stale code', () => {
+    expect(
+      getValidationExitCode({
+        ...base,
+        strict: true,
+        failOnStale: true,
+        actionable: 1,
+        staleProblems: 1,
+      })
+    ).toBe(2);
   });
 });
 

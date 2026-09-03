@@ -16,14 +16,19 @@
  *
  *   CONFLICT  We have an override, but the override value disagrees with the
  *             reference. -> our override is wrong; fix it.
+ *   UNRESOLVED The client names a prerequisite task absent from the selected
+ *              API mode. -> do not add a dangling override; investigate the
+ *              missing task as an addition/upstream ingestion issue.
  *
  *   OK        We have an override, the API is (still) wrong, and the override
  *             matches the reference. -> working as intended, keep it.
  *
  * Fields with no reference value (the reference can't adjudicate) are skipped,
- * so this never produces false GAPs. The reference is per game-mode; pass --mode
- * to pick which tarkov.dev mode and which mode-specific override file to audit
- * against (defaults to pve). Shared overrides
+ * so this never produces false GAPs. Reference prerequisite targets that are not
+ * present in the selected API mode are reported as UNRESOLVED instead of GAP:
+ * an override for one would create a dangling task edge. The reference is
+ * per game-mode; pass --mode to pick which tarkov.dev mode and which mode-specific
+ * override file to audit against (defaults to pve). Shared overrides
  * (src/overrides/tasks.json5) are merged with the mode file the same way the
  * built overlay applies them (mode wins per field).
  *
@@ -61,17 +66,18 @@ import {
 } from '../src/lib/index.js';
 import { loadReferenceTasks, parseModeArgs, writeJsonOutput, type EftTask } from './eft-compare.js';
 
-type Verdict = 'GAP' | 'STALE' | 'CONFLICT' | 'OK';
-type Field = 'experience' | 'minPlayerLevel' | `objective[${string}].count`;
+type Verdict = 'GAP' | 'STALE' | 'CONFLICT' | 'UNRESOLVED' | 'OK';
+type Field = 'experience' | 'minPlayerLevel' | 'taskRequirements' | `objective[${string}].count`;
 
 interface Row {
   taskId: string;
   taskName: string;
   field: Field;
-  reference: number;
-  api: number | undefined;
-  override: number | undefined;
+  reference: number | string;
+  api: number | string | undefined;
+  override: number | string | undefined;
   verdict: Verdict;
+  note?: string;
 }
 
 const { srcDir } = getProjectPaths();
@@ -108,10 +114,10 @@ function effectiveOverrides(mode: GameMode): Record<string, TaskOverride> {
 }
 
 /** Classify one (task, field) across the three sources. */
-function classify(
-  reference: number,
-  api: number | undefined,
-  override: number | undefined
+function classify<T extends number | string>(
+  reference: T,
+  api: T | undefined,
+  override: T | undefined
 ): Verdict | null {
   const apiCorrect = api !== undefined && api === reference;
   const hasOverride = override !== undefined;
@@ -126,12 +132,23 @@ function classify(
   return 'OK'; // API still wrong, override fixes it
 }
 
+/**
+ * Canonical, comparable form of an unordered requirement set: sorted members
+ * joined with `+`, or `(none)` when empty. Order in the source data is not
+ * meaningful, so sorting keeps a reordering from reading as a difference.
+ */
+function canonicalJoin(members: Iterable<string>): string {
+  const sorted = [...new Set(members)].sort();
+  return sorted.length === 0 ? '(none)' : sorted.join('+');
+}
+
 function buildRows(
   eftTasks: Map<string, EftTask>,
   apiTasks: TaskData[],
   overrides: Record<string, TaskOverride>
 ): Row[] {
   const rows: Row[] = [];
+  const apiTaskIds = new Set(apiTasks.map((task) => task.id));
 
   for (const eft of eftTasks.values()) {
     const api = findTaskById(apiTasks, eft.id);
@@ -159,6 +176,66 @@ function buildRows(
     };
     scalar('experience', eft.experience);
     scalar('minPlayerLevel', eft.minPlayerLevel);
+
+    // Prerequisite edges. The reference adjudicates by absence here (see
+    // EftTask.prerequisites), so an empty reference set is a real "no quest
+    // prerequisite" and an override that adds one is a CONFLICT.
+    //
+    // Skipped entirely when either side carries `taskRequirementGroups`. Those
+    // are OR groups, while `prerequisites` is a flat AND set, so folding grouped
+    // IDs into one set would compare different semantics and invent a verdict.
+    // Nothing uses the field today (it is absent upstream and unused in the
+    // overlay), but silently mis-auditing the first entry that does is worse
+    // than declining to audit it.
+    const hasGroups =
+      (api.taskRequirementGroups?.length ?? 0) > 0 || (ov?.taskRequirementGroups?.length ?? 0) > 0;
+
+    if (!hasGroups) {
+      const referenceEdges = canonicalJoin(eft.prerequisites);
+      const apiEdges = canonicalJoin(
+        (api.taskRequirements ?? []).flatMap((r) => (r.task?.id ? [r.task.id] : []))
+      );
+      const overrideEdges =
+        ov?.taskRequirements === undefined
+          ? undefined
+          : canonicalJoin(ov.taskRequirements.flatMap((r) => (r.task?.id ? [r.task.id] : [])));
+      const missingReferenceTargets = [...eft.prerequisites].filter(
+        (taskId) => !apiTaskIds.has(taskId)
+      );
+
+      // A client edge to a task absent from the selected API mode cannot be
+      // safely represented by a task override: adding it would leave consumers
+      // with a dangling prerequisite. Keep the evidence visible, but do not
+      // call it a GAP that invites an unsafe correction. This is common for
+      // story/seasonal tasks that the task endpoint does not model.
+      if (missingReferenceTargets.length > 0) {
+        rows.push({
+          taskId: eft.id,
+          taskName: name,
+          field: 'taskRequirements',
+          reference: referenceEdges,
+          api: apiEdges,
+          override: overrideEdges,
+          verdict: 'UNRESOLVED',
+          note:
+            `client prerequisite target(s) absent from selected API mode: ${missingReferenceTargets.join(', ')}; ` +
+            'do not add a dangling task override',
+        });
+      } else {
+        const edgeVerdict = classify(referenceEdges, apiEdges, overrideEdges);
+        if (edgeVerdict) {
+          rows.push({
+            taskId: eft.id,
+            taskName: name,
+            field: 'taskRequirements',
+            reference: referenceEdges,
+            api: apiEdges,
+            override: overrideEdges,
+            verdict: edgeVerdict,
+          });
+        }
+      }
+    }
 
     // Objective counts (keyed by objective/condition id).
     const apiObjectives = new Map((api.objectives ?? []).map((o) => [o.id, o]));
@@ -197,6 +274,11 @@ const VERDICT_META: Record<Verdict, { icon: string; color: string; blurb: string
     color: colors.yellow,
     blurb: 'API fixed upstream - override redundant, remove it',
   },
+  UNRESOLVED: {
+    icon: icons.warning,
+    color: colors.yellow,
+    blurb: 'client edge targets a task absent from the API - no safe override',
+  },
   OK: { icon: icons.success, color: colors.green, blurb: 'override correct and still needed' },
 };
 
@@ -209,7 +291,7 @@ function fieldLabel(field: Field): string {
 function printReport(rows: Row[], mode: GameMode): void {
   printHeader(`THREE-WAY AUDIT  (reference -> tarkov.dev ${mode} -> overrides)`);
 
-  const order: Verdict[] = ['GAP', 'CONFLICT', 'STALE', 'OK'];
+  const order: Verdict[] = ['GAP', 'CONFLICT', 'UNRESOLVED', 'STALE', 'OK'];
   for (const verdict of order) {
     const items = rows.filter((r) => r.verdict === verdict);
     if (items.length === 0) continue;
@@ -220,7 +302,8 @@ function printReport(rows: Row[], mode: GameMode): void {
         `  ${r.taskName} ${dim(`(${r.taskId})`)} ${dim(fieldLabel(r.field))}\n` +
           `     reference: ${colors.green}${r.reference}${colors.reset}  ` +
           `api: ${colors.red}${r.api}${colors.reset}  ` +
-          `override: ${r.override === undefined ? dim('none') : colors.cyan + r.override + colors.reset}`
+          `override: ${r.override === undefined ? dim('none') : colors.cyan + r.override + colors.reset}` +
+          (r.note ? `\n     note: ${dim(r.note)}` : '')
       );
     }
   }
@@ -229,6 +312,9 @@ function printReport(rows: Row[], mode: GameMode): void {
   printHeader('SUMMARY');
   console.log(`  GAP      (add override):    ${bold(String(count('GAP')))} : ${icons.error}`);
   console.log(`  CONFLICT (fix override):    ${bold(String(count('CONFLICT')))} : ${icons.error}`);
+  console.log(
+    `  UNRESOLVED (no safe override): ${bold(String(count('UNRESOLVED')))} : ${icons.warning}`
+  );
   console.log(`  STALE    (remove override): ${bold(String(count('STALE')))} : ${icons.warning}`);
   console.log(`  OK       (keep override):   ${bold(String(count('OK')))} : ${icons.success}`);
   console.log();

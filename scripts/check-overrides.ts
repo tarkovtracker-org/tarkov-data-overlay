@@ -8,10 +8,33 @@
  *
  * Usage:
  *   npm run check-overrides
+ *   npm run check-overrides -- --fail-on-stale
+ *   npm run check-overrides -- --strict --fail-on-upstream
+ *
+ * Flags (all off by default; without them the script only reports):
+ *   --strict            Fail when the overlay is inconsistent or data is being
+ *                       served incorrectly (see `actionable` in main()).
+ *   --fail-on-stale     Fail when the overlay carries data tarkov.dev now
+ *                       supplies itself. This is what CI runs.
+ *   --fail-on-upstream  Fail on upstream data-quality regressions. Off by
+ *                       default and deliberately NOT part of the CI gate: these
+ *                       problems originate in tarkov.dev's data, so no
+ *                       contributor can fix one, and gating PRs on it would
+ *                       block every merge until upstream repaired their data.
+ *                       Intended for the scheduled monitoring job, which opens
+ *                       an issue instead of failing a PR. The diagnostic is
+ *                       always printed regardless of this flag.
  *
  * Exit codes:
- *   0 - All overrides validated successfully
- *   1 - Error occurred during validation
+ *   0 - Ran to completion with no problem that an enabled gate fails on
+ *   1 - Error occurred during validation (network, parse, unexpected throw)
+ *   2 - Overlay inconsistency / data served incorrectly  (--strict)
+ *   3 - Overlay carries data now supplied upstream       (--fail-on-stale)
+ *   4 - Upstream data-quality regression                 (--fail-on-upstream)
+ *
+ * When more than one gate would fail, every applicable summary is printed and
+ * the most specific classification wins: 4 (upstream's problem) before
+ * 2 (our overlay is wrong) before 3 (our overlay is merely redundant).
  */
 
 import { join } from 'path';
@@ -50,7 +73,6 @@ import {
   type TaskAddition,
   type TaskData,
   type TaskDataWithRequirementCounts,
-  type TraderRequirementIdCounts,
   type GameMode,
   type ValidationResult,
   type ValidationDetail,
@@ -260,6 +282,41 @@ export function countRequirementTypes(tasks: TaskData[]): RequirementTypeCounts 
     }
   }
   return counts;
+}
+
+export type ValidationExitCode = 0 | 2 | 3 | 4;
+
+export type ValidationGateCounts = {
+  strict: boolean;
+  failOnStale: boolean;
+  /** Opt-in; see the `--fail-on-upstream` note in this file's header. */
+  failOnUpstream: boolean;
+  actionable: number;
+  staleProblems: number;
+  upstreamProblems: number;
+};
+
+/**
+ * Select the exit code for the validation gates.
+ *
+ * Upstream data-quality regressions take precedence because they are distinct
+ * from overlay inconsistencies and stale overlay fields: they describe a problem
+ * in tarkov.dev's data rather than in ours. They are gated behind their own
+ * opt-in flag so that a regression nobody here can fix cannot block every PR;
+ * the caller prints the diagnostic either way.
+ */
+export function getValidationExitCode({
+  strict,
+  failOnStale,
+  failOnUpstream,
+  actionable,
+  staleProblems,
+  upstreamProblems,
+}: ValidationGateCounts): ValidationExitCode {
+  if (failOnUpstream && upstreamProblems > 0) return 4;
+  if (strict && actionable > 0) return 2;
+  if (failOnStale && staleProblems > 0) return 3;
+  return 0;
 }
 
 function buildApiIndexes(apiTasks: TaskData[]) {
@@ -723,28 +780,41 @@ function printReferenceCrossCheck(
  * Report upstream trader-requirement counts by semantic type and mode.
  *
  * Surfaces the level/reputation split so a consumer's requirement evaluation
- * can be kept in sync with the discriminated upstream schema.
+ * can be kept in sync with the discriminated upstream schema, and reports how
+ * many requirements arrive without a merge identity (issue #276).
+ *
+ * Takes one snapshot per mode rather than parallel task/count maps so a mode
+ * cannot be present in one and absent from the other.
+ *
+ * @returns the number of upstream requirements lacking a merge ID, summed across
+ *   modes. The adapter mints a synthetic `overlay.*` ID for these, which keeps
+ *   consumers working but is the same shape our own additions use, so a silent
+ *   collision is possible. The caller always prints the diagnostic and gates on
+ *   it only under the opt-in `--fail-on-upstream` (exit 4), because nothing in
+ *   this repository can fix an upstream data problem.
  */
 function printRequirementTypeCounts(
-  apiTasksByMode: Partial<Record<GameMode, TaskData[]>>,
-  requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>>
-): void {
+  snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>>
+): { missingRequirementIds: number } {
   printHeader('TRADER REQUIREMENT TYPE COUNTS (UPSTREAM)');
+  const missing: string[] = [];
+  let missingRequirementIds = 0;
+
   for (const mode of SUPPORTED_GAME_MODES) {
-    const tasks = apiTasksByMode[mode];
-    if (!tasks) continue;
-    const counts = countRequirementTypes(tasks);
-    const ids = requirementIdCountsByMode[mode];
-    const idSummary = ids
-      ? `, ${ids.missing} missing ID(s) of ${ids.total}`
-      : ', missing-ID count unavailable';
-    console.log(`  ${mode}: ${counts.level} level, ${counts.reputation} reputation${idSummary}`);
+    const snapshot = snapshotsByMode[mode];
+    if (!snapshot) continue;
+    const counts = countRequirementTypes(snapshot.tasks);
+    const ids = snapshot.traderRequirementIds;
+    console.log(
+      `  ${mode}: ${counts.level} level, ${counts.reputation} reputation, ` +
+        `${ids.missing} missing ID(s) of ${ids.total}`
+    );
+    if (ids.missing > 0) {
+      missingRequirementIds += ids.missing;
+      missing.push(`${mode}: ${ids.missing} trader requirement(s) lack an upstream id`);
+    }
   }
 
-  const missing = SUPPORTED_GAME_MODES.flatMap((mode) => {
-    const count = requirementIdCountsByMode[mode]?.missing ?? 0;
-    return count > 0 ? [`${mode}: ${count} trader requirement(s) lack an upstream id`] : [];
-  });
   if (missing.length > 0) {
     console.log(
       `${colors.yellow}WARNING: upstream trader requirements lack merge IDs${colors.reset}`
@@ -752,6 +822,7 @@ function printRequirementTypeCounts(
     for (const line of missing) console.log(`  ${line}`);
   }
   console.log();
+  return { missingRequirementIds };
 }
 
 /**
@@ -1151,11 +1222,24 @@ function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequireme
 async function main(): Promise<void> {
   const strict = process.argv.includes('--strict');
   const failOnStale = process.argv.includes('--fail-on-stale');
+  const failOnUpstream = process.argv.includes('--fail-on-upstream');
   const getTasksForMode = createTaskFetcher();
   /** Problems that mean data is being served wrong or the overlay is inconsistent. */
   let actionable = 0;
   /** Overlay entries or fields now supplied upstream and safe to remove. */
   let staleProblems = 0;
+  /**
+   * Upstream data-quality regressions, currently trader requirements arriving
+   * without a merge identity (issue #276). Deliberately kept out of
+   * `actionable` and `staleProblems`: it is neither an overlay inconsistency nor
+   * a stale overlay field, and it gets its own exit code so automation can tell
+   * "our overlay is out of date" from "upstream regressed".
+   *
+   * Always reported; gated only under the opt-in `--fail-on-upstream`. Nobody
+   * working in this repo can fix an upstream data problem, so wiring it into the
+   * CI gate would block every PR for the duration of someone else's outage.
+   */
+  let upstreamProblems = 0;
 
   try {
     printProgress('Loading task overrides...');
@@ -1197,7 +1281,9 @@ async function main(): Promise<void> {
     // cross-mode passes so nothing is fetched twice.
     const modeOverridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>> = {};
     const apiTasksByMode: Partial<Record<GameMode, TaskData[]>> = {};
-    const requirementIdCountsByMode: Partial<Record<GameMode, TraderRequirementIdCounts>> = {};
+    // Keyed snapshots keep each mode's tasks and its raw trader-requirement ID
+    // counts together, so the diagnostic cannot see one without the other.
+    const snapshotsByMode: Partial<Record<GameMode, TaskDataWithRequirementCounts>> = {};
 
     // Validate mode-specific overrides and additions
     for (const mode of SUPPORTED_GAME_MODES) {
@@ -1206,9 +1292,10 @@ async function main(): Promise<void> {
       modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const { tasks: modeApiTasks, traderRequirementIds } = await getTasksForMode(mode);
+      const modeSnapshot = await getTasksForMode(mode);
+      const modeApiTasks = modeSnapshot.tasks;
       apiTasksByMode[mode] = modeApiTasks;
-      requirementIdCountsByMode[mode] = traderRequirementIds;
+      snapshotsByMode[mode] = modeSnapshot;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       const modeOverrideCount = Object.keys(modeOverrides).length;
@@ -1246,7 +1333,7 @@ async function main(): Promise<void> {
 
     // The mode loop covers `regular` too, so every supported mode's raw
     // diagnostic is already recorded here.
-    printRequirementTypeCounts(apiTasksByMode, requirementIdCountsByMode);
+    upstreamProblems += printRequirementTypeCounts(snapshotsByMode).missingRequirementIds;
 
     // Base overrides apply to every mode, so validate them against every mode.
     const baseResultsByMode: Partial<Record<GameMode, ValidationResult[]>> = {};
@@ -1423,23 +1510,49 @@ async function main(): Promise<void> {
     printProgress('Checking locale overrides against tarkov.dev bundles...\n');
     staleProblems += await checkLocaleOverrides();
 
-    if (strict && actionable > 0) {
+    // Every problem that has a count gets its summary printed, so enabling one
+    // gate never hides another's findings in a multi-thousand-line log. Only the
+    // exit code is exclusive, and the most specific classification wins: an
+    // upstream regression (4) is neither an overlay inconsistency (2) nor a
+    // stale overlay field (3).
+    const exitCode = getValidationExitCode({
+      strict,
+      failOnStale,
+      failOnUpstream,
+      actionable,
+      staleProblems,
+      upstreamProblems,
+    });
+
+    // Printed whenever the count is non-zero, gate or no gate: the whole point
+    // of issue #276 is that this must not pass silently. Only the exit code is
+    // opt-in.
+    if (upstreamProblems > 0) {
+      printError(
+        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
+          'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
+          'an overlay.* id for them - the same shape our own additions use. An overlay ' +
+          'addition can therefore collide with a real upstream requirement instead of ' +
+          'being added alongside it. Nothing here can fix it; report it upstream.' +
+          (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
+      );
+    }
+
+    if (actionable > 0 && strict) {
       printError(
         `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
           'Data is being served incorrectly or the overlay is inconsistent.'
       );
-      process.exit(2);
     }
 
-    if (failOnStale && staleProblems > 0) {
+    if (staleProblems > 0 && failOnStale) {
       printError(
         `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
           'Remove data now supplied upstream or scope it to the modes where it is still missing.'
       );
-      process.exit(3);
     }
 
-    process.exit(0);
+    process.exit(exitCode);
   } catch (error) {
     printError('Error during validation:', error as Error);
     process.exit(1);

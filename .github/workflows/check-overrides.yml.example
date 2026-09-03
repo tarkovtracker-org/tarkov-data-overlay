@@ -33,13 +33,39 @@ jobs:
 
       - name: Check overrides
         id: check
+        # This scheduled job is the right home for --fail-on-upstream: an upstream
+        # data-quality regression cannot be fixed from this repository, so it must
+        # not gate pull requests (CI deliberately omits the flag). Here it only
+        # sets an output that decides whether an issue gets opened.
+        #
+        # `|| status=$?` captures the code and keeps the step green so the
+        # issue-creation step still runs. Do not use `|| true` here: it makes
+        # `true` the last command, so both `$?` and `PIPESTATUS[0]` become 0 and
+        # every failure looks like a pass. 3 = stale overlay data, 4 = upstream
+        # regression (see the exit-code table in README.md).
+        #
+        # Only 3 and 4 are "reportable"; anything else nonzero (1 = network,
+        # parse or unexpected error, 2 = overlay inconsistency) means the check
+        # could not do its job or found something the issue step does not
+        # describe, so the job fails loudly rather than passing silently.
         run: |
-          npm run check-overrides > check-output.txt 2>&1 || true
+          status=0
+          npm run check-overrides -- --fail-on-stale --fail-on-upstream \
+            > check-output.txt 2>&1 || status=$?
           cat check-output.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          case "$status" in
+            0 | 3 | 4) ;;
+            *) exit "$status" ;;
+          esac
 
       - name: Create issue if overrides need updating
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        if: contains(steps.check.outputs.stdout, 'can remove')
+        # Runs for a stale overlay (3) or an upstream regression (4). The previous
+        # `contains(steps.check.outputs.stdout, ...)` condition never fired: `run`
+        # steps have no `stdout` output, and the upstream diagnostic does not
+        # contain the string it looked for.
+        if: steps.check.outputs.status == '3' || steps.check.outputs.status == '4'
         with:
           script: |
             const fs = require('fs');

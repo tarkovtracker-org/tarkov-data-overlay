@@ -308,8 +308,30 @@
   // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
   // lists no player level for Collector (only Scav karma + trader loyalties),
   // so it cannot adjudicate. Previously shipped as a PvE-only correction.
+  // The same client capture also requires Chemical - Part 4, Shooter Born in
+  // Heaven, The Tarkov Shooter - Part 4, and Sew it Good - Part 2. The live API
+  // has Chemical - Part 3 and an extra Postman Pat - Part 2 edge in all modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
     minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
+    taskRequirements: [
+      {
+        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
+        status: ['complete', 'failed'],
+      },
+      {
+        task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5bc480a686f7741af0342e29', name: 'The Tarkov Shooter - Part 4' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
+        status: ['complete'],
+      },
+    ], // Was: Chemical - Part 3 + Postman Pat - Part 2 (and the three shared edges)
   },
 
   // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)
@@ -1239,7 +1261,12 @@
     ],
   },
   // What's on the Flash Drive? - S1 (2026-08-10) replaced the player-level gate
-  // with Skier LL1; upstream still serves U+2019 in the name (issue #335)
+  // with Skier LL1; upstream still serves U+2019 in the name (issue #335).
+  // Note the wiki's own canonical title also uses U+2019 (the ASCII-apostrophe
+  // title is a redirect), so the link below is not the proof for the character.
+  // The straight quote follows the report in #335 plus upstream's own
+  // convention: every other apostrophe in tarkov.dev task names is U+0027, and
+  // this task is the single U+2019 outlier.
   // Proof: https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive
   '5979ed3886f77431307dc512': {
     name: "What's on the Flash Drive?", // Was: What’s on the Flash Drive?
@@ -1299,8 +1326,9 @@
     ],
   },
   // Tigr Safari - S1 (2026-08-10) replaced the player-level gate with
-  // Peacekeeper LL1; wiki lists Fishing Gear as the prerequisite and limits
-  // the quest to USEC PMCs (issue #320)
+  // Peacekeeper LL1, and the quest is USEC-only (issue #320). No
+  // `taskRequirements`: the wiki names Fishing Gear as `previous`, but that is
+  // narrative order - the client's only start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
   '5a27b7a786f774579c3eb376': {
     factionName: 'USEC', // Was: Any
@@ -1312,11 +1340,6 @@
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 10)
-    ],
-    taskRequirements: [
-      {
-        task: { id: '5a27b75b86f7742e97191958', name: 'Fishing Gear' },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal
@@ -1869,10 +1892,31 @@
       }, // Was: [] (player level requirement, minPlayerLevel 30)
     ],
   },
+  // The Guide
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Guide
   //
-  // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  // 2026-08-10 - S1: requires Peacekeeper LL4 instead of a player level. The
+  // wiki Requirements section lists exactly "Must be Loyalty Level 4 to start
+  // this quest" and no player level.
+  //
+  // Patch 1.1.0.0 expresses trader-loyalty gates as GlobalVariableValue start
+  // conditions rather than TraderLoyalty conditions, which is why upstream serves
+  // this as an opaque `otherRequirements` globalVariable entry and why the
+  // loyalty level has to be restored here, exactly as the other 150+ entries in
+  // this file do. The variable this task is gated on also gates six other
+  // Peacekeeper quests, and every one of them is Peacekeeper LL4.
+  //
+  // minPlayerLevel 0 rather than a number: upstream's 32 is neither an explicit
+  // client `Level` condition (the task has none) nor the LL4 tier floor
+  // (Peacekeeper LL4 requires level 37), so it is a stale pre-S1 leftover rather
+  // than the derived floor upstream computes for loyalty-gated tasks. The
+  // Peacekeeper LL4 requirement below carries the real gate.
+  //
+  // No `taskRequirements` entry: the wiki's `previous = Wet Job - Part 6` is
+  // narrative order, and this task's only start condition is the loyalty
+  // variable, not a Quest condition.
   '5c0d4e61d09282029f53920e': {
+    minPlayerLevel: 0, // Was: 32 (stale pre-S1 player-level gate)
     traderRequirements: [
       {
         id: 'overlay.5c0d4e61d09282029f53920e.5935c25fb3acc3127c3d8cd9.level.>=.4',
@@ -1956,8 +2000,9 @@
     ],
   },
   // The Huntsman Path - Trophy - S1 (2026-08-10) replaced the player-level gate
-  // with Jaeger LL1; wiki lists Secured Perimeter as the prerequisite that
-  // upstream omits, which is why the task never unlocks (issue #286)
+  // with Jaeger LL1 (issue #286). No `taskRequirements`: the wiki names Secured
+  // Perimeter as `previous`, but that is narrative order - the client's only
+  // start condition is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
   '5d25e2c386f77443e7549029': {
     traderRequirements: [
@@ -1968,14 +2013,6 @@
         trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
-    ],
-    taskRequirements: [
-      {
-        task: {
-          id: '5d25e2b486f77409de05bba0',
-          name: 'The Huntsman Path - Secured Perimeter',
-        },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Forest_Cleaning
@@ -2874,8 +2911,9 @@
     ],
   },
   // The Walls Have Eyes - S1 (2026-08-10) replaced the player-level gate with
-  // Skier LL2; wiki lists Exit Here as the prerequisite upstream omits, which is
-  // why the task shows as never unlocked (issue #330)
+  // Skier LL2 (issue #330). No `taskRequirements`: the wiki names Exit Here as
+  // `previous`, but that is narrative order - the client's only start condition
+  // is the loyalty gate.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
   '669fa39c64ea11e84c0642a6': {
     traderRequirements: [
@@ -2886,11 +2924,6 @@
         trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
         value: 2,
       }, // Was: [] (player level requirement, minPlayerLevel 12)
-    ],
-    taskRequirements: [
-      {
-        task: { id: '669fa395c4c5c04798002497', name: 'Exit Here' },
-      }, // Was: []
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
@@ -3050,38 +3083,12 @@
     ],
   },
 
-  // The Tarkov Shooter - Part 5 - Rewards corrected
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
-  // Exp 13100 (was 28000); Roubles 85000 (was 275000); the Mosin Archangel
-  // chassis reward + its Jaeger LL3 barter are replaced by the ATI Monte Carlo
-  // stock (which is also barter-unlocked at Jaeger LL3), plus a Ski hat; Jaeger
-  // reputation +0.02.
-  '5bc4836986f7740c0152911c': {
-    experience: 13100, // Was: 28000
-    finishRewards: {
-      traderStanding: [
-        { trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }, standing: 0.02 }, // Was: none
-      ],
-      items: [
-        {
-          count: 85000,
-          item: { id: '5449016a4bdc2d6f028b456f', name: 'Roubles', shortName: 'RUB' },
-        }, // Was: 275000
-        {
-          count: 1,
-          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
-        }, // Was: Mosin Archangel chassis x1
-        { count: 1, item: { id: '5ab8f20c86f7745cdb629fb2', name: 'Ski hat with holes for eyes' } },
-      ],
-      offerUnlock: [
-        {
-          level: 3,
-          item: { id: '5bbdb870d4351e00367fb67d', name: 'Mosin Rifle ATI Monte Carlo stock' },
-          trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
-        }, // Was: Jaeger LL3 barter for Mosin Archangel chassis
-      ],
-    },
-  },
+  // The Tarkov Shooter - Part 5 - old reward correction removed (issue #356)
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  // The 1.1.0.0 client reference and regular, pve, and pvp-season API payloads
+  // agree on 28000 experience, 275000 roubles, two copies of the same reward
+  // item, and its Jaeger LL3 offer. The previous wiki-based patch supplied a
+  // different reward block, so it must not override the matching upstream data.
 
   // ---------------------------------------------------------------------------
   // TASK AVAILABILITY CORRECTIONS
@@ -3091,45 +3098,108 @@
   // the links even though the corresponding quest pages document them.
   // ---------------------------------------------------------------------------
 
-  // The Tarkov Shooter - Part 1 - follows Acquaintance (issue #295)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_1
-  '5bc4776586f774512d07cf05': {
-    taskRequirements: [
-      {
-        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
-      }, // Was: []
-    ],
-  },
+  // NOTE (issue #328, The Survivalist Path - Unprotected but Dangerous,
+  // 5d25aed386f77442734d25d2): no override belongs here.
+  //
+  // A previous revision repointed this task's prerequisite to Acquaintance and
+  // restricted its kill objective to Woods, both taken from the wiki. The client
+  // disagrees on both counts: its only AvailableForStart condition is a Quest
+  // condition on Zhivchik (which upstream already serves), and the objective's
+  // kill counter carries only Kills + Equipment conditions - there is no
+  // Location condition, so the objective is not map-restricted and upstream's
+  // empty `maps` is correct.
+  //
+  // Issue #328 reports a completed task not registering from a Seasonal profile.
+  // That symptom is not explained by the unlock graph, which matches the client
+  // here, so it needs a separate root cause.
 
-  // The Survivalist Path - Unprotected but Dangerous - follows Acquaintance,
-  // not Zhivchik, and its objective is Woods-only (issue #328)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Unprotected_but_Dangerous
-  '5d25aed386f77442734d25d2': {
-    taskRequirements: [
-      {
-        task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' },
-      }, // Was: The Survivalist Path - Zhivchik
-    ],
-    objectives: {
-      '5d25af3c86f77443ff46b9e7': {
-        maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }], // Was: []
-      },
-    },
-  },
-
-  // The Good Times - Part 1 - follows Shooting Cans and requires level 27.
-  // Issue #343 reports its successor Quality Standard (666314b696a9349baa021bac)
-  // appearing at level 21; the successor's own gate is right, so the fix belongs
-  // on this predecessor whose level 27 gate upstream understates as 12.
+  // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
+  // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
+  // successor's own gate is right, so the fix belongs on this predecessor whose
+  // level 27 gate upstream understates as 12. No `taskRequirements`: the client
+  // gates this task with five TraderLoyalty LL2 conditions that upstream already
+  // serves, not with a Quest condition on Shooting Cans.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
   '666314b4d7f171c4c20226c3': {
     minPlayerLevel: 27, // Was: 12
+  },
+
+  // The Hermit - the client has no Quest AvailableForStart condition, while
+  // the API incorrectly adds Tough Guy in all three modes. Keep the explicit
+  // empty array so the upstream edge is cleared.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '61904daa7d0d857927447b9c': {
+    taskRequirements: [], // Was: The Survivalist Path - Tough Guy
+  },
+
+  // Offensive Reconnaissance - the client has no Quest AvailableForStart
+  // condition, while the API incorrectly adds Hidden Layer in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '67a0970744893b9f3f0d9b68': {
+    taskRequirements: [], // Was: Hidden Layer
+  },
+
+  // Hot Wheels - the client roots this task at A Helping Hand; the API instead
+  // points at Shipping Delay - Part 1 in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f4e956f1b89c7bc0f56ef': {
     taskRequirements: [
       {
-        task: { id: '657315df034d76585f032e01', name: 'Shooting Cans' },
-      }, // Was: []
-    ],
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Shipping Delay - Part 1
   },
+
+  // Building Foundations - the client roots this task at A Helping Hand; the
+  // API instead points at Swift Retribution in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f629c5b555b53460cf827': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Swift Retribution
+  },
+
+  // The Higher They Fly - the client roots this task at A Helping Hand; the
+  // API instead points at Building Foundations in all three modes.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '6745fae369a58fceba10343d': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      },
+    ], // Was: Building Foundations
+  },
+
+  // NOTE (Survivalist / Jaeger chain): no overrides belong here.
+  //
+  // The wiki infobox `previous` field describes narrative progression, not the
+  // client's `AvailableForStart` conditions, and for this chain the two
+  // disagree. Patch 1.1.0.0 (S1) replaced most quest-chain prerequisites with
+  // TraderLoyalty and GlobalVariableValue gates, and tarkov.dev already serves
+  // those (`traderRequirements` / `otherRequirements`). The in-game order is:
+  //
+  //   Thrifty (Jaeger LL2, no quest prerequisite)
+  //     -> Zhivchik -> Unprotected but Dangerous -> Wounded Beast
+  //
+  // Acquaintance has no start conditions at all, and The Tarkov Shooter - Part 1
+  // is gated by a loyalty variable rather than by Acquaintance. Upstream matches
+  // the client on every one of these, so overriding `taskRequirements` here would
+  // introduce edges the client does not have.
+  //
+  // Introduction (5d2495a886f77425cd51e403) has no override either, and note that
+  // its wiki Requirements section still reads "Must be level 2 to start this
+  // quest": that is pre-S1: the client carries no `Level` condition for it, its
+  // gate is a GlobalVariableValue that upstream serves as an `otherRequirements`
+  // dialogue entry, and upstream's minPlayerLevel is already 0. Do not re-add a
+  // level gate from that wiki line.
+  //
+  // See docs/CONTRIBUTING.md for why `previous` is not proof for
+  // `taskRequirements`.
 
   // ---------------------------------------------------------------------------
   // FACTION-LOCKED QUESTS (issues #288, #291)

@@ -86,9 +86,43 @@ resulting JSON5 corrections plus proof links.
 - `npm run eft:audit` is the three-way `reference -> API -> overrides` check.
   Per field it reports GAP (API wrong, no override — add one), STALE (API fixed
   upstream, override redundant — remove it), CONFLICT (override disagrees with
-  the reference — fix it), or OK (override correct and still needed). The
+  the reference — fix it), or OK (override correct and still needed). It covers
+  `experience`, `minPlayerLevel`, objective counts, and `taskRequirements`. The
   reference is mode-specific; the audit auto-detects its mode and refuses a
   mismatched `--mode` to avoid false positives.
+
+  Field authority differs, and getting this wrong has shipped regressions.
+  Patch 1.1.0.0 expresses most trader-loyalty gates as `GlobalVariableValue`
+  start conditions against opaque per-tier variables rather than as
+  `TraderLoyalty` conditions, and tarkov.dev serves those as
+  `otherRequirements` `globalVariable` entries. That one change drives all three
+  rules below:
+  - `taskRequirements` — the reference adjudicates **by absence**. `Quest` start
+    conditions are densely populated (they match upstream for ~98% of tasks), so
+    an empty reference set means the task genuinely has no quest prerequisite; its
+    gate is a loyalty variable instead. The wiki's infobox `previous` field is
+    narrative order, **not** proof of an unlock edge.
+  - `minPlayerLevel` — the reference tells you whether an **explicit** level gate
+    exists, and absence does **not** license setting `0`. Two separate facts:
+    (1) the 8 quests carrying a `Level` condition are the complete set of
+    _explicit_ gates — the list is unfiltered quest templates (every entry has
+    `status: 0`) and nothing is pruned, proven by a trivially-satisfied
+    `Level >= 1` condition surviving in a capture taken on a level-55 profile,
+    which could not happen if satisfied conditions were stripped; (2) for the
+    other 636 quests tarkov.dev still reports a non-zero `minPlayerLevel` in many
+    cases, because it _derives_ the value from the loyalty tier's
+    `requiredPlayerLevel` when a task is loyalty-gated — across all 91 such tasks
+    upstream equals that floor exactly. So a missing `Level` condition means "no
+    explicit gate", not "no gate", and zeroing those would discard a correct
+    derived floor. Only correct `minPlayerLevel` when upstream's value matches
+    neither an explicit `Level` condition nor the loyalty-tier floor, and
+    corroborate with the wiki Requirements section.
+  - `traderRequirements` — **not** auditable against the reference, which is why
+    `eft:audit` deliberately does not cover it. Because the gate lives in a
+    global variable, the client shows no `TraderLoyalty` condition even for tasks
+    that do have a loyalty gate; treating absence as "no gate" would falsely
+    condemn 150+ correct overrides. Use the wiki Requirements section.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
@@ -121,10 +155,11 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 
 - Edit the correct JSON5 file in `src/overrides/` or `src/additions/`.
 - Provide proof (wiki link, screenshot, or patch notes).
-- For map references, look the ID up in `TARKOV_MAP_NAMES_BY_ID` (`src/lib/types.ts`)
-  rather than copying a nearby entry. Consumers resolve maps by `id`, so a correct
-  `name` beside the wrong `id` silently points at another map;
-  `tests/map-references.test.ts` enforces the pairing.
+- For map and trader references, look the ID up in `TARKOV_MAP_NAMES_BY_ID` /
+  `TARKOV_TRADER_NAMES_BY_ID` (`src/lib/types.ts`) rather than copying a nearby
+  entry. Consumers resolve these by `id`, so a correct `name` beside the wrong
+  `id` silently points at another map or trader;
+  `tests/entity-references.test.ts` enforces the pairing.
 - Run `npm run validate` and `npm run build` before submitting.
 
 ## Issue Triage
