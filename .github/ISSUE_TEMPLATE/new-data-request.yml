@@ -30,14 +30,24 @@ body:
   - type: dropdown
     id: game_mode
     attributes:
-      label: Game mode or scope
-      description: Select the mode the addition belongs to, or state if it is mode-independent.
+      label: Affected concrete mode(s)
+      description: Select each concrete mode affected. Select all three when the addition applies across every supported mode. If the scope is unknown, leave this blank and explain below.
+      multiple: true
       options:
         - regular
         - pve
         - pvp-season
+
+  - type: dropdown
+    id: mode_scope
+    attributes:
+      label: Mode scope
+      description: Clarify whether the selected modes are complete or whether this is mode-independent or still needs investigation.
+      options:
         - Mode-independent
-        - Unknown
+        - Specific mode(s) selected above
+        - All supported modes
+        - Unknown / needs investigation
     validations:
       required: true
 

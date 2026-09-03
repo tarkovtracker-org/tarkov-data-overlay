@@ -47,15 +47,23 @@ body:
   - type: dropdown
     id: game_mode
     attributes:
-      label: Game mode
-      description: Select every mode affected. If unknown, choose Unknown and explain below.
+      label: Affected concrete mode(s)
+      description: Select each concrete mode affected. Select all three when the correction applies across every supported mode. If the scope is unknown, leave this blank and explain below.
       multiple: true
       options:
         - regular
         - pve
         - pvp-season
+
+  - type: dropdown
+    id: mode_scope
+    attributes:
+      label: Mode scope
+      description: Clarify whether the selected modes are complete or still need investigation.
+      options:
+        - Specific mode(s) selected above
         - All supported modes
-        - Unknown
+        - Unknown / needs investigation
     validations:
       required: true
 
