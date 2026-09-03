@@ -102,8 +102,9 @@ function stringId(value: unknown): string | undefined {
  * The adapter's synthetic-`overlay.*`-ID fallback and the `check-overrides`
  * diagnostic both call this on the same requirement record, so they cannot
  * disagree about what "missing" means. It deliberately does not reuse
- * `stringId`, whose "string, or record with a string `id`" leniency made a
- * nested `{ id: { id } }` read as an identity at one call site and not the other.
+ * `stringId`, which treats a blank or whitespace-only `id` as a real identity:
+ * that would let the adapter emit an unusable merge key while the diagnostic
+ * reported the requirement as healthy.
  */
 function traderRequirementId(raw: unknown): string | undefined {
   if (!isRecord(raw) || typeof raw.id !== 'string') return undefined;
