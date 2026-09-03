@@ -86,9 +86,38 @@ resulting JSON5 corrections plus proof links.
 - `npm run eft:audit` is the three-way `reference -> API -> overrides` check.
   Per field it reports GAP (API wrong, no override — add one), STALE (API fixed
   upstream, override redundant — remove it), CONFLICT (override disagrees with
-  the reference — fix it), or OK (override correct and still needed). The
+  the reference — fix it), or OK (override correct and still needed). It covers
+  `experience`, `minPlayerLevel`, objective counts, and `taskRequirements`. The
   reference is mode-specific; the audit auto-detects its mode and refuses a
   mismatched `--mode` to avoid false positives.
+
+  Field authority differs, and getting this wrong has shipped regressions.
+  Patch 1.1.0.0 expresses most trader-loyalty gates as `GlobalVariableValue`
+  start conditions against opaque per-tier variables rather than as
+  `TraderLoyalty` conditions, and tarkov.dev serves those as
+  `otherRequirements` `globalVariable` entries. That one change drives all three
+  rules below:
+  - `taskRequirements` — the reference adjudicates **by absence**. `Quest` start
+    conditions are densely populated (they match upstream for ~98% of tasks), so
+    an empty reference set means the task genuinely has no quest prerequisite; its
+    gate is a loyalty variable instead. The wiki's infobox `previous` field is
+    narrative order, **not** proof of an unlock edge.
+  - `minPlayerLevel` — the reference tells you whether an **explicit** level gate
+    exists, but absence does **not** license setting `0`. The list is unfiltered
+    quest templates (every entry has `status: 0`) and a `Level >= 1` condition
+    survives in it, so nothing is stripped: only 8 of 644 quests carry a `Level`
+    condition. However, tarkov.dev _derives_ `minPlayerLevel` from the loyalty
+    tier's `requiredPlayerLevel` when a task is loyalty-gated — for all 91 such
+    tasks upstream's value equals that floor exactly. Zeroing those would discard
+    a correct derived floor. Only correct `minPlayerLevel` when upstream's value
+    matches neither an explicit `Level` condition nor the loyalty-tier floor, and
+    corroborate with the wiki Requirements section.
+  - `traderRequirements` — **not** auditable against the reference, which is why
+    `eft:audit` deliberately does not cover it. Because the gate lives in a
+    global variable, the client shows no `TraderLoyalty` condition even for tasks
+    that do have a loyalty gate; treating absence as "no gate" would falsely
+    condemn 150+ correct overrides. Use the wiki Requirements section.
+
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the
   numeric `eft:*` tools this one produces committed additions, not a gitignored
