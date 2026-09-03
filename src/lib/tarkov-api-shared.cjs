@@ -11,16 +11,46 @@ const { execFileSync } = require('node:child_process');
 
 const DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
 const VERSION_TAG_PATTERN =
-  /^v(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*))?$/;
+  /^v(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isDigits(value) {
+  for (const character of value) {
+    if (character < '0' || character > '9') return false;
+  }
+  return value.length > 0;
+}
+
+function hasLetterOrHyphen(value) {
+  for (const character of value) {
+    if (
+      (character >= 'A' && character <= 'Z') ||
+      (character >= 'a' && character <= 'z') ||
+      character === '-'
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Parse the supported release-tag formats into comparable version parts. */
 function parseVersionTag(tag) {
   const match = VERSION_TAG_PATTERN.exec(tag);
   if (!match) return undefined;
+  const prerelease = match[4]?.split('.');
+  if (
+    prerelease?.some((identifier) =>
+      isDigits(identifier)
+        ? identifier.length > 1 && identifier.startsWith('0')
+        : !hasLetterOrHyphen(identifier)
+    )
+  ) {
+    return undefined;
+  }
   const parts = [match[1], match[2], match[3] || '0'].map(Number);
   if (!parts.every(Number.isSafeInteger)) return undefined;
   return {
@@ -28,7 +58,7 @@ function parseVersionTag(tag) {
     major: parts[0],
     minor: parts[1],
     patch: parts[2],
-    prerelease: match[4] ? match[4].split('.') : undefined,
+    prerelease,
   };
 }
 

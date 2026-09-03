@@ -90,6 +90,19 @@ describe('getNextTagVersion', () => {
   it('compares large numeric prerelease identifiers without precision loss', () => {
     expect(isVersionStale('1.0.0-rc.9007199254740992', '1.0.0-rc.9007199254740993')).toBe(true);
   });
+
+  it('ignores invalid prerelease identifiers', () => {
+    const directory = createGitRepo();
+    try {
+      for (const tag of ['v1.0', 'v99.99.0-01', 'v99.99.0-123_']) {
+        execFileSync('git', ['-C', directory, 'tag', tag]);
+      }
+
+      expect(getNextTagVersion(directory)).toBe('v1.1');
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('resolveReferenceMatrix', () => {
