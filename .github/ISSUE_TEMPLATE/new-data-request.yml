@@ -31,7 +31,7 @@ body:
     id: game_mode
     attributes:
       label: Affected concrete mode(s)
-      description: Select each concrete mode affected. Select all three when the addition applies across every supported mode. If the scope is unknown, leave this blank and explain below.
+      description: Select each concrete mode affected. Select all three when the addition applies across every supported mode. Leave this blank only when Mode scope is Mode-independent or Unknown / needs investigation.
       multiple: true
       options:
         - regular
@@ -42,11 +42,10 @@ body:
     id: mode_scope
     attributes:
       label: Mode scope
-      description: Clarify whether the selected modes are complete or whether this is mode-independent or still needs investigation.
+      description: Use Specific mode(s) selected above for one or more selected modes, including all three when every supported mode is affected.
       options:
         - Mode-independent
         - Specific mode(s) selected above
-        - All supported modes
         - Unknown / needs investigation
     validations:
       required: true

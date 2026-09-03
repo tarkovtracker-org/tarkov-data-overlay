@@ -92,8 +92,9 @@ Review the latest `main`, not only the branch or commit that happened to be
 checked out. A local verification can start with:
 
 ```bash
+set -euo pipefail
 git fetch origin main --no-tags
-triage_worktree="../tarkov-data-overlay-triage"
+triage_worktree="../tarkov-data-overlay-triage-$(date +%Y%m%d-%H%M%S)-$$"
 git worktree add --detach "$triage_worktree" origin/main
 cd "$triage_worktree"
 git rev-parse HEAD
