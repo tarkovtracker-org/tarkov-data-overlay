@@ -49,6 +49,7 @@ import {
   type TaskOverride,
   type TaskAddition,
   type TaskData,
+  type TaskDataWithRequirementCounts,
   type TraderRequirementIdCounts,
   type GameMode,
   type ValidationResult,
@@ -1129,13 +1130,8 @@ function printSuppressionResults(results: SuppressionStaleness[]): { stale: numb
  * regular-mode data; without memoization the (large) regular-mode payloads
  * would be downloaded twice in a single run.
  */
-type FetchedTaskData = {
-  tasks: TaskData[];
-  traderRequirementIds: TraderRequirementIdCounts;
-};
-
-function createTaskFetcher(): (mode?: GameMode) => Promise<FetchedTaskData> {
-  const cache = new Map<GameMode, Promise<FetchedTaskData>>();
+function createTaskFetcher(): (mode?: GameMode) => Promise<TaskDataWithRequirementCounts> {
+  const cache = new Map<GameMode, Promise<TaskDataWithRequirementCounts>>();
   return (mode: GameMode = 'regular') => {
     let tasks = cache.get(mode);
     if (!tasks) {
@@ -1175,8 +1171,7 @@ async function main(): Promise<void> {
     printSuccess(`Found ${additionsCount} task addition(s) and ${editionsCount} edition(s)\n`);
 
     printProgress('Fetching current data from tarkov.dev API...');
-    const apiSnapshot = await getTasksForMode();
-    const apiTasks = apiSnapshot.tasks;
+    const { tasks: apiTasks } = await getTasksForMode();
     printSuccess(`Fetched ${apiTasks.length} tasks from API\n`);
 
     printProgress('Validating overrides...\n');
@@ -1211,10 +1206,9 @@ async function main(): Promise<void> {
       modeOverridesByMode[mode] = modeOverrides;
 
       printProgress(`Fetching ${mode} tasks from tarkov.dev API...`);
-      const modeSnapshot = await getTasksForMode(mode);
-      const modeApiTasks = modeSnapshot.tasks;
+      const { tasks: modeApiTasks, traderRequirementIds } = await getTasksForMode(mode);
       apiTasksByMode[mode] = modeApiTasks;
-      requirementIdCountsByMode[mode] = modeSnapshot.traderRequirementIds;
+      requirementIdCountsByMode[mode] = traderRequirementIds;
       printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
       const modeOverrideCount = Object.keys(modeOverrides).length;
@@ -1250,9 +1244,8 @@ async function main(): Promise<void> {
     }
     staleProblems += staleSharedAdditionKeys.size;
 
-    // The regular snapshot was fetched before the mode loop; keep its raw
-    // diagnostic alongside the per-mode snapshots.
-    requirementIdCountsByMode.regular = apiSnapshot.traderRequirementIds;
+    // The mode loop covers `regular` too, so every supported mode's raw
+    // diagnostic is already recorded here.
     printRequirementTypeCounts(apiTasksByMode, requirementIdCountsByMode);
 
     // Base overrides apply to every mode, so validate them against every mode.

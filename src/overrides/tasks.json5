@@ -72,14 +72,17 @@
     experience: 10000, // Was: 8300 (all modes, stale pre-1.1 value)
   },
 
-  // Glory to CPSU - Part 1 (obsolete duplicate)
+  // Glory to CPSU - Part 1 (obsolete duplicate; issues #302 PvE, #350 seasonal)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Glory_to_CPSU_-_Part_1
-  // The old Part 1 task was removed from the 1.1 release; retain the disabled
-  // marker so consumers do not show the duplicate while upstream still serves it.
-  // The replacement task's Prapor LL2 requirement is now supplied upstream, so
-  // its temporary requirement override is intentionally not retained.
+  //        ({{Historical content}}; the live quest is 64f5aac4b63b74469b6c14c2)
+  // Removed in 1.1 yet still served by regular, pve AND pvp-season - the two
+  // reports above are the same duplicate seen from different modes. This entry
+  // lives in the shared section precisely so it disables the task in every
+  // mode; tests/task-corrections.test.ts pins that across SUPPORTED_GAME_MODES.
+  // The surviving quest gets its Prapor LL2 requirement from upstream now, so
+  // no requirement override is retained for it.
   '639135b04ed9512be67647d7': {
-    disabled: true, // Was: active
+    disabled: true, // Was: active (served by all 3 upstream modes)
   },
 
   // Escort - quest XP reworked in 1.1.0.0
@@ -111,20 +114,27 @@
     experience: 65000, // Was: 12500 (all modes, stale pre-1.1 value)
   },
 
-  // Gendarmerie - Mall Cop (historical task removed from EFT)
+  // Gendarmerie - Mall Cop (historical task removed from EFT; issue #325)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Mall_Cop
+  //        ({{Historical content}})
   '64e7b99017ab941a6f7bf9d7': {
     disabled: true, // Was: active
   },
 
-  // Gendarmerie - Tickets, Please (historical task removed from EFT)
+  // Gendarmerie - Tickets, Please (historical task removed from EFT; issue #349)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Gendarmerie_-_Tickets%2C_Please
+  //        ({{Historical content}})
+  // Its only prerequisite is Mall Cop above, so disabling both leaves no
+  // dangling prerequisite edge in the unlock graph.
   '64e7b9a4aac4cd0a726562cb': {
     disabled: true, // Was: active
   },
 
-  // The Tarkov Shooter - Part 5 (obsolete duplicate)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Tarkov_Shooter_-_Part_5
+  // The Tarkov Shooter - Part 5 (obsolete duplicate; issue #322)
+  // Proof: https://json.tarkov.dev/regular/tasks - regular, pve and pvp-season
+  // each serve two tasks named "The Tarkov Shooter - Part 5". Part 6
+  // (5bc4856986f77454c317bea7) requires 5bc4836986f7740c0152911c, so this ID is
+  // an orphaned dead end and the wiki page documents the surviving task.
   // Keep the comparison suppression in src/suppressions/tasks.json5; this
   // disabled marker controls consumer visibility independently.
   '5bc4826c86f774106d22d88b': {
@@ -1228,9 +1238,9 @@
       }, // Was: [] (player level requirement, minPlayerLevel 8)
     ],
   },
+  // What's on the Flash Drive? - S1 (2026-08-10) replaced the player-level gate
+  // with Skier LL1; upstream still serves U+2019 in the name (issue #335)
   // Proof: https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive
-  //
-  // 2026-08-10 - S1: now requires Skier LL1 instead of player level
   '5979ed3886f77431307dc512': {
     name: "What's on the Flash Drive?", // Was: What’s on the Flash Drive?
     traderRequirements: [
@@ -1288,9 +1298,9 @@
       }, // Was: [] (player level requirement, minPlayerLevel 5)
     ],
   },
+  // Tigr Safari - S1 (2026-08-10) replaced the player-level gate with
+  // Peacekeeper LL1; wiki lists Fishing Gear as the prerequisite (issue #320)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Tigr_Safari
-  //
-  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
   '5a27b7a786f774579c3eb376': {
     traderRequirements: [
       {
@@ -1777,12 +1787,11 @@
       }, // Was: [] (player level requirement, minPlayerLevel 22)
     ],
   },
+  // Supplements - renamed in S1 (2026-08-10), which also replaced the
+  // player-level gate with Skier LL2. USEC-only per wiki Requirements ("This
+  // quest is only obtainable by USEC PMCs.") (issues #288, #291). The chemical
+  // vial objective is on Customs, matching the objective text (issue #321).
   // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
-  //
-  // 2026-08-10: renamed in S1
-  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
-  // USEC-only quest: wiki Requirements - "This quest is only obtainable by
-  // USEC PMCs." (issues #288, #291)
   '5b478ff486f7744d184ecbbf': {
     factionName: 'USEC', // Was: Any
     traderRequirements: [
@@ -1944,9 +1953,10 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
   },
+  // The Huntsman Path - Trophy - S1 (2026-08-10) replaced the player-level gate
+  // with Jaeger LL1; wiki lists Secured Perimeter as the prerequisite that
+  // upstream omits, which is why the task never unlocks (issue #286)
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Trophy
-  //
-  // 2026-08-10 - S1: now requires Jaeger LL1 instead of player level
   '5d25e2c386f77443e7549029': {
     traderRequirements: [
       {
@@ -2356,9 +2366,11 @@
       }, // Was: [] (player level requirement, minPlayerLevel 45)
     ],
   },
+  // The Huntsman Path - Relentless - S1 (2026-08-10) replaced the player-level
+  // gate with Jaeger LL4; wiki Requirements list only "Obtain level 4 loyalty
+  // with Jaeger", so the level 55 gate upstream still serves is stale and hides
+  // the task from players who already meet the loyalty requirement (issue #339)
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Relentless
-  //
-  // 2026-08-10 - S1: now requires Jaeger LL4 instead of player level
   '60e71e8ed54b755a3b53eb67': {
     minPlayerLevel: 0, // Was: 55 (stale player-level gate)
     traderRequirements: [
@@ -2859,9 +2871,10 @@
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
   },
+  // The Walls Have Eyes - S1 (2026-08-10) replaced the player-level gate with
+  // Skier LL2; wiki lists Exit Here as the prerequisite upstream omits, which is
+  // why the task shows as never unlocked (issue #330)
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Walls_Have_Eyes
-  //
-  // 2026-08-10 - S1: now requires Skier LL2 instead of player level
   '669fa39c64ea11e84c0642a6': {
     traderRequirements: [
       {
@@ -3086,8 +3099,8 @@
     ],
   },
 
-  // The Survivalist Path - Unprotected but Dangerous - objective takes place
-  // on Woods (issue #328)
+  // The Survivalist Path - Unprotected but Dangerous - follows Acquaintance,
+  // not Zhivchik, and its objective is Woods-only (issue #328)
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Unprotected_but_Dangerous
   '5d25aed386f77442734d25d2': {
     taskRequirements: [
@@ -3102,8 +3115,10 @@
     },
   },
 
-  // The Good Times - Part 1 - follows Shooting Cans and requires level 27
-  // (issue #343)
+  // The Good Times - Part 1 - follows Shooting Cans and requires level 27.
+  // Issue #343 reports its successor Quality Standard (666314b696a9349baa021bac)
+  // appearing at level 21; the successor's own gate is right, so the fix belongs
+  // on this predecessor whose level 27 gate upstream understates as 12.
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
   '666314b4d7f171c4c20226c3': {
     minPlayerLevel: 27, // Was: 12

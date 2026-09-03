@@ -880,6 +880,35 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     expect(snapshot.tasks[0]?.traderRequirements?.[0]?.id).toMatch(/^overlay\.t1\./);
   });
 
+  it('treats a blank upstream trader-requirement ID as absent when adapting', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/tasks': {
+          data: {
+            tasks: {
+              t1: {
+                id: 't1',
+                name: 't1 name',
+                traderRequirements: [
+                  { id: '   ', requirementType: 'level', compareMethod: '>=', value: 2 },
+                ],
+              },
+            },
+          },
+        },
+        'regular/tasks_en': { data: { 't1 name': 'Task One' } },
+      })
+    );
+
+    const snapshot = await fetchTasksWithRequirementCounts();
+
+    // The diagnostic and the adapter must agree: a whitespace-only ID carries no
+    // merge identity, so it is counted as missing AND replaced with a synthetic
+    // overlay ID rather than being passed through verbatim.
+    expect(snapshot.traderRequirementIds).toEqual({ total: 1, missing: 1 });
+    expect(snapshot.tasks[0]?.traderRequirements?.[0]?.id).toBe('overlay.t1..level.>=.2');
+  });
+
   it('fetches each endpoint exactly once per call', async () => {
     const fetchMock = mockEndpoints(baseRoutes('regular'));
 

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { join } from 'path';
-import { getProjectPaths, loadJson5File, type TaskOverride } from '../src/lib/index.js';
+import {
+  getProjectPaths,
+  loadJson5File,
+  loadJsonFile,
+  SUPPORTED_GAME_MODES,
+  type TaskOverride,
+} from '../src/lib/index.js';
 import { applyTaskOverride, getTaskOverrideForMode } from '../examples/apply-overlay.js';
 
 const TASK_IDS = {
@@ -20,6 +26,18 @@ const TASK_IDS = {
   easyBreezy: '669fa3a40c828825de06d6a1',
 } as const;
 
+/**
+ * Tasks upstream still serves in every mode even though the game removed them.
+ * Each entry is a user report filed from a different game mode, which is exactly
+ * why the corrections live in the shared section rather than a mode folder.
+ */
+const DISABLED_DUPLICATES = [
+  { id: TASK_IDS.oldGlory, label: 'Glory to CPSU - Part 1', issues: [302, 350] },
+  { id: TASK_IDS.mallCop, label: 'Gendarmerie - Mall Cop', issues: [325] },
+  { id: TASK_IDS.tickets, label: 'Gendarmerie - Tickets, Please', issues: [349] },
+  { id: TASK_IDS.duplicateShooter, label: 'The Tarkov Shooter - Part 5', issues: [322] },
+] as const;
+
 const paths = getProjectPaths();
 
 function loadTaskOverrides(): Record<string, TaskOverride> {
@@ -34,16 +52,28 @@ describe('task correction data', () => {
   const overrides = loadTaskOverrides();
 
   it('disables obsolete tasks while retaining the duplicate comparison suppression', () => {
-    for (const id of [
-      TASK_IDS.oldGlory,
-      TASK_IDS.mallCop,
-      TASK_IDS.tickets,
-      TASK_IDS.duplicateShooter,
-    ]) {
-      expect(overrides[id]).toMatchObject({ disabled: true });
+    for (const { id, label } of DISABLED_DUPLICATES) {
+      expect(overrides[id], label).toMatchObject({ disabled: true });
     }
 
     expect(loadSuppressions()[TASK_IDS.duplicateShooter]).toMatchObject({ name: true });
+  });
+
+  it('keeps every disabled duplicate in the shared section so no mode is missed', () => {
+    // A correction placed under src/overrides/modes/<mode>/ would only fix the
+    // one mode that reported it, leaving the duplicate visible elsewhere. These
+    // IDs must therefore never move out of the shared file, and no mode file may
+    // re-enable them.
+    for (const mode of SUPPORTED_GAME_MODES) {
+      const modeOverrides = loadJson5File<Record<string, TaskOverride>>(
+        join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+      );
+      for (const { id, label } of DISABLED_DUPLICATES) {
+        expect(modeOverrides[id]?.disabled, `${label} must not be re-enabled in ${mode}`).not.toBe(
+          false
+        );
+      }
+    }
   });
 
   it('restores the documented prerequisite chains', () => {
@@ -100,6 +130,33 @@ describe('task correction data', () => {
 });
 
 describe('mode-specific task correction consumption', () => {
+  it('filters every obsolete duplicate out of every game mode', () => {
+    // End-to-end proof over the shipped artifact: a consumer following
+    // docs/INTEGRATION.md must get `null` (task hidden) for each removed
+    // duplicate in regular, pve AND pvp-season. Issues #302 (pve) and #350
+    // (seasonal) are the same Glory to CPSU - Part 1 duplicate reported from two
+    // modes, so per-mode coverage is the actual acceptance criterion.
+    const overlay = loadJsonFile<Record<string, unknown>>(
+      join(paths.distDir, 'overlay.json')
+    ) as never;
+
+    for (const mode of SUPPORTED_GAME_MODES) {
+      for (const { id, label, issues } of DISABLED_DUPLICATES) {
+        const upstreamTask = {
+          id,
+          name: label,
+          minPlayerLevel: 17,
+          objectives: [],
+        };
+        const override = getTaskOverrideForMode(id, overlay, mode);
+        const reason = `${label} (${issues.map((n) => `#${n}`).join(', ')}) in ${mode}`;
+
+        expect(override?.disabled, reason).toBe(true);
+        expect(applyTaskOverride(upstreamTask, override), reason).toBeNull();
+      }
+    }
+  });
+
   it('applies regular Easy-Breezy data without leaking it into PvE', () => {
     const regularOverrides = loadJson5File<Record<string, TaskOverride>>(
       join(paths.srcDir, 'overrides', 'modes', 'regular', 'tasks.json5')

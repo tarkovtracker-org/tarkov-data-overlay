@@ -96,6 +96,17 @@ function stringId(value: unknown): string | undefined {
 }
 
 /**
+ * Narrow an upstream identifier to a usable merge identity: a whitespace-only id
+ * carries no identity, so it counts as absent. The adapter (which substitutes a
+ * synthetic `overlay.*` id) and the `check-overrides` diagnostic (which counts
+ * absent ids) share this predicate so they cannot disagree on "missing".
+ */
+function usableId(value: unknown): string | undefined {
+  const id = stringId(value);
+  return id !== undefined && id.trim().length > 0 ? id : undefined;
+}
+
+/**
  * Remove undefined values so adapted objects compare cleanly against overrides.
  */
 function compact<T extends JsonRecord>(value: T): T {
@@ -467,7 +478,7 @@ function adaptTraderRequirement(
   if (!isRecord(raw)) return raw as TraderRequirement;
 
   const trader = resolveTraderRef(raw.trader, ctx);
-  const upstreamId = stringId(raw);
+  const upstreamId = usableId(raw);
   const syntheticIdBase = [
     SYNTHETIC_REQUIREMENT_ID_PREFIX.slice(0, -1),
     taskId,
@@ -730,15 +741,23 @@ export interface TaskModeData {
 export async function fetchTaskModeData(gameMode?: GameMode): Promise<TaskModeData> {
   const mode: GameMode = gameMode ?? 'regular';
   const cache: EndpointCache = new Map();
-  const [tasks, access] = await Promise.all([
-    fetchTasksWithCache(mode, cache),
+  const [snapshot, access] = await Promise.all([
+    fetchTaskSnapshot(mode, cache),
     fetchModeAccessDataWithCache(mode, cache),
   ]);
-  return { tasks, access };
+  return { tasks: snapshot.tasks, access };
 }
 
-/** Extract and validate the task collection from a mode endpoint envelope. */
-function getTaskData(mode: GameMode, tasksEnvelope: TarkovEnvelope): JsonRecord {
+/**
+ * Fetch all tasks for a game mode from json.tarkov.dev, adapt them into the
+ * `TaskData[]` shape used by the override validator, and report the raw
+ * trader-requirement merge identities seen before adaptation.
+ */
+async function fetchTaskSnapshot(
+  mode: GameMode,
+  cache: EndpointCache
+): Promise<TaskDataWithRequirementCounts> {
+  const tasksEnvelope = await fetchEnvelope(cache, `${mode}/tasks`);
   const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
   if (!tasksData || !isRecord(tasksData.tasks)) {
     throw new Error(
@@ -747,20 +766,10 @@ function getTaskData(mode: GameMode, tasksEnvelope: TarkovEnvelope): JsonRecord 
       )}`
     );
   }
-  return tasksData;
-}
-
-/**
- * Fetch all tasks for a game mode from json.tarkov.dev and adapt them into
- * the `TaskData[]` shape used by the override validator.
- */
-async function fetchTasksWithCache(mode: GameMode, cache: EndpointCache): Promise<TaskData[]> {
-  const tasksData = getTaskData(mode, await fetchEnvelope(cache, `${mode}/tasks`));
-  const taskCollection = tasksData.tasks as JsonRecord;
 
   const taskEntries: Array<[string, JsonRecord]> = [];
   const seenIds = new Set<string>();
-  for (const [sourceKey, rawTask] of Object.entries(taskCollection)) {
+  for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
     if (!isRecord(rawTask)) {
       throw new EnvelopeValidationError(
         `Invalid json.tarkov.dev response for ${mode}/tasks: task '${sourceKey}' is not an object`
@@ -782,7 +791,10 @@ async function fetchTasksWithCache(mode: GameMode, cache: EndpointCache): Promis
   }
 
   const ctx = await buildContext(cache, mode, tasksData);
-  return taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx));
+  return {
+    tasks: taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx)),
+    traderRequirementIds: countTraderRequirementIds(tasksData),
+  };
 }
 
 /** Counts the merge identities present in raw upstream trader requirements. */
@@ -792,16 +804,13 @@ export interface TraderRequirementIdCounts {
 }
 
 /**
- * Count missing trader-requirement IDs in the raw task payload.
- *
- * This intentionally runs on the endpoint payload before `adaptTask()` adds
- * deterministic synthetic IDs. The synthetic IDs keep consumers safe, but
- * must not hide an upstream data-quality regression from maintenance checks.
+ * Count trader requirements that arrive without a usable merge identity. This
+ * runs on the raw payload before `adaptTask()` substitutes synthetic IDs: those
+ * IDs keep consumers safe but must not hide an upstream data-quality regression
+ * from maintenance checks (issue #276).
  */
 export function countTraderRequirementIds(tasksData: unknown): TraderRequirementIdCounts {
-  if (!isRecord(tasksData) || !isRecord(tasksData.tasks)) {
-    return { total: 0, missing: 0 };
-  }
+  if (!isRecord(tasksData) || !isRecord(tasksData.tasks)) return { total: 0, missing: 0 };
 
   let total = 0;
   let missing = 0;
@@ -809,40 +818,28 @@ export function countTraderRequirementIds(tasksData: unknown): TraderRequirement
     if (!isRecord(task) || !Array.isArray(task.traderRequirements)) continue;
     for (const requirement of task.traderRequirements) {
       total += 1;
-      if (
-        !isRecord(requirement) ||
-        typeof requirement.id !== 'string' ||
-        requirement.id.trim().length === 0
-      ) {
-        missing += 1;
-      }
+      if (!isRecord(requirement) || usableId(requirement.id) === undefined) missing += 1;
     }
   }
   return { total, missing };
 }
 
-/** Fetch adapted tasks and raw trader-requirement ID diagnostics together. */
+/** Adapted tasks paired with the raw upstream trader-requirement ID counts. */
 export interface TaskDataWithRequirementCounts {
   tasks: TaskData[];
   traderRequirementIds: TraderRequirementIdCounts;
 }
 
+/** Fetch adapted tasks and raw trader-requirement ID diagnostics together. */
 export async function fetchTasksWithRequirementCounts(
   gameMode?: GameMode
 ): Promise<TaskDataWithRequirementCounts> {
-  const mode: GameMode = gameMode ?? 'regular';
-  const cache: EndpointCache = new Map();
-  const tasksData = getTaskData(mode, await fetchEnvelope(cache, `${mode}/tasks`));
-
-  return {
-    tasks: await fetchTasksWithCache(mode, cache),
-    traderRequirementIds: countTraderRequirementIds(tasksData),
-  };
+  return fetchTaskSnapshot(gameMode ?? 'regular', new Map());
 }
 
 /** Fetch all tasks for a game mode from json.tarkov.dev. */
 export async function fetchTasks(gameMode?: GameMode): Promise<TaskData[]> {
-  return fetchTasksWithCache(gameMode ?? 'regular', new Map());
+  return (await fetchTaskSnapshot(gameMode ?? 'regular', new Map())).tasks;
 }
 
 /**
