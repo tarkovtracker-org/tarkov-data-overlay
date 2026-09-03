@@ -313,9 +313,11 @@ async function buildReport(
 
   for (const apiTask of tasks) {
     const result = buildReportTask(apiTask, overlay, mode, includeDisabled, additions);
-    effectiveTasks.push(result.effectiveTask);
     if (result.disabled) disabledTaskCount += 1;
-    if (result.task) reportTasks.set(result.task.id, result.task);
+    if (result.task) {
+      effectiveTasks.push(result.effectiveTask);
+      reportTasks.set(result.task.id, result.task);
+    }
   }
 
   return {
@@ -357,9 +359,13 @@ function outputPath(out: string, mode: GameMode, singleMode: boolean): string {
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const overlay = loadOverlay(options.applyOverlay);
-  const reports = await Promise.all(
-    options.modes.map((mode) => buildReport(mode, overlay, options.includeDisabled))
-  );
+  // Each mode loads several large upstream collections. Keep mode processing
+  // sequential so a three-mode report does not retain all raw API payloads at
+  // once and create an avoidable memory spike.
+  const reports: ModeAvailabilityReport[] = [];
+  for (const mode of options.modes) {
+    reports.push(await buildReport(mode, overlay, options.includeDisabled));
+  }
 
   if (options.stdout) {
     const value =

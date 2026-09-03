@@ -1,7 +1,7 @@
 'use strict';
 
 const { createHash } = require('node:crypto');
-const { execSync } = require('node:child_process');
+const { execFileSync } = require('node:child_process');
 
 /**
  * Helpers shared by the TypeScript API client and the standalone CommonJS
@@ -10,6 +10,8 @@ const { execSync } = require('node:child_process');
  */
 
 const DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
+const VERSION_TAG_PATTERN =
+  /^v(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*))?$/;
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -17,7 +19,7 @@ function isRecord(value) {
 
 /** Parse the supported release-tag formats into comparable version parts. */
 function parseVersionTag(tag) {
-  const match = /^v(\d+)\.(\d+)(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?$/.exec(tag);
+  const match = VERSION_TAG_PATTERN.exec(tag);
   if (!match) return undefined;
   const parts = [match[1], match[2], match[3] || '0'].map(Number);
   if (!parts.every(Number.isSafeInteger)) return undefined;
@@ -28,6 +30,17 @@ function parseVersionTag(tag) {
     patch: parts[2],
     prerelease: match[4] ? match[4].split('.') : undefined,
   };
+}
+
+/** Compare numeric prerelease identifiers without losing precision. */
+function compareNumericPrerelease(left, right) {
+  const normalizedLeft = left.replace(/^0+(?=\d)/, '');
+  const normalizedRight = right.replace(/^0+(?=\d)/, '');
+  if (normalizedLeft.length !== normalizedRight.length) {
+    return normalizedLeft.length - normalizedRight.length;
+  }
+  if (normalizedLeft === normalizedRight) return 0;
+  return normalizedLeft < normalizedRight ? -1 : 1;
 }
 
 /** Compare parsed release tags using semver precedence. */
@@ -48,7 +61,7 @@ function compareVersionTags(left, right) {
     const leftNumeric = /^\d+$/.test(leftPart);
     const rightNumeric = /^\d+$/.test(rightPart);
     if (leftNumeric && rightNumeric) {
-      const difference = Number(leftPart) - Number(rightPart);
+      const difference = compareNumericPrerelease(leftPart, rightPart);
       if (difference !== 0) return difference;
     } else if (leftNumeric !== rightNumeric) {
       return leftNumeric ? -1 : 1;
@@ -62,7 +75,7 @@ function compareVersionTags(left, right) {
 /** Return the highest supported release tag, or undefined when git is unavailable. */
 function getLatestTagVersion(cwd) {
   try {
-    const tag = execSync("git tag --list 'v*'", {
+    const tag = execFileSync('git', ['tag', '--merged', 'HEAD', '--list', 'v*'], {
       cwd: cwd || process.cwd(),
       stdio: ['ignore', 'pipe', 'ignore'],
     })
@@ -431,12 +444,24 @@ async function buildTaskContext(cache, mode, tasksData, helpers) {
   }
 
   return {
-    itemsById: toLookup(requireCollection(itemsData.items, `${mode}/items data.items`, isRecord)),
-    questItemsById: toLookup(tasksData.questItems),
-    tasksById: toLookup(requireCollection(tasksData.tasks, `${mode}/tasks data.tasks`, isRecord)),
-    mapsById: toLookup(requireCollection(mapsData.maps, `${mode}/maps data.maps`, isRecord)),
-    tradersById: toLookup(requireCollection(tradersData, `${mode}/traders data`, isRecord)),
-    prestigeById: toLookup(tasksData.prestige),
+    itemsById: toLookup(
+      requireCollection(itemsData.items, `${mode}/items data.items`, isRecord),
+      `${mode}/items`
+    ),
+    questItemsById: toLookup(tasksData.questItems, `${mode}/tasks questItems`),
+    tasksById: toLookup(
+      requireCollection(tasksData.tasks, `${mode}/tasks data.tasks`, isRecord),
+      `${mode}/tasks`
+    ),
+    mapsById: toLookup(
+      requireCollection(mapsData.maps, `${mode}/maps data.maps`, isRecord),
+      `${mode}/maps`
+    ),
+    tradersById: toLookup(
+      requireCollection(tradersData, `${mode}/traders data`, isRecord),
+      `${mode}/traders`
+    ),
+    prestigeById: toLookup(tasksData.prestige, `${mode}/tasks prestige`),
     itemsEn,
     tasksEn,
     mapsEn,

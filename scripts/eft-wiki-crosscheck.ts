@@ -61,10 +61,19 @@ interface Row {
 }
 
 /** tarkov.dev wikiLink -> wiki page title. */
-function wikiTitleFor(task: TaskData): string {
+export function wikiTitleFor(task: TaskData): string {
   if (task.wikiLink) {
-    const match = task.wikiLink.match(/\/wiki\/(.+)$/);
-    if (match?.[1]) return decodeURIComponent(match[1]);
+    try {
+      const url = new URL(task.wikiLink, 'https://escapefromtarkov.fandom.com');
+      const marker = '/wiki/';
+      const markerIndex = url.pathname.indexOf(marker);
+      const encodedTitle =
+        markerIndex === -1 ? undefined : url.pathname.slice(markerIndex + marker.length);
+      if (encodedTitle) return decodeURIComponent(encodedTitle);
+    } catch {
+      // A malformed link should degrade to the task name so one bad row does
+      // not abort the entire reference/wiki cross-check.
+    }
   }
   return task.name;
 }

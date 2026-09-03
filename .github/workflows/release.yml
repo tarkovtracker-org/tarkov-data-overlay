@@ -31,6 +31,15 @@ jobs:
           ref: main
           persist-credentials: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Sync trusted main branch
         run: |
           git fetch origin main --no-tags
@@ -108,6 +117,13 @@ jobs:
 
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `artifact_tag=v${meta.version}\n`);
           NODE
+
+      - name: Verify artifact against trusted source
+        env:
+          ARTIFACT_TAG: ${{ steps.artifact.outputs.artifact_tag }}
+        run: |
+          export OVERLAY_VERSION="${ARTIFACT_TAG#v}"
+          npm run build:check
 
       - name: Verify branch state and determine release tag
         id: version
@@ -218,11 +234,20 @@ jobs:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
           if gh release view "$NEXT_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $NEXT_TAG already exists; syncing overlay asset"
-            gh release upload "$NEXT_TAG" \
-              --repo "$REPOSITORY" \
-              --clobber \
-              dist/overlay.json
+            artifact_digest="$(sha256sum dist/overlay.json | awk '{print $1}')"
+            existing_digest="$(gh api \
+              "repos/${REPOSITORY}/releases/tags/${NEXT_TAG}/assets" \
+              --paginate \
+              --jq '.[] | select(.name == "overlay.json") | .digest')"
+            if [[ "$existing_digest" == "sha256:$artifact_digest" ]]; then
+              echo "Release $NEXT_TAG already has the validated overlay asset"
+            else
+              echo "Release $NEXT_TAG is missing or has a different overlay asset; syncing it"
+              gh release upload "$NEXT_TAG" \
+                --repo "$REPOSITORY" \
+                --clobber \
+                dist/overlay.json
+            fi
           else
             gh release create "$NEXT_TAG" \
               --repo "$REPOSITORY" \

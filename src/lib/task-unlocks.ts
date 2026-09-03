@@ -349,6 +349,14 @@ function traderRequirementCondition(requirement: TraderRequirement): TaskUnlockC
   }
 
   if (requirement.requirementType === 'level') {
+    if (
+      requirement.compareMethod !== '>=' ||
+      !Number.isInteger(requirement.value) ||
+      requirement.value < 1 ||
+      requirement.value > 4
+    ) {
+      return unknownRequirementCondition(requirement.id, requirement.requirementType);
+    }
     return {
       type: 'traderLevel',
       requirementId: requirement.id,
@@ -565,9 +573,12 @@ export function deriveTaskUnlockDefinition(
     context: {},
   };
 
-  if (task.trader !== undefined) {
-    if (isTaskRef(task.trader)) definition.context.trader = task.trader;
-    else definition.all.push(unknownRequirementCondition(undefined, 'trader'));
+  if (task.trader !== undefined && isTaskRef(task.trader)) {
+    definition.context.trader = task.trader;
+  } else {
+    // Every upstream task currently has a task giver. Missing or malformed
+    // data must not silently remove the account-level trader gate.
+    definition.all.push(unknownRequirementCondition(undefined, 'trader'));
   }
   if (task.map !== undefined && task.map !== null) {
     if (isTaskRef(task.map)) definition.context.map = task.map;

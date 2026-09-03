@@ -43,7 +43,9 @@ ALLOW_REBUILD=true REBUILD_TOKEN='choose-a-local-secret' npm run monitor
 The server binds to `127.0.0.1` by default. Set `HOST` only when a trusted
 reverse proxy or network boundary is configured; a non-empty token is always
 required for rebuilds, and callers must pass it in an `Authorization: Bearer …`
-header. Rebuilds target the default `dist/overlay.json` output; custom local
+header. When `HOST` is not loopback, set `TRUSTED_HTTPS_PROXY=true` only when
+HTTPS is terminated by a trusted reverse proxy; otherwise rebuilds remain
+disabled. Rebuilds target the default `dist/overlay.json` output; custom local
 and HTTP(S) overlay targets remain read-only.
 
 ## Maintenance

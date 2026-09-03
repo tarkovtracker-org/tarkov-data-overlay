@@ -111,6 +111,66 @@ describe('task unlock model', () => {
     });
   });
 
+  it('does not treat a missing task giver as an absent account gate', () => {
+    const task = makeTask({ trader: undefined });
+    const definition = deriveTaskUnlockDefinition(task);
+
+    expect(evaluateTaskUnlock(task, definition, { mapAccess: { [map.id]: true } }).status).toBe(
+      'unknown'
+    );
+    expect(definition.all).toContainEqual({
+      type: 'unknown',
+      requirementId: 'malformed-requirement',
+      requirementType: 'trader',
+    });
+  });
+
+  it.each([0, 5, 2.5])('treats an invalid trader level value %s as unknown', (value) => {
+    const task = makeTask({
+      traderRequirements: [
+        {
+          id: 'invalid-level',
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: value as 1,
+          trader,
+        },
+      ],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        traderLevels: { [trader.id]: 4 },
+      }).status
+    ).toBe('unknown');
+  });
+
+  it('treats a non-level trader operator as unknown', () => {
+    const task = makeTask({
+      traderRequirements: [
+        {
+          id: 'invalid-level-operator',
+          requirementType: 'level',
+          compareMethod: '<=' as '>=',
+          value: 2,
+          trader,
+        },
+      ],
+    });
+    const definition = deriveTaskUnlockDefinition(task);
+
+    expect(
+      evaluateTaskUnlock(task, definition, {
+        traderUnlocked: { [trader.id]: true },
+        mapAccess: { [map.id]: true },
+        traderLevels: { [trader.id]: 4 },
+      }).status
+    ).toBe('unknown');
+  });
+
   it('does not show a task as available when hidden/account state is missing', () => {
     const task = makeTask({
       taskRequirements: [{ task: prerequisite }],

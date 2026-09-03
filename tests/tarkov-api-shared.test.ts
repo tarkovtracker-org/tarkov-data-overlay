@@ -7,6 +7,7 @@ import {
   fetchCached,
   adaptReward,
   getNextTagVersion,
+  isVersionStale,
   mergeTaskOverride,
   readResponseJson,
   resolveReferenceMatrix,
@@ -61,6 +62,33 @@ describe('getNextTagVersion', () => {
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
+  });
+
+  it('ignores canonical-looking tags that are not reachable from HEAD', () => {
+    const directory = createGitRepo();
+    try {
+      execFileSync('git', ['-C', directory, 'tag', 'v1.0']);
+      execFileSync('git', ['-C', directory, 'checkout', '--quiet', '-b', 'unmerged-release']);
+      execFileSync('git', [
+        '-C',
+        directory,
+        'commit',
+        '--quiet',
+        '--allow-empty',
+        '-m',
+        'unmerged',
+      ]);
+      execFileSync('git', ['-C', directory, 'tag', 'v99.99']);
+      execFileSync('git', ['-C', directory, 'checkout', '--quiet', '-']);
+
+      expect(getNextTagVersion(directory)).toBe('v1.1');
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('compares large numeric prerelease identifiers without precision loss', () => {
+    expect(isVersionStale('1.0.0-rc.9007199254740992', '1.0.0-rc.9007199254740993')).toBe(true);
   });
 });
 

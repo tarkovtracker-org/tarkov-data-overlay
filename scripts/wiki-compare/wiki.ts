@@ -145,19 +145,41 @@ export function parseMinLevel(requirements: string[]): number | undefined {
   return undefined;
 }
 
+/** Remove bounded linked names without constructing a regex from page data. */
+function removeLinkedNames(value: string, patterns: string[]): string {
+  if (patterns.length === 0) return value;
+
+  const characters: string[] = [];
+  for (let index = 0; index < value.length;) {
+    const match = patterns.find((pattern) => value.startsWith(pattern, index));
+    if (match) {
+      index += match.length;
+    } else {
+      characters.push(value[index]);
+      index += 1;
+    }
+  }
+  return characters.join('');
+}
+
 export function extractCount(text: string, links: string[] = []): number | undefined {
   const normalized = stripWikiMarkup(text).toLowerCase();
   if (!/\d/.test(normalized)) return undefined;
 
   let scrubbed = normalized;
 
-  // Remove linked item names to avoid pulling numbers from item titles.
-  for (const link of links) {
-    const linkText = link.trim().toLowerCase();
-    if (linkText.length === 0) continue;
-    const escaped = linkText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    scrubbed = scrubbed.replace(new RegExp(escaped, 'g'), '');
-  }
+  // Remove linked item names to avoid pulling numbers from item titles. The
+  // bounded matcher scans the line once and never treats page data as regex.
+  const linkPatterns = [
+    ...new Set(
+      links
+        .map((link) => link.trim().toLowerCase())
+        .filter((link) => link.length > 0 && link.length <= 256)
+    ),
+  ]
+    .sort((left, right) => right.length - left.length)
+    .slice(0, 256);
+  scrubbed = removeLinkedNames(scrubbed, linkPatterns);
 
   // Remove distance patterns like "75 meters".
   scrubbed = scrubbed.replace(/\b\d+\s*meters?\b/gi, '');

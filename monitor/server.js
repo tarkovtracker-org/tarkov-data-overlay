@@ -73,6 +73,7 @@ const readLocks = {
 // seeded from DEFAULT_MODES so the module works under test without I/O).
 const MAX_DISCOVERED_MODES = 32;
 const MAX_SSE_CONNECTIONS = 100;
+const MAX_SSE_CONNECTIONS_PER_ADDRESS = 20;
 const MAX_SSE_CONNECTIONS_PER_KEY = 10;
 const MAX_SSE_BUFFERED_BYTES = 1024 * 1024;
 const RESERVED_MODE_NAMES = new Set(["__proto__", "constructor", "prototype"]);
@@ -111,6 +112,7 @@ function registerModes(modes) {
 }
 
 const clientsByKey = new Map();
+const sseConnectionsByAddress = new Map();
 let activeSseConnections = 0;
 let overlayFsWatcher = null;
 
@@ -189,10 +191,27 @@ function isDefaultOverlayPath(targetPath) {
   return path.resolve(targetPath) === DEFAULT_OVERLAY_PATH;
 }
 
+/** Recognize the listener values that stay on the local machine. */
+function isLoopbackHost(host) {
+  const normalized = String(host || '').replace(/^\[|\]$/g, '').toLowerCase();
+  return (
+    normalized === 'localhost' ||
+    normalized === '127.0.0.1' ||
+    normalized === '::1' ||
+    /^::ffff:127\.0\.0\.1$/.test(normalized)
+  );
+}
+
+/** Rebuild tokens are safe only locally or behind an explicitly trusted HTTPS proxy. */
+function isTrustedRebuildTransport() {
+  return isLoopbackHost(config.host) || process.env.TRUSTED_HTTPS_PROXY === 'true';
+}
+
 function isRebuildEnabled() {
   return (
     process.env.NODE_ENV !== "test" &&
     process.env.ALLOW_REBUILD === "true" &&
+    isTrustedRebuildTransport() &&
     !isRemotePath(OVERLAY_PATH) &&
     isDefaultOverlayPath(OVERLAY_PATH) &&
     typeof process.env.REBUILD_TOKEN === "string" &&
@@ -234,12 +253,27 @@ async function refreshOverlayIfStale() {
       await refreshOverlay();
     }
   } catch (error) {
-    overlayState.error = error.message || "Unable to read overlay";
+    overlayState.error = redactErrorMessage(error, "Unable to read overlay");
   }
 }
 
 function isRemotePath(targetPath) {
   return /^https?:\/\//i.test(targetPath);
+}
+
+/** Return a safe source label without disclosing operator-supplied paths. */
+function publicOverlaySource(targetPath = OVERLAY_PATH) {
+  return isRemotePath(targetPath) ? "remote overlay" : "local overlay";
+}
+
+/** Remove URLs and configured local paths from messages sent to unauthenticated clients. */
+function redactErrorMessage(error, fallback = "Unable to read overlay") {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (!message) return fallback;
+  return message
+    .replace(/https?:\/\/[^\s"'<>)}\]]+/gi, "[remote overlay]")
+    .split(OVERLAY_PATH)
+    .join(publicOverlaySource());
 }
 
 function normalizeRemoteUrl(input) {
@@ -296,7 +330,7 @@ function fetchRemoteText(url) {
 
     const request = client.get(url, (res) => {
       if (res.statusCode && res.statusCode >= 400) {
-        settle(reject, new Error(`Remote fetch failed with HTTP ${res.statusCode}: ${url}`));
+        settle(reject, new Error(`Remote fetch failed with HTTP ${res.statusCode}`));
         res.resume();
         return;
       }
@@ -308,9 +342,7 @@ function fetchRemoteText(url) {
       if (Number.isFinite(expectedBytes) && expectedBytes > REMOTE_FETCH_MAX_BYTES) {
         settle(
           reject,
-          new Error(
-            `Remote fetch exceeded max size (${expectedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`
-          )
+          new Error(`Remote fetch exceeded max size (${expectedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes)`)
         );
         res.resume();
         return;
@@ -324,7 +356,7 @@ function fetchRemoteText(url) {
         if (receivedBytes > REMOTE_FETCH_MAX_BYTES) {
           res.destroy(
             new Error(
-              `Remote fetch exceeded max size (${receivedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes): ${url}`
+              `Remote fetch exceeded max size (${receivedBytes} > ${REMOTE_FETCH_MAX_BYTES} bytes)`
             )
           );
           return;
@@ -343,7 +375,7 @@ function fetchRemoteText(url) {
     // deadline so a remote overlay cannot stall monitor refresh forever.
     deadlineTimer = setTimeout(() => {
       request.destroy(
-        new Error(`Remote fetch timed out after ${REMOTE_FETCH_TIMEOUT_MS}ms: ${url}`)
+        new Error(`Remote fetch timed out after ${REMOTE_FETCH_TIMEOUT_MS}ms`)
       );
     }, REMOTE_FETCH_TIMEOUT_MS);
     request.on("error", (error) => {
@@ -521,14 +553,27 @@ function writeSse(key, client, message) {
   }
 }
 
-function reserveSseConnection() {
-  if (activeSseConnections >= MAX_SSE_CONNECTIONS) return undefined;
+function reserveSseConnection(address = "unknown") {
+  const currentForAddress = sseConnectionsByAddress.get(address) || 0;
+  if (
+    activeSseConnections >= MAX_SSE_CONNECTIONS ||
+    currentForAddress >= MAX_SSE_CONNECTIONS_PER_ADDRESS
+  ) {
+    return undefined;
+  }
   activeSseConnections += 1;
+  sseConnectionsByAddress.set(address, currentForAddress + 1);
   let released = false;
   return () => {
     if (released) return;
     released = true;
     activeSseConnections -= 1;
+    const remainingForAddress = (sseConnectionsByAddress.get(address) || 1) - 1;
+    if (remainingForAddress > 0) {
+      sseConnectionsByAddress.set(address, remainingForAddress);
+    } else {
+      sseConnectionsByAddress.delete(address);
+    }
   };
 }
 
@@ -585,7 +630,7 @@ async function refreshOverlay() {
       overlayState.error = null;
       rebuildSummaries();
     } catch (error) {
-      overlayState.error = error.message || "Unable to read overlay";
+      overlayState.error = redactErrorMessage(error, "Unable to read overlay");
       rebuildSummaries();
     }
   })();
@@ -1147,13 +1192,13 @@ function getState(view, mode, locale) {
     title: config?.title || view,
     lede: config?.lede || "",
     overlay: {
-      path: OVERLAY_PATH,
+      path: publicOverlaySource(),
       updatedAt: overlayState.updatedAt,
       meta,
       version: meta ? meta.version : null,
       latestVersion,
       stale,
-      error: overlayState.error,
+      error: overlayState.error ? redactErrorMessage(overlayState.error) : null,
     },
     api: config?.requiresMode
       ? {
@@ -1167,7 +1212,7 @@ function getState(view, mode, locale) {
       lastSuccess: rebuildState.lastSuccess,
     },
     sections: summary.sections,
-    error: summary.error,
+    error: summary.error ? redactErrorMessage(summary.error, "") : null,
   };
 }
 
@@ -1340,11 +1385,11 @@ const server = http.createServer((req, res) => {
           running: rebuildState.running,
           lastRun: rebuildState.lastRun,
           lastSuccess: rebuildState.lastSuccess,
-          error: rebuildState.error,
+          error: redactErrorMessage(rebuildState.error, ""),
         },
         overlay: {
           updatedAt: overlayState.updatedAt,
-          error: overlayState.error,
+          error: overlayState.error ? redactErrorMessage(overlayState.error) : null,
           meta: overlayState.data?.$meta || null,
         },
         api: apiHealth,
@@ -1355,7 +1400,8 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname === "/events") {
-    const releaseSseSlot = reserveSseConnection();
+    const clientAddress = req.socket?.remoteAddress || "unknown";
+    const releaseSseSlot = reserveSseConnection(clientAddress);
     if (!releaseSseSlot) {
       send(
         res,
@@ -1501,6 +1547,7 @@ if (process.env.NODE_ENV === "test") {
     MAX_ROWS,
     MAX_DISCOVERED_MODES,
     MAX_SSE_CONNECTIONS,
+    MAX_SSE_CONNECTIONS_PER_ADDRESS,
     MAX_SSE_CONNECTIONS_PER_KEY,
     MAX_SSE_BUFFERED_BYTES,
     buildTasksSections,
@@ -1530,8 +1577,13 @@ if (process.env.NODE_ENV === "test") {
     rebuildOverlay,
     isRebuildEnabled,
     isDefaultOverlayPath,
+    isLoopbackHost,
+    isTrustedRebuildTransport,
+    publicOverlaySource,
+    redactErrorMessage,
     safeJoin,
     writeSse,
+    reserveSseConnection,
     fetchRemoteText,
     createSection,
     pushRow,

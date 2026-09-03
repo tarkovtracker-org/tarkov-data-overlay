@@ -132,6 +132,7 @@ describe('mode discovery', () => {
 
 const {
   MAX_ROWS,
+  MAX_SSE_CONNECTIONS_PER_ADDRESS,
   MAX_SSE_BUFFERED_BYTES,
   buildTasksSections,
   buildSummary,
@@ -157,8 +158,13 @@ const {
   getLatestTagVersion,
   isVersionStale,
   isRebuildEnabled,
+  isLoopbackHost,
+  isTrustedRebuildTransport,
+  publicOverlaySource,
+  redactErrorMessage,
   safeJoin,
   writeSse,
+  reserveSseConnection,
   createSection,
   pushRow,
   overlayState,
@@ -449,6 +455,31 @@ describe('remote overlay loading', () => {
         httpServer.close((error) => (error ? reject(error) : resolve()))
       );
     }
+  });
+});
+
+describe('monitor public diagnostics', () => {
+  it('does not expose configured overlay paths or URLs in public messages', () => {
+    expect(publicOverlaySource()).toBe('local overlay');
+    expect(publicOverlaySource('https://user:secret@example.test/overlay.json')).toBe(
+      'remote overlay'
+    );
+    const secret = 'secret-value';
+    const message = redactErrorMessage(
+      new Error(
+        `Remote fetch failed: https://user:${secret}@example.test/overlay.json?token=${secret}`
+      )
+    );
+
+    expect(message).not.toContain(secret);
+    expect(message).toContain('[remote overlay]');
+  });
+
+  it('only treats loopback listener addresses as local rebuild transports', () => {
+    expect(isLoopbackHost('127.0.0.1')).toBe(true);
+    expect(isLoopbackHost('::1')).toBe(true);
+    expect(isLoopbackHost('0.0.0.0')).toBe(false);
+    expect(isTrustedRebuildTransport()).toBe(true);
   });
 });
 
@@ -896,6 +927,22 @@ describe('monitor hardening', () => {
 
     expect(writeSse('test', client, 'event: summary\n\n')).toBe(false);
     expect(client.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('limits SSE connections per client address and releases the quota idempotently', () => {
+    const address = 'quota-test-client';
+    const releases = Array.from({ length: MAX_SSE_CONNECTIONS_PER_ADDRESS }, () =>
+      reserveSseConnection(address)
+    );
+
+    expect(releases.every(Boolean)).toBe(true);
+    expect(reserveSseConnection(address)).toBeUndefined();
+
+    releases.forEach((release) => release?.());
+    releases[0]?.();
+    const replacement = reserveSseConnection(address);
+    expect(replacement).toEqual(expect.any(Function));
+    replacement?.();
   });
 });
 

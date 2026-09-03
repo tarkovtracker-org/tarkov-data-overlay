@@ -257,6 +257,11 @@ describe('extractCount', () => {
     expect(extractCount('Find 3 dogtags')).toBe(3);
   });
 
+  it('removes linked item names in one bounded pass before extracting counts', () => {
+    expect(extractCount('Find [[Item 7]] and 3 dogtags', ['Item 7'])).toBe(3);
+    expect(extractCount('Find 3 dogtags', ['x'.repeat(257)])).toBe(3);
+  });
+
   it('parses counts from the verb fallback', () => {
     expect(extractCount('Reach 15 Strength skill level')).toBe(15);
     expect(extractCount('Visit 4 locations on Woods')).toBe(4);

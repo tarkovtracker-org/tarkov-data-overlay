@@ -688,6 +688,38 @@ describe('tarkov-api (json.tarkov.dev adapter)', () => {
     await expect(fetchTasks()).rejects.toThrow(/duplicate task id 'duplicate'/);
   });
 
+  it('rejects duplicate map and trader IDs instead of silently taking the last record', async () => {
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/maps': {
+          data: {
+            maps: {
+              first: { id: 'duplicate-map', name: 'First' },
+              second: { id: 'duplicate-map', name: 'Second' },
+            },
+          },
+        },
+      })
+    );
+    await expect(fetchModeAccessData('regular')).rejects.toThrow(
+      "Duplicate regular/maps id 'duplicate-map'"
+    );
+
+    mockEndpoints(
+      baseRoutes('regular', {
+        'regular/traders': {
+          data: {
+            first: { id: 'duplicate-trader', name: 'First' },
+            second: { id: 'duplicate-trader', name: 'Second' },
+          },
+        },
+      })
+    );
+    await expect(fetchModeAccessData('regular')).rejects.toThrow(
+      "Duplicate regular/traders id 'duplicate-trader'"
+    );
+  });
+
   it('resolves taskRequirements task refs', async () => {
     mockEndpoints(
       baseRoutes('regular', {

@@ -62,7 +62,11 @@ describe('task availability report helpers', () => {
               taskRequirements: [{ task: 'prerequisite', status: ['complete'] }],
             },
             prerequisite: { id: 'prerequisite', name: 'prerequisite name' },
-            'disabled-task': { id: 'disabled-task', name: 'disabled-task name' },
+            'disabled-task': {
+              id: 'disabled-task',
+              name: 'disabled-task name',
+              otherRequirements: [{ id: 'disabled-hidden', type: 'future' }],
+            },
           },
         },
       },

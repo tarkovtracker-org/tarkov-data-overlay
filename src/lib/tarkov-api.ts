@@ -108,15 +108,19 @@ function compact<T extends JsonRecord>(value: T): T {
  * Build an id -> record lookup from either an id-keyed object or an array of
  * records.
  */
-function toLookup(value: unknown): Map<string, JsonRecord> {
-  const entries: Array<readonly [string, JsonRecord]> = [];
+function toLookup(value: unknown, label = 'collection'): Map<string, JsonRecord> {
+  const lookup = new Map<string, JsonRecord>();
   const records = Array.isArray(value) ? value : isRecord(value) ? Object.values(value) : [];
   for (const entry of records) {
     if (!isRecord(entry)) continue;
     const id = typeof entry.id === 'string' ? entry.id : undefined;
-    if (id) entries.push([id, entry] as const);
+    if (!id) continue;
+    if (lookup.has(id)) {
+      throw new EnvelopeValidationError(`Duplicate ${label} id '${id}'`);
+    }
+    lookup.set(id, entry);
   }
-  return new Map(entries);
+  return lookup;
 }
 
 /**
@@ -616,7 +620,7 @@ export async function fetchRawEntities(
         `fetchRawEntities: ${mode}/${endpoint} returned a top-level array but collectionKey '${collectionKey}' was provided`
       );
     }
-    return toLookup(envelope.data);
+    return toLookup(envelope.data, `${mode}/${endpoint}`);
   }
   if (!isRecord(envelope.data)) {
     throw new Error(
@@ -632,7 +636,10 @@ export async function fetchRawEntities(
       } collection`
     );
   }
-  return toLookup(collection);
+  return toLookup(
+    collection,
+    `${mode}/${endpoint}${collectionKey ? ` data.${collectionKey}` : ''}`
+  );
 }
 
 /** Read an optional finite numeric field from an endpoint record. */
@@ -672,7 +679,7 @@ async function fetchModeAccessDataWithCache(
     throw new Error(`Invalid json.tarkov.dev response for ${mode}/maps data.maps`);
   }
   const maps = Object.fromEntries(
-    [...toLookup(mapsData.maps)].map(([id, raw]) => [
+    [...toLookup(mapsData.maps, `${mode}/maps`)].map(([id, raw]) => [
       id,
       compact({
         id,
@@ -686,7 +693,7 @@ async function fetchModeAccessDataWithCache(
   );
 
   const traders = Object.fromEntries(
-    [...toLookup(tradersEnvelope.data)].map(([id, raw]) => [
+    [...toLookup(tradersEnvelope.data, `${mode}/traders`)].map(([id, raw]) => [
       id,
       compact({
         id,
@@ -745,8 +752,7 @@ async function fetchTasksWithCache(mode: GameMode, cache: EndpointCache): Promis
     );
   }
 
-  const ctx = await buildContext(cache, mode, tasksData);
-  const tasks: TaskData[] = [];
+  const taskEntries: Array<[string, JsonRecord]> = [];
   const seenIds = new Set<string>();
   for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
     if (!isRecord(rawTask)) {
@@ -766,9 +772,11 @@ async function fetchTasksWithCache(mode: GameMode, cache: EndpointCache): Promis
       );
     }
     seenIds.add(id);
-    tasks.push(adaptTask(rawTask, ctx));
+    taskEntries.push([sourceKey, rawTask]);
   }
-  return tasks;
+
+  const ctx = await buildContext(cache, mode, tasksData);
+  return taskEntries.map(([, rawTask]) => adaptTask(rawTask, ctx));
 }
 
 /** Fetch all tasks for a game mode from json.tarkov.dev. */
@@ -849,11 +857,11 @@ export async function fetchLocaleBundle(gameMode?: GameMode, locale = 'en'): Pro
 
   return {
     locale,
-    tasksById: toLookup(tasksData.tasks),
-    itemsById: toLookup(itemsData.items),
-    mapsById: toLookup(mapsData.maps),
-    tradersById: toLookup(tradersEnvelope.data),
-    prestigeById: toLookup(tasksData.prestige),
+    tasksById: toLookup(tasksData.tasks, `${mode}/tasks`),
+    itemsById: toLookup(itemsData.items, `${mode}/items`),
+    mapsById: toLookup(mapsData.maps, `${mode}/maps`),
+    tradersById: toLookup(tradersEnvelope.data, `${mode}/traders`),
+    prestigeById: toLookup(tasksData.prestige, `${mode}/tasks prestige`),
     tasksLocale,
     itemsLocale,
     mapsLocale,
