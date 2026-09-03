@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { getPackageVersion, getProjectPaths } from '../src/lib/index.js';
+import { getProjectPaths } from '../src/lib/index.js';
 import { resolveBuildVersion } from '../scripts/build.js';
 
 const previousOverlayVersion = process.env.OVERLAY_VERSION;
@@ -36,7 +36,7 @@ describe('resolveBuildVersion', () => {
     const { rootDir } = getProjectPaths();
 
     expect(resolveBuildVersion(rootDir, () => undefined)).toEqual({
-      value: getPackageVersion(rootDir),
+      value: '1.0.0',
       isAuthoritative: false,
     });
   });

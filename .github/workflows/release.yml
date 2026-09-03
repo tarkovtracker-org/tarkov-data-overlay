@@ -198,6 +198,7 @@ jobs:
                 exit 1
               fi
               echo "has_changes=false" >> "$GITHUB_OUTPUT"
+              echo "release_ready=true" >> "$GITHUB_OUTPUT"
             else
               echo "No overlay changes to commit; continuing to tag $NEXT_TAG"
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -240,7 +241,7 @@ jobs:
           echo "tag_ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
-        if: steps.tag.outputs.tag_ready == 'true'
+        if: steps.commit.outputs.release_ready == 'true' || steps.tag.outputs.tag_ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
