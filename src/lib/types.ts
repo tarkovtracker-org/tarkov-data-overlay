@@ -500,6 +500,41 @@ export const DIVERGENCE_MODES = SUPPORTED_GAME_MODES;
 /** A game mode the divergence registry records per-mode values for. */
 export type DivergenceMode = GameMode;
 
+/**
+ * Canonical tarkov.dev map IDs mapped to their English names.
+ *
+ * Map references in overrides and additions are `{ id, name }` pairs, but only
+ * `id` is the join key a consumer resolves. A pair whose name reads correctly
+ * while its ID points at a different map is therefore silently wrong: the schema
+ * only type-checks both as strings, so nothing else catches it.
+ * `tests/map-references.test.ts` validates every map reference in `src/` against
+ * this registry, which is why a corrected map must be looked up rather than
+ * copied from a nearby entry.
+ *
+ * Captured from `json.tarkov.dev/regular/maps` + `/regular/maps_en` (v1.81).
+ * When upstream adds a map the guard fails with the unknown ID; verify the new
+ * ID against those endpoints and add it here.
+ */
+export const TARKOV_MAP_NAMES_BY_ID: Readonly<Record<string, string>> = {
+  '56f40101d2720b2a4d8b45d6': 'Customs',
+  '55f2d3fd4bdc2d5f408b4567': 'Factory',
+  '653e6760052c01c1c805532f': 'Ground Zero',
+  '65b8d6f5cdde2479cb2a3125': 'Ground Zero 21+',
+  '68236e8153654e8c1200798a': 'Ground Zero Tutorial',
+  '69af492a4819ea4ba10a69c5': 'Icebreaker',
+  '5714dbc024597771384a510d': 'Interchange',
+  '5704e4dad2720bb55b8b4567': 'Lighthouse',
+  '59fc81d786f774390775787e': 'Night Factory',
+  '5704e5fad2720bc05b8b4567': 'Reserve',
+  '5704e554d2720bac5b8b456e': 'Shoreline',
+  '5714dc692459777137212e12': 'Streets of Tarkov',
+  '65cc8f81a9aac3e77d0cfd3e': 'Terminal',
+  '5b0fc42d86f7744a585f9105': 'The Lab',
+  '6a294a5b5eb5f9a1700417b7': 'The Lab (Dark)',
+  '6733700029c367a3d40b02af': 'The Labyrinth',
+  '5704e3c2d2720bac5b8b4567': 'Woods',
+} as const;
+
 /** Mode-specific overlay data */
 export interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
