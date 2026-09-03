@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { join, relative } from 'path';
 import { existsSync } from 'fs';
-import { getProjectPaths, loadJson5File, loadJsonFile } from '../src/lib/index.js';
+import {
+  getProjectPaths,
+  loadJson5File,
+  loadJsonFile,
+  SUPPORTED_GAME_MODES,
+} from '../src/lib/index.js';
 
 /**
  * Guards the shape of the prerequisite graph the overlay declares.
@@ -183,6 +188,32 @@ function toSource(file: string, entries: Record<string, unknown>): TaskSource {
   return { file, tasks };
 }
 
+/**
+ * Compose the graph a consumer actually resolves for one mode.
+ *
+ * `mergeTaskOverride` merges shared and mode-specific patches with
+ * `{ ...shared, ...modeSpecific }`, so a mode entry replaces the base entry's
+ * `taskRequirements` wholesale rather than adding to it. Checking each file
+ * separately would miss a ring that only exists once they are combined - a base
+ * edge `a -> b` beside a regular-mode edge `b -> a` is a cycle in regular mode
+ * while neither file contains one on its own.
+ */
+export function buildEffectiveSource(
+  label: string,
+  base: readonly TaskSource[],
+  modeSpecific?: TaskSource
+): TaskSource {
+  const tasks = new Map<string, TaskReference[]>();
+  for (const source of base) {
+    for (const [taskId, refs] of source.tasks) tasks.set(taskId, refs);
+  }
+  // Mode entries win per task, matching mergeTaskOverride's field-level spread.
+  if (modeSpecific) {
+    for (const [taskId, refs] of modeSpecific.tasks) tasks.set(taskId, refs);
+  }
+  return { file: label, tasks };
+}
+
 function loadTaskSource(absolutePath: string, rootDir: string): TaskSource | undefined {
   if (!existsSync(absolutePath)) return undefined;
   const parsed = absolutePath.endsWith('.json5')
@@ -193,17 +224,29 @@ function loadTaskSource(absolutePath: string, rootDir: string): TaskSource | und
 
 const { rootDir, srcDir, distDir } = getProjectPaths();
 
-/** Every committed source that can declare a `taskRequirements` edge. */
-const SOURCE_FILES = [
+/** Sources that apply to every mode. */
+const BASE_FILES = [
   join(srcDir, 'overrides', 'tasks.json5'),
-  join(srcDir, 'overrides', 'modes', 'regular', 'tasks.json5'),
-  join(srcDir, 'overrides', 'modes', 'pve', 'tasks.json5'),
-  join(srcDir, 'overrides', 'modes', 'pvp-season', 'tasks.json5'),
   join(srcDir, 'additions', 'tasksAdd.json5'),
 ];
 
-const sources = SOURCE_FILES.map((file) => loadTaskSource(file, rootDir)).filter(
-  (source): source is TaskSource => source !== undefined
+/** Mode-specific sources, which win per task over the base files. */
+const MODE_FILES = SUPPORTED_GAME_MODES.map(
+  (mode) => [mode, join(srcDir, 'overrides', 'modes', mode, 'tasks.json5')] as const
+);
+
+const load = (file: string) => loadTaskSource(file, rootDir);
+const isSource = (source: TaskSource | undefined): source is TaskSource => source !== undefined;
+
+const baseSources = BASE_FILES.map(load).filter(isSource);
+const modeSources = MODE_FILES.map(([mode, file]) => [mode, load(file)] as const);
+
+/** Every committed source, for the per-entry and cross-file rules. */
+const sources = [...baseSources, ...modeSources.flatMap(([, s]) => (s ? [s] : []))];
+
+/** One composed graph per mode, for the cycle rule. */
+const effectiveSources = modeSources.map(([mode, source]) =>
+  buildEffectiveSource(`effective:${mode}`, baseSources, source)
 );
 
 const edge = (id: string, name?: string) => ({ task: name === undefined ? { id } : { id, name } });
@@ -274,6 +317,33 @@ describe('task prerequisite graph rules', () => {
     ]);
   });
 
+  it('detects a cycle spanning a base entry and a mode entry', () => {
+    const base = [toSource('src/overrides/tasks.json5', { a: { taskRequirements: [edge('b')] } })];
+    const mode = toSource('src/overrides/modes/regular/tasks.json5', {
+      b: { taskRequirements: [edge('a')] },
+    });
+
+    // Neither file contains a ring on its own, so the per-file view is clean.
+    expect(findCycles([...base, mode])).toEqual([]);
+
+    // Composed for the mode a consumer resolves, the ring appears.
+    const effective = buildEffectiveSource('effective:regular', base, mode);
+    expect(findCycles([effective])).toHaveLength(1);
+    expect(findCycles([effective])[0]).toContain('a -> b -> a');
+  });
+
+  it('lets a mode entry replace a base entry rather than adding to it', () => {
+    const base = [
+      toSource('base', { a: { taskRequirements: [edge('b')] }, b: { taskRequirements: [] } }),
+    ];
+    // Base says a -> b; regular repoints a at c, which breaks the b edge.
+    const mode = toSource('mode', { a: { taskRequirements: [edge('c')] } });
+    const effective = buildEffectiveSource('effective:regular', base, mode);
+
+    expect(effective.tasks.get('a')?.map((r) => r.id)).toEqual(['c']);
+    expect(findCycles([effective])).toEqual([]);
+  });
+
   it('accepts a consistent acyclic graph', () => {
     const ok = [
       toSource('fixture.json5', {
@@ -318,8 +388,13 @@ describe('committed task prerequisite graph', () => {
     expect(findDuplicatePrerequisites(sources)).toEqual([]);
   });
 
-  it('declares no prerequisite cycle within a single source', () => {
-    expect(findCycles(sources)).toEqual([]);
+  /**
+   * Checked on the composed per-mode graphs, not per file: base overrides apply
+   * in every mode, so a ring can span a base entry and a mode entry.
+   */
+  it('declares no prerequisite cycle in any mode\u2019s effective graph', () => {
+    expect(effectiveSources.map((s) => s.file)).toHaveLength(SUPPORTED_GAME_MODES.length);
+    expect(findCycles(effectiveSources)).toEqual([]);
   });
 
   it('references each task under a single consistent id and name', () => {
