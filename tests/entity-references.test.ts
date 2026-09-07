@@ -38,6 +38,7 @@ interface Registry {
   expectedFiles: string[];
 }
 
+/** Narrow parsed JSON values to objects before reading reference fields. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -204,6 +205,7 @@ const parsedSources = json5SourceFiles().map((entry) => ({
   data: loadJson5File(join(srcDir, entry)) as unknown,
 }));
 
+/** Collect references from every parsed source for the selected entity registry. */
 function scan(registry: Registry): { file: string; references: EntityReference[] }[] {
   return parsedSources.map(({ file, data }) => {
     const references: EntityReference[] = [];

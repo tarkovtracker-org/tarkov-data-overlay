@@ -270,6 +270,7 @@ function readQuestArray(file: string): EftQuest[] {
   return data as EftQuest[];
 }
 
+/** Normalize quest templates into explicit gates, prerequisite IDs, rewards, and objective counts for comparison. */
 function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
   const out = new Map<string, EftTask>();
   for (const q of quests) {

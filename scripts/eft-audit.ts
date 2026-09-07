@@ -142,6 +142,7 @@ function canonicalJoin(members: Iterable<string>): string {
   return sorted.length === 0 ? '(none)' : sorted.join('+');
 }
 
+/** Compare reference-backed fields with upstream and effective overrides, flagging missing prerequisite targets. */
 function buildRows(
   eftTasks: Map<string, EftTask>,
   apiTasks: TaskData[],

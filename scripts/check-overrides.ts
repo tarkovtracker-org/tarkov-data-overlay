@@ -90,8 +90,6 @@ import {
   loadEftTasks,
   detectReferenceMode,
   crossCheckOverrides,
-  findReferenceFile,
-  readQuestArray,
   type CrossCheckEntry,
 } from './eft-compare.js';
 
@@ -1111,26 +1109,36 @@ function printStoryChapterIssues(
  *   what `chapterQuestId` points at. Chapter IDs are NOT in `quest_list`, so
  *   without this file every chapter would look unresolvable.
  */
-function loadReferenceQuestIds(): Set<string> | null {
-  const eftDir = join(rootDir, 'eft');
+export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string> | null {
   if (!existsSync(eftDir)) return null;
 
   const ids = new Set<string>();
 
-  try {
-    for (const quest of readQuestArray(findReferenceFile(eftDir))) {
-      const rawId = (quest as { _id?: unknown })._id;
-      if (typeof rawId === 'string') {
-        // EFT reference _id values are wrapped, e.g. "[60e71dc0...] Long Line".
-        // Extract the first 24-hex token so hex letters in the quest name
-        // (the 'e' in "Line") don't corrupt the id. Mirrors eft-compare bareId.
-        const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
-        if (bare) ids.add(bare);
+  // This checks provenance, not current unlock values: profile captures may
+  // contain only a subset of story sub-quests. Collect actual definitions from
+  // every capture; an ID merely mentioned by another quest is not a definition.
+  const files = readdirSync(eftDir, { recursive: true }).map(String);
+  for (const file of files) {
+    if (!/quest[_-]list.*\.json$/i.test(file)) continue;
+    try {
+      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      const decoded = raw?.response?.body_response ?? raw?.response?.decoded_response;
+      const quests = decoded?.data ?? raw?.data ?? raw;
+      if (!Array.isArray(quests)) continue;
+      for (const quest of quests) {
+        const rawId = quest?._id;
+        if (typeof rawId === 'string') {
+          const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
+          if (bare) ids.add(bare);
+        }
       }
+    } catch {
+      // Unusable optional captures do not invalidate definitions in other files.
     }
-  } catch {
-    // No quest_list reference, or an unexpected shape.
   }
+
+  // Chapter IDs alone cannot adjudicate whether sub-quest IDs are missing.
+  if (ids.size === 0) return null;
 
   for (const chapterId of loadReferenceChapterIds(eftDir)) ids.add(chapterId);
 
@@ -1139,38 +1147,22 @@ function loadReferenceQuestIds(): Set<string> | null {
 
 /** Story chapter IDs from a `quest_getMainQuestsList` capture, if present. */
 function loadReferenceChapterIds(eftDir: string): string[] {
-  let files: string[];
-  try {
-    files = readdirSync(eftDir);
-  } catch {
-    return [];
+  const ids = new Set<string>();
+  for (const file of readdirSync(eftDir, { recursive: true }).map(String)) {
+    if (!/getmainquestslist.*\.json$/i.test(file)) continue;
+    try {
+      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      const decoded = raw?.response?.body_response ?? raw?.response?.decoded_response ?? raw;
+      const data = decoded?.data ?? decoded;
+      if (!Array.isArray(data?.chapters)) continue;
+      for (const chapter of data.chapters) {
+        if (typeof chapter?.ChapterId === 'string') ids.add(chapter.ChapterId);
+      }
+    } catch {
+      // Keep usable chapter definitions when another optional capture is invalid.
+    }
   }
-
-  const mainQuestFile = files.find(
-    (file) => /getmainquestslist/i.test(file) && file.endsWith('.json')
-  );
-  if (!mainQuestFile) return [];
-
-  try {
-    const raw = JSON.parse(readFileSync(join(eftDir, mainQuestFile), 'utf-8')) as unknown;
-    const envelope = raw as {
-      response?: { decoded_response?: unknown };
-      data?: unknown;
-    };
-    const decoded = (envelope.response?.decoded_response ?? raw) as { data?: unknown };
-    const data = (decoded.data ?? decoded) as { chapters?: unknown };
-    if (!Array.isArray(data.chapters)) return [];
-
-    return data.chapters
-      .map((chapter) =>
-        chapter && typeof chapter === 'object'
-          ? (chapter as Record<string, unknown>).ChapterId
-          : undefined
-      )
-      .filter((id): id is string => typeof id === 'string');
-  } catch {
-    return [];
-  }
+  return [...ids];
 }
 
 /** Report suppressions that no longer suppress anything. */

@@ -889,21 +889,9 @@
     disabled: true,
   },
 
-  // Mechanic - Capacity Check (remove from EFT in Season 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Capacity_Check
-  '669fa3a1c26f13bd04030f37': {
-    disabled: true,
-  },
-
   // Mechanic - Farming - Part 2 (remove from EFT in Season 1)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Farming_-_Part_2
   '5ac3460c86f7742880308185': {
-    disabled: true,
-  },
-
-  // Mechanic - Forklift Certified (remove from EFT in Season 1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Forklift_Certified
-  '669fa394e0c9f9fafa082897': {
     disabled: true,
   },
 

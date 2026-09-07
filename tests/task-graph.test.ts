@@ -50,6 +50,7 @@ interface TaskSource {
   tasks: Map<string, TaskReference[] | undefined>;
 }
 
+/** Narrow parsed JSON values to objects before inspecting task requirements. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -238,6 +239,7 @@ export function buildEffectiveSource(
   return { file: label, tasks };
 }
 
+/** Load an optional JSON or JSON5 task source with a repository-relative diagnostic path. */
 function loadTaskSource(absolutePath: string, rootDir: string): TaskSource | undefined {
   if (!existsSync(absolutePath)) return undefined;
   const parsed = absolutePath.endsWith('.json5')

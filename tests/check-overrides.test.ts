@@ -3,7 +3,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
+  loadReferenceQuestIds,
   normalizeWikiLink,
   checkTaskAdditions,
   checkEditionTaskReferences,
@@ -366,5 +370,80 @@ describe('checkEditionTaskReferences', () => {
       taskId: 'task-missing-excluded',
       kind: 'excluded',
     });
+  });
+});
+
+describe('loadReferenceQuestIds', () => {
+  it('retains usable mode references when another mode has an invalid capture', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const id = '6895bbb0e7dac53c7c08797b';
+      writeFileSync(
+        join(dir, 'quest_list.pve.json'),
+        JSON.stringify({
+          request: { url: 'https://gw-pve.escapefromtarkov.com/client/quest/list' },
+          response: { decoded_response: { data: [{ _id: `[${id}] Story quest` }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'quest_list.regular.json'),
+        JSON.stringify({
+          request: { url: 'https://prod.escapefromtarkov.com/client/quest/list' },
+          response: { decoded_response: { data: {} } },
+        })
+      );
+      expect(loadReferenceQuestIds(dir)?.has(id)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('combines nested partial captures and both decoded formats without accepting mere references', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      mkdirSync(join(dir, 'capture'));
+      const first = '6895bbb0e7dac53c7c08797b';
+      const second = '69bbfae89ce356593c0e2f35';
+      const mentioned = '678fa1463977eb69290a3a06';
+      const chapter = '68cbd33676fe74b1e80bfd91';
+      writeFileSync(
+        join(dir, 'quest_list.old.json'),
+        JSON.stringify({
+          response: { decoded_response: { data: [{ _id: first }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'capture', 'quest_list.new.json'),
+        JSON.stringify({
+          response: { body_response: { data: [{ _id: second, target: mentioned }] } },
+        })
+      );
+      writeFileSync(
+        join(dir, 'capture', 'quest_getMainQuestsList.json'),
+        JSON.stringify({
+          response: { body_response: { data: { chapters: [{ ChapterId: chapter }] } } },
+        })
+      );
+      const ids = loadReferenceQuestIds(dir);
+      expect(ids).toEqual(new Set([first, second, chapter]));
+      expect(ids?.has(mentioned)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not treat a chapter-only capture as a complete quest reference', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      writeFileSync(
+        join(dir, 'quest_getMainQuestsList.json'),
+        JSON.stringify({
+          data: { chapters: [{ ChapterId: '6895bbb0e7dac53c7c08797b' }] },
+        })
+      );
+      expect(loadReferenceQuestIds(dir)).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
