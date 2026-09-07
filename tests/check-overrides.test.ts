@@ -432,6 +432,17 @@ describe('loadReferenceQuestIds', () => {
     }
   });
 
+  it('treats directory scan failures as an unavailable optional reference', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const file = join(dir, 'not-a-directory');
+      writeFileSync(file, '');
+      expect(loadReferenceQuestIds(file)).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('does not treat a chapter-only capture as a complete quest reference', () => {
     const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
     try {

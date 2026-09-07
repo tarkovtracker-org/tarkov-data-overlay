@@ -82,8 +82,18 @@ jobs:
               ? '⚠️ Upstream task data regression detected'
               : '🔄 Overlay overrides may need updating';
             const description = upstream
-              ? 'The automated check found an upstream data-quality regression. Review the missing trader requirement IDs and report the affected mode and task IDs to tarkov.dev. Stale overlay findings, if also present, are listed separately in the output.'
+              ? 'The automated check found an upstream data-quality regression. Report the affected modes and missing-ID counts to tarkov.dev; inspect the live task endpoints for those modes to identify the affected tasks. Stale overlay findings, if also present, are listed separately in the output.'
               : 'The automated check found obsolete overlay data. Review the affected source files and remove or scope the entries identified in the output.';
+
+            // Provision labels when this example is enabled in a fresh repository.
+            for (const name of [label, 'maintenance']) {
+              try {
+                await github.rest.issues.getLabel({ ...context.repo, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ ...context.repo, name, color: 'FBCA04' });
+              }
+            }
 
             // Each finding type has its own deduplication label.
             const issues = await github.rest.issues.listForRepo({

@@ -1117,7 +1117,12 @@ export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string
   // This checks provenance, not current unlock values: profile captures may
   // contain only a subset of story sub-quests. Collect actual definitions from
   // every capture; an ID merely mentioned by another quest is not a definition.
-  const files = readdirSync(eftDir, { recursive: true }).map(String);
+  let files: string[];
+  try {
+    files = readdirSync(eftDir, { recursive: true }).map(String);
+  } catch {
+    return null; // Optional references may be unreadable or disappear during a run.
+  }
   for (const file of files) {
     if (!/quest[_-]list.*\.json$/i.test(file)) continue;
     try {
@@ -1140,15 +1145,15 @@ export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string
   // Chapter IDs alone cannot adjudicate whether sub-quest IDs are missing.
   if (ids.size === 0) return null;
 
-  for (const chapterId of loadReferenceChapterIds(eftDir)) ids.add(chapterId);
+  for (const chapterId of loadReferenceChapterIds(eftDir, files)) ids.add(chapterId);
 
   return ids.size > 0 ? ids : null;
 }
 
 /** Story chapter IDs from a `quest_getMainQuestsList` capture, if present. */
-function loadReferenceChapterIds(eftDir: string): string[] {
+function loadReferenceChapterIds(eftDir: string, files: string[]): string[] {
   const ids = new Set<string>();
-  for (const file of readdirSync(eftDir, { recursive: true }).map(String)) {
+  for (const file of files) {
     if (!/getmainquestslist.*\.json$/i.test(file)) continue;
     try {
       const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
