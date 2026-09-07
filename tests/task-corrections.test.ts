@@ -14,11 +14,8 @@ const TASK_IDS = {
   mallCop: '64e7b99017ab941a6f7bf9d7',
   tickets: '64e7b9a4aac4cd0a726562cb',
   duplicateShooter: '5bc4826c86f774106d22d88b',
-  shooterPart1: '5bc4776586f774512d07cf05',
-  unprotected: '5d25aed386f77442734d25d2',
-  walls: '669fa39c64ea11e84c0642a6',
+  theGuide: '5c0d4e61d09282029f53920e',
   tigrSafari: '5a27b7a786f774579c3eb376',
-  trophy: '5d25e2c386f77443e7549029',
   goodTimes: '666314b4d7f171c4c20226c3',
   supplements: '5b478ff486f7744d184ecbbf',
   relentless: '60e71e8ed54b755a3b53eb67',
@@ -76,42 +73,26 @@ describe('task correction data', () => {
     }
   });
 
-  it('restores the documented prerequisite chains', () => {
-    expect(overrides[TASK_IDS.shooterPart1]).toMatchObject({
-      taskRequirements: [{ task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' } }],
-    });
-    expect(overrides[TASK_IDS.unprotected]).toMatchObject({
-      taskRequirements: [{ task: { id: '5d24b81486f77439c92d6ba8', name: 'Acquaintance' } }],
-      objectives: {
-        '5d25af3c86f77443ff46b9e7': {
-          maps: [{ id: '5704e3c2d2720bac5b8b4567', name: 'Woods' }],
-        },
-      },
-    });
-    expect(overrides[TASK_IDS.walls]).toMatchObject({
-      taskRequirements: [{ task: { id: '669fa395c4c5c04798002497', name: 'Exit Here' } }],
-    });
-    expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({
-      factionName: 'USEC',
-      taskRequirements: [{ task: { id: '5a27b75b86f7742e97191958', name: 'Fishing Gear' } }],
-    });
-    expect(overrides[TASK_IDS.trophy]).toMatchObject({
-      taskRequirements: [
-        {
-          task: {
-            id: '5d25e2b486f77409de05bba0',
-            name: 'The Huntsman Path - Secured Perimeter',
-          },
-        },
-      ],
-    });
+  /**
+   * Faction locking is a property of the override that nothing else asserts, so
+   * it is pinned here (issues #288, #291).
+   *
+   * Prerequisite edges are deliberately NOT pinned in this file. An assertion
+   * that simply restates whatever `taskRequirements` currently says verifies
+   * nothing about correctness while making a genuine correction look like a
+   * regression - that is how a wrong Survivalist chain stayed green through two
+   * pull requests. Prerequisite correctness is adjudicated against the game
+   * client's own `AvailableForStart` conditions by `npm run eft:audit`
+   * (local-only, needs the quest reference), and the structural properties that
+   * can be checked offline - no cycles, no self-references, consistent id/name
+   * pairs - live in `tests/task-graph.test.ts`.
+   */
+  it('keeps the faction lock on faction-restricted tasks', () => {
+    expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({ factionName: 'USEC' });
   });
 
   it('applies the level, map, name, and objective corrections', () => {
-    expect(overrides[TASK_IDS.goodTimes]).toMatchObject({
-      minPlayerLevel: 27,
-      taskRequirements: [{ task: { id: '657315df034d76585f032e01', name: 'Shooting Cans' } }],
-    });
+    expect(overrides[TASK_IDS.goodTimes]).toMatchObject({ minPlayerLevel: 27 });
     expect(overrides[TASK_IDS.supplements]).toMatchObject({
       objectives: {
         '6a5ab1920a2a6d86771ee14a': {
@@ -127,6 +108,25 @@ describe('task correction data', () => {
       ],
     });
     expect(overrides[TASK_IDS.flashDrive]?.name).toBe("What's on the Flash Drive?");
+  });
+
+  /**
+   * The Guide's start condition in the client is a single loyalty variable, so
+   * upstream's minPlayerLevel 32 is a stale pre-S1 gate (cleared to 0) and the
+   * real gate is Peacekeeper LL4, which upstream only serves as an opaque
+   * `otherRequirements` globalVariable entry. The one thing that must NOT be here
+   * is a `taskRequirements` edge: the wiki's `previous = Wet Job - Part 6` is
+   * narrative order, and the client carries no Quest condition for this task.
+   */
+  it('gates The Guide on Peacekeeper LL4 rather than a player level or a quest', () => {
+    const guide = overrides[TASK_IDS.theGuide];
+    expect(guide).toMatchObject({
+      minPlayerLevel: 0,
+      traderRequirements: [
+        { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, value: 4 },
+      ],
+    });
+    expect(guide?.taskRequirements).toBeUndefined();
   });
 });
 

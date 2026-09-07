@@ -149,6 +149,72 @@ include `name`/`shortName` for readability.
 
 ---
 
+## What Counts as Proof for Which Field
+
+Not every wiki field is evidence for every override. Patch 1.1.0.0 expresses most
+trader-loyalty gates as `GlobalVariableValue` start conditions against opaque
+per-tier variables instead of `TraderLoyalty` conditions, and tarkov.dev serves
+those as `otherRequirements` `globalVariable` entries. That single change is why
+the three rules below differ, and getting them mixed up has already shipped
+regressions.
+
+### `taskRequirements` — the wiki `previous` field is not proof
+
+The infobox `previous` field describes narrative progression. The game gates a
+task with the `AvailableForStart` conditions in its quest template, so a task
+whose only start condition is a loyalty variable has **no** quest prerequisite,
+and `taskRequirements: []` is correct rather than missing an edge.
+
+Before overriding `taskRequirements`, confirm the edge exists as a `Quest` start
+condition. `npm run eft:audit` reports this per task (`CONFLICT` means the
+override disagrees with the client). If you cannot check the client data, do not
+override the field.
+
+If the client names a prerequisite task that is absent from the selected
+tarkov.dev task endpoint, the audit reports `UNRESOLVED`. Do not add that edge to
+an override: it would create a dangling prerequisite for consumers. Track the
+missing task separately as an upstream-ingestion or data-addition investigation
+until the task can be represented safely.
+
+### `minPlayerLevel` — absence of a `Level` condition does not mean `0`
+
+The reference lists **explicit** level gates completely: only 8 of 644 quests carry
+a `Level` condition, and that is the whole set rather than a filtered view — the
+list is unfiltered quest templates, and a trivially-satisfied `Level >= 1`
+condition survives in a capture taken on a level-55 profile, which could not
+happen if satisfied conditions were stripped.
+
+The other 636 quests still often have a real floor. tarkov.dev _derives_
+`minPlayerLevel` from the loyalty tier's `requiredPlayerLevel` when a task is
+loyalty-gated, and across all 91 such tasks upstream equals that floor exactly.
+So "no `Level` condition" means "no explicit gate", not "no gate", and zeroing
+those would throw away a correct derived floor.
+
+Only correct `minPlayerLevel` when upstream's value matches neither an explicit
+`Level` condition nor the loyalty-tier floor — that is the case where it is a
+genuine stale leftover. Corroborate with the wiki Requirements section, and use
+`0` to mean "no level gate" (see `src/lib/task-unlocks.ts`).
+
+### `traderRequirements` — use the wiki, not the reference
+
+This is the one field the reference cannot adjudicate, and `eft:audit`
+deliberately skips it. Because the gate lives in a global variable, the client
+shows no `TraderLoyalty` condition even for tasks that genuinely have a loyalty
+gate, so reading absence as "no gate" would falsely condemn 150+ correct
+overrides. Use the wiki Requirements section.
+
+### Entity `{ id, name }` pairs — look the ID up, never copy it
+
+Consumers resolve maps and traders by `id`, and the schema only type-checks both
+as strings, so a correct name beside the wrong ID silently points at another
+entity. Look the ID up in `TARKOV_MAP_NAMES_BY_ID` /
+`TARKOV_TRADER_NAMES_BY_ID` (`src/lib/types.ts`);
+`tests/entity-references.test.ts` enforces the pairing, and
+`tests/task-graph.test.ts` enforces that task references stay internally
+consistent and acyclic.
+
+---
+
 ## Disabled Tasks
 
 If a task is removed from gameplay but still present in the API, you can set
