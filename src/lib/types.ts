@@ -188,7 +188,7 @@ export interface TaskGlobalVariableRequirement {
   id: string;
   type: 'globalVariable';
   variableId: string;
-  compareMethod: TraderRequirementCompareMethod;
+  compareMethod: TraderRequirementCompareMethod | '==';
   value: number;
 }
 
@@ -766,7 +766,28 @@ export interface PrestigeOverride {
 }
 
 /** Built overlay output structure */
+/** Evidence-scoped mapping from a condition target to distinct task completions. */
+export interface ProgressionCounterDefinition {
+  /** Explicit compatibility revision; callers must select the same revision. */
+  revision: string;
+  verification: 'verified' | 'unresolved';
+  coverage: 'complete' | 'partial';
+  derivation: {
+    type: 'distinctTaskCompletions';
+    /** Candidates only unless verification and coverage permit evaluation. */
+    taskIds: string[];
+  };
+  /** Public evidence for the mapping, including contribution and reset semantics. */
+  proof: string[];
+}
+
+/** Mode -> condition variableId -> mapping. No cross-mode fallback. */
+export type ProgressionCounterRegistry = Partial<
+  Record<GameMode, Record<string, ProgressionCounterDefinition>>
+>;
+
 export interface OverlayOutput {
+  progressionCounters?: ProgressionCounterRegistry;
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   items?: Record<string, unknown>;
@@ -884,6 +905,7 @@ export interface DivergenceResult {
 
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
+  { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },

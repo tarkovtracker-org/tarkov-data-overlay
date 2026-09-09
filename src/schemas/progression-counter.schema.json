@@ -1,0 +1,89 @@
+{
+  "$id": "progression-counter.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mode-scoped progression counters",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "regular": {
+      "type": "object",
+      "propertyNames": {
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/counter"
+      }
+    },
+    "pve": {
+      "type": "object",
+      "propertyNames": {
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/counter"
+      }
+    },
+    "pvp-season": {
+      "type": "object",
+      "propertyNames": {
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/counter"
+      }
+    }
+  },
+  "definitions": {
+    "counter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "verification", "coverage", "derivation", "proof"],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "verification": {
+          "enum": ["verified", "unresolved"]
+        },
+        "coverage": {
+          "enum": ["complete", "partial"]
+        },
+        "derivation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "taskIds"],
+          "properties": {
+            "type": {
+              "const": "distinctTaskCompletions"
+            },
+            "taskIds": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        },
+        "proof": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^https?://\\S+$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -17,7 +17,7 @@ import type {
   TraderRequirement,
 } from './types.js';
 
-export type TaskUnlockCompareMethod = '>=' | '<=' | '>' | '<' | '=';
+export type TaskUnlockCompareMethod = '>=' | '<=' | '>' | '<' | '=' | '==';
 export type RequirementState = 'met' | 'unmet' | 'unknown';
 export type TaskAvailabilityStatus = 'available' | 'blocked' | 'unknown';
 export type TaskStatusValue = string | number;
@@ -25,15 +25,15 @@ export type TaskStatusValue = string | number;
 /** BSG quest status codes accepted by the evaluator when a profile is numeric. */
 export const TASK_STATUS_NAMES: Readonly<Record<number, string>> = {
   0: 'locked',
-  1: 'active',
+  1: 'availableForStart',
   2: 'active',
-  3: 'active',
+  3: 'availableForFinish',
   4: 'complete',
   5: 'failed',
-  6: 'failed',
-  7: 'failed',
-  8: 'failed',
-  9: 'active',
+  6: 'failedRestartable',
+  7: 'markedFailed',
+  8: 'expired',
+  9: 'availableAfter',
 };
 
 const STATUS_ALIASES: Readonly<Record<string, string>> = {
@@ -41,16 +41,17 @@ const STATUS_ALIASES: Readonly<Record<string, string>> = {
   success: 'complete',
   accepted: 'active',
   started: 'active',
-  availableforstart: 'active',
-  availableforfinish: 'active',
-  availableafter: 'active',
+  availableforstart: 'availableForStart',
+  availableforfinish: 'availableForFinish',
+  availableafter: 'availableAfter',
   fail: 'failed',
-  failedrestartable: 'failed',
-  markedasfailed: 'failed',
-  expired: 'failed',
+  failedrestartable: 'failedRestartable',
+  markedasfailed: 'markedFailed',
+  markedfailed: 'markedFailed',
+  expired: 'expired',
 };
 
-const CANONICAL_TASK_STATUSES = new Set(['locked', 'active', 'complete', 'failed']);
+const CANONICAL_TASK_STATUSES = new Set(Object.values(TASK_STATUS_NAMES));
 
 type TaskRef = { id: string; name: string };
 
@@ -146,7 +147,7 @@ export interface TaskUnlockState {
   traderUnlocked?: Record<string, boolean>;
   /** True after the account has unlocked the Lightkeeper chain. */
   lightkeeperUnlocked?: boolean;
-  /** Values from the account's variable-group state, keyed by variableId. */
+  /** Resolved numeric values keyed by condition target (scalar or group ID). */
   globalVariables?: Record<string, number>;
   /** Dialogue requirement IDs acknowledged by the player. */
   dialogues?: Record<string, boolean>;
@@ -274,7 +275,14 @@ function isTaskRef(value: unknown): value is TaskRef {
 
 /** Check the comparison operators accepted by numeric unlock conditions. */
 function isCompareMethod(value: unknown): value is TaskUnlockCompareMethod {
-  return value === '>=' || value === '<=' || value === '>' || value === '<' || value === '=';
+  return (
+    value === '>=' ||
+    value === '<=' ||
+    value === '>' ||
+    value === '<' ||
+    value === '=' ||
+    value === '=='
+  );
 }
 
 /** Check whether a value is a finite numeric requirement. */
@@ -641,12 +649,13 @@ function compare(actual: number, method: TaskUnlockCompareMethod, expected: numb
     case '<':
       return actual < expected;
     case '=':
+    case '==':
       return actual === expected;
   }
 }
 
 /** Map numeric/profile status spellings to canonical names when well-formed. */
-function canonicalStatus(status: unknown): string | undefined {
+export function normalizeTaskStatus(status: unknown): string | undefined {
   if (typeof status === 'number') {
     return Number.isFinite(status) ? TASK_STATUS_NAMES[status] : undefined;
   }
@@ -731,8 +740,8 @@ function evaluateTaskStatusCondition(
     return { state: 'unknown', reason: 'task status is empty' };
   }
 
-  const acceptedStatuses = denseArray(condition.statuses).map(canonicalStatus);
-  const actualStatuses = statuses.map(canonicalStatus);
+  const acceptedStatuses = denseArray(condition.statuses).map(normalizeTaskStatus);
+  const actualStatuses = statuses.map(normalizeTaskStatus);
   if (
     acceptedStatuses.some((status) => status === undefined) ||
     actualStatuses.some((status) => status === undefined)

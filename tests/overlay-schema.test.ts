@@ -91,6 +91,7 @@ describe('overlay.schema.json', () => {
       'task-additions.schema.json',
       'trader-requirement.schema.json',
       'story-chapter.schema.json',
+      'progression-counter.schema.json',
       'locale-override.schema.json',
       'seasonal-perk.schema.json',
       'craft-additions.schema.json',

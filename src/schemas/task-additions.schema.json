@@ -844,7 +844,20 @@
             "status": {
               "description": "Allowed statuses used by task graph logic: accepted/active (links predecessors), complete/completed (normal prerequisite), failed (marks as alternative)",
               "items": {
-                "enum": ["accepted", "active", "complete", "completed", "failed"],
+                "enum": [
+                  "locked",
+                  "availableForStart",
+                  "accepted",
+                  "active",
+                  "availableForFinish",
+                  "complete",
+                  "completed",
+                  "failed",
+                  "failedRestartable",
+                  "markedFailed",
+                  "expired",
+                  "availableAfter"
+                ],
                 "type": "string"
               },
               "type": "array"
@@ -877,7 +890,20 @@
               },
               "status": {
                 "items": {
-                  "enum": ["accepted", "active", "complete", "completed", "failed"],
+                  "enum": [
+                    "locked",
+                    "availableForStart",
+                    "accepted",
+                    "active",
+                    "availableForFinish",
+                    "complete",
+                    "completed",
+                    "failed",
+                    "failedRestartable",
+                    "markedFailed",
+                    "expired",
+                    "availableAfter"
+                  ],
                   "type": "string"
                 },
                 "type": "array"
@@ -914,7 +940,7 @@
               "type": "array"
             },
             "variableId": { "type": "string" },
-            "compareMethod": { "enum": [">=", "<=", ">", "<", "="] },
+            "compareMethod": { "enum": [">=", "<=", ">", "<", "=", "=="] },
             "value": { "type": "number" }
           },
           "allOf": [

@@ -4033,6 +4033,7 @@
       "shortName": "USEC"
     }
   },
+  "progressionCounters": {},
   "seasonalPerks": {
     "69c41a19cd28c936320a7523": {
       "id": "69c41a19cd28c936320a7523",
@@ -9023,7 +9024,7 @@
   },
   "$meta": {
     "version": "1.84",
-    "generated": "2026-09-07T16:16:19.491Z",
-    "sha256": "1a72a4401e397594a59684578952f4ef40185b361b78cbbb79229673accffb5f"
+    "generated": "2026-09-09T02:33:38.463Z",
+    "sha256": "16a65a538e92a2a8290fff6f8e4642608e8f8f0c8364e22055e82ed50e95c82c"
   }
 }

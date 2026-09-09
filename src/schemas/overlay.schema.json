@@ -38,6 +38,9 @@
     "storyChapters": {
       "$ref": "story-chapter.schema.json"
     },
+    "progressionCounters": {
+      "$ref": "progression-counter.schema.json"
+    },
     "seasonalPerks": {
       "$ref": "seasonal-perk.schema.json"
     },
