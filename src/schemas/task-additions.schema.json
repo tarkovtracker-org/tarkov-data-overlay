@@ -842,7 +842,7 @@
               "type": "object"
             },
             "status": {
-              "description": "Allowed statuses used by task graph logic: accepted/active (links predecessors), complete/completed (normal prerequisite), failed (marks as alternative)",
+              "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. complete/completed is the normal prerequisite, accepted/active links a predecessor that must be started, and the failed family marks alternatives",
               "items": {
                 "enum": [
                   "locked",

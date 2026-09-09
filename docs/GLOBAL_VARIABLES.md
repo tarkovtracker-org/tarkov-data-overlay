@@ -77,9 +77,12 @@ Raw child values are not automatically summed. An invalid explicit value yields
 unknown rather than falling back to a potentially contradictory inferred value.
 
 Without an explicit value, the evaluator requires a complete verified mapping and
-known statuses for every contributor. Missing, invalid, or mixed complete/non-complete
-status lists make the result unknown. Known non-complete statuses contribute zero;
-complete statuses contribute one. Incomplete history is not silently treated as zero.
+known statuses for every contributor. A contributor is unknown when its own status is
+missing or invalid, or when its status list mixes complete and non-complete entries; a
+single unknown contributor makes the whole counter unknown. Otherwise each contributor
+is scored: complete contributes one and known non-complete contributes zero, so a
+contributor set mixing complete and incomplete tasks still resolves to a known value.
+Incomplete history is not silently treated as zero.
 
 `result.counters[variableId]` explains the source and includes the computed value
 when known. For verified derivations it also lists completed, incomplete, and unknown

@@ -69,6 +69,7 @@ describe('progress-based task eligibility', () => {
     { coverage: 'partial' },
     { proof: [] },
     { proof: ['not a link'] },
+    { proof: ['https://example.com/rule', 'https://example.com/rule'] },
     { derivation: { type: 'sum', taskIds: ['a'] } },
     { derivation: { type: 'distinctTaskCompletions', taskIds: ['a', 'a'] } },
     { derivation: { type: 'distinctTaskCompletions', taskIds: [] } },
@@ -140,6 +141,20 @@ describe('progress-based task eligibility', () => {
 
   it('does not derive a parent from an inherited mapping', () => {
     const counters = { pve: Object.create({ pool: mapping }) };
+    expect(evaluateTaskProgression(task, state, { ...options, counters }).status).toBe('unknown');
+  });
+
+  it('does not accept prototype-supplied definition fields', () => {
+    const inherited = { pve: { pool: Object.create(mapping) } };
+    expect(evaluateTaskProgression(task, state, { ...options, counters: inherited }).status).toBe(
+      'unknown'
+    );
+    const polluted: Record<string, unknown> = Object.assign(
+      Object.create({ verification: 'verified' }),
+      mapping
+    );
+    delete polluted.verification;
+    const counters = { pve: { pool: polluted } } as unknown as TaskProgressionOptions['counters'];
     expect(evaluateTaskProgression(task, state, { ...options, counters }).status).toBe('unknown');
   });
 
@@ -240,6 +255,7 @@ describe('published counter schema', () => {
       },
     },
     { pve: { pool: { ...mapping, proof: ['not a link'] } } },
+    { pve: { pool: { ...mapping, proof: ['https://example.com/r', 'https://example.com/r'] } } },
   ])('rejects malformed published definitions: %j', (registry) =>
     expect(validate(registry)).toBe(false)
   );

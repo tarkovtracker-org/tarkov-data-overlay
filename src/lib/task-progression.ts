@@ -60,9 +60,9 @@ function contributorIds(definition: unknown, revision: unknown): string[] | unde
   if (
     !record(definition) ||
     !nonEmpty(revision) ||
-    definition.revision !== revision ||
-    definition.verification !== 'verified' ||
-    definition.coverage !== 'complete'
+    own(definition, 'revision') !== revision ||
+    own(definition, 'verification') !== 'verified' ||
+    own(definition, 'coverage') !== 'complete'
   )
     return undefined;
   if (
@@ -71,15 +71,15 @@ function contributorIds(definition: unknown, revision: unknown): string[] | unde
     )
   )
     return undefined;
-  const derivation = definition.derivation;
+  const derivation = own(definition, 'derivation');
   if (
     !record(derivation) ||
-    derivation.type !== 'distinctTaskCompletions' ||
+    own(derivation, 'type') !== 'distinctTaskCompletions' ||
     Object.keys(derivation).some((key) => !['type', 'taskIds'].includes(key))
   )
     return undefined;
-  const ids = derivation.taskIds;
-  const proof = definition.proof;
+  const ids = own(derivation, 'taskIds');
+  const proof = own(definition, 'proof');
   if (
     !Array.isArray(ids) ||
     ids.length === 0 ||
@@ -87,7 +87,8 @@ function contributorIds(definition: unknown, revision: unknown): string[] | unde
     new Set(ids).size !== ids.length ||
     !Array.isArray(proof) ||
     proof.length === 0 ||
-    !Array.from(proof).every((link) => nonEmpty(link) && /^https?:\/\/\S+$/.test(link))
+    !Array.from(proof).every((link) => nonEmpty(link) && /^https?:\/\/\S+$/.test(link)) ||
+    new Set(proof).size !== proof.length
   )
     return undefined;
   return ids;
