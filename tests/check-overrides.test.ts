@@ -443,6 +443,26 @@ describe('loadReferenceQuestIds', () => {
     }
   });
 
+  it('keeps usable chapter definitions when another chapter capture is invalid', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
+    try {
+      const quest = '6895bbb0e7dac53c7c08797b';
+      const chapter = '68cbd33676fe74b1e80bfd91';
+      writeFileSync(
+        join(dir, 'quest_list.json'),
+        JSON.stringify({ response: { decoded_response: { data: [{ _id: quest }] } } })
+      );
+      writeFileSync(join(dir, 'quest_getMainQuestsList.broken.json'), '{ not json');
+      writeFileSync(
+        join(dir, 'quest_getMainQuestsList.good.json'),
+        JSON.stringify({ data: { chapters: [{ ChapterId: chapter }] } })
+      );
+      expect(loadReferenceQuestIds(dir)).toEqual(new Set([quest, chapter]));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('does not treat a chapter-only capture as a complete quest reference', () => {
     const dir = mkdtempSync(join(tmpdir(), 'overlay-reference-'));
     try {

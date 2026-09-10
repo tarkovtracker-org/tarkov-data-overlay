@@ -1098,6 +1098,47 @@ function printStoryChapterIssues(
 }
 
 /**
+ * Parse each capture whose name matches `pattern`, yielding the raw document and
+ * its unwrapped response envelope (captures use either decoded format).
+ *
+ * Reading lazily keeps per-file isolation: an unusable optional capture is
+ * skipped without invalidating the definitions found in the other files.
+ */
+function* readReferenceCaptures(eftDir: string, files: string[], pattern: RegExp) {
+  for (const file of files) {
+    if (!pattern.test(file)) continue;
+    try {
+      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
+      yield { raw, envelope: raw?.response?.body_response ?? raw?.response?.decoded_response };
+    } catch {
+      // Unusable optional captures do not invalidate definitions in other files.
+    }
+  }
+}
+
+/**
+ * Quest definition IDs from every `quest_list` capture.
+ *
+ * Profile captures may contain only a subset of story sub-quests, so every
+ * capture contributes. An ID merely mentioned by another quest is not a
+ * definition, which is why only `_id` is read.
+ */
+function loadReferenceTaskIds(eftDir: string, files: string[]): string[] {
+  const ids = new Set<string>();
+  for (const { raw, envelope } of readReferenceCaptures(eftDir, files, /quest[_-]list.*\.json$/i)) {
+    const quests = envelope?.data ?? raw?.data ?? raw;
+    if (!Array.isArray(quests)) continue;
+    for (const quest of quests) {
+      const rawId = quest?._id;
+      if (typeof rawId !== 'string') continue;
+      const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
+      if (bare) ids.add(bare);
+    }
+  }
+  return [...ids];
+}
+
+/**
  * Quest IDs from the local EFT reference, or null when no reference is present.
  *
  * Story-chapter quests are absent from tarkov.dev, so this is the only source
@@ -1108,63 +1149,42 @@ function printStoryChapterIssues(
  * - `quest_getMainQuestsList` carries the story chapters themselves, which is
  *   what `chapterQuestId` points at. Chapter IDs are NOT in `quest_list`, so
  *   without this file every chapter would look unresolvable.
+ *
+ * This checks provenance, not current unlock values.
  */
 export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string> | null {
   if (!existsSync(eftDir)) return null;
 
-  const ids = new Set<string>();
-
-  // This checks provenance, not current unlock values: profile captures may
-  // contain only a subset of story sub-quests. Collect actual definitions from
-  // every capture; an ID merely mentioned by another quest is not a definition.
   let files: string[];
   try {
     files = readdirSync(eftDir, { recursive: true }).map(String);
   } catch {
     return null; // Optional references may be unreadable or disappear during a run.
   }
-  for (const file of files) {
-    if (!/quest[_-]list.*\.json$/i.test(file)) continue;
-    try {
-      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
-      const decoded = raw?.response?.body_response ?? raw?.response?.decoded_response;
-      const quests = decoded?.data ?? raw?.data ?? raw;
-      if (!Array.isArray(quests)) continue;
-      for (const quest of quests) {
-        const rawId = quest?._id;
-        if (typeof rawId === 'string') {
-          const bare = rawId.match(/[0-9a-f]{24}/i)?.[0]?.toLowerCase();
-          if (bare) ids.add(bare);
-        }
-      }
-    } catch {
-      // Unusable optional captures do not invalidate definitions in other files.
-    }
-  }
+
+  const ids = new Set(loadReferenceTaskIds(eftDir, files));
 
   // Chapter IDs alone cannot adjudicate whether sub-quest IDs are missing.
   if (ids.size === 0) return null;
 
   for (const chapterId of loadReferenceChapterIds(eftDir, files)) ids.add(chapterId);
 
-  return ids.size > 0 ? ids : null;
+  return ids;
 }
 
 /** Story chapter IDs from a `quest_getMainQuestsList` capture, if present. */
 function loadReferenceChapterIds(eftDir: string, files: string[]): string[] {
   const ids = new Set<string>();
-  for (const file of files) {
-    if (!/getmainquestslist.*\.json$/i.test(file)) continue;
-    try {
-      const raw = JSON.parse(readFileSync(join(eftDir, file), 'utf-8'));
-      const decoded = raw?.response?.body_response ?? raw?.response?.decoded_response ?? raw;
-      const data = decoded?.data ?? decoded;
-      if (!Array.isArray(data?.chapters)) continue;
-      for (const chapter of data.chapters) {
-        if (typeof chapter?.ChapterId === 'string') ids.add(chapter.ChapterId);
-      }
-    } catch {
-      // Keep usable chapter definitions when another optional capture is invalid.
+  for (const { raw, envelope } of readReferenceCaptures(
+    eftDir,
+    files,
+    /getmainquestslist.*\.json$/i
+  )) {
+    const decoded = envelope ?? raw;
+    const data = decoded?.data ?? decoded;
+    if (!Array.isArray(data?.chapters)) continue;
+    for (const chapter of data.chapters) {
+      if (typeof chapter?.ChapterId === 'string') ids.add(chapter.ChapterId);
     }
   }
   return [...ids];
