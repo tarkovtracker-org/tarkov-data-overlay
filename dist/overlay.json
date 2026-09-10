@@ -9115,8 +9115,8 @@
     }
   },
   "$meta": {
-    "version": "1.91",
-    "generated": "2026-09-10T06:51:48.324Z",
-    "sha256": "846d403d19420306fa86ddf5879861e2ca0af8ee5275f3ab7a01e303203c7525"
+    "version": "1.92",
+    "generated": "2026-09-10T10:52:41.280Z",
+    "sha256": "8c80102e9f0e1e731cc7030e4eddc3ac5ff43e6cc6b59f5e5feff8e05626c368"
   }
 }
