@@ -192,8 +192,10 @@ evidence that the head commit was reviewed. Get the coverage another way:
   for structured findings, with `--committed` / `--uncommitted` to scope which
   changes are considered, `coderabbit review findings` to re-read the last local
   run, and `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit
-  already posted on a PR. Subcommands vary by CLI version, so confirm against
-  `coderabbit --help` before relying on one. A local run has completed a full
+  already posted on a PR. Subcommands and their flags vary by CLI version, so
+  confirm against `coderabbit review --help` and `coderabbit pullrequest --help`
+  before relying on one; the top-level `coderabbit --help` lists subcommands and
+  global options only. A local run has completed a full
   review while the GitHub PR allowance was exhausted, so the two are metered
   separately in practice — but CLI runs are still review events counted against the
   account's limits and can draw on usage-based billing, so treat them as costed
