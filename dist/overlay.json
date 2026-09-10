@@ -209,6 +209,85 @@
     "pvp-season": {}
   },
   "tasks": {
+    "59ca1a6286f774509a270942": {
+      "factionName": "USEC",
+      "traderRequirements": [
+        {
+          "id": "overlay.59ca1a6286f774509a270942.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "69ce1cfb298a6529b30d712b": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce1cfb298a6529b30d712b.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce204c8702b378f9091e4b": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce204c8702b378f9091e4b.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce1de03e15cd80bd06f6c9": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce1de03e15cd80bd06f6c9.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
+    "69ce21e990144e437802b1e0": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce21e990144e437802b1e0.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
     "64e7b9bffd30422ed03dad38": {
       "traderRequirements": [
         {
@@ -800,6 +879,18 @@
       }
     },
     "68ee1c18b4e5bc9a68018cd7": {
+      "traderRequirements": [
+        {
+          "id": "overlay.68ee1c18b4e5bc9a68018cd7.54cb50c76803fa8b248b4571.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 4
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -1261,6 +1352,7 @@
       ]
     },
     "5a27b7d686f77460d847e6a6": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.5a27b7d686f77460d847e6a6.5935c25fb3acc3127c3d8cd9.level.>=.2",
@@ -9024,7 +9116,7 @@
   },
   "$meta": {
     "version": "1.89",
-    "generated": "2026-09-10T04:07:20.394Z",
-    "sha256": "1a002461909ff67d92c43ebf8e7f64ac9698a6ccaa89cea2634f3b851b454a42"
+    "generated": "2026-09-10T05:16:14.789Z",
+    "sha256": "ade30ceffb3109df620b8232ca31e0f0ae416f61a9d7d27c1002d175fbfb8a00"
   }
 }

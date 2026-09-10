@@ -123,6 +123,12 @@ export type TaskUnlockCondition =
       value: number;
     }
   | {
+      type: 'storyObjective';
+      requirementId: string;
+      storyChapter: TaskRef;
+      objective: TaskRef;
+    }
+  | {
       /** Explicit story progress supplied by the story-chapter overlay. */
       type: 'storyChapterProgress';
       storyChapter: TaskRef;
@@ -155,6 +161,8 @@ export interface TaskUnlockState {
   completedConditionIds?: string[];
   /** Story chapter progress, keyed by the addition's chapter ID. */
   storyChapters?: Record<string, boolean>;
+  /** Explicit objective completion, keyed by chapter ID then objective ID. */
+  storyObjectives?: Record<string, Record<string, boolean>>;
   /** Current epoch time in seconds, used for delayed availability. */
   nowSeconds?: number;
   /** Time at which this task's non-delay conditions became satisfied. */
@@ -390,6 +398,22 @@ function otherRequirementCondition(requirement: TaskOtherRequirement): TaskUnloc
       isRecord(requirement) ? requirement.id : undefined,
       isRecord(requirement) ? requirement.type : undefined
     );
+  }
+
+  if (requirement.type === 'storyObjective') {
+    if (
+      !isNonEmptyString(requirement.id) ||
+      !isTaskRef(requirement.storyChapter) ||
+      !isTaskRef(requirement.objective)
+    ) {
+      return unknownRequirementCondition(requirement.id, requirement.type);
+    }
+    return {
+      type: 'storyObjective',
+      requirementId: requirement.id,
+      storyChapter: requirement.storyChapter,
+      objective: requirement.objective,
+    };
   }
 
   if (requirement.type === 'dialogue') {
@@ -869,6 +893,46 @@ function evaluateStoryChapterCondition(
   };
 }
 
+/**
+ * Read a boolean from a two-level map using own properties only, so inherited
+ * or prototype-supplied values cannot be mistaken for recorded account state.
+ */
+function ownNestedBoolean(map: unknown, outerKey: string, innerKey: string): boolean | undefined {
+  if (!isRecord(map) || !Object.prototype.hasOwnProperty.call(map, outerKey)) return undefined;
+  const inner = map[outerKey];
+  if (!isRecord(inner) || !Object.prototype.hasOwnProperty.call(inner, innerKey)) return undefined;
+  const value = inner[innerKey];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+/** Only explicit completion of the named objective satisfies an objective gate. */
+function evaluateStoryObjectiveCondition(
+  condition: Extract<TaskUnlockCondition, { type: 'storyObjective' }>,
+  state: TaskUnlockState
+): ConditionEvaluation {
+  if (
+    !isNonEmptyString(condition.requirementId) ||
+    !isTaskRef(condition.storyChapter) ||
+    !isTaskRef(condition.objective)
+  ) {
+    return { state: 'unknown', reason: 'story objective requirement definition is invalid' };
+  }
+  const value = ownNestedBoolean(
+    state.storyObjectives,
+    condition.storyChapter.id,
+    condition.objective.id
+  );
+  if (value === undefined) {
+    return { state: 'unknown', reason: 'story objective completion is not present or invalid' };
+  }
+  return {
+    state: value ? 'met' : 'unmet',
+    reason: value
+      ? `story objective completed: ${condition.objective.name}`
+      : `requires story objective: ${condition.objective.name}`,
+  };
+}
+
 /** Preserve unsupported conditions as unknown instead of guessing their state. */
 function evaluateUnknownCondition(
   condition: Extract<TaskUnlockCondition, { type: 'unknown' }>
@@ -896,6 +960,7 @@ const CONDITION_HANDLERS: ConditionHandlers = {
   dialogue: evaluateDialogueCondition,
   prestigeLevel: evaluatePrestigeCondition,
   storyChapterProgress: evaluateStoryChapterCondition,
+  storyObjective: evaluateStoryObjectiveCondition,
   unknown: (condition) => evaluateUnknownCondition(condition),
 };
 

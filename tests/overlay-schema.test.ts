@@ -74,6 +74,40 @@ describe('overlay.schema.json', () => {
     expect(rootSchema.required).toContain('modes');
   });
 
+  it.each(['task-override.schema.json', 'task-additions.schema.json'])(
+    'requires both references on a story-objective start gate in %s',
+    (schemaFile) => {
+      const { schemasDir } = getProjectPaths();
+      const ajv = new Ajv({ strict: false, $data: true });
+      ajv.addSchema(loadJsonFile(join(schemasDir, 'trader-requirement.schema.json')));
+      const validate = ajv.compile(loadJsonFile(join(schemasDir, schemaFile)));
+      // Additions describe a whole task, overrides only the patched fields.
+      const base =
+        schemaFile === 'task-additions.schema.json'
+          ? {
+              id: 'test',
+              name: 'Test',
+              wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Test',
+              trader: { id: 'trader', name: 'Trader' },
+              objectives: [],
+            }
+          : {};
+      const requirement = {
+        id: 'overlay.test.boreas',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: { id: 'objective', name: 'Hand over drives' },
+      };
+      expect(validate({ test: { ...base, otherRequirements: [requirement] } })).toBe(true);
+      for (const field of ['storyChapter', 'objective'] as const) {
+        const missing = { ...requirement, [field]: undefined };
+        expect(validate({ test: { ...base, otherRequirements: [missing] } })).toBe(false);
+        const incomplete = { ...requirement, [field]: { id: 'x' } };
+        expect(validate({ test: { ...base, otherRequirements: [incomplete] } })).toBe(false);
+      }
+    }
+  );
+
   it('validates generated overlay output', () => {
     const { schemasDir } = getProjectPaths();
     const ajv = new Ajv({

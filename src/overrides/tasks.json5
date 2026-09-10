@@ -1,4 +1,96 @@
 {
+  // Ironclad Proof - USEC counterpart of Our Own Land (issue #301).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Ironclad_Proof?oldid=357227
+  // Requirements updated 2026-08-31; retain upstream's independent global variable.
+  '59ca1a6286f774509a270942': {
+    factionName: 'USEC', // Was: Any
+    traderRequirements: [
+      // Was: []
+      {
+        id: 'overlay.59ca1a6286f774509a270942.54cb50c76803fa8b248b4571.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 3,
+      },
+    ],
+  },
+
+  // A Wedge Between Us - Boreas hard-drive hand-in (issue #331).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/A_Wedge_Between_Us
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce1cfb298a6529b30d712b': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce1cfb298a6529b30d712b.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // War Never Changes - the same specific hand-in, not all of Boreas (issue #303).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/War_Never_Changes
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce204c8702b378f9091e4b': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce204c8702b378f9091e4b.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // Oil Change - Boreas hard-drive hand-in (issue #298).
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Oil_Change
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce1de03e15cd80bd06f6c9': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce1de03e15cd80bd06f6c9.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
+  // Fresh Stock - the fourth task the same hand-in unlocks. The Boreas guide
+  // names A Wedge Between Us, Fresh Stock, Oil Change and War Never Changes in
+  // one note, and this page carries the identical Requirements line, so it
+  // needs the same gate as its three siblings above.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fresh_Stock
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce21e990144e437802b1e0': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce21e990144e437802b1e0.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
   // ---------------------------------------------------------------------------
   // Provenance notes for entries that were deliberately dropped or moved
   // (recoverable from git history):
@@ -738,6 +830,17 @@
   // S1: hand over 1 (Was: 2) Red Rebel ice pick (upstream now serves the S1
   // objective); exp 65000, +1.5, 400,000 Roubles + TKPD Assault + 2x FMJ ammo packs.
   '68ee1c18b4e5bc9a68018cd7': {
+    // Requirements section: Prapor LL4. Preserve the separate global-variable gate.
+    traderRequirements: [
+      // Was: []
+      {
+        id: 'overlay.68ee1c18b4e5bc9a68018cd7.54cb50c76803fa8b248b4571.level.>=.4',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 4,
+      },
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 1.5 }, // Was: 0 (upstream now serves 1.5)
@@ -1334,6 +1437,8 @@
   //
   // 2026-08-10 - S1: now requires Peacekeeper LL2 instead of player level
   '5a27b7d686f77460d847e6a6': {
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Scrap_Metal?oldid=357252
+    factionName: 'BEAR', // Was: Any (Requirements updated 2026-08-31; issue #308)
     traderRequirements: [
       {
         id: 'overlay.5a27b7d686f77460d847e6a6.5935c25fb3acc3127c3d8cd9.level.>=.2',

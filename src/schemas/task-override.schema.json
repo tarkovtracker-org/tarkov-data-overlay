@@ -1272,6 +1272,24 @@
               },
               "type": "array"
             },
+            "storyChapter": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "name": { "type": "string", "minLength": 1 }
+              },
+              "required": ["id", "name"]
+            },
+            "objective": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "name": { "type": "string", "minLength": 1 }
+              },
+              "required": ["id", "name"]
+            },
             "variableId": { "type": "string" },
             "compareMethod": { "enum": [">=", "<=", ">", "<", "=", "=="] },
             "value": { "type": "number" }
@@ -1290,6 +1308,13 @@
                 "required": ["type"]
               },
               "then": { "required": ["variableId", "compareMethod", "value"] }
+            },
+            {
+              "if": {
+                "properties": { "type": { "const": "storyObjective" } },
+                "required": ["type"]
+              },
+              "then": { "required": ["storyChapter", "objective"] }
             }
           ],
           "required": ["id", "type"],

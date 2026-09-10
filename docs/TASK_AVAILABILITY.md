@@ -150,6 +150,35 @@ Unknown future `otherRequirements` types are retained by the adapter and
 evaluate as `unknown` until TarkovTracker adds a state adapter. This is safer
 than silently dropping a new BSG start condition.
 
+## Specific story-objective gates
+
+`otherRequirements` also supports the overlay-defined `storyObjective` type:
+
+```json
+{
+  "id": "overlay.task-id.boreas.hard-drives",
+  "type": "storyObjective",
+  "storyChapter": { "id": "boreas", "name": "Boreas" },
+  "objective": {
+    "id": "69bc0b6069651f9af0993d2c",
+    "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+  }
+}
+```
+
+Supply explicit completion through
+`accountState.storyObjectives[chapterId][objectiveId]`: `true` satisfies the
+condition, `false` blocks it, and missing/non-boolean values remain `unknown`.
+Chapter completion or an unrelated objective does not substitute for this state.
+The Boreas guide identifies this objective as handing all three C-1 hard drives
+to Mechanic; collecting the drives or merely starting Boreas is insufficient.
+These gates are ANDed with the task's other requirements and do not invent
+normal quest prerequisites. They do not require finishing the whole chapter.
+
+Consumers must update their vendored evaluator and account adapter. Older
+versions safely retain this new requirement type as unknown; they must not
+silently drop it or display unknown eligibility as available.
+
 ## Account adapter
 
 The consumer should convert its synchronized profile into the small state
@@ -175,6 +204,7 @@ const result = evaluateTaskUnlock(task, definition, {
   globalVariables: variablesByVariableId,
   completedConditionIds: profile.completedConditionIds,
   storyChapters: storyChapterProgressById,
+  storyObjectives: storyObjectiveCompletionByChapterId,
 });
 
 if (result.status === 'available') {
@@ -192,7 +222,9 @@ For BSG profile data, `taskStatuses` may use the quest's numeric `status`, and
 IDs. `globalVariables` is keyed by the condition's `variableId`, whether that is
 a scalar ID or a group ID. Group values must already be resolved by a trusted
 adapter; raw profile child values are not sufficient. Both `=` and BSG `==`
-are supported numeric equality operators.
+are supported numeric equality operators. `storyObjectives` is keyed by story
+chapter ID and then by objective ID, and only the adapter's own recorded
+booleans count: inherited or prototype-supplied values stay `unknown`.
 
 ## Traders and maps
 
