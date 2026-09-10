@@ -171,6 +171,34 @@ overlay would not.
 
 Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.
 
+### PR review bots
+
+Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
+allowance is metered from recent usage (CodeRabbit has reported it as one review
+per hour here), and when it is exhausted the bot replies `Review rate limited`
+while still reporting its own check as passing. It also "does not re-review
+already reviewed commits", so a green CodeRabbit check is not evidence that the
+current head commit was reviewed at all. Get the review from a source that is not
+rate limited instead:
+
+- Run it locally with the CodeRabbit CLI, which does not consume the GitHub
+  allowance: `coderabbit review --base main --agent` for structured findings, or
+  `--committed` / `--uncommitted` to scope which changes are considered.
+  `coderabbit review findings` re-reads the last local run, and
+  `coderabbit pullrequest <number> --agent` pulls the findings CodeRabbit already
+  posted on a PR.
+- Comment `@codex review` on the PR for a fresh bot review of the current head
+  commit. cubic re-reviews automatically on push, so pushing a fix already
+  re-runs that one.
+
+Reply to each review thread naming the commit that fixed it and what changed, then
+resolve the thread; the reply is what makes the trail auditable later. A
+`CHANGES_REQUESTED` decision stays attached to the commit it was written against
+and keeps blocking the PR after the findings are fixed, so once the threads are
+resolved and the fix is pushed, dismiss that review with a message citing the
+fixing commit and the replacement review evidence rather than waiting for the bot
+to revisit it.
+
 ## Data Contribution Quick Checklist
 
 - Edit the correct JSON5 file in `src/overrides/` or `src/additions/`.
