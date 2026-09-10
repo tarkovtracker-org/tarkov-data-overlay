@@ -16,6 +16,13 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: "development"
+    ignore:
+      # @types/node must track the Node major this project supports
+      # (engines.node and .nvmrc), not the newest published types. Typechecking
+      # against a newer major accepts APIs the tested runtime does not have, so
+      # this moves deliberately alongside the supported Node LTS.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
