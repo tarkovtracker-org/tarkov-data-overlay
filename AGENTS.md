@@ -137,13 +137,14 @@ suppressing an item:
 - **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
   is `path.join(process.cwd(), …)` over literal segments except the mode segment in
   `taskOverlayFiles`, which is either a member of the module-local `WIKI_COMPARE_MODES`
-  constant or the caller's `scope` argument. That argument is bounded by `SuppressionScope`
-  (`GameMode | 'both'`) at compile time only — there is no runtime check. Its one production
-  caller is `loadSuppressedFields` in the same module, and `tests/wiki-compare-overlay.test.ts`
-  calls it directly with literal modes, so no untrusted value reaches it; add a runtime guard
-  before exposing the helper to external input. User-derived cache stems go through
-  `assertSafeCacheFileStem` (`/^[A-Za-z0-9_-]{1,128}$/`). `resolveOutputFilePath` returns
-  the operator's own `--output` argument, which is intended CLI behaviour.
+  constant or a `SuppressionScope` argument threaded down from a caller. That type is a
+  compile-time bound only, so the guard that matters is at the input boundary: the sole
+  external source is the `--gameMode`/`-g` flag, and `cli.ts` accepts it only when it equals
+  `regular`, `pve`, or `both`, discarding anything else so the `'both'` default applies. A new
+  entry point that reaches these helpers without passing through that check needs its own
+  validation. User-derived cache stems go through `assertSafeCacheFileStem`
+  (`/^[A-Za-z0-9_-]{1,128}$/`). `resolveOutputFilePath` returns the operator's own `--output`
+  argument, which is intended CLI behaviour.
 - **Dynamic regular expression, 11 items** (`normalize.ts`, `wiki.ts`). Every
   interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
   The two that are not (`normalize.ts` around the count-word replacements) interpolate
