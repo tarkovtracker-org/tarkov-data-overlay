@@ -63,11 +63,12 @@ latest for corrections.
 
 ## Hardening already in place
 
-The `Validate & Build` workflow gates every pull request on
-`npm run audit:dependencies` (fails at high severity) and on
+The `Validate & Build` workflow runs on every pull request and checks
+`npm run audit:dependencies` (fails at high severity) and
 `fallow security --gate new` for newly introduced findings. CodeQL runs for
 `javascript-typescript` and `actions` through GitHub's default code-scanning setup, which is
-configured on the repository rather than by a workflow in this tree. Note that `main` is not
-branch-protected, so these checks report rather than block a merge. Dependabot security
-updates, secret scanning, and push protection are enabled. GitHub Actions are pinned to
-commit SHAs and the workflows declare explicit `permissions` blocks.
+configured on the repository rather than by a workflow in this tree. `main` is not
+branch-protected, so none of these block a merge — treat a red check as a request to
+investigate, not a hard stop that someone else will enforce. Dependabot security updates,
+secret scanning, and push protection are enabled. GitHub Actions are pinned to commit SHAs
+and the workflows declare explicit `permissions` blocks.
