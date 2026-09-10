@@ -557,12 +557,12 @@
     "6572e876dc0d635f633a5714": {
       "traderRequirements": [
         {
-          "id": "overlay.6572e876dc0d635f633a5714.58330581ace78e27b8b10cee.level.>=.3",
+          "id": "overlay.6572e876dc0d635f633a5714.5935c25fb3acc3127c3d8cd9.level.>=.3",
           "requirementType": "level",
           "compareMethod": ">=",
           "trader": {
-            "id": "58330581ace78e27b8b10cee",
-            "name": "Skier"
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
           },
           "value": 3
         }
@@ -720,6 +720,18 @@
       }
     },
     "6179b5b06e9dd54ac275e409": {
+      "traderRequirements": [
+        {
+          "id": "overlay.6179b5b06e9dd54ac275e409.54cb50c76803fa8b248b4571.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 3
+        }
+      ],
       "objectives": {
         "6194fbf785a6d62c481a7aee": {
           "foundInRaid": true
@@ -739,6 +751,18 @@
       }
     },
     "5a0449d586f77474e66227b7": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5a0449d586f77474e66227b7.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -811,6 +835,18 @@
       }
     },
     "5a0327ba86f77456b9154236": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5a0327ba86f77456b9154236.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -834,6 +870,18 @@
       }
     },
     "5a03296886f774569778596a": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5a03296886f774569778596a.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -865,6 +913,18 @@
       }
     },
     "5a27bafb86f7741c73584017": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5a27bafb86f7741c73584017.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ],
       "finishRewards": {
         "traderStanding": [
           {
@@ -1851,6 +1911,7 @@
       ]
     },
     "5c0bd01e86f7747cdd799e56": {
+      "factionName": "BEAR",
       "traderRequirements": [
         {
           "id": "overlay.5c0bd01e86f7747cdd799e56.5935c25fb3acc3127c3d8cd9.level.>=.4",
@@ -2842,14 +2903,14 @@
     "669fa38fad7f1eac2607ed46": {
       "traderRequirements": [
         {
-          "id": "overlay.669fa38fad7f1eac2607ed46.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "id": "overlay.669fa38fad7f1eac2607ed46.5935c25fb3acc3127c3d8cd9.level.>=.2",
           "requirementType": "level",
           "compareMethod": ">=",
           "trader": {
             "id": "5935c25fb3acc3127c3d8cd9",
             "name": "Peacekeeper"
           },
-          "value": 1
+          "value": 2
         }
       ]
     },
@@ -3106,6 +3167,104 @@
     },
     "67af4c17f4f1fb58a907f8f6": {
       "factionName": "USEC"
+    },
+    "5b4794cb86f774598100d5d4": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5b4794cb86f774598100d5d4.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "5c0d0f1886f77457b8210226": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5c0d0f1886f77457b8210226.58330581ace78e27b8b10cee.level.>=.3",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "58330581ace78e27b8b10cee",
+            "name": "Skier"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "600302d73b897b11364cd161": {
+      "traderRequirements": [
+        {
+          "id": "overlay.600302d73b897b11364cd161.5c0647fdd443bc2504c2d371.level.>=.4",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 4
+        }
+      ]
+    },
+    "64f3176921045e77405d63b5": {
+      "traderRequirements": [
+        {
+          "id": "overlay.64f3176921045e77405d63b5.54cb57776803fa99248b456e.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6a5424ae135497b9df0c68be": {
+      "traderRequirements": [
+        {
+          "id": "overlay.6a5424ae135497b9df0c68be.54cb57776803fa99248b456e.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb57776803fa99248b456e",
+            "name": "Therapist"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "6a5ccda873f06065630d61b0": {
+      "traderRequirements": [
+        {
+          "id": "overlay.6a5ccda873f06065630d61b0.5935c25fb3acc3127c3d8cd9.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6a5c1578f2689567c30eb0f3": {
+      "traderRequirements": [
+        {
+          "id": "overlay.6a5c1578f2689567c30eb0f3.5935c25fb3acc3127c3d8cd9.level.>=.1",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5935c25fb3acc3127c3d8cd9",
+            "name": "Peacekeeper"
+          },
+          "value": 1
+        }
+      ]
     }
   },
   "craftsAdd": {
@@ -9125,7 +9284,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-10T15:04:19.510Z",
-    "sha256": "c8c3fbc3bed83523e2bbe7eab37f87efce487888397ba315b14253868e0a757d"
+    "generated": "2026-09-10T15:34:58.417Z",
+    "sha256": "3f69ad0ba0ea4c5e68ae5298cafb47269be1a3540cb50c388238477e86d7f420"
   }
 }

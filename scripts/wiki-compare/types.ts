@@ -56,6 +56,17 @@ export type WikiTaskData = {
   objectives: WikiObjective[];
   rewards: WikiRewards;
   minPlayerLevel?: number;
+  /**
+   * Trader loyalty gates parsed from the Requirements section. Patch 1.1.0.0
+   * expresses most quest gates this way instead of as a player level, and the
+   * client hides them behind opaque `GlobalVariableValue` conditions - so the
+   * wiki is the corroborating source for `traderRequirements`.
+   */
+  traderLoyalty: Array<{ trader: string; level: number }>;
+  /** PMC faction gate, when the quest is USEC- or BEAR-only. */
+  factionName?: 'USEC' | 'BEAR';
+  /** Scav karma gate; negative values are real ("Scav karma of -6"). */
+  scavKarma?: number;
   previousTasks: string[];
   nextTasks: string[];
   maps: string[];
@@ -114,6 +125,8 @@ export function getPriority(field: string): Priority {
   switch (field) {
     case 'minPlayerLevel':
     case 'taskRequirements':
+    case 'traderRequirements':
+    case 'factionName':
     case 'nextTasks':
     case 'objectives.description':
       return 'high';

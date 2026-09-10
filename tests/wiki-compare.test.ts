@@ -18,7 +18,11 @@ import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
 import {
   extractCount,
   MAX_LINK_PATTERN_COUNT,
+  parseFactionRequirement,
+  parseMinLevel,
   parseObjectives,
+  parseScavKarma,
+  parseTraderLoyalty,
 } from '../scripts/wiki-compare/wiki.js';
 import type { TaskData } from '../src/lib/types.js';
 
@@ -30,6 +34,7 @@ function makeWiki(overrides: Partial<WikiTaskData> = {}): WikiTaskData {
     requirements: [],
     objectives: [],
     rewards: { reputations: [], items: [], raw: [] },
+    traderLoyalty: [],
     previousTasks: [],
     nextTasks: [],
     maps: [],
@@ -299,6 +304,135 @@ describe('extractCount', () => {
     expect(extractCount('Survive for 5 minutes while suffering from dehydration')).toBeUndefined();
     expect(extractCount('Visit the pier within 20 minutes of the raid start')).toBeUndefined();
     expect(extractCount('Eliminate Scavs from over 40 meters away')).toBeUndefined();
+  });
+});
+
+describe('1.1 Requirements-section parsing', () => {
+  const TRADERS = ['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Mechanic', 'Ragman', 'Jaeger'];
+
+  describe('parseMinLevel', () => {
+    it('reads a player-level gate', () => {
+      expect(parseMinLevel(['Must be level 25 to start this quest.'])).toBe(25);
+    });
+
+    // Regression: patch 1.1.0.0 rewrote most gates as trader loyalty tiers, and
+    // a bare /level (\d+)/ returned the TIER as a player level on 90 of the 286
+    // pages carrying a Requirements section. Both wiki:compare and eft:wiki
+    // consumed that number as the wiki's minPlayerLevel witness.
+    it.each([
+      'Must reach Loyalty Level 3 with [[Ragman]] to obtain this quest.',
+      'Must be Loyalty Level 3 to start this quest',
+      'Obtain level 3 loyalty with [[Peacekeeper]]',
+      'Loyalty Level II with Prapor.',
+      'Reach Loyalty Level 4 with [[Prapor]], [[Therapist]] and [[Jaeger]]',
+    ])('never reports a loyalty tier as a player level: %s', (line) => {
+      expect(parseMinLevel([line])).toBeUndefined();
+    });
+
+    it('ignores incidental "level N" that is not a player gate', () => {
+      // Stick to It: these are building floors, not requirements on the player.
+      expect(parseMinLevel(['Talk to the scientist on level 1 via the intercom.'])).toBeUndefined();
+      expect(parseMinLevel(['Reach the damaged door on level 3.'])).toBeUndefined();
+    });
+
+    it('still finds the player level when a loyalty line comes first', () => {
+      expect(
+        parseMinLevel([
+          'Must reach Loyalty Level 2 with [[Skier]] to obtain this quest.',
+          'Must be level 20 to start this quest.',
+        ])
+      ).toBe(20);
+    });
+  });
+
+  describe('parseTraderLoyalty', () => {
+    it('parses the "Must reach Loyalty Level N with X" form', () => {
+      expect(
+        parseTraderLoyalty(
+          ['Must reach Loyalty Level 3 with [[Ragman]] to obtain this quest.'],
+          TRADERS
+        )
+      ).toEqual([{ trader: 'Ragman', level: 3 }]);
+    });
+
+    it('parses the "Obtain level N loyalty with X" form', () => {
+      expect(parseTraderLoyalty(['Obtain level 2 loyalty with [[Prapor]].'], TRADERS)).toEqual([
+        { trader: 'Prapor', level: 2 },
+      ]);
+    });
+
+    it('parses roman-numeral tiers', () => {
+      expect(parseTraderLoyalty(['Loyalty Level II with Prapor.'], TRADERS)).toEqual([
+        { trader: 'Prapor', level: 2 },
+      ]);
+    });
+
+    it('parses a multi-trader gate', () => {
+      const got = parseTraderLoyalty(
+        ['Reach Loyalty Level 4 with [[Prapor]], [[Therapist]] and [[Jaeger]]'],
+        TRADERS
+      );
+      expect(got).toHaveLength(3);
+      expect(got.map((x) => x.trader).sort()).toEqual(['Jaeger', 'Prapor', 'Therapist']);
+      expect(new Set(got.map((x) => x.level))).toEqual(new Set([4]));
+    });
+
+    it('falls back to the quest giver when the line names no trader', () => {
+      expect(
+        parseTraderLoyalty(['Must be Loyalty Level 2 to start this quest'], TRADERS, 'Peacekeeper')
+      ).toEqual([{ trader: 'Peacekeeper', level: 2 }]);
+    });
+
+    it('returns nothing rather than guessing when no trader is available', () => {
+      expect(parseTraderLoyalty(['Must be Loyalty Level 2 to start this quest'], TRADERS)).toEqual(
+        []
+      );
+    });
+
+    it('keeps a cross-trader gate rather than assuming the quest giver', () => {
+      // Pyramid Scheme is given by Skier but gated on Peacekeeper LL3.
+      expect(
+        parseTraderLoyalty(['Obtain level 3 loyalty with [[Peacekeeper]]'], TRADERS, 'Skier')
+      ).toEqual([{ trader: 'Peacekeeper', level: 3 }]);
+    });
+
+    it('ignores non-loyalty requirement lines', () => {
+      expect(
+        parseTraderLoyalty(
+          [
+            'Must be level 25 to start this quest.',
+            'This quest is only obtainable by [[USEC]] PMCs.',
+          ],
+          TRADERS
+        )
+      ).toEqual([]);
+    });
+  });
+
+  describe('parseFactionRequirement', () => {
+    it('reads USEC and BEAR gates', () => {
+      expect(parseFactionRequirement(['This quest is only obtainable by [[USEC]] PMCs.'])).toBe(
+        'USEC'
+      );
+      expect(parseFactionRequirement(['This quest is only obtainable by [[BEAR]] PMCs'])).toBe(
+        'BEAR'
+      );
+    });
+
+    it('does not invent a faction from unrelated prose', () => {
+      expect(parseFactionRequirement(['Must be level 25 to start this quest.'])).toBeUndefined();
+    });
+  });
+
+  describe('parseScavKarma', () => {
+    it('reads positive and negative karma gates', () => {
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of at least +3'])).toBe(3);
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of -6'])).toBe(-6);
+    });
+
+    it('ignores lines without a karma mention', () => {
+      expect(parseScavKarma(['Must be level 25 to start this quest.'])).toBeUndefined();
+    });
   });
 });
 

@@ -138,6 +138,65 @@ export function compareTasks(
     }
   }
 
+  // traderRequirements (loyalty gates)
+  //
+  // Patch 1.1.0.0 moved most quest gates from a player level onto a trader
+  // loyalty tier and expresses them as opaque `GlobalVariableValue` start
+  // conditions, so the client cannot confirm a tier and the wiki Requirements
+  // section is the source for this field (see AGENTS.md). Compare only when the
+  // wiki actually states a gate: wiki silence is not evidence of absence, since
+  // many pages still document the pre-1.1 player level instead.
+  if (wiki.traderLoyalty.length > 0) {
+    const apiLoyalty = (apiTask.traderRequirements ?? [])
+      .filter((req) => req.requirementType === 'level')
+      .map((req) => `${req.trader?.name}:${req.value}`)
+      .sort();
+    const wikiLoyalty = wiki.traderLoyalty.map((ll) => `${ll.trader}:${ll.level}`).sort();
+    if (apiLoyalty.join('+') !== wikiLoyalty.join('+')) {
+      discrepancies.push({
+        taskId,
+        taskName,
+        field: 'traderRequirements',
+        apiValue: apiLoyalty.join(', ') || '(none)',
+        wikiValue: wikiLoyalty.join(', '),
+        priority: getPriority('traderRequirements'),
+        trustsWiki: true,
+        wikiLastEdit,
+        wikiEditDaysAgo,
+        wikiEditedPost1_0,
+      });
+      if (verbose)
+        console.log(
+          `${icons.warning} traderRequirements: API=${apiLoyalty.join(', ') || '(none)'}, Wiki=${wikiLoyalty.join(', ')}`
+        );
+    } else if (verbose) {
+      console.log(`${icons.success} traderRequirements match (${wikiLoyalty.join(', ')})`);
+    }
+  }
+
+  // factionName (USEC/BEAR-only quests)
+  if (wiki.factionName !== undefined) {
+    const apiFaction = apiTask.factionName ?? 'Any';
+    if (apiFaction !== wiki.factionName) {
+      discrepancies.push({
+        taskId,
+        taskName,
+        field: 'factionName',
+        apiValue: apiFaction,
+        wikiValue: wiki.factionName,
+        priority: getPriority('factionName'),
+        trustsWiki: true,
+        wikiLastEdit,
+        wikiEditDaysAgo,
+        wikiEditedPost1_0,
+      });
+      if (verbose)
+        console.log(`${icons.warning} factionName: API=${apiFaction}, Wiki=${wiki.factionName}`);
+    } else if (verbose) {
+      console.log(`${icons.success} factionName matches (${apiFaction})`);
+    }
+  }
+
   const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
 
   // Task-level map/location

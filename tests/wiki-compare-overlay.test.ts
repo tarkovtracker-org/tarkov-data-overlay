@@ -79,6 +79,23 @@ describe('loadSuppressedFields', () => {
     const { suppressed } = loadSuppressedFields('regular');
     expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(true);
   });
+
+  // Without these keys, `wiki:compare --all` would re-report every loyalty and
+  // faction gate the overlay already corrects (160 loyalty blocks and 20+
+  // faction entries) as a fresh wiki/API discrepancy.
+  it('suppresses traderRequirements corrected by the overlay', () => {
+    const { suppressed } = loadSuppressedFields();
+    // Pyramid Scheme - cross-trader Peacekeeper LL3 gate.
+    expect(suppressed.has('6572e876dc0d635f633a5714:traderRequirements')).toBe(true);
+    // Reserve Expert - Ragman LL3.
+    expect(suppressed.has('608974af4b05530f55550c21:traderRequirements')).toBe(true);
+  });
+
+  it('suppresses factionName corrected by the overlay', () => {
+    const { suppressed } = loadSuppressedFields();
+    // Insomnia - wiki says BEAR-only, upstream serves Any.
+    expect(suppressed.has('5c0bd01e86f7747cdd799e56:factionName')).toBe(true);
+  });
 });
 
 describe('loadDivergentFieldKeys', () => {

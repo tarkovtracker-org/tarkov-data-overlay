@@ -232,6 +232,8 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
         field === 'experience' ||
         field === 'minPlayerLevel' ||
         field === 'taskRequirements' ||
+        field === 'traderRequirements' ||
+        field === 'factionName' ||
         field === 'reputation' ||
         field === 'money' ||
         field === 'finishRewards' ||

@@ -452,14 +452,20 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
   // Verified: the 1.1-pve data; wiki agrees.
   '6572e876dc0d635f633a5714': {
+    // 2026-09-10: the loyalty gate named the wrong trader. The wiki Requirements
+    // line reads "Obtain level 3 loyalty with [[Peacekeeper]]" and has said so
+    // since revision 352415 (2026-08-08), before this override was written - the
+    // original entry appears to have assumed the gate belonged to the quest
+    // giver (Skier). This is a cross-trader gate: Skier gives the quest,
+    // Peacekeeper LL3 unlocks it.
     traderRequirements: [
       {
-        id: 'overlay.6572e876dc0d635f633a5714.58330581ace78e27b8b10cee.level.>=.3',
+        id: 'overlay.6572e876dc0d635f633a5714.5935c25fb3acc3127c3d8cd9.level.>=.3',
         requirementType: 'level',
         compareMethod: '>=',
-        trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
         value: 3,
-      }, // Was: [] (player level requirement, minPlayerLevel 28)
+      }, // Was: Skier LL3 (overlay); API serves [] (player level requirement, minPlayerLevel 28)
     ],
     experience: 28000, // Was: 12400 (all modes, stale pre-1.1 value)
   },
@@ -633,6 +639,19 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
   // Wiki objective text explicitly states "found in raid" dogtags.
   '6179b5b06e9dd54ac275e409': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits. The
+    // BEAR faction line on the same page is already served correctly upstream.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
+    //        ("Must reach Loyalty Level 3 with Prapor to obtain this quest.")
+    traderRequirements: [
+      {
+        id: 'overlay.6179b5b06e9dd54ac275e409.54cb50c76803fa8b248b4571.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 3,
+      }, // Was: []
+    ],
     objectives: {
       '6194fbf785a6d62c481a7aee': {
         foundInRaid: true, // Was: false
@@ -657,6 +676,19 @@
   // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
   // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
   '5a0449d586f77474e66227b7': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
+    //        ("Must be Loyalty Level 1 to start this quest" - quest giver
+    //        Peacekeeper, per the infobox `given by`)
+    traderRequirements: [
+      {
+        id: 'overlay.5a0449d586f77474e66227b7.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02 (upstream now serves 0.1)
@@ -708,6 +740,19 @@
   // serves the S1 category objectives); exp 3000, +0.1,
   // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
   '5a0327ba86f77456b9154236': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
+    //        ("Must be Loyalty Level 1 to start this quest" - quest giver
+    //        Peacekeeper, per the infobox `given by`)
+    traderRequirements: [
+      {
+        id: 'overlay.5a0327ba86f77456b9154236.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03 (upstream now serves 0.1)
@@ -724,6 +769,18 @@
   // objective); exp 10000, +0.25, 1347 Dollars (IC2, base = 1347 / 1.15 = 1171),
   // 2 Military flash drives.
   '5a03296886f774569778596a': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
+    //        ("Must reach Loyalty Level 2 with Peacekeeper to obtain this quest.")
+    traderRequirements: [
+      {
+        id: 'overlay.5a03296886f774569778596a.5935c25fb3acc3127c3d8cd9.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 2,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
@@ -747,6 +804,18 @@
   // the restructured objective); exp 3000, +0.1, 570 Dollars (655 with IC2);
   // RB-ST key and Jaeger -0.01 removed.
   '5a27bafb86f7741c73584017': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
+    //        ("Obtain level 1 loyalty with Peacekeeper")
+    traderRequirements: [
+      {
+        id: 'overlay.5a27bafb86f7741c73584017.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger) (upstream now serves 0.1)
@@ -1860,7 +1929,11 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Insomnia
   //
   // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  // 2026-09-10: added the BEAR faction gate. The wiki Requirements section has
+  // carried "This quest is only obtainable by [[BEAR]] PMCs." alongside the
+  // loyalty line; tarkov.dev serves factionName "Any" in every mode.
   '5c0bd01e86f7747cdd799e56': {
+    factionName: 'BEAR', // Was: Any
     traderRequirements: [
       {
         id: 'overlay.5c0bd01e86f7747cdd799e56.5935c25fb3acc3127c3d8cd9.level.>=.4',
@@ -2892,16 +2965,20 @@
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/One_Less_Loose_End
   //
-  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  // 2026-08-10 - S1: now requires Peacekeeper loyalty instead of player level
+  // 2026-09-10: tier corrected 1 -> 2. The wiki Requirements line reads "Must be
+  // Loyalty Level 2 to start this quest" and has since revision 349612
+  // (2026-08-04), before this override was written, so the original 1 was a
+  // transcription error against its own cited proof.
   '669fa38fad7f1eac2607ed46': {
     traderRequirements: [
       {
-        id: 'overlay.669fa38fad7f1eac2607ed46.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        id: 'overlay.669fa38fad7f1eac2607ed46.5935c25fb3acc3127c3d8cd9.level.>=.2',
         requirementType: 'level',
         compareMethod: '>=',
         trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
-        value: 1,
-      }, // Was: [] (player level requirement, minPlayerLevel 15)
+        value: 2,
+      }, // Was: Peacekeeper LL1 (overlay); API serves [] (player level requirement, minPlayerLevel 15)
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Claustrophobia
@@ -3245,5 +3322,128 @@
   // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
   '67af4c17f4f1fb58a907f8f6': {
     factionName: 'USEC', // Was: Any
+  },
+
+  // ---------------------------------------------------------------------------
+  // 2026-09-10: trader-loyalty gates the wiki documents and tarkov.dev omits.
+  //
+  // Found by parsing the Requirements section of every task page and comparing
+  // it against the API, the overlay, and the client captures. Patch 1.1.0.0
+  // expresses these gates as opaque `GlobalVariableValue` start conditions, so
+  // the client shows no `TraderLoyalty` condition for them and cannot confirm or
+  // deny a tier - which is exactly why AGENTS.md makes the wiki the source for
+  // `traderRequirements`. The same comparison found 185 rows where the client
+  // *does* carry an explicit `TraderLoyalty` condition, and the wiki agreed with
+  // the client on every one of them (50/50 where both had a gate), which is the
+  // evidence that this wiki field is trustworthy.
+  //
+  // Each entry below has API `traderRequirements: []` and `minPlayerLevel: 0`,
+  // i.e. upstream dropped the pre-1.1 player-level gate without adding the
+  // loyalty gate that replaced it.
+  // ---------------------------------------------------------------------------
+
+  // Metal Birds - Peacekeeper LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Metal_Birds
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Peacekeeper to obtain this quest."
+  '5b4794cb86f774598100d5d4': {
+    traderRequirements: [
+      {
+        id: 'overlay.5b4794cb86f774598100d5d4.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
+  },
+
+  // From Hand to Hand - Skier LL3
+  // Proof: https://escapefromtarkov.fandom.com/wiki/From_Hand_to_Hand
+  // Wiki Requirements: "Must reach Loyalty Level 3 with Skier to obtain this quest."
+  '5c0d0f1886f77457b8210226': {
+    traderRequirements: [
+      {
+        id: 'overlay.5c0d0f1886f77457b8210226.58330581ace78e27b8b10cee.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
+        value: 3,
+      }, // Was: []
+    ],
+  },
+
+  // All This Filth... - Jaeger LL4
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_This_Filth...
+  // Wiki Requirements: "Must reach Loyalty Level 4 with Jaeger to obtain this quest."
+  '600302d73b897b11364cd161': {
+    traderRequirements: [
+      {
+        id: 'overlay.600302d73b897b11364cd161.5c0647fdd443bc2504c2d371.level.>=.4',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 4,
+      }, // Was: []
+    ],
+  },
+
+  // Paramedic - Therapist LL2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  // Wiki Requirements: "Must reach Loyalty Level 2 with Therapist to obtain this quest."
+  '64f3176921045e77405d63b5': {
+    traderRequirements: [
+      {
+        id: 'overlay.64f3176921045e77405d63b5.54cb57776803fa99248b456e.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
+  // Fall Ailment - Therapist LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fall_Ailment
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Therapist to obtain this quest."
+  '6a5424ae135497b9df0c68be': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5424ae135497b9df0c68be.54cb57776803fa99248b456e.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' },
+        value: 1,
+      }, // Was: []
+    ],
+  },
+
+  // Secret Message - Peacekeeper LL2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Secret_Message
+  // Wiki Requirements: "Must reach Loyalty Level 2 with Peacekeeper to obtain this quest."
+  '6a5ccda873f06065630d61b0': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5ccda873f06065630d61b0.5935c25fb3acc3127c3d8cd9.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
+  // Hiking - Peacekeeper LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hiking
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Peacekeeper to obtain this quest."
+  '6a5c1578f2689567c30eb0f3': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5c1578f2689567c30eb0f3.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
   },
 }
