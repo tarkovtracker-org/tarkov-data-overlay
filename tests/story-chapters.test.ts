@@ -2,8 +2,10 @@
  * Tests for the story-chapter data generated from the local quest reference.
  *
  * Guards the invariants of the extraction/merge pipeline (scripts/eft-story-*):
- * chapter -> source quest traceability, objective id/source integrity, the
- * required Boreas chapter (issue #233), and the preserved branching for The Ticket.
+ * chapter -> source quest traceability, objective id/source integrity (every
+ * chapter, including The Ticket, must use real 24-hex client ids), the required
+ * Boreas chapter (issue #233), real ending ids, and that no chapter unlocks a
+ * task the overlay disables.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -47,32 +49,53 @@ describe('story chapters (EFT-sourced)', () => {
         ).toBe(false);
         seen.set(obj.id, cid);
         expect(['main', 'optional']).toContain(obj.type);
-        // The Ticket keeps curated branching objectives (no source ids); every
-        // other chapter is generated straight from the quest reference, where the
+        // Every chapter is generated straight from the quest reference, where the
         // objective id IS the stable source objective id (24-hex) plus a
-        // sourceQuestId linking it to its sub-quest.
-        if (cid !== 'the-ticket') {
-          expect(obj.id, `${cid} objective id`).toMatch(/^[0-9a-f]{24}$/);
-          expect(obj.sourceQuestId, `${cid}/${obj.id} sourceQuestId`).toMatch(/^[0-9a-f]{24}$/);
-        }
+        // sourceQuestId linking it to its sub-quest. No chapter is exempt: a
+        // fabricated id cannot be aligned to game data by a consumer, so The
+        // Ticket's former `the-ticket-main-n` ids are not allowed back in.
+        expect(obj.id, `${cid} objective id`).toMatch(/^[0-9a-f]{24}$/);
+        expect(obj.sourceQuestId, `${cid}/${obj.id} sourceQuestId`).toMatch(/^[0-9a-f]{24}$/);
       }
     }
   });
 
-  it('preserves The Ticket branching (endings + mutual exclusion)', () => {
+  it('ties The Ticket endings to real client ending ids', () => {
+    // The four endings come from `client/ending_list`; each is gated by one of
+    // The Ticket's sub-quests, so objectives of a gate sub-quest carry that
+    // ending's real id. Slugs (savior/fallen/survivor/debtor) are gone - they
+    // could not be aligned to anything a consumer stores.
+    const REAL_ENDING_IDS = new Set([
+      '68a6e8f1a7455e5e23099ad8', // EscapedFromTarkovForHumanity
+      '68a6e8c834a37e244710d516', // EscapedFromTarkovAndSurvived
+      '68a6e8e4a8d0bee0b5324d96', // EscapedFromTarkovToFallInTheDarkness
+      '68a6028ef4c23ebbbc49da4b', // YouDidntEscapeFromYourself
+    ]);
     const ticket = chapters['the-ticket'];
     expect(ticket).toBeDefined();
-    const objs = ticket.objectives ?? [];
-    expect(objs.some((o) => o.endingId)).toBe(true);
-    expect(objs.some((o) => (o.mutuallyExclusiveWith?.length ?? 0) > 0)).toBe(true);
+    const tagged = (ticket.objectives ?? []).filter((o) => o.endingId);
+    expect(tagged.length).toBeGreaterThan(0);
+    for (const objective of tagged) {
+      expect(REAL_ENDING_IDS, `${objective.id} endingId`).toContain(objective.endingId);
+    }
   });
 
-  it('wires Network Provider - Part 1 as a story-chapter unlock for Batya and The Ticket', () => {
-    const unlock = { id: '625d6ff5ddc94657c21a1625', name: 'Network Provider - Part 1' };
-    for (const cid of ['batya', 'the-ticket']) {
-      const ch = chapters[cid];
-      expect(ch, `chapter ${cid}`).toBeDefined();
-      expect(ch.questUnlocks ?? [], `${cid} questUnlocks`).toContainEqual(unlock);
+  it('never points a chapter unlock at a task the overlay disables', () => {
+    // A story chapter claiming to unlock a retired quest is dead information;
+    // the pre-1.1 Lightkeeper access chain was removed this way.
+    const { srcDir } = getProjectPaths();
+    const overrides = loadAllJson5FromDir(join(srcDir, 'overrides'), false);
+    const baseTasks = (overrides.tasks ?? {}) as Record<string, { disabled?: boolean }>;
+    const disabled = new Set(
+      Object.entries(baseTasks)
+        .filter(([, task]) => task?.disabled === true)
+        .map(([id]) => id)
+    );
+    expect(disabled.size).toBeGreaterThan(0);
+    for (const [cid, ch] of Object.entries(chapters)) {
+      for (const unlock of ch.questUnlocks ?? []) {
+        expect(disabled.has(unlock.id), `${cid} unlocks disabled task ${unlock.id}`).toBe(false);
+      }
     }
   });
 });

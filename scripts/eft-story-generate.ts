@@ -4,26 +4,27 @@
  * wiki-verified optional/required flags.
  *
  * Sources (by authority):
- * - Local quest reference (eft/quest-list.json): objective existence, text,
- *   order, and stable ids. A chapter is a named storyline quest on the narrator
- *   trader (67f7af56c117b6140af2a607); its objective conditions are ordered
- *   sub-quest refs whose own conditions carry the text. The objective condition
- *   id is used as the stable objective id so consumers that persist completion
- *   per id are not broken by wording/order changes on regeneration.
+ * - Local quest reference (auto-selected from eft/; see loadReference): objective
+ *   existence, text, order, and stable ids. A chapter is a named storyline quest
+ *   on the narrator trader (67f7af56c117b6140af2a607); its objective conditions
+ *   are ordered sub-quest refs whose own conditions carry the text. The objective
+ *   condition id is used as the stable objective id so consumers that persist
+ *   completion per id are not broken by wording/order changes on regeneration.
  * - EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.ts):
  *   the player-facing optional/required distinction, matched by fuzzy text.
  * - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
- *   activation/requirements the reference lacks, plus The Ticket's branching
- *   objectives (endings + mutual exclusion), preserved verbatim.
+ *   activation/requirements the reference lacks. Objectives are NOT curated -
+ *   every chapter is derived from the reference so that no objective ships a
+ *   fabricated id.
  *
  * Emits final storyChapters JSON to stdout. Deterministic given the inputs.
  */
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import { join } from 'path';
 import { isDirectExecution } from '../src/lib/index.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
 
-const REF = 'eft/quest-list.json';
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
 export const NARRATOR_TRADER = '67f7af56c117b6140af2a607';
@@ -43,7 +44,56 @@ const CHAPTER_QUEST_ID: Record<string, string> = {
   'the-ticket': '68da33fe00868edcb6025ac4',
   boreas: '69d38381cea4b428690ea1d9',
 };
-const PRESERVE_OBJECTIVES = new Set(['the-ticket']); // keep curated branching/endings verbatim
+/**
+ * Every chapter's objectives are derived from the reference, so every objective
+ * id in the output is a real client condition id.
+ *
+ * The Ticket used to be exempt (its objectives were kept verbatim from
+ * `story-chapter-meta.json`) so that hand-written branching notes could be
+ * preserved. That cost 44 fabricated ids of the form `the-ticket-main-1`, which
+ * a consumer cannot align to anything in its database - the exact failure the
+ * "use the real source objective id" rule below exists to prevent. The
+ * fabricated ids also anchored `mutuallyExclusiveWith` and `endingId`, so the
+ * branching data was self-referential rather than tied to game data.
+ *
+ * Re-deriving The Ticket from the reference yields real ids for the sub-quests
+ * the capture resolves. Note this is a deliberate trade: the client only returns
+ * a story sub-quest template once the player has reached it, so a chapter's
+ * coverage is bounded by how far the captured character progressed (The Ticket
+ * resolves 35 of its 88 sub-quest references). Real ids for what we can see beat
+ * invented ids for a hand-written summary.
+ */
+const PRESERVE_OBJECTIVES = new Set<string>();
+
+/**
+ * Real ending ids, keyed by the sub-quest that gates each ending.
+ *
+ * Source: `client/ending_list` in the local captures, which returns exactly four
+ * endings, each with a `systemName` and a single `Quest` condition naming its
+ * gate sub-quest. All four gate quests are sub-quests of The Ticket, so an
+ * objective belonging to one of them can be tagged with its ending.
+ *
+ * Only the gate quests the reference actually resolves can be tagged; the others
+ * contribute no objectives, so they are simply absent rather than guessed.
+ */
+const ENDING_BY_GATE_QUEST: Record<string, { id: string; systemName: string }> = {
+  '67bdf8c066ca1d79a202463a': {
+    id: '68a6e8f1a7455e5e23099ad8',
+    systemName: 'EscapedFromTarkovForHumanity',
+  },
+  '67c08f0268e50a07b10d25a6': {
+    id: '68a6e8c834a37e244710d516',
+    systemName: 'EscapedFromTarkovAndSurvived',
+  },
+  '67c862bd9f9b7ef9090651d8': {
+    id: '68a6e8e4a8d0bee0b5324d96',
+    systemName: 'EscapedFromTarkovToFallInTheDarkness',
+  },
+  '67c9877aff0329206209cb67': {
+    id: '68a6028ef4c23ebbbc49da4b',
+    systemName: 'YouDidntEscapeFromYourself',
+  },
+};
 
 interface WikiObjective {
   text: string;
@@ -95,16 +145,117 @@ export function matchOptional(
 }
 
 /**
- * Load the quest list from the local reference file.
+ * Pick and load the quest reference to generate from.
  *
- * The reference is wrapped in a nested envelope; unwrap to the quest array,
- * tolerating either the enveloped shape or an already-unwrapped `{data: [...]}`.
+ * Story chapters are not served like ordinary quests: the client returns a
+ * chapter's sub-quest templates only once the player has reached them, so the
+ * *newest* capture is not automatically the most useful one here - a fresh
+ * capture from an early character resolves far fewer sub-quests than an older
+ * capture from an advanced one. Selecting by "newest" (what `findReferenceFile`
+ * does for the numeric `eft:*` tools) would silently shrink the storyline.
+ *
+ * Candidates are therefore scored by how much of the storyline each can actually
+ * resolve: chapter quests present first, then objective conditions that carry
+ * `localization.en` text. Set `STORY_REFERENCE` to pin one explicitly.
  */
 function loadReference(): JsonRecord[] {
-  const raw = JSON.parse(readFileSync(REF, 'utf-8'));
+  const explicit = process.env.STORY_REFERENCE;
+  const candidates = explicit ? [explicit] : storyReferenceCandidates();
+  let best: { file: string; quests: JsonRecord[]; chapters: number; texts: number } | null = null;
+
+  for (const file of candidates) {
+    let quests: JsonRecord[];
+    try {
+      quests = readReferenceFile(file);
+    } catch {
+      continue;
+    }
+    const byId = new Map<string, JsonRecord>();
+    for (const quest of quests) {
+      const id = bareId(quest._id);
+      if (id) byId.set(id, quest);
+    }
+    let chapters = 0;
+    let texts = 0;
+    for (const chapterQuestId of Object.values(CHAPTER_QUEST_ID)) {
+      const chapterQuest = byId.get(chapterQuestId) as any;
+      if (!chapterQuest) continue;
+      chapters += 1;
+      for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
+        if (condition?.conditionType !== 'Quest') continue;
+        let target = condition.target;
+        if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
+        const sub = byId.get(bareId(target) ?? '') as any;
+        if (!sub) continue;
+        const en: Record<string, string> = sub?.localization?.en ?? {};
+        for (const objective of sub?.conditions?.AvailableForFinish ?? []) {
+          if (objective?.id && (en[objective.id] ?? '').trim()) texts += 1;
+        }
+      }
+    }
+    if (!best || chapters > best.chapters || (chapters === best.chapters && texts > best.texts)) {
+      best = { file, quests, chapters, texts };
+    }
+  }
+
+  if (!best || best.chapters === 0) {
+    throw new Error(
+      `No usable story reference found (checked: ${candidates.join(', ') || 'nothing'}). ` +
+        'Place a quest capture under eft/, or set STORY_REFERENCE to one.'
+    );
+  }
+  console.error(
+    `story reference: ${best.file} ` +
+      `(${best.chapters}/${Object.keys(CHAPTER_QUEST_ID).length} chapter quests, ${best.texts} objective texts)`
+  );
+  return best.quests;
+}
+
+/** Quest-capture files under eft/, enriched variants first. */
+function storyReferenceCandidates(): string[] {
+  const found: string[] = [];
+  const walk = (dir: string): void => {
+    let names: string[];
+    try {
+      names = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const name of names) {
+      const full = join(dir, name);
+      let stats;
+      try {
+        stats = statSync(full);
+      } catch {
+        continue;
+      }
+      if (stats.isDirectory()) walk(full);
+      else if (stats.isFile() && /quest[_-]list/i.test(name) && name.endsWith('.json'))
+        found.push(full);
+    }
+  };
+  walk('eft');
+  // Enriched captures carry the localization.en block that supplies objective
+  // text, so prefer them; otherwise keep discovery order for determinism.
+  return found.sort(
+    (a, b) =>
+      (a.includes('rollinglatest.modified') ? 0 : 1) -
+      (b.includes('rollinglatest.modified') ? 0 : 1)
+  );
+}
+
+/**
+ * Unwrap a capture envelope to the quest array, tolerating the older
+ * `decoded_response`, the newer `body_response`, an already-unwrapped
+ * `{data: [...]}`, or a bare array.
+ */
+function readReferenceFile(file: string): JsonRecord[] {
+  const raw = JSON.parse(readFileSync(file, 'utf-8'));
   const node = raw?.response ?? raw;
-  const decoded = node?.decoded_response ?? node;
-  return decoded?.data ?? decoded;
+  const decoded = node?.decoded_response ?? node?.body_response ?? node;
+  const data = decoded?.data ?? decoded;
+  if (!Array.isArray(data)) throw new Error(`unexpected quest reference shape in ${file}`);
+  return data as JsonRecord[];
 }
 
 function main(): void {
@@ -164,12 +315,17 @@ function main(): void {
         // ({chapter}-main-n) shift whenever wording/order changes, which
         // silently corrupts consumers that persist completion per objective
         // id. The source id is unique and stable across regens.
-        objectives.push({
+        const emitted: JsonRecord = {
           id: objectiveId,
           type: optional ? 'optional' : 'main',
           description: text,
           sourceQuestId: subId,
-        });
+        };
+        // Objectives belonging to an ending's gate sub-quest carry that ending's
+        // real id, so consumers can attribute a branch without a slug lookup.
+        const ending = subId ? ENDING_BY_GATE_QUEST[subId] : undefined;
+        if (ending) emitted.endingId = ending.id;
+        objectives.push(emitted);
       }
     }
 

@@ -160,7 +160,7 @@ describe('prestige override (issue #207)', () => {
             {
               type: 'storyChapterStatus',
               storyChapter: 'tour',
-              objective: 'the-ticket-main-10',
+              objective: '68e2ecfeb88d405a420774f8',
               name: 'Tour',
               status: ['complete'],
             },

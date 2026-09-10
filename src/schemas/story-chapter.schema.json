@@ -131,8 +131,9 @@
           "required": ["id", "type", "description"],
           "properties": {
             "id": {
-              "description": "Objective ID. Generated chapters use the stable source objective id (24-hex); curated chapters (The Ticket) use {chapter}-{main|opt}-{n}.",
-              "type": "string"
+              "description": "Objective ID: the stable source objective id from the client (24-hex). Every chapter is generated from the quest reference, so fabricated positional ids are not accepted.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
             },
             "sourceQuestId": {
               "description": "EFT sub-quest id backing this objective (traceability to source game data)",
@@ -166,9 +167,9 @@
               "type": ["string", "null"]
             },
             "mutuallyExclusiveWith": {
-              "description": "Objective IDs that are mutually exclusive with this objective",
+              "description": "Real objective IDs (24-hex) that are mutually exclusive with this objective",
               "type": "array",
-              "items": { "type": "string" }
+              "items": { "type": "string", "pattern": "^[0-9a-f]{24}$" }
             },
             "count": {
               "description": "Item or action count for the objective",
@@ -323,9 +324,14 @@
               }
             },
             "endingId": {
-              "description": "Canonical ending this objective is tied to",
+              "description": "Canonical ending this objective is tied to, as the real ending id from client/ending_list. Slugs (savior/survivor/fallen/debtor) are not used: consumers align endings by id.",
               "type": "string",
-              "enum": ["savior", "survivor", "fallen", "debtor"]
+              "enum": [
+                "68a6e8f1a7455e5e23099ad8",
+                "68a6e8c834a37e244710d516",
+                "68a6e8e4a8d0bee0b5324d96",
+                "68a6028ef4c23ebbbc49da4b"
+              ]
             },
             "unlocks": {
               "description": "Unlocks tied to objective completion",

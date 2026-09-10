@@ -22,8 +22,10 @@ const HEADER =
   '  // narrator-trader quests; objectives are the ordered sub-quest references. Optional\n' +
   '  // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements\n' +
   '  // are curated (scripts/story-chapter-meta.json). Each generated objective id is\n' +
-  '  // the stable source objective id, with sourceQuestId linking to its sub-quest\n' +
-  '  // (The Ticket keeps its curated branching objectives). Regenerate with `npm run eft:story`.\n' +
+  '  // the stable source objective id, with sourceQuestId linking to its sub-quest.\n' +
+  '  // Every chapter is derived from the reference, so no objective carries a\n' +
+  '  // fabricated id; endingId, where present, is the real client/ending_list id.\n' +
+  '  // Regenerate with `npm run eft:story`.\n' +
   '  // The storyline is shared between PVP and PVE.\n' +
   '  //\n' +
   '  // Objectives can carry task-style marker data (maps, zones, possibleLocations,\n' +
