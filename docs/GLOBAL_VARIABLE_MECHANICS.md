@@ -467,5 +467,37 @@ jq -r -n --slurpfile t /tmp/tasks.json --slurpfile en /tmp/tasks_en.json --arg g
 This repository's `fetchTasks` adapter (`src/lib/tarkov-api.ts`) performs the same
 translation lookup, so a script can call it instead of resolving keys by hand.
 
-Per repository policy the capture and anything derived from it stay out of Git;
-this document deliberately records the data model and aggregate counts only.
+### Why this document is tracked
+
+`AGENTS.md` says of the numeric `eft:*` cross-check tooling: "Never commit the
+reference or anything derived from it; PRs carry only the resulting JSON5
+corrections plus proof links." That prohibition is about republishing the
+reference's contents — the raw capture and the field-by-field diffs the `eft:*`
+tools emit, which is why their output goes to gitignored `data/`.
+
+It is not a blanket ban on reference-informed output, and the repository already
+commits such output deliberately: `src/additions/storyChapters.json5` is tracked,
+declares "Source: local quest reference (structure/ordering)", and carries 345
+per-objective `sourceQuestId` references, because those story quests exist nowhere
+else. `AGENTS.md` sanctions that explicitly — "unlike the numeric `eft:*` tools
+this one produces committed additions, not a gitignored diff. The reference itself
+stays gitignored; only the generated JSON5 is committed."
+
+This document sits well inside that boundary, and the boundary is checkable rather
+than asserted:
+
+- Every one of the 27 identifiers it names is published by
+  `json.tarkov.dev/pve/tasks`. No capture-only identifier appears — two were
+  removed for that reason while this document was in review.
+- Every threshold and gated task name is re-derivable from public endpoints with
+  the command above.
+- Capture-informed content is limited to aggregates: the `Children` and `Pool`
+  integers, the reconciliation counts, condition-type and `compareMethod`
+  distributions, and the caveats. No per-task reference field values, and no
+  quest, objective or child-variable identifier.
+
+That is strictly less reference detail than the committed `storyChapters.json5`
+already carries. If a maintainer prefers a stricter line, the affected material is
+the aggregate columns and counts; the resolution rule and the guidance would go
+with them, since `variable_group` is a client endpoint and cannot be described
+from public data at all.

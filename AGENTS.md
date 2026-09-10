@@ -75,7 +75,13 @@ scans recursively and auto-detects the most recently captured `quest_list`
 reference, so a fresh dump supersedes an older one without touching the tooling
 call sites (pass an explicit `eftDir` to pin a specific capture).
 Never commit the reference or anything derived from it; PRs carry only the
-resulting JSON5 corrections plus proof links.
+resulting JSON5 corrections plus proof links. That prohibition covers the raw
+capture and the field-by-field diffs these tools emit — not every artifact
+informed by the reference. Deliberate, documented exceptions exist and are called
+out where they apply: `src/additions/storyChapters.json5` (below) and
+`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates and publicly
+published identifiers only. Anything new in that category needs the same explicit
+rationale and must name what it does and does not reproduce.
 
 - `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
