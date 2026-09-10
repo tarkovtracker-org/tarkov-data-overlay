@@ -66,8 +66,12 @@ Notable details:
 
 - `variable_group` carries **no** names, scopes, or metadata — only `id` and
   `variables`. There is no locale entry for either a group ID or a child ID.
-- The payload is byte-identical across `pve`, `pvp` and `pvp-season` (same
-  SHA-256), so groups are global definitions rather than per-mode ones.
+- The payload was byte-identical across `pve`, `pvp` and `pvp-season` in the
+  captures inspected (same SHA-256). That is an observation about those snapshots,
+  not proof that the definitions are globally shared or cannot diverge by mode.
+  Keep group catalogues mode-scoped — as the `progressionCounters` registry
+  deliberately is — and treat a mode you have not inspected as **unknown** rather
+  than reusing another mode's catalogue for it.
 - Group IDs never appear in `profile.Variables`. Only children do.
 
 ## Resolution rule
