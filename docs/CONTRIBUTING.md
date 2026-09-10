@@ -284,9 +284,15 @@ once authored as a "Fence LL1" `traderRequirements` entry, but the gate is Fence
 _reputation_ (scav karma), not a loyalty level. Upstream now serves the correct
 discriminated requirement — `requirementType: 'reputation'` on Fence with
 `value` 4, 3 and 1 respectively, and Collector additionally carries seven
-`level`-type LL4 requirements — and the wiki agrees. Because
-`traderRequirements` replaces the whole array, an LL1 entry would both mislabel
-the semantic and strip the upstream reputation gate.
+`level`-type LL4 requirements — and the wiki agrees.
+
+Re-adding an LL1 entry breaks both documented merge strategies, in opposite ways.
+Under the patch-by-id merge in [INTEGRATION.md](INTEGRATION.md), an overlay-authored
+entry carries its own synthetic `overlay.` ID, so it does not patch the upstream
+reputation requirement — it is **appended**, leaving the task with a correct
+reputation gate plus a fabricated loyalty gate. Under the legacy wholesale
+replace-array merge, it **replaces** the array and the upstream reputation gate is
+lost entirely. Only an explicit empty array is meant to clear requirements.
 
 **Objective description rewrites removed as fabricated or swapped.** Pathfinder's
 "Sales Night" objective description was mis-attributed to a nonexistent quest and

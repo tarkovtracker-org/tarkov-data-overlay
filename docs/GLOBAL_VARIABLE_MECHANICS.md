@@ -346,20 +346,29 @@ curl -s https://json.tarkov.dev/pve/tasks \
 ```
 
 Every threshold in the table, and the gated task names for any one group, come
-from the same endpoint. Note that the endpoint returns translation keys rather
-than names, so resolve them through `tasks_en` (or use this repository's
-`fetchTasks` adapter, which does that for you):
+from the same endpoint. Names arrive as translation keys (`"<taskId> name"`), so
+this resolves them through `tasks_en`; the output is the Mechanic tier-2 listing
+shown earlier verbatim:
 
 ```bash
 GROUP=6a3c0fefbea2d2ad581c090b
-curl -s https://json.tarkov.dev/pve/tasks | jq -r --arg g "$GROUP" '
-  [ .data.tasks[]
-    | . as $t
-    | (.otherRequirements[]? | select(.type=="globalVariable" and .variableId==$g))
-    | { value, name: $t.name } ]
-  | group_by(.value) | .[]
+curl -s https://json.tarkov.dev/pve/tasks    -o /tmp/tasks.json
+curl -s https://json.tarkov.dev/pve/tasks_en -o /tmp/tasks_en.json
+jq -r -n --slurpfile t /tmp/tasks.json --slurpfile en /tmp/tasks_en.json --arg g "$GROUP" '
+  ($en[0].data) as $L
+  | [ $t[0].data.tasks[]
+      | . as $task
+      | (.otherRequirements[]? | select(.type=="globalVariable" and .variableId==$g))
+      | { value, name: ($L[$task.name] // $task.name) } ]
+  | group_by(.value)[]
   | ">=\(.[0].value) (\(length)): \(map(.name) | join(", "))"'
+# >=1 (5): Ill-Wisher, Chemistry Closet, Corporate Perks, The Secret to Productivity, Shady Contractor
+# >=3 (3): Scout, Surveillance, Gunsmith - OP-SKS
+# >=5 (3): Playing the Market, Gunsmith - Model 870, Secrets of Polikhim
 ```
+
+This repository's `fetchTasks` adapter (`src/lib/tarkov-api.ts`) performs the same
+translation lookup, so a script can call it instead of resolving keys by hand.
 
 Per repository policy the capture and anything derived from it stay out of Git;
 this document deliberately records the data model and aggregate counts only.
