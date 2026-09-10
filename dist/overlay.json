@@ -9023,8 +9023,8 @@
     }
   },
   "$meta": {
-    "version": "1.86",
-    "generated": "2026-09-10T02:12:13.447Z",
-    "sha256": "8b77f985ee5c63ac7f5a74fc8ab86fc78bb5a5d5da229bb6baabd9244f6397e4"
+    "version": "1.87",
+    "generated": "2026-09-10T02:40:20.118Z",
+    "sha256": "318823d9601dc9928324b9180386213a581e14ac4e6be12c94f543a32fef6e8c"
   }
 }
