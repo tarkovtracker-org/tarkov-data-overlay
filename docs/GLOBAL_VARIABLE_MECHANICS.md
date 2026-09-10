@@ -24,11 +24,12 @@ that the counter is **"how many tasks you have completed for one trader at one
 loyalty tier"**, so the condition means **"complete N tasks from that trader's
 tier-M pool"**.
 
-Treat that as an observed interpretation with unresolved exceptions, not an
-established rule. It reproduces the profile's value for 23 of the 27 groups and
-matches the pool size for 20 of 27; the remaining groups are listed in
-[Caveats](#caveats) and are not explained. Do not build a progression mapping on
-a group whose numbers do not reconcile — see
+Treat that as an observed interpretation, not an established rule. It reproduces
+the profile's value for 23 of the 27 groups and matches the pool size for 20 of
+27; the groups it fails on are listed in [Caveats](#caveats) and are not
+explained. Reconciling is necessary but **not sufficient** — an aggregate match in
+one profile cannot show which tasks contribute or by how much — so no group here
+is established well enough to drive a progression mapping. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the bar a
 mapping must clear before it can produce a value.
 
@@ -257,11 +258,26 @@ globalVariables[groupId] = |completed ∩ contributors(groupId)|
 ```
 
 Throughout this document, **`contributors(groupId)`** means the set of tasks that
-actually increment that counter, and it is only known to equal the full pool for
-the 23 groups whose observed value matches their completed-task count. For the
-four groups in [Caveats](#caveats) it does not, so substituting the pool there
-overshoots. Every formula below is scoped to `contributors`, never to the raw
-pool, for that reason.
+actually increment that counter. Nothing here establishes that set for **any**
+group, so distinguish three states and do not conflate the first two:
+
+- **Aggregate-reconciling (23 groups).** The counter's observed value equals the
+  number of completed pool tasks in one profile. That is consistent with the pool
+  being the contributor set, but it does not prove it: an aggregate can match
+  while one task contributes nothing and another contributes twice, and one
+  profile says nothing about contribution amounts, alternate producers, initial
+  values or resets. See
+  [the registry's evidence bar](GLOBAL_VARIABLES.md#registry-contract), which
+  states outright that a matching sum in one profile does not prove these
+  properties.
+- **Not reconciling (4 groups).** The counter reads below the completed count, so
+  the pool is definitely _not_ the contributor set. See [Caveats](#caveats).
+- **Verified.** Contributor identities established by evidence of the derivation
+  itself. No group in this document reaches this state.
+
+Every formula below is scoped to `contributors`, never to the raw pool, and each
+is usable only once a group is verified — by evidence beyond this document. On the
+strength of what is recorded here, all 27 are candidates.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
 which is why the table below has no Ragman tier-4 row. Do not add it as a
@@ -274,14 +290,16 @@ published as `overlay.progressionCounters` and consumed by
 task IDs is exactly the shape above.
 
 What is _not_ settled is whether the mapping in this document clears that
-registry's evidence bar. The registry requires `verification: 'verified'` and
-`coverage: 'complete'` with public proof, and the caveats below leave four
-counters where the observed value does not equal the completed count and seven
-where the child count does not equal the pool size. Until those are explained,
-these pools belong in the registry as `unresolved` candidates at most, which
-never produce an inferred value. See
-[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the fields
-and the bar.
+registry's evidence bar. It does not, and not merely because of the four
+unreconciled counters and seven child-count mismatches below. The bar requires
+`verification: 'verified'` and `coverage: 'complete'` with public proof of the
+derivation, and the aggregate profile match behind this model does not supply that
+for **any** of the 27 — it cannot distinguish which tasks contribute, how much
+each contributes, whether another producer writes the value, or how it initialises
+and resets. So all 27 belong in the registry as `unresolved` candidates at most,
+which never produce an inferred value. See
+[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the fields and
+the bar.
 
 ## Building a progression model
 
@@ -312,17 +330,18 @@ available(task) =
   AND counter(task.trader, task.tier) >= task.threshold
 ```
 
-`counter(...)` is `|completed ∩ contributors(groupId)|`, which is **not** reliably
-`|completed ∩ pool|`. For the 23 groups where the observed value equals the
-completed-task count, the pool is the contributor set and substituting it
-reproduces the game's value. For the four groups in [Caveats](#caveats) it does
-not: in each the counter read **below** the number of completed pool tasks, so at
-least one member does not contribute, and counting the whole pool **overshoots** —
-a consumer would clear the threshold and report a task available too early. A
+`counter(...)` is `|completed ∩ contributors(groupId)|`, which is **not**
+interchangeable with `|completed ∩ pool|`. For the 23 aggregate-reconciling groups
+substituting the pool happens to reproduce the observed value in the one profile
+checked, which is why the model is plausible — but as noted above that match does
+not establish the contributor set, so the substitution stays a hypothesis rather
+than a licence. For the four groups in [Caveats](#caveats) it is refuted outright:
+in each the counter read **below** the number of completed pool tasks, so at least
+one member does not contribute, and counting the whole pool **overshoots** — a
+consumer would clear the threshold and report a task available too early. A
 shortfall in child count explains only two of the four (Mechanic tier 3 and Ragman
 tier 1); for the other two the reason a member fails to contribute is unknown.
-Until the excluded members are identified, treat those four counters as `unknown`
-rather than substituting a full-pool count.
+Treat all four as `unknown` rather than substituting a full-pool count.
 
 Each pool has 1–7 seed tasks carrying no counter gate, and the staggered waves
 are reachable from those seeds in all 27 pools, so no pool can deadlock.
