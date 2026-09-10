@@ -43,12 +43,14 @@ is established well enough to drive a progression mapping. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the bar a
 mapping must clear before it can produce a value.
 
-The group's child variables are the individual per-task completion markers for
-that pool. There are 8 children when the pool contains 8 tasks; pool sizes
-observed across the 42 groups in the client's `variable_group` response are
-2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18 and 36 — 8 and 9 are simply the most
-common. So the count is not a fixed structural "8"; it is the size of the task
-pool being counted.
+Under that reading the group's child variables would be individual per-task
+completion markers for the pool — but that is the hypothesis, not a finding: 351 of
+374 children have no declared writer, so what sets them is unknown (see
+[Caveats](#caveats)). Child counts track pool sizes loosely rather than exactly:
+20 of 27 groups match, and across the 42 groups in the client's `variable_group`
+response the observed child counts are 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 18 and
+36, with 8 and 9 most common. So the count is at least not a fixed structural "8";
+it varies with the size of the task set involved.
 
 ## The three pieces of data
 
@@ -94,11 +96,14 @@ Treating an absent value as `0` is therefore only ever valid against a complete
 raw payload: an unwritten group child in step 1, or the second bullet above. It
 must not be carried into `TaskUnlockState.globalVariables`, which holds
 already-resolved effective values: a key missing from that map means **unknown**,
-not zero. The distinction is load-bearing because 60 of the published conditions
-compare with `==`, so an invented `0` would satisfy an `== 0` gate and report a
-task available with no account evidence. `evaluateTaskProgression` already behaves
-this way — a missing entry reaches `evaluateNumericCondition` as `undefined` and
-yields `unknown` ("… is not present"), never `0`.
+not zero. The distinction is load-bearing because `==` comparisons exist: all 164
+conditions tarkov.dev currently publishes use `>=`, but 60 of the 300 in the
+capture compare with `==`, so an invented `0` would satisfy an `== 0` gate and
+report a task available with no account evidence. Anyone reading client data, or
+consuming a future publication that includes them, is exposed.
+`evaluateTaskProgression` already behaves correctly here — a missing entry reaches
+`evaluateNumericCondition` as `undefined` and yields `unknown` ("… is not
+present"), never `0`.
 
 In the 1.1 PVE reference, 109 distinct targets appear across 300
 `GlobalVariableValue` conditions: **36 are group IDs and 73 are plain
@@ -217,7 +222,8 @@ are the point of the question; no child variable IDs are reproduced here.
 
 Only these seven traders use tier counters. Fence, Lightkeeper, BTR, Ref and
 the 1.1 story traders gate through plain variables instead (next section).
-Ragman has no tier-4 group because that tier holds a single task.
+Ragman has no tier-4 group; that tier holds a single task. Whether the one implies
+the other is not established.
 
 Rows where Children ≠ Pool are unresolved; see Caveats.
 
@@ -307,7 +313,7 @@ is usable only once a group is verified — by evidence beyond this document. On
 strength of what is recorded here, all 27 are candidates.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
-which is why the table below has no Ragman tier-4 row. Do not add it as a
+which is why the table above has no Ragman tier-4 row. Do not add it as a
 contributor to any pool.
 
 The overlay already has the vehicle for that annotation: the
