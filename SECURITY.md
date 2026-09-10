@@ -34,9 +34,12 @@ tooling that maintainers run locally or in CI.
 - **Supply chain**: a dependency advisory that `npm run audit:dependencies` does not
   catch, or a way to influence what CI installs.
 - **Overlay data integrity**: a route by which unreviewed third-party content reaches a
-  committed file. Wiki-derived text is scraped into the gitignored
-  `data/eft/story-wiki-objectives.json` and then used only as a fuzzy-match key, so a path
-  that copies it into `src/additions/` or `dist/overlay.json` is a real finding.
+  committed file. The wiki does influence committed output today, but only as a coerced
+  boolean — the optional/required marker on a story objective — while the scraped text stays
+  in the gitignored `data/eft/story-wiki-objectives.json` and is used purely as a
+  fuzzy-match key. A path that copies wiki _text_ into `src/additions/` or
+  `dist/overlay.json` is a real finding, because free-form content can carry markup where a
+  boolean cannot.
 
 ## Out of scope
 
