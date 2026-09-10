@@ -128,6 +128,33 @@ Vitest is the only test framework. Tests should be named `*.test.ts` under `test
 
 Fix fallow findings at their root whenever the code can be safely consolidated, simplified, removed, or covered by tests. Do not add `fallow-ignore` suppressions for resolvable findings; suppressions must be reserved for genuinely unavoidable tool false positives or external/runtime constraints, include a specific reason, and receive explicit reviewer approval.
 
+`npm run fallow:security` reports candidates rather than confirmed vulnerabilities and
+exits 0; CI gates only on newly introduced ones (`--gate new --changed-since <base>`). The
+30 candidates standing on `main` were triaged and are all tool false positives. Re-check a
+category only if the guard named below stops holding, and prefer fixing a guard over
+suppressing an item:
+
+- **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
+  is `path.join(process.cwd(), …)` over literal segments; the only interpolated segment is
+  a mode from `SUPPORTED_GAME_MODES`. User-derived stems go through
+  `assertSafeCacheFileStem` (`/^[A-Za-z0-9_-]{1,128}$/`). `resolveOutputFilePath` returns
+  the operator's own `--output` argument, which is intended CLI behaviour.
+- **Dynamic regular expression, 11 items** (`normalize.ts`, `wiki.ts`). Every
+  interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
+  The two that are not (`normalize.ts` around the count-word replacements) interpolate
+  module-local word lists, not input.
+- **SSRF, 3 items** (`monitor/server.js`, `src/lib/tarkov-api.ts`,
+  `monitor/public/app.js`). Both server-side calls append to a hardcoded
+  `https://json.tarkov.dev` base, so the host cannot be redirected, and the request-derived
+  mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`
+  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). The third is a same-origin `fetch` in
+  browser code.
+
+CodeQL alerts dismissed as false positives should state the reason that actually holds. For
+wiki-derived text the operative reason is that it is used only as a fuzzy-match key and
+never stored — not that it lands in a gitignored file, since `eft:story` output is
+committed.
+
 ## Commit & Pull Request Guidelines
 
 Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.

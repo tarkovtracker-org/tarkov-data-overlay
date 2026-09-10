@@ -83,6 +83,11 @@ export function cleanObjectiveLine(line: string): WikiStoryObjective {
     .replace(TAG_RE, '')
     .replaceAll("'''", '')
     .replaceAll("''", '')
+    // TAG_RE only matches a bracket pair, so markup hiding the delimiter
+    // survives it and the italic pass can then rebuild a tag: `<''script`
+    // becomes `<script`. Drop leftover brackets individually and last, since
+    // single characters cannot recombine into a tag.
+    .replace(/[<>]/g, '')
     .replace(/\s+/g, ' ');
   text = text
     .replace(/^[ *:]+/, '')
