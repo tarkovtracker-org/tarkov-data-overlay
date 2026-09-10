@@ -135,8 +135,12 @@ category only if the guard named below stops holding, and prefer fixing a guard 
 suppressing an item:
 
 - **Path traversal, 16 items** (`scripts/wiki-compare/overlay.ts`, `cache.ts`). Every path
-  is `path.join(process.cwd(), …)` over literal segments; the only interpolated segment is
-  a mode from `SUPPORTED_GAME_MODES`. User-derived stems go through
+  is `path.join(process.cwd(), …)` over literal segments except the mode segment in
+  `taskOverlayFiles`, which is either a member of the module-local `WIKI_COMPARE_MODES`
+  constant or the caller's `scope` argument. That argument is constrained at compile time
+  by `SuppressionScope` (`GameMode | 'both'`) rather than by a runtime check, and its only
+  callers are inside the same module, so no external value reaches it — add a runtime guard
+  before exposing the helper to untrusted input. User-derived cache stems go through
   `assertSafeCacheFileStem` (`/^[A-Za-z0-9_-]{1,128}$/`). `resolveOutputFilePath` returns
   the operator's own `--output` argument, which is intended CLI behaviour.
 - **Dynamic regular expression, 11 items** (`normalize.ts`, `wiki.ts`). Every
@@ -151,9 +155,12 @@ suppressing an item:
   browser code.
 
 CodeQL alerts dismissed as false positives should state the reason that actually holds. For
-wiki-derived text the operative reason is that it is used only as a fuzzy-match key and
-never stored — not that it lands in a gitignored file, since `eft:story` output is
-committed.
+wiki-derived text the operative reason is that `eft-story-generate.ts` uses it only as a
+fuzzy-match key and never copies it into the generated additions — not that it stays out of
+the filesystem. `eft-story-wiki.ts` does persist the scraped text to the gitignored
+`data/eft/story-wiki-objectives.json`, and `eft:story` writes the committed
+`src/additions/storyChapters.json5`, so "it only touches gitignored files" is not a claim
+this pipeline supports.
 
 ## Commit & Pull Request Guidelines
 

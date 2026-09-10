@@ -34,8 +34,9 @@ tooling that maintainers run locally or in CI.
 - **Supply chain**: a dependency advisory that `npm run audit:dependencies` does not
   catch, or a way to influence what CI installs.
 - **Overlay data integrity**: a route by which unreviewed third-party content reaches a
-  committed file. Wiki-derived text is deliberately used only as a fuzzy-match key rather
-  than stored, so a path that lands it in the overlay is a real finding.
+  committed file. Wiki-derived text is scraped into the gitignored
+  `data/eft/story-wiki-objectives.json` and then used only as a fuzzy-match key, so a path
+  that copies it into `src/additions/` or `dist/overlay.json` is a real finding.
 
 ## Out of scope
 
@@ -59,8 +60,11 @@ latest for corrections.
 
 ## Hardening already in place
 
-CI gates every pull request on `npm run audit:dependencies` (fails at high severity),
-CodeQL for `javascript-typescript` and `actions`, and `fallow security --gate new` for
-newly introduced findings. Dependabot security updates, secret scanning, and push
-protection are enabled. GitHub Actions are pinned to commit SHAs and workflows declare
-explicit `permissions` blocks.
+The `Validate & Build` workflow gates every pull request on
+`npm run audit:dependencies` (fails at high severity) and on
+`fallow security --gate new` for newly introduced findings. CodeQL runs for
+`javascript-typescript` and `actions` through GitHub's default code-scanning setup, which is
+configured on the repository rather than by a workflow in this tree. Note that `main` is not
+branch-protected, so these checks report rather than block a merge. Dependabot security
+updates, secret scanning, and push protection are enabled. GitHub Actions are pinned to
+commit SHAs and the workflows declare explicit `permissions` blocks.
