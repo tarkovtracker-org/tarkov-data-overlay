@@ -173,31 +173,41 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 
 ### PR review bots
 
+Three bots review pull requests here. cubic re-reviews automatically on every
+push. Codex reviews on open, on ready-for-review, and on a `@codex review`
+comment, but only because the Codex GitHub integration is enabled for this
+repository; that comment does nothing where it is not. CodeRabbit reviews on push
+and on `@coderabbitai review`, subject to the allowance below.
+
 Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
 allowance is metered from recent usage (CodeRabbit has reported it as one review
-per hour here), and when it is exhausted the bot replies `Review rate limited`
-while still reporting its own check as passing. It also "does not re-review
-already reviewed commits", so a green CodeRabbit check is not evidence that the
-current head commit was reviewed at all. Get the review from a source that is not
-rate limited instead:
+per hour here), and when it is exhausted the bot answers a review request with
+`Review rate limited` while still reporting its own check as **passing**. It also
+"does not re-review already reviewed commits", so a green CodeRabbit check is not
+evidence that the head commit was reviewed. Get the coverage another way:
 
-- Run it locally with the CodeRabbit CLI, which does not consume the GitHub
-  allowance: `coderabbit review --base main --agent` for structured findings, or
-  `--committed` / `--uncommitted` to scope which changes are considered.
-  `coderabbit review findings` re-reads the last local run, and
-  `coderabbit pullrequest <number> --agent` pulls the findings CodeRabbit already
-  posted on a PR.
-- Comment `@codex review` on the PR for a fresh bot review of the current head
-  commit. cubic re-reviews automatically on push, so pushing a fix already
-  re-runs that one.
+- Run the same reviewer locally: `coderabbit review --base main --agent` for
+  structured findings, with `--committed` / `--uncommitted` to scope which changes
+  are considered, `coderabbit review findings` to re-read the last local run, and
+  `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit already
+  posted on a PR. A local run has completed a full review while the GitHub PR
+  allowance was exhausted, so the two are metered separately in practice — but CLI
+  runs are still review events counted against the account's limits and can draw
+  on usage-based billing, so treat them as costed rather than free.
+- Comment `@codex review` for a fresh pass on the current head commit.
 
 Reply to each review thread naming the commit that fixed it and what changed, then
-resolve the thread; the reply is what makes the trail auditable later. A
-`CHANGES_REQUESTED` decision stays attached to the commit it was written against
-and keeps blocking the PR after the findings are fixed, so once the threads are
-resolved and the fix is pushed, dismiss that review with a message citing the
-fixing commit and the replacement review evidence rather than waiting for the bot
-to revisit it.
+resolve the thread; the reply is what makes the trail auditable later.
+
+A `CHANGES_REQUESTED` review stays attached to the commit it was written against,
+so it survives the push that fixes it and leaves `reviewDecision` misleading. It
+does not block merging here: `main` is not branch-protected, and GitHub has
+reported `mergeStateStatus: CLEAN` alongside a stale `CHANGES_REQUESTED`. Dismiss
+such a review only after confirming its findings are genuinely fixed, its threads
+are resolved, and you hold permission to dismiss; cite the fixing commit and the
+replacement review evidence in the dismissal message. If branch protection is ever
+enabled and requires approval of the most recent push, dismissal alone will not
+satisfy that rule and a fresh approving review will be needed.
 
 ## Data Contribution Quick Checklist
 
