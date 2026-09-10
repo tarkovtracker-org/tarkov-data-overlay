@@ -186,14 +186,18 @@ per hour here), and when it is exhausted the bot answers a review request with
 "does not re-review already reviewed commits", so a green CodeRabbit check is not
 evidence that the head commit was reviewed. Get the coverage another way:
 
-- Run the same reviewer locally: `coderabbit review --base main --agent` for
-  structured findings, with `--committed` / `--uncommitted` to scope which changes
-  are considered, `coderabbit review findings` to re-read the last local run, and
-  `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit already
-  posted on a PR. A local run has completed a full review while the GitHub PR
-  allowance was exhausted, so the two are metered separately in practice — but CLI
-  runs are still review events counted against the account's limits and can draw
-  on usage-based billing, so treat them as costed rather than free.
+- Run a supplemental local CodeRabbit review. It is not the same artifact as a PR
+  review — different context, and no PR threads come out of it — but it surfaces
+  findings while the PR allowance is closed: `coderabbit review --base main --agent`
+  for structured findings, with `--committed` / `--uncommitted` to scope which
+  changes are considered, `coderabbit review findings` to re-read the last local
+  run, and `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit
+  already posted on a PR. Subcommands vary by CLI version, so confirm against
+  `coderabbit --help` before relying on one. A local run has completed a full
+  review while the GitHub PR allowance was exhausted, so the two are metered
+  separately in practice — but CLI runs are still review events counted against the
+  account's limits and can draw on usage-based billing, so treat them as costed
+  rather than free.
 - Comment `@codex review` for a fresh pass on the current head commit.
 
 Reply to each review thread naming the commit that fixed it and what changed, then
