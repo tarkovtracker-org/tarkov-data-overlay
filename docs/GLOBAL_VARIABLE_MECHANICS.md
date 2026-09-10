@@ -66,23 +66,28 @@ The condition's `target` is **not always a group**. Resolve it in this order:
 2. Otherwise `target` is a plain variable ID and the compared value is
    `profile.Variables[target]` directly.
 
-Step 2 is only sound with a **complete** `variable_group` catalog in hand. The
-catalog is not public — only the condition payload is — so for most consumers a
-failed lookup means "not found in my catalog", not "not a group". Guessing scalar
-there is doubly wrong: group IDs never appear in `profile.Variables`, so the read
-misses and an invented zero can satisfy the gate. Without a complete catalog,
-classify an unrecognized target as **unknown** rather than as a scalar.
+Step 2 needs care without a **complete** `variable_group` catalog, which is not
+public — only the condition payload is — so for most consumers a failed lookup
+means "not in my catalog", not "not a group". Resolve the ambiguity with the
+profile rather than by guessing, using the fact that group IDs never appear in
+`profile.Variables`:
 
-The `absent = 0` default applies **only** to steps 1 and 2 above, and only when
-reading a complete raw `profile.Variables` payload — there, a variable that was
-never written is genuinely zero. It must not be carried into
-`TaskUnlockState.globalVariables`, which holds already-resolved effective values:
-a key missing from that map means **unknown**, not zero. The distinction is
-load-bearing because 60 of the published conditions compare with `==`, so an
-invented `0` would satisfy an `== 0` gate and report a task available with no
-account evidence. `evaluateTaskProgression` already behaves this way — a missing
-entry reaches `evaluateNumericCondition` as `undefined` and yields `unknown`
-("… is not present"), never `0`.
+- `target` is a key in `profile.Variables` → it is a scalar. Use its value.
+- `target` is absent and the catalog is known complete → it is a scalar that was
+  never written. Use `0`.
+- `target` is absent and the catalog may be incomplete → **unknown**. It may be a
+  group you cannot expand, and reading it as a scalar would miss (group IDs are
+  not profile keys) and then invent a zero.
+
+Treating an absent value as `0` is therefore only ever valid against a complete
+raw payload: an unwritten group child in step 1, or the second bullet above. It
+must not be carried into `TaskUnlockState.globalVariables`, which holds
+already-resolved effective values: a key missing from that map means **unknown**,
+not zero. The distinction is load-bearing because 60 of the published conditions
+compare with `==`, so an invented `0` would satisfy an `== 0` gate and report a
+task available with no account evidence. `evaluateTaskProgression` already behaves
+this way — a missing entry reaches `evaluateNumericCondition` as `undefined` and
+yields `unknown` ("… is not present"), never `0`.
 
 In the 1.1 PVE reference, 109 distinct targets appear across 300
 `GlobalVariableValue` conditions: **36 are group IDs and 73 are plain
@@ -294,12 +299,14 @@ available(task) =
 `counter(...)` is **not** reliably `count(completed ∩ pool)`. For the 23 groups
 where the observed value equals the completed-task count, substituting the full
 pool reproduces the game's value. For the four groups in [Caveats](#caveats) it
-does not: those groups have fewer children than their pool has tasks, so some
-member does not contribute, and counting the whole pool **overshoots** — a
-consumer would clear the threshold and report a task available too early.
-Until the excluded members are identified, treat those four counters as
-`unknown` rather than substituting a full-pool count, and only ever count a
-verified contributor set.
+does not: in each of them the counter read **below** the number of completed pool
+tasks, so at least one member does not contribute, and counting the whole pool
+**overshoots** — a consumer would clear the threshold and report a task available
+too early. Note that a shortfall in child count explains only two of the four
+(Mechanic tier 3 and Ragman tier 1); for the other two the reason a member fails
+to contribute is unknown. Until the excluded members are identified, treat those
+four counters as `unknown` rather than substituting a full-pool count, and only
+ever count a verified contributor set.
 
 Eleven tier-1 tasks add a gate on a plain variable rather than the tier counter
 (Mechanic 3, Ragman 3, Therapist 3, Skier 2); those are the trader-intro/world
@@ -325,12 +332,18 @@ history. The gate supplies no identity evidence, so any such subset is invented:
 it can contradict the player's real history and double-count when the actual
 completions later arrive. Keep the cardinality constraint instead.
 
-What the absence of branches does buy is safety when planning **forward**. Any
-`N` currently-available members will clear the threshold, and no choice among
-them can strand the player, because no member fails another member and the only
-`Fail` conditions on pool tasks are 5 `CounterCreator` and 3 `Quest` entries,
-none of which target a pool task. So a route planner may choose freely by cost;
-a history reconstructor may not choose at all.
+What the absence of branches does buy is safety when planning **forward**, for a
+pool whose contributor set is verified. There, any `N` currently-available members
+will clear the threshold, and no choice among them can strand the player, because
+no member fails another member and the only `Fail` conditions on pool tasks are
+5 `CounterCreator` and 3 `Quest` entries, none of which target a pool task. So a
+route planner may choose freely by cost; a history reconstructor may not choose at
+all.
+
+That guarantee does **not** extend to the four unreconciled groups. There an
+available pool task may not advance the counter at all, so completing `N` of them
+can leave the threshold unmet and a planner would report false progress. Restrict
+route planning to verified contributors.
 
 ### Practical guidance
 
@@ -344,11 +357,16 @@ a history reconstructor may not choose at all.
 
 ## Caveats
 
-- **Four groups where the counter ≠ completed count** in the level-55 profile:
-  Mechanic tier 3 (12 vs 16), Mechanic tier 4 (3 vs 4), Prapor tier 4 (6 vs 7),
-  Ragman tier 1 (8 vs 9). In each case the group has fewer children than the
-  pool has tasks, so some tasks do not contribute to the counter. Which tasks
-  are excluded, and why, is not determined.
+- **Four groups where the counter ≠ completed count** in the level-55 profile.
+  The pairs below are the counter's value versus the number of completed pool
+  tasks — not children versus pool size: Mechanic tier 3 (12 vs 16), Mechanic
+  tier 4 (3 vs 4), Prapor tier 4 (6 vs 7), Ragman tier 1 (8 vs 9). In every case
+  the counter reads lower, so at least one task does not contribute. A shortfall
+  in child count accounts for only two of them (Mechanic tier 3 has 12 children
+  for 16 tasks, Ragman tier 1 has 8 for 9); Mechanic tier 4 has _more_ children
+  than pool tasks and Prapor tier 4 has exactly as many, so for those two the
+  cause is undetermined. Which tasks are excluded, and why, is not determined in
+  any of the four.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
   (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). Extra children are
   never set in the observed profile, so they are plausibly retired or
