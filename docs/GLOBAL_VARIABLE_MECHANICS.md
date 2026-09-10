@@ -313,16 +313,24 @@ design, not a data gap.
 
 ### Forward: no task prerequisites to recover
 
-Across all 248 tier-pool tasks, `AvailableForStart` contains only two condition
-types — `TraderLoyalty` and `GlobalVariableValue` (164 of them) — and **zero
-`Quest` conditions**. There is no "task X, Y, Z" prerequisite list to recover,
-because these tasks have no task prerequisites at all.
+Across all 248 tier-pool tasks, the captured `AvailableForStart` conditions are of
+only two types — `TraderLoyalty` and `GlobalVariableValue` (164 of them) — with
+**no `Quest` condition among them**. So there is no intra-pool "task X, Y, Z"
+prerequisite list to recover from these gates.
+
+Read that as the scope it is: no recoverable `Quest` edge in the captured start
+conditions of these pools. It is **not** a licence to strip `taskRequirements`.
+Upstream asserts one for one of the 248 (see below), and `AGENTS.md` requires
+preserving explicit `Quest` start conditions and their accepted statuses; an
+absence here is not evidence against an edge established elsewhere.
 
 The 164 counter-gated tasks take the predicate below. It does **not** apply to
 every tier-pool task: 11 tier-1 tasks are gated on a plain variable rather than
-their tier counter (Mechanic 3, Ragman 3, Therapist 3, Skier 2). Reading
-`counter(trader, tier)` for those would inspect the wrong state entirely — they
-are trader-intro/world scalars, they have no threshold over a pool, and they stay
+their tier counter, distributed across four traders (Mechanic and Ragman and
+Therapist with 3 each, Skier with 2 — these are task counts per trader, all at
+tier 1, not tier numbers). Reading `counter(trader, tier)` for those would inspect
+the wrong state entirely — they are trader-intro/world scalars, they have no
+threshold over a pool, and they stay
 `unknown` without account state. Branch on the condition's `variableId`: a tier
 group ID takes the predicate, anything else takes the plain-variable path in
 [Resolution rule](#resolution-rule).
@@ -360,12 +368,11 @@ full-pool count.
 Each pool has 1–7 tasks carrying no counter gate, and the staggered waves are
 reachable from those tasks in all 27 pools — but only once those tasks are
 themselves available, which is not established. A counter-free task is not
-automatically an open seed: some are gated on a plain variable instead, and
-Mechanic tier 1 is the worst case, where all three of its counter-free tasks
-(9 pool, 6 threshold-gated) are among the 11 plain-variable-gated tier-1 tasks. So
-its entire apparent seed set can sit at `unknown` without account state. Read the
-no-deadlock property as conditional on those scalar gates being satisfied, not as
-a guarantee.
+automatically an open seed: 11 tier-1 tasks are gated on a plain variable instead,
+and because that mapping is not published, which pools lose seeds that way cannot
+be determined from public data. In the worst case a pool's entire counter-free set
+is scalar-gated and sits at `unknown` without account state. Read the no-deadlock
+property as conditional on those scalar gates being satisfied, not as a guarantee.
 
 For corroboration, upstream asserts `taskRequirements` for only 1 of the 248,
 and this overlay already corrects that entry.
@@ -380,10 +387,12 @@ minimal explanations is `C(|contributors|, N)` — large enough that enumerating
 is pointless. Since no group here is verified, that figure cannot currently be
 computed for any of them: substituting the pool would enumerate subsets containing
 members that may not contribute. Raw-pool arithmetic gives a feel for the scale
-only — over the 27 pools the median is 45 and Mechanic tier 3 would reach
-`C(16,5) = 4368` — but treat both as illustrations of magnitude, not as counts of
-valid histories, and note that Mechanic tier 3 is itself one of the four
-unreconciled groups where `16` is only a pool size.
+only — taking `C(Pool, N)` for each of the 164 gated tasks in the table, using its
+own threshold `N` and its pool size, the median is 56 and the maximum is
+`C(16,5) = 4368` at Mechanic tier 3. Both are reproducible from the table, but
+treat them as illustrations of magnitude rather than counts of valid histories:
+Mechanic tier 3 is one of the four unreconciled groups, so its `16` is only a pool
+size.
 
 This does **not** license picking an `N`-subset and recording it as completed
 history. The gate supplies no identity evidence, so any such subset is invented:
