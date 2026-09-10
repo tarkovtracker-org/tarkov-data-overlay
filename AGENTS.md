@@ -197,7 +197,9 @@ evidence that the head commit was reviewed. Get the coverage another way:
   review while the GitHub PR allowance was exhausted, so the two are metered
   separately in practice — but CLI runs are still review events counted against the
   account's limits and can draw on usage-based billing, so treat them as costed
-  rather than free.
+  rather than free. The CLI has its own small included pool and reports
+  `errorType: rate_limit` with a wait time when it is spent; when that happens fall
+  through to the bots below rather than waiting for it either.
 - Comment `@codex review` for a fresh pass on the current head commit.
 
 Reply to each review thread naming the commit that fixed it and what changed, then
