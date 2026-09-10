@@ -272,6 +272,22 @@
         }
       ]
     },
+    "69ce21e990144e437802b1e0": {
+      "otherRequirements": [
+        {
+          "id": "overlay.69ce21e990144e437802b1e0.boreas.hard-drives",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "boreas",
+            "name": "Boreas"
+          },
+          "objective": {
+            "id": "69bc0b6069651f9af0993d2c",
+            "name": "Ask Mechanic for help decoding the hard drives from the icebreaker"
+          }
+        }
+      ]
+    },
     "64e7b9bffd30422ed03dad38": {
       "traderRequirements": [
         {
@@ -9100,7 +9116,7 @@
   },
   "$meta": {
     "version": "1.89",
-    "generated": "2026-09-10T04:50:09.107Z",
-    "sha256": "b4e21e42e097c07f33c2b9af583c551a8fbe98b7509a107cbf93f20384cabe96"
+    "generated": "2026-09-10T05:16:14.789Z",
+    "sha256": "ade30ceffb3109df620b8232ca31e0f0ae416f61a9d7d27c1002d175fbfb8a00"
   }
 }

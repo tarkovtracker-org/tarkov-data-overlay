@@ -11,6 +11,7 @@ import {
   type StoryChapter,
   type TaskData,
   type TaskOverride,
+  type TaskUnlockDefinition,
 } from '../src/lib/index.js';
 import { applyTaskOverride, getTaskOverrideForMode } from '../examples/apply-overlay.js';
 
@@ -26,6 +27,7 @@ const boreasTasks = [
   '69ce1cfb298a6529b30d712b',
   '69ce204c8702b378f9091e4b',
   '69ce1de03e15cd80bd06f6c9',
+  '69ce21e990144e437802b1e0',
 ];
 
 function evaluate(requirements: TaskData['otherRequirements'], state = {}) {
@@ -85,6 +87,64 @@ describe('verified story objective gates', () => {
         storyObjectives: { otherChapter: { [objectiveId]: true } },
       }).status
     ).toBe('unknown');
+  });
+
+  // Derivation already rejects a blank requirement id, so build the condition
+  // directly: consumers vendor these types and can supply their own definition.
+  it('fails closed for a condition with no requirement id', () => {
+    const task: TaskData = {
+      id: 'test',
+      name: 'Test',
+      trader: { id: 'trader', name: 'Trader' },
+    };
+    const state = {
+      traderUnlocked: { trader: true },
+      storyObjectives: { boreas: { [objectiveId]: true } },
+    };
+    const condition = {
+      type: 'storyObjective',
+      requirementId: '',
+      storyChapter: { id: 'boreas', name: 'Boreas' },
+      objective: { id: objectiveId, name: 'Hand over drives' },
+    } as const;
+    const definition: TaskUnlockDefinition = {
+      all: [condition],
+      taskRequirements: [],
+      anyOf: [],
+      context: { trader: { id: 'trader', name: 'Trader' } },
+    };
+    expect(evaluateTaskUnlock(task, definition, state).status).toBe('unknown');
+    const valid: TaskUnlockDefinition = {
+      ...definition,
+      all: [{ ...condition, requirementId: 'overlay.test.boreas' }],
+    };
+    expect(evaluateTaskUnlock(task, valid, state).status).toBe('available');
+  });
+
+  it('ignores inherited chapter and objective entries', () => {
+    const requirement = tasks[boreasTasks[0]].otherRequirements![0];
+    const inheritedObjective = Object.create({ [objectiveId]: true }) as Record<string, boolean>;
+    expect(
+      evaluate([requirement], { storyObjectives: { boreas: inheritedObjective } }).status
+    ).toBe('unknown');
+    const inheritedChapter = Object.create({ boreas: { [objectiveId]: true } }) as Record<
+      string,
+      Record<string, boolean>
+    >;
+    expect(evaluate([requirement], { storyObjectives: inheritedChapter }).status).toBe('unknown');
+  });
+
+  it('explains an unmet objective gate without claiming completion', () => {
+    const requirement = tasks[boreasTasks[0]].otherRequirements![0];
+    const blocked = evaluate([requirement], {
+      storyObjectives: { boreas: { [objectiveId]: false } },
+    });
+    expect(blocked.status).toBe('blocked');
+    const reasons = blocked.blockers.map((blocker) => blocker.reason);
+    expect(reasons).toContain(
+      'requires story objective: Ask Mechanic for help decoding the hard drives from the icebreaker'
+    );
+    for (const reason of reasons) expect(reason).not.toMatch(/objective completed/);
   });
 
   it('preserves recorded lifecycle history when objective progress is unavailable', () => {

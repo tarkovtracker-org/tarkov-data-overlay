@@ -70,6 +70,27 @@
     ],
   },
 
+  // Fresh Stock - the fourth task the same hand-in unlocks. The Boreas guide
+  // names A Wedge Between Us, Fresh Stock, Oil Change and War Never Changes in
+  // one note, and this page carries the identical Requirements line, so it
+  // needs the same gate as its three siblings above.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fresh_Stock
+  // https://escapefromtarkov.fandom.com/wiki/Boreas#Ask_Mechanic_for_help_decoding_the_hard_drives_from_the_icebreaker
+  '69ce21e990144e437802b1e0': {
+    otherRequirements: [
+      // Was: []
+      {
+        id: 'overlay.69ce21e990144e437802b1e0.boreas.hard-drives',
+        type: 'storyObjective',
+        storyChapter: { id: 'boreas', name: 'Boreas' },
+        objective: {
+          id: '69bc0b6069651f9af0993d2c',
+          name: 'Ask Mechanic for help decoding the hard drives from the icebreaker',
+        },
+      },
+    ],
+  },
+
   // ---------------------------------------------------------------------------
   // Provenance notes for entries that were deliberately dropped or moved
   // (recoverable from git history):

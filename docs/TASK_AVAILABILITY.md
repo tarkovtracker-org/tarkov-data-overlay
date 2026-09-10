@@ -204,6 +204,7 @@ const result = evaluateTaskUnlock(task, definition, {
   globalVariables: variablesByVariableId,
   completedConditionIds: profile.completedConditionIds,
   storyChapters: storyChapterProgressById,
+  storyObjectives: storyObjectiveCompletionByChapterId,
 });
 
 if (result.status === 'available') {
@@ -221,7 +222,9 @@ For BSG profile data, `taskStatuses` may use the quest's numeric `status`, and
 IDs. `globalVariables` is keyed by the condition's `variableId`, whether that is
 a scalar ID or a group ID. Group values must already be resolved by a trusted
 adapter; raw profile child values are not sufficient. Both `=` and BSG `==`
-are supported numeric equality operators.
+are supported numeric equality operators. `storyObjectives` is keyed by story
+chapter ID and then by objective ID, and only the adapter's own recorded
+booleans count: inherited or prototype-supplied values stay `unknown`.
 
 ## Traders and maps
 

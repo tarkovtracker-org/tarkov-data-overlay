@@ -893,19 +893,44 @@ function evaluateStoryChapterCondition(
   };
 }
 
+/**
+ * Read a boolean from a two-level map using own properties only, so inherited
+ * or prototype-supplied values cannot be mistaken for recorded account state.
+ */
+function ownNestedBoolean(map: unknown, outerKey: string, innerKey: string): boolean | undefined {
+  if (!isRecord(map) || !Object.prototype.hasOwnProperty.call(map, outerKey)) return undefined;
+  const inner = map[outerKey];
+  if (!isRecord(inner) || !Object.prototype.hasOwnProperty.call(inner, innerKey)) return undefined;
+  const value = inner[innerKey];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
 /** Only explicit completion of the named objective satisfies an objective gate. */
 function evaluateStoryObjectiveCondition(
   condition: Extract<TaskUnlockCondition, { type: 'storyObjective' }>,
   state: TaskUnlockState
 ): ConditionEvaluation {
-  if (!isTaskRef(condition.storyChapter) || !isTaskRef(condition.objective)) {
+  if (
+    !isNonEmptyString(condition.requirementId) ||
+    !isTaskRef(condition.storyChapter) ||
+    !isTaskRef(condition.objective)
+  ) {
     return { state: 'unknown', reason: 'story objective requirement definition is invalid' };
   }
-  const value = state.storyObjectives?.[condition.storyChapter.id]?.[condition.objective.id];
-  if (typeof value !== 'boolean') {
+  const value = ownNestedBoolean(
+    state.storyObjectives,
+    condition.storyChapter.id,
+    condition.objective.id
+  );
+  if (value === undefined) {
     return { state: 'unknown', reason: 'story objective completion is not present or invalid' };
   }
-  return { state: value ? 'met' : 'unmet', reason: 'required story objective completed' };
+  return {
+    state: value ? 'met' : 'unmet',
+    reason: value
+      ? `story objective completed: ${condition.objective.name}`
+      : `requires story objective: ${condition.objective.name}`,
+  };
 }
 
 /** Preserve unsupported conditions as unknown instead of guessing their state. */
