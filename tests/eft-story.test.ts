@@ -75,6 +75,21 @@ describe('cleanObjectiveLine', () => {
       optional: false,
     });
   });
+
+  it('does not let quote stripping rebuild a tag the tag pass missed', () => {
+    // `<''script` has no closing bracket, so the tag pass leaves it alone and
+    // removing the italic markers would otherwise yield `<script`.
+    for (const line of ["<''script", "<'''script", "<''script alert(1)", "<''img src=x"]) {
+      const { text } = cleanObjectiveLine(line);
+      expect(text).not.toMatch(/[<>]/);
+      expect(text.toLowerCase()).not.toContain('<script');
+    }
+    expect(cleanObjectiveLine("<''script").text).toBe('script');
+  });
+
+  it('keeps objective wording intact when brackets are unbalanced', () => {
+    expect(cleanObjectiveLine('* Survive the raid <3').text).toBe('Survive the raid 3');
+  });
 });
 
 describe('parseObjectives', () => {
