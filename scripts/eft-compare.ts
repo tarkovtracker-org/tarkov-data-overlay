@@ -42,6 +42,7 @@ import {
   dim,
   colors,
   icons,
+  SUPPORTED_GAME_MODES,
   type TaskData,
   type GameMode,
 } from '../src/lib/index.js';
@@ -258,12 +259,21 @@ function captureTimestamp(file: string): number | null {
   return readReferenceEnvelope(file).timestamp;
 }
 
-/** Read the quest array out of the reference-file envelope. */
+/** Read the quest array out of the reference-file envelope.
+ *
+ * Two capture envelope shapes exist and both are in use:
+ *   - older: `{ request, response: { decoded_response: { data: [...] } } }`
+ *   - newer: `{ request, response: { body_response: { data: [...] } } }`
+ *     (the capture tool moved the decoded payload under `body_response` and
+ *     records the decode chain in `response.pipeline`)
+ * A bare `{ data: [...] }` or a top-level array is also accepted so hand-made
+ * extracts keep working.
+ */
 function readQuestArray(file: string): EftQuest[] {
   const raw = JSON.parse(readFileSync(file, 'utf-8')) as unknown;
-  // The reference format is { request, response: { decoded_response: { data: [...] } } }.
-  const decoded = (raw as any)?.response?.decoded_response;
-  const data = decoded?.data ?? (raw as any)?.data ?? raw;
+  const response = (raw as any)?.response;
+  const data =
+    response?.decoded_response?.data ?? response?.body_response?.data ?? (raw as any)?.data ?? raw;
   if (!Array.isArray(data)) {
     throw new Error(`Unexpected quest reference shape in ${file}: expected an array of quests`);
   }
@@ -554,13 +564,14 @@ export function parseModeArgs(argv: string[], booleanFlags: string[] = []): Mode
     const arg = argv[i];
     if (arg === '--mode') {
       const value = argv[(i += 1)];
-      // The local quest reference only has regular and pve captures (there is
-      // no pvp-season reference), so --mode is limited to those two even though
-      // SUPPORTED_GAME_MODES also lists pvp-season for upstream fetches.
-      if (value !== 'pve' && value !== 'regular') {
-        throw new Error(`--mode must be 'pve' or 'regular', got '${value}'`);
+      // Captures exist for every mode tarkov.dev serves, so --mode accepts the
+      // full SUPPORTED_GAME_MODES list. requireMatchingReferenceMode() still
+      // refuses a mode with no matching capture in the given directory, which
+      // is what actually prevents cross-mode false positives.
+      if (!(SUPPORTED_GAME_MODES as readonly string[]).includes(value)) {
+        throw new Error(`--mode must be one of ${SUPPORTED_GAME_MODES.join(', ')}, got '${value}'`);
       }
-      mode = value;
+      mode = value as GameMode;
     } else if (arg === '--json') {
       jsonOut = argv[(i += 1)];
     } else if (booleanFlags.includes(arg)) {
@@ -745,11 +756,18 @@ export function writeJsonOutput(path: string | undefined, rows: unknown[], noun:
 
 /**
  * Infer the game mode from a reference file's captured request URL
- * (`gw-pve` / `gw-pvp` gateway hosts). Null when the URL is inconclusive.
+ * (`gw-pve` / `gw-pvp-season` / `gw-pvp` gateway hosts). Null when the URL is
+ * inconclusive.
+ *
+ * Order matters: the Seasonal Character gateway host is `gw-pvp-season`, which
+ * also contains the substring `gw-pvp`. Testing `gw-pvp` first would silently
+ * label every seasonal capture `regular` and make mode-scoped comparisons
+ * adjudicate the wrong dataset.
  */
 export function modeFromRequestUrl(url: string | undefined): GameMode | null {
   if (!url) return null;
   if (url.includes('gw-pve')) return 'pve';
+  if (url.includes('gw-pvp-season')) return 'pvp-season';
   if (url.includes('gw-pvp')) return 'regular';
   return null;
 }

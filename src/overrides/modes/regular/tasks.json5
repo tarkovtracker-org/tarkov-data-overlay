@@ -22,49 +22,38 @@
     },
   },
 
+  // Provide Viewership - the API invents a prerequisite in regular only.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/324
+  //        https://escapefromtarkov.fandom.com/wiki/Provide_Viewership
+  //
+  // The 2026-08-27 regular capture carries `AvailableForStart: []` for this task
+  // - an explicitly empty list on a present template, which is what licenses
+  // `taskRequirements: []` here rather than an absent-from-capture guess. The
+  // 1.1-pve capture is identical, and tarkov.dev's pve record already serves no
+  // prerequisite; only its regular record adds Easy Money - Part 2 [PVP ZONE]
+  // (66058cb5ae4719735349b9e8). The wiki page lists no Requirements section.
+  //
+  // That spurious edge is also the most likely cause of #324: it is the only
+  // link from a mode-shared task into the PVP-ZONE Easy Money chain, so a
+  // consumer that walks the regular graph surfaces a [PVP ZONE] task for
+  // players who never see it.
+  '675c15fbf7da9792a4059871': {
+    taskRequirements: [], // Was: Easy Money - Part 2 [PVP ZONE] (active, complete)
+  },
+
   // ---------------------------------------------------------------------------
   // Mode-divergent objective maps/counts - tarkov.dev mirrors the PvE text into
   // regular. The wiki (regular witness) documents the
   // PvP variant; the 1.1-pve data carries the other variant. See
   // src/divergences/tasks.json5 for the recorded per-mode counts.
+  //
+  // Power of Persuasion (63a5cf262964a7488f5243ce) and Easy-Breezy
+  // (669fa3a40c828825de06d6a1) used to be corrected here from the wiki. The
+  // 2026-08-27 regular client capture shows both objectives byte-identical to
+  // PvE (5 kills on Woods/Ground Zero/Interchange/Customs, and 30 on
+  // Reserve/Lighthouse), which is also exactly what tarkov.dev serves for
+  // regular - so the overrides were injecting stale pre-1.1 wiki values into a
+  // correct upstream record. Removed; see issue #356 and the converged entries
+  // in src/divergences/tasks.json5.
   // ---------------------------------------------------------------------------
-
-  // Power of Persuasion - PvP: 20 PMCs with MP5SD on Streets/Ground Zero/
-  // Interchange (wiki); PvE: 5 PMCs with MP5SD on Woods/Ground Zero/Interchange/
-  // Customs (1.1-pve data). tarkov.dev serves the PvE variant in both modes.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion
-  '63a5cf262964a7488f5243ce': {
-    objectives: {
-      '63a5cf262964a7488f5243d1': {
-        description: 'Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange', // Was (PvE): "Eliminate PMC operatives with an MP5SD on Woods, Ground Zero, Interchange, or Customs"
-        count: 20, // Was: 5 (tarkov.dev mirrors PvE count)
-        usingWeapon: [
-          {
-            id: '59411abb86f77478f702b5d2',
-            name: 'HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD',
-            shortName: 'MP5 SD',
-          },
-        ], // Was: MP5 (unsilenced) - contradicts even the PvE description
-        maps: [
-          { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
-          { id: '653e6760052c01c1c805532f', name: 'Ground Zero' },
-          { id: '5714dbc024597771384a510d', name: 'Interchange' },
-        ], // Was (PvE): Woods, Ground Zero, Interchange, Customs
-      },
-    },
-  },
-
-  // Easy-Breezy - PvP: 50 targets with SR-2M on Factory (wiki); PvE: 30 targets
-  // on Reserve or Lighthouse (1.1-pve data). tarkov.dev serves the PvE variant in
-  // both modes, which is what issue #352 reports from a PvP profile.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Easy-Breezy
-  '669fa3a40c828825de06d6a1': {
-    objectives: {
-      '66a0f5a7f9eae6761253114c': {
-        description: 'Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory', // Was (PvE): "Eliminate any target with SR-2M with suppressor and KP-SR2 sight on Reserve or Lighthouse"
-        count: 50, // Was: 30 (tarkov.dev mirrors PvE count)
-        maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }], // Was (PvE): Reserve, Lighthouse
-      },
-    },
-  },
 }

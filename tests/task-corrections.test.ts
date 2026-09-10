@@ -21,6 +21,7 @@ const TASK_IDS = {
   relentless: '60e71e8ed54b755a3b53eb67',
   flashDrive: '5979ed3886f77431307dc512',
   easyBreezy: '669fa3a40c828825de06d6a1',
+  vacateThePremises: '67d03be712fb5f8fd2096332',
 } as const;
 
 /**
@@ -158,7 +159,7 @@ describe('mode-specific task correction consumption', () => {
     }
   });
 
-  it('applies regular Easy-Breezy data without leaking it into PvE', () => {
+  it('applies regular Vacate the Premises data without leaking it into PvE', () => {
     const regularOverrides = loadJson5File<Record<string, TaskOverride>>(
       join(paths.srcDir, 'overrides', 'modes', 'regular', 'tasks.json5')
     );
@@ -168,39 +169,35 @@ describe('mode-specific task correction consumption', () => {
       $meta: { version: '1.0', generated: '2026-01-01T00:00:00.000Z', sha256: '' },
     };
     const upstreamTask = {
-      id: TASK_IDS.easyBreezy,
-      name: 'Easy-Breezy',
+      id: TASK_IDS.vacateThePremises,
+      name: 'Vacate the Premises',
       minPlayerLevel: 1,
       objectives: [
         {
-          id: '66a0f5a7f9eae6761253114c',
-          description: 'PvE objective',
-          count: 30,
-          maps: [
-            { id: '5704e5fad2720bc05b8b4567', name: 'Reserve' },
-            { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
-          ],
+          id: '67d03be712fb5f8fd2096334',
+          description: 'Eliminate any target inside The Labyrinth',
+          count: 36,
         },
       ],
     };
 
     const regularOverride = getTaskOverrideForMode(
-      TASK_IDS.easyBreezy,
+      TASK_IDS.vacateThePremises,
       overlay as never,
       'regular'
     );
-    const pveOverride = getTaskOverrideForMode(TASK_IDS.easyBreezy, overlay as never, 'pve');
+    const pveOverride = getTaskOverrideForMode(TASK_IDS.vacateThePremises, overlay as never, 'pve');
     const regularTask = applyTaskOverride(upstreamTask, regularOverride);
     const pveTask = applyTaskOverride(upstreamTask, pveOverride);
 
     expect(regularTask?.objectives[0]).toMatchObject({
-      count: 50,
-      maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
+      count: 24,
+      description: 'Eliminate PMC operatives inside The Labyrinth',
     });
     expect(pveOverride).toBeUndefined();
     expect(pveTask?.objectives[0]).toMatchObject({
-      count: 30,
-      maps: upstreamTask.objectives[0].maps,
+      count: 36,
+      description: upstreamTask.objectives[0].description,
     });
   });
 });

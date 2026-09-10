@@ -469,12 +469,12 @@
         regular: 40,
         pve: 40,
         'pvp-season': 40,
-        confidence: 'medium',
-        regularSource: 'patch-notes',
+        confidence: 'high',
+        regularSource: 'in-game',
         pveSource: 'in-game',
         pvpSeasonSource: 'patch-notes',
-        verified: '1.1-pve',
-        note: 'PvE Level condition from the 1.1-pve data (single mode-free condition). 1.1 unified quest data across modes (patch notes: all game modes), so the pre-1.1 figure (42) tarkov.dev serves in every mode is stale; the wiki lists no player level and cannot adjudicate. The base override corrects all modes.',
+        verified: '1.1-regular',
+        note: 'Both the 1.1-pve capture and the 2026-08-27 regular capture carry an explicit `Level >= 40` start condition, so regular is no longer inferred from patch notes. tarkov.dev serves the stale pre-1.1 figure (42) in every mode; the wiki lists no player level and cannot adjudicate. The base override corrects all modes. pvp-season still rests on the 1.1 all-modes patch-note statement - the seasonal capture does not contain this task.',
       },
     },
   },
@@ -525,38 +525,38 @@
     },
   },
 
-  // Power of Persuasion (divergent objective count/maps/weapon)
+  // Power of Persuasion (converged - regular capture matches PvE)
   '63a5cf262964a7488f5243ce': {
     name: 'Power of Persuasion',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       'objective[63a5cf262964a7488f5243d1].count': {
-        regular: 20,
+        regular: 5,
         pve: 5,
-        confidence: 'medium',
-        regularSource: 'wiki',
+        confidence: 'high',
+        regularSource: 'in-game',
         pveSource: 'in-game',
-        verified: '1.1-pve',
-        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
+        verified: '1.1-regular',
+        note: 'Recorded as divergent (regular 20) from the wiki while no regular capture existed. The 2026-08-27 regular client capture carries the same condition as PvE byte-for-byte: value 5, Kills target AnyPmc with the MP5 + suppressor mod, Location [Woods, Sandbox_high, Sandbox, Interchange, bigmap]. tarkov.dev already serves 5 in both modes, so no override is needed; the wiki page (20 kills on Streets) is a stale pre-1.1 description.',
       },
     },
   },
 
-  // Easy-Breezy (divergent objective count/maps)
+  // Easy-Breezy (converged - regular capture matches PvE)
   '669fa3a40c828825de06d6a1': {
     name: 'Easy-Breezy',
     proof: 'https://escapefromtarkov.fandom.com/wiki/Easy-Breezy',
-    status: 'divergent',
+    status: 'converged',
     fields: {
       'objective[66a0f5a7f9eae6761253114c].count': {
-        regular: 50,
+        regular: 30,
         pve: 30,
-        confidence: 'medium',
-        regularSource: 'wiki',
+        confidence: 'high',
+        regularSource: 'in-game',
         pveSource: 'in-game',
-        verified: '1.1-pve',
-        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
+        verified: '1.1-regular',
+        note: 'Recorded as divergent (regular 50) from the wiki while no regular capture existed. The 2026-08-27 regular client capture carries the same condition as PvE byte-for-byte: value 30, Location [RezervBase, Lighthouse], SR-2M plus suppressor and sight mods. tarkov.dev already serves 30 in both modes, so no override is needed; the wiki page (50 targets on Factory) is a stale pre-1.1 description.',
       },
     },
   },

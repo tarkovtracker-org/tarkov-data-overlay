@@ -58,25 +58,26 @@ describe('taskOverlayFiles', () => {
 });
 
 describe('loadSuppressedFields', () => {
+  // Vacate the Premises' objective count correction lives only in the REGULAR
+  // mode file, which is what makes it a valid fixture for mode scoping.
+  const REGULAR_ONLY_COUNT_KEY = '67d03be712fb5f8fd2096332:objectives.count';
+
   it('suppresses fields corrected in mode-specific files, not just the base file', () => {
-    // Power of Persuasion's objective count correction lives in the REGULAR
-    // mode file (the base file only carries a provenance note). Default scope
-    // reads both, so the key must be suppressed.
+    // Default scope reads base + every mode file, so the key must be suppressed.
     const { suppressed } = loadSuppressedFields();
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(true);
   });
 
   it('does not let a regular-mode correction suppress when scoped to pve', () => {
-    // The regression this PR guards against: a correction present only in the
-    // regular file must not mask a pve comparison. Power of Persuasion is
-    // corrected in regular, so under pve scope its key must be absent.
+    // The regression this guards against: a correction present only in the
+    // regular file must not mask a pve comparison.
     const { suppressed } = loadSuppressedFields('pve');
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(false);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(false);
   });
 
   it('still suppresses the regular correction under regular scope', () => {
     const { suppressed } = loadSuppressedFields('regular');
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(true);
   });
 });
 

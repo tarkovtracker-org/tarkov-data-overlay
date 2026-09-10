@@ -17,7 +17,29 @@
   // perks - there is no pvp-season/seasonal-perks endpoint) are NOT task
   // overrides; they live in dedicated additions such as
   // src/additions/seasonalPerks.json5.
+
+  // New Beginning - prestige track, and Seasonal has no prestige.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/361
+  //        https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
   //
-  // Empty for now: no proof-backed pvp-season task corrections recorded yet.
-  // An empty object is valid and is skipped by the build.
+  // This task is not an ordinary trader quest: it is the Quest start condition
+  // on prestige element 672df12f97f0469cea52f55e (Prestige 1), returned by
+  // `client/prestige/list`. Three sources agree prestige is regular-only:
+  //
+  //  1. Client captures - every full regular login requests and receives
+  //     `client/prestige/list` (5 of 5 sessions); no full pvp-season login does.
+  //     That comparison is same-build (EFT Client 1.1.0.1.46911) and even
+  //     same-session, since one session logged into both modes back to back.
+  //  2. Upstream - `json.tarkov.dev/pvp-season/tasks` serves `prestige: []`,
+  //     while `json.tarkov.dev/regular/tasks` serves all six prestige elements.
+  //     So tarkov.dev already agrees Seasonal has no prestige, yet still lists
+  //     the quest that exists only to gate it.
+  //  3. This repository already scopes every prestige correction to
+  //     src/overrides/modes/regular/prestige.json5 for the same reason.
+  //
+  // With no prestige track in Seasonal the gating quest cannot be obtained,
+  // which is what the reporter observed at level 49 with Kappa.
+  '6761f28a022f60bb320f3e95': {
+    disabled: true, // Was: active (pvp-season has no prestige track)
+  },
 }

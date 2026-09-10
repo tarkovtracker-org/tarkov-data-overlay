@@ -341,23 +341,30 @@
     experience: 10000, // Was: 18000 (all modes, stale pre-1.1 value)
   },
 
-  // Collector - minimum player level in 1.1.0.0
+  // Collector - minimum player level in 1.1.0.0 + prerequisite set
   // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
   //
-  // The 1.1-pve data carries a single mode-free Level condition (value 40);
-  // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
-  // lists no player level for Collector (only Scav karma + trader loyalties),
-  // so it cannot adjudicate. Previously shipped as a PvE-only correction.
-  // The same client capture also requires Chemical - Part 4, Shooter Born in
-  // Heaven, The Tarkov Shooter - Part 4, and Sew it Good - Part 2. The live API
-  // has Chemical - Part 3 and an extra Postman Pat - Part 2 edge in all modes.
+  // minPlayerLevel: both the 1.1-pve capture and the 2026-08-27 regular capture
+  // carry an explicit `Level >= 40` start condition, so 40 is now witnessed
+  // in-game in both modes; tarkov.dev serves the stale pre-1.1 figure (42) in
+  // every mode. The wiki lists no player level for Collector (only Scav karma +
+  // trader loyalties), so it cannot adjudicate that field.
+  //
+  // taskRequirements: the two captures agree on three edges (Shooter Born in
+  // Heaven, The Tarkov Shooter - Part 4, Sew it Good - Part 2) and both omit the
+  // Postman Pat - Part 2 edge the API adds, which is why that edge is dropped.
+  // They disagree on the Chemical edge: PvE has Chemical - Part 4 accepting
+  // complete-or-failed, regular has Chemical - Part 3 accepting complete. The
+  // wiki Requirements section lists Chemical - Part 3, agreeing with regular, so
+  // Chemical - Part 3 is the shared value here and the PvE variant is scoped to
+  // src/overrides/modes/pve/tasks.json5 rather than forced into every mode.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
     minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
     taskRequirements: [
       {
-        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
-        status: ['complete', 'failed'],
+        task: { id: '597a0e5786f77426d66c0636', name: 'Chemical - Part 3' },
+        status: ['complete'],
       },
       {
         task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
@@ -371,7 +378,7 @@
         task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
         status: ['complete'],
       },
-    ], // Was: Chemical - Part 3 + Postman Pat - Part 2 (and the three shared edges)
+    ], // Was: + Postman Pat - Part 2 (no Quest condition in either capture)
   },
 
   // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)

@@ -140,48 +140,8 @@
             }
           }
         },
-        "63a5cf262964a7488f5243ce": {
-          "objectives": {
-            "63a5cf262964a7488f5243d1": {
-              "description": "Eliminate PMC operatives while using an MP5SD on Streets of Tarkov, Ground Zero or Interchange",
-              "count": 20,
-              "usingWeapon": [
-                {
-                  "id": "59411abb86f77478f702b5d2",
-                  "name": "HK MP5 9x19 submachine gun (Navy 3 Round Burst) SD",
-                  "shortName": "MP5 SD"
-                }
-              ],
-              "maps": [
-                {
-                  "id": "5714dc692459777137212e12",
-                  "name": "Streets of Tarkov"
-                },
-                {
-                  "id": "653e6760052c01c1c805532f",
-                  "name": "Ground Zero"
-                },
-                {
-                  "id": "5714dbc024597771384a510d",
-                  "name": "Interchange"
-                }
-              ]
-            }
-          }
-        },
-        "669fa3a40c828825de06d6a1": {
-          "objectives": {
-            "66a0f5a7f9eae6761253114c": {
-              "description": "Eliminate any targets while using an SR-2M with suppressor and KP-SR2 sight on Factory",
-              "count": 50,
-              "maps": [
-                {
-                  "id": "55f2d3fd4bdc2d5f408b4567",
-                  "name": "Factory"
-                }
-              ]
-            }
-          }
+        "675c15fbf7da9792a4059871": {
+          "taskRequirements": []
         }
       }
     },
@@ -203,10 +163,60 @@
               "description": "Stash a Cultist knife at the river village marked circle on Woods"
             }
           }
+        },
+        "5c51aac186f77432ea65c552": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "597a0f5686f774273b74f676",
+                "name": "Chemical - Part 4"
+              },
+              "status": [
+                "complete",
+                "failed"
+              ]
+            },
+            {
+              "task": {
+                "id": "5c0bde0986f77479cf22c2f8",
+                "name": "Shooter Born in Heaven"
+              },
+              "status": [
+                "complete"
+              ]
+            },
+            {
+              "task": {
+                "id": "5bc480a686f7741af0342e29",
+                "name": "The Tarkov Shooter - Part 4"
+              },
+              "status": [
+                "complete"
+              ]
+            },
+            {
+              "task": {
+                "id": "5ae4497b86f7744cf402ed00",
+                "name": "Sew it Good - Part 2"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ]
+        },
+        "6761f28a022f60bb320f3e95": {
+          "disabled": true
         }
       }
     },
-    "pvp-season": {}
+    "pvp-season": {
+      "tasks": {
+        "6761f28a022f60bb320f3e95": {
+          "disabled": true
+        }
+      }
+    }
   },
   "tasks": {
     "59ca1a6286f774509a270942": {
@@ -455,12 +465,11 @@
       "taskRequirements": [
         {
           "task": {
-            "id": "597a0f5686f774273b74f676",
-            "name": "Chemical - Part 4"
+            "id": "597a0e5786f77426d66c0636",
+            "name": "Chemical - Part 3"
           },
           "status": [
-            "complete",
-            "failed"
+            "complete"
           ]
         },
         {
@@ -9116,7 +9125,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-10T10:52:41.280Z",
-    "sha256": "8c80102e9f0e1e731cc7030e4eddc3ac5ff43e6cc6b59f5e5feff8e05626c368"
+    "generated": "2026-09-10T15:04:19.510Z",
+    "sha256": "c8c3fbc3bed83523e2bbe7eab37f87efce487888397ba315b14253868e0a757d"
   }
 }
