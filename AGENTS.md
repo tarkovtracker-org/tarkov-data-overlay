@@ -91,18 +91,35 @@ resulting JSON5 corrections plus proof links.
   reference is mode-specific; the audit auto-detects its mode and refuses a
   mismatched `--mode` to avoid false positives.
 
-  Field authority differs. `GlobalVariableValue` is a numeric state gate, not
-  automatically a loyalty condition or a task prerequisite list. See
-  `docs/GLOBAL_VARIABLES.md` for counter evidence requirements.
-  - `taskRequirements`: preserve explicit `Quest` start conditions and their
-    accepted statuses. Wiki narrative `previous` is not proof of an unlock edge.
-    Distinguish a present template with no Quest condition from a missing task.
-  - `minPlayerLevel`: absence of an explicit `Level` condition does not authorize
-    zero. Check trader and predecessor-derived floors and wiki Requirements.
-    Template status values alone do not prove capture completeness.
-  - `traderRequirements`: use explicit loyalty conditions and corroborated wiki
-    requirements. `eft:audit` does not adjudicate these. A candidate cohort tier
-    must not automatically become an extra runtime gate.
+  Field authority differs, and getting this wrong has shipped regressions.
+  Patch 1.1.0.0 expresses most trader-loyalty gates as `GlobalVariableValue`
+  start conditions against opaque per-tier variables rather than as
+  `TraderLoyalty` conditions, and tarkov.dev serves those as
+  `otherRequirements` `globalVariable` entries. A `GlobalVariableValue` is a
+  numeric state gate, though — not automatically a loyalty condition or a task
+  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for counter evidence
+  requirements. That distinction drives all three rules below:
+  - `taskRequirements` — preserve explicit `Quest` start conditions and their
+    accepted statuses. The wiki's infobox `previous` field is narrative order,
+    **not** proof of an unlock edge. Distinguish a present template carrying no
+    `Quest` condition from a task missing from the capture entirely; only the
+    former licenses `taskRequirements: []`.
+  - `minPlayerLevel` — absence of an explicit `Level` condition does **not**
+    authorize `0`. Template status values alone do not prove capture
+    completeness, so treat the explicit-gate list as a floor on what exists
+    rather than a closed set. Upstream also _derives_ `minPlayerLevel` from the
+    loyalty tier's `requiredPlayerLevel` when a task is loyalty-gated, so a
+    missing `Level` condition means "no explicit gate", not "no gate", and
+    zeroing those would discard a correct derived floor. Check trader and
+    predecessor-derived floors plus the wiki Requirements section, and only
+    correct the field when upstream's value matches none of them.
+  - `traderRequirements` — **not** auditable against the reference, which is why
+    `eft:audit` deliberately does not cover it. Because the gate lives in a
+    global variable, the client shows no `TraderLoyalty` condition even for tasks
+    that do have a loyalty gate; treating absence as "no gate" would falsely
+    condemn 150+ correct overrides. Use explicit loyalty conditions and the
+    corroborated wiki Requirements section. A candidate cohort tier must not
+    automatically become an extra runtime gate.
 
 - `npm run eft:story` regenerates `src/additions/storyChapters.json5` from the
   reference. Story quests are entirely absent from tarkov.dev, so unlike the

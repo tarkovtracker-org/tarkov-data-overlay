@@ -67,9 +67,6 @@
   // it still shows the old figure it is treated as stale because the 1.1 patch
   // notes apply the rework to all game modes and the 1.1-pve data carries
   // single mode-free values (see the SOURCES OF TRUTH header).
-  //
-  // Perfect Mediator - REMOVED on main: superseded by the Season 1
-  // trader-loyalty rework; see git history (commit 045c943).
   // ---------------------------------------------------------------------------
 
   // Dandies (converged, base override)

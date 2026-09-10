@@ -91,55 +91,9 @@
     ],
   },
 
-  // ---------------------------------------------------------------------------
-  // Provenance notes for entries that were deliberately dropped or moved
-  // (recoverable from git history):
-  //
-  // Pathfinder - REMOVED: an objective description was mis-attributed to a
-  // nonexistent quest ("Sales Night"); it rewrote a correct type=visit
-  // objective ("Visit the Railway Exfil exit on Interchange", confirmed by both
-  // captures + tarkov.dev) into fabricated text.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
-  //
-  // Power of Persuasion (aka "Test Drive - Part 2") - MOVED to
-  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 20 PMCs on Streets/GZ/Interchange; 1.1-pve data = 5 on
-  // Woods/GZ/Interchange/Customs.
-  //
-  // Easy-Breezy (aka "Test Drive - Part 5") - MOVED to
-  // src/overrides/modes/regular/tasks.json5: a mode divergence - wiki
-  // (regular) = 50 targets on Factory; 1.1-pve data = 30 on
-  // Reserve/Lighthouse.
-  //
-  // Small Business - Part 3 - REMOVED: the two Woods objective descriptions
-  // were swapped, contradicting tarkov.dev, BOTH game captures, and the wiki
-  // guide. Re-add only with a fresh in-game marker screenshot.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Small_Business_-_Part_3
-  //
-  // Setup - REMOVED: the API serves the same 9 hat/vest combinations
-  // (verified: normalized item-id sets are identical; only ordering differed).
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Setup
-  //
-  // Establish Contact, Collector, Is This a Reference? - REMOVED (issue #274):
-  // these were authored as "Fence LL1" but are actually Fence *reputation*
-  // (scav karma) gates. json.tarkov.dev now serves the correct discriminated
-  // requirement (reputation >= 4 / >= 3 / >= 1) and the wiki agrees, so the
-  // ambiguous LL1 entry would both mislabel the semantic and - under
-  // replace-array semantics - strip the upstream requirement. Proof:
-  //   https://escapefromtarkov.fandom.com/wiki/Establish_Contact (scav karma +4)
-  //   https://escapefromtarkov.fandom.com/wiki/Collector (scav karma +3 + 7x LL4)
-  //   https://escapefromtarkov.fandom.com/wiki/Is_This_a_Reference%3F (scav karma +1)
-  //
-  // minPlayerLevel overrides (A Fuel Matter, Inventory Check, Psycho Sniper,
-  // Bullshit, Chumming, ...) - REMOVED: the 1.1-pve data carries no Level
-  // conditions for these quests.
-  //
-  // The original Season 1 LL1-LL4 batch was removed after its requirement
-  // claims proved unreliable. The active traderRequirements later in this file
-  // are a separately re-audited set: entries already supplied upstream were
-  // retired, while the remaining corrections are verified against the current
-  // reference/API comparison and kept only where still load-bearing.
-  // ---------------------------------------------------------------------------
+  // Corrections that were tried and found wrong are recorded in
+  // docs/CONTRIBUTING.md ("Corrections Deliberately Not Made") so the bar for
+  // re-adding one stays visible. Dropped entries are recoverable from git history.
 
   // District Patrol - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/District_Patrol
@@ -180,12 +134,6 @@
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
   // Verified: the 1.1-pve data; wiki agrees.
-  //
-  // The optional:true patch for duplicate Ground Zero objective
-  // 65e09b343458a36a766837c7 was REMOVED: upstream deleted the hand-added
-  // tarkov-data-manager objective, so the API now serves the wiki's eight
-  // objectives and the patch (plus its suppression and de locale override)
-  // has nothing left to pin.
   '60e71b62a0beca400d69efc4': {
     traderRequirements: [
       {
@@ -530,9 +478,6 @@
   //
   // The northern-territory fuel-tank objective ships with empty zones
   // upstream; this patch supplies its zone (in-game verified, issue #246).
-  // tarkov.dev dropped the third/fourth tank objectives entirely in the
-  // 1.1.0.0 sync (matching the 1.1-pve data); the former fourth-tank zone patch
-  // (6926fcc872a6499d1fa29327) was removed with them.
   '5ae448f286f77448d73c0131': {
     traderRequirements: [
       {
@@ -643,26 +588,6 @@
       },
     },
   },
-
-  // New Beginning (Prestige 1)
-  //
-  // REMOVED: this override was a no-op targeting the wrong task's
-  // objective. Objective 6848100b00afffa81f09e36b does not exist on Prestige 1
-  // (6761f28a022f60bb320f3e95) - it belongs to Prestige 3
-  // (6848100b00afffa81f09e365), where upstream reads exactly the "Was:" text
-  // the comment recorded ("Use the transit from The Lab to Streets of Tarkov"),
-  // confirming the ID was copied from Prestige 3.
-  //
-  // The override's intent is already satisfied: Prestige 1's own equivalent
-  // objective (6761f9d718fa62aac3264ff2) already reads "Survive and extract
-  // from The Lab" upstream.
-  //
-  // It was NOT retargeted to Prestige 3 because Prestige 3's wording is correct.
-  // Upstream shows a deliberate escalating chain: P1/P2 extract from The Lab;
-  // P3 transits Lab -> Streets then extracts from Streets; P4 adds Streets ->
-  // Interchange then extracts from Interchange.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
-  // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
 
   // New Beginning (Prestige 3) - Reputation reward and objective exit status incorrect
   // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
@@ -1057,23 +982,6 @@
   '5d25e2a986f77409dd5cdf2a': {
     disabled: true,
   },
-  //
-  // S1 (patch 1.1.0.0) trader-loyalty requirements + renames, ported from the
-  // s1 branch and re-expressed in the refactor branch's discriminated syntax.
-  //
-  // 2026-08-15: tarkov.dev ingested most of the S1 batch upstream (renames,
-  // trader LL requirements, XP reworks), so the 239 absorbed items were removed
-  // from this file (85 whole entries, 154 individual fields). What remains
-  // below still diverges from the live API and is load-bearing: 189
-  // still-needed corrections, 0 stale (`npm run check-overrides -- --fail-on-stale`).
-  //
-  // Power of Persuasion / Easy-Breezy / Setup keep only their shared name
-  // and/or traderRequirements here; regular-mode objective variants live in
-  // modes/regular/tasks.json5. Pathfinder's name is now supplied upstream,
-  // while its PvE-only objective rewrite lives in modes/pve/tasks.json5.
-  //
-  // Entries below are ACTIVE corrections; `npm run check-overrides` verifies
-  // them against the live API.
 
   // A Helping Hand - minimum player level to start
   // Proof: https://escapefromtarkov.fandom.com/wiki/A_Helping_Hand
@@ -3176,13 +3084,6 @@
     ],
   },
 
-  // The Tarkov Shooter - Part 5 - old reward correction removed (issue #356)
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  // The 1.1.0.0 client reference and regular, pve, and pvp-season API payloads
-  // agree on 28000 experience, 275000 roubles, two copies of the same reward
-  // item, and its Jaeger LL3 offer. The previous wiki-based patch supplied a
-  // different reward block, so it must not override the matching upstream data.
-
   // ---------------------------------------------------------------------------
   // TASK AVAILABILITY CORRECTIONS
   //
@@ -3190,21 +3091,6 @@
   // the task unlock graph from tarkov.dev. The API omits or misstates some of
   // the links even though the corresponding quest pages document them.
   // ---------------------------------------------------------------------------
-
-  // NOTE (issue #328, The Survivalist Path - Unprotected but Dangerous,
-  // 5d25aed386f77442734d25d2): no override belongs here.
-  //
-  // A previous revision repointed this task's prerequisite to Acquaintance and
-  // restricted its kill objective to Woods, both taken from the wiki. The client
-  // disagrees on both counts: its only AvailableForStart condition is a Quest
-  // condition on Zhivchik (which upstream already serves), and the objective's
-  // kill counter carries only Kills + Equipment conditions - there is no
-  // Location condition, so the objective is not map-restricted and upstream's
-  // empty `maps` is correct.
-  //
-  // Issue #328 reports a completed task not registering from a Seasonal profile.
-  // That symptom is not explained by the unlock graph, which matches the client
-  // here, so it needs a separate root cause.
 
   // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
   // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
@@ -3267,32 +3153,6 @@
       },
     ], // Was: Building Foundations
   },
-
-  // NOTE (Survivalist / Jaeger chain): no overrides belong here.
-  //
-  // The wiki infobox `previous` field describes narrative progression, not the
-  // client's `AvailableForStart` conditions, and for this chain the two
-  // disagree. Patch 1.1.0.0 (S1) replaced most quest-chain prerequisites with
-  // TraderLoyalty and GlobalVariableValue gates, and tarkov.dev already serves
-  // those (`traderRequirements` / `otherRequirements`). The in-game order is:
-  //
-  //   Thrifty (Jaeger LL2, no quest prerequisite)
-  //     -> Zhivchik -> Unprotected but Dangerous -> Wounded Beast
-  //
-  // Acquaintance has no start conditions at all, and The Tarkov Shooter - Part 1
-  // is gated by a loyalty variable rather than by Acquaintance. Upstream matches
-  // the client on every one of these, so overriding `taskRequirements` here would
-  // introduce edges the client does not have.
-  //
-  // Introduction (5d2495a886f77425cd51e403) has no override either, and note that
-  // its wiki Requirements section still reads "Must be level 2 to start this
-  // quest": that is pre-S1: the client carries no `Level` condition for it, its
-  // gate is a GlobalVariableValue that upstream serves as an `otherRequirements`
-  // dialogue entry, and upstream's minPlayerLevel is already 0. Do not re-add a
-  // level gate from that wiki line.
-  //
-  // See docs/CONTRIBUTING.md for why `previous` is not proof for
-  // `taskRequirements`.
 
   // ---------------------------------------------------------------------------
   // FACTION-LOCKED QUESTS (issues #288, #291)
