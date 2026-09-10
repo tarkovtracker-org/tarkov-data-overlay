@@ -74,6 +74,24 @@ describe('overlay.schema.json', () => {
     expect(rootSchema.required).toContain('modes');
   });
 
+  it('requires both references on a story-objective start gate', () => {
+    const { schemasDir } = getProjectPaths();
+    const ajv = new Ajv({ strict: false, $data: true });
+    ajv.addSchema(loadJsonFile(join(schemasDir, 'trader-requirement.schema.json')));
+    const validate = ajv.compile(loadJsonFile(join(schemasDir, 'task-override.schema.json')));
+    const requirement = {
+      id: 'overlay.test.boreas',
+      type: 'storyObjective',
+      storyChapter: { id: 'boreas', name: 'Boreas' },
+      objective: { id: 'objective', name: 'Hand over drives' },
+    };
+    expect(validate({ test: { otherRequirements: [requirement] } })).toBe(true);
+    for (const field of ['storyChapter', 'objective'] as const) {
+      const malformed = { ...requirement, [field]: undefined };
+      expect(validate({ test: { otherRequirements: [malformed] } })).toBe(false);
+    }
+  });
+
   it('validates generated overlay output', () => {
     const { schemasDir } = getProjectPaths();
     const ajv = new Ajv({

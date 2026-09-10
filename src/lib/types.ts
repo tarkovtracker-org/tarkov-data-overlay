@@ -183,6 +183,14 @@ export interface TaskDialogueRequirement {
   traders: Array<{ id: string; name: string }>;
 }
 
+/** An overlay start gate tied to a specific story objective, not chapter completion. */
+export interface TaskStoryObjectiveRequirement {
+  id: string;
+  type: 'storyObjective';
+  storyChapter: { id: string; name: string };
+  objective: { id: string; name: string };
+}
+
 /** A task's persistent numeric global-variable requirement. */
 export interface TaskGlobalVariableRequirement {
   id: string;
@@ -204,7 +212,10 @@ export interface TaskUnknownOtherRequirement {
 }
 
 export type TaskOtherRequirement =
-  TaskDialogueRequirement | TaskGlobalVariableRequirement | TaskUnknownOtherRequirement;
+  | TaskDialogueRequirement
+  | TaskGlobalVariableRequirement
+  | TaskStoryObjectiveRequirement
+  | TaskUnknownOtherRequirement;
 
 /**
  * Comparison methods json.tarkov.dev serves for trader requirements. Loyalty
