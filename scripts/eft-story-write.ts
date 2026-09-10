@@ -35,11 +35,11 @@ const HEADER =
   '  // is real (the chapter quest references its gate sub-quest) but this capture holds\n' +
   '  // no objective-level evidence for it.\n' +
   '  //\n' +
-  '  // `mutuallyExclusiveWith` is derived from the capture: a sub-quest that fails when\n' +
-  '  // another completes, or that only becomes startable once another failed, cannot be\n' +
-  '  // completed alongside it. Cascade failure (failing because a predecessor failed) is\n' +
-  '  // not exclusivity and is excluded, and exclusivity against a quest outside the\n' +
-  '  // chapter is dropped because this field holds objective ids.\n' +
+  '  // `mutuallyExclusiveQuestPairs` contains unordered pairs of resolved chapter\n' +
+  '  // sub-quest ids that cannot both be completed, derived from fail-on-start/complete\n' +
+  '  // and fail-only start conditions. Each pair is emitted once in id order. Partial\n' +
+  '  // progress on both quests is allowed: these are NOT objective exclusions. Cascade\n' +
+  '  // failure and counterparts outside the resolved chapter sub-quests are excluded.\n' +
   '  //\n' +
   '  // Regenerate with `npm run eft:story`; the exact source capture is pinned by\n' +
   '  // scripts/story-reference.lock.json.\n' +

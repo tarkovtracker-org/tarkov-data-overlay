@@ -219,50 +219,48 @@ describe('story chapters (EFT-sourced)', () => {
     expect(resolved).toBeLessThanOrEqual(lock.quests);
   });
 
-  it('keeps the exclusive branch pairs the capture proves, symmetrically', () => {
-    // The former curated data anchored exclusivity on fabricated ids; it is now
-    // derived from the capture's own conditions (a sub-quest that fails when
-    // another completes, or that only starts once another failed). Losing these
-    // again would silently drop the chapter's decision points.
-    const byId = new Map<string, { chapter: string; sourceQuestId?: string }>();
-    for (const [cid, ch] of Object.entries(chapters)) {
-      for (const objective of ch.objectives ?? []) {
-        byId.set(objective.id, { chapter: cid, sourceQuestId: objective.sourceQuestId });
+  it('keeps canonical chapter-local quest completion exclusions', () => {
+    let count = 0;
+    for (const [cid, chapter] of Object.entries(chapters)) {
+      const sources = new Set(chapter.objectives?.map((objective) => objective.sourceQuestId));
+      const pairs = chapter.mutuallyExclusiveQuestPairs ?? [];
+      const seen = new Set<string>();
+      for (const [left, right] of pairs) {
+        expect(left, cid).toMatch(/^[0-9a-f]{24}$/);
+        expect(right, cid).toMatch(/^[0-9a-f]{24}$/);
+        expect(left < right, `${cid}: pair must be sorted and distinct`).toBe(true);
+        expect(sources, cid).toContain(left);
+        expect(sources, cid).toContain(right);
+        expect(seen.has(`${left}:${right}`), `${cid}: duplicate pair`).toBe(false);
+        seen.add(`${left}:${right}`);
+        count += 1;
       }
     }
+    expect(count).toBeGreaterThan(0);
+    expect(chapters['the-ticket'].mutuallyExclusiveQuestPairs).toContainEqual([
+      '67bc9d70adb794ecb40f5755',
+      '67bc9e3e7801bf5c41017b82',
+    ]);
+  });
 
-    let pairs = 0;
-    for (const [cid, ch] of Object.entries(chapters)) {
-      for (const objective of ch.objectives ?? []) {
-        for (const other of objective.mutuallyExclusiveWith ?? []) {
-          pairs += 1;
-          const counterpart = byId.get(other);
-          // Must resolve to a real objective, in the same chapter, from a
-          // different sub-quest - an objective cannot exclude its own sibling.
-          expect(counterpart, `${cid}/${objective.id} excludes unknown ${other}`).toBeDefined();
-          expect(counterpart!.chapter).toBe(cid);
-          expect(counterpart!.sourceQuestId).not.toBe(objective.sourceQuestId);
-          const back = (ch.objectives ?? []).find((candidate) => candidate.id === other);
-          expect(
-            back?.mutuallyExclusiveWith ?? [],
-            `${other} does not exclude ${objective.id} back`
-          ).toContain(objective.id);
-        }
+  it('allows retrieving the armored case before choosing to keep it', () => {
+    const chapter = chapters['falling-skies'];
+    const retrieve = chapter.objectives?.find((o) => o.id === '679cdee4ce3a208fee0ad65a');
+    const keep = chapter.objectives?.find((o) => o.id === '690177dcaaed5ef80cdcd1ef');
+    expect(retrieve?.description).toBe('Retrieve the armored case');
+    expect(keep?.description).toBe('Keep the armored case for yourself');
+    expect(chapter.mutuallyExclusiveQuestPairs).toContainEqual([
+      '679cdee4ce3a208fee0ad657',
+      '68cd7d6d9510d63fdb05a76a',
+    ]);
+    expect(retrieve?.mutuallyExclusiveWith ?? []).not.toContain(keep!.id);
+    expect(keep?.mutuallyExclusiveWith ?? []).not.toContain(retrieve!.id);
+    // No quest-completion exclusion is promoted into an objective constraint.
+    for (const chapter of Object.values(chapters)) {
+      for (const objective of chapter.objectives ?? []) {
+        expect(objective.mutuallyExclusiveWith).toBeUndefined();
       }
     }
-    expect(pairs).toBeGreaterThan(0);
-
-    // The Falling Skies armored-case decision and The Ticket's Kerman/Mechanic
-    // split are the concrete pairs; assert one of each so a regression in either
-    // chapter fails.
-    const keep = (chapters['falling-skies'].objectives ?? []).find(
-      (o) => o.description === 'Keep the armored case for yourself'
-    );
-    expect(keep?.mutuallyExclusiveWith?.length).toBeGreaterThan(0);
-    const device = (chapters['the-ticket'].objectives ?? []).find(
-      (o) => o.description === 'Obtain an RFID card encryption device'
-    );
-    expect(device?.mutuallyExclusiveWith?.length).toBeGreaterThan(0);
   });
 
   it('never points a chapter unlock at a task the overlay disables', () => {

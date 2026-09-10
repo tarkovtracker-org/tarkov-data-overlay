@@ -64,6 +64,18 @@
         },
         "additionalProperties": false
       },
+      "mutuallyExclusiveQuestPairs": {
+        "description": "Unordered pairs of resolved chapter sub-quest IDs that cannot both be completed. Each pair is emitted once in ID order. Partial objective progress on both quests is allowed; do not apply these as objective exclusions.",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[0-9a-f]{24}$" }
+        }
+      },
       "endings": {
         "description": "Endings this chapter branches into, restated from the client's ending_list so the whole branch set is visible without scanning objectives. Present only on a chapter whose quest references ending gate sub-quests.",
         "type": "array",

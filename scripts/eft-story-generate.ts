@@ -77,8 +77,9 @@ const CHAPTER_QUEST_ID: Record<string, string> = {
  * - `referenceCoverage` reports referenced vs resolved sub-quests, because the
  *   client only returns a story sub-quest template once the player has reached
  *   it (The Ticket resolves 35 of its 88 sub-quest references).
- * - `mutuallyExclusiveWith` is re-derived from the capture's own condition
- *   graph (see `exclusiveCounterparts`), not from curated slugs.
+ * - `mutuallyExclusiveQuestPairs` is derived from the capture's own condition
+ *   graph (see `exclusiveCounterparts`), not from curated slugs. These exclude
+ *   quest completions, not partial progress on individual objectives.
  */
 
 /** Quest status codes used by the client's conditions (see eft-normalize.ts). */
@@ -116,9 +117,9 @@ export function exclusiveCounterparts(quest: JsonRecord | undefined): string[] {
   }
   for (const condition of conditions.AvailableForStart ?? []) {
     const status: number[] = Array.isArray(condition?.status) ? condition.status : [];
-    // "startable once it failed" only excludes the counterpart when success is
-    // not also accepted.
-    if (status.includes(STATUS_COMPLETE)) continue;
+    // Failure must be the only accepted state. Accepting started (or any other
+    // state) also permits progress without the counterpart having failed.
+    if (status.length === 0 || !status.every((value) => value === STATUS_FAIL)) continue;
     add(condition, [STATUS_FAIL]);
   }
   return out;
@@ -140,11 +141,11 @@ interface ChapterExpansion {
   /**
    * Sub-quest pairs the capture proves cannot both be completed, as sorted
    * `[a, b]` tuples. Only pairs where both sides are resolved sub-quests of this
-   * chapter are kept: the field they feed (`mutuallyExclusiveWith`) holds
-   * objective ids, and a counterpart outside the chapter contributes none. The
+   * chapter are kept, bounding the model to resolved chapter sub-quests. The
    * capture also states exclusivity against ordinary tasks (The Ticket's
-   * "Choose Your Friends Wisely", Boreas' "Hangover"), which the objective-level
-   * field cannot express and which is therefore dropped rather than approximated.
+   * "Choose Your Friends Wisely", Boreas' "Hangover"), which remains outside this
+   * chapter-local model. Pairs exclude completed quests, not their individual
+   * objectives: partial progress can exist on both sides.
    */
   exclusivePairs: Array<[string, string]>;
 }
@@ -593,22 +594,6 @@ function main(): void {
 
     let matched = 0;
     let optionalCount = 0;
-    // Objective ids per sub-quest, so a proven sub-quest pair can be expressed
-    // as the objective-to-objective exclusivity consumers actually store.
-    const objectiveIdsByQuest = new Map<string, string[]>();
-    for (const objective of expansion.objectives) {
-      const ids = objectiveIdsByQuest.get(objective.sourceQuestId) ?? [];
-      ids.push(objective.id);
-      objectiveIdsByQuest.set(objective.sourceQuestId, ids);
-    }
-    // Exclusivity is symmetric; the capture states only one direction, so both
-    // are emitted.
-    const exclusiveByQuest = new Map<string, string[]>();
-    for (const [left, right] of expansion.exclusivePairs) {
-      exclusiveByQuest.set(left, [...(exclusiveByQuest.get(left) ?? []), right]);
-      exclusiveByQuest.set(right, [...(exclusiveByQuest.get(right) ?? []), left]);
-    }
-
     const objectives = expansion.objectives.map((objective) => {
       const { optional, ratio } = matchOptional(objective.text, wikiObjectives);
       if (ratio >= MATCH_THRESHOLD) matched += 1;
@@ -619,10 +604,6 @@ function main(): void {
         description: objective.text,
         sourceQuestId: objective.sourceQuestId,
       };
-      const exclusive = (exclusiveByQuest.get(objective.sourceQuestId) ?? [])
-        .flatMap((questId) => objectiveIdsByQuest.get(questId) ?? [])
-        .sort(byCodePoint);
-      if (exclusive.length > 0) emitted.mutuallyExclusiveWith = exclusive;
       if (objective.endingId) emitted.endingId = objective.endingId;
       return emitted;
     });
@@ -657,6 +638,9 @@ function main(): void {
     chapter.description = meta.description ?? null;
     chapter.notes = meta.notes ?? null;
     chapter.objectives = objectives;
+    if (expansion.exclusivePairs.length > 0) {
+      chapter.mutuallyExclusiveQuestPairs = expansion.exclusivePairs;
+    }
 
     // A chapter that references ending gate sub-quests owns those endings, so
     // restate the whole branch set from client/ending_list with the real ids -

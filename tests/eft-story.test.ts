@@ -216,8 +216,8 @@ describe('expandChapterObjectives', () => {
         AvailableForStart: [
           { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: [5] },
         ],
-        // The counterpart is not a sub-quest of this chapter, so it cannot be
-        // expressed with objective ids and must be dropped.
+        // The counterpart is not a resolved sub-quest of this chapter, so it
+        // is outside the chapter-local completion-pair model.
         Fail: [{ conditionType: 'Quest', target: '67460662d0fbbc74ca0f7229', status: [4] }],
       },
     },
@@ -304,6 +304,27 @@ describe('exclusiveCounterparts', () => {
       })
     ).toEqual(['cccccccccccccccccccccccc']);
   });
+
+  it.each([
+    { status: [2, 5] },
+    { status: [1, 5] },
+    { status: [4, 5] },
+    { status: [] },
+    { status: [2] },
+  ])(
+    'does not infer exclusivity when failure is not the only accepted state: $status',
+    ({ status }) => {
+      expect(
+        exclusiveCounterparts({
+          conditions: {
+            AvailableForStart: [
+              { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status },
+            ],
+          },
+        })
+      ).toEqual([]);
+    }
+  );
 
   it('does not treat cascade failure or ordinary prerequisites as exclusivity', () => {
     // Fails because its predecessor failed - the chain dies together, it is not

@@ -533,6 +533,12 @@ export interface StoryChapter {
    * id. Present only on a chapter whose quest references ending gate sub-quests.
    */
   endings?: StoryChapterEnding[];
+  /**
+   * Unordered pairs of resolved sub-quest IDs that cannot both be completed.
+   * Each pair is emitted once, sorted by ID. Partial objective progress on both
+   * quests is allowed; these must not be applied as objective exclusions.
+   */
+  mutuallyExclusiveQuestPairs?: Array<[string, string]>;
   rewards?: StoryRewards | null;
 }
 

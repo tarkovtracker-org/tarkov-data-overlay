@@ -221,7 +221,7 @@
       "summary": "Continue from Falling Skies after obtaining the armored case and start the Mr. Kerman terminal chain."
     },
     "description": "Branches into the storyline's four endings, listed in `endings` with the real ids the client serves in ending_list. The wiki describes the decision points as helping or betraying Mr. Kerman, paying Prapor, or seeking the Lightkeeper; each ending is gated by its own sub-quest.",
-    "notes": "Decision points are mutually exclusive; the pairs the reference capture proves are emitted per objective as `mutuallyExclusiveWith`, and exclusivity against quests outside the chapter is not expressible there. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).",
+    "notes": "The reference capture's mutually exclusive sub-quest completions are emitted at chapter level as `mutuallyExclusiveQuestPairs`. Partial objective progress on both sides is allowed. Only pairs of resolved sub-quests within this chapter are included. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).",
     "rewards": null,
     "mapUnlocks": [
       {

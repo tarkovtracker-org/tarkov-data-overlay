@@ -5771,77 +5771,43 @@
           "id": "68b83ecbe7204965a7265865",
           "type": "main",
           "description": "Learn details about the SUV from Therapist",
-          "sourceQuestId": "678f6bd1e8d46e40ff021605",
-          "mutuallyExclusiveWith": [
-            "678fa1b62f3482f90842ff2f",
-            "68b5758c09b1506a5cd4e3a3"
-          ]
+          "sourceQuestId": "678f6bd1e8d46e40ff021605"
         },
         {
           "id": "68c01c6c954650cf2b48bbea",
           "type": "main",
           "description": "Ask the traders about the fallen plane",
-          "sourceQuestId": "678f6bd1e8d46e40ff021605",
-          "mutuallyExclusiveWith": [
-            "678fa1b62f3482f90842ff2f",
-            "68b5758c09b1506a5cd4e3a3"
-          ]
+          "sourceQuestId": "678f6bd1e8d46e40ff021605"
         },
         {
           "id": "678f6eae2ed26c2110cb9909",
           "type": "main",
           "description": "Retrieve the flash drive from one of the G-Wagon SUVs",
-          "sourceQuestId": "678f6bd1e8d46e40ff021605",
-          "mutuallyExclusiveWith": [
-            "678fa1b62f3482f90842ff2f",
-            "68b5758c09b1506a5cd4e3a3"
-          ]
+          "sourceQuestId": "678f6bd1e8d46e40ff021605"
         },
         {
           "id": "678f6edd6b76b693d0f62654",
           "type": "main",
           "description": "Locate the right G-Wagon SUV",
-          "sourceQuestId": "678f6bd1e8d46e40ff021605",
-          "mutuallyExclusiveWith": [
-            "678fa1b62f3482f90842ff2f",
-            "68b5758c09b1506a5cd4e3a3"
-          ]
+          "sourceQuestId": "678f6bd1e8d46e40ff021605"
         },
         {
           "id": "678f6ec00199b227bbf61473",
           "type": "main",
           "description": "Hand over the flash drive to Prapor",
-          "sourceQuestId": "678f6bd1e8d46e40ff021605",
-          "mutuallyExclusiveWith": [
-            "678fa1b62f3482f90842ff2f",
-            "68b5758c09b1506a5cd4e3a3"
-          ]
+          "sourceQuestId": "678f6bd1e8d46e40ff021605"
         },
         {
           "id": "68b5758c09b1506a5cd4e3a3",
           "type": "main",
           "description": "Collect the required amount in USD",
-          "sourceQuestId": "678fa1463977eb69290a3a06",
-          "mutuallyExclusiveWith": [
-            "678f6eae2ed26c2110cb9909",
-            "678f6ec00199b227bbf61473",
-            "678f6edd6b76b693d0f62654",
-            "68b83ecbe7204965a7265865",
-            "68c01c6c954650cf2b48bbea"
-          ]
+          "sourceQuestId": "678fa1463977eb69290a3a06"
         },
         {
           "id": "678fa1b62f3482f90842ff2f",
           "type": "main",
           "description": "Hand over the cash to Therapist",
-          "sourceQuestId": "678fa1463977eb69290a3a06",
-          "mutuallyExclusiveWith": [
-            "678f6eae2ed26c2110cb9909",
-            "678f6ec00199b227bbf61473",
-            "678f6edd6b76b693d0f62654",
-            "68b83ecbe7204965a7265865",
-            "68c01c6c954650cf2b48bbea"
-          ]
+          "sourceQuestId": "678fa1463977eb69290a3a06"
         },
         {
           "id": "68f3e4d558b556716299f8de",
@@ -5955,40 +5921,36 @@
           "id": "679cdee4ce3a208fee0ad65a",
           "type": "main",
           "description": "Retrieve the armored case",
-          "sourceQuestId": "679cdee4ce3a208fee0ad657",
-          "mutuallyExclusiveWith": [
-            "690177dcaaed5ef80cdcd1ef"
-          ]
+          "sourceQuestId": "679cdee4ce3a208fee0ad657"
         },
         {
           "id": "679cdee4ce3a208fee0ad65b",
           "type": "main",
           "description": "Hand over the armored case to Prapor",
-          "sourceQuestId": "679cdee4ce3a208fee0ad657",
-          "mutuallyExclusiveWith": [
-            "690177dcaaed5ef80cdcd1ef"
-          ]
+          "sourceQuestId": "679cdee4ce3a208fee0ad657"
         },
         {
           "id": "68fbbc8ea9ece72415bf5223",
           "type": "optional",
           "description": "Find any additional clues",
-          "sourceQuestId": "679cdee4ce3a208fee0ad657",
-          "mutuallyExclusiveWith": [
-            "690177dcaaed5ef80cdcd1ef"
-          ]
+          "sourceQuestId": "679cdee4ce3a208fee0ad657"
         },
         {
           "id": "690177dcaaed5ef80cdcd1ef",
           "type": "main",
           "description": "Keep the armored case for yourself",
-          "sourceQuestId": "68cd7d6d9510d63fdb05a76a",
-          "mutuallyExclusiveWith": [
-            "679cdee4ce3a208fee0ad65a",
-            "679cdee4ce3a208fee0ad65b",
-            "68fbbc8ea9ece72415bf5223"
-          ]
+          "sourceQuestId": "68cd7d6d9510d63fdb05a76a"
         }
+      ],
+      "mutuallyExclusiveQuestPairs": [
+        [
+          "678f6bd1e8d46e40ff021605",
+          "678fa1463977eb69290a3a06"
+        ],
+        [
+          "679cdee4ce3a208fee0ad657",
+          "68cd7d6d9510d63fdb05a76a"
+        ]
       ],
       "rewards": null,
       "mapUnlocks": [],
@@ -6090,19 +6052,13 @@
           "id": "6915bb52dff93d50490eaf58",
           "type": "main",
           "description": "Learn more about the Bogatyr squad's activities",
-          "sourceQuestId": "6915bb52dff93d50490eaf54",
-          "mutuallyExclusiveWith": [
-            "68facc4bd5527594cfda2849"
-          ]
+          "sourceQuestId": "6915bb52dff93d50490eaf54"
         },
         {
           "id": "6915bb52dff93d50490eaf5b",
           "type": "main",
           "description": "Learn more about the Bogatyr squad's members",
-          "sourceQuestId": "6915bb52dff93d50490eaf54",
-          "mutuallyExclusiveWith": [
-            "68facc4bd5527594cfda2849"
-          ]
+          "sourceQuestId": "6915bb52dff93d50490eaf54"
         },
         {
           "id": "68cd71414bff4d23910fa1f7",
@@ -6180,28 +6136,19 @@
           "id": "68f9ef8a1dbc7a9f81001a92",
           "type": "main",
           "description": "Learn more about Taran",
-          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87",
-          "mutuallyExclusiveWith": [
-            "68facc4bd5527594cfda2849"
-          ]
+          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87"
         },
         {
           "id": "68f9ef8a1dbc7a9f81001a94",
           "type": "main",
           "description": "Learn more about Strelets",
-          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87",
-          "mutuallyExclusiveWith": [
-            "68facc4bd5527594cfda2849"
-          ]
+          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87"
         },
         {
           "id": "68f9ef8a1dbc7a9f81001a98",
           "type": "main",
           "description": "Find Voevoda's personal belongings",
-          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87",
-          "mutuallyExclusiveWith": [
-            "68facc4bd5527594cfda2849"
-          ]
+          "sourceQuestId": "68f9ef8a1dbc7a9f81001a87"
         },
         {
           "id": "68d52f63e94e3689328fc3b0",
@@ -6381,15 +6328,18 @@
           "id": "68facc4bd5527594cfda2849",
           "type": "main",
           "description": "Read the agent network deployment report",
-          "sourceQuestId": "68caba4119f13a8d1b0ad3ac",
-          "mutuallyExclusiveWith": [
-            "68f9ef8a1dbc7a9f81001a92",
-            "68f9ef8a1dbc7a9f81001a94",
-            "68f9ef8a1dbc7a9f81001a98",
-            "6915bb52dff93d50490eaf58",
-            "6915bb52dff93d50490eaf5b"
-          ]
+          "sourceQuestId": "68caba4119f13a8d1b0ad3ac"
         }
+      ],
+      "mutuallyExclusiveQuestPairs": [
+        [
+          "68caba4119f13a8d1b0ad3ac",
+          "68f9ef8a1dbc7a9f81001a87"
+        ],
+        [
+          "68caba4119f13a8d1b0ad3ac",
+          "6915bb52dff93d50490eaf54"
+        ]
       ],
       "rewards": null,
       "mapUnlocks": [],
@@ -6685,19 +6635,13 @@
           "id": "67dc00dfbb13159031c752a6",
           "type": "main",
           "description": "Hand over the fragment of Item 1156 to Mechanic",
-          "sourceQuestId": "67b892b832f50fb7ec084426",
-          "mutuallyExclusiveWith": [
-            "690014682dda730f8911daf0"
-          ]
+          "sourceQuestId": "67b892b832f50fb7ec084426"
         },
         {
           "id": "690014682dda730f8911daf0",
           "type": "main",
           "description": "Keep the fragment of Item 1156 for yourself",
-          "sourceQuestId": "67b892ba0e9aad30720bfc56",
-          "mutuallyExclusiveWith": [
-            "67dc00dfbb13159031c752a6"
-          ]
+          "sourceQuestId": "67b892ba0e9aad30720bfc56"
         },
         {
           "id": "68e8d7b563fa6ade0f6327e5",
@@ -6723,6 +6667,12 @@
           "description": "Obtain the blueprint for Item 1156",
           "sourceQuestId": "67b892bd55eaf7b06d011436"
         }
+      ],
+      "mutuallyExclusiveQuestPairs": [
+        [
+          "67b892b832f50fb7ec084426",
+          "67b892ba0e9aad30720bfc56"
+        ]
       ],
       "rewards": null,
       "mapUnlocks": [],
@@ -6932,25 +6882,13 @@
           "id": "6914d59b1bd36f988e0d95be",
           "type": "main",
           "description": "Collect the flash drive from the ARRS station",
-          "sourceQuestId": "6914d59b1bd36f988e0d95bc",
-          "mutuallyExclusiveWith": [
-            "68e5976a0a045554d26a7d8c",
-            "690420e9f34c0074532b1aa2",
-            "690a144cb3bb1e6f6cb9b95d",
-            "690a15748850c7c2ccc34e38"
-          ]
+          "sourceQuestId": "6914d59b1bd36f988e0d95bc"
         },
         {
           "id": "691509592ce11cbec81adf13",
           "type": "main",
           "description": "Survive and extract from Interchange",
-          "sourceQuestId": "6914d59b1bd36f988e0d95bc",
-          "mutuallyExclusiveWith": [
-            "68e5976a0a045554d26a7d8c",
-            "690420e9f34c0074532b1aa2",
-            "690a144cb3bb1e6f6cb9b95d",
-            "690a15748850c7c2ccc34e38"
-          ]
+          "sourceQuestId": "6914d59b1bd36f988e0d95bc"
         },
         {
           "id": "68bc802a6df67927e13893a7",
@@ -6968,41 +6906,25 @@
           "id": "68e5976a0a045554d26a7d8c",
           "type": "main",
           "description": "Investigate ARRS Station 14-4 KORD thoroughly",
-          "sourceQuestId": "68588ede90466842410d7bb8",
-          "mutuallyExclusiveWith": [
-            "6914d59b1bd36f988e0d95be",
-            "691509592ce11cbec81adf13"
-          ]
+          "sourceQuestId": "68588ede90466842410d7bb8"
         },
         {
           "id": "690420e9f34c0074532b1aa2",
           "type": "main",
           "description": "Find a way to disconnect the station from external agents",
-          "sourceQuestId": "68588edf975681ee130def28",
-          "mutuallyExclusiveWith": [
-            "6914d59b1bd36f988e0d95be",
-            "691509592ce11cbec81adf13"
-          ]
+          "sourceQuestId": "68588edf975681ee130def28"
         },
         {
           "id": "690a144cb3bb1e6f6cb9b95d",
           "type": "optional",
           "description": "Check that the station power is turned on",
-          "sourceQuestId": "68588edf975681ee130def28",
-          "mutuallyExclusiveWith": [
-            "6914d59b1bd36f988e0d95be",
-            "691509592ce11cbec81adf13"
-          ]
+          "sourceQuestId": "68588edf975681ee130def28"
         },
         {
           "id": "690a15748850c7c2ccc34e38",
           "type": "main",
           "description": "Restore the ARRS station to backup settings",
-          "sourceQuestId": "68588edf975681ee130def28",
-          "mutuallyExclusiveWith": [
-            "6914d59b1bd36f988e0d95be",
-            "691509592ce11cbec81adf13"
-          ]
+          "sourceQuestId": "68588edf975681ee130def28"
         },
         {
           "id": "69041d636437f226275b55a0",
@@ -7010,6 +6932,16 @@
           "description": "Read the ARRS station specifications",
           "sourceQuestId": "68588ee109509e9fa1045b38"
         }
+      ],
+      "mutuallyExclusiveQuestPairs": [
+        [
+          "68588ede90466842410d7bb8",
+          "6914d59b1bd36f988e0d95bc"
+        ],
+        [
+          "68588edf975681ee130def28",
+          "6914d59b1bd36f988e0d95bc"
+        ]
       ],
       "rewards": null,
       "mapUnlocks": [],
@@ -7363,7 +7295,7 @@
         "summary": "Continue from Falling Skies after obtaining the armored case and start the Mr. Kerman terminal chain."
       },
       "description": "Branches into the storyline's four endings, listed in `endings` with the real ids the client serves in ending_list. The wiki describes the decision points as helping or betraying Mr. Kerman, paying Prapor, or seeking the Lightkeeper; each ending is gated by its own sub-quest.",
-      "notes": "Decision points are mutually exclusive; the pairs the reference capture proves are emitted per objective as `mutuallyExclusiveWith`, and exclusivity against quests outside the chapter is not expressible there. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).",
+      "notes": "The reference capture's mutually exclusive sub-quest completions are emitted at chapter level as `mutuallyExclusiveQuestPairs`. Partial objective progress on both sides is allowed. Only pairs of resolved sub-quests within this chapter are included. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).",
       "objectives": [
         {
           "id": "68d921de0d2f39698f6562c1",
@@ -7585,29 +7517,19 @@
           "id": "68fcc20ed1efc371307d4e47",
           "type": "main",
           "description": "Obtain an RFID card encryption device",
-          "sourceQuestId": "67bc9d70adb794ecb40f5755",
-          "mutuallyExclusiveWith": [
-            "68e6a2c30efb846429f36bf7",
-            "68e6a2cdfed9106cf6c920d2"
-          ]
+          "sourceQuestId": "67bc9d70adb794ecb40f5755"
         },
         {
           "id": "68e6a2c30efb846429f36bf7",
           "type": "main",
           "description": "Talk to Mr. Kerman",
-          "sourceQuestId": "67bc9e3e7801bf5c41017b82",
-          "mutuallyExclusiveWith": [
-            "68fcc20ed1efc371307d4e47"
-          ]
+          "sourceQuestId": "67bc9e3e7801bf5c41017b82"
         },
         {
           "id": "68e6a2cdfed9106cf6c920d2",
           "type": "main",
           "description": "Talk to Mechanic",
-          "sourceQuestId": "67bc9e3e7801bf5c41017b82",
-          "mutuallyExclusiveWith": [
-            "68fcc20ed1efc371307d4e47"
-          ]
+          "sourceQuestId": "67bc9e3e7801bf5c41017b82"
         },
         {
           "id": "68e6a6b0a2fae0a7a812325d",
@@ -7914,6 +7836,12 @@
           "description": "Negotiate with Mr. Kerman",
           "sourceQuestId": "68f16d504a7305f74f0c746b"
         }
+      ],
+      "mutuallyExclusiveQuestPairs": [
+        [
+          "67bc9d70adb794ecb40f5755",
+          "67bc9e3e7801bf5c41017b82"
+        ]
       ],
       "endings": [
         {
@@ -9716,7 +9644,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-10T20:15:47.662Z",
-    "sha256": "53d6fa7153e2af603a96240a0354c46c172d92f2e41057ea01e1d24667458c7a"
+    "generated": "2026-09-10T20:39:04.776Z",
+    "sha256": "a59e0c1544f6b2ad681b68cdd70ad7fbe780a6643b08c7f5dec052d8805982b5"
   }
 }
