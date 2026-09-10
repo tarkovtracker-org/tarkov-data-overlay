@@ -250,11 +250,18 @@ The missing input is small and fully covered upstream. The 27 counter pools hold
 gated figure is publicly checkable: it equals the 164 `globalVariable` conditions
 `json.tarkov.dev/pve/tasks` serves over these 27 `variableId`s. All 248 tasks
 already exist in that endpoint — they just lack the pool annotation. Supplying
-`(trader, tier)` membership per task makes each of the 27 counters computable as:
+`(trader, tier)` membership per task makes a counter computable as:
 
 ```text
-globalVariables[groupId] = count(completed tasks in pool(trader, tier))
+globalVariables[groupId] = |completed ∩ contributors(groupId)|
 ```
+
+Throughout this document, **`contributors(groupId)`** means the set of tasks that
+actually increment that counter, and it is only known to equal the full pool for
+the 23 groups whose observed value matches their completed-task count. For the
+four groups in [Caveats](#caveats) it does not, so substituting the pool there
+overshoots. Every formula below is scoped to `contributors`, never to the raw
+pool, for that reason.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
 which is why the table below has no Ragman tier-4 row. Do not add it as a
@@ -287,30 +294,35 @@ design, not a data gap.
 Across all 248 tier-pool tasks, `AvailableForStart` contains only two condition
 types — `TraderLoyalty` and `GlobalVariableValue` (164 of them) — and **zero
 `Quest` conditions**. There is no "task X, Y, Z" prerequisite list to recover,
-because these tasks have no task prerequisites at all. The predicate has the
-shape:
+because these tasks have no task prerequisites at all.
+
+The 164 counter-gated tasks take the predicate below. It does **not** apply to
+every tier-pool task: 11 tier-1 tasks are gated on a plain variable rather than
+their tier counter (Mechanic 3, Ragman 3, Therapist 3, Skier 2). Reading
+`counter(trader, tier)` for those would inspect the wrong state entirely — they
+are trader-intro/world scalars, they have no threshold over a pool, and they stay
+`unknown` without account state. Branch on the condition's `variableId`: a tier
+group ID takes the predicate, anything else takes the plain-variable path in
+[Resolution rule](#resolution-rule).
 
 ```text
+# counter-gated tasks only
 available(task) =
       traderLoyalty(task.trader) >= task.tier
   AND counter(task.trader, task.tier) >= task.threshold
 ```
 
-`counter(...)` is **not** reliably `count(completed ∩ pool)`. For the 23 groups
-where the observed value equals the completed-task count, substituting the full
-pool reproduces the game's value. For the four groups in [Caveats](#caveats) it
-does not: in each of them the counter read **below** the number of completed pool
-tasks, so at least one member does not contribute, and counting the whole pool
-**overshoots** — a consumer would clear the threshold and report a task available
-too early. Note that a shortfall in child count explains only two of the four
-(Mechanic tier 3 and Ragman tier 1); for the other two the reason a member fails
-to contribute is unknown. Until the excluded members are identified, treat those
-four counters as `unknown` rather than substituting a full-pool count, and only
-ever count a verified contributor set.
-
-Eleven tier-1 tasks add a gate on a plain variable rather than the tier counter
-(Mechanic 3, Ragman 3, Therapist 3, Skier 2); those are the trader-intro/world
-scalars and stay `unknown` without account state.
+`counter(...)` is `|completed ∩ contributors(groupId)|`, which is **not** reliably
+`|completed ∩ pool|`. For the 23 groups where the observed value equals the
+completed-task count, the pool is the contributor set and substituting it
+reproduces the game's value. For the four groups in [Caveats](#caveats) it does
+not: in each the counter read **below** the number of completed pool tasks, so at
+least one member does not contribute, and counting the whole pool **overshoots** —
+a consumer would clear the threshold and report a task available too early. A
+shortfall in child count explains only two of the four (Mechanic tier 3 and Ragman
+tier 1); for the other two the reason a member fails to contribute is unknown.
+Until the excluded members are identified, treat those four counters as `unknown`
+rather than substituting a full-pool count.
 
 Each pool has 1–7 seed tasks carrying no counter gate, and the staggered waves
 are reachable from those seeds in all 27 pools, so no pool can deadlock.
@@ -320,12 +332,15 @@ and this overlay already corrects that entry.
 
 ### Reverse: a cardinality constraint, not a dependency
 
-Knowing a player has a task at threshold `N` over pool `P` tells you
-`|completed ∩ P| >= N` and nothing more. Because there are **zero intra-pool
-task edges**, no individual member is ever forced, so no specific task can be
-inferred as required. The number of minimal explanations is `C(|P|, N)` —
-median 45 across the 164 gated tasks, up to `C(16,5) = 4368` for Mechanic
-tier 3.
+Knowing a player has a task at threshold `N` over a group tells you
+`|completed ∩ contributors| >= N` and nothing more. Because there are **zero
+intra-pool task edges**, no individual member is ever forced, so no specific task
+can be inferred as required. Where the contributor set is verified, the number of
+minimal explanations is `C(|contributors|, N)` — median 45 across the 164 gated
+tasks, up to `C(16,5) = 4368` for Mechanic tier 3. Where it is not verified, the
+count is not computable at all: substituting the pool would enumerate subsets that
+include non-contributing members, so those four groups yield no explanation set
+rather than a large one.
 
 This does **not** license picking an `N`-subset and recording it as completed
 history. The gate supplies no identity evidence, so any such subset is invented:
@@ -349,10 +364,14 @@ route planning to verified contributors.
 
 - Store the counter, not synthesized edges. Rendering these gates as
   prerequisite arrows invents structure the game does not have.
-- Backfilling an unknown history: record the constraint `>= N of P` rather than
-  marking specific tasks complete, and surface the shortfall (`N - have`).
-- Planning a route to a task: any `N` available members work, so pick by cost.
-  Greedy selection is sufficient given the seed/wave structure.
+- Backfilling an unknown history: record the constraint `>= N of contributors`
+  rather than marking specific tasks complete, and surface the shortfall
+  (`N - have`).
+- Planning a route to a task, **only for a group with a verified contributor
+  set**: any `N` available contributors work, so pick by cost. Greedy selection is
+  sufficient given the seed/wave structure. For the four unreconciled groups an
+  available task may not advance the counter, so do not plan routes or report
+  progress across them.
 - A missing account value must evaluate to `unknown`, never `available`.
 
 ## Caveats
