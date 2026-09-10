@@ -1101,8 +1101,14 @@ function printStoryChapterIssues(
  * Parse each capture whose name matches `pattern`, yielding the raw document and
  * its unwrapped response envelope (captures use either decoded format).
  *
- * Reading lazily keeps per-file isolation: an unusable optional capture is
- * skipped without invalidating the definitions found in the other files.
+ * Reading lazily keeps per-file isolation for unreadable or unparsable captures:
+ * one bad optional file is skipped without invalidating the definitions found in
+ * the others. Note the isolation covers parsing only - a consumer that throws
+ * while extracting abandons the remaining captures rather than skipping one, so
+ * consumers guard their own field access.
+ *
+ * `pattern` must not carry the `g` or `y` flag: `test` is stateful with either,
+ * which would silently skip alternating files.
  */
 function* readReferenceCaptures(eftDir: string, files: string[], pattern: RegExp) {
   for (const file of files) {
