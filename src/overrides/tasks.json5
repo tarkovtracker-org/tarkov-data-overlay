@@ -3446,4 +3446,118 @@
       }, // Was: []
     ],
   },
+
+  // ---------------------------------------------------------------------------
+  // Retired Lightkeeper access chain (2026-09-10).
+  //
+  // The whole pre-1.1 route to Lightkeeper was replaced by the "To the Light -
+  // ..." series. The wiki marked all seven of these pages
+  // `{{Historical content}}` in one coordinated sweep on 2026-09-08
+  // (20:21-20:48 UTC) and rewrote each opening line to the past tense
+  // ("'''X''' was a Quest in Escape from Tarkov"), which is the same standard
+  // already used for the 33 other disabled tasks in this file. The Lightkeeper
+  // trader page no longer documents an unlock chain at all - access now runs
+  // through the story chapters.
+  //
+  // tarkov.dev still serves all seven in regular, pve and pvp-season.
+  //
+  // Evidence limit worth recording: the newest local client capture is
+  // 2026-08-11 (PvE) and still contains the chain wired together, i.e. it
+  // predates the change; the 2026-08-27 regular capture does not contain them,
+  // but that capture covers only ~63% of upstream tasks so its silence is not
+  // proof. The wiki is therefore the freshest source here, and the
+  // `{{Historical content}}` marker is what these entries rest on.
+  //
+  // Replacement data is NOT added here: none of the ten "To the Light - ..."
+  // quests exists in tarkov.dev, and none appears in any local capture locale,
+  // so their IDs are unknown. Adding them needs a post-2026-09-08 capture.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Lightkeeper
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365
+  // ---------------------------------------------------------------------------
+
+  // Network Provider - Part 1 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
+  '625d6ff5ddc94657c21a1625': {
+    disabled: true, // Was: active
+  },
+
+  // Network Provider - Part 2 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2
+  '625d6ffaf7308432be1d44c5': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 1 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_1
+  '625d6ffcaa168e51321d69d7': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 2 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_2
+  '625d6fff4149f1149b5b12c9': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 3 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_3
+  '625d7001c4874104f230c0c5': {
+    disabled: true, // Was: active
+  },
+
+  // Key to the Tower ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Key_to_the_Tower
+  '625d70031ed3bb5bcc5bd9e5': {
+    disabled: true, // Was: active
+  },
+
+  // Knock-Knock ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Knock-Knock
+  '625d7005a4eb80027c4f2e09': {
+    disabled: true, // Was: active
+  },
+
+  // Getting Acquainted -> To the Light - Getting Acquainted (renamed, NOT retired)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
+  //
+  // This is the one member of the old chain that survived the rework, so it is
+  // renamed rather than disabled. The old page is now literally
+  // `#REDIRECT [[To the Light - Getting Acquainted]]`, and the identity is
+  // confirmed field-by-field: same trader (Mechanic) and all four objective IDs
+  // match the new page's objective list (6391e2f9e705511c8a4a1b85 obtain the V3
+  // flash drive, 6391e31bfa894f0a866afdec reflash the transmitter,
+  // 6391e329c115f907b14700b1 hand over the flash drive, 63ab727b1287ef0b827d0c95
+  // visit the Lighthouse building).
+  //
+  // Getting Acquainted -> To the Light - Getting Acquainted (renamed, NOT retired)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
+  //
+  // This is the one member of the old chain that survived the rework, so it is
+  // renamed rather than disabled. The old page is now literally
+  // `#REDIRECT [[To the Light - Getting Acquainted]]`, and the identity is
+  // confirmed field-by-field: same trader (Mechanic) and all four objective IDs
+  // match the new page's objective list (6391e2f9e705511c8a4a1b85 obtain the V3
+  // flash drive, 6391e31bfa894f0a866afdec reflash the transmitter,
+  // 6391e329c115f907b14700b1 hand over the flash drive, 63ab727b1287ef0b827d0c95
+  // visit the Lighthouse building).
+  //
+  // Only the name and wiki link are corrected here. `taskRequirements` is
+  // deliberately left alone even though its sole upstream edge (Knock-Knock) is
+  // disabled above:
+  //   - Asserting a replacement edge would mean trusting the wiki's `previous`
+  //     field, which AGENTS.md rules out as proof of an unlock edge.
+  //   - Asserting `taskRequirements: []` is not licensed either: the 2026-08-11
+  //     capture carries a real `Quest` start condition for this task, so an empty
+  //     list would contradict the reference rather than record an absence.
+  // Consequence to be aware of: consumers that filter disabled tasks will see
+  // this task and Information Source (63966faeea19ac7ed845db2c) gated behind a
+  // filtered prerequisite until a post-2026-09-08 capture establishes the real
+  // wiring. The wiki's own reading is that this task now follows "To the Light -
+  // The Other Side" and still leads to Information Source; neither edge is
+  // expressible today, because the "To the Light - ..." quests are absent from
+  // tarkov.dev entirely.
+  '625d700cc48e6c62a440fab5': {
+    name: 'To the Light - Getting Acquainted', // Was: Getting Acquainted
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted', // Was: .../Getting_Acquainted (now a redirect)
+  },
 }

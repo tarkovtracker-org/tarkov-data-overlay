@@ -3265,6 +3265,31 @@
           "value": 1
         }
       ]
+    },
+    "625d6ff5ddc94657c21a1625": {
+      "disabled": true
+    },
+    "625d6ffaf7308432be1d44c5": {
+      "disabled": true
+    },
+    "625d6ffcaa168e51321d69d7": {
+      "disabled": true
+    },
+    "625d6fff4149f1149b5b12c9": {
+      "disabled": true
+    },
+    "625d7001c4874104f230c0c5": {
+      "disabled": true
+    },
+    "625d70031ed3bb5bcc5bd9e5": {
+      "disabled": true
+    },
+    "625d7005a4eb80027c4f2e09": {
+      "disabled": true
+    },
+    "625d700cc48e6c62a440fab5": {
+      "name": "To the Light - Getting Acquainted",
+      "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted"
     }
   },
   "craftsAdd": {
@@ -9284,7 +9309,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-10T15:34:58.417Z",
-    "sha256": "3f69ad0ba0ea4c5e68ae5298cafb47269be1a3540cb50c388238477e86d7f420"
+    "generated": "2026-09-10T17:56:40.484Z",
+    "sha256": "52aa7be43a54261e8183830e9bbd1a0873b4385bf3545bfd810bc676aba6d5e8"
   }
 }
