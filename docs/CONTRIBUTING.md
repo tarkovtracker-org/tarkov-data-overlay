@@ -151,18 +151,25 @@ include `name`/`shortName` for readability.
 
 ## What Counts as Proof for Which Field
 
-Not every wiki field is evidence for every override. A `GlobalVariableValue`
-condition is a numeric state comparison; it is not interchangeable with a
-`TraderLoyalty` condition or a list of prerequisite tasks. See
-[global variables and progression counters](GLOBAL_VARIABLES.md) before adding
-counter metadata. Keep incomplete or unverified mappings informational.
+Not every wiki field is evidence for every override. Patch 1.1.0.0 expresses most
+trader-loyalty gates as `GlobalVariableValue` start conditions against opaque
+per-tier variables instead of `TraderLoyalty` conditions, and tarkov.dev serves
+those as `otherRequirements` `globalVariable` entries. That single change is why
+the three rules below differ, and getting them mixed up has already shipped
+regressions.
+
+A `GlobalVariableValue` condition is a numeric state comparison, though; it is
+not interchangeable with a `TraderLoyalty` condition or a list of prerequisite
+tasks. See [global variables and progression counters](GLOBAL_VARIABLES.md)
+before adding counter metadata, and keep incomplete or unverified mappings
+informational.
 
 ### `taskRequirements` — the wiki `previous` field is not proof
 
 The infobox `previous` field describes narrative progression. The game gates a
 task with the `AvailableForStart` conditions in its quest template, so a task
-whose only captured start condition is a variable has **no explicit Quest** prerequisite,
-and `taskRequirements: []` is correct rather than missing an edge.
+whose only captured start condition is a variable has **no explicit Quest**
+prerequisite, and `taskRequirements: []` is correct rather than missing an edge.
 
 Before overriding `taskRequirements`, confirm the edge exists as a `Quest` start
 condition. `npm run eft:audit` reports this per task (`CONFLICT` means the
@@ -177,24 +184,34 @@ until the task can be represented safely.
 
 ### `minPlayerLevel` — absence of a `Level` condition does not mean `0`
 
-A reference establishes explicit conditions in the captured task templates. An
-all-zero template status or a surviving satisfied condition does not prove the
-capture is a complete, unfiltered catalog. Pin its mode and version and distinguish
-an absent task from an explicit empty prerequisite list on a present task.
+A reference establishes the **explicit** conditions in the captured task
+templates, and nothing more. An all-zero template status or a surviving satisfied
+condition does not prove the capture is a complete, unfiltered catalog, so treat
+the explicit-gate list as a floor on what exists rather than a closed set. Pin
+its mode and version, and distinguish an absent task from an explicit empty
+prerequisite list on a task that is present.
 
-A missing `Level` condition does not authorize setting `minPlayerLevel` to zero.
-Upstream can derive a floor from trader requirements and prerequisite tasks.
+A missing `Level` condition therefore does not authorize setting `minPlayerLevel`
+to zero. Upstream _derives_ a floor from the loyalty tier's
+`requiredPlayerLevel` when a task is loyalty-gated, and from prerequisite tasks,
+so "no `Level` condition" means "no explicit gate", not "no gate", and zeroing
+those would throw away a correct derived floor.
+
 Investigate those sources and corroborate with the wiki Requirements section
 before correcting a value; exceeding the task's own trader floor is not alone
-proof that it is stale.
+proof that it is stale. Use `0` to mean "no level gate" (see
+`src/lib/task-unlocks.ts`).
 
 ### `traderRequirements` — distinguish explicit gates from inferred cohorts
 
-An explicit `TraderLoyalty` condition is evidence of a loyalty gate in that capture.
-Its absence does not by itself establish that no other mechanism restricts access.
-`eft:audit` does not currently adjudicate trader requirements. Use the wiki
-Requirements section and applicable condition evidence; do not turn a cohort's
-inferred tier into an extra gate on every member.
+An explicit `TraderLoyalty` condition is evidence of a loyalty gate in that
+capture. Its absence does not by itself establish that no other mechanism
+restricts access: because the gate often lives in a global variable, the client
+shows no `TraderLoyalty` condition even for tasks that genuinely have a loyalty
+gate, so reading absence as "no gate" would falsely condemn 150+ correct
+overrides. `eft:audit` does not currently adjudicate trader requirements. Use the
+wiki Requirements section and applicable condition evidence; do not turn a
+cohort's inferred tier into an extra gate on every member.
 
 ### Entity `{ id, name }` pairs — look the ID up, never copy it
 
@@ -205,6 +222,88 @@ entity. Look the ID up in `TARKOV_MAP_NAMES_BY_ID` /
 `tests/entity-references.test.ts` enforces the pairing, and
 `tests/task-graph.test.ts` enforces that task references stay internally
 consistent and acyclic.
+
+---
+
+## Corrections Deliberately Not Made
+
+Each entry below is a correction that looks obviously missing, was tried, and was
+found wrong. The reason it is recorded here rather than in the data file is that
+absence leaves no trace: without this list the next contributor reads the wiki,
+sees a discrepancy, and re-adds the same bad override. Re-add one only by
+clearing the specific bar named for it.
+
+**The Survivalist Path — Unprotected but Dangerous**
+(`5d25aed386f77442734d25d2`, issue #328). A previous revision repointed this
+task's prerequisite to Acquaintance and restricted its kill objective to Woods,
+both taken from the wiki. The client disagrees on both counts: its only
+`AvailableForStart` condition is a `Quest` condition on Zhivchik, which upstream
+already serves, and the objective's kill counter carries only `Kills` and
+`Equipment` conditions — no `Location` condition, so the objective is not
+map-restricted and upstream's empty `maps` is correct. Issue #328 reports a
+completed task not registering from a Seasonal profile; the unlock graph matches
+the client here, so that symptom still needs a separate root cause.
+
+**The Survivalist / Jaeger chain.** Patch 1.1.0.0 replaced most quest-chain
+prerequisites with `TraderLoyalty` and `GlobalVariableValue` gates, which
+tarkov.dev already serves as `traderRequirements` / `otherRequirements`. The
+in-game order is Thrifty (Jaeger LL2, no quest prerequisite) → Zhivchik →
+Unprotected but Dangerous → Wounded Beast. Acquaintance has no start conditions
+at all, and The Tarkov Shooter - Part 1 is gated by a loyalty variable rather
+than by Acquaintance. Upstream matches the client on every one of these, so
+overriding `taskRequirements` here would introduce edges the client does not
+have.
+
+**Introduction** (`5d2495a886f77425cd51e403`). Its wiki Requirements section
+still reads "Must be level 2 to start this quest". That is pre-1.1.0.0: the
+client carries no `Level` condition for it, and upstream's `minPlayerLevel` is
+already `0`. Its gate is a **dialogue** requirement — upstream serves a single
+`otherRequirements` entry of `type: 'dialogue'`, not `globalVariable`, and the
+two are mutually exclusive types. Track it by its condition ID through
+`completedConditionIds` / `dialogues` rather than as numeric variable state, and
+do not re-add a level gate from that wiki line.
+
+**New Beginning (Prestige 1)** (`6761f28a022f60bb320f3e95`). An override here
+targeting objective `6848100b00afffa81f09e36b` is a no-op: that objective belongs
+to Prestige 3 (`6848100b00afffa81f09e365`), where upstream already reads the text
+such an override would supply. Prestige 1's own equivalent objective
+(`6761f9d718fa62aac3264ff2`) already reads correctly upstream. Do not retarget it
+to Prestige 3 either — upstream shows a deliberate escalating chain: P1/P2 extract
+from The Lab, P3 transits Lab → Streets then extracts from Streets, P4 adds
+Streets → Interchange.
+
+**The Tarkov Shooter - Part 5** (`5bc4836986f7740c0152911c`, issue #356). Two
+different tasks carry this name, so check the ID first: `5bc4826c86f774106d22d88b`
+is the obsolete duplicate that this overlay sets `disabled: true` on (issue #322),
+while `5bc4836986f7740c0152911c` is the live task and correctly has no override.
+For the live task the 1.1.0.0 client reference and the regular, pve and
+pvp-season payloads all agree — 28000 experience, 275000 roubles, two copies of
+the Mosin Rifle ProMag Archangel OPFOR PRS chassis, and a Jaeger LL3 offer — so a
+reward override here would override matching upstream data. An earlier wiki-based
+patch supplied a different reward block.
+
+**Establish Contact, Collector, Is This a Reference?** (issue #274). These were
+once authored as a "Fence LL1" `traderRequirements` entry, but the gate is Fence
+_reputation_ (scav karma), not a loyalty level. Upstream now serves the correct
+discriminated requirement — `requirementType: 'reputation'` on Fence with
+`value` 4, 3 and 1 respectively, and Collector additionally carries seven
+`level`-type LL4 requirements — and the wiki agrees.
+
+Re-adding an LL1 entry breaks both documented merge strategies, in opposite ways.
+Under the patch-by-id merge in [INTEGRATION.md](INTEGRATION.md), an overlay-authored
+entry carries its own synthetic `overlay.` ID, so it does not patch the upstream
+reputation requirement — it is **appended**, leaving the task with a correct
+reputation gate plus a fabricated loyalty gate. Under the legacy wholesale
+replace-array merge, it **replaces** the array and the upstream reputation gate is
+lost entirely. Only an explicit empty array is meant to clear requirements.
+
+**Objective description rewrites removed as fabricated or swapped.** Pathfinder's
+"Sales Night" objective description was mis-attributed to a nonexistent quest and
+rewrote a correct `type=visit` objective. Small Business - Part 3 had its two
+Woods objective descriptions swapped, contradicting tarkov.dev, both game
+captures, and the wiki guide. Setup's hat/vest combinations are served correctly
+upstream; only their ordering differed. Re-add any of these only with a fresh
+in-game marker screenshot, not a wiki reading.
 
 ---
 

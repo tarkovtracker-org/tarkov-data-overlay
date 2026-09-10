@@ -1168,6 +1168,9 @@ export function loadReferenceQuestIds(eftDir = join(rootDir, 'eft')): Set<string
     return null; // Optional references may be unreadable or disappear during a run.
   }
 
+  // Profile captures may contain only a subset of story sub-quests, so
+  // definitions are collected from every capture. An ID merely mentioned by
+  // another quest is not a definition.
   const ids = new Set(loadReferenceTaskIds(eftDir, files));
 
   // Chapter IDs alone cannot adjudicate whether sub-quest IDs are missing.

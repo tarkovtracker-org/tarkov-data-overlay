@@ -915,10 +915,6 @@
     // renders it three ways: untranslated in Sanitary Standards, as "am
     // Nachmittag" here, and correctly as "auf Factory zur Tageszeit" in the
     // Jaeger melee objective. This follows the third.
-    //
-    // The Ground Zero duplicate objective (65e09b343458a36a766837c7) formerly
-    // patched here was REMOVED: upstream deleted the hand-added objective, so
-    // there is nothing left to translate.
     // Proof: https://json.tarkov.dev/regular/tasks_de (60e71b62a0beca400d69efc4)
     '60e71b62a0beca400d69efc4': {
       objectives: {

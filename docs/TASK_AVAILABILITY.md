@@ -140,7 +140,9 @@ The `otherRequirements` field currently contains two important types:
   identifies the scalar or group whose effective numeric value is compared. The IDs may look
   random because they are generated identifiers, but they are deterministic
   references, not a task-order heuristic. Track the value by `variableId` and
-  retain `requirementId` for provenance/debugging.
+  retain `requirementId` for provenance/debugging. For how a `variableId`
+  resolves to a group sum or a plain scalar, see
+  [`GlobalVariableValue` task gates](GLOBAL_VARIABLE_MECHANICS.md#resolution-rule).
 - `dialogue`: `requirementId` is the condition identity and `traders` identifies
   the trader interaction. Track the condition ID in `completedConditionIds` or
   provide it in `dialogues`. Do not infer dialogue completion from the task

@@ -10,6 +10,11 @@ flags or stage values. Group membership alone does not establish how tasks
 contribute, how values aggregate, or whether they reset. Trader loyalty is a
 separate condition. Do not infer an additional loyalty gate from cohort metadata.
 
+For the underlying mechanism — how a target resolves to a group or a scalar, what
+the counters were observed to represent, and the open questions that keep those
+observations short of this document's evidence bar — see
+[`GlobalVariableValue` task gates](GLOBAL_VARIABLE_MECHANICS.md).
+
 ## What ships today
 
 The overlay exposes an optional `progressionCounters` registry, initially empty.
