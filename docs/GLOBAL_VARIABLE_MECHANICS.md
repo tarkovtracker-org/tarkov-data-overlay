@@ -17,12 +17,22 @@ evaluation rules `evaluateTaskProgression` follows — see
 
 ## Short answer
 
-A `GlobalVariableValue` condition is a **counter comparison**, not a flag check.
+A `GlobalVariableValue` condition is a **numeric-state comparison**, not a flag
+check. What the number means depends entirely on what `target` resolves to, and the
+two cases need different handling:
 
-For the 27 IDs that tarkov.dev currently publishes, the best-supported reading is
-that the counter is **"how many tasks you have completed for one trader at one
-loyalty tier"**, so the condition means **"complete N tasks from that trader's
-tier-M pool"**.
+- **Group target** — the value is a counter. For the 27 group IDs tarkov.dev
+  currently publishes, the best-supported reading is **"how many tasks you have
+  completed for one trader at one loyalty tier"**, so the condition means
+  **"complete N tasks from that trader's tier-M pool"**.
+- **Plain scalar target** — the value is account or world state, not a task
+  counter. The 73 such targets cannot be derived from any task list; a consumer
+  must supply the resolved value or evaluate `unknown`. Looking for a pool
+  derivation for these is a dead end (see
+  [The second family](#the-second-family-plain-variables)).
+
+Resolve the target first ([Resolution rule](#resolution-rule)); only then does the
+counter interpretation below apply.
 
 Treat that as an observed interpretation, not an established rule. It reproduces
 the profile's value for 23 of the 27 groups and matches the pool size for 20 of
@@ -131,11 +141,21 @@ group 6a3c0fefbea2d2ad581c090b  (Mechanic, trader level 2, 12 children)
 Tier access itself is a separate, ordinary condition. In the reference the
 per-task `tierAccessory` field and the `TraderLoyalty` condition never
 disagree: `tierAccessory` 2/3/4 pairs only with `TraderLoyalty` value 2/3/4,
-and `tierAccessory` 1 carries no loyalty condition. So the full unlock is:
+and `tierAccessory` 1 carries no loyalty condition. So the shape of the unlock is:
 
 ```text
-trader loyalty level M  AND  (completed tasks in that trader's tier-M pool) >= N
+(explicit TraderLoyalty condition, if the task has one)
+  AND  |completed ∩ contributors(group)| >= N
 ```
+
+Both conjuncts are narrower than they look, and the exact form is given in
+[Forward](#forward-no-task-prerequisites-to-recover). Tier-1 tasks carry no
+`TraderLoyalty` condition, so the first conjunct must not be applied to them.
+And `contributors` is not interchangeable with the tier pool: for four groups the
+counter reads below the completed pool count, so counting every completed pool
+task would overshoot and report a task available too early. No group's contributor
+set is established here, so this is the model's shape rather than an evaluable
+predicate.
 
 ### Evidence
 
@@ -147,9 +167,12 @@ Four independent checks support the reading above.
 2. **Child count equals pool size** for **20 of 27** groups, exactly.
 3. **Explicit writes.** Two Prapor tier-2 tasks (`Capturing Outposts`,
    `Glory to CPSU`) declare a `Success` reward of `type: "GlobalVariable"`
-   whose `target` is a child of the Prapor tier-2 group. Most tasks do not
-   declare this — the server sets the marker implicitly — but where it is
-   declared, it lands in the tier group the model predicts.
+   whose `target` is a child of the Prapor tier-2 group. Where the write is
+   declared, it lands in the tier group the model predicts. These two are the
+   only evidence in this bullet: the other children have no declared writer, and
+   that makes their producer **unknown** rather than an implicit
+   completion-time write. Do not read undeclared children as confirmed
+   task-completion contributors.
 4. **Independent tier derivation.** Assigning each group a tier from the
    _published_ trader-level requirements of its gated tasks (tarkov.dev plus
    this repo's overlay) reproduces the reference's `tierAccessory` for every
@@ -314,9 +337,18 @@ design, not a data gap.
 ### Forward: no task prerequisites to recover
 
 Across all 248 tier-pool tasks, the captured `AvailableForStart` conditions are of
-only two types — `TraderLoyalty` and `GlobalVariableValue` (164 of them) — with
-**no `Quest` condition among them**. So there is no intra-pool "task X, Y, Z"
-prerequisite list to recover from these gates.
+only two types — `TraderLoyalty` and `GlobalVariableValue` — with **no `Quest`
+condition among them**. So there is no intra-pool "task X, Y, Z" prerequisite list
+to recover from these gates.
+
+Two populations of `GlobalVariableValue` live in here and must not be added
+together or confused with the public figure. 164 target one of the 27 tier groups,
+which is the count `json.tarkov.dev/pve/tasks` also serves. A further 11 tier-1
+tasks target a plain variable instead, and those are **not** published — the public
+endpoint carries no `globalVariable` requirement outside the 27 groups. So the
+captured total is at least 175, and the match between 164 and the public count is a
+property of the group population alone, not evidence that the capture and the
+endpoint agree overall.
 
 Read that as the scope it is: no recoverable `Quest` edge in the captured start
 conditions of these pools. It is **not** a licence to strip `taskRequirements`.
