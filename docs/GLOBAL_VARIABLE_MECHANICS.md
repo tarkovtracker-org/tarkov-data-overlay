@@ -330,9 +330,17 @@ group ID takes the predicate, anything else takes the plain-variable path in
 ```text
 # counter-gated tasks only
 available(task) =
-      traderLoyalty(task.trader) >= task.tier
+      (task has an explicit TraderLoyalty condition
+         ? traderLoyalty(task.trader) >= that condition's value
+         : true)
   AND counter(task.trader, task.tier) >= task.threshold
 ```
+
+Apply the loyalty conjunct **only** when the task carries that condition. Tier-1
+tasks do not (`tierAccessory` 1 pairs with no `TraderLoyalty` condition), so
+requiring one there invents a gate the task definition does not have, and a
+consumer that supplied no trader-level value would flip a valid tier-1 unlock to
+`unknown` or unavailable.
 
 `counter(...)` is `|completed ∩ contributors(groupId)|`, which is **not**
 interchangeable with `|completed ∩ pool|`. For the 23 aggregate-reconciling groups
@@ -349,8 +357,15 @@ of the four an unresolved reset could equally explain a low reading after every
 member had contributed. Treat all four as `unknown` rather than substituting a
 full-pool count.
 
-Each pool has 1–7 seed tasks carrying no counter gate, and the staggered waves
-are reachable from those seeds in all 27 pools, so no pool can deadlock.
+Each pool has 1–7 tasks carrying no counter gate, and the staggered waves are
+reachable from those tasks in all 27 pools — but only once those tasks are
+themselves available, which is not established. A counter-free task is not
+automatically an open seed: some are gated on a plain variable instead, and
+Mechanic tier 1 is the worst case, where all three of its counter-free tasks
+(9 pool, 6 threshold-gated) are among the 11 plain-variable-gated tier-1 tasks. So
+its entire apparent seed set can sit at `unknown` without account state. Read the
+no-deadlock property as conditional on those scalar gates being satisfied, not as
+a guarantee.
 
 For corroboration, upstream asserts `taskRequirements` for only 1 of the 248,
 and this overlay already corrects that entry.
@@ -360,12 +375,15 @@ and this overlay already corrects that entry.
 Knowing a player has a task at threshold `N` over a group tells you
 `|completed ∩ contributors| >= N` and nothing more. Because there are **zero
 intra-pool task edges**, no individual member is ever forced, so no specific task
-can be inferred as required. Where the contributor set is verified, the number of
-minimal explanations is `C(|contributors|, N)` — median 45 across the 164 gated
-tasks, up to `C(16,5) = 4368` for Mechanic tier 3. Where it is not verified, the
-count is not computable at all: substituting the pool would enumerate subsets that
-include non-contributing members, so those four groups yield no explanation set
-rather than a large one.
+can be inferred as required. Where a contributor set is verified, the number of
+minimal explanations is `C(|contributors|, N)` — large enough that enumerating them
+is pointless. Since no group here is verified, that figure cannot currently be
+computed for any of them: substituting the pool would enumerate subsets containing
+members that may not contribute. Raw-pool arithmetic gives a feel for the scale
+only — over the 27 pools the median is 45 and Mechanic tier 3 would reach
+`C(16,5) = 4368` — but treat both as illustrations of magnitude, not as counts of
+valid histories, and note that Mechanic tier 3 is itself one of the four
+unreconciled groups where `16` is only a pool size.
 
 This does **not** license picking an `N`-subset and recording it as completed
 history. The gate supplies no identity evidence, so any such subset is invented:
@@ -393,7 +411,9 @@ route planning to verified contributors.
   rather than marking specific tasks complete, and surface the shortfall
   (`N - have`).
 - Planning a route to a task, **only for a group with a verified contributor
-  set**: any `N` available contributors work, so pick by cost. Greedy selection is
+  set**: schedule `max(0, N - have)` further contributors, not `N` — counting from
+  the threshold rather than the shortfall schedules work the player has already
+  done. Any available contributors will do, so pick by cost; greedy selection is
   sufficient given the seed/wave structure. For the four unreconciled groups an
   available task may not advance the counter, so do not plan routes or report
   progress across them.
@@ -417,8 +437,11 @@ route planning to verified contributors.
   never set in the observed profile, so they are plausibly retired or
   mode-specific markers, but that is unverified.
 - **351 of 374 child variables have no writer anywhere in the client payloads.**
-  They are set server-side on task completion. The child → task mapping is
-  therefore not statically derivable; only the aggregate count is usable.
+  That makes their producer **unknown**, not confirmed: the write happens
+  server-side, but nothing here shows it happens on task completion rather than at
+  profile initialisation or on some other server event. Either way the child → task
+  mapping is not statically derivable, and only the aggregate count is usable.
+  Do not treat this as evidence for a contributor mapping.
 - `TradersInfo` entries no longer carry `loyaltyLevel` (keys are `unlocked`,
   `disabled`, `salesSum`, `standing`, `dialogueAvailable`). Trader tier is not
   readable from the profile directly.
@@ -477,7 +500,7 @@ tools emit, which is why their output goes to gitignored `data/`.
 
 It is not a blanket ban on reference-informed output, and the repository already
 commits such output deliberately: `src/additions/storyChapters.json5` is tracked,
-declares "Source: local quest reference (structure/ordering)", and carries 345
+declares "Source: local quest reference (structure/ordering)", and carries 344
 per-objective `sourceQuestId` references, because those story quests exist nowhere
 else. `AGENTS.md` sanctions that explicitly — "unlike the numeric `eft:*` tools
 this one produces committed additions, not a gitignored diff. The reference itself
@@ -491,13 +514,19 @@ than asserted:
   removed for that reason while this document was in review.
 - Every threshold and gated task name is re-derivable from public endpoints with
   the command above.
-- Capture-informed content is limited to aggregates: the `Children` and `Pool`
-  integers, the reconciliation counts, condition-type and `compareMethod`
-  distributions, and the caveats. No per-task reference field values, and no
-  quest, objective or child-variable identifier.
+- Capture-informed content is mostly aggregate: the `Children` and `Pool` integers,
+  the reconciliation counts, condition-type and `compareMethod` distributions, and
+  the caveats. A few observations are per-task rather than aggregate — which tier-1
+  tasks are gated on a plain variable, and that two named Prapor tier-2 tasks
+  declare an explicit `GlobalVariable` success reward. Those name tasks only by
+  their public identifiers and report the presence of a condition, never a
+  reference field value.
+- No reference field values appear at all — no experience, no `minPlayerLevel`, no
+  objective counts — and no quest, objective or child-variable identifier that
+  tarkov.dev does not already publish.
 
-That is strictly less reference detail than the committed `storyChapters.json5`
-already carries. If a maintainer prefers a stricter line, the affected material is
-the aggregate columns and counts; the resolution rule and the guidance would go
-with them, since `variable_group` is a client endpoint and cannot be described
-from public data at all.
+That is less reference detail than the committed `storyChapters.json5` already
+carries. If a maintainer prefers a stricter line, the affected material is the
+aggregate columns and counts plus those per-task observations; the resolution rule
+and the guidance would go with them, since `variable_group` is a client endpoint
+and cannot be described from public data at all.

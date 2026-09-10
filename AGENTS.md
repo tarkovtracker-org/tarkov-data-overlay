@@ -79,9 +79,10 @@ resulting JSON5 corrections plus proof links. That prohibition covers the raw
 capture and the field-by-field diffs these tools emit — not every artifact
 informed by the reference. Deliberate, documented exceptions exist and are called
 out where they apply: `src/additions/storyChapters.json5` (below) and
-`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates and publicly
-published identifiers only. Anything new in that category needs the same explicit
-rationale and must name what it does and does not reproduce.
+`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates plus a few per-task
+observations, using only publicly published identifiers and no reference field
+values. Anything new in that category needs the same explicit rationale and must
+name what it does and does not reproduce.
 
 - `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
