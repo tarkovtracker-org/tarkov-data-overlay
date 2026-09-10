@@ -842,7 +842,7 @@
               "type": "object"
             },
             "status": {
-              "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. complete/completed is the normal prerequisite, accepted/active links a predecessor that must be started, and the failed family marks alternatives",
+              "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
               "items": {
                 "enum": [
                   "locked",
@@ -889,6 +889,7 @@
                 "type": "object"
               },
               "status": {
+                "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
                 "items": {
                   "enum": [
                     "locked",

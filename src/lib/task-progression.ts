@@ -110,23 +110,27 @@ function resolveCounter(
   state: TaskUnlockState,
   options: TaskProgressionOptions
 ): ProgressionCounterEvaluation {
-  const account = own(state.globalVariables, variableId);
-  if (record(state.globalVariables) && Object.hasOwn(state.globalVariables, variableId)) {
+  const globalVariables = own(state, 'globalVariables');
+  if (record(globalVariables) && Object.hasOwn(globalVariables, variableId)) {
+    const account = globalVariables[variableId];
     return typeof account === 'number' && Number.isFinite(account)
       ? { source: 'account', value: account, reason: 'explicit resolved account value' }
       : unresolved('account value is invalid');
   }
-  if (!SUPPORTED_GAME_MODES.includes(options.mode)) return unresolved('game mode is invalid');
+  const mode = own(options, 'mode');
+  if (!nonEmpty(mode) || !SUPPORTED_GAME_MODES.includes(mode as GameMode))
+    return unresolved('game mode is invalid');
   const ids = contributorIds(
-    own(own(options.counters, options.mode), variableId),
-    options.revision
+    own(own(own(options, 'counters'), mode), variableId),
+    own(options, 'revision')
   );
   if (!ids) return unresolved('no complete verified mapping for this mode and revision');
+  const taskStatuses = own(state, 'taskStatuses');
   const completedTaskIds: string[] = [];
   const incompleteTaskIds: string[] = [];
   const unknownTaskIds: string[] = [];
   for (const id of ids) {
-    const status = completionState(own(state.taskStatuses, id));
+    const status = completionState(own(taskStatuses, id));
     if (status === 'complete') completedTaskIds.push(id);
     else if (status === 'incomplete') incompleteTaskIds.push(id);
     else unknownTaskIds.push(id);
@@ -168,11 +172,14 @@ export function evaluateTaskProgression(
     safeTask,
     definition,
     { ...safeState, globalVariables },
-    safeOptions.evaluation
+    own(safeOptions, 'evaluation') as TaskUnlockEvaluationOptions | undefined
   );
+  const taskId = own(safeTask, 'id');
   return {
     ...result,
-    recordedStatus: normalizeTaskStatus(own(safeState.taskStatuses, safeTask.id)),
+    recordedStatus: nonEmpty(taskId)
+      ? normalizeTaskStatus(own(own(safeState, 'taskStatuses'), taskId))
+      : undefined,
     counters,
   };
 }

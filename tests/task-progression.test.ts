@@ -158,6 +158,30 @@ describe('progress-based task eligibility', () => {
     expect(evaluateTaskProgression(task, state, { ...options, counters }).status).toBe('unknown');
   });
 
+  it('does not read state or registry containers from a polluted prototype', () => {
+    const polluted = {
+      globalVariables: { pool: 999 },
+      counters: { pve: { pool: mapping } },
+      revision: 'test-revision',
+      taskStatuses: { a: 'complete', b: 'complete', c: 'complete' },
+    };
+    const proto = Object.prototype as unknown as Record<string, unknown>;
+    try {
+      Object.assign(proto, polluted);
+      // Only `mode` is supplied; every container must come from own properties.
+      const result = evaluateTaskProgression(task, { traderUnlocked: { trader: true } }, {
+        mode: 'pve',
+      } as TaskProgressionOptions);
+      expect(result.status).toBe('unknown');
+      expect(result.counters.pool).toMatchObject({ source: 'unresolved' });
+      expect(result.counters.pool.value).toBeUndefined();
+      expect(result.recordedStatus).toBeUndefined();
+    } finally {
+      Object.keys(polluted).forEach((key) => delete proto[key]);
+    }
+    expect(Object.keys(Object.prototype)).toHaveLength(0);
+  });
+
   it('retains other account gates and recorded lifecycle status', () => {
     const supplied = {
       ...state,
