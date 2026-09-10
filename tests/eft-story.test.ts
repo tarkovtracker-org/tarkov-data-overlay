@@ -87,6 +87,19 @@ describe('cleanObjectiveLine', () => {
     expect(cleanObjectiveLine("<''script").text).toBe('script');
   });
 
+  it('repeats the tag pass so a nested span cannot survive', () => {
+    // Deleting the inner span brings the outer delimiters together into a fresh
+    // tag, which a single pass would leave behind. The surviving wording is
+    // arbitrary for malformed nesting, so assert the invariant that matters:
+    // nothing bracket-shaped gets through.
+    for (const line of ['Kill <b<i>b>Scavs</b>', '<<font>font>Survive</font>', '<scr<b>ipt>x']) {
+      const { text } = cleanObjectiveLine(line);
+      expect(text).not.toMatch(/[<>]/);
+    }
+    // Well-formed markup still reduces to the wording it wrapped.
+    expect(cleanObjectiveLine('Kill <font color=red>Scavs</font>').text).toBe('Kill Scavs');
+  });
+
   it('keeps objective wording intact when brackets are unbalanced', () => {
     expect(cleanObjectiveLine('* Survive the raid <3').text).toBe('Survive the raid 3');
   });

@@ -73,19 +73,34 @@ export async function fetchWikitext(title: string): Promise<string> {
   return wikitext;
 }
 
+/**
+ * Remove `<…>` spans, repeating until the string stops changing.
+ *
+ * A single pass over a bracket-pair pattern can leave a tag behind, because
+ * deleting one span brings its neighbours together. Repeating until stable is
+ * the remediation CodeQL documents for
+ * `js/incomplete-multi-character-sanitization`.
+ */
+function stripTags(value: string): string {
+  let previous: string;
+  let result = value;
+  do {
+    previous = result;
+    result = result.replace(TAG_RE, '');
+  } while (result !== previous);
+  return result;
+}
+
 /** Strip wiki markup to plain text, and report whether it's optional. */
 export function cleanObjectiveLine(line: string): WikiStoryObjective {
   const optional = OPT_RE.test(line);
   OPT_RE.lastIndex = 0;
-  let text = line
-    .replace(OPT_RE, '')
-    .replace(LINK_RE, '$1')
-    .replace(TAG_RE, '')
+  let text = stripTags(line.replace(OPT_RE, '').replace(LINK_RE, '$1'))
     .replaceAll("'''", '')
     .replaceAll("''", '')
-    // TAG_RE only matches a bracket pair, so markup hiding the delimiter
-    // survives it and the italic pass can then rebuild a tag: `<''script`
-    // becomes `<script`. Drop leftover brackets individually and last, since
+    // Repeating the tag pass cannot help when no closing bracket was ever
+    // present: `<''script` survives it untouched and the italic pass above then
+    // yields `<script`. Drop stray brackets individually and last, because
     // single characters cannot recombine into a tag.
     .replace(/[<>]/g, '')
     .replace(/\s+/g, ' ');
