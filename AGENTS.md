@@ -129,8 +129,9 @@ Vitest is the only test framework. Tests should be named `*.test.ts` under `test
 Fix fallow findings at their root whenever the code can be safely consolidated, simplified, removed, or covered by tests. Do not add `fallow-ignore` suppressions for resolvable findings; suppressions must be reserved for genuinely unavoidable tool false positives or external/runtime constraints, include a specific reason, and receive explicit reviewer approval.
 
 `npm run fallow:security` reports candidates rather than confirmed vulnerabilities and
-exits 0; CI gates only on newly introduced ones (`--gate new --changed-since <base>`). The
-30 candidates standing on `main` were triaged and are all tool false positives. Re-check a
+exits 0; CI checks only newly introduced ones (`--gate new --changed-since <base>`), and
+because `main` is not branch-protected a red result reports rather than blocks. The 30
+candidates standing on `main` were triaged and are all tool false positives. Re-check a
 category only if the guard named below stops holding, and prefer fixing a guard over
 suppressing an item:
 
