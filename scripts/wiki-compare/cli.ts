@@ -432,6 +432,7 @@ export async function runBulkMode(
     const categoryLabels: Record<string, string> = {
       minPlayerLevel: 'Level Requirements',
       traderRequirements: 'Trader Loyalty Requirements',
+      scavKarma: 'Scav Karma Requirements',
       factionName: 'PMC Faction Restriction',
       taskRequirements: 'Task Prerequisites',
       nextTasks: 'Task Next / Unlocks',
@@ -448,6 +449,7 @@ export async function runBulkMode(
     const categoryOrder = [
       'minPlayerLevel',
       'traderRequirements',
+      'scavKarma',
       'factionName',
       'taskRequirements',
       'nextTasks',

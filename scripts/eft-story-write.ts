@@ -24,8 +24,25 @@ const HEADER =
   '  // are curated (scripts/story-chapter-meta.json). Each generated objective id is\n' +
   '  // the stable source objective id, with sourceQuestId linking to its sub-quest.\n' +
   '  // Every chapter is derived from the reference, so no objective carries a\n' +
-  '  // fabricated id; endingId, where present, is the real client/ending_list id.\n' +
-  '  // Regenerate with `npm run eft:story`.\n' +
+  '  // fabricated id; endingId and the chapter-level `endings` list use the real\n' +
+  '  // client/ending_list ids.\n' +
+  '  //\n' +
+  '  // `referenceCoverage` reports how much of each chapter the capture resolved. The\n' +
+  '  // client only returns a story sub-quest template once the player has reached it,\n' +
+  '  // so `partial: true` means these objectives are what the capture could see, not a\n' +
+  '  // complete chapter - a missing objective is not evidence that none exists. For the\n' +
+  '  // same reason an ending can appear in `endings` with objectiveCount 0: the branch\n' +
+  '  // is real (the chapter quest references its gate sub-quest) but this capture holds\n' +
+  '  // no objective-level evidence for it.\n' +
+  '  //\n' +
+  '  // `mutuallyExclusiveWith` is derived from the capture: a sub-quest that fails when\n' +
+  '  // another completes, or that only becomes startable once another failed, cannot be\n' +
+  '  // completed alongside it. Cascade failure (failing because a predecessor failed) is\n' +
+  '  // not exclusivity and is excluded, and exclusivity against a quest outside the\n' +
+  '  // chapter is dropped because this field holds objective ids.\n' +
+  '  //\n' +
+  '  // Regenerate with `npm run eft:story`; the exact source capture is pinned by\n' +
+  '  // scripts/story-reference.lock.json.\n' +
   '  // The storyline is shared between PVP and PVE.\n' +
   '  //\n' +
   '  // Objectives can carry task-style marker data (maps, zones, possibleLocations,\n' +

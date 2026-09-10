@@ -1,0 +1,11 @@
+{
+  "file": "eft/quest_list.rollinglatest.modified.json",
+  "sha256": "c8357e137b6fcfd25ff255e889286a8de5e0fd248001e207b87a5b17b14403f1",
+  "bytes": 46940789,
+  "clientVersion": "EFT Client 1.0.5.0.45581",
+  "gameMode": "pve",
+  "capturedAt": "2026-06-30T00:02:37.467608",
+  "quests": 688,
+  "chapterQuests": 10,
+  "objectiveTexts": 430
+}

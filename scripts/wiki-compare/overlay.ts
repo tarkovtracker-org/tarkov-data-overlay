@@ -241,6 +241,13 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
       ) {
         suppressed.add(`${taskId}:${field}`);
 
+        // Scav karma is served inside `traderRequirements` (a Fence
+        // `reputation` entry), so an override of that field answers both the
+        // loyalty and the karma report for this task.
+        if (field === 'traderRequirements') {
+          suppressed.add(`${taskId}:scavKarma`);
+        }
+
         if (field === 'finishRewards' && fields && typeof fields === 'object') {
           const finishRewards = (fields as Record<string, unknown>)[field];
           if (finishRewards && typeof finishRewards === 'object') {

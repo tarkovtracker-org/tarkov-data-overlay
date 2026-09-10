@@ -4,13 +4,21 @@
  * Guards the invariants of the extraction/merge pipeline (scripts/eft-story-*):
  * chapter -> source quest traceability, objective id/source integrity (every
  * chapter, including The Ticket, must use real 24-hex client ids), the required
- * Boreas chapter (issue #233), real ending ids, and that no chapter unlocks a
- * task the overlay disables.
+ * Boreas chapter (issue #233), the four real endings and their coverage, the
+ * pinned source capture, and that no chapter unlocks a task the overlay
+ * disables.
  */
 
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'fs';
 import { join } from 'path';
-import { getProjectPaths, loadAllJson5FromDir, type StoryChapter } from '../src/lib/index.js';
+import JSON5 from 'json5';
+import {
+  getProjectPaths,
+  loadAllJson5FromDir,
+  STORY_ENDINGS,
+  type StoryChapter,
+} from '../src/lib/index.js';
 
 function loadStoryChapters(): Record<string, StoryChapter> {
   const { srcDir } = getProjectPaths();
@@ -61,16 +69,9 @@ describe('story chapters (EFT-sourced)', () => {
   });
 
   it('ties The Ticket endings to real client ending ids', () => {
-    // The four endings come from `client/ending_list`; each is gated by one of
-    // The Ticket's sub-quests, so objectives of a gate sub-quest carry that
-    // ending's real id. Slugs (savior/fallen/survivor/debtor) are gone - they
-    // could not be aligned to anything a consumer stores.
-    const REAL_ENDING_IDS = new Set([
-      '68a6e8f1a7455e5e23099ad8', // EscapedFromTarkovForHumanity
-      '68a6e8c834a37e244710d516', // EscapedFromTarkovAndSurvived
-      '68a6e8e4a8d0bee0b5324d96', // EscapedFromTarkovToFallInTheDarkness
-      '68a6028ef4c23ebbbc49da4b', // YouDidntEscapeFromYourself
-    ]);
+    // Slugs (savior/fallen/survivor/debtor) are gone - they could not be aligned
+    // to anything a consumer stores.
+    const REAL_ENDING_IDS = new Set(STORY_ENDINGS.map((ending) => ending.id));
     const ticket = chapters['the-ticket'];
     expect(ticket).toBeDefined();
     const tagged = (ticket.objectives ?? []).filter((o) => o.endingId);
@@ -78,6 +79,190 @@ describe('story chapters (EFT-sourced)', () => {
     for (const objective of tagged) {
       expect(REAL_ENDING_IDS, `${objective.id} endingId`).toContain(objective.endingId);
     }
+  });
+
+  it('models every client ending on The Ticket, with real ids and honest coverage', () => {
+    // The four endings come from `client/ending_list`; each is gated by one of
+    // The Ticket's sub-quests. The whole branch set is restated at chapter level
+    // so the chapter cannot claim four endings in prose while modelling one, and
+    // an ending the capture could not resolve reports 0 objectives instead of
+    // vanishing (which is how three of them were silently dropped before).
+    const ticket = chapters['the-ticket'];
+    expect(ticket).toBeDefined();
+    const endings = ticket.endings ?? [];
+    expect(endings.length).toBe(STORY_ENDINGS.length);
+    for (const ending of STORY_ENDINGS) {
+      const modelled = endings.find((candidate) => candidate.id === ending.id);
+      expect(modelled, `ending ${ending.systemName} missing`).toBeDefined();
+      expect(modelled!.systemName).toBe(ending.systemName);
+      expect(modelled!.gateQuestId).toBe(ending.gateQuestId);
+      // Objectives can only be attributed when the gate sub-quest resolved, and
+      // a resolved gate that contributes objectives must report them.
+      expect(modelled!.resolvedInReference).toBe(modelled!.objectiveCount > 0);
+    }
+    // Exactly one branch has objective-level evidence in the pinned capture; if a
+    // future capture resolves more gates this must be revisited deliberately
+    // rather than drift.
+    expect(endings.filter((ending) => ending.objectiveCount > 0).length).toBe(1);
+    expect(endings.find((ending) => ending.objectiveCount > 0)?.systemName).toBe(
+      'EscapedFromTarkovForHumanity'
+    );
+  });
+
+  it('ties every tagged objective to an ending its chapter declares', () => {
+    for (const [cid, ch] of Object.entries(chapters)) {
+      const declared = new Map((ch.endings ?? []).map((ending) => [ending.id, ending]));
+      const tallies = new Map<string, number>();
+      for (const objective of ch.objectives ?? []) {
+        if (!objective.endingId) continue;
+        const ending = declared.get(objective.endingId);
+        expect(ending, `${cid}/${objective.id} endingId not declared by chapter`).toBeDefined();
+        // The objective must belong to that ending's gate sub-quest - the only
+        // evidence that links the two.
+        expect(objective.sourceQuestId, `${cid}/${objective.id} sourceQuestId`).toBe(
+          ending!.gateQuestId
+        );
+        tallies.set(objective.endingId, (tallies.get(objective.endingId) ?? 0) + 1);
+      }
+      for (const ending of ch.endings ?? []) {
+        expect(ending.objectiveCount, `${cid} ${ending.systemName} objectiveCount`).toBe(
+          tallies.get(ending.id) ?? 0
+        );
+      }
+    }
+  });
+
+  it('reports reference coverage on every chapter', () => {
+    // Coverage is the guard against reading a chapter as complete: the client
+    // only returns a story sub-quest template once the player has reached it.
+    for (const [cid, ch] of Object.entries(chapters)) {
+      const coverage = ch.referenceCoverage;
+      expect(coverage, `${cid} referenceCoverage`).toBeDefined();
+      expect(coverage!.referencedSubquests).toBeGreaterThan(0);
+      expect(coverage!.resolvedSubquests).toBeGreaterThan(0);
+      expect(coverage!.resolvedSubquests).toBeLessThanOrEqual(coverage!.referencedSubquests);
+      expect(coverage!.partial).toBe(coverage!.resolvedSubquests < coverage!.referencedSubquests);
+      const sources = new Set((ch.objectives ?? []).map((objective) => objective.sourceQuestId));
+      expect(sources.size, `${cid} distinct sourceQuestIds`).toBeLessThanOrEqual(
+        coverage!.resolvedSubquests
+      );
+    }
+    // The Ticket's coverage is partial today (35 of 88 sub-quests); asserting it
+    // keeps the fact machine-checked rather than prose.
+    expect(chapters['the-ticket'].referenceCoverage?.partial).toBe(true);
+  });
+
+  it('keeps the schema ending enums in sync with STORY_ENDINGS', () => {
+    // The schema hardcodes the ending ids on purpose (it is what stops slugs
+    // coming back), which only stays correct while it matches the exported
+    // registry consumers compile against.
+    const { schemasDir } = getProjectPaths();
+    const schema = JSON5.parse(
+      readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8')
+    ) as any;
+    const chapterSchema = schema.additionalProperties.properties;
+    const expected = STORY_ENDINGS.map((ending) => ending.id);
+    expect(chapterSchema.endings.items.properties.id.enum.slice().sort()).toEqual(
+      expected.slice().sort()
+    );
+    expect(chapterSchema.objectives.items.properties.endingId.enum.slice().sort()).toEqual(
+      expected.slice().sort()
+    );
+  });
+
+  it('keeps the objective the prestige overrides depend on', () => {
+    // src/overrides/modes/*/prestige.json5 point storyObjectiveStatus at this
+    // real objective id; regeneration must not drop or renumber it.
+    const ticket = chapters['the-ticket'];
+    const anchor = (ticket.objectives ?? []).find((o) => o.id === '68e2ecfeb88d405a420774f8');
+    expect(anchor, 'prestige anchor objective missing').toBeDefined();
+    expect(anchor!.description).toBe('Obtain the "Ticket"');
+  });
+
+  it('pins the source capture that produced the committed chapters', () => {
+    // Generation is local-only (eft/ is gitignored), so the lock is the only
+    // thing that makes the committed output auditable: it records which capture
+    // was used, not any of its field values.
+    const lock = JSON.parse(readFileSync(join('scripts', 'story-reference.lock.json'), 'utf8')) as {
+      file: string;
+      sha256: string;
+      bytes: number;
+      clientVersion: string | null;
+      gameMode: string | null;
+      capturedAt: string | null;
+      quests: number;
+      chapterQuests: number;
+      objectiveTexts: number;
+    };
+    expect(lock.file).toMatch(/^eft\/.+\.json$/);
+    expect(lock.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(lock.bytes).toBeGreaterThan(0);
+    expect(lock.quests).toBeGreaterThan(0);
+    // Provenance a reviewer needs to judge the source: which client build, which
+    // mode, and when. A lock that cannot answer those is not auditable.
+    expect(lock.clientVersion, 'lock clientVersion').toMatch(/\d+\.\d+\.\d+/);
+    expect(['regular', 'pve', 'pvp-season']).toContain(lock.gameMode);
+    expect(Number.isNaN(Date.parse(lock.capturedAt ?? '')), 'lock capturedAt').toBe(false);
+    expect(lock.chapterQuests).toBe(Object.keys(chapters).length);
+    // Every objective in the committed data came from that capture's texts.
+    const objectives = Object.values(chapters).reduce(
+      (total, ch) => total + (ch.objectives ?? []).length,
+      0
+    );
+    expect(lock.objectiveTexts).toBe(objectives);
+    // Sub-quest coverage has to add up to the capture too, so a hand-edited lock
+    // or hand-edited chapters disagree.
+    const resolved = Object.values(chapters).reduce(
+      (total, ch) => total + (ch.referenceCoverage?.resolvedSubquests ?? 0),
+      0
+    );
+    expect(resolved).toBeLessThanOrEqual(lock.quests);
+  });
+
+  it('keeps the exclusive branch pairs the capture proves, symmetrically', () => {
+    // The former curated data anchored exclusivity on fabricated ids; it is now
+    // derived from the capture's own conditions (a sub-quest that fails when
+    // another completes, or that only starts once another failed). Losing these
+    // again would silently drop the chapter's decision points.
+    const byId = new Map<string, { chapter: string; sourceQuestId?: string }>();
+    for (const [cid, ch] of Object.entries(chapters)) {
+      for (const objective of ch.objectives ?? []) {
+        byId.set(objective.id, { chapter: cid, sourceQuestId: objective.sourceQuestId });
+      }
+    }
+
+    let pairs = 0;
+    for (const [cid, ch] of Object.entries(chapters)) {
+      for (const objective of ch.objectives ?? []) {
+        for (const other of objective.mutuallyExclusiveWith ?? []) {
+          pairs += 1;
+          const counterpart = byId.get(other);
+          // Must resolve to a real objective, in the same chapter, from a
+          // different sub-quest - an objective cannot exclude its own sibling.
+          expect(counterpart, `${cid}/${objective.id} excludes unknown ${other}`).toBeDefined();
+          expect(counterpart!.chapter).toBe(cid);
+          expect(counterpart!.sourceQuestId).not.toBe(objective.sourceQuestId);
+          const back = (ch.objectives ?? []).find((candidate) => candidate.id === other);
+          expect(
+            back?.mutuallyExclusiveWith ?? [],
+            `${other} does not exclude ${objective.id} back`
+          ).toContain(objective.id);
+        }
+      }
+    }
+    expect(pairs).toBeGreaterThan(0);
+
+    // The Falling Skies armored-case decision and The Ticket's Kerman/Mechanic
+    // split are the concrete pairs; assert one of each so a regression in either
+    // chapter fails.
+    const keep = (chapters['falling-skies'].objectives ?? []).find(
+      (o) => o.description === 'Keep the armored case for yourself'
+    );
+    expect(keep?.mutuallyExclusiveWith?.length).toBeGreaterThan(0);
+    const device = (chapters['the-ticket'].objectives ?? []).find(
+      (o) => o.description === 'Obtain an RFID card encryption device'
+    );
+    expect(device?.mutuallyExclusiveWith?.length).toBeGreaterThan(0);
   });
 
   it('never points a chapter unlock at a task the overlay disables', () => {

@@ -5,14 +5,24 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 import JSON5 from 'json5';
 import { sequenceRatio } from '../scripts/lib/sequence-matcher.js';
 import { cleanObjectiveLine, parseObjectives } from '../scripts/eft-story-wiki.js';
-import { bareId, normalizeStoryText, matchOptional } from '../scripts/eft-story-generate.js';
+import {
+  bareId,
+  exclusiveCounterparts,
+  expandChapterObjectives,
+  indexQuests,
+  matchOptional,
+  normalizeStoryText,
+  storyReferenceCandidates,
+  unwrapAnnotatedText,
+} from '../scripts/eft-story-generate.js';
 import { renderStoryChaptersJson5 } from '../scripts/eft-story-write.js';
-import { getProjectPaths } from '../src/lib/index.js';
+import { getProjectPaths, STORY_ENDINGS } from '../src/lib/index.js';
 
 describe('sequenceRatio (difflib SequenceMatcher.ratio port)', () => {
   // Expected values computed with CPython difflib.SequenceMatcher(None, a, b).ratio()
@@ -148,6 +158,223 @@ describe('bareId', () => {
     expect(bareId('68cbd33676fe74b1e80bfd91')).toBe('68cbd33676fe74b1e80bfd91');
     expect(bareId('not an id')).toBeNull();
     expect(bareId(42)).toBeNull();
+  });
+});
+
+describe('unwrapAnnotatedText', () => {
+  it('recovers the client value from the enrichment wrapper', () => {
+    // The enriched capture rewrites values as `[<original>] <resolved>`; the
+    // plain 1.1 capture gives this objective id exactly "Escape from Tarkov".
+    expect(unwrapAnnotatedText('[Escape from Tarkov] ESCAPE FROM TARKOV')).toBe(
+      'Escape from Tarkov'
+    );
+    expect(unwrapAnnotatedText('[68da33fe00868edcb6025ac4 name] The Ticket')).toBe(
+      '68da33fe00868edcb6025ac4 name'
+    );
+  });
+
+  it('leaves plain text and unresolvable markers alone', () => {
+    expect(unwrapAnnotatedText('Pass the security check')).toBe('Pass the security check');
+    // Empty brackets are the tool's "could not resolve" marker: there is no
+    // original to recover, and the tail is an unrelated string.
+    expect(unwrapAnnotatedText('[] Experience bonus {0}')).toBe('[] Experience bonus {0}');
+  });
+});
+
+describe('expandChapterObjectives', () => {
+  const capture = [
+    {
+      _id: '[68da33fe00868edcb6025ac4] Chapter',
+      conditions: {
+        AvailableForFinish: [
+          { conditionType: 'Quest', target: ['[aaaaaaaaaaaaaaaaaaaaaaaa] sub'] },
+          { conditionType: 'Quest', target: '[aaaaaaaaaaaaaaaaaaaaaaaa] sub' }, // duplicate ref
+          { conditionType: 'Quest', target: '67bdf8c066ca1d79a202463a' }, // ending gate
+          { conditionType: 'Quest', target: 'cccccccccccccccccccccccc' }, // unresolved
+          { conditionType: 'CounterCreator' }, // not a sub-quest ref
+        ],
+      },
+    },
+    {
+      _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+      localization: { en: { o1: 'First objective', o3: 'Third objective' } },
+      conditions: {
+        AvailableForFinish: [
+          { id: 'o1' },
+          { id: 'o2' }, // no localized text -> skipped
+          {}, // no id -> skipped
+          { id: 'o3' },
+        ],
+      },
+    },
+    {
+      _id: '67bdf8c066ca1d79a202463a',
+      localization: { en: { g1: 'Reach the evacuation area' } },
+      conditions: {
+        AvailableForFinish: [{ id: 'g1' }],
+        // Only startable if the other resolved sub-quest failed -> exclusive.
+        AvailableForStart: [
+          { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: [5] },
+        ],
+        // The counterpart is not a sub-quest of this chapter, so it cannot be
+        // expressed with objective ids and must be dropped.
+        Fail: [{ conditionType: 'Quest', target: '67460662d0fbbc74ca0f7229', status: [4] }],
+      },
+    },
+  ];
+
+  it('collects objectives once per referenced sub-quest and tags ending gates', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    expect(expansion.objectives.map((o) => o.id)).toEqual(['o1', 'o3', 'g1']);
+    expect(expansion.objectives[0]).toEqual({
+      id: 'o1',
+      text: 'First objective',
+      sourceQuestId: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+    });
+    // The gate sub-quest's objective carries the real ending id.
+    expect(expansion.objectives[2].endingId).toBe(STORY_ENDINGS[0].id);
+  });
+
+  it('reports referenced vs resolved sub-quests for coverage', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    // Three distinct refs (the duplicate collapses), one of which is missing.
+    expect(expansion.referencedSubquests).toEqual([
+      'aaaaaaaaaaaaaaaaaaaaaaaa',
+      '67bdf8c066ca1d79a202463a',
+      'cccccccccccccccccccccccc',
+    ]);
+    expect(expansion.resolvedSubquests).toEqual([
+      'aaaaaaaaaaaaaaaaaaaaaaaa',
+      '67bdf8c066ca1d79a202463a',
+    ]);
+  });
+
+  it('returns nothing for a chapter quest the capture lacks', () => {
+    const expansion = expandChapterObjectives('ffffffffffffffffffffffff', indexQuests([]));
+    expect(expansion.objectives).toEqual([]);
+    expect(expansion.referencedSubquests).toEqual([]);
+    expect(expansion.resolvedSubquests).toEqual([]);
+    expect(expansion.exclusivePairs).toEqual([]);
+  });
+
+  it('keeps exclusive pairs only between resolved sub-quests of the chapter', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    expect(expansion.exclusivePairs).toEqual([
+      ['67bdf8c066ca1d79a202463a', 'aaaaaaaaaaaaaaaaaaaaaaaa'],
+    ]);
+  });
+});
+
+describe('exclusiveCounterparts', () => {
+  it('reads a fail-on-completion condition as exclusivity', () => {
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: [4] }],
+        },
+      })
+    ).toEqual(['aaaaaaaaaaaaaaaaaaaaaaaa']);
+    // "fails once the other is even started" is stronger exclusivity, not weaker.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'bbbbbbbbbbbbbbbbbbbbbbbb', status: [2, 4] }],
+        },
+      })
+    ).toEqual(['bbbbbbbbbbbbbbbbbbbbbbbb']);
+  });
+
+  it('reads a start-only-if-failed condition as exclusivity', () => {
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: '[cccccccccccccccccccccccc] Other', status: [5] },
+          ],
+        },
+      })
+    ).toEqual(['cccccccccccccccccccccccc']);
+  });
+
+  it('does not treat cascade failure or ordinary prerequisites as exclusivity', () => {
+    // Fails because its predecessor failed - the chain dies together, it is not
+    // an alternative branch.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'dddddddddddddddddddddddd', status: [5] }],
+        },
+      })
+    ).toEqual([]);
+    // Ordinary unlock edge.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: 'eeeeeeeeeeeeeeeeeeeeeeee', status: [4] },
+          ],
+        },
+      })
+    ).toEqual([]);
+    // "completed or failed" accepts success, so it excludes nothing.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: 'ffffffffffffffffffffffff', status: [4, 5] },
+          ],
+        },
+      })
+    ).toEqual([]);
+    // Non-Quest conditions and missing quests contribute nothing.
+    expect(
+      exclusiveCounterparts({
+        conditions: { Fail: [{ conditionType: 'CounterCreator', status: [4] }] },
+      })
+    ).toEqual([]);
+    expect(exclusiveCounterparts(undefined)).toEqual([]);
+  });
+});
+
+describe('storyReferenceCandidates', () => {
+  it('discovers captures in a filesystem-independent order', () => {
+    // readdirSync order is not portable, so discovery sorts; enriched captures
+    // still rank first because they carry the localization block.
+    const root = mkdtempSync(join(tmpdir(), 'story-candidates-'));
+    try {
+      mkdirSync(join(root, 'zdir'));
+      mkdirSync(join(root, 'adir'));
+      for (const file of [
+        'quest_list.b.json',
+        'quest_list.a.json',
+        'quest_list.rollinglatest.modified.json',
+        'not-a-capture.json',
+        'quest_list.txt',
+      ]) {
+        writeFileSync(join(root, file), '{}');
+      }
+      writeFileSync(join(root, 'zdir', 'quest-list.z.json'), '{}');
+      writeFileSync(join(root, 'adir', 'quest_list.nested.json'), '{}');
+
+      expect(storyReferenceCandidates(root)).toEqual([
+        join(root, 'quest_list.rollinglatest.modified.json'),
+        join(root, 'adir', 'quest_list.nested.json'),
+        join(root, 'quest_list.a.json'),
+        join(root, 'quest_list.b.json'),
+        join(root, 'zdir', 'quest-list.z.json'),
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

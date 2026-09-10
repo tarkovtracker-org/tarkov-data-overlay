@@ -8,8 +8,25 @@
   // are curated (scripts/story-chapter-meta.json). Each generated objective id is
   // the stable source objective id, with sourceQuestId linking to its sub-quest.
   // Every chapter is derived from the reference, so no objective carries a
-  // fabricated id; endingId, where present, is the real client/ending_list id.
-  // Regenerate with `npm run eft:story`.
+  // fabricated id; endingId and the chapter-level `endings` list use the real
+  // client/ending_list ids.
+  //
+  // `referenceCoverage` reports how much of each chapter the capture resolved. The
+  // client only returns a story sub-quest template once the player has reached it,
+  // so `partial: true` means these objectives are what the capture could see, not a
+  // complete chapter - a missing objective is not evidence that none exists. For the
+  // same reason an ending can appear in `endings` with objectiveCount 0: the branch
+  // is real (the chapter quest references its gate sub-quest) but this capture holds
+  // no objective-level evidence for it.
+  //
+  // `mutuallyExclusiveWith` is derived from the capture: a sub-quest that fails when
+  // another completes, or that only becomes startable once another failed, cannot be
+  // completed alongside it. Cascade failure (failing because a predecessor failed) is
+  // not exclusivity and is excluded, and exclusivity against a quest outside the
+  // chapter is dropped because this field holds objective ids.
+  //
+  // Regenerate with `npm run eft:story`; the exact source capture is pinned by
+  // scripts/story-reference.lock.json.
   // The storyline is shared between PVP and PVE.
   //
   // Objectives can carry task-style marker data (maps, zones, possibleLocations,
@@ -25,6 +42,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Tour',
       order: 1,
       chapterQuestId: '68cbd33676fe74b1e80bfd91',
+      referenceCoverage: {
+          referencedSubquests: 12,
+          resolvedSubquests: 12,
+          partial: false,
+      },
       autoStart: true,
       chapterRequirements: [],
       description: 'Starting quest - automatically unlocked at the beginning of the storyline',
@@ -363,6 +385,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Falling_Skies',
       order: 2,
       chapterQuestId: '68cbcdc4c964ab83cc0c928e',
+      referenceCoverage: {
+          referencedSubquests: 15,
+          resolvedSubquests: 12,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [
           {
@@ -381,42 +408,76 @@
               type: 'main',
               description: 'Learn details about the SUV from Therapist',
               sourceQuestId: '678f6bd1e8d46e40ff021605',
+              mutuallyExclusiveWith: [
+                  '678fa1b62f3482f90842ff2f',
+                  '68b5758c09b1506a5cd4e3a3',
+              ],
           },
           {
               id: '68c01c6c954650cf2b48bbea',
               type: 'main',
               description: 'Ask the traders about the fallen plane',
               sourceQuestId: '678f6bd1e8d46e40ff021605',
+              mutuallyExclusiveWith: [
+                  '678fa1b62f3482f90842ff2f',
+                  '68b5758c09b1506a5cd4e3a3',
+              ],
           },
           {
               id: '678f6eae2ed26c2110cb9909',
               type: 'main',
               description: 'Retrieve the flash drive from one of the G-Wagon SUVs',
               sourceQuestId: '678f6bd1e8d46e40ff021605',
+              mutuallyExclusiveWith: [
+                  '678fa1b62f3482f90842ff2f',
+                  '68b5758c09b1506a5cd4e3a3',
+              ],
           },
           {
               id: '678f6edd6b76b693d0f62654',
               type: 'main',
               description: 'Locate the right G-Wagon SUV',
               sourceQuestId: '678f6bd1e8d46e40ff021605',
+              mutuallyExclusiveWith: [
+                  '678fa1b62f3482f90842ff2f',
+                  '68b5758c09b1506a5cd4e3a3',
+              ],
           },
           {
               id: '678f6ec00199b227bbf61473',
               type: 'main',
               description: 'Hand over the flash drive to Prapor',
               sourceQuestId: '678f6bd1e8d46e40ff021605',
+              mutuallyExclusiveWith: [
+                  '678fa1b62f3482f90842ff2f',
+                  '68b5758c09b1506a5cd4e3a3',
+              ],
           },
           {
               id: '68b5758c09b1506a5cd4e3a3',
               type: 'main',
               description: 'Collect the required amount in USD',
               sourceQuestId: '678fa1463977eb69290a3a06',
+              mutuallyExclusiveWith: [
+                  '678f6eae2ed26c2110cb9909',
+                  '678f6ec00199b227bbf61473',
+                  '678f6edd6b76b693d0f62654',
+                  '68b83ecbe7204965a7265865',
+                  '68c01c6c954650cf2b48bbea',
+              ],
           },
           {
               id: '678fa1b62f3482f90842ff2f',
               type: 'main',
               description: 'Hand over the cash to Therapist',
               sourceQuestId: '678fa1463977eb69290a3a06',
+              mutuallyExclusiveWith: [
+                  '678f6eae2ed26c2110cb9909',
+                  '678f6ec00199b227bbf61473',
+                  '678f6edd6b76b693d0f62654',
+                  '68b83ecbe7204965a7265865',
+                  '68c01c6c954650cf2b48bbea',
+              ],
           },
           {
               id: '68f3e4d558b556716299f8de',
@@ -531,24 +592,38 @@
               type: 'main',
               description: 'Retrieve the armored case',
               sourceQuestId: '679cdee4ce3a208fee0ad657',
+              mutuallyExclusiveWith: [
+                  '690177dcaaed5ef80cdcd1ef',
+              ],
           },
           {
               id: '679cdee4ce3a208fee0ad65b',
               type: 'main',
               description: 'Hand over the armored case to Prapor',
               sourceQuestId: '679cdee4ce3a208fee0ad657',
+              mutuallyExclusiveWith: [
+                  '690177dcaaed5ef80cdcd1ef',
+              ],
           },
           {
               id: '68fbbc8ea9ece72415bf5223',
               type: 'optional',
               description: 'Find any additional clues',
               sourceQuestId: '679cdee4ce3a208fee0ad657',
+              mutuallyExclusiveWith: [
+                  '690177dcaaed5ef80cdcd1ef',
+              ],
           },
           {
               id: '690177dcaaed5ef80cdcd1ef',
               type: 'main',
               description: 'Keep the armored case for yourself',
               sourceQuestId: '68cd7d6d9510d63fdb05a76a',
+              mutuallyExclusiveWith: [
+                  '679cdee4ce3a208fee0ad65a',
+                  '679cdee4ce3a208fee0ad65b',
+                  '68fbbc8ea9ece72415bf5223',
+              ],
           },
       ],
       rewards: null,
@@ -565,6 +640,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Batya',
       order: 3,
       chapterQuestId: '68da36cf7cff54fc6109874a',
+      referenceCoverage: {
+          referencedSubquests: 33,
+          resolvedSubquests: 25,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -650,12 +730,18 @@
               type: 'main',
               description: 'Learn more about the Bogatyr squad\'s activities',
               sourceQuestId: '6915bb52dff93d50490eaf54',
+              mutuallyExclusiveWith: [
+                  '68facc4bd5527594cfda2849',
+              ],
           },
           {
               id: '6915bb52dff93d50490eaf5b',
               type: 'main',
               description: 'Learn more about the Bogatyr squad\'s members',
               sourceQuestId: '6915bb52dff93d50490eaf54',
+              mutuallyExclusiveWith: [
+                  '68facc4bd5527594cfda2849',
+              ],
           },
           {
               id: '68cd71414bff4d23910fa1f7',
@@ -734,18 +820,27 @@
               type: 'main',
               description: 'Learn more about Taran',
               sourceQuestId: '68f9ef8a1dbc7a9f81001a87',
+              mutuallyExclusiveWith: [
+                  '68facc4bd5527594cfda2849',
+              ],
           },
           {
               id: '68f9ef8a1dbc7a9f81001a94',
               type: 'main',
               description: 'Learn more about Strelets',
               sourceQuestId: '68f9ef8a1dbc7a9f81001a87',
+              mutuallyExclusiveWith: [
+                  '68facc4bd5527594cfda2849',
+              ],
           },
           {
               id: '68f9ef8a1dbc7a9f81001a98',
               type: 'main',
               description: 'Find Voevoda\'s personal belongings',
               sourceQuestId: '68f9ef8a1dbc7a9f81001a87',
+              mutuallyExclusiveWith: [
+                  '68facc4bd5527594cfda2849',
+              ],
           },
           {
               id: '68d52f63e94e3689328fc3b0',
@@ -926,6 +1021,13 @@
               type: 'main',
               description: 'Read the agent network deployment report',
               sourceQuestId: '68caba4119f13a8d1b0ad3ac',
+              mutuallyExclusiveWith: [
+                  '68f9ef8a1dbc7a9f81001a92',
+                  '68f9ef8a1dbc7a9f81001a94',
+                  '68f9ef8a1dbc7a9f81001a98',
+                  '6915bb52dff93d50490eaf58',
+                  '6915bb52dff93d50490eaf5b',
+              ],
           },
       ],
       rewards: null,
@@ -943,6 +1045,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard',
       order: 4,
       chapterQuestId: '6900927ab7d28358f80b9421',
+      referenceCoverage: {
+          referencedSubquests: 16,
+          resolvedSubquests: 15,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1176,6 +1283,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Blue_Fire',
       order: 5,
       chapterQuestId: '68e784b7fa3f1fa3770094ba',
+      referenceCoverage: {
+          referencedSubquests: 10,
+          resolvedSubquests: 8,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1219,12 +1331,18 @@
               type: 'main',
               description: 'Hand over the fragment of Item 1156 to Mechanic',
               sourceQuestId: '67b892b832f50fb7ec084426',
+              mutuallyExclusiveWith: [
+                  '690014682dda730f8911daf0',
+              ],
           },
           {
               id: '690014682dda730f8911daf0',
               type: 'main',
               description: 'Keep the fragment of Item 1156 for yourself',
               sourceQuestId: '67b892ba0e9aad30720bfc56',
+              mutuallyExclusiveWith: [
+                  '67dc00dfbb13159031c752a6',
+              ],
           },
           {
               id: '68e8d7b563fa6ade0f6327e5',
@@ -1265,6 +1383,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/They_Are_Already_Here',
       order: 6,
       chapterQuestId: '6903d779fdfc4078740a4bd0',
+      referenceCoverage: {
+          referencedSubquests: 19,
+          resolvedSubquests: 15,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1458,12 +1581,24 @@
               type: 'main',
               description: 'Collect the flash drive from the ARRS station',
               sourceQuestId: '6914d59b1bd36f988e0d95bc',
+              mutuallyExclusiveWith: [
+                  '68e5976a0a045554d26a7d8c',
+                  '690420e9f34c0074532b1aa2',
+                  '690a144cb3bb1e6f6cb9b95d',
+                  '690a15748850c7c2ccc34e38',
+              ],
           },
           {
               id: '691509592ce11cbec81adf13',
               type: 'main',
               description: 'Survive and extract from Interchange',
               sourceQuestId: '6914d59b1bd36f988e0d95bc',
+              mutuallyExclusiveWith: [
+                  '68e5976a0a045554d26a7d8c',
+                  '690420e9f34c0074532b1aa2',
+                  '690a144cb3bb1e6f6cb9b95d',
+                  '690a15748850c7c2ccc34e38',
+              ],
           },
           {
               id: '68bc802a6df67927e13893a7',
@@ -1482,24 +1617,40 @@
               type: 'main',
               description: 'Investigate ARRS Station 14-4 KORD thoroughly',
               sourceQuestId: '68588ede90466842410d7bb8',
+              mutuallyExclusiveWith: [
+                  '6914d59b1bd36f988e0d95be',
+                  '691509592ce11cbec81adf13',
+              ],
           },
           {
               id: '690420e9f34c0074532b1aa2',
               type: 'main',
               description: 'Find a way to disconnect the station from external agents',
               sourceQuestId: '68588edf975681ee130def28',
+              mutuallyExclusiveWith: [
+                  '6914d59b1bd36f988e0d95be',
+                  '691509592ce11cbec81adf13',
+              ],
           },
           {
               id: '690a144cb3bb1e6f6cb9b95d',
               type: 'optional',
               description: 'Check that the station power is turned on',
               sourceQuestId: '68588edf975681ee130def28',
+              mutuallyExclusiveWith: [
+                  '6914d59b1bd36f988e0d95be',
+                  '691509592ce11cbec81adf13',
+              ],
           },
           {
               id: '690a15748850c7c2ccc34e38',
               type: 'main',
               description: 'Restore the ARRS station to backup settings',
               sourceQuestId: '68588edf975681ee130def28',
+              mutuallyExclusiveWith: [
+                  '6914d59b1bd36f988e0d95be',
+                  '691509592ce11cbec81adf13',
+              ],
           },
           {
               id: '69041d636437f226275b55a0',
@@ -1522,6 +1673,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Accidental_Witness',
       order: 7,
       chapterQuestId: '69052e18e680c2d3e3034d3a',
+      referenceCoverage: {
+          referencedSubquests: 12,
+          resolvedSubquests: 11,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1719,6 +1875,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)',
       order: 8,
       chapterQuestId: '68e3a35002661eb2d30ce387',
+      referenceCoverage: {
+          referencedSubquests: 5,
+          resolvedSubquests: 5,
+          partial: false,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1843,6 +2004,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Ticket',
       order: 9,
       chapterQuestId: '68da33fe00868edcb6025ac4',
+      referenceCoverage: {
+          referencedSubquests: 88,
+          resolvedSubquests: 35,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [
           {
@@ -1853,8 +2019,8 @@
       activation: {
           summary: 'Continue from Falling Skies after obtaining the armored case and start the Mr. Kerman terminal chain.',
       },
-      description: 'Branches into 4 endings based on player decisions: Savior (help Kerman), Fallen (betray Kerman), Survivor (pay Prapor), Debtor (seek Lightkeeper)',
-      notes: 'Decision points are mutually exclusive. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).',
+      description: 'Branches into the storyline\'s four endings, listed in `endings` with the real ids the client serves in ending_list. The wiki describes the decision points as helping or betraying Mr. Kerman, paying Prapor, or seeking the Lightkeeper; each ending is gated by its own sub-quest.',
+      notes: 'Decision points are mutually exclusive; the pairs the reference capture proves are emitted per objective as `mutuallyExclusiveWith`, and exclusivity against quests outside the chapter is not expressible there. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).',
       objectives: [
           {
               id: '68d921de0d2f39698f6562c1',
@@ -2077,18 +2243,28 @@
               type: 'main',
               description: 'Obtain an RFID card encryption device',
               sourceQuestId: '67bc9d70adb794ecb40f5755',
+              mutuallyExclusiveWith: [
+                  '68e6a2c30efb846429f36bf7',
+                  '68e6a2cdfed9106cf6c920d2',
+              ],
           },
           {
               id: '68e6a2c30efb846429f36bf7',
               type: 'main',
               description: 'Talk to Mr. Kerman',
               sourceQuestId: '67bc9e3e7801bf5c41017b82',
+              mutuallyExclusiveWith: [
+                  '68fcc20ed1efc371307d4e47',
+              ],
           },
           {
               id: '68e6a2cdfed9106cf6c920d2',
               type: 'main',
               description: 'Talk to Mechanic',
               sourceQuestId: '67bc9e3e7801bf5c41017b82',
+              mutuallyExclusiveWith: [
+                  '68fcc20ed1efc371307d4e47',
+              ],
           },
           {
               id: '68e6a6b0a2fae0a7a812325d',
@@ -2280,7 +2456,7 @@
           {
               id: '68f7eb1280b4d1114f1acb5e',
               type: 'main',
-              description: '[Escape from Tarkov] ESCAPE FROM TARKOV',
+              description: 'Escape from Tarkov',
               sourceQuestId: '67bdf8c066ca1d79a202463a',
               endingId: '68a6e8f1a7455e5e23099ad8',
           },
@@ -2396,6 +2572,36 @@
               sourceQuestId: '68f16d504a7305f74f0c746b',
           },
       ],
+      endings: [
+          {
+              id: '68a6e8f1a7455e5e23099ad8',
+              systemName: 'EscapedFromTarkovForHumanity',
+              gateQuestId: '67bdf8c066ca1d79a202463a',
+              objectiveCount: 23,
+              resolvedInReference: true,
+          },
+          {
+              id: '68a6e8c834a37e244710d516',
+              systemName: 'EscapedFromTarkovAndSurvived',
+              gateQuestId: '67c08f0268e50a07b10d25a6',
+              objectiveCount: 0,
+              resolvedInReference: false,
+          },
+          {
+              id: '68a6e8e4a8d0bee0b5324d96',
+              systemName: 'EscapedFromTarkovToFallInTheDarkness',
+              gateQuestId: '67c862bd9f9b7ef9090651d8',
+              objectiveCount: 0,
+              resolvedInReference: false,
+          },
+          {
+              id: '68a6028ef4c23ebbbc49da4b',
+              systemName: 'YouDidntEscapeFromYourself',
+              gateQuestId: '67c9877aff0329206209cb67',
+              objectiveCount: 0,
+              resolvedInReference: false,
+          },
+      ],
       rewards: null,
       mapUnlocks: [
           {
@@ -2421,6 +2627,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Boreas',
       order: 10,
       chapterQuestId: '69d38381cea4b428690ea1d9',
+      referenceCoverage: {
+          referencedSubquests: 38,
+          resolvedSubquests: 20,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {

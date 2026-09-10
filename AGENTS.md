@@ -78,7 +78,8 @@ Never commit the reference or anything derived from it; PRs carry only the
 resulting JSON5 corrections plus proof links. That prohibition covers the raw
 capture and the field-by-field diffs these tools emit — not every artifact
 informed by the reference. Deliberate, documented exceptions exist and are called
-out where they apply: `src/additions/storyChapters.json5` (below) and
+out where they apply: `src/additions/storyChapters.json5` and its provenance lock
+`scripts/story-reference.lock.json` (both below) and
 `docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates plus a few per-task
 observations, using only publicly published identifiers and no reference field
 values. Anything new in that category needs the same explicit rationale and must
@@ -133,12 +134,34 @@ name what it does and does not reproduce.
   numeric `eft:*` tools this one produces committed additions, not a gitignored
   diff. It takes objective text/order/ids from the local reference for structure
   and the optional/required flags plus proof from the EFT wiki, merges curated
-  chapter metadata from `scripts/story-chapter-meta.json`, and preserves The
-  Ticket's branching. The reference itself stays gitignored; only the generated
-  JSON5 is committed. The pipeline is pure TypeScript
+  chapter metadata from `scripts/story-chapter-meta.json`, and derives The
+  Ticket's branch model (chapter-level `endings` with the real
+  `client/ending_list` ids, plus per-chapter `referenceCoverage`) from the
+  capture rather than from curated slugs. The reference itself stays gitignored;
+  only the generated JSON5 is committed. The pipeline is pure TypeScript
   (`eft-story-wiki.ts` -> `eft-story-generate.ts` -> `eft-story-write.ts`);
   fuzzy optional-matching uses a faithful difflib `SequenceMatcher.ratio()`
   port in `scripts/lib/sequence-matcher.ts`.
+
+  Generation is local-only and cannot run in CI or for a contributor without the
+  capture. What keeps the committed output auditable is
+  `scripts/story-reference.lock.json`, a committed provenance lock — the second
+  deliberate exception to "never commit anything derived from the reference".
+  It records only which capture was used: path, SHA-256, byte size, client
+  version, game mode, capture timestamp, and how much of the storyline that
+  capture resolved (quest count, chapter quests, objective texts). It reproduces
+  no field values — no experience, no level gates, no objective text, no ids.
+  The generator refuses to guess: it uses the locked capture and fails if the
+  hash no longer matches, and `STORY_REFERENCE_UPDATE_LOCK=1` is the only way to
+  re-pin, so switching source captures always lands as a reviewable lock diff
+  next to the regenerated data. `STORY_REFERENCE=<file>` only relaxes the _path_
+  (a moved or renamed copy of the pinned capture); its hash must still match, so
+  it cannot swap in a different capture. Note the pinned capture is not
+  necessarily the newest one: the client returns a story sub-quest template only
+  once the player has reached it, so an older capture from an advanced character
+  resolves more of the storyline than a fresh one from an early character, and
+  the lock's `clientVersion` may therefore predate the current patch. Check it
+  before assuming the storyline data reflects the latest build.
 
 ## Coding Style & Naming Conventions
 

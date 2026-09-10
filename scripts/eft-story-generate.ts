@@ -4,12 +4,13 @@
  * wiki-verified optional/required flags.
  *
  * Sources (by authority):
- * - Local quest reference (auto-selected from eft/; see loadReference): objective
- *   existence, text, order, and stable ids. A chapter is a named storyline quest
- *   on the narrator trader (67f7af56c117b6140af2a607); its objective conditions
- *   are ordered sub-quest refs whose own conditions carry the text. The objective
- *   condition id is used as the stable objective id so consumers that persist
- *   completion per id are not broken by wording/order changes on regeneration.
+ * - Local quest reference (pinned by scripts/story-reference.lock.json; see
+ *   loadReference): objective existence, text, order, and stable ids. A chapter
+ *   is a named storyline quest on the narrator trader
+ *   (67f7af56c117b6140af2a607); its objective conditions are ordered sub-quest
+ *   refs whose own conditions carry the text. The objective condition id is used
+ *   as the stable objective id so consumers that persist completion per id are
+ *   not broken by wording/order changes on regeneration.
  * - EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.ts):
  *   the player-facing optional/required distinction, matched by fuzzy text.
  * - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
@@ -17,16 +18,26 @@
  *   every chapter is derived from the reference so that no objective ships a
  *   fabricated id.
  *
+ * Generation is local-only: the capture lives under the gitignored eft/, so CI
+ * and contributors without it cannot regenerate. What makes the committed output
+ * auditable anyway is the lock file, which pins the exact capture by SHA-256
+ * (plus client version, mode, capture time and resolution counts). A different
+ * capture cannot silently take over: it either fails the hash check or shows up
+ * as a lock diff in the same commit.
+ *
  * Emits final storyChapters JSON to stdout. Deterministic given the inputs.
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import { createHash } from 'crypto';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { isDirectExecution } from '../src/lib/index.js';
+import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
+import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
 
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
+const LOCK = 'scripts/story-reference.lock.json';
 export const NARRATOR_TRADER = '67f7af56c117b6140af2a607';
 const ID_RE = /[0-9a-fA-F]{24}/;
 const MATCH_THRESHOLD = 0.6;
@@ -44,6 +55,7 @@ const CHAPTER_QUEST_ID: Record<string, string> = {
   'the-ticket': '68da33fe00868edcb6025ac4',
   boreas: '69d38381cea4b428690ea1d9',
 };
+
 /**
  * Every chapter's objectives are derived from the reference, so every objective
  * id in the output is a real client condition id.
@@ -52,55 +64,114 @@ const CHAPTER_QUEST_ID: Record<string, string> = {
  * `story-chapter-meta.json`) so that hand-written branching notes could be
  * preserved. That cost 44 fabricated ids of the form `the-ticket-main-1`, which
  * a consumer cannot align to anything in its database - the exact failure the
- * "use the real source objective id" rule below exists to prevent. The
- * fabricated ids also anchored `mutuallyExclusiveWith` and `endingId`, so the
- * branching data was self-referential rather than tied to game data.
+ * "use the real source objective id" rule exists to prevent. The fabricated ids
+ * also anchored `mutuallyExclusiveWith` and `endingId`, so the branching data
+ * was self-referential rather than tied to game data.
  *
- * Re-deriving The Ticket from the reference yields real ids for the sub-quests
- * the capture resolves. Note this is a deliberate trade: the client only returns
- * a story sub-quest template once the player has reached it, so a chapter's
- * coverage is bounded by how far the captured character progressed (The Ticket
- * resolves 35 of its 88 sub-quest references). Real ids for what we can see beat
- * invented ids for a hand-written summary.
+ * Deriving The Ticket from the reference instead loses nothing real, but it does
+ * change what the branch model can claim, so the branch structure is emitted
+ * from game data too:
+ * - `endings` restates all four `client/ending_list` endings at chapter level
+ *   with their real ids and gate sub-quests, each carrying how many objectives
+ *   the capture attributes to it.
+ * - `referenceCoverage` reports referenced vs resolved sub-quests, because the
+ *   client only returns a story sub-quest template once the player has reached
+ *   it (The Ticket resolves 35 of its 88 sub-quest references).
+ * - `mutuallyExclusiveWith` is re-derived from the capture's own condition
+ *   graph (see `exclusiveCounterparts`), not from curated slugs.
  */
-const PRESERVE_OBJECTIVES = new Set<string>();
+
+/** Quest status codes used by the client's conditions (see eft-normalize.ts). */
+const STATUS_STARTED = 2;
+const STATUS_COMPLETE = 4;
+const STATUS_FAIL = 5;
 
 /**
- * Real ending ids, keyed by the sub-quest that gates each ending.
+ * Sub-quests that cannot both be completed alongside `quest`, as the capture
+ * states it. Two condition shapes prove exclusivity:
  *
- * Source: `client/ending_list` in the local captures, which returns exactly four
- * endings, each with a `systemName` and a single `Quest` condition naming its
- * gate sub-quest. All four gate quests are sub-quests of The Ticket, so an
- * objective belonging to one of them can be tagged with its ending.
+ * - `Fail` / `Quest` with the counterpart's `complete` (or `started`) status:
+ *   completing that quest fails this one.
+ * - `AvailableForStart` / `Quest` with only the counterpart's `fail` status:
+ *   this quest is reachable only after that one failed.
  *
- * Only the gate quests the reference actually resolves can be tagged; the others
- * contribute no objectives, so they are simply absent rather than guessed.
+ * A `Fail` condition on the counterpart's *fail* status is cascade failure, not
+ * exclusivity, so it is excluded - a chain that dies with its predecessor is not
+ * an alternative to it.
  */
-const ENDING_BY_GATE_QUEST: Record<string, { id: string; systemName: string }> = {
-  '67bdf8c066ca1d79a202463a': {
-    id: '68a6e8f1a7455e5e23099ad8',
-    systemName: 'EscapedFromTarkovForHumanity',
-  },
-  '67c08f0268e50a07b10d25a6': {
-    id: '68a6e8c834a37e244710d516',
-    systemName: 'EscapedFromTarkovAndSurvived',
-  },
-  '67c862bd9f9b7ef9090651d8': {
-    id: '68a6e8e4a8d0bee0b5324d96',
-    systemName: 'EscapedFromTarkovToFallInTheDarkness',
-  },
-  '67c9877aff0329206209cb67': {
-    id: '68a6028ef4c23ebbbc49da4b',
-    systemName: 'YouDidntEscapeFromYourself',
-  },
-};
+export function exclusiveCounterparts(quest: JsonRecord | undefined): string[] {
+  const out: string[] = [];
+  const conditions = quest?.conditions ?? {};
+  const add = (condition: JsonRecord, statuses: number[]): void => {
+    if (condition?.conditionType !== 'Quest') return;
+    const status: number[] = Array.isArray(condition.status) ? condition.status : [];
+    if (!statuses.some((wanted) => status.includes(wanted))) return;
+    let target = condition.target;
+    if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
+    const id = bareId(target);
+    if (id && !out.includes(id)) out.push(id);
+  };
+  for (const condition of conditions.Fail ?? []) {
+    add(condition, [STATUS_COMPLETE, STATUS_STARTED]);
+  }
+  for (const condition of conditions.AvailableForStart ?? []) {
+    const status: number[] = Array.isArray(condition?.status) ? condition.status : [];
+    // "startable once it failed" only excludes the counterpart when success is
+    // not also accepted.
+    if (status.includes(STATUS_COMPLETE)) continue;
+    add(condition, [STATUS_FAIL]);
+  }
+  return out;
+}
+
+interface ExpandedObjective {
+  id: string;
+  text: string;
+  sourceQuestId: string;
+  endingId?: string;
+}
+
+interface ChapterExpansion {
+  objectives: ExpandedObjective[];
+  /** Distinct sub-quest ids the chapter quest references. */
+  referencedSubquests: string[];
+  /** Referenced sub-quests whose templates the capture resolved. */
+  resolvedSubquests: string[];
+  /**
+   * Sub-quest pairs the capture proves cannot both be completed, as sorted
+   * `[a, b]` tuples. Only pairs where both sides are resolved sub-quests of this
+   * chapter are kept: the field they feed (`mutuallyExclusiveWith`) holds
+   * objective ids, and a counterpart outside the chapter contributes none. The
+   * capture also states exclusivity against ordinary tasks (The Ticket's
+   * "Choose Your Friends Wisely", Boreas' "Hangover"), which the objective-level
+   * field cannot express and which is therefore dropped rather than approximated.
+   */
+  exclusivePairs: Array<[string, string]>;
+}
 
 interface WikiObjective {
   text: string;
   optional: boolean;
 }
 
+/** Provenance for the capture that produced the committed output. */
+interface ReferenceLock {
+  file: string;
+  sha256: string;
+  bytes: number;
+  clientVersion: string | null;
+  gameMode: string | null;
+  capturedAt: string | null;
+  quests: number;
+  chapterQuests: number;
+  objectiveTexts: number;
+}
+
 type JsonRecord = Record<string, any>;
+
+const ENDING_BY_GATE_QUEST = new Map<string, (typeof STORY_ENDINGS)[number]>(
+  STORY_ENDINGS.map((ending) => [ending.gateQuestId, ending])
+);
 
 /** Extract a bare 24-hex id from a value that may be wrapped as `[id] Name`. */
 export function bareId(value: unknown): string | null {
@@ -109,12 +180,43 @@ export function bareId(value: unknown): string | null {
   return match ? match[0] : null;
 }
 
+/**
+ * Codepoint ordering, used wherever output order must not vary.
+ * `String.localeCompare` depends on the runtime's locale/ICU data, so it cannot
+ * back a reproducibility guarantee.
+ */
+function byCodePoint(a: string, b: string): number {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
+
 /** Normalize objective text for fuzzy matching: collapse numbers, keep letters. */
 export function normalizeStoryText(text: string): string {
   let out = text.toLowerCase();
   out = out.replace(/\b\d[\d,]*\b/g, '#'); // collapse numbers
   out = out.replace(/[^a-z# ]/g, ' ');
   return out.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Undo the enriched capture's annotation wrapper on a localized string.
+ *
+ * The enrichment tool rewrites values as `[<original>] <resolved>` - the same
+ * convention `bareId` already unwraps for ids (`_id: '[68da33fe…] The Ticket'`).
+ * It reaches objective text too: The Ticket's final objective arrives as
+ * `[Escape from Tarkov] ESCAPE FROM TARKOV`, and the plain 1.1 PvE capture
+ * (unannotated) gives that same objective id the text `Escape from Tarkov`, so
+ * the bracketed half is the client's value and the tail is the tool's lookup.
+ *
+ * When the brackets are empty (`[] Experience bonus {0}`, the tool's marker for
+ * a string it could not resolve) there is no original to recover, so the value
+ * is returned untouched rather than replaced with the unrelated tail.
+ */
+export function unwrapAnnotatedText(text: string): string {
+  const match = /^\[([^\]]*)\]\s*(.*)$/s.exec(text);
+  if (!match) return text;
+  const original = match[1].trim();
+  return original.length > 0 ? original : text;
 }
 
 /**
@@ -144,75 +246,154 @@ export function matchOptional(
   return { optional: false, ratio: bestRatio };
 }
 
-/**
- * Pick and load the quest reference to generate from.
- *
- * Story chapters are not served like ordinary quests: the client returns a
- * chapter's sub-quest templates only once the player has reached them, so the
- * *newest* capture is not automatically the most useful one here - a fresh
- * capture from an early character resolves far fewer sub-quests than an older
- * capture from an advanced one. Selecting by "newest" (what `findReferenceFile`
- * does for the numeric `eft:*` tools) would silently shrink the storyline.
- *
- * Candidates are therefore scored by how much of the storyline each can actually
- * resolve: chapter quests present first, then objective conditions that carry
- * `localization.en` text. Set `STORY_REFERENCE` to pin one explicitly.
- */
-function loadReference(): JsonRecord[] {
-  const explicit = process.env.STORY_REFERENCE;
-  const candidates = explicit ? [explicit] : storyReferenceCandidates();
-  let best: { file: string; quests: JsonRecord[]; chapters: number; texts: number } | null = null;
-
-  for (const file of candidates) {
-    let quests: JsonRecord[];
-    try {
-      quests = readReferenceFile(file);
-    } catch {
-      continue;
-    }
-    const byId = new Map<string, JsonRecord>();
-    for (const quest of quests) {
-      const id = bareId(quest._id);
-      if (id) byId.set(id, quest);
-    }
-    let chapters = 0;
-    let texts = 0;
-    for (const chapterQuestId of Object.values(CHAPTER_QUEST_ID)) {
-      const chapterQuest = byId.get(chapterQuestId) as any;
-      if (!chapterQuest) continue;
-      chapters += 1;
-      for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
-        if (condition?.conditionType !== 'Quest') continue;
-        let target = condition.target;
-        if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
-        const sub = byId.get(bareId(target) ?? '') as any;
-        if (!sub) continue;
-        const en: Record<string, string> = sub?.localization?.en ?? {};
-        for (const objective of sub?.conditions?.AvailableForFinish ?? []) {
-          if (objective?.id && (en[objective.id] ?? '').trim()) texts += 1;
-        }
-      }
-    }
-    if (!best || chapters > best.chapters || (chapters === best.chapters && texts > best.texts)) {
-      best = { file, quests, chapters, texts };
-    }
+/** Index a capture's quests by bare id. */
+export function indexQuests(quests: JsonRecord[]): Map<string, JsonRecord> {
+  const byId = new Map<string, JsonRecord>();
+  for (const quest of quests) {
+    const id = bareId(quest._id);
+    if (id) byId.set(id, quest);
   }
-
-  if (!best || best.chapters === 0) {
-    throw new Error(
-      `No usable story reference found (checked: ${candidates.join(', ') || 'nothing'}). ` +
-        'Place a quest capture under eft/, or set STORY_REFERENCE to one.'
-    );
-  }
-  console.error(
-    `story reference: ${best.file} ` +
-      `(${best.chapters}/${Object.keys(CHAPTER_QUEST_ID).length} chapter quests, ${best.texts} objective texts)`
-  );
-  return best.quests;
+  return byId;
 }
 
-/** Quest-capture files under eft/, enriched variants first. */
-function storyReferenceCandidates(): string[] {
+/**
+ * Walk a chapter quest's ordered sub-quest references and collect their
+ * objectives.
+ *
+ * Single source of the expansion for both candidate scoring and output
+ * generation: when the two disagreed, a capture could score well and then emit
+ * something else.
+ */
+export function expandChapterObjectives(
+  chapterQuestId: string | undefined,
+  byId: Map<string, JsonRecord>
+): ChapterExpansion {
+  const objectives: ExpandedObjective[] = [];
+  const referenced: string[] = [];
+  const resolved: string[] = [];
+  const chapterQuest = chapterQuestId ? byId.get(chapterQuestId) : undefined;
+  if (!chapterQuest)
+    return {
+      objectives,
+      referencedSubquests: referenced,
+      resolvedSubquests: [],
+      exclusivePairs: [],
+    };
+
+  const seenRef = new Set<string>();
+  for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
+    if (condition?.conditionType !== 'Quest') continue;
+    let target = condition.target;
+    if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
+    const subId = bareId(target);
+    if (!subId || seenRef.has(subId)) continue;
+    seenRef.add(subId);
+    referenced.push(subId);
+
+    const subQuest = byId.get(subId);
+    if (!subQuest) continue;
+    resolved.push(subId);
+
+    const localized: Record<string, string> = subQuest?.localization?.en ?? {};
+    for (const objective of subQuest?.conditions?.AvailableForFinish ?? []) {
+      const objectiveId = objective?.id;
+      if (!objectiveId) continue; // skip conditions without an id
+      const text = unwrapAnnotatedText((localized[objectiveId] ?? '').trim()).trim();
+      if (!text) continue;
+      // Use the real source objective id as the stable id. Positional ids
+      // ({chapter}-main-n) shift whenever wording/order changes, which silently
+      // corrupts consumers that persist completion per objective id. The source
+      // id is unique and stable across regens.
+      const expanded: ExpandedObjective = { id: objectiveId, text, sourceQuestId: subId };
+      // Objectives belonging to an ending's gate sub-quest carry that ending's
+      // real id, so consumers can attribute a branch without a slug lookup.
+      const ending = ENDING_BY_GATE_QUEST.get(subId);
+      if (ending) expanded.endingId = ending.id;
+      objectives.push(expanded);
+    }
+  }
+
+  const resolvedSet = new Set(resolved);
+  const pairs: Array<[string, string]> = [];
+  const seenPair = new Set<string>();
+  for (const subId of resolved) {
+    for (const counterpart of exclusiveCounterparts(byId.get(subId))) {
+      if (!resolvedSet.has(counterpart) || counterpart === subId) continue;
+      const pair: [string, string] =
+        subId < counterpart ? [subId, counterpart] : [counterpart, subId];
+      const key = pair.join(':');
+      if (seenPair.has(key)) continue;
+      seenPair.add(key);
+      pairs.push(pair);
+    }
+  }
+  pairs.sort((a, b) => byCodePoint(a[0], b[0]) || byCodePoint(a[1], b[1]));
+
+  return {
+    objectives,
+    referencedSubquests: referenced,
+    resolvedSubquests: resolved,
+    exclusivePairs: pairs,
+  };
+}
+
+/**
+ * Unwrap a capture envelope to the quest array, tolerating the older
+ * `decoded_response`, the newer `body_response`, an already-unwrapped
+ * `{data: [...]}`, or a bare array.
+ */
+function readReferenceFile(file: string): JsonRecord[] {
+  return parseReferenceEnvelope(file, readFileSync(file)).quests;
+}
+
+/**
+ * Parse a capture's bytes into its quest array plus the envelope provenance.
+ *
+ * The bytes are passed in rather than re-read so that the hash recorded in the
+ * lock is taken over exactly the bytes that produced the quests (and so a 47 MB
+ * capture is read once).
+ */
+function parseReferenceEnvelope(
+  file: string,
+  bytes: Buffer
+): {
+  quests: JsonRecord[];
+  request?: { url?: string; headers?: Record<string, string> };
+  capturedAt?: string;
+} {
+  const raw = JSON.parse(bytes.toString('utf-8'));
+  const node = raw?.response ?? raw;
+  const decoded = node?.decoded_response ?? node?.body_response ?? node;
+  const data = decoded?.data ?? decoded;
+  if (!Array.isArray(data)) throw new Error(`unexpected quest reference shape in ${file}`);
+  return {
+    quests: data as JsonRecord[],
+    request: raw?.request,
+    capturedAt: raw?.response?.timestamp,
+  };
+}
+
+/** How much of the storyline a capture resolves. */
+function scoreReference(quests: JsonRecord[]): { chapters: number; texts: number } {
+  const byId = indexQuests(quests);
+  let chapters = 0;
+  let texts = 0;
+  for (const chapterQuestId of Object.values(CHAPTER_QUEST_ID)) {
+    if (!byId.has(chapterQuestId)) continue;
+    chapters += 1;
+    texts += expandChapterObjectives(chapterQuestId, byId).objectives.length;
+  }
+  return { chapters, texts };
+}
+
+/**
+ * Quest-capture files under eft/, enriched variants first.
+ *
+ * Directory entries are sorted before walking: `readdirSync` order is
+ * filesystem-dependent, so relying on it would make discovery - and therefore
+ * the fallback candidate ranking - vary between machines.
+ */
+export function storyReferenceCandidates(root = 'eft'): string[] {
   const found: string[] = [];
   const walk = (dir: string): void => {
     let names: string[];
@@ -221,7 +402,7 @@ function storyReferenceCandidates(): string[] {
     } catch {
       return;
     }
-    for (const name of names) {
+    for (const name of [...names].sort()) {
       const full = join(dir, name);
       let stats;
       try {
@@ -234,37 +415,158 @@ function storyReferenceCandidates(): string[] {
         found.push(full);
     }
   };
-  walk('eft');
+  walk(root);
   // Enriched captures carry the localization.en block that supplies objective
-  // text, so prefer them; otherwise keep discovery order for determinism.
+  // text, so prefer them; ties fall back to the sorted discovery order.
   return found.sort(
     (a, b) =>
       (a.includes('rollinglatest.modified') ? 0 : 1) -
-      (b.includes('rollinglatest.modified') ? 0 : 1)
+        (b.includes('rollinglatest.modified') ? 0 : 1) || byCodePoint(a, b)
   );
 }
 
 /**
- * Unwrap a capture envelope to the quest array, tolerating the older
- * `decoded_response`, the newer `body_response`, an already-unwrapped
- * `{data: [...]}`, or a bare array.
+ * Rank capture candidates for a lock refresh.
+ *
+ * Story chapters are not served like ordinary quests: the client returns a
+ * chapter's sub-quest templates only once the player has reached them, so the
+ * *newest* capture is not automatically the most useful one here - a fresh
+ * capture from an early character resolves far fewer sub-quests than an older
+ * capture from an advanced one. Selecting by "newest" (what `findReferenceFile`
+ * does for the numeric `eft:*` tools) would silently shrink the storyline.
+ *
+ * Candidates are therefore ranked by how much of the storyline each can resolve:
+ * chapter quests present first, then objective texts, then file path so equal
+ * scores resolve to one deterministic winner instead of discovery order.
  */
-function readReferenceFile(file: string): JsonRecord[] {
-  const raw = JSON.parse(readFileSync(file, 'utf-8'));
-  const node = raw?.response ?? raw;
-  const decoded = node?.decoded_response ?? node?.body_response ?? node;
-  const data = decoded?.data ?? decoded;
-  if (!Array.isArray(data)) throw new Error(`unexpected quest reference shape in ${file}`);
-  return data as JsonRecord[];
+export function rankStoryReferences(
+  candidates: string[]
+): Array<{ file: string; chapters: number; texts: number }> {
+  const scored: Array<{ file: string; chapters: number; texts: number }> = [];
+  for (const file of candidates) {
+    try {
+      scored.push({ file, ...scoreReference(readReferenceFile(file)) });
+    } catch {
+      continue; // unreadable or wrong-shaped capture
+    }
+  }
+  return scored.sort(
+    (a, b) => b.chapters - a.chapters || b.texts - a.texts || byCodePoint(a.file, b.file)
+  );
+}
+
+function readLock(): ReferenceLock | null {
+  if (!existsSync(LOCK)) return null;
+  return JSON.parse(readFileSync(LOCK, 'utf-8')) as ReferenceLock;
+}
+
+/** Fingerprint a capture: content hash plus the provenance in its envelope. */
+function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] } {
+  const bytes = readFileSync(file);
+  const envelope = parseReferenceEnvelope(file, bytes);
+  const { chapters, texts } = scoreReference(envelope.quests);
+  return {
+    quests: envelope.quests,
+    lock: {
+      file,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+      bytes: bytes.length,
+      clientVersion: envelope.request?.headers?.['App-Version'] ?? null,
+      gameMode: modeFromRequestUrl(envelope.request?.url),
+      capturedAt: envelope.capturedAt ?? null,
+      quests: envelope.quests.length,
+      chapterQuests: chapters,
+      objectiveTexts: texts,
+    },
+  };
+}
+
+/**
+ * Load the pinned quest reference.
+ *
+ * Selection is explicit rather than heuristic, so that regenerating on a
+ * workstation whose eft/ has since grown cannot quietly rewrite committed
+ * objectives:
+ * - by default the lock's capture is used and its SHA-256 must still match.
+ * - `STORY_REFERENCE=<file>` reads the pinned capture from another path (a moved
+ *   or renamed copy). The hash must still match the lock, so this cannot swap in
+ *   a different capture - it only relaxes the path.
+ * - `STORY_REFERENCE_UPDATE_LOCK=1` is the only mode that accepts a different
+ *   capture: it ranks candidates (or takes `STORY_REFERENCE`) and rewrites the
+ *   lock, so a source switch always lands as a reviewable diff.
+ */
+function loadReference(): JsonRecord[] {
+  const explicit = process.env.STORY_REFERENCE;
+  const updating = process.env.STORY_REFERENCE_UPDATE_LOCK === '1';
+  const lock = readLock();
+
+  let file: string | undefined = explicit;
+  if (!file && lock && !updating) {
+    if (!existsSync(lock.file)) {
+      throw new Error(
+        `pinned story reference is missing: ${lock.file} (${LOCK}). Restore that capture, ` +
+          'or point STORY_REFERENCE at a copy of it, or re-pin with ' +
+          'STORY_REFERENCE_UPDATE_LOCK=1.'
+      );
+    }
+    file = lock.file;
+  }
+  if (!file) {
+    const ranked = rankStoryReferences(storyReferenceCandidates());
+    if (ranked.length === 0 || ranked[0].chapters === 0) {
+      throw new Error(
+        'No usable story reference found under eft/. Place a quest capture there, or set ' +
+          'STORY_REFERENCE to one.'
+      );
+    }
+    if (!updating) {
+      throw new Error(
+        `no ${LOCK} to pin the story reference. Regenerating without a pin cannot be reviewed; ` +
+          `re-pin with STORY_REFERENCE_UPDATE_LOCK=1 (best candidate: ${ranked[0].file}).`
+      );
+    }
+    file = ranked[0].file;
+  }
+
+  const { lock: current, quests } = fingerprint(file);
+  if (current.chapterQuests === 0) {
+    throw new Error(`story reference ${file} resolves no chapter quests`);
+  }
+
+  if (lock && !updating) {
+    // The hash is the identity; the path may differ when STORY_REFERENCE points
+    // at a copy of the pinned capture.
+    if (current.sha256 !== lock.sha256) {
+      throw new Error(
+        `story reference does not match ${LOCK}\n` +
+          `  pinned:   ${lock.file} sha256=${lock.sha256}\n` +
+          `  selected: ${current.file} sha256=${current.sha256}\n` +
+          'Re-verify the capture, then re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+      );
+    }
+    if (current.file !== lock.file) {
+      console.error(`note: reading the pinned capture from ${current.file} (lock: ${lock.file})`);
+    }
+  }
+
+  if (updating) {
+    writeFileSync(LOCK, `${JSON.stringify(current, null, 2)}\n`);
+    console.error(`re-pinned ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…)`);
+  }
+
+  console.error(
+    `story reference: ${current.file} ` +
+      `(${current.clientVersion ?? 'unknown client'}, ${current.gameMode ?? 'unknown mode'}, ` +
+      `captured ${current.capturedAt ?? 'unknown'}; ` +
+      `${current.chapterQuests}/${Object.keys(CHAPTER_QUEST_ID).length} chapter quests, ` +
+      `${current.objectiveTexts} objective texts)`
+  );
+  return quests;
 }
 
 function main(): void {
   const quests = loadReference();
-  const byId = new Map<string, JsonRecord>();
-  for (const quest of quests) {
-    const id = bareId(quest._id);
-    if (id) byId.set(id, quest);
-  }
+  const byId = indexQuests(quests);
 
   const curated: Record<string, JsonRecord> = JSON.parse(readFileSync(META, 'utf-8'));
   const wiki: Record<string, WikiObjective[]> = existsSync(WIKI)
@@ -277,71 +579,60 @@ function main(): void {
     );
   }
 
-  const en = (quest: JsonRecord): Record<string, string> => quest?.localization?.en ?? {};
-
   const stats: Record<
     string,
     { objectives: number; matched: number; optional: number; wiki: number }
   > = {};
 
-  const expand = (chapterId: string): JsonRecord[] => {
-    const chapterQuest = byId.get(CHAPTER_QUEST_ID[chapterId]);
-    if (!chapterQuest) {
-      stats[chapterId] = { objectives: 0, matched: 0, optional: 0, wiki: 0 };
-      return [];
-    }
+  const out: Record<string, JsonRecord> = {};
+  const chapterIds = Object.keys(curated).sort((a, b) => curated[a].order - curated[b].order);
+  for (const chapterId of chapterIds) {
+    const meta = curated[chapterId];
+    const expansion = expandChapterObjectives(CHAPTER_QUEST_ID[chapterId], byId);
     const wikiObjectives = wiki[chapterId] ?? [];
-    const objectives: JsonRecord[] = [];
-    let optionalCount = 0;
-    let matched = 0;
 
-    for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
-      if (condition?.conditionType !== 'Quest') continue;
-      let target = condition.target;
-      if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
-      const subQuest = byId.get(bareId(target) ?? '');
-      if (!subQuest) continue;
-      const subId = bareId(subQuest._id);
-      const subEn = en(subQuest);
-      for (const objective of subQuest?.conditions?.AvailableForFinish ?? []) {
-        const objectiveId = objective?.id;
-        if (!objectiveId) continue; // skip conditions without an id
-        const text = (subEn[objectiveId] ?? '').trim();
-        if (!text) continue;
-        const { optional, ratio } = matchOptional(text, wikiObjectives);
-        if (ratio >= MATCH_THRESHOLD) matched += 1;
-        if (optional) optionalCount += 1;
-        // Use the real source objective id as the stable id. Positional ids
-        // ({chapter}-main-n) shift whenever wording/order changes, which
-        // silently corrupts consumers that persist completion per objective
-        // id. The source id is unique and stable across regens.
-        const emitted: JsonRecord = {
-          id: objectiveId,
-          type: optional ? 'optional' : 'main',
-          description: text,
-          sourceQuestId: subId,
-        };
-        // Objectives belonging to an ending's gate sub-quest carry that ending's
-        // real id, so consumers can attribute a branch without a slug lookup.
-        const ending = subId ? ENDING_BY_GATE_QUEST[subId] : undefined;
-        if (ending) emitted.endingId = ending.id;
-        objectives.push(emitted);
-      }
+    let matched = 0;
+    let optionalCount = 0;
+    // Objective ids per sub-quest, so a proven sub-quest pair can be expressed
+    // as the objective-to-objective exclusivity consumers actually store.
+    const objectiveIdsByQuest = new Map<string, string[]>();
+    for (const objective of expansion.objectives) {
+      const ids = objectiveIdsByQuest.get(objective.sourceQuestId) ?? [];
+      ids.push(objective.id);
+      objectiveIdsByQuest.set(objective.sourceQuestId, ids);
+    }
+    // Exclusivity is symmetric; the capture states only one direction, so both
+    // are emitted.
+    const exclusiveByQuest = new Map<string, string[]>();
+    for (const [left, right] of expansion.exclusivePairs) {
+      exclusiveByQuest.set(left, [...(exclusiveByQuest.get(left) ?? []), right]);
+      exclusiveByQuest.set(right, [...(exclusiveByQuest.get(right) ?? []), left]);
     }
 
+    const objectives = expansion.objectives.map((objective) => {
+      const { optional, ratio } = matchOptional(objective.text, wikiObjectives);
+      if (ratio >= MATCH_THRESHOLD) matched += 1;
+      if (optional) optionalCount += 1;
+      const emitted: JsonRecord = {
+        id: objective.id,
+        type: optional ? 'optional' : 'main',
+        description: objective.text,
+        sourceQuestId: objective.sourceQuestId,
+      };
+      const exclusive = (exclusiveByQuest.get(objective.sourceQuestId) ?? [])
+        .flatMap((questId) => objectiveIdsByQuest.get(questId) ?? [])
+        .sort(byCodePoint);
+      if (exclusive.length > 0) emitted.mutuallyExclusiveWith = exclusive;
+      if (objective.endingId) emitted.endingId = objective.endingId;
+      return emitted;
+    });
     stats[chapterId] = {
       objectives: objectives.length,
       matched,
       optional: optionalCount,
       wiki: wikiObjectives.length,
     };
-    return objectives;
-  };
 
-  const out: Record<string, JsonRecord> = {};
-  const chapterIds = Object.keys(curated).sort((a, b) => curated[a].order - curated[b].order);
-  for (const chapterId of chapterIds) {
-    const meta = curated[chapterId];
     const chapter: JsonRecord = {
       id: meta.id,
       name: meta.name,
@@ -349,6 +640,14 @@ function main(): void {
       wikiLink: meta.wikiLink,
       order: meta.order,
       chapterQuestId: CHAPTER_QUEST_ID[chapterId],
+      // Coverage is emitted for every chapter, not just partial ones: a consumer
+      // must be able to tell "this chapter is complete" from "this is what the
+      // capture could see" without comparing counts against something else.
+      referenceCoverage: {
+        referencedSubquests: expansion.referencedSubquests.length,
+        resolvedSubquests: expansion.resolvedSubquests.length,
+        partial: expansion.resolvedSubquests.length < expansion.referencedSubquests.length,
+      },
       autoStart: meta.autoStart ?? false,
       chapterRequirements: meta.chapterRequirements ?? [],
     };
@@ -357,11 +656,25 @@ function main(): void {
     }
     chapter.description = meta.description ?? null;
     chapter.notes = meta.notes ?? null;
-    if (PRESERVE_OBJECTIVES.has(chapterId) && meta.objectives) {
-      chapter.objectives = meta.objectives;
-    } else {
-      chapter.objectives = expand(chapterId);
-    }
+    chapter.objectives = objectives;
+
+    // A chapter that references ending gate sub-quests owns those endings, so
+    // restate the whole branch set from client/ending_list with the real ids -
+    // including the gates this capture could not resolve, which report zero
+    // objectives instead of disappearing.
+    const referenced = new Set(expansion.referencedSubquests);
+    const resolved = new Set(expansion.resolvedSubquests);
+    const endings = STORY_ENDINGS.filter((ending) => referenced.has(ending.gateQuestId)).map(
+      (ending) => ({
+        id: ending.id,
+        systemName: ending.systemName,
+        gateQuestId: ending.gateQuestId,
+        objectiveCount: objectives.filter((objective) => objective.endingId === ending.id).length,
+        resolvedInReference: resolved.has(ending.gateQuestId),
+      })
+    );
+    if (endings.length > 0) chapter.endings = endings;
+
     chapter.rewards = meta.rewards ?? null;
     chapter.mapUnlocks = meta.mapUnlocks ?? [];
     chapter.traderUnlocks = meta.traderUnlocks ?? [];
@@ -371,20 +684,22 @@ function main(): void {
     out[chapterId] = chapter;
   }
 
-  console.error('chapter match stats (eft objs / wiki-matched / optional):');
+  console.error('chapter match stats (eft objs / wiki-matched / optional / sub-quest coverage):');
   const low: Array<[string, number]> = [];
   for (const [chapterId, s] of Object.entries(stats)) {
     const pct = Math.floor((100 * s.matched) / Math.max(s.objectives, 1));
+    const coverage = out[chapterId]?.referenceCoverage;
     console.error(
       `  ${chapterId.padEnd(22)} objs=${String(s.objectives).padStart(3)} ` +
         `matched=${String(pct).padStart(3)}% optional=${String(s.optional).padStart(2)} ` +
-        `wiki=${s.wiki}`
+        `wiki=${String(s.wiki).padStart(3)} ` +
+        `subquests=${coverage?.resolvedSubquests}/${coverage?.referencedSubquests}`
     );
     // A chapter that no longer matches the wiki means wording drift has
     // degraded optional/required accuracy; fail generation so it is caught
     // now rather than shipped silently. Zero resolvable objectives (e.g. a
     // broken CHAPTER_QUEST_ID mapping) is an even harder failure. Current
-    // expanded chapters match >=86%. (The Ticket is preserved, not in stats.)
+    // chapters match >=86%.
     if (s.objectives === 0 || pct < MIN_MATCH_PCT) {
       low.push([chapterId, pct]);
     }

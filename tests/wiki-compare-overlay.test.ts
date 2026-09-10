@@ -85,7 +85,7 @@ describe('loadSuppressedFields', () => {
   // faction entries) as a fresh wiki/API discrepancy.
   it('suppresses traderRequirements corrected by the overlay', () => {
     const { suppressed } = loadSuppressedFields();
-    // Pyramid Scheme - cross-trader Peacekeeper LL3 gate.
+    // Pyramid Scheme - Skier LL3 gate.
     expect(suppressed.has('6572e876dc0d635f633a5714:traderRequirements')).toBe(true);
     // Reserve Expert - Ragman LL3.
     expect(suppressed.has('608974af4b05530f55550c21:traderRequirements')).toBe(true);
@@ -93,8 +93,15 @@ describe('loadSuppressedFields', () => {
 
   it('suppresses factionName corrected by the overlay', () => {
     const { suppressed } = loadSuppressedFields();
-    // Insomnia - wiki says BEAR-only, upstream serves Any.
-    expect(suppressed.has('5c0bd01e86f7747cdd799e56:factionName')).toBe(true);
+    // Never Too Late To Learn - wiki says USEC-only, upstream serves Any.
+    expect(suppressed.has('67af4c17f4f1fb58a907f8f6:factionName')).toBe(true);
+  });
+
+  it('bridges a traderRequirements correction to the Scav karma report', () => {
+    // Karma is served inside traderRequirements (a Fence reputation entry), so an
+    // override of that field answers the karma report for the same task too.
+    const { suppressed } = loadSuppressedFields();
+    expect(suppressed.has('6572e876dc0d635f633a5714:scavKarma')).toBe(true);
   });
 });
 

@@ -201,17 +201,17 @@ export function parseTraderLoyalty(
   requirements: string[],
   traderNames: Iterable<string>,
   questGiver?: string
-): Array<{ trader: string; level: number }> {
+): Array<{ trader: string; level: number; inferredTrader?: boolean }> {
   const known = new Map<string, string>();
   for (const name of traderNames) known.set(name.toLowerCase(), name);
 
-  const out: Array<{ trader: string; level: number }> = [];
+  const out: Array<{ trader: string; level: number; inferredTrader?: boolean }> = [];
   const seen = new Set<string>();
-  const add = (trader: string, level: number) => {
+  const add = (trader: string, level: number, inferredTrader = false) => {
     const key = `${trader}:${level}`;
     if (seen.has(key)) return;
     seen.add(key);
-    out.push({ trader, level });
+    out.push(inferredTrader ? { trader, level, inferredTrader } : { trader, level });
   };
 
   for (const line of requirements) {
@@ -240,8 +240,11 @@ export function parseTraderLoyalty(
       for (const trader of named) add(trader, level);
     } else if (questGiver && known.has(questGiver.toLowerCase())) {
       // "Must be Loyalty Level N to start this quest" - the tier belongs to the
-      // quest giver, which the sentence leaves implicit.
-      add(known.get(questGiver.toLowerCase())!, level);
+      // quest giver, which the sentence leaves implicit. That is an inference,
+      // not a quoted requirement, so mark it: trader loyalty is
+      // progression-critical, and a reviewer must be able to see which entries
+      // came from the sentence naming a trader and which came from the infobox.
+      add(known.get(questGiver.toLowerCase())!, level, true);
     }
   }
   return out;
@@ -729,7 +732,12 @@ export function printWikiData(wiki: WikiTaskData): void {
     console.log(`  ${dim(`Detected level requirement: ${wiki.minPlayerLevel}`)}`);
   }
   if (wiki.traderLoyalty.length > 0) {
-    const gates = wiki.traderLoyalty.map((ll) => `${ll.trader} LL${ll.level}`).join(', ');
+    // An inferred trader is flagged inline: the sentence stated a tier without
+    // naming a trader, so the attribution to the quest giver needs confirming
+    // before it becomes an override.
+    const gates = wiki.traderLoyalty
+      .map((ll) => `${ll.trader} LL${ll.level}${ll.inferredTrader ? ' (trader inferred)' : ''}`)
+      .join(', ');
     console.log(`  ${dim(`Detected trader loyalty: ${gates}`)}`);
   }
   if (wiki.factionName !== undefined) {
