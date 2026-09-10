@@ -270,8 +270,12 @@ group, so distinguish three states and do not conflate the first two:
   [the registry's evidence bar](GLOBAL_VARIABLES.md#registry-contract), which
   states outright that a matching sum in one profile does not prove these
   properties.
-- **Not reconciling (4 groups).** The counter reads below the completed count, so
-  the pool is definitely _not_ the contributor set. See [Caveats](#caveats).
+- **Not reconciling (4 groups).** The counter reads below the completed pool
+  count, so the pool and the counter are **inconsistent under the simple model**.
+  This is not proof that those tasks are outside the contributor set: since reset
+  and initial-value behaviour is unresolved, a reset could produce the same
+  shortfall after every pool task had contributed. Either way the identities stay
+  unknown and the counter is not computable. See [Caveats](#caveats).
 - **Verified.** Contributor identities established by evidence of the derivation
   itself. No group in this document reaches this state.
 
@@ -335,13 +339,15 @@ interchangeable with `|completed ∩ pool|`. For the 23 aggregate-reconciling gr
 substituting the pool happens to reproduce the observed value in the one profile
 checked, which is why the model is plausible — but as noted above that match does
 not establish the contributor set, so the substitution stays a hypothesis rather
-than a licence. For the four groups in [Caveats](#caveats) it is refuted outright:
-in each the counter read **below** the number of completed pool tasks, so at least
-one member does not contribute, and counting the whole pool **overshoots** — a
-consumer would clear the threshold and report a task available too early. A
-shortfall in child count explains only two of the four (Mechanic tier 3 and Ragman
-tier 1); for the other two the reason a member fails to contribute is unknown.
-Treat all four as `unknown` rather than substituting a full-pool count.
+than a licence. For the four groups in [Caveats](#caveats) the substitution is
+contradicted: in each the counter read **below** the number of completed pool
+tasks, so counting the whole pool **overshoots** — a consumer would clear the
+threshold and report a task available too early. The reason is undetermined. A
+shortfall in child count fits two of the four (Mechanic tier 3 and Ragman tier 1),
+but for the other two the children are not fewer than the pool at all, and in any
+of the four an unresolved reset could equally explain a low reading after every
+member had contributed. Treat all four as `unknown` rather than substituting a
+full-pool count.
 
 Each pool has 1–7 seed tasks carrying no counter gate, and the staggered waves
 are reachable from those seeds in all 27 pools, so no pool can deadlock.
@@ -399,12 +405,13 @@ route planning to verified contributors.
   The pairs below are the counter's value versus the number of completed pool
   tasks — not children versus pool size: Mechanic tier 3 (12 vs 16), Mechanic
   tier 4 (3 vs 4), Prapor tier 4 (6 vs 7), Ragman tier 1 (8 vs 9). In every case
-  the counter reads lower, so at least one task does not contribute. A shortfall
-  in child count accounts for only two of them (Mechanic tier 3 has 12 children
-  for 16 tasks, Ragman tier 1 has 8 for 9); Mechanic tier 4 has _more_ children
-  than pool tasks and Prapor tier 4 has exactly as many, so for those two the
-  cause is undetermined. Which tasks are excluded, and why, is not determined in
-  any of the four.
+  the counter reads lower, which is inconsistent with the pool being counted
+  one-per-task. The cause is undetermined and at least two explanations survive:
+  some task does not contribute (a shortfall in child count fits Mechanic tier 3
+  at 12 children for 16 tasks and Ragman tier 1 at 8 for 9, but Mechanic tier 4
+  has _more_ children than pool tasks and Prapor tier 4 has exactly as many), or
+  the counter reset at some point after contributions landed. Nothing here
+  distinguishes them, so no contributor identity is established for these groups.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
   (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). Extra children are
   never set in the observed profile, so they are plausibly retired or
