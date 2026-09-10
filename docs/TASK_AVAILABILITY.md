@@ -20,6 +20,57 @@ static task definition + account snapshot -> available | blocked | unknown
 `true`, because that is what makes every task look available to a new or
 partially synchronized user.
 
+## Evaluate user progress
+
+Use one operation for a task after merging the selected mode's API data and overlay:
+
+```ts
+import { evaluateTaskProgression } from '../src/lib/index.js';
+
+const result = evaluateTaskProgression(task, accountState, {
+  mode: selectedMode,
+  revision: selectedGameRulesRevision,
+  counters: overlay.progressionCounters,
+  storyChapters: overlay.storyChapters,
+});
+
+if (result.recordedStatus === 'complete') {
+  // Keep the task in completed history.
+} else if (result.recordedStatus === 'active') {
+  // Keep the accepted task active, independently of its current start gates.
+} else if (result.status === 'available') {
+  // Eligible to start, subject to its separately recorded lifecycle state.
+} else if (result.status === 'blocked') {
+  // Explain result.blockers.
+} else {
+  // Explain result.unknown; do not silently present this as available.
+}
+```
+
+Handle other recorded states (such as availableForFinish, failed, and availableAfter)
+in their own lifecycle views. `result.status` evaluates start conditions only; it does
+not restart, fail, or complete an existing task. Never replace recorded history with
+that result. The helper does not fetch account data or apply an overlay for you.
+
+`accountState` uses the fields in the account adapter below. Supply one account,
+game mode, and wipe/prestige/season run consistently. Recompute after progress changes;
+no counters or history are mutated. Missing task entries mean unknown, so a tracker
+with a known complete history should explicitly record its non-complete tasks too.
+
+A required false condition produces `blocked`; otherwise missing state produces
+`unknown`. An OR group is satisfied if one supported alternative is satisfied.
+Existing player-level, trader, dialogue, map, story, and timing gates still apply.
+Task completion alone cannot resolve all of them.
+
+For verified mappings, `result.counters` explains each value and its contributor
+progress. The registry starts empty: this release supplies the model, not speculative
+game mappings. See [global variables and progression counters](GLOBAL_VARIABLES.md)
+for the data contract, evidence requirements, and safe backward-inference boundary.
+
+The helpers are source-level exports, not a published npm runtime package. Consumers
+must update their vendored/workspace source to use this entry point. Existing callers
+of `deriveTaskUnlockDefinition` and `evaluateTaskUnlock` can continue using them.
+
 ## Definition semantics
 
 `deriveTaskUnlockDefinition(task, { storyChapters })` produces this compact shape.
@@ -59,18 +110,34 @@ Status values inside one task requirement are ORed. For example, `['complete',
 `active` is meaningful: it allows a predecessor that is currently started,
 not only one that has been completed. Do not discard active edges.
 
-The evaluator accepts both the string statuses used by tarkov.dev and BSG's
-numeric profile status codes. The numeric mapping is based on the
-[SPT quest structure reference](https://github.com/sp-tarkov/wiki/blob/main/modding/references/quest-values.md):
-success (`4`) becomes `complete`, failure states (`5`–`8`) become `failed`, and
-the in-progress/available states become `active`.
+The evaluator accepts string statuses and BSG numeric profile status codes, keeping
+their meanings distinct:
+
+| Code | Status             |
+| ---- | ------------------ |
+| 0    | locked             |
+| 1    | availableForStart  |
+| 2    | active             |
+| 3    | availableForFinish |
+| 4    | complete           |
+| 5    | failed             |
+| 6    | failedRestartable  |
+| 7    | markedFailed       |
+| 8    | expired            |
+| 9    | availableAfter     |
+
+`started` and `accepted` alias `active`; `completed` and `success` alias `complete`.
+Available/delayed states do not satisfy an active edge. Failure states are also
+distinct. This corrects the previous evaluator's broad status collapsing; consumers
+that intentionally accept several states must list those states explicitly. The
+exported `normalizeTaskStatus` uses the same normalization as the evaluator.
 
 ## Hidden IDs are useful state keys
 
 The `otherRequirements` field currently contains two important types:
 
 - `globalVariable`: `requirementId` is the BSG condition identity; `variableId`
-  is the persistent variable whose numeric value is compared. The IDs may look
+  identifies the scalar or group whose effective numeric value is compared. The IDs may look
   random because they are generated identifiers, but they are deterministic
   references, not a task-order heuristic. Track the value by `variableId` and
   retain `requirementId` for provenance/debugging.
@@ -122,8 +189,10 @@ if (result.status === 'available') {
 
 For BSG profile data, `taskStatuses` may use the quest's numeric `status`, and
 `completedConditionIds` may be populated from the quest's completed condition
-IDs. `globalVariables` should be keyed by the variable-group entry's `id`
-(the `variableId` in the task definition), not by the task's condition ID.
+IDs. `globalVariables` is keyed by the condition's `variableId`, whether that is
+a scalar ID or a group ID. Group values must already be resolved by a trusted
+adapter; raw profile child values are not sufficient. Both `=` and BSG `==`
+are supported numeric equality operators.
 
 ## Traders and maps
 

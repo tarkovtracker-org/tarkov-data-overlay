@@ -1174,9 +1174,22 @@
               "type": "object"
             },
             "status": {
-              "description": "Allowed statuses used by task graph logic: accepted/active (links predecessors), complete/completed (normal prerequisite), failed (marks as alternative)",
+              "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
               "items": {
-                "enum": ["accepted", "active", "complete", "completed", "failed"],
+                "enum": [
+                  "locked",
+                  "availableForStart",
+                  "accepted",
+                  "active",
+                  "availableForFinish",
+                  "complete",
+                  "completed",
+                  "failed",
+                  "failedRestartable",
+                  "markedFailed",
+                  "expired",
+                  "availableAfter"
+                ],
                 "type": "string"
               },
               "type": "array"
@@ -1208,8 +1221,22 @@
                 "type": "object"
               },
               "status": {
+                "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
                 "items": {
-                  "enum": ["accepted", "active", "complete", "completed", "failed"],
+                  "enum": [
+                    "locked",
+                    "availableForStart",
+                    "accepted",
+                    "active",
+                    "availableForFinish",
+                    "complete",
+                    "completed",
+                    "failed",
+                    "failedRestartable",
+                    "markedFailed",
+                    "expired",
+                    "availableAfter"
+                  ],
                   "type": "string"
                 },
                 "type": "array"
@@ -1246,7 +1273,7 @@
               "type": "array"
             },
             "variableId": { "type": "string" },
-            "compareMethod": { "enum": [">=", "<=", ">", "<", "="] },
+            "compareMethod": { "enum": [">=", "<=", ">", "<", "=", "=="] },
             "value": { "type": "number" }
           },
           "allOf": [

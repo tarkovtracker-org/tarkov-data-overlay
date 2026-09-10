@@ -26,3 +26,4 @@ export * from './locale-validator.js';
 export * from './divergence-validator.js';
 export * from './entity-validator.js';
 export * from './json5-keys.js';
+export * from './task-progression.js';

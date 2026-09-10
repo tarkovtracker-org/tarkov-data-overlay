@@ -151,18 +151,17 @@ include `name`/`shortName` for readability.
 
 ## What Counts as Proof for Which Field
 
-Not every wiki field is evidence for every override. Patch 1.1.0.0 expresses most
-trader-loyalty gates as `GlobalVariableValue` start conditions against opaque
-per-tier variables instead of `TraderLoyalty` conditions, and tarkov.dev serves
-those as `otherRequirements` `globalVariable` entries. That single change is why
-the three rules below differ, and getting them mixed up has already shipped
-regressions.
+Not every wiki field is evidence for every override. A `GlobalVariableValue`
+condition is a numeric state comparison; it is not interchangeable with a
+`TraderLoyalty` condition or a list of prerequisite tasks. See
+[global variables and progression counters](GLOBAL_VARIABLES.md) before adding
+counter metadata. Keep incomplete or unverified mappings informational.
 
 ### `taskRequirements` — the wiki `previous` field is not proof
 
 The infobox `previous` field describes narrative progression. The game gates a
 task with the `AvailableForStart` conditions in its quest template, so a task
-whose only start condition is a loyalty variable has **no** quest prerequisite,
+whose only captured start condition is a variable has **no explicit Quest** prerequisite,
 and `taskRequirements: []` is correct rather than missing an edge.
 
 Before overriding `taskRequirements`, confirm the edge exists as a `Quest` start
@@ -178,30 +177,24 @@ until the task can be represented safely.
 
 ### `minPlayerLevel` — absence of a `Level` condition does not mean `0`
 
-The reference lists **explicit** level gates completely: only 8 of 644 quests carry
-a `Level` condition, and that is the whole set rather than a filtered view — the
-list is unfiltered quest templates, and a trivially-satisfied `Level >= 1`
-condition survives in a capture taken on a level-55 profile, which could not
-happen if satisfied conditions were stripped.
+A reference establishes explicit conditions in the captured task templates. An
+all-zero template status or a surviving satisfied condition does not prove the
+capture is a complete, unfiltered catalog. Pin its mode and version and distinguish
+an absent task from an explicit empty prerequisite list on a present task.
 
-The other 636 quests still often have a real floor. tarkov.dev _derives_
-`minPlayerLevel` from the loyalty tier's `requiredPlayerLevel` when a task is
-loyalty-gated, and across all 91 such tasks upstream equals that floor exactly.
-So "no `Level` condition" means "no explicit gate", not "no gate", and zeroing
-those would throw away a correct derived floor.
+A missing `Level` condition does not authorize setting `minPlayerLevel` to zero.
+Upstream can derive a floor from trader requirements and prerequisite tasks.
+Investigate those sources and corroborate with the wiki Requirements section
+before correcting a value; exceeding the task's own trader floor is not alone
+proof that it is stale.
 
-Only correct `minPlayerLevel` when upstream's value matches neither an explicit
-`Level` condition nor the loyalty-tier floor — that is the case where it is a
-genuine stale leftover. Corroborate with the wiki Requirements section, and use
-`0` to mean "no level gate" (see `src/lib/task-unlocks.ts`).
+### `traderRequirements` — distinguish explicit gates from inferred cohorts
 
-### `traderRequirements` — use the wiki, not the reference
-
-This is the one field the reference cannot adjudicate, and `eft:audit`
-deliberately skips it. Because the gate lives in a global variable, the client
-shows no `TraderLoyalty` condition even for tasks that genuinely have a loyalty
-gate, so reading absence as "no gate" would falsely condemn 150+ correct
-overrides. Use the wiki Requirements section.
+An explicit `TraderLoyalty` condition is evidence of a loyalty gate in that capture.
+Its absence does not by itself establish that no other mechanism restricts access.
+`eft:audit` does not currently adjudicate trader requirements. Use the wiki
+Requirements section and applicable condition evidence; do not turn a cohort's
+inferred tier into an extra gate on every member.
 
 ### Entity `{ id, name }` pairs — look the ID up, never copy it
 

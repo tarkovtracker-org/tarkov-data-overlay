@@ -1,0 +1,5 @@
+{
+  // No contributor mapping currently meets the complete, verified evidence requirement.
+  // Consumers retain global-variable gates as unknown without resolved account values.
+  // See docs/GLOBAL_VARIABLES.md before adding mode-scoped entries.
+}
