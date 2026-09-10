@@ -66,7 +66,14 @@ The condition's `target` is **not always a group**. Resolve it in this order:
 2. Otherwise `target` is a plain variable ID and the compared value is
    `profile.Variables[target]` directly.
 
-The `absent = 0` default applies **only** to step 1 and 2 above, and only when
+Step 2 is only sound with a **complete** `variable_group` catalog in hand. The
+catalog is not public — only the condition payload is — so for most consumers a
+failed lookup means "not found in my catalog", not "not a group". Guessing scalar
+there is doubly wrong: group IDs never appear in `profile.Variables`, so the read
+misses and an invented zero can satisfy the gate. Without a complete catalog,
+classify an unrecognized target as **unknown** rather than as a scalar.
+
+The `absent = 0` default applies **only** to steps 1 and 2 above, and only when
 reading a complete raw `profile.Variables` payload — there, a variable that was
 never written is genuinely zero. It must not be carried into
 `TaskUnlockState.globalVariables`, which holds already-resolved effective values:
@@ -202,12 +209,15 @@ tree also drives:
   of `type: "GlobalVariable"` (19 in the PVE reference), where `target` is the
   variable ID.
 
-These scalars behave like story-stage counters, typically holding 0–4. Some are
-world state rather than player state: two of them read the same non-zero value
-(`3` and `1`) in **both** a level-55 PVE profile and a level-5 seasonal profile,
-which per-player progress could not do. Their IDs are capture-only — they are
-not among the 27 that tarkov.dev publishes — so they are described rather than
-listed here.
+These scalars behave like story-stage counters, typically holding 0–4. The scope
+of some is **unresolved**: two of them read the same non-zero value (`3` and `1`)
+in both a level-55 PVE profile and a level-5 seasonal profile. That is consistent
+with world state, but two profiles cannot establish it — independent per-player
+variables can share a default or coincidentally reach a low value. Treat the
+scope as unknown until a producer or a `saveScope` definition shows the value is
+shared, and do **not** cache such a value globally and apply it to another
+account. Their IDs are capture-only — not among the 27 that tarkov.dev publishes
+— so they are described rather than listed here.
 
 Practical consequence: a plain-variable gate cannot be resolved from static
 data. It is genuinely account/world state, and the honest evaluation result for
@@ -229,15 +239,21 @@ reference counter for only **7 of 27** groups, because tasks that are free
 within their tier carry no trader-level requirement upstream and are therefore
 missed, while some gated tasks carry a level that differs from their pool.
 
-The missing input is small and fully covered upstream: **249 tasks** across the
-27 pools (66 at tier 1, 79 at tier 2, 68 at tier 3, 36 at tier 4; 169 gated,
-80 free), and **all 249 already exist in `json.tarkov.dev/pve/tasks`** — they
-just lack the pool annotation. Supplying `(trader, tier)` membership per task
-makes each of the 27 counters computable as:
+The missing input is small and fully covered upstream. The 27 counter pools hold
+**248 tasks** (66 at tier 1, 79 at tier 2, 68 at tier 3, 35 at tier 4), of which
+**164 are gated** by a counter threshold and 84 are free within their tier. The
+gated figure is publicly checkable: it equals the 164 `globalVariable` conditions
+`json.tarkov.dev/pve/tasks` serves over these 27 `variableId`s. All 248 tasks
+already exist in that endpoint — they just lack the pool annotation. Supplying
+`(trader, tier)` membership per task makes each of the 27 counters computable as:
 
 ```text
 globalVariables[groupId] = count(completed tasks in pool(trader, tier))
 ```
+
+Ragman's single tier-4 task is **not** in these totals: it has no counter group,
+which is why the table below has no Ragman tier-4 row. Do not add it as a
+contributor to any pool.
 
 The overlay already has the vehicle for that annotation: the
 `progressionCounters` registry in `src/additions/progressionCounters.json5`,
@@ -257,22 +273,33 @@ and the bar.
 
 ## Building a progression model
 
-The forward direction is exact; the reverse direction is not an edge list and
-cannot be made into one. This is a property of the design, not a data gap.
+The forward direction is structurally determined; the reverse direction is not an
+edge list and cannot be made into one. That second point is a property of the
+design, not a data gap.
 
-### Forward: fully determined
+### Forward: no task prerequisites to recover
 
-Across all 249 tier-pool tasks, `AvailableForStart` contains only two condition
-types — `TraderLoyalty` (63) and `GlobalVariableValue` (169) — and **zero
+Across all 248 tier-pool tasks, `AvailableForStart` contains only two condition
+types — `TraderLoyalty` and `GlobalVariableValue` (164 of them) — and **zero
 `Quest` conditions**. There is no "task X, Y, Z" prerequisite list to recover,
-because these tasks have no task prerequisites at all. The complete predicate
-is:
+because these tasks have no task prerequisites at all. The predicate has the
+shape:
 
 ```text
 available(task) =
       traderLoyalty(task.trader) >= task.tier
-  AND count(completed ∩ pool(task.trader, task.tier)) >= task.threshold
+  AND counter(task.trader, task.tier) >= task.threshold
 ```
+
+`counter(...)` is **not** reliably `count(completed ∩ pool)`. For the 23 groups
+where the observed value equals the completed-task count, substituting the full
+pool reproduces the game's value. For the four groups in [Caveats](#caveats) it
+does not: those groups have fewer children than their pool has tasks, so some
+member does not contribute, and counting the whole pool **overshoots** — a
+consumer would clear the threshold and report a task available too early.
+Until the excluded members are identified, treat those four counters as
+`unknown` rather than substituting a full-pool count, and only ever count a
+verified contributor set.
 
 Eleven tier-1 tasks add a gate on a plain variable rather than the tier counter
 (Mechanic 3, Ragman 3, Therapist 3, Skier 2); those are the trader-intro/world
@@ -281,7 +308,7 @@ scalars and stay `unknown` without account state.
 Each pool has 1–7 seed tasks carrying no counter gate, and the staggered waves
 are reachable from those seeds in all 27 pools, so no pool can deadlock.
 
-For corroboration, upstream asserts `taskRequirements` for only 1 of the 249,
+For corroboration, upstream asserts `taskRequirements` for only 1 of the 248,
 and this overlay already corrects that entry.
 
 ### Reverse: a cardinality constraint, not a dependency
@@ -290,13 +317,20 @@ Knowing a player has a task at threshold `N` over pool `P` tells you
 `|completed ∩ P| >= N` and nothing more. Because there are **zero intra-pool
 task edges**, no individual member is ever forced, so no specific task can be
 inferred as required. The number of minimal explanations is `C(|P|, N)` —
-median 45 across the 169 gated tasks, up to `C(16,5) = 4368` for Mechanic
+median 45 across the 164 gated tasks, up to `C(16,5) = 4368` for Mechanic
 tier 3.
 
-Choosing an arbitrary `N`-subset is nevertheless safe, because pools contain no
-branches to diverge down: no member fails another member, and the only
+This does **not** license picking an `N`-subset and recording it as completed
+history. The gate supplies no identity evidence, so any such subset is invented:
+it can contradict the player's real history and double-count when the actual
+completions later arrive. Keep the cardinality constraint instead.
+
+What the absence of branches does buy is safety when planning **forward**. Any
+`N` currently-available members will clear the threshold, and no choice among
+them can strand the player, because no member fails another member and the only
 `Fail` conditions on pool tasks are 5 `CounterCreator` and 3 `Quest` entries,
-none of which target a pool task.
+none of which target a pool task. So a route planner may choose freely by cost;
+a history reconstructor may not choose at all.
 
 ### Practical guidance
 

@@ -256,9 +256,12 @@ have.
 
 **Introduction** (`5d2495a886f77425cd51e403`). Its wiki Requirements section
 still reads "Must be level 2 to start this quest". That is pre-1.1.0.0: the
-client carries no `Level` condition for it, its gate is a `GlobalVariableValue`
-that upstream serves as an `otherRequirements` dialogue entry, and upstream's
-`minPlayerLevel` is already `0`. Do not re-add a level gate from that wiki line.
+client carries no `Level` condition for it, and upstream's `minPlayerLevel` is
+already `0`. Its gate is a **dialogue** requirement — upstream serves a single
+`otherRequirements` entry of `type: 'dialogue'`, not `globalVariable`, and the
+two are mutually exclusive types. Track it by its condition ID through
+`completedConditionIds` / `dialogues` rather than as numeric variable state, and
+do not re-add a level gate from that wiki line.
 
 **New Beginning (Prestige 1)** (`6761f28a022f60bb320f3e95`). An override here
 targeting objective `6848100b00afffa81f09e36b` is a no-op: that objective belongs
