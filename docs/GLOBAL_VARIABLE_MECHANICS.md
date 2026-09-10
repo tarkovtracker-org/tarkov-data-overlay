@@ -19,9 +19,18 @@ evaluation rules `evaluateTaskProgression` follows — see
 
 A `GlobalVariableValue` condition is a **counter comparison**, not a flag check.
 
-For the 27 IDs that tarkov.dev currently publishes, the counter is
-**"how many tasks you have completed for one trader at one loyalty tier"**, and
-the condition means **"complete N tasks from that trader's tier-M pool"**.
+For the 27 IDs that tarkov.dev currently publishes, the best-supported reading is
+that the counter is **"how many tasks you have completed for one trader at one
+loyalty tier"**, so the condition means **"complete N tasks from that trader's
+tier-M pool"**.
+
+Treat that as an observed interpretation with unresolved exceptions, not an
+established rule. It reproduces the profile's value for 23 of the 27 groups and
+matches the pool size for 20 of 27; the remaining groups are listed in
+[Caveats](#caveats) and are not explained. Do not build a progression mapping on
+a group whose numbers do not reconcile — see
+[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the bar a
+mapping must clear before it can produce a value.
 
 The group's child variables are the individual per-task completion markers for
 that pool. There are 8 children when the pool contains 8 tasks; pool sizes
@@ -53,9 +62,20 @@ Notable details:
 The condition's `target` is **not always a group**. Resolve it in this order:
 
 1. If `target` matches a `variable_group` `id`, the compared value is the **sum
-   of that group's children** as read from `profile.Variables` (absent child = 0).
+   of that group's children** as read from `profile.Variables`.
 2. Otherwise `target` is a plain variable ID and the compared value is
-   `profile.Variables[target]` directly (absent = 0).
+   `profile.Variables[target]` directly.
+
+The `absent = 0` default applies **only** to step 1 and 2 above, and only when
+reading a complete raw `profile.Variables` payload — there, a variable that was
+never written is genuinely zero. It must not be carried into
+`TaskUnlockState.globalVariables`, which holds already-resolved effective values:
+a key missing from that map means **unknown**, not zero. The distinction is
+load-bearing because 60 of the published conditions compare with `==`, so an
+invented `0` would satisfy an `== 0` gate and report a task available with no
+account evidence. `evaluateTaskProgression` already behaves this way — a missing
+entry reaches `evaluateNumericCondition` as `undefined` and yields `unknown`
+("… is not present"), never `0`.
 
 In the 1.1 PVE reference, 109 distinct targets appear across 300
 `GlobalVariableValue` conditions: **36 are group IDs and 73 are plain
@@ -78,15 +98,21 @@ Every one of the 27 IDs tarkov.dev publishes corresponds to exactly one
 sets: some are open as soon as the tier is reached, and the rest are staggered
 behind counter thresholds.
 
-Mechanic tier 2 is representative — 12 tasks in the pool, 3 open on arrival,
-then 3 more at each of `>=1`, `>=3`, `>=5`:
+Mechanic tier 2 is representative — 12 tasks in the pool, 11 of them gated, so
+one is open on arrival and the rest unlock in waves at `>=1`, `>=3` and `>=5`.
+The thresholds and task names below are from the published data and can be
+re-derived with the snippet under [Reproducing](#reproducing); only "children"
+and the pool size come from the capture:
 
 ```text
 group 6a3c0fefbea2d2ad581c090b  (Mechanic, trader level 2, 12 children)
-  free                     3 tasks
-  GlobalVariableValue >=1  3 tasks   (Gunsmith - P226R, Corporate Secrets, ...)
-  GlobalVariableValue >=3  3 tasks   (Gunsmith - AK-105, Energy Crisis, ...)
-  GlobalVariableValue >=5  3 tasks   (Semiconductor Crisis, Import, ...)
+  free                     1 task
+  GlobalVariableValue >=1  5 tasks   (Ill-Wisher, Chemistry Closet,
+                                      Corporate Perks, The Secret to
+                                      Productivity, Shady Contractor)
+  GlobalVariableValue >=3  3 tasks   (Scout, Surveillance, Gunsmith - OP-SKS)
+  GlobalVariableValue >=5  3 tasks   (Playing the Market, Gunsmith - Model 870,
+                                      Secrets of Polikhim)
 ```
 
 Tier access itself is a separate, ordinary condition. In the reference the
@@ -317,6 +343,22 @@ The published condition can be listed without any local capture:
 curl -s https://json.tarkov.dev/pve/tasks \
   | jq '[.data.tasks[].otherRequirements[]? | select(.type=="globalVariable")] | length'
 # 164 conditions over 27 distinct variableIds
+```
+
+Every threshold in the table, and the gated task names for any one group, come
+from the same endpoint. Note that the endpoint returns translation keys rather
+than names, so resolve them through `tasks_en` (or use this repository's
+`fetchTasks` adapter, which does that for you):
+
+```bash
+GROUP=6a3c0fefbea2d2ad581c090b
+curl -s https://json.tarkov.dev/pve/tasks | jq -r --arg g "$GROUP" '
+  [ .data.tasks[]
+    | . as $t
+    | (.otherRequirements[]? | select(.type=="globalVariable" and .variableId==$g))
+    | { value, name: $t.name } ]
+  | group_by(.value) | .[]
+  | ">=\(.[0].value) (\(length)): \(map(.name) | join(", "))"'
 ```
 
 Per repository policy the capture and anything derived from it stay out of Git;
