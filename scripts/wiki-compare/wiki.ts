@@ -231,8 +231,16 @@ export function parseTraderLoyalty(
     // Traders named on the line, matched against the known set only.
     const named: string[] = [];
     for (const [lower, canonical] of known) {
-      const words = text.toLowerCase().split(/[^a-z0-9_]+/);
-      if (words.includes(lower)) named.push(canonical);
+      const words = ` ${text
+        .toLowerCase()
+        .split(/[^a-z0-9_]+/)
+        .filter(Boolean)
+        .join(' ')} `;
+      const phrase = lower
+        .split(/[^a-z0-9_]+/)
+        .filter(Boolean)
+        .join(' ');
+      if (phrase && words.includes(` ${phrase} `)) named.push(canonical);
     }
 
     if (named.length > 0) {

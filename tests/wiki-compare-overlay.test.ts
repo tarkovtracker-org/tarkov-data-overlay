@@ -97,9 +97,8 @@ describe('loadSuppressedFields', () => {
     expect(suppressed.has('67af4c17f4f1fb58a907f8f6:factionName')).toBe(true);
   });
 
-  it('bridges a traderRequirements correction to the Scav karma report', () => {
-    // Karma is served inside traderRequirements (a Fence reputation entry), so an
-    // override of that field answers the karma report for the same task too.
+  it('does not suppress Scav karma for a loyalty-only override', () => {
+    // Pyramid Scheme corrects Skier loyalty, not Fence reputation.
     const { suppressed } = loadSuppressedFields();
     expect(suppressed.has('6572e876dc0d635f633a5714:scavKarma')).toBe(false);
   });

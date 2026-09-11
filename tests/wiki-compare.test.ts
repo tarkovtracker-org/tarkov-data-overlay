@@ -184,6 +184,14 @@ describe('compareTasks', () => {
       false
     );
     expect(matching.some((d) => d.field === 'scavKarma')).toBe(false);
+    const unspecified = compareTasks(
+      baseApi,
+      makeWiki({ scavKarma: { value: -6 } }),
+      EMPTY_ALIASES,
+      false
+    ).find((entry) => entry.field === 'scavKarma');
+    expect(unspecified?.wikiValue).toContain('direction unspecified');
+    expect(unspecified?.trustsWiki).toBe(false);
 
     const missing = compareTasks(baseApi, wiki, EMPTY_ALIASES, false);
     const karma = missing.find((d) => d.field === 'scavKarma');
@@ -537,6 +545,13 @@ describe('1.1 Requirements-section parsing', () => {
     it('does not invent a faction from unrelated prose', () => {
       expect(parseFactionRequirement(['Must be level 25 to start this quest.'])).toBeUndefined();
     });
+  });
+
+  it('recognizes multi-word trader names without matching partial names', () => {
+    expect(parseTraderLoyalty(['Loyalty Level 2 with [[BTR Driver]]'], ['BTR Driver'])).toEqual([
+      { trader: 'BTR Driver', level: 2 },
+    ]);
+    expect(parseTraderLoyalty(['Loyalty Level 2 with NotBTR Driver'], ['BTR Driver'])).toEqual([]);
   });
 
   it('separates player and loyalty levels on the same requirements line', () => {

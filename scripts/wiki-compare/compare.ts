@@ -208,7 +208,8 @@ export function compareTasks(
     const matches = apiKarma.some(
       (req) =>
         req.value === karma.value &&
-        (karma.compareMethod === undefined || req.compareMethod === karma.compareMethod)
+        karma.compareMethod !== undefined &&
+        req.compareMethod === karma.compareMethod
     );
     if (!matches) {
       discrepancies.push({
@@ -219,7 +220,7 @@ export function compareTasks(
           apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') || '(none)',
         wikiValue: wikiKarma,
         priority: getPriority('scavKarma'),
-        trustsWiki: true,
+        trustsWiki: karma.compareMethod !== undefined,
         wikiLastEdit,
         wikiEditDaysAgo,
         wikiEditedPost1_0,
