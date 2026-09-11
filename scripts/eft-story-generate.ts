@@ -31,6 +31,7 @@
 import { createHash } from 'crypto';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
 import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
@@ -777,7 +778,24 @@ function main(): void {
     process.exit(1);
   }
 
-  // Every chapter validated, so a staged re-pin is now safe to persist.
+  // Validate against the same schema `eft-story-write.ts` enforces before it
+  // persists the artifact. Without this the lock could be pinned here and the
+  // downstream writer still reject the data, leaving the committed lock pointing
+  // at a capture whose output never landed.
+  const schema = JSON.parse(
+    readFileSync(join('src', 'schemas', 'story-chapter.schema.json'), 'utf-8')
+  );
+  const validate = new Ajv({ allErrors: true, strict: false }).compile(schema);
+  if (!validate(out)) {
+    console.error('error: generated story chapters fail story-chapter.schema.json:');
+    for (const error of (validate.errors ?? []).slice(0, 20)) {
+      console.error(`  ${error.instancePath} ${error.message}`);
+    }
+    process.exit(1);
+  }
+
+  // Every chapter validated and the output satisfies the schema the writer
+  // applies, so a staged re-pin is now safe to persist.
   commitStoryReferenceLock();
 
   process.stdout.write(JSON.stringify(out, null, 2));
