@@ -6591,6 +6591,7 @@
       "referenceCoverage": {
         "referencedSubquests": 10,
         "resolvedSubquests": 8,
+        "missingObjectiveTexts": 1,
         "partial": true
       },
       "autoStart": false,
@@ -7156,7 +7157,8 @@
       "referenceCoverage": {
         "referencedSubquests": 5,
         "resolvedSubquests": 5,
-        "partial": false
+        "missingObjectiveTexts": 2,
+        "partial": true
       },
       "autoStart": false,
       "chapterRequirements": [],
@@ -7282,6 +7284,7 @@
       "referenceCoverage": {
         "referencedSubquests": 88,
         "resolvedSubquests": 35,
+        "missingObjectiveTexts": 2,
         "partial": true
       },
       "autoStart": false,
@@ -7898,6 +7901,7 @@
       "referenceCoverage": {
         "referencedSubquests": 38,
         "resolvedSubquests": 20,
+        "missingObjectiveTexts": 2,
         "partial": true
       },
       "autoStart": false,
@@ -9644,7 +9648,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-11T01:12:15.859Z",
-    "sha256": "d99ada767bab967bb2288ce70cef58ede407b04ea9aeb6cc8cafc647e758a1ef"
+    "generated": "2026-09-11T01:37:01.216Z",
+    "sha256": "ea41e953a47c4071b5f9507d7a2ca1723064b5babdc0f744571adc0f1741a1c8"
   }
 }

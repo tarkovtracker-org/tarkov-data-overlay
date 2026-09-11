@@ -57,8 +57,13 @@
             "type": "integer",
             "minimum": 0
           },
+          "missingObjectiveTexts": {
+            "description": "Finish conditions omitted because English objective text was unavailable; omitted when zero.",
+            "type": "integer",
+            "minimum": 0
+          },
           "partial": {
-            "description": "True when resolvedSubquests < referencedSubquests",
+            "description": "True when sub-quest templates or objective texts are missing",
             "type": "boolean"
           }
         },

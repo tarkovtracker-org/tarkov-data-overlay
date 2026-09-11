@@ -134,6 +134,7 @@ interface ExpandedObjective {
 
 interface ChapterExpansion {
   objectives: ExpandedObjective[];
+  missingObjectiveTexts: number;
   /** Distinct sub-quest ids the chapter quest references. */
   referencedSubquests: string[];
   /** Referenced sub-quests whose templates the capture resolved. */
@@ -270,12 +271,14 @@ export function expandChapterObjectives(
   byId: Map<string, JsonRecord>
 ): ChapterExpansion {
   const objectives: ExpandedObjective[] = [];
+  let missingObjectiveTexts = 0;
   const referenced: string[] = [];
   const resolved: string[] = [];
   const chapterQuest = chapterQuestId ? byId.get(chapterQuestId) : undefined;
   if (!chapterQuest)
     return {
       objectives,
+      missingObjectiveTexts,
       referencedSubquests: referenced,
       resolvedSubquests: [],
       exclusivePairs: [],
@@ -300,7 +303,10 @@ export function expandChapterObjectives(
       const objectiveId = objective?.id;
       if (!objectiveId) continue; // skip conditions without an id
       const text = unwrapAnnotatedText((localized[objectiveId] ?? '').trim()).trim();
-      if (!text) continue;
+      if (!text) {
+        missingObjectiveTexts += 1;
+        continue;
+      }
       // Use the real source objective id as the stable id. Positional ids
       // ({chapter}-main-n) shift whenever wording/order changes, which silently
       // corrupts consumers that persist completion per objective id. The source
@@ -332,6 +338,7 @@ export function expandChapterObjectives(
 
   return {
     objectives,
+    missingObjectiveTexts,
     referencedSubquests: referenced,
     resolvedSubquests: resolved,
     exclusivePairs: pairs,
@@ -551,6 +558,13 @@ export function loadReference(): JsonRecord[] {
           'Re-verify the capture, then re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
       );
     }
+    for (const key of Object.keys(current) as Array<keyof ReferenceLock>) {
+      if (key !== 'file' && current[key] !== lock[key]) {
+        throw new Error(
+          `story reference provenance mismatch for ${key} in ${LOCK}; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+        );
+      }
+    }
     if (current.file !== lock.file) {
       console.error(`note: reading the pinned capture from ${current.file} (lock: ${lock.file})`);
     }
@@ -633,7 +647,12 @@ function main(): void {
       referenceCoverage: {
         referencedSubquests: expansion.referencedSubquests.length,
         resolvedSubquests: expansion.resolvedSubquests.length,
-        partial: expansion.resolvedSubquests.length < expansion.referencedSubquests.length,
+        ...(expansion.missingObjectiveTexts > 0
+          ? { missingObjectiveTexts: expansion.missingObjectiveTexts }
+          : {}),
+        partial:
+          expansion.resolvedSubquests.length < expansion.referencedSubquests.length ||
+          expansion.missingObjectiveTexts > 0,
       },
       autoStart: meta.autoStart ?? false,
       chapterRequirements: meta.chapterRequirements ?? [],

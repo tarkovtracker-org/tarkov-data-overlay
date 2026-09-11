@@ -151,6 +151,36 @@ describe('compareTasks', () => {
     expect(result.some((d) => d.field === 'objectives.count')).toBe(true);
   });
 
+  it('does not interpret an omitted wiki loyalty gate as contradicting the API', () => {
+    const api = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 2,
+        },
+        {
+          id: 't',
+          trader: { id: 't', name: 'Therapist' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 2,
+        },
+      ],
+    } as ExtendedTaskData;
+    expect(
+      compareTasks(
+        api,
+        makeWiki({ traderLoyalty: [{ trader: 'Prapor', level: 2 }] }),
+        EMPTY_ALIASES,
+        false
+      ).some((entry) => entry.field === 'traderRequirements')
+    ).toBe(false);
+  });
+
   it('does not trust inferred trader attribution as a verified gate', () => {
     const wiki = makeWiki({
       traderLoyalty: [{ trader: 'Prapor', level: 2, inferredTrader: true }],

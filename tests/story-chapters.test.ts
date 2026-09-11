@@ -141,7 +141,10 @@ describe('story chapters (EFT-sourced)', () => {
       expect(coverage!.referencedSubquests).toBeGreaterThan(0);
       expect(coverage!.resolvedSubquests).toBeGreaterThan(0);
       expect(coverage!.resolvedSubquests).toBeLessThanOrEqual(coverage!.referencedSubquests);
-      expect(coverage!.partial).toBe(coverage!.resolvedSubquests < coverage!.referencedSubquests);
+      expect(coverage!.partial).toBe(
+        coverage!.resolvedSubquests < coverage!.referencedSubquests ||
+          (coverage!.missingObjectiveTexts ?? 0) > 0
+      );
       const sources = new Set((ch.objectives ?? []).map((objective) => objective.sourceQuestId));
       expect(sources.size, `${cid} distinct sourceQuestIds`).toBeLessThanOrEqual(
         coverage!.resolvedSubquests

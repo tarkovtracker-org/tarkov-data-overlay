@@ -420,14 +420,16 @@ export interface StoryChapterEnding {
 /**
  * How much of a chapter the pinned capture could resolve. `partial` is true when
  * the chapter quest references sub-quests whose templates the capture does not
- * contain, so the objective list is a projection of the capture rather than the
- * complete chapter.
+ * contain or finish conditions lack English objective text, so the objective
+ * list is a projection of the capture rather than the complete chapter.
  */
 export interface StoryReferenceCoverage {
   /** Sub-quests the chapter quest references (distinct ids). */
   referencedSubquests: number;
   /** Referenced sub-quests whose templates the capture resolved. */
   resolvedSubquests: number;
+  /** Finish conditions omitted because English objective text was unavailable. */
+  missingObjectiveTexts?: number;
   partial: boolean;
 }
 

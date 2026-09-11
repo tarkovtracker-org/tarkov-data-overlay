@@ -1236,6 +1236,7 @@
       referenceCoverage: {
           referencedSubquests: 10,
           resolvedSubquests: 8,
+          missingObjectiveTexts: 1,
           partial: true,
       },
       autoStart: false,
@@ -1810,7 +1811,8 @@
       referenceCoverage: {
           referencedSubquests: 5,
           resolvedSubquests: 5,
-          partial: false,
+          missingObjectiveTexts: 2,
+          partial: true,
       },
       autoStart: false,
       chapterRequirements: [],
@@ -1939,6 +1941,7 @@
       referenceCoverage: {
           referencedSubquests: 88,
           resolvedSubquests: 35,
+          missingObjectiveTexts: 2,
           partial: true,
       },
       autoStart: false,
@@ -2558,6 +2561,7 @@
       referenceCoverage: {
           referencedSubquests: 38,
           resolvedSubquests: 20,
+          missingObjectiveTexts: 2,
           partial: true,
       },
       autoStart: false,

@@ -86,6 +86,8 @@ describe('story reference provenance enforcement', () => {
         gameMode: 'pve',
         sha256: createHash('sha256').update(capture).digest('hex'),
       });
+      writeFileSync(lockFile, JSON.stringify({ ...lock, clientVersion: 'wrong' }));
+      expect(() => run()).toThrow(/provenance mismatch for clientVersion/);
       writeFileSync(lockFile, JSON.stringify({ ...lock, file: 'moved/original.json' }));
       expect(() => run()).not.toThrow();
       writeFileSync(file, `${capture}\n`);
@@ -336,6 +338,7 @@ describe('expandChapterObjectives', () => {
     expect(expansion.objectives).toEqual([]);
     expect(expansion.referencedSubquests).toEqual([]);
     expect(expansion.resolvedSubquests).toEqual([]);
+    expect(expansion.missingObjectiveTexts).toBe(0);
     expect(expansion.exclusivePairs).toEqual([]);
   });
 

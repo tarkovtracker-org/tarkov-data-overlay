@@ -159,7 +159,7 @@ export function compareTasks(
       .map((req) => `${req.trader?.name}:${req.value}`)
       .sort();
     const wikiLoyalty = wiki.traderLoyalty.map((ll) => `${ll.trader}:${ll.level}`).sort();
-    if (apiLoyalty.join('+') !== wikiLoyalty.join('+')) {
+    if (wikiLoyalty.some((gate) => !apiLoyalty.includes(gate))) {
       // Mark attributions the wiki sentence did not state: the tier is quoted,
       // the trader is inferred from the infobox quest giver, and a reviewer must
       // be able to tell those apart before writing an override.
