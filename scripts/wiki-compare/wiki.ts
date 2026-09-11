@@ -236,50 +236,54 @@ export function parseTraderLoyalty(
     }
     if (tiers.length === 0) continue;
 
-    // Tokenized once per line: punctuation and wiki markup collapse to single
-    // spaces, so a known name matches only on whole-word boundaries and
-    // "NotBTR Driver" cannot match "BTR Driver".
-    const words = ` ${text
-      .toLowerCase()
-      .split(/[^a-z0-9_]+/)
-      .filter(Boolean)
-      .join(' ')} `;
-
-    // Traders named on the line, matched against the known set only.
-    const named: string[] = [];
-    for (const [lower, canonical] of known) {
-      const phrase = lower
+    // Tokenized per span: punctuation and wiki markup collapse to single spaces,
+    // so a known name matches only on whole-word boundaries and "NotBTR Driver"
+    // cannot match "BTR Driver". No pattern is built from the text.
+    const namedIn = (span: string): string[] => {
+      const words = ` ${span
+        .toLowerCase()
         .split(/[^a-z0-9_]+/)
         .filter(Boolean)
-        .join(' ');
-      if (phrase && words.includes(` ${phrase} `)) named.push(canonical);
-    }
+        .join(' ')} `;
+      const found: string[] = [];
+      for (const [lower, canonical] of known) {
+        const phrase = lower
+          .split(/[^a-z0-9_]+/)
+          .filter(Boolean)
+          .join(' ');
+        if (phrase && words.includes(` ${phrase} `)) found.push(canonical);
+      }
+      return found;
+    };
+
+    const named = namedIn(text);
 
     if (named.length > 0) {
-      // One tier governs the whole line, including the "Level 4 with X, Y and Z"
-      // form. With several, each trader takes the tier it is written next to.
-      // Which side to look at depends on the line's word order: "Level 3 with
-      // Prapor and Level 2 with Skier" puts each tier before its trader, while
-      // "Prapor at Level 3 and Skier at Level 2" puts it after. Deciding once per
-      // line from whichever comes first keeps both forms consistent, where
-      // nearest-by-distance would mis-assign the common tier-first phrasing.
-      const positions = new Map(named.map((trader) => [trader, traderIndex(text, trader)]));
-      const firstTrader = Math.min(
-        ...[...positions.values()].filter((at) => at >= 0).concat(Number.MAX_SAFE_INTEGER)
-      );
-      const tierFirst = tiers[0].index < firstTrader;
-      const levelFor = (trader: string): number => {
-        if (tiers.length === 1) return tiers[0].level;
-        const at = positions.get(trader) ?? -1;
-        if (at < 0) return tiers[0].level;
-        const before = tiers.filter((tier) => tier.index <= at);
-        const after = tiers.filter((tier) => tier.index >= at);
-        const preceding = before.length > 0 ? before[before.length - 1] : undefined;
-        const following = after[0];
-        const chosen = tierFirst ? (preceding ?? following) : (following ?? preceding);
-        return (chosen ?? tiers[0]).level;
-      };
-      for (const trader of named) add(trader, levelFor(trader));
+      if (tiers.length === 1) {
+        // One tier governs the whole line, including "Level 4 with X, Y and Z".
+        for (const trader of named) add(trader, tiers[0].level);
+      } else {
+        // Several gates on one line: split the line at the tier positions and read
+        // each tier's own traders out of its span. Which side of a tier its
+        // traders sit on depends on the line's word order - the wiki's usual
+        // phrasing puts the tier first ("Level 3 with Prapor and Level 2 with
+        // Skier"), but "Prapor at Level 3 and Skier at Level 2" puts it after.
+        // Anything named before the first tier settles that for the whole line.
+        const traderFirst = namedIn(text.slice(0, tiers[0].index)).length > 0;
+        const assigned = new Set<string>();
+        tiers.forEach((tier, i) => {
+          const span = traderFirst
+            ? text.slice(i === 0 ? 0 : tiers[i - 1].index, tier.index)
+            : text.slice(tier.index, tiers[i + 1]?.index ?? text.length);
+          for (const trader of namedIn(span)) {
+            assigned.add(trader);
+            add(trader, tier.level);
+          }
+        });
+        // A name outside every span still had a gate on this line; attributing it
+        // to the first tier keeps it visible rather than dropping it silently.
+        for (const trader of named) if (!assigned.has(trader)) add(trader, tiers[0].level);
+      }
     } else if (questGiver && known.has(questGiver.toLowerCase())) {
       // "Must be Loyalty Level N to start this quest" - the tier belongs to the
       // quest giver, which the sentence leaves implicit. That is an inference,
@@ -290,22 +294,6 @@ export function parseTraderLoyalty(
     }
   }
   return out;
-}
-
-/**
- * Position of a trader name in a requirements line, or -1 when not found.
- *
- * Words are separated the same way the token match collapses them, so a
- * multi-word name still matches across wiki markup and punctuation.
- */
-function traderIndex(text: string, trader: string): number {
-  const parts = trader
-    .split(/[^A-Za-z0-9_]+/)
-    .filter(Boolean)
-    .map(escapeRegExp);
-  if (parts.length === 0) return -1;
-  const match = new RegExp(`\\b${parts.join('[^A-Za-z0-9_]+')}\\b`, 'i').exec(text);
-  return match ? match.index : -1;
 }
 
 /** The PMC faction gate ("This quest is only obtainable by [[USEC]] PMCs."). */
