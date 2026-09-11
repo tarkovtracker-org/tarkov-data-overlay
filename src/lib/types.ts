@@ -354,8 +354,86 @@ export interface ValidationDetail {
   message: string;
 }
 
+/**
+ * The storyline's endings, exactly as the client serves them from
+ * `client/ending_list`: the real ending id, the client's own `systemName`, and
+ * the sub-quest whose completion gates the ending (each ending record carries a
+ * single `Quest` condition naming it).
+ *
+ * This is the single source of truth for endings in the repository: the
+ * generator (`scripts/eft-story-generate.ts`) tags objectives from it, and
+ * `tests/story-chapters.test.ts` asserts the `story-chapter.schema.json` enums
+ * still match it, so the schema cannot drift from the type.
+ *
+ * The list is closed on purpose. Slugs (`savior`/`survivor`/`fallen`/`debtor`)
+ * were used before and matched nothing a consumer could store, so a new ending
+ * shipped by the game is meant to fail validation here and be added
+ * deliberately rather than be accepted as free-form text.
+ */
+export const STORY_ENDINGS = [
+  {
+    id: '68a6e8f1a7455e5e23099ad8',
+    systemName: 'EscapedFromTarkovForHumanity',
+    gateQuestId: '67bdf8c066ca1d79a202463a',
+  },
+  {
+    id: '68a6e8c834a37e244710d516',
+    systemName: 'EscapedFromTarkovAndSurvived',
+    gateQuestId: '67c08f0268e50a07b10d25a6',
+  },
+  {
+    id: '68a6e8e4a8d0bee0b5324d96',
+    systemName: 'EscapedFromTarkovToFallInTheDarkness',
+    gateQuestId: '67c862bd9f9b7ef9090651d8',
+  },
+  {
+    id: '68a6028ef4c23ebbbc49da4b',
+    systemName: 'YouDidntEscapeFromYourself',
+    gateQuestId: '67c9877aff0329206209cb67',
+  },
+] as const;
+
+/** Real `client/ending_list` ending id. */
+export type StoryEndingId = (typeof STORY_ENDINGS)[number]['id'];
+
+/**
+ * One ending of a branching chapter, restated at chapter level so consumers can
+ * see the whole branch set without scanning objectives.
+ *
+ * `objectiveCount` and `resolvedInReference` describe how much of the branch the
+ * pinned capture proves: the client only returns a story sub-quest template once
+ * the player has reached it, so an ending whose gate sub-quest is referenced but
+ * unresolved has no objectives attributed to it. Zero is reported rather than
+ * guessed.
+ */
+export interface StoryChapterEnding {
+  id: StoryEndingId;
+  systemName: string;
+  /** Sub-quest whose completion gates this ending. */
+  gateQuestId: string;
+  /** Objectives in this chapter attributed to the gate sub-quest. */
+  objectiveCount: number;
+  /** Whether the pinned reference resolved the gate sub-quest's template. */
+  resolvedInReference: boolean;
+}
+
+/**
+ * How much of a chapter the pinned capture could resolve. `partial` is true when
+ * the chapter quest references sub-quests whose templates the capture does not
+ * contain or finish conditions lack English objective text, so the objective
+ * list is a projection of the capture rather than the complete chapter.
+ */
+export interface StoryReferenceCoverage {
+  /** Sub-quests the chapter quest references (distinct ids). */
+  referencedSubquests: number;
+  /** Referenced sub-quests whose templates the capture resolved. */
+  resolvedSubquests: number;
+  /** Finish conditions omitted because English objective text was unavailable. */
+  missingObjectiveTexts?: number;
+  partial: boolean;
+}
+
 /** Individual objective within a story chapter */
-export type StoryEndingId = 'savior' | 'survivor' | 'fallen' | 'debtor';
 
 export interface StoryObjectiveUnlock {
   type: 'achievement' | 'barter' | 'map' | 'quest' | 'trader' | 'other';
@@ -398,8 +476,15 @@ export interface StoryObjective {
   id: string;
   type: 'main' | 'optional';
   description: string;
-  /** EFT sub-quest id backing this objective (source traceability) */
-  sourceQuestId?: string;
+  /**
+   * EFT sub-quest id backing this objective (source traceability).
+   *
+   * Required, matching `story-chapter.schema.json`: every chapter is generated
+   * from the quest reference, so an objective with no source sub-quest cannot be
+   * produced. Kept non-optional so TypeScript consumers cannot construct a
+   * `StoryChapter` that compiles but fails schema validation.
+   */
+  sourceQuestId: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;
@@ -440,6 +525,8 @@ export interface StoryChapter {
   order: number;
   /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
   chapterQuestId: string;
+  /** How much of the chapter the pinned reference capture resolved */
+  referenceCoverage: StoryReferenceCoverage;
   autoStart?: boolean;
   chapterRequirements?: Array<{ id: string; name: string }>;
   activation?: StoryChapterActivation;
@@ -450,6 +537,17 @@ export interface StoryChapter {
   description?: string | null;
   notes?: string | null;
   objectives?: StoryObjective[];
+  /**
+   * Endings this chapter branches into, keyed by the real `client/ending_list`
+   * id. Present only on a chapter whose quest references ending gate sub-quests.
+   */
+  endings?: StoryChapterEnding[];
+  /**
+   * Unordered pairs of resolved sub-quest IDs that cannot both be completed.
+   * Each pair is emitted once, sorted by ID. Partial objective progress on both
+   * quests is allowed; these must not be applied as objective exclusions.
+   */
+  mutuallyExclusiveQuestPairs?: Array<[string, string]>;
   rewards?: StoryRewards | null;
 }
 

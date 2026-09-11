@@ -5,6 +5,9 @@ import {
   loadJson5File,
   loadJsonFile,
   SUPPORTED_GAME_MODES,
+  deriveTaskUnlockDefinition,
+  evaluateTaskUnlock,
+  type TaskData,
   type TaskOverride,
 } from '../src/lib/index.js';
 import { applyTaskOverride, getTaskOverrideForMode } from '../examples/apply-overlay.js';
@@ -21,6 +24,8 @@ const TASK_IDS = {
   relentless: '60e71e8ed54b755a3b53eb67',
   flashDrive: '5979ed3886f77431307dc512',
   easyBreezy: '669fa3a40c828825de06d6a1',
+  collector: '5c51aac186f77432ea65c552',
+  vacateThePremises: '67d03be712fb5f8fd2096332',
 } as const;
 
 /**
@@ -131,6 +136,84 @@ describe('task correction data', () => {
 });
 
 describe('mode-specific task correction consumption', () => {
+  it.each(SUPPORTED_GAME_MODES)(
+    "preserves Collector's upstream loyalty-derived level floor in %s",
+    (mode) => {
+      // Public proof: Collector requires Ragman LL4, which requires level 42.
+      // The task's lower explicit Level condition must not erase that floor.
+      // https://escapefromtarkov.fandom.com/wiki/Collector
+      // https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
+      const overlay = {
+        tasks: loadTaskOverrides(),
+        modes: {
+          [mode]: {
+            tasks: loadJson5File<Record<string, TaskOverride>>(
+              join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+            ),
+          },
+        },
+      };
+      const upstream = {
+        id: TASK_IDS.collector,
+        name: 'Collector',
+        minPlayerLevel: 42,
+        objectives: [],
+        traderRequirements: [
+          {
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 4,
+            trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
+          },
+        ],
+      };
+      const override = getTaskOverrideForMode(TASK_IDS.collector, overlay as never, mode);
+      expect(override).not.toHaveProperty('minPlayerLevel');
+      const effective = applyTaskOverride(upstream, override) as TaskData | null;
+      expect(effective?.minPlayerLevel).toBe(upstream.minPlayerLevel);
+      expect(effective?.traderRequirements).toEqual(upstream.traderRequirements);
+
+      const divergences = loadJson5File<Record<string, { fields: Record<string, unknown> }>>(
+        join(paths.srcDir, 'divergences', 'tasks.json5')
+      );
+      expect(divergences[TASK_IDS.collector]?.fields.minPlayerLevel).toBeUndefined();
+    }
+  );
+
+  it('keeps active Lightkeeper successors fail-closed when their retired prerequisite is filtered', () => {
+    // Explicit exception: missing replacement wiring is unknown, not available
+    // and not proof that these surviving quests have themselves been retired.
+    const tasks = loadTaskOverrides();
+    const retiredId = '625d7005a4eb80027c4f2e09';
+    expect(tasks[retiredId]?.disabled).toBe(true);
+    for (const mode of SUPPORTED_GAME_MODES) {
+      const modeTasks = loadJson5File<Record<string, TaskOverride>>(
+        join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+      );
+      for (const id of ['625d700cc48e6c62a440fab5', '63966faeea19ac7ed845db2c']) {
+        const task = {
+          id,
+          name: id,
+          minPlayerLevel: 0,
+          objectives: [],
+          taskRequirements: [
+            { task: { id: retiredId, name: 'Knock-Knock' }, status: ['complete'] },
+          ],
+        };
+        const effective = applyTaskOverride(task, {
+          ...tasks[id],
+          ...modeTasks[id],
+        }) as TaskData | null;
+        expect(effective).not.toBeNull();
+        const definition = deriveTaskUnlockDefinition(effective!);
+        const result = evaluateTaskUnlock(effective!, definition, { taskStatuses: {} });
+        expect(result.status).toBe('unknown');
+        expect(result.unknown.some((entry) => entry.condition.type === 'taskStatus')).toBe(true);
+        expect(effective!.taskRequirements).toEqual(task.taskRequirements);
+      }
+    }
+  });
+
   it('filters every obsolete duplicate out of every game mode', () => {
     // End-to-end proof over the shipped artifact: a consumer following
     // docs/INTEGRATION.md must get `null` (task hidden) for each removed
@@ -158,7 +241,7 @@ describe('mode-specific task correction consumption', () => {
     }
   });
 
-  it('applies regular Easy-Breezy data without leaking it into PvE', () => {
+  it('applies regular Vacate the Premises data without leaking it into PvE', () => {
     const regularOverrides = loadJson5File<Record<string, TaskOverride>>(
       join(paths.srcDir, 'overrides', 'modes', 'regular', 'tasks.json5')
     );
@@ -168,39 +251,35 @@ describe('mode-specific task correction consumption', () => {
       $meta: { version: '1.0', generated: '2026-01-01T00:00:00.000Z', sha256: '' },
     };
     const upstreamTask = {
-      id: TASK_IDS.easyBreezy,
-      name: 'Easy-Breezy',
+      id: TASK_IDS.vacateThePremises,
+      name: 'Vacate the Premises',
       minPlayerLevel: 1,
       objectives: [
         {
-          id: '66a0f5a7f9eae6761253114c',
-          description: 'PvE objective',
-          count: 30,
-          maps: [
-            { id: '5704e5fad2720bc05b8b4567', name: 'Reserve' },
-            { id: '5704e4dad2720bb55b8b4567', name: 'Lighthouse' },
-          ],
+          id: '67d03be712fb5f8fd2096334',
+          description: 'Eliminate any target inside The Labyrinth',
+          count: 36,
         },
       ],
     };
 
     const regularOverride = getTaskOverrideForMode(
-      TASK_IDS.easyBreezy,
+      TASK_IDS.vacateThePremises,
       overlay as never,
       'regular'
     );
-    const pveOverride = getTaskOverrideForMode(TASK_IDS.easyBreezy, overlay as never, 'pve');
+    const pveOverride = getTaskOverrideForMode(TASK_IDS.vacateThePremises, overlay as never, 'pve');
     const regularTask = applyTaskOverride(upstreamTask, regularOverride);
     const pveTask = applyTaskOverride(upstreamTask, pveOverride);
 
     expect(regularTask?.objectives[0]).toMatchObject({
-      count: 50,
-      maps: [{ id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' }],
+      count: 24,
+      description: 'Eliminate PMC operatives inside The Labyrinth',
     });
     expect(pveOverride).toBeUndefined();
     expect(pveTask?.objectives[0]).toMatchObject({
-      count: 30,
-      maps: upstreamTask.objectives[0].maps,
+      count: 36,
+      description: upstreamTask.objectives[0].description,
     });
   });
 });

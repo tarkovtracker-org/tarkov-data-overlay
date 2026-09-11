@@ -9,10 +9,66 @@ import {
   findReferenceFile,
   firstNumber,
   loadReferenceTasks,
+  modeFromRequestUrl,
+  parseModeArgs,
   requireMatchingReferenceMode,
   writeJsonOutput,
 } from '../scripts/eft-compare.js';
 import type { TaskData } from '../src/lib/index.js';
+
+describe('capture envelope and mode detection', () => {
+  // Regression: `gw-pvp-season` contains the substring `gw-pvp`, so testing
+  // `gw-pvp` first labelled every Seasonal capture `regular` and made
+  // mode-scoped comparisons adjudicate the wrong dataset.
+  it('detects pvp-season without matching it as regular', () => {
+    expect(modeFromRequestUrl('https://gw-pvp-season.escapefromtarkov.com/client/quest/list')).toBe(
+      'pvp-season'
+    );
+    expect(modeFromRequestUrl('https://gw-pvp.escapefromtarkov.com/client/quest/list')).toBe(
+      'regular'
+    );
+    expect(modeFromRequestUrl('https://gw-pve.escapefromtarkov.com/client/quest/list')).toBe('pve');
+    expect(modeFromRequestUrl(undefined)).toBeNull();
+    expect(modeFromRequestUrl('https://example.invalid/client/quest/list')).toBeNull();
+  });
+
+  // Regression: newer captures nest the decoded payload under
+  // `response.body_response` instead of `response.decoded_response`, and the
+  // reader threw "Unexpected quest reference shape" on every one of them.
+  it('reads quests from both capture envelope shapes', () => {
+    const quest = { _id: 'aaaaaaaaaaaaaaaaaaaaaaaa', rewards: { Success: [] } };
+    const url = 'https://gw-pve.escapefromtarkov.com/client/quest/list';
+
+    for (const response of [
+      { decoded_response: { data: [quest] } },
+      { body_response: { err: 0, errmsg: null, data: [quest] } },
+    ]) {
+      const dir = mkdtempSync(join(tmpdir(), 'overlay-eft-envelope-'));
+      try {
+        writeFileSync(join(dir, 'quest_list.json'), JSON.stringify({ request: { url }, response }));
+        const { tasks, refMode } = loadReferenceTasks({
+          eftDir: dir,
+          mode: 'pve',
+          jsonOut: undefined,
+          flags: new Set<string>(),
+        });
+        expect(refMode).toBe('pve');
+        expect(tasks.size).toBe(1);
+        expect(tasks.has('aaaaaaaaaaaaaaaaaaaaaaaa')).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it('accepts every supported game mode for --mode', () => {
+    expect(parseModeArgs(['--mode', 'pvp-season']).mode).toBe('pvp-season');
+    expect(parseModeArgs(['--mode', 'regular']).mode).toBe('regular');
+    expect(parseModeArgs(['--mode', 'pve']).mode).toBe('pve');
+    expect(parseModeArgs([]).mode).toBe('pve');
+    expect(() => parseModeArgs(['--mode', 'nope'])).toThrow(/--mode must be one of/);
+  });
+});
 
 describe('eft-compare', () => {
   const quests = [

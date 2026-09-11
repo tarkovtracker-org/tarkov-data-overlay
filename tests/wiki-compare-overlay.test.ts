@@ -6,14 +6,23 @@
  * new. That noise is why the regular-mode experience regression stayed hidden.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import * as fs from 'node:fs';
 import { join } from 'path';
 import {
   taskOverlayFiles,
   loadDivergentFieldKeys,
   loadSuppressedFields,
+  loadTaskRequirementOverrides,
+  buildNextTaskMap,
+  nextTaskKey,
 } from '../scripts/wiki-compare/overlay.js';
 import { compareSubset, valuesEqual, formatValue } from '../src/lib/index.js';
+
+vi.mock('node:fs', async (importOriginal) => {
+  const original = await importOriginal<typeof import('node:fs')>();
+  return { ...original, readFileSync: vi.fn(original.readFileSync) };
+});
 
 const base = join('src', 'overrides', 'tasks.json5');
 const regularFile = join('src', 'overrides', 'modes', 'regular', 'tasks.json5');
@@ -58,25 +67,66 @@ describe('taskOverlayFiles', () => {
 });
 
 describe('loadSuppressedFields', () => {
+  // Vacate the Premises' objective count correction lives only in the REGULAR
+  // mode file, which is what makes it a valid fixture for mode scoping.
+  const REGULAR_ONLY_COUNT_KEY = '67d03be712fb5f8fd2096332:objectives.count';
+
   it('suppresses fields corrected in mode-specific files, not just the base file', () => {
-    // Power of Persuasion's objective count correction lives in the REGULAR
-    // mode file (the base file only carries a provenance note). Default scope
-    // reads both, so the key must be suppressed.
+    // Default scope reads base + every mode file, so the key must be suppressed.
     const { suppressed } = loadSuppressedFields();
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(true);
   });
 
   it('does not let a regular-mode correction suppress when scoped to pve', () => {
-    // The regression this PR guards against: a correction present only in the
-    // regular file must not mask a pve comparison. Power of Persuasion is
-    // corrected in regular, so under pve scope its key must be absent.
+    // The regression this guards against: a correction present only in the
+    // regular file must not mask a pve comparison.
     const { suppressed } = loadSuppressedFields('pve');
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(false);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(false);
   });
 
   it('still suppresses the regular correction under regular scope', () => {
     const { suppressed } = loadSuppressedFields('regular');
-    expect(suppressed.has('63a5cf262964a7488f5243ce:objectives.count')).toBe(true);
+    expect(suppressed.has(REGULAR_ONLY_COUNT_KEY)).toBe(true);
+  });
+
+  // Without these keys, `wiki:compare --all` would re-report every loyalty and
+  // faction gate the overlay already corrects (160 loyalty blocks and 20+
+  // faction entries) as a fresh wiki/API discrepancy.
+  it('suppresses traderRequirements corrected by the overlay', () => {
+    const { suppressed } = loadSuppressedFields();
+    // Pyramid Scheme - Skier LL3 gate.
+    expect(suppressed.has('6572e876dc0d635f633a5714:traderRequirements')).toBe(true);
+    // Reserve Expert - Ragman LL3.
+    expect(suppressed.has('608974af4b05530f55550c21:traderRequirements')).toBe(true);
+  });
+
+  it('suppresses factionName corrected by the overlay', () => {
+    const { suppressed } = loadSuppressedFields();
+    // Never Too Late To Learn - wiki says USEC-only, upstream serves Any.
+    expect(suppressed.has('67af4c17f4f1fb58a907f8f6:factionName')).toBe(true);
+  });
+
+  it('does not suppress a task-wide report for ID-keyed trader patches', async () => {
+    const original = (await vi.importActual<typeof import('node:fs')>('node:fs')).readFileSync;
+    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((
+      file: unknown,
+      ...args: unknown[]
+    ) => {
+      if (String(file).endsWith(base))
+        return JSON.stringify({ fixture: { traderRequirements: { requirementId: { value: 3 } } } });
+      return (original as (...values: unknown[]) => unknown)(file, ...args);
+    }) as typeof fs.readFileSync);
+    try {
+      expect(loadSuppressedFields().suppressed.has('fixture:traderRequirements')).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('does not suppress Scav karma for a loyalty-only override', () => {
+    // Pyramid Scheme corrects Skier loyalty, not Fence reputation.
+    const { suppressed } = loadSuppressedFields();
+    expect(suppressed.has('6572e876dc0d635f633a5714:scavKarma')).toBe(false);
   });
 });
 
@@ -149,5 +199,82 @@ describe('shared compare helpers', () => {
   it('distinguishes null from undefined when formatting', () => {
     expect(formatValue(null)).toBe('null');
     expect(formatValue(undefined)).toBe('undefined');
+  });
+});
+
+describe('loadTaskRequirementOverrides (mode-aware)', () => {
+  // A shared-file value and a mode-file value for the same task used to collapse
+  // into one task-id map, so whichever file was read last won for every mode.
+  // Collector is the live case: base has Chemical - Part 3 (complete), PvE has
+  // Chemical - Part 4 (complete-or-failed).
+  const COLLECTOR = '5c51aac186f77432ea65c552';
+  const chemicalEdge = (
+    reqs: ReturnType<typeof loadTaskRequirementOverrides>,
+    mode: 'regular' | 'pve'
+  ) =>
+    reqs
+      .get(mode)
+      ?.get(COLLECTOR)
+      ?.find((req) => /Chemical/.test(req?.task?.name ?? ''));
+
+  it('keeps each mode on its own resolved requirement set', () => {
+    const overrides = loadTaskRequirementOverrides('both');
+    expect([...overrides.keys()]).toEqual(['regular', 'pve']);
+
+    const regular = chemicalEdge(overrides, 'regular');
+    const pve = chemicalEdge(overrides, 'pve');
+    expect(regular?.task?.name).toBe('Chemical - Part 3');
+    expect(regular?.status).toEqual(['complete']);
+    expect(pve?.task?.name).toBe('Chemical - Part 4');
+    expect(pve?.status).toEqual(['complete', 'failed']);
+  });
+
+  it('does not leak a mode-specific override into the other mode', () => {
+    const overrides = loadTaskRequirementOverrides('both');
+    const regularNames = (overrides.get('regular')?.get(COLLECTOR) ?? []).map((r) => r?.task?.name);
+    expect(regularNames).not.toContain('Chemical - Part 4');
+  });
+
+  it('scopes a single mode to that mode only', () => {
+    const regularOnly = loadTaskRequirementOverrides('regular');
+    expect([...regularOnly.keys()]).toEqual(['regular']);
+    expect(chemicalEdge(regularOnly, 'regular')?.task?.name).toBe('Chemical - Part 3');
+  });
+});
+
+describe('buildNextTaskMap', () => {
+  it('attributes unlocks using each task entry\u2019s own game mode', () => {
+    // Under the default "both" scope every task entry carries its mode, so a
+    // divergent prerequisite must not be applied across modes: that would report
+    // Collector as unlocked by Chemical - Part 4 in regular as well.
+    const overrides = loadTaskRequirementOverrides('both');
+    const tasks = [
+      { id: '5c51aac186f77432ea65c552', name: 'Collector', gameModes: ['regular'] },
+      { id: '5c51aac186f77432ea65c552', name: 'Collector', gameModes: ['pve'] },
+    ] as unknown as Parameters<typeof buildNextTaskMap>[0];
+
+    const next = buildNextTaskMap(tasks, overrides);
+    const PART3 = '597a0e5786f77426d66c0636';
+    const PART4 = '597a0f5686f774273b74f676';
+
+    expect(next.get(nextTaskKey('regular', PART3))).toEqual(['Collector']);
+    expect(next.get(nextTaskKey('pve', PART4))).toEqual(['Collector']);
+    // The leak: keying by task id alone let each mode read the other's edge.
+    expect(next.get(nextTaskKey('regular', PART4))).toBeUndefined();
+    expect(next.get(nextTaskKey('pve', PART3))).toBeUndefined();
+  });
+
+  it('falls back to the API requirements when no override applies', () => {
+    const tasks = [
+      {
+        id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        name: 'Unoverridden',
+        gameModes: ['regular'],
+        taskRequirements: [{ task: { id: 'bbbbbbbbbbbbbbbbbbbbbbbb', name: 'Predecessor' } }],
+      },
+    ] as unknown as Parameters<typeof buildNextTaskMap>[0];
+
+    const next = buildNextTaskMap(tasks, loadTaskRequirementOverrides('both'));
+    expect(next.get(nextTaskKey('regular', 'bbbbbbbbbbbbbbbbbbbbbbbb'))).toEqual(['Unoverridden']);
   });
 });

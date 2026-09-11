@@ -56,6 +56,27 @@ export type WikiTaskData = {
   objectives: WikiObjective[];
   rewards: WikiRewards;
   minPlayerLevel?: number;
+  /**
+   * Trader loyalty gates parsed from the Requirements section. Patch 1.1.0.0
+   * expresses most quest gates this way instead of as a player level, and the
+   * client hides them behind opaque `GlobalVariableValue` conditions - so the
+   * wiki is the corroborating source for `traderRequirements`.
+   *
+   * `inferredTrader` marks an entry whose sentence never named a trader ("Must
+   * be Loyalty Level 2 to start this quest") and was attributed to the infobox
+   * quest giver. The gate is real; which trader it belongs to is an inference,
+   * so it must be confirmed before it becomes an override.
+   */
+  traderLoyalty: Array<{ trader: string; level: number; inferredTrader?: boolean }>;
+  /** PMC faction gate, when the quest is USEC- or BEAR-only. */
+  factionName?: 'USEC' | 'BEAR';
+  /**
+   * Scav karma gate; negative values are real ("Scav karma of -6"). Compared
+   * against the task's Fence `reputation` trader requirement, which is how
+   * json.tarkov.dev models karma - a `level` requirement is a loyalty tier and
+   * is compared separately.
+   */
+  scavKarma?: { value: number; compareMethod?: '>=' | '<=' | '>' | '<' };
   previousTasks: string[];
   nextTasks: string[];
   maps: string[];
@@ -114,6 +135,9 @@ export function getPriority(field: string): Priority {
   switch (field) {
     case 'minPlayerLevel':
     case 'taskRequirements':
+    case 'traderRequirements':
+    case 'scavKarma':
+    case 'factionName':
     case 'nextTasks':
     case 'objectives.description':
       return 'high';

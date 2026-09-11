@@ -699,6 +699,47 @@ const addedTasks = getTaskAdditionsForMode(overlay, gameMode);
 const allTasks = [...tasksFromApi, ...addedTasks];
 ```
 
+### Story Chapters
+
+Story chapters are an addition — tarkov.dev serves no storyline data — so read
+`overlay.storyChapters` directly rather than merging it into an API response.
+
+> **Breaking change in overlay v1.92:** story chapter objectives are now keyed by
+> the real client objective id from the pinned source capture. Previously The
+> Ticket's objectives carried generated positional ids (`the-ticket-main-1` and
+> similar); all 44 were replaced, and none of the old ids survives. Related
+> changes landing with it:
+>
+> - `StoryObjective.sourceQuestId` is now present on every objective, naming the
+>   sub-quest it came from. Before it was missing only from The Ticket's 44
+>   curated objectives; the other 344 already carried it, so only persisted
+>   Ticket objective records need re-keying.
+> - Objective `endingId` now holds a real `client/ending_list` id instead of a
+>   descriptive slug. The old values were `savior`, `fallen`, `survivor` and
+>   `debtor`, so `StoryEndingId` is a different set of values.
+> - Only the ending that the pinned capture resolved objectives for is tagged, so
+>   objectives currently carry one `endingId` value rather than four. The other
+>   three branches are still described, at chapter level.
+> - `the-ticket.endings` is now populated with all four real ending ids (with
+>   per-ending `objectiveCount`). No chapter previously carried a non-empty
+>   `endings` array.
+> - The Ticket grew from 44 to 86 objectives as more of the chapter resolved.
+>
+> **Migration:** consumers that persist story progress keyed by objective id will
+> not find The Ticket's stored ids after upgrading, and that progress will read as
+> incomplete rather than failing loudly. There is no mapping from the old ids to
+> the real ones, because the old ids encoded position rather than identity. Either
+> reset stored story progress for that chapter, or pin the overlay to a tag
+> published before v1.92 until you are ready to migrate. Progress keyed by chapter
+> id is unaffected. Consumers matching on the old ending slugs must switch to the
+> real ids.
+>
+> `referenceCoverage.partial` is also worth reading before treating a chapter as
+> complete: the client only returns a story sub-quest template once the player has
+> reached it, so a missing objective is not evidence that none exists. The same
+> applies to an ending whose `objectiveCount` is 0 — the branch is real, but this
+> capture holds no objective-level evidence for it.
+
 ---
 
 ## Full Integration Example

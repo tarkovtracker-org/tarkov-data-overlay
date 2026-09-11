@@ -232,12 +232,35 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
         field === 'experience' ||
         field === 'minPlayerLevel' ||
         field === 'taskRequirements' ||
+        field === 'traderRequirements' ||
+        field === 'factionName' ||
         field === 'reputation' ||
         field === 'money' ||
         field === 'finishRewards' ||
         field === 'map'
       ) {
-        suppressed.add(`${taskId}:${field}`);
+        // Only an array replaces the full requirement set. ID-keyed patches
+        // leave other gates untouched and cannot suppress a task-wide report.
+        if (
+          field !== 'traderRequirements' ||
+          Array.isArray((fields as Record<string, unknown>)[field])
+        ) {
+          suppressed.add(`${taskId}:${field}`);
+        }
+
+        // A loyalty-only override does not answer a missing Fence karma gate.
+        if (field === 'traderRequirements') {
+          const requirements = (fields as Record<string, unknown>)[field];
+          if (
+            Array.isArray(requirements) &&
+            requirements.some(
+              (req) =>
+                req?.requirementType === 'reputation' &&
+                req.trader?.id === '579dc571d53a0658a154fbec'
+            )
+          )
+            suppressed.add(`${taskId}:scavKarma`);
+        }
 
         if (field === 'finishRewards' && fields && typeof fields === 'object') {
           const finishRewards = (fields as Record<string, unknown>)[field];
@@ -272,8 +295,8 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
         }
       }
 
-      // Also add the raw field name for flexibility
-      suppressed.add(`${taskId}:${field}`);
+      // Trader requirements use the full-replacement guard above.
+      if (field !== 'traderRequirements') suppressed.add(`${taskId}:${field}`);
 
       overlayCount += suppressed.size - beforeSize;
     }
@@ -301,36 +324,78 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
   return { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys };
 }
 
+/**
+ * Task-requirement overrides resolved per game mode.
+ *
+ * Keyed by mode because the base file and a mode file can disagree: Collector
+ * has `Chemical - Part 3` (complete) in the shared file and `Chemical - Part 4`
+ * (complete-or-failed) in PvE. Collapsing both into one task-id map made
+ * whichever file was read last win for *every* mode, so under the default
+ * `both` scope the PvE prerequisite silently became regular's too.
+ */
+export type TaskRequirementOverridesByMode = Map<GameMode, Map<string, TaskRequirement[]>>;
+
+/**
+ * Load `taskRequirements` overrides, resolved separately for each in-scope mode.
+ *
+ * Each mode's map is the base file overlaid with that mode's file, matching the
+ * documented base -> mode merge precedence that consumers apply.
+ */
 export function loadTaskRequirementOverrides(
   scope: SuppressionScope = 'both'
-): Map<string, TaskRequirement[]> {
-  const overrides = new Map<string, TaskRequirement[]>();
+): TaskRequirementOverridesByMode {
+  const modes = scope === 'both' ? WIKI_COMPARE_MODES : [scope];
+  const byMode: TaskRequirementOverridesByMode = new Map();
 
-  // Later files win, matching the documented base -> mode merge precedence.
-  for (const [taskId, fields] of overlayFields(scope)) {
-    const reqs = fields.taskRequirements;
-    if (Array.isArray(reqs)) {
-      overrides.set(taskId, reqs as TaskRequirement[]);
+  for (const mode of modes) {
+    const overrides = new Map<string, TaskRequirement[]>();
+    // Scoping to the single mode keeps the other mode's file out of this map;
+    // within it, the mode file still wins over the base file.
+    for (const [taskId, fields] of overlayFields(mode)) {
+      const reqs = fields.taskRequirements;
+      if (Array.isArray(reqs)) {
+        overrides.set(taskId, reqs as TaskRequirement[]);
+      }
     }
+    byMode.set(mode, overrides);
   }
 
-  return overrides;
+  return byMode;
+}
+
+/**
+ * Key for {@link buildNextTaskMap} lookups.
+ *
+ * The map is keyed by mode *and* predecessor id. Keying by id alone let a
+ * divergent prerequisite cross modes even once the overrides themselves were
+ * resolved per mode: Collector's PvE entry contributed a `Chemical - Part 4`
+ * edge that the regular comparison then read back, and vice versa.
+ */
+export function nextTaskKey(mode: GameMode, taskId: string): string {
+  return `${mode}:${taskId}`;
 }
 
 export function buildNextTaskMap(
   tasks: ExtendedTaskData[],
-  requirementOverrides?: Map<string, TaskRequirement[]>
+  requirementOverrides?: TaskRequirementOverridesByMode
 ): Map<string, string[]> {
   const nextMap = new Map<string, Set<string>>();
 
   for (const task of tasks) {
-    const requirements = requirementOverrides?.get(task.id) ?? task.taskRequirements ?? [];
+    // Each task entry carries its own mode under the `both` scope, so resolve
+    // the override from that mode rather than from a merged map.
+    const mode: GameMode = task.gameModes?.[0] ?? 'regular';
+    const forMode =
+      requirementOverrides?.get(mode) ??
+      (requirementOverrides?.size === 1 ? requirementOverrides.values().next().value : undefined);
+    const requirements = forMode?.get(task.id) ?? task.taskRequirements ?? [];
     for (const req of requirements) {
       const reqTaskId = req?.task?.id;
       if (!reqTaskId) continue;
-      const set = nextMap.get(reqTaskId) ?? new Set<string>();
+      const key = nextTaskKey(mode, reqTaskId);
+      const set = nextMap.get(key) ?? new Set<string>();
       set.add(task.name);
-      nextMap.set(reqTaskId, set);
+      nextMap.set(key, set);
     }
   }
 

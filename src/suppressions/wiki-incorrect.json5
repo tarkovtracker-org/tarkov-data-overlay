@@ -7,4 +7,39 @@
   //
   // Run `npx tsx scripts/wiki-compare.ts --all --cache` to check for stale entries.
   // Stale entries (wiki now matches API) will be flagged for removal.
+
+  // Fuel Shortage - wiki claims a loyalty gate the client does not carry.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fuel_Shortage
+  // 2026-09-10: the Requirements line reads "Must be Loyalty Level 1 to start this
+  // quest" and names no trader, so it would be attributed to the quest giver by
+  // inference. Both 1.1 captures serve the task with an empty `AvailableForStart` -
+  // no `TraderLoyalty`, no `GlobalVariableValue`, no condition of any kind - and the
+  // API serves `traderRequirements: []`. The "the gate hides in a global variable"
+  // argument cannot apply where the client carries no start condition at all.
+  '5a0327ba86f77456b9154236': ['traderRequirements'],
+
+  // Chemical Experiments - same adjudication as Fuel Shortage.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Chemical_Experiments
+  // 2026-09-10: wiki reads "Obtain level 1 loyalty with Peacekeeper"; both 1.1
+  // captures serve an empty `AvailableForStart` and the API serves
+  // `traderRequirements: []`.
+  '5a27bafb86f7741c73584017': ['traderRequirements'],
+
+  // All This Filth... - wiki claims Jaeger LL4; nothing corroborates it.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_This_Filth...
+  // 2026-09-10: both 1.1 captures serve an empty `AvailableForStart`. Jaeger LL4 is
+  // restrictive enough that shipping it unverified would hide a task players can
+  // actually take, so the gate stays out until a capture shows it.
+  '600302d73b897b11364cd161': ['traderRequirements'],
+
+  // Insomnia - wiki claims a BEAR faction restriction the client contradicts.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Insomnia
+  // 2026-09-10: the wiki added "This quest is only obtainable by [[BEAR]] PMCs."
+  // on 2026-08-31 (revid 357247), but a USEC profile's quest list contains Insomnia
+  // while containing 0 of the 6 BEAR-only tasks and all 6 USEC-only ones - so the
+  // client is filtering by faction and is not filtering this quest. tarkov.dev
+  // serves factionName "Any", matching the client. The same wiki edit calls
+  // Counteraction "the USEC counterpart quest", which is really the USEC half of the
+  // Our Own Land / Counteraction pair, the likely source of the confusion.
+  '5c0bd01e86f7747cdd799e56': ['factionName'],
 }

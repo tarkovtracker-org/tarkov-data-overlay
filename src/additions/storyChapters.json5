@@ -6,8 +6,27 @@
   // narrator-trader quests; objectives are the ordered sub-quest references. Optional
   // flags come from the wiki. Chapter ordering, wikiLink, activation, and requirements
   // are curated (scripts/story-chapter-meta.json). Each generated objective id is
-  // the stable source objective id, with sourceQuestId linking to its sub-quest
-  // (The Ticket keeps its curated branching objectives). Regenerate with `npm run eft:story`.
+  // the stable source objective id, with sourceQuestId linking to its sub-quest.
+  // Every chapter is derived from the reference, so no objective carries a
+  // fabricated id; endingId and the chapter-level `endings` list use the real
+  // client/ending_list ids.
+  //
+  // `referenceCoverage` reports how much of each chapter the capture resolved. The
+  // client only returns a story sub-quest template once the player has reached it,
+  // so `partial: true` means these objectives are what the capture could see, not a
+  // complete chapter - a missing objective is not evidence that none exists. For the
+  // same reason an ending can appear in `endings` with objectiveCount 0: the branch
+  // is real (the chapter quest references its gate sub-quest) but this capture holds
+  // no objective-level evidence for it.
+  //
+  // `mutuallyExclusiveQuestPairs` contains unordered pairs of resolved chapter
+  // sub-quest ids that cannot both be completed, derived from fail-on-start/complete
+  // and fail-only start conditions. Each pair is emitted once in id order. Partial
+  // progress on both quests is allowed: these are NOT objective exclusions. Cascade
+  // failure and counterparts outside the resolved chapter sub-quests are excluded.
+  //
+  // Regenerate with `npm run eft:story`; the exact source capture is pinned by
+  // scripts/story-reference.lock.json.
   // The storyline is shared between PVP and PVE.
   //
   // Objectives can carry task-style marker data (maps, zones, possibleLocations,
@@ -23,6 +42,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Tour',
       order: 1,
       chapterQuestId: '68cbd33676fe74b1e80bfd91',
+      referenceCoverage: {
+          referencedSubquests: 12,
+          resolvedSubquests: 12,
+          partial: false,
+      },
       autoStart: true,
       chapterRequirements: [],
       description: 'Starting quest - automatically unlocked at the beginning of the storyline',
@@ -361,6 +385,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Falling_Skies',
       order: 2,
       chapterQuestId: '68cbcdc4c964ab83cc0c928e',
+      referenceCoverage: {
+          referencedSubquests: 15,
+          resolvedSubquests: 12,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [
           {
@@ -549,6 +578,16 @@
               sourceQuestId: '68cd7d6d9510d63fdb05a76a',
           },
       ],
+      mutuallyExclusiveQuestPairs: [
+          [
+              '678f6bd1e8d46e40ff021605',
+              '678fa1463977eb69290a3a06',
+          ],
+          [
+              '679cdee4ce3a208fee0ad657',
+              '68cd7d6d9510d63fdb05a76a',
+          ],
+      ],
       rewards: null,
       mapUnlocks: [],
       traderUnlocks: [],
@@ -563,6 +602,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Batya',
       order: 3,
       chapterQuestId: '68da36cf7cff54fc6109874a',
+      referenceCoverage: {
+          referencedSubquests: 33,
+          resolvedSubquests: 25,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -926,15 +970,20 @@
               sourceQuestId: '68caba4119f13a8d1b0ad3ac',
           },
       ],
+      mutuallyExclusiveQuestPairs: [
+          [
+              '68caba4119f13a8d1b0ad3ac',
+              '68f9ef8a1dbc7a9f81001a87',
+          ],
+          [
+              '68caba4119f13a8d1b0ad3ac',
+              '6915bb52dff93d50490eaf54',
+          ],
+      ],
       rewards: null,
       mapUnlocks: [],
       traderUnlocks: [],
-      questUnlocks: [
-          {
-              id: '625d6ff5ddc94657c21a1625',
-              name: 'Network Provider - Part 1',
-          },
-      ],
+      questUnlocks: [],
   },
 
   // The Unheard
@@ -946,6 +995,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Unheard',
       order: 4,
       chapterQuestId: '6900927ab7d28358f80b9421',
+      referenceCoverage: {
+          referencedSubquests: 16,
+          resolvedSubquests: 15,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1179,6 +1233,12 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Blue_Fire',
       order: 5,
       chapterQuestId: '68e784b7fa3f1fa3770094ba',
+      referenceCoverage: {
+          referencedSubquests: 10,
+          resolvedSubquests: 8,
+          missingObjectiveTexts: 1,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1254,6 +1314,12 @@
               sourceQuestId: '67b892bd55eaf7b06d011436',
           },
       ],
+      mutuallyExclusiveQuestPairs: [
+          [
+              '67b892b832f50fb7ec084426',
+              '67b892ba0e9aad30720bfc56',
+          ],
+      ],
       rewards: null,
       mapUnlocks: [],
       traderUnlocks: [],
@@ -1268,6 +1334,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/They_Are_Already_Here',
       order: 6,
       chapterQuestId: '6903d779fdfc4078740a4bd0',
+      referenceCoverage: {
+          referencedSubquests: 19,
+          resolvedSubquests: 15,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1511,6 +1582,16 @@
               sourceQuestId: '68588ee109509e9fa1045b38',
           },
       ],
+      mutuallyExclusiveQuestPairs: [
+          [
+              '68588ede90466842410d7bb8',
+              '6914d59b1bd36f988e0d95bc',
+          ],
+          [
+              '68588edf975681ee130def28',
+              '6914d59b1bd36f988e0d95bc',
+          ],
+      ],
       rewards: null,
       mapUnlocks: [],
       traderUnlocks: [],
@@ -1525,6 +1606,11 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Accidental_Witness',
       order: 7,
       chapterQuestId: '69052e18e680c2d3e3034d3a',
+      referenceCoverage: {
+          referencedSubquests: 12,
+          resolvedSubquests: 11,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1722,6 +1808,12 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Labyrinth_(story_chapter)',
       order: 8,
       chapterQuestId: '68e3a35002661eb2d30ce387',
+      referenceCoverage: {
+          referencedSubquests: 5,
+          resolvedSubquests: 5,
+          missingObjectiveTexts: 2,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -1846,6 +1938,12 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/The_Ticket',
       order: 9,
       chapterQuestId: '68da33fe00868edcb6025ac4',
+      referenceCoverage: {
+          referencedSubquests: 88,
+          resolvedSubquests: 35,
+          missingObjectiveTexts: 2,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [
           {
@@ -1856,285 +1954,583 @@
       activation: {
           summary: 'Continue from Falling Skies after obtaining the armored case and start the Mr. Kerman terminal chain.',
       },
-      description: 'Branches into 4 endings based on player decisions: Savior (help Kerman), Fallen (betray Kerman), Survivor (pay Prapor), Debtor (seek Lightkeeper)',
-      notes: 'Decision points are mutually exclusive. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).',
+      description: 'Branches into the storyline\'s four endings, listed in `endings` with the real ids the client serves in ending_list. The wiki describes the decision points as helping or betraying Mr. Kerman, paying Prapor, or seeking the Lightkeeper; each ending is gated by its own sub-quest.',
+      notes: 'The reference capture\'s mutually exclusive sub-quest completions are emitted at chapter level as `mutuallyExclusiveQuestPairs`. Partial objective progress on both sides is allowed. Only pairs of resolved sub-quests within this chapter are included. Objective coverage is partial (see `referenceCoverage`): the client only returns a story sub-quest template once the player has reached it, so only the endings whose `objectiveCount` is above zero have objective-level evidence here. The armored case choice in Falling Skies affects available optional objectives (Lightkeeper access).',
       objectives: [
           {
-              id: 'the-ticket-main-1',
-              type: 'main',
-              description: 'Obtain Intelligence Center level 1',
-          },
-          {
-              id: 'the-ticket-main-2',
+              id: '68d921de0d2f39698f6562c1',
               type: 'main',
               description: 'Talk to Mr. Kerman',
+              sourceQuestId: '68d82d29d34befa7d30b8771',
           },
           {
-              id: 'the-ticket-main-3',
+              id: '68e1a87e4c6b5f9e825bf3a0',
               type: 'main',
               description: 'Wait for Mr. Kerman to reach out',
+              sourceQuestId: '68d922a310451b42200b33bf',
           },
           {
-              id: 'the-ticket-main-4',
+              id: '68d9290c4d67043271847892',
               type: 'main',
               description: 'Talk to Prapor',
+              sourceQuestId: '67bc646c6e34475fea09d2a5',
           },
           {
-              id: 'the-ticket-main-5',
+              id: '68d9319732ca4fa98b0ca90f',
               type: 'main',
               description: 'Talk to Mr. Kerman',
+              sourceQuestId: '67bc646c6e34475fea09d2a5',
           },
           {
-              id: 'the-ticket-main-6',
-              type: 'main',
-              description: 'Ask Mechanic for help with the armored case',
-          },
-          {
-              id: 'the-ticket-main-7',
-              type: 'main',
-              description: 'Obtain the experimental signal jammer',
-          },
-          {
-              id: 'the-ticket-main-8',
-              type: 'main',
-              description: 'Use the signal jammer to unlock the armored case',
-          },
-          {
-              id: 'the-ticket-main-9',
-              type: 'main',
-              description: 'Unlock the armored case',
-          },
-          {
-              id: 'the-ticket-main-10',
-              type: 'main',
-              description: 'Retrieve the Ticket document from the case',
-          },
-          {
-              id: 'the-ticket-main-11',
-              type: 'main',
-              description: 'Contact Mr. Kerman about the Ticket',
-          },
-          {
-              id: 'the-ticket-main-12',
-              type: 'main',
-              description: 'Accept Mr. Kerman\'s cooperation offer',
-              notes: 'Kerman Route — leads to Savior or Fallen ending',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-13',
-              ],
-          },
-          {
-              id: 'the-ticket-main-13',
-              type: 'main',
-              description: 'Refuse Mr. Kerman\'s cooperation offer',
-              notes: 'Refuse Route — leads to Survivor or Debtor ending',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-12',
-              ],
-          },
-          {
-              id: 'the-ticket-main-14',
-              type: 'main',
-              description: 'Obtain the Laboratory master pass',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-15',
-              type: 'main',
-              description: 'Locate the RFID card encryption device',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-16',
-              type: 'main',
-              description: 'Talk to Mechanic about the RFID device',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-17',
-              type: 'main',
-              description: 'Wait for Mechanic',
-              notes: 'Kerman Route — 24-hour cooldown',
-          },
-          {
-              id: 'the-ticket-main-18',
-              type: 'main',
-              description: 'Hand over 40 Physical Bitcoins to Mechanic',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-19',
-              type: 'main',
-              description: 'Collect the RFID encryption device from Mechanic',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-20',
-              type: 'main',
-              description: 'Use the RFID device to activate Kruglov\'s keycard',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-21',
-              type: 'main',
-              description: 'Report to Mr. Kerman',
-              notes: 'Kerman Route',
-          },
-          {
-              id: 'the-ticket-main-22',
-              type: 'main',
-              description: 'Hand over the TerraGroup evidence to Mr. Kerman',
-              notes: 'Savior ending — cooperate fully with Kerman',
-              endingId: 'savior',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-23',
-              ],
-          },
-          {
-              id: 'the-ticket-main-23',
-              type: 'main',
-              description: 'Betray Mr. Kerman and keep the evidence',
-              notes: 'Fallen ending — turn against Kerman',
-              endingId: 'fallen',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-22',
-              ],
-          },
-          {
-              id: 'the-ticket-main-24',
-              type: 'main',
-              description: 'Use the RFID card at the Terminal intercom on Shoreline',
-              notes: 'Refuse Route',
-          },
-          {
-              id: 'the-ticket-main-25',
-              type: 'main',
-              description: 'Pay Prapor to arrange Terminal access',
-              notes: 'Survivor ending — pay the ruble cost',
-              endingId: 'survivor',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-26',
-              ],
-          },
-          {
-              id: 'the-ticket-main-26',
-              type: 'main',
-              description: 'Seek Lightkeeper for Terminal access',
-              notes: 'Debtor ending — work with Lightkeeper instead',
-              endingId: 'debtor',
-              mutuallyExclusiveWith: [
-                  'the-ticket-main-25',
-              ],
-          },
-          {
-              id: 'the-ticket-main-27',
-              type: 'main',
-              description: 'Complete topographic reconnaissance for Lightkeeper',
-              notes: 'Debtor Route',
-          },
-          {
-              id: 'the-ticket-main-28',
-              type: 'main',
-              description: 'Obtain cultist amulets for Lightkeeper',
-              notes: 'Debtor Route',
-          },
-          {
-              id: 'the-ticket-main-29',
-              type: 'main',
-              description: 'Deliver items to Lightkeeper',
-              notes: 'Debtor Route',
-          },
-          {
-              id: 'the-ticket-main-30',
-              type: 'main',
-              description: 'Receive the Lightkeeper keycard',
-              notes: 'Debtor Route',
-          },
-          {
-              id: 'the-ticket-main-31',
-              type: 'main',
-              description: 'Arrive at the port Terminal entrance',
-          },
-          {
-              id: 'the-ticket-opt-1',
+              id: '67bc700fbbf2563b14c50abc',
               type: 'optional',
-              description: 'Locate Prapor\'s camp on Lighthouse',
-              notes: 'Only if armored case was given to Prapor in Falling Skies',
+              description: 'Locate the camp of Prapor\'s people on Lighthouse',
+              sourceQuestId: '67bc6acd21692c74e700bc66',
           },
           {
-              id: 'the-ticket-opt-2',
+              id: '68d9a1a4b21940c70508506e',
               type: 'optional',
-              description: 'Find clues about their intentions at the camp',
-              notes: 'Lightkeeper access chain',
+              description: 'Find any clues about Prapor\'s people\'s intentions',
+              sourceQuestId: '67bc6acd21692c74e700bc66',
           },
           {
-              id: 'the-ticket-opt-3',
-              type: 'optional',
-              description: 'Talk to Mr. Kerman about what you found',
-              notes: 'Lightkeeper access chain',
+              id: '68f4de9df50153689f033322',
+              type: 'main',
+              description: 'Talk to Mr. Kerman',
+              sourceQuestId: '68f4de9df50153689f033320',
           },
           {
-              id: 'the-ticket-opt-4',
-              type: 'optional',
-              description: 'Gain access to Lightkeeper',
-              notes: 'Lightkeeper access chain',
-          },
-          {
-              id: 'the-ticket-opt-5',
+              id: '68dabd4ad16134208310ad64',
               type: 'optional',
               description: 'Talk to Lightkeeper',
-              notes: 'Lightkeeper access chain',
+              sourceQuestId: '67bc79321d99d6ebe5014b5a',
           },
           {
-              id: 'the-ticket-opt-6',
+              id: '692eb8a5997e309c890d4ac1',
               type: 'optional',
-              description: 'Maintain good standing with Lightkeeper',
-              notes: 'Lightkeeper access chain',
+              description: 'Gain access to Lightkeeper',
+              sourceQuestId: '67bc79321d99d6ebe5014b5a',
           },
           {
-              id: 'the-ticket-opt-7',
+              id: '68f4dc0c8ea1b5f183d9c25b',
               type: 'optional',
-              description: 'Obtain 3 TerraGroup "Blue Folders" materials',
-              notes: 'Lightkeeper access chain',
+              description: 'Stay on good terms with Lightkeeper',
+              sourceQuestId: '67bc79321d99d6ebe5014b5a',
           },
           {
-              id: 'the-ticket-opt-8',
+              id: '67bc79d9d5807d6fa5b18466',
               type: 'optional',
-              description: 'Deliver materials to Lightkeeper',
-              notes: 'Lightkeeper access chain',
+              description: 'Obtain the item: TerraGroup "Blue Folders" materials',
+              sourceQuestId: '67bc798e612537def10eac17',
           },
           {
-              id: 'the-ticket-opt-9',
+              id: '67bc79ed0e70fe1ee20ca3eb',
               type: 'optional',
-              description: 'Launch yellow signal flare at ULTRA entrance on Interchange',
-              notes: 'Lightkeeper access chain',
+              description: 'Bring the found items to Lightkeeper',
+              sourceQuestId: '67bc798e612537def10eac17',
           },
           {
-              id: 'the-ticket-opt-10',
+              id: '67bc7aeb828af7a5f180b291',
               type: 'optional',
-              description: 'Eliminate 15 targets in a single Interchange raid',
-              notes: 'Lightkeeper access chain',
+              description: 'Launch a yellow signal flare in front of ULTRA\'s main entrance on Interchange',
+              sourceQuestId: '67bc7abc7801bf5c41017b68',
           },
           {
-              id: 'the-ticket-opt-11',
+              id: '67bc7afbff2e9e386993ea66',
               type: 'optional',
-              description: 'Obtain Batya\'s evidence documents',
-              notes: 'Cross-chapter evidence for Savior ending (from Batya chapter)',
-              endingId: 'savior',
+              description: 'Eliminate any target in one raid on Interchange',
+              sourceQuestId: '67bc7abc7801bf5c41017b68',
           },
           {
-              id: 'the-ticket-opt-12',
+              id: '68dacb518adba673600f2536',
               type: 'optional',
-              description: 'Obtain The Unheard evidence documents',
-              notes: 'Cross-chapter evidence for Savior ending (from The Unheard chapter)',
-              endingId: 'savior',
+              description: 'Talk to Lightkeeper',
+              sourceQuestId: '68dac755bf449210f60f0e6e',
           },
           {
-              id: 'the-ticket-opt-13',
+              id: '68e1d036248463ac81787373',
               type: 'optional',
-              description: 'Collect all required TerraGroup compromise evidence',
-              notes: 'Savior ending requires 8+ evidence documents from multiple chapters',
-              endingId: 'savior',
+              description: 'Get the armored case from Lightkeeper',
+              sourceQuestId: '68dac755bf449210f60f0e6e',
+          },
+          {
+              id: '68e2d8d52a2449612b06ac9d',
+              type: 'main',
+              description: 'Unlock the armored case',
+              sourceQuestId: '68e2d8d52a2449612b06ac9b',
+          },
+          {
+              id: '68e2ecfeb88d405a420774f8',
+              type: 'main',
+              description: 'Obtain the "Ticket"',
+              sourceQuestId: '68e2ecfeb88d405a420774f5',
+          },
+          {
+              id: '68fbdbae729bd58bc80974f4',
+              type: 'main',
+              description: 'Read the instruction from the armored case',
+              sourceQuestId: '68fbdbae729bd58bc80974f1',
+          },
+          {
+              id: '68dad4ef477377b3e04d718d',
+              type: 'main',
+              description: 'Ask Mechanic for help',
+              sourceQuestId: '67bc801c7801bf5c41017b6d',
+          },
+          {
+              id: '67bc885febc1b9a2446146c2',
+              type: 'main',
+              description: 'Obtain the experimental signal jammer',
+              sourceQuestId: '67bc86024e7dbc3aa202431b',
+          },
+          {
+              id: '67bc886390e71643f037a60f',
+              type: 'optional',
+              description: 'Obtain the TerraGroup Labs access keycard',
+              sourceQuestId: '67bc86024e7dbc3aa202431b',
+          },
+          {
+              id: '68e2eb699fdd17b8c4065264',
+              type: 'optional',
+              description: 'Talk to Mechanic',
+              sourceQuestId: '67bc86024e7dbc3aa202431b',
+          },
+          {
+              id: '68e2eb399f73b1a93ded4c47',
+              type: 'optional',
+              description: 'Gain access to The Lab',
+              sourceQuestId: '67bc86024e7dbc3aa202431b',
+          },
+          {
+              id: '68e2eb7fd393583cd94c4ea0',
+              type: 'main',
+              description: 'Use the experimental signal jammer to unlock the case',
+              sourceQuestId: '67bc86024e7dbc3aa202431b',
+          },
+          {
+              id: '68dc2693e3ba78b216aa93bd',
+              type: 'main',
+              description: 'Contact Mr. Kerman',
+              sourceQuestId: '67bc8c817801bf5c41017b73',
+          },
+          {
+              id: '68e2e61ba1f1d0daa8d25101',
+              type: 'optional',
+              description: 'Accept Mr. Kerman\'s offer',
+              sourceQuestId: '67bc8c817801bf5c41017b73',
+          },
+          {
+              id: '68efcba85c7ddd51e1857a01',
+              type: 'optional',
+              description: 'Obtain a blank RFID card',
+              sourceQuestId: '67bc93e6adb794ecb40f574d',
+          },
+          {
+              id: '67bc943b38c9039da6e5a284',
+              type: 'optional',
+              description: 'Activate the RFID card from the case',
+              sourceQuestId: '67bc93e6adb794ecb40f574d',
+          },
+          {
+              id: '68e3ce5660b161e1202ef2f0',
+              type: 'main',
+              description: 'Construct the Solar Power zone in the Hideout',
+              sourceQuestId: '67bc93e6adb794ecb40f574d',
+          },
+          {
+              id: '67bc9970a23671dbdd023d3a',
+              type: 'optional',
+              description: 'Obtain the Laboratory master pass',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '67bc9a1bee1bde80279ca7d4',
+              type: 'optional',
+              description: 'Use the Laboratory master pass to activate Kruglov\'s keycard',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '690632405116d2a683efeac6',
+              type: 'main',
+              description: 'Access Kruglov\'s office in The Lab',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '68fe06facd232a319b476a78',
+              type: 'optional',
+              description: 'Gain access to The Lab',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '68e3ef1765d7acb61e859da1',
+              type: 'optional',
+              description: 'Access Kruglov\'s apartment on Streets of Tarkov',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '68e3ef54ba6e16b054dc7b42',
+              type: 'optional',
+              description: 'Gain access to Streets of Tarkov',
+              sourceQuestId: '67bc9970a23671dbdd023d38',
+          },
+          {
+              id: '68fcc20ed1efc371307d4e47',
+              type: 'optional',
+              description: 'Obtain an RFID card encryption device',
+              sourceQuestId: '67bc9d70adb794ecb40f5755',
+          },
+          {
+              id: '68e6a2c30efb846429f36bf7',
+              type: 'main',
+              description: 'Talk to Mr. Kerman',
+              sourceQuestId: '67bc9e3e7801bf5c41017b82',
+          },
+          {
+              id: '68e6a2cdfed9106cf6c920d2',
+              type: 'optional',
+              description: 'Talk to Mechanic',
+              sourceQuestId: '67bc9e3e7801bf5c41017b82',
+          },
+          {
+              id: '68e6a6b0a2fae0a7a812325d',
+              type: 'optional',
+              description: 'Wait for a response from Mechanic',
+              sourceQuestId: '68e6a5b42a3fa47e9100c196',
+          },
+          {
+              id: '67bc9f527b52304e9e27ee5a',
+              type: 'optional',
+              description: 'Hand over the Physical Bitcoins to Mechanic',
+              sourceQuestId: '67bc9eda1d99d6ebe5014b65',
+          },
+          {
+              id: '68e6aa67ad4bcfc1a03333c9',
+              type: 'optional',
+              description: 'Obtain Physical Bitcoins to pay for Elektronik\'s services',
+              sourceQuestId: '67bc9eda1d99d6ebe5014b65',
+          },
+          {
+              id: '68e6a79bd472a1082654749c',
+              type: 'main',
+              description: 'Construct a Bitcoin Farm in the Hideout',
+              sourceQuestId: '67bc9eda1d99d6ebe5014b65',
+          },
+          {
+              id: '67bca0d332f7486973bcabbb',
+              type: 'optional',
+              description: 'Collect the RFID card encryption device',
+              sourceQuestId: '67bca04f21692c74e700bc72',
+          },
+          {
+              id: '67bca11cf4b9a801e92f1958',
+              type: 'optional',
+              description: 'Use the RFID card encryption device to activate Kruglov\'s keycard',
+              sourceQuestId: '67bca04f21692c74e700bc72',
+          },
+          {
+              id: '68efedffcd801e39304398dc',
+              type: 'optional',
+              description: 'Gain access to Streets of Tarkov',
+              sourceQuestId: '67bca04f21692c74e700bc72',
+          },
+          {
+              id: '67bdafe5be7a35664013f1ad',
+              type: 'main',
+              description: 'Arrive at the entrance pathway to the port Terminal',
+              sourceQuestId: '67bdafa17c1ef7a64804319c',
+          },
+          {
+              id: '68e6b9b1ecabcb4c973b2cf4',
+              type: 'main',
+              description: 'Swipe the keycard at the intercom reader',
+              sourceQuestId: '67bdafa17c1ef7a64804319c',
+          },
+          {
+              id: '68eff999afc78b8a37fb6584',
+              type: 'main',
+              description: 'Talk to Mr. Kerman',
+              sourceQuestId: '68e7e20801bd936405037bee',
+          },
+          {
+              id: '691e693540966bb93bd1d6a6',
+              type: 'optional',
+              description: 'Agree to find dirt on TerraGroup for Mr. Kerman',
+              sourceQuestId: '68e7e20801bd936405037bee',
+          },
+          {
+              id: '68f0cfd10cac71bba872ec3e',
+              type: 'main',
+              description: 'Upgrade the Intelligence Center to Level 3 in the Hideout',
+              sourceQuestId: '67bdeeee884b40ea9d08b5c4',
+          },
+          {
+              id: '68f018886f7970e2c2cb4db7',
+              type: 'optional',
+              description: 'Deliver the minor TerraGroup evidence to Mr. Kerman',
+              sourceQuestId: '67bdeeee884b40ea9d08b5c4',
+          },
+          {
+              id: '68f0154a0066922971815219',
+              type: 'optional',
+              description: 'Deliver the major TerraGroup evidence to Mr. Kerman',
+              sourceQuestId: '67bdeeee884b40ea9d08b5c4',
+          },
+          {
+              id: '68f27802133262374f6aa07e',
+              type: 'optional',
+              description: 'Confirm with Mr. Kerman that all the evidence has been delivered',
+              sourceQuestId: '67bdeeee884b40ea9d08b5c4',
+          },
+          {
+              id: '68e90a73a3d110355b03e3a4',
+              type: 'optional',
+              description: 'Wait for Mr. Kerman\'s trusted contact to get in touch',
+              sourceQuestId: '68e90a73a3d110355b03e3a2',
+          },
+          {
+              id: '68ead7cf17dfeaf7227a5a66',
+              type: 'optional',
+              description: 'Talk to Fence',
+              sourceQuestId: '68ea9b0b8bfb4ae0aa04ddf9',
+          },
+          {
+              id: '68f107ca9efb74c9cf93f699',
+              type: 'optional',
+              description: 'Complete Fence\'s assignment',
+              sourceQuestId: '67bdf2cecf0cc29475092199',
+          },
+          {
+              id: '68f6c3264d2db3fea5ea145b',
+              type: 'optional',
+              description: 'Keep the reputation with Fence above 4.0',
+              sourceQuestId: '67bdf2cecf0cc29475092199',
+          },
+          {
+              id: '68f6c4c66b0d110ab742a742',
+              type: 'optional',
+              description: 'Tell Fence that the assignment is complete',
+              sourceQuestId: '67bdf2cecf0cc29475092199',
+          },
+          {
+              id: '69247e3953de0941eff6df58',
+              type: 'optional',
+              description: 'Eliminate PMC operatives on Interchange (in one raid)',
+              sourceQuestId: '69247ccc803723e83c0439fd',
+          },
+          {
+              id: '6924820dbf8cf5498b05dac2',
+              type: 'optional',
+              description: 'Eliminate PMC operatives on Shoreline (in one raid)',
+              sourceQuestId: '6924820dbf8cf5498b05dac0',
+          },
+          {
+              id: '68eadb1dd5f0fec15aecfa7d',
+              type: 'optional',
+              description: 'Reach 0.4 reputation with BTR Driver',
+              sourceQuestId: '68e9156369a053d132045c56',
+          },
+          {
+              id: '67bdf920f72ddfffed2b9b8d',
+              type: 'main',
+              description: 'Arrive at the entrance pathway to the port Terminal',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f18b76d82c053a7f76e1cc',
+              type: 'optional',
+              description: 'Bring the reprogrammed RFID card with Mr. Kerman\'s hash codes',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f54deb15aa37c3fa481760',
+              type: 'optional',
+              description: 'Bring the Secure container Alpha-1 with TerraGroup evidence',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68efcc353316ee1b07b4b2ba',
+              type: 'main',
+              description: 'Swipe the keycard at the intercom reader',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '67bdf90c8da8324b09e0c223',
+              type: 'main',
+              description: 'Access the port Terminal',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7eadf2379685b4546303d',
+              type: 'main',
+              description: 'Pass the security check',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '6907a63ebec93c14a8a51212',
+              type: 'optional',
+              description: 'Retrieve the Secure container Alpha-1',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7eb1280b4d1114f1acb5e',
+              type: 'main',
+              description: 'Escape from Tarkov',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7eb6f5e145413afa3ab19',
+              type: 'optional',
+              description: 'Locate the armory with the confiscated equipment',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ebabf77d9bba8fd60fae',
+              type: 'optional',
+              description: 'Locate the exit leading to the Terminal loading zone',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ec206cb96fcd5e730c2a',
+              type: 'optional',
+              description: 'Obtain the keycard to unlock the service passage',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ebcab907501e487e44eb',
+              type: 'optional',
+              description: 'Unlock the service passage inside the seaport building',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ed9e8ad566b5c5419f46',
+              type: 'optional',
+              description: 'Figure out how to reach the evacuation zone on the pier',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ef835b65e040bc7a1317',
+              type: 'optional',
+              description: 'Obtain the key to the gate blocking the road to the pier',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7edbd3a999dffc6a47b09',
+              type: 'optional',
+              description: 'Locate the way into the fuel depot',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ee1009c8143e31f2feaa',
+              type: 'main',
+              description: 'Access the fuel depot',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ed640efeca1d4e693371',
+              type: 'optional',
+              description: 'Access the Terminal loading zone',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7eeb4fc3c24f0eb31ab8f',
+              type: 'optional',
+              description: 'Locate the pumping station inside the fuel depot',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ef09497ab3db747c4832',
+              type: 'optional',
+              description: 'Drain the water in the pumping station',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f7ef9e854da39746cb452b',
+              type: 'optional',
+              description: 'Locate the exit leading to the pier',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '6907abc1f29bc685319134b3',
+              type: 'optional',
+              description: 'Reach the evacuation area at the pier',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f8babc010865c5d0e0ae19',
+              type: 'optional',
+              description: 'Figure out how to restore power to the pumping station',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f8bac80d780029e9a1e4bb',
+              type: 'optional',
+              description: 'Obtain the diagram of the electrical panels',
+              sourceQuestId: '67bdf8c066ca1d79a202463a',
+              endingId: '68a6e8f1a7455e5e23099ad8',
+          },
+          {
+              id: '68f174e12488a7ab54dedeb7',
+              type: 'optional',
+              description: 'Negotiate with Mr. Kerman',
+              sourceQuestId: '68f16d504a7305f74f0c746b',
+          },
+      ],
+      mutuallyExclusiveQuestPairs: [
+          [
+              '67bc9d70adb794ecb40f5755',
+              '67bc9e3e7801bf5c41017b82',
+          ],
+      ],
+      endings: [
+          {
+              id: '68a6e8f1a7455e5e23099ad8',
+              systemName: 'EscapedFromTarkovForHumanity',
+              gateQuestId: '67bdf8c066ca1d79a202463a',
+              objectiveCount: 23,
+              resolvedInReference: true,
+          },
+          {
+              id: '68a6e8c834a37e244710d516',
+              systemName: 'EscapedFromTarkovAndSurvived',
+              gateQuestId: '67c08f0268e50a07b10d25a6',
+              objectiveCount: 0,
+              resolvedInReference: false,
+          },
+          {
+              id: '68a6e8e4a8d0bee0b5324d96',
+              systemName: 'EscapedFromTarkovToFallInTheDarkness',
+              gateQuestId: '67c862bd9f9b7ef9090651d8',
+              objectiveCount: 0,
+              resolvedInReference: false,
+          },
+          {
+              id: '68a6028ef4c23ebbbc49da4b',
+              systemName: 'YouDidntEscapeFromYourself',
+              gateQuestId: '67c9877aff0329206209cb67',
+              objectiveCount: 0,
+              resolvedInReference: false,
           },
       ],
       rewards: null,
@@ -2150,12 +2546,7 @@
               name: 'Mr. Kerman',
           },
       ],
-      questUnlocks: [
-          {
-              id: '625d6ff5ddc94657c21a1625',
-              name: 'Network Provider - Part 1',
-          },
-      ],
+      questUnlocks: [],
   },
 
   // Boreas
@@ -2167,6 +2558,12 @@
       wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Boreas',
       order: 10,
       chapterQuestId: '69d38381cea4b428690ea1d9',
+      referenceCoverage: {
+          referencedSubquests: 38,
+          resolvedSubquests: 20,
+          missingObjectiveTexts: 2,
+          partial: true,
+      },
       autoStart: false,
       chapterRequirements: [],
       activation: {
@@ -2243,7 +2640,7 @@
           },
           {
               id: '69b41af35e0e9ae61396da9d',
-              type: 'main',
+              type: 'optional',
               description: 'Return to the Hideout',
               sourceQuestId: '69b41843dc22acbf90051e3f',
           },

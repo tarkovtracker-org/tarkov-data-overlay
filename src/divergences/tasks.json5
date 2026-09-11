@@ -21,7 +21,8 @@
   //   pve      -> `in-game`: PvE values verified in-game on the PvE profile
   //               (read off the quest screens). PvE is the mode we verify
   //               directly, so it is treated as authoritative here.
-  //   regular  -> `wiki` when the page is current, `patch-notes` when the
+  //   regular  -> `in-game` for regular client captures (`verified: 1.1-regular`),
+  //               `wiki` when the page is current, `patch-notes` when the
   //               wiki still documents a pre-1.1 figure: the Season 1 patch
   //               notes state the task-reward rebalance applies to ALL game
   //               modes (PvP Season, PvP Zone, PvE Zone), and the 1.1-pve
@@ -459,25 +460,12 @@
     },
   },
 
-  // Collector (converged, base override - 1.1 unification)
-  '5c51aac186f77432ea65c552': {
-    name: 'Collector',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Collector',
-    status: 'converged',
-    fields: {
-      minPlayerLevel: {
-        regular: 40,
-        pve: 40,
-        'pvp-season': 40,
-        confidence: 'medium',
-        regularSource: 'patch-notes',
-        pveSource: 'in-game',
-        pvpSeasonSource: 'patch-notes',
-        verified: '1.1-pve',
-        note: 'PvE Level condition from the 1.1-pve data (single mode-free condition). 1.1 unified quest data across modes (patch notes: all game modes), so the pre-1.1 figure (42) tarkov.dev serves in every mode is stale; the wiki lists no player level and cannot adjudicate. The base override corrects all modes.',
-      },
-    },
-  },
+  // Collector's minPlayerLevel record was retired with its level-40 override:
+  // upstream's 42 matches the Ragman-LL4-derived floor, not a stale value.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //        https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
+  // The task's explicit Level condition is not the effective minimum. Keeping
+  // the old record would make check-overrides recommend the same bad correction.
 
   // Long Road (converged, base override - 1.1 unification)
   '6193850f60b34236ee0483de': {
@@ -521,42 +509,6 @@
         pveSource: 'in-game',
         verified: '1.1-pve',
         note: 'The wiki documents a mode split for this objective; the PvE count is confirmed by the 1.1-pve data.',
-      },
-    },
-  },
-
-  // Power of Persuasion (divergent objective count/maps/weapon)
-  '63a5cf262964a7488f5243ce': {
-    name: 'Power of Persuasion',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion',
-    status: 'divergent',
-    fields: {
-      'objective[63a5cf262964a7488f5243d1].count': {
-        regular: 20,
-        pve: 5,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '1.1-pve',
-        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
-      },
-    },
-  },
-
-  // Easy-Breezy (divergent objective count/maps)
-  '669fa3a40c828825de06d6a1': {
-    name: 'Easy-Breezy',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Easy-Breezy',
-    status: 'divergent',
-    fields: {
-      'objective[66a0f5a7f9eae6761253114c].count': {
-        regular: 50,
-        pve: 30,
-        confidence: 'medium',
-        regularSource: 'wiki',
-        pveSource: 'in-game',
-        verified: '1.1-pve',
-        note: 'The wiki documents the regular variant (different count and maps); the 1.1-pve data reads the PvE variant. tarkov.dev serves the PvE variant in both modes.',
       },
     },
   },

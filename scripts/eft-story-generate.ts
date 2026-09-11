@@ -4,28 +4,42 @@
  * wiki-verified optional/required flags.
  *
  * Sources (by authority):
- * - Local quest reference (eft/quest-list.json): objective existence, text,
- *   order, and stable ids. A chapter is a named storyline quest on the narrator
- *   trader (67f7af56c117b6140af2a607); its objective conditions are ordered
- *   sub-quest refs whose own conditions carry the text. The objective condition
- *   id is used as the stable objective id so consumers that persist completion
- *   per id are not broken by wording/order changes on regeneration.
+ * - Local quest reference (pinned by scripts/story-reference.lock.json; see
+ *   loadReference): objective existence, text, order, and stable ids. A chapter
+ *   is a named storyline quest on the narrator trader
+ *   (67f7af56c117b6140af2a607); its objective conditions are ordered sub-quest
+ *   refs whose own conditions carry the text. The objective condition id is used
+ *   as the stable objective id so consumers that persist completion per id are
+ *   not broken by wording/order changes on regeneration.
  * - EFT wiki (data/eft/story-wiki-objectives.json via scripts/eft-story-wiki.ts):
  *   the player-facing optional/required distinction, matched by fuzzy text.
  * - Curated (scripts/story-chapter-meta.json): chapter id/name/order/wikiLink/
- *   activation/requirements the reference lacks, plus The Ticket's branching
- *   objectives (endings + mutual exclusion), preserved verbatim.
+ *   activation/requirements the reference lacks. Objectives are NOT curated -
+ *   every chapter is derived from the reference so that no objective ships a
+ *   fabricated id.
+ *
+ * Generation is local-only: the capture lives under the gitignored eft/, so CI
+ * and contributors without it cannot regenerate. What makes the committed output
+ * auditable anyway is the lock file, which pins the exact capture by SHA-256
+ * (plus client version, mode, capture time and resolution counts). A different
+ * capture cannot silently take over: it either fails the hash check or shows up
+ * as a lock diff in the same commit.
  *
  * Emits final storyChapters JSON to stdout. Deterministic given the inputs.
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { isDirectExecution } from '../src/lib/index.js';
+import { createHash } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'fs';
+import { dirname, join } from 'path';
+import Ajv from 'ajv';
+import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
+import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
+import { writeFileAtomicSync, writeFileExclusiveSync } from './lib/atomic-write.js';
 
-const REF = 'eft/quest-list.json';
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
+export const LOCK = 'scripts/story-reference.lock.json';
 export const NARRATOR_TRADER = '67f7af56c117b6140af2a607';
 const ID_RE = /[0-9a-fA-F]{24}/;
 const MATCH_THRESHOLD = 0.6;
@@ -43,14 +57,125 @@ const CHAPTER_QUEST_ID: Record<string, string> = {
   'the-ticket': '68da33fe00868edcb6025ac4',
   boreas: '69d38381cea4b428690ea1d9',
 };
-const PRESERVE_OBJECTIVES = new Set(['the-ticket']); // keep curated branching/endings verbatim
+
+/**
+ * Every chapter's objectives are derived from the reference, so every objective
+ * id in the output is a real client condition id.
+ *
+ * The Ticket used to be exempt (its objectives were kept verbatim from
+ * `story-chapter-meta.json`) so that hand-written branching notes could be
+ * preserved. That cost 44 fabricated ids of the form `the-ticket-main-1`, which
+ * a consumer cannot align to anything in its database - the exact failure the
+ * "use the real source objective id" rule exists to prevent. The fabricated ids
+ * also anchored `mutuallyExclusiveWith` and `endingId`, so the branching data
+ * was self-referential rather than tied to game data.
+ *
+ * Deriving The Ticket from the reference instead loses nothing real, but it does
+ * change what the branch model can claim, so the branch structure is emitted
+ * from game data too:
+ * - `endings` restates all four `client/ending_list` endings at chapter level
+ *   with their real ids and gate sub-quests, each carrying how many objectives
+ *   the capture attributes to it.
+ * - `referenceCoverage` reports referenced vs resolved sub-quests, because the
+ *   client only returns a story sub-quest template once the player has reached
+ *   it (The Ticket resolves 35 of its 88 sub-quest references).
+ * - `mutuallyExclusiveQuestPairs` is derived from the capture's own condition
+ *   graph (see `exclusiveCounterparts`), not from curated slugs. These exclude
+ *   quest completions, not partial progress on individual objectives.
+ */
+
+/** Quest status codes used by the client's conditions (see eft-normalize.ts). */
+const STATUS_STARTED = 2;
+const STATUS_COMPLETE = 4;
+const STATUS_FAIL = 5;
+
+/**
+ * Sub-quests that cannot both be completed alongside `quest`, as the capture
+ * states it. Two condition shapes prove exclusivity:
+ *
+ * - `Fail` / `Quest` with the counterpart's `complete` (or `started`) status:
+ *   completing that quest fails this one.
+ * - `AvailableForStart` / `Quest` with only the counterpart's `fail` status:
+ *   this quest is reachable only after that one failed.
+ *
+ * A `Fail` condition on the counterpart's *fail* status is cascade failure, not
+ * exclusivity, so it is excluded - a chain that dies with its predecessor is not
+ * an alternative to it.
+ */
+export function exclusiveCounterparts(quest: JsonRecord | undefined): string[] {
+  const out: string[] = [];
+  const conditions = quest?.conditions ?? {};
+  const add = (condition: JsonRecord, statuses: number[]): void => {
+    if (condition?.conditionType !== 'Quest') return;
+    const status: number[] = Array.isArray(condition.status) ? condition.status : [];
+    if (!statuses.some((wanted) => status.includes(wanted))) return;
+    let target = condition.target;
+    if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
+    const id = bareId(target);
+    if (id && !out.includes(id)) out.push(id);
+  };
+  for (const condition of conditions.Fail ?? []) {
+    add(condition, [STATUS_COMPLETE, STATUS_STARTED]);
+  }
+  for (const condition of conditions.AvailableForStart ?? []) {
+    const status: number[] = Array.isArray(condition?.status) ? condition.status : [];
+    // Failure must be the only accepted state. Accepting started (or any other
+    // state) also permits progress without the counterpart having failed.
+    if (status.length === 0 || !status.every((value) => value === STATUS_FAIL)) continue;
+    add(condition, [STATUS_FAIL]);
+  }
+  return out;
+}
+
+interface ExpandedObjective {
+  id: string;
+  text: string;
+  sourceQuestId: string;
+  endingId?: string;
+}
+
+interface ChapterExpansion {
+  objectives: ExpandedObjective[];
+  missingObjectiveTexts: number;
+  /** Distinct sub-quest ids the chapter quest references. */
+  referencedSubquests: string[];
+  /** Referenced sub-quests whose templates the capture resolved. */
+  resolvedSubquests: string[];
+  /**
+   * Sub-quest pairs the capture proves cannot both be completed, as sorted
+   * `[a, b]` tuples. Only pairs where both sides are resolved sub-quests of this
+   * chapter are kept, bounding the model to resolved chapter sub-quests. The
+   * capture also states exclusivity against ordinary tasks (The Ticket's
+   * "Choose Your Friends Wisely", Boreas' "Hangover"), which remains outside this
+   * chapter-local model. Pairs exclude completed quests, not their individual
+   * objectives: partial progress can exist on both sides.
+   */
+  exclusivePairs: Array<[string, string]>;
+}
 
 interface WikiObjective {
   text: string;
   optional: boolean;
 }
 
+/** Provenance for the capture that produced the committed output. */
+interface ReferenceLock {
+  file: string;
+  sha256: string;
+  bytes: number;
+  clientVersion: string | null;
+  gameMode: string | null;
+  capturedAt: string | null;
+  quests: number;
+  chapterQuests: number;
+  objectiveTexts: number;
+}
+
 type JsonRecord = Record<string, any>;
+
+const ENDING_BY_GATE_QUEST = new Map<string, (typeof STORY_ENDINGS)[number]>(
+  STORY_ENDINGS.map((ending) => [ending.gateQuestId, ending])
+);
 
 /** Extract a bare 24-hex id from a value that may be wrapped as `[id] Name`. */
 export function bareId(value: unknown): string | null {
@@ -59,12 +184,59 @@ export function bareId(value: unknown): string | null {
   return match ? match[0] : null;
 }
 
+/**
+ * Codepoint ordering, used wherever output order must not vary.
+ * `String.localeCompare` depends on the runtime's locale/ICU data, so it cannot
+ * back a reproducibility guarantee.
+ */
+function byCodePoint(a: string, b: string): number {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
+
 /** Normalize objective text for fuzzy matching: collapse numbers, keep letters. */
 export function normalizeStoryText(text: string): string {
   let out = text.toLowerCase();
   out = out.replace(/\b\d[\d,]*\b/g, '#'); // collapse numbers
   out = out.replace(/[^a-z# ]/g, ' ');
   return out.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Undo the enriched capture's annotation wrapper on a localized string.
+ *
+ * The enrichment tool rewrites values as `[<original>] <resolved>` - the same
+ * convention `bareId` already unwraps for ids (`_id: '[68da33fe…] The Ticket'`).
+ * It reaches objective text too: The Ticket's final objective arrives as
+ * `[Escape from Tarkov] ESCAPE FROM TARKOV`, and the plain 1.1 PvE capture
+ * (unannotated) gives that same objective id the text `Escape from Tarkov`, so
+ * the bracketed half is the client's value and the tail is the tool's lookup.
+ *
+ * When the brackets are empty (`[] Experience bonus {0}`, the tool's marker for
+ * a string it could not resolve) there is no original to recover, so the value
+ * is returned untouched rather than replaced with the unrelated tail.
+ */
+export function unwrapAnnotatedText(text: string): string {
+  const match = /^\[([^\]]*)\]\s*(.*)$/s.exec(text);
+  if (!match) return text;
+  const original = match[1].trim();
+  return original.length > 0 ? original : text;
+}
+
+/**
+ * True when a localized string is the enrichment tool's unresolved marker.
+ *
+ * `[] Experience bonus {0}` means the tool could not resolve the string, so the
+ * bracketed original is absent and the tail is an unrelated lookup.
+ * {@link unwrapAnnotatedText} deliberately returns such a value untouched
+ * because there is nothing to recover - which means callers must not treat it as
+ * usable objective text. Emitting it would ship the marker as an objective
+ * description while still counting the objective as resolved, letting a chapter
+ * report complete coverage over text the capture never actually provided.
+ */
+export function isUnresolvedAnnotation(text: string): boolean {
+  const match = /^\[([^\]]*)\]/.exec(text);
+  return match !== null && match[1].trim().length === 0;
 }
 
 /**
@@ -94,26 +266,676 @@ export function matchOptional(
   return { optional: false, ratio: bestRatio };
 }
 
-/**
- * Load the quest list from the local reference file.
- *
- * The reference is wrapped in a nested envelope; unwrap to the quest array,
- * tolerating either the enveloped shape or an already-unwrapped `{data: [...]}`.
- */
-function loadReference(): JsonRecord[] {
-  const raw = JSON.parse(readFileSync(REF, 'utf-8'));
-  const node = raw?.response ?? raw;
-  const decoded = node?.decoded_response ?? node;
-  return decoded?.data ?? decoded;
-}
-
-function main(): void {
-  const quests = loadReference();
+/** Index a capture's quests by bare id. */
+export function indexQuests(quests: JsonRecord[]): Map<string, JsonRecord> {
   const byId = new Map<string, JsonRecord>();
   for (const quest of quests) {
     const id = bareId(quest._id);
     if (id) byId.set(id, quest);
   }
+  return byId;
+}
+
+/**
+ * Walk a chapter quest's ordered sub-quest references and collect their
+ * objectives.
+ *
+ * Single source of the expansion for both candidate scoring and output
+ * generation: when the two disagreed, a capture could score well and then emit
+ * something else.
+ */
+export function expandChapterObjectives(
+  chapterQuestId: string | undefined,
+  byId: Map<string, JsonRecord>
+): ChapterExpansion {
+  const objectives: ExpandedObjective[] = [];
+  let missingObjectiveTexts = 0;
+  const referenced: string[] = [];
+  const resolved: string[] = [];
+  const chapterQuest = chapterQuestId ? byId.get(chapterQuestId) : undefined;
+  if (!chapterQuest)
+    return {
+      objectives,
+      missingObjectiveTexts,
+      referencedSubquests: referenced,
+      resolvedSubquests: [],
+      exclusivePairs: [],
+    };
+
+  const seenRef = new Set<string>();
+  for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
+    if (condition?.conditionType !== 'Quest') continue;
+    let target = condition.target;
+    if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
+    const subId = bareId(target);
+    if (!subId || seenRef.has(subId)) continue;
+    seenRef.add(subId);
+    referenced.push(subId);
+
+    const subQuest = byId.get(subId);
+    if (!subQuest) continue;
+    resolved.push(subId);
+
+    const localized: Record<string, string> = subQuest?.localization?.en ?? {};
+    for (const objective of subQuest?.conditions?.AvailableForFinish ?? []) {
+      const objectiveId = objective?.id;
+      if (!objectiveId) {
+        // A finish condition with no id cannot become a stable objective. Count
+        // it so coverage reports `partial` instead of silently claiming this
+        // chapter was fully resolved.
+        missingObjectiveTexts += 1;
+        continue;
+      }
+      const raw = (localized[objectiveId] ?? '').trim();
+      const text = unwrapAnnotatedText(raw).trim();
+      // An unresolved `[]` marker is not usable text: emitting it would ship the
+      // marker as the description AND count the objective as resolved.
+      if (!text || isUnresolvedAnnotation(text)) {
+        missingObjectiveTexts += 1;
+        continue;
+      }
+      // Use the real source objective id as the stable id. Positional ids
+      // ({chapter}-main-n) shift whenever wording/order changes, which silently
+      // corrupts consumers that persist completion per objective id. The source
+      // id is unique and stable across regens.
+      const expanded: ExpandedObjective = { id: objectiveId, text, sourceQuestId: subId };
+      // Objectives belonging to an ending's gate sub-quest carry that ending's
+      // real id, so consumers can attribute a branch without a slug lookup.
+      const ending = ENDING_BY_GATE_QUEST.get(subId);
+      if (ending) expanded.endingId = ending.id;
+      objectives.push(expanded);
+    }
+  }
+
+  const resolvedSet = new Set(resolved);
+  const pairs: Array<[string, string]> = [];
+  const seenPair = new Set<string>();
+  for (const subId of resolved) {
+    for (const counterpart of exclusiveCounterparts(byId.get(subId))) {
+      if (!resolvedSet.has(counterpart) || counterpart === subId) continue;
+      const pair: [string, string] =
+        subId < counterpart ? [subId, counterpart] : [counterpart, subId];
+      const key = pair.join(':');
+      if (seenPair.has(key)) continue;
+      seenPair.add(key);
+      pairs.push(pair);
+    }
+  }
+  pairs.sort((a, b) => byCodePoint(a[0], b[0]) || byCodePoint(a[1], b[1]));
+
+  return {
+    objectives,
+    missingObjectiveTexts,
+    referencedSubquests: referenced,
+    resolvedSubquests: resolved,
+    exclusivePairs: pairs,
+  };
+}
+
+/**
+ * Parse a capture's bytes into its quest array plus the envelope provenance.
+ *
+ * The bytes are passed in rather than re-read so that the hash recorded in the
+ * lock is taken over exactly the bytes that produced the quests (and so a 47 MB
+ * capture is read once).
+ */
+function parseReferenceEnvelope(
+  file: string,
+  bytes: Buffer
+): {
+  quests: JsonRecord[];
+  request?: { url?: string; headers?: Record<string, string> };
+  capturedAt?: string;
+} {
+  const raw = JSON.parse(bytes.toString('utf-8'));
+  const node = raw?.response ?? raw;
+  const decoded = node?.decoded_response ?? node?.body_response ?? node;
+  const data = decoded?.data ?? decoded;
+  if (!Array.isArray(data)) throw new Error(`unexpected quest reference shape in ${file}`);
+  return {
+    quests: data as JsonRecord[],
+    request: raw?.request,
+    capturedAt: raw?.request?.timestamp,
+  };
+}
+
+/** How much of the storyline a capture resolves. */
+function scoreReference(quests: JsonRecord[]): { chapters: number; texts: number } {
+  const byId = indexQuests(quests);
+  let chapters = 0;
+  let texts = 0;
+  for (const chapterQuestId of Object.values(CHAPTER_QUEST_ID)) {
+    if (!byId.has(chapterQuestId)) continue;
+    chapters += 1;
+    texts += expandChapterObjectives(chapterQuestId, byId).objectives.length;
+  }
+  return { chapters, texts };
+}
+
+/**
+ * Quest-capture files under eft/, enriched variants first.
+ *
+ * Directory entries are sorted before walking: `readdirSync` order is
+ * filesystem-dependent, so relying on it would make discovery - and therefore
+ * the fallback candidate ranking - vary between machines.
+ */
+export function storyReferenceCandidates(root = 'eft'): string[] {
+  const found: string[] = [];
+  const walk = (dir: string): void => {
+    let names: string[];
+    try {
+      names = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const name of [...names].sort()) {
+      const full = join(dir, name);
+      let stats;
+      try {
+        stats = statSync(full);
+      } catch {
+        continue;
+      }
+      if (stats.isDirectory()) walk(full);
+      else if (stats.isFile() && /quest[_-]list/i.test(name) && name.endsWith('.json'))
+        found.push(full);
+    }
+  };
+  walk(root);
+  // Enriched captures carry the localization.en block that supplies objective
+  // text, so prefer them; ties fall back to the sorted discovery order.
+  return found.sort(
+    (a, b) =>
+      (a.includes('rollinglatest.modified') ? 0 : 1) -
+        (b.includes('rollinglatest.modified') ? 0 : 1) || byCodePoint(a, b)
+  );
+}
+
+/**
+ * Capture modes the committed storyline is allowed to come from.
+ *
+ * `eft-story-write.ts` stamps "The storyline is shared between PVP and PVE" onto
+ * the generated addition, and consumers merge `storyChapters` for those modes.
+ * `pvp-season` is a separate BSG character with independently divergent quest
+ * data, so a seasonal capture must never become the shared storyline even when
+ * an advanced Seasonal character would out-score every other capture on chapter
+ * coverage.
+ */
+export const STORY_SHARED_MODES: readonly string[] = ['regular', 'pve'];
+
+/**
+ * Rank capture candidates for a lock refresh.
+ *
+ * Story chapters are not served like ordinary quests: the client returns a
+ * chapter's sub-quest templates only once the player has reached them, so the
+ * *newest* capture is not automatically the most useful one here - a fresh
+ * capture from an early character resolves far fewer sub-quests than an older
+ * capture from an advanced one. Selecting by "newest" (what `findReferenceFile`
+ * does for the numeric `eft:*` tools) would silently shrink the storyline.
+ *
+ * Candidates are therefore ranked by how much of the storyline each can resolve:
+ * chapter quests present first, then objective texts, then file path so equal
+ * scores resolve to one deterministic winner instead of discovery order.
+ *
+ * Captures from modes outside {@link STORY_SHARED_MODES} are dropped before
+ * ranking, so seasonal coverage cannot win the auto-selection.
+ */
+export function rankStoryReferences(
+  candidates: string[]
+): Array<{ file: string; chapters: number; texts: number; gameMode: string | null }> {
+  const scored: Array<{ file: string; chapters: number; texts: number; gameMode: string | null }> =
+    [];
+  for (const file of candidates) {
+    try {
+      const envelope = parseReferenceEnvelope(file, readFileSync(file));
+      const gameMode = modeFromRequestUrl(envelope.request?.url);
+      // Unknown mode is dropped as well: a capture whose request URL does not
+      // identify it cannot be shown to belong to the shared storyline's modes.
+      if (gameMode === null || !STORY_SHARED_MODES.includes(gameMode)) continue;
+      scored.push({ file, gameMode, ...scoreReference(envelope.quests) });
+    } catch {
+      continue; // unreadable or wrong-shaped capture
+    }
+  }
+  return scored.sort(
+    (a, b) => b.chapters - a.chapters || b.texts - a.texts || byCodePoint(a.file, b.file)
+  );
+}
+
+function readLock(): ReferenceLock | null {
+  let raw: string;
+  try {
+    raw = readFileSync(LOCK, 'utf-8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    // A raw SyntaxError here names no file and suggests no remedy, and the lock is
+    // committed, so restoring it is usually a one-line fix.
+    if (process.env.STORY_REFERENCE_UPDATE_LOCK === '1') {
+      console.error(
+        `warning: ${LOCK} is not valid JSON; re-pinning replaces it. Check the resulting lock diff.`
+      );
+      return null;
+    }
+    throw new Error(
+      `${LOCK} is not valid JSON (${(error as Error).message}). Restore it from version control, ` +
+        'or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+    );
+  }
+  // Held to the same contract as a staged lock, so a truncated or hand-edited
+  // committed lock fails here by name instead of as an opaque TypeError deeper in
+  // loadReference.
+  if (!isReferenceLock(parsed)) {
+    // An explicit re-pin rewrites the lock, so refusing to run is what would make
+    // the situation unrecoverable - and the error below names that as the remedy.
+    // Treat the unusable lock as absent and let the update path replace it; the
+    // result still lands as a reviewable lock diff.
+    if (process.env.STORY_REFERENCE_UPDATE_LOCK === '1') {
+      console.error(
+        `warning: ${LOCK} is not a complete provenance record; re-pinning replaces it. ` +
+          'Check the resulting lock diff.'
+      );
+      return null;
+    }
+    throw new Error(
+      `${LOCK} is not a complete provenance record (needs file, 64-hex sha256, bytes, ` +
+        'clientVersion, gameMode, capturedAt, quests, chapterQuests, objectiveTexts). Restore it ' +
+        'from version control, or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+    );
+  }
+  return parsed;
+}
+
+/** Fingerprint a capture: content hash plus the provenance in its envelope. */
+function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] } {
+  const bytes = readFileSync(file);
+  const envelope = parseReferenceEnvelope(file, bytes);
+  const { chapters, texts } = scoreReference(envelope.quests);
+  return {
+    quests: envelope.quests,
+    lock: {
+      file,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+      bytes: bytes.length,
+      clientVersion: envelope.request?.headers?.['App-Version'] ?? null,
+      gameMode: modeFromRequestUrl(envelope.request?.url),
+      capturedAt: envelope.capturedAt ?? null,
+      quests: envelope.quests.length,
+      chapterQuests: chapters,
+      objectiveTexts: texts,
+    },
+  };
+}
+
+/**
+ * Load the pinned quest reference.
+ *
+ * Selection is explicit rather than heuristic, so that regenerating on a
+ * workstation whose eft/ has since grown cannot quietly rewrite committed
+ * objectives:
+ * - by default the lock's capture is used and its SHA-256 must still match.
+ * - `STORY_REFERENCE=<file>` reads the pinned capture from another path (a moved
+ *   or renamed copy). The hash must still match the lock, so this cannot swap in
+ *   a different capture - it only relaxes the path.
+ * - `STORY_REFERENCE_UPDATE_LOCK=1` is the only mode that accepts a different
+ *   capture: it ranks candidates (or takes `STORY_REFERENCE`) and rewrites the
+ *   lock, so a source switch always lands as a reviewable diff.
+ */
+/**
+ * Lock staged by {@link loadReference} for the writer to bind to its output.
+ *
+ * Staged on every run, not only on an explicit re-pin: the writer replaces the
+ * committed artifact, so it must be able to tie that write to a capture the
+ * generator vouched for. On a normal run the staged lock is the committed one;
+ * under `STORY_REFERENCE_UPDATE_LOCK=1` it is the newly selected capture.
+ *
+ * Held until {@link commitStoryReferenceLock} runs so a staged pin only lands
+ * when generation actually produced the chapters it claims to describe.
+ */
+let pendingLock: ReferenceLock | undefined;
+
+/**
+ * Sidecar carrying a staged provenance binding across the generate -> write process boundary.
+ *
+ * The generator only emits JSON on stdout; `eft-story-write.ts` is what persists
+ * `src/additions/storyChapters.json5`. The lock's whole purpose is to record
+ * which capture produced the *committed* data, so the writer refuses to replace
+ * the artifact unless the sidecar is bound to the exact payload it is about to
+ * write. The binding must not land until that write succeeds - otherwise a
+ * failed redirect or a writer error leaves the lock describing an artifact that
+ * was never updated. Lives under the gitignored data/ tree and is consumed and
+ * removed by the writer after a successful promotion.
+ */
+/**
+ * Path to the staged binding for one generated payload.
+ *
+ * Addressed by the payload's SHA-256, so overlapping `npm run eft:story` runs
+ * cannot consume or overwrite each other's binding: a generation only ever
+ * writes, promotes and removes the file naming its own payload. The binding is
+ * still validated against the lock contract before it can be applied, and the
+ * writer takes an exclusive lock around publication, so a payload-addressed file
+ * that outlives its run is refused rather than applied to something else.
+ */
+export function pendingLockSidecar(outputSha256: string): string {
+  return join('data', 'eft', `story-reference.lock.pending.${outputSha256}.json`);
+}
+
+/**
+ * Stage a provenance binding for the writer to promote. No-op only when
+ * {@link loadReference} found no lock to stage.
+ *
+ * `outputSha256` binds the staged binding to the exact generated payload, so a
+ * sidecar left behind by a run whose write never happened cannot later be
+ * promoted alongside different data.
+ */
+export function commitStoryReferenceLock(outputSha256: string): void {
+  if (!pendingLock) return;
+  const sidecar = pendingLockSidecar(outputSha256);
+  mkdirSync(dirname(sidecar), { recursive: true });
+  // Two runs can produce byte-identical payloads - a normal run and a re-pin
+  // whose capture changed only provenance, say - so they share a binding
+  // address. Replacing the other run's binding would let its writer promote the
+  // wrong capture and, in the re-pin case, silently confirm the old lock, so
+  // staging is exclusive: an identical binding is left in place, and a binding
+  // recording a different capture is refused rather than clobbered. A binding
+  // left by a failed run must be removed (or completed) before re-staging.
+  const staged = `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`;
+  if (!writeFileExclusiveSync(sidecar, staged)) {
+    let existingLock: unknown;
+    try {
+      existingLock = (JSON.parse(readFileSync(sidecar, 'utf-8')) as { lock?: unknown }).lock;
+    } catch {
+      existingLock = undefined;
+    }
+    if (
+      !isReferenceLock(existingLock) ||
+      JSON.stringify(existingLock) !== JSON.stringify(pendingLock)
+    ) {
+      throw new Error(
+        `refusing to replace the staged binding at ${sidecar}: it records a different capture for the ` +
+          'same payload, so replacing it could promote the wrong pin. If another story run is active, ' +
+          'let it finish; otherwise remove that file and re-run.'
+      );
+    }
+    // Identical binding already staged by another run of the same capture.
+  }
+  console.error(
+    `staged provenance binding at ${sidecar}; ` +
+      `${LOCK} updates once the story artifact is written`
+  );
+  pendingLock = undefined;
+}
+
+/**
+ * Result of examining the sidecar.
+ *
+ * A `lock` is present exactly for the statuses that carry one, so the committed
+ * lock can never be written from an absent value - the compiler rejects it
+ * rather than serializing `undefined`.
+ */
+export type StagedLockInspection =
+  | { status: 'none' }
+  | { status: 'unusable' }
+  | { status: 'ready'; lock: ReferenceLock }
+  | { status: 'mismatched'; lock: ReferenceLock };
+
+/**
+ * Validate the complete provenance record before it can replace the committed lock.
+ *
+ * The sidecar lives in the gitignored data/ tree and can be truncated by an
+ * interrupted run or hand-edited, so its shape is not guaranteed by having
+ * parsed as JSON. Without this check a payload that omits `lock` would make
+ * `JSON.stringify(undefined)` write the literal `undefined` over the committed
+ * lock, corrupting the provenance record that every later run parses.
+ *
+ * Every field is required, not just the two the write dereferences: the lock's
+ * purpose is to record byte size, client version, game mode, capture timestamp
+ * and coverage counts, so promoting a partial record would silently drop the
+ * evidence that makes the committed chapters auditable.
+ */
+function isReferenceLock(value: unknown): value is ReferenceLock {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const lock = value as Partial<ReferenceLock>;
+  const nonEmptyString = (field: unknown): boolean => typeof field === 'string' && field.length > 0;
+  const stringOrNull = (field: unknown): boolean => typeof field === 'string' || field === null;
+  const count = (field: unknown): boolean =>
+    typeof field === 'number' && Number.isInteger(field) && field >= 0;
+  return (
+    nonEmptyString(lock.file) &&
+    // A digest, not merely a non-empty string: a hand-edited `"sha256": "x"` must
+    // not be able to replace the committed provenance record.
+    typeof lock.sha256 === 'string' &&
+    /^[0-9a-f]{64}$/i.test(lock.sha256) &&
+    count(lock.bytes) &&
+    stringOrNull(lock.clientVersion) &&
+    stringOrNull(lock.gameMode) &&
+    stringOrNull(lock.capturedAt) &&
+    count(lock.quests) &&
+    count(lock.chapterQuests) &&
+    count(lock.objectiveTexts)
+  );
+}
+
+/**
+ * Read and validate the staged sidecar without modifying anything on disk.
+ *
+ * Side-effect free so the writer can decide whether a re-pin will be refused
+ * *before* it replaces the committed artifact, while the sidecar is still
+ * available for {@link promoteStoryReferenceLock} to consume afterwards.
+ *
+ * Passing `outputSha256` asserts "this is the payload I am about to commit":
+ * the sidecar addressed by that hash must exist and carry a complete lock bound
+ * to it. A sidecar addressed by a payload hash but carrying a different binding
+ * is refused rather than trusted.
+ */
+export function inspectStagedReferenceLock(outputSha256: string): StagedLockInspection {
+  const sidecar = pendingLockSidecar(outputSha256);
+  if (!existsSync(sidecar)) return { status: 'none' };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(sidecar, 'utf-8'));
+  } catch {
+    return { status: 'unusable' };
+  }
+  if (typeof parsed !== 'object' || parsed === null) return { status: 'unusable' };
+
+  const staged = parsed as { lock?: unknown; outputSha256?: unknown };
+  const stagedOutput = staged.outputSha256 ?? null;
+  if (stagedOutput !== null && typeof stagedOutput !== 'string') return { status: 'unusable' };
+  if (!isReferenceLock(staged.lock)) return { status: 'unusable' };
+
+  if (stagedOutput !== outputSha256) {
+    return { status: 'mismatched', lock: staged.lock };
+  }
+  return { status: 'ready', lock: staged.lock };
+}
+
+/**
+ * Promote a staged re-pin to the committed lock. Returns true when one was
+ * applied.
+ *
+ * Called by `eft-story-write.ts` after it has written
+ * `src/additions/storyChapters.json5`, so the lock and the artifact it describes
+ * move together. When `outputSha256` is supplied it must match what the
+ * generator staged; a mismatch means the sidecar belongs to a different
+ * generation, so it is refused without destroying it (the sidecar may belong to
+ * a concurrent run). An unusable sidecar is discarded, leaving the committed
+ * lock untouched.
+ */
+export function promoteStoryReferenceLock(outputSha256: string): boolean {
+  const staged = inspectStagedReferenceLock(outputSha256);
+  if (staged.status === 'none') return false;
+  const sidecar = pendingLockSidecar(outputSha256);
+
+  if (staged.status === 'unusable' || staged.status === 'mismatched') {
+    const reason =
+      staged.status === 'unusable'
+        ? 'it is not a complete provenance record'
+        : 'it is not bound to the artifact just written';
+    // A mismatched sidecar is left in place: it may describe a payload whose run
+    // has not finished, or a hand-copied file a human is mid-way through fixing.
+    // Only a sidecar that cannot be a staged lock at all is removed.
+    if (staged.status === 'unusable') rmSync(sidecar, { force: true });
+    console.error(
+      `warning: refused the staged binding at ${sidecar}; ${reason}, so ${LOCK} ` +
+        'was left unchanged. Re-run the generator to stage a binding for the data being written.'
+    );
+    return false;
+  }
+
+  const { lock } = staged;
+  const serialized = `${JSON.stringify(lock, null, 2)}\n`;
+  let changed = true;
+  try {
+    changed = readFileSync(LOCK, 'utf-8') !== serialized;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  writeFileAtomicSync(LOCK, serialized);
+  // The lock write is the commit point. Removing the consumed sidecar afterwards
+  // is best-effort: letting an EPERM/EBUSY here throw would unwind the caller and
+  // roll the artifact back while the lock stayed advanced, breaking exactly the
+  // pairing this function exists to keep. A leftover sidecar is harmless - the
+  // next run refuses to promote one that is not bound to its own output - so it is
+  // reported rather than escalated.
+  // The path is payload-addressed, so removing it can only affect a run that
+  // staged a binding for these exact bytes; the exclusive write lock means no
+  // other promotion is in flight either.
+  try {
+    rmSync(sidecar, { force: true });
+  } catch (error) {
+    console.error(
+      `warning: ${LOCK} was updated but the consumed sidecar at ${sidecar} could ` +
+        `not be removed (${(error as Error).message}). Delete it manually; it will not be ` +
+        're-applied to a different generation.'
+    );
+  }
+  console.error(
+    changed
+      ? `re-pinned ${LOCK} -> ${lock.file} (sha256=${lock.sha256.slice(0, 12)}…)`
+      : `confirmed ${LOCK} -> ${lock.file} (unchanged: already pinned to this capture)`
+  );
+  return true;
+}
+
+export function loadReference(): JsonRecord[] {
+  const explicit = process.env.STORY_REFERENCE;
+  const updating = process.env.STORY_REFERENCE_UPDATE_LOCK === '1';
+  const lock = readLock();
+
+  if (!lock && !updating && explicit) {
+    throw new Error(
+      `no ${LOCK} to pin the story reference; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+    );
+  }
+
+  let file: string | undefined = explicit;
+  if (!file && lock && !updating) {
+    if (!existsSync(lock.file)) {
+      throw new Error(
+        `pinned story reference is missing: ${lock.file} (${LOCK}). Restore that capture, ` +
+          'or point STORY_REFERENCE at a copy of it, or re-pin with ' +
+          'STORY_REFERENCE_UPDATE_LOCK=1.'
+      );
+    }
+    file = lock.file;
+  }
+  if (!file) {
+    const ranked = rankStoryReferences(storyReferenceCandidates());
+    if (ranked.length === 0 || ranked[0].chapters === 0) {
+      throw new Error(
+        'No usable story reference found under eft/. Place a quest capture there, or set ' +
+          'STORY_REFERENCE to one.'
+      );
+    }
+    if (!updating) {
+      throw new Error(
+        `no ${LOCK} to pin the story reference. Regenerating without a pin cannot be reviewed; ` +
+          `re-pin with STORY_REFERENCE_UPDATE_LOCK=1 (best candidate: ${ranked[0].file}).`
+      );
+    }
+    file = ranked[0].file;
+  }
+
+  const { lock: current, quests } = fingerprint(file);
+  if (current.chapterQuests === 0 || current.objectiveTexts === 0) {
+    throw new Error(`story reference ${file} resolves no chapter quests or objective texts`);
+  }
+  // Enforced for explicit replacements too, not just auto-discovery: the
+  // committed addition is declared shared between PVP and PvE, so pinning a
+  // seasonal capture would publish independently divergent data as the shared
+  // storyline. An unidentifiable mode is refused rather than allowed through -
+  // a capture with no recognizable request URL cannot be shown to be in scope,
+  // and treating "unknown" as acceptable would reopen the same hole. Only
+  // checked when re-pinning - an already-pinned capture is identified by hash
+  // and must keep validating even if this list later changes.
+  if (updating && !(current.gameMode !== null && STORY_SHARED_MODES.includes(current.gameMode))) {
+    throw new Error(
+      `story reference ${file} reports game mode '${current.gameMode ?? 'unknown'}'; the ` +
+        `committed storyline is shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a ` +
+        'capture whose request URL identifies it as one of those modes.'
+    );
+  }
+
+  if (lock && !updating) {
+    // The hash is the identity; the path may differ when STORY_REFERENCE points
+    // at a copy of the pinned capture.
+    if (current.sha256 !== lock.sha256) {
+      throw new Error(
+        `story reference does not match ${LOCK}\n` +
+          `  pinned:   ${lock.file} sha256=${lock.sha256}\n` +
+          `  selected: ${current.file} sha256=${current.sha256}\n` +
+          'Re-verify the capture, then re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+      );
+    }
+    for (const key of Object.keys(current) as Array<keyof ReferenceLock>) {
+      if (key !== 'file' && current[key] !== lock[key]) {
+        throw new Error(
+          `story reference provenance mismatch for ${key} in ${LOCK}; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+        );
+      }
+    }
+    if (current.file !== lock.file) {
+      console.error(`note: reading the pinned capture from ${current.file} (lock: ${lock.file})`);
+    }
+  }
+
+  // Stage the provenance binding in every mode, not only on an explicit re-pin.
+  // `main()` commits it only after every chapter validation passes, and the
+  // writer refuses to replace the artifact without a binding for its exact
+  // payload - so a capture that resolves some data but leaves a chapter empty
+  // (or drops wiki matching below MIN_MATCH_PCT) can neither re-pin the lock nor
+  // get different data published under the current pin.
+  pendingLock = updating ? current : (lock ?? undefined);
+  console.error(
+    updating
+      ? `staged re-pin of ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…); ` +
+          'writes after generation succeeds'
+      : pendingLock
+        ? `staged provenance binding for ${LOCK} -> ${pendingLock.file}; ` +
+          'writes after generation succeeds'
+        : 'warning: no lock available to stage a provenance binding'
+  );
+
+  console.error(
+    `story reference: ${current.file} ` +
+      `(${current.clientVersion ?? 'unknown client'}, ${current.gameMode ?? 'unknown mode'}, ` +
+      `captured ${current.capturedAt ?? 'unknown'}; ` +
+      `${current.chapterQuests}/${Object.keys(CHAPTER_QUEST_ID).length} chapter quests, ` +
+      `${current.objectiveTexts} objective texts)`
+  );
+  return quests;
+}
+
+function main(): void {
+  const quests = loadReference();
+  const byId = indexQuests(quests);
 
   const curated: Record<string, JsonRecord> = JSON.parse(readFileSync(META, 'utf-8'));
   const wiki: Record<string, WikiObjective[]> = existsSync(WIKI)
@@ -126,66 +948,40 @@ function main(): void {
     );
   }
 
-  const en = (quest: JsonRecord): Record<string, string> => quest?.localization?.en ?? {};
-
   const stats: Record<
     string,
     { objectives: number; matched: number; optional: number; wiki: number }
   > = {};
 
-  const expand = (chapterId: string): JsonRecord[] => {
-    const chapterQuest = byId.get(CHAPTER_QUEST_ID[chapterId]);
-    if (!chapterQuest) {
-      stats[chapterId] = { objectives: 0, matched: 0, optional: 0, wiki: 0 };
-      return [];
-    }
+  const out: Record<string, JsonRecord> = {};
+  const chapterIds = Object.keys(curated).sort((a, b) => curated[a].order - curated[b].order);
+  for (const chapterId of chapterIds) {
+    const meta = curated[chapterId];
+    const expansion = expandChapterObjectives(CHAPTER_QUEST_ID[chapterId], byId);
     const wikiObjectives = wiki[chapterId] ?? [];
-    const objectives: JsonRecord[] = [];
-    let optionalCount = 0;
+
     let matched = 0;
-
-    for (const condition of chapterQuest?.conditions?.AvailableForFinish ?? []) {
-      if (condition?.conditionType !== 'Quest') continue;
-      let target = condition.target;
-      if (Array.isArray(target)) target = target.length > 0 ? target[0] : undefined;
-      const subQuest = byId.get(bareId(target) ?? '');
-      if (!subQuest) continue;
-      const subId = bareId(subQuest._id);
-      const subEn = en(subQuest);
-      for (const objective of subQuest?.conditions?.AvailableForFinish ?? []) {
-        const objectiveId = objective?.id;
-        if (!objectiveId) continue; // skip conditions without an id
-        const text = (subEn[objectiveId] ?? '').trim();
-        if (!text) continue;
-        const { optional, ratio } = matchOptional(text, wikiObjectives);
-        if (ratio >= MATCH_THRESHOLD) matched += 1;
-        if (optional) optionalCount += 1;
-        // Use the real source objective id as the stable id. Positional ids
-        // ({chapter}-main-n) shift whenever wording/order changes, which
-        // silently corrupts consumers that persist completion per objective
-        // id. The source id is unique and stable across regens.
-        objectives.push({
-          id: objectiveId,
-          type: optional ? 'optional' : 'main',
-          description: text,
-          sourceQuestId: subId,
-        });
-      }
-    }
-
+    let optionalCount = 0;
+    const objectives = expansion.objectives.map((objective) => {
+      const { optional, ratio } = matchOptional(objective.text, wikiObjectives);
+      if (ratio >= MATCH_THRESHOLD) matched += 1;
+      if (optional) optionalCount += 1;
+      const emitted: JsonRecord = {
+        id: objective.id,
+        type: optional ? 'optional' : 'main',
+        description: objective.text,
+        sourceQuestId: objective.sourceQuestId,
+      };
+      if (objective.endingId) emitted.endingId = objective.endingId;
+      return emitted;
+    });
     stats[chapterId] = {
       objectives: objectives.length,
       matched,
       optional: optionalCount,
       wiki: wikiObjectives.length,
     };
-    return objectives;
-  };
 
-  const out: Record<string, JsonRecord> = {};
-  const chapterIds = Object.keys(curated).sort((a, b) => curated[a].order - curated[b].order);
-  for (const chapterId of chapterIds) {
-    const meta = curated[chapterId];
     const chapter: JsonRecord = {
       id: meta.id,
       name: meta.name,
@@ -193,6 +989,19 @@ function main(): void {
       wikiLink: meta.wikiLink,
       order: meta.order,
       chapterQuestId: CHAPTER_QUEST_ID[chapterId],
+      // Coverage is emitted for every chapter, not just partial ones: a consumer
+      // must be able to tell "this chapter is complete" from "this is what the
+      // capture could see" without comparing counts against something else.
+      referenceCoverage: {
+        referencedSubquests: expansion.referencedSubquests.length,
+        resolvedSubquests: expansion.resolvedSubquests.length,
+        ...(expansion.missingObjectiveTexts > 0
+          ? { missingObjectiveTexts: expansion.missingObjectiveTexts }
+          : {}),
+        partial:
+          expansion.resolvedSubquests.length < expansion.referencedSubquests.length ||
+          expansion.missingObjectiveTexts > 0,
+      },
       autoStart: meta.autoStart ?? false,
       chapterRequirements: meta.chapterRequirements ?? [],
     };
@@ -201,11 +1010,28 @@ function main(): void {
     }
     chapter.description = meta.description ?? null;
     chapter.notes = meta.notes ?? null;
-    if (PRESERVE_OBJECTIVES.has(chapterId) && meta.objectives) {
-      chapter.objectives = meta.objectives;
-    } else {
-      chapter.objectives = expand(chapterId);
+    chapter.objectives = objectives;
+    if (expansion.exclusivePairs.length > 0) {
+      chapter.mutuallyExclusiveQuestPairs = expansion.exclusivePairs;
     }
+
+    // A chapter that references ending gate sub-quests owns those endings, so
+    // restate the whole branch set from client/ending_list with the real ids -
+    // including the gates this capture could not resolve, which report zero
+    // objectives instead of disappearing.
+    const referenced = new Set(expansion.referencedSubquests);
+    const resolved = new Set(expansion.resolvedSubquests);
+    const endings = STORY_ENDINGS.filter((ending) => referenced.has(ending.gateQuestId)).map(
+      (ending) => ({
+        id: ending.id,
+        systemName: ending.systemName,
+        gateQuestId: ending.gateQuestId,
+        objectiveCount: objectives.filter((objective) => objective.endingId === ending.id).length,
+        resolvedInReference: resolved.has(ending.gateQuestId),
+      })
+    );
+    if (endings.length > 0) chapter.endings = endings;
+
     chapter.rewards = meta.rewards ?? null;
     chapter.mapUnlocks = meta.mapUnlocks ?? [];
     chapter.traderUnlocks = meta.traderUnlocks ?? [];
@@ -215,20 +1041,22 @@ function main(): void {
     out[chapterId] = chapter;
   }
 
-  console.error('chapter match stats (eft objs / wiki-matched / optional):');
+  console.error('chapter match stats (eft objs / wiki-matched / optional / sub-quest coverage):');
   const low: Array<[string, number]> = [];
   for (const [chapterId, s] of Object.entries(stats)) {
     const pct = Math.floor((100 * s.matched) / Math.max(s.objectives, 1));
+    const coverage = out[chapterId]?.referenceCoverage;
     console.error(
       `  ${chapterId.padEnd(22)} objs=${String(s.objectives).padStart(3)} ` +
         `matched=${String(pct).padStart(3)}% optional=${String(s.optional).padStart(2)} ` +
-        `wiki=${s.wiki}`
+        `wiki=${String(s.wiki).padStart(3)} ` +
+        `subquests=${coverage?.resolvedSubquests}/${coverage?.referencedSubquests}`
     );
     // A chapter that no longer matches the wiki means wording drift has
     // degraded optional/required accuracy; fail generation so it is caught
     // now rather than shipped silently. Zero resolvable objectives (e.g. a
     // broken CHAPTER_QUEST_ID mapping) is an even harder failure. Current
-    // expanded chapters match >=86%. (The Ticket is preserved, not in stats.)
+    // chapters match >=86%.
     if (s.objectives === 0 || pct < MIN_MATCH_PCT) {
       low.push([chapterId, pct]);
     }
@@ -240,7 +1068,30 @@ function main(): void {
     process.exit(1);
   }
 
-  process.stdout.write(JSON.stringify(out, null, 2));
+  // Validate against the same schema `eft-story-write.ts` enforces before it
+  // persists the artifact. Without this the lock could be pinned here and the
+  // downstream writer still reject the data, leaving the committed lock pointing
+  // at a capture whose output never landed.
+  const schema = JSON.parse(
+    readFileSync(join('src', 'schemas', 'story-chapter.schema.json'), 'utf-8')
+  );
+  const validate = new Ajv({ allErrors: true, strict: false }).compile(schema);
+  if (!validate(out)) {
+    console.error('error: generated story chapters fail story-chapter.schema.json:');
+    for (const error of (validate.errors ?? []).slice(0, 20)) {
+      console.error(`  ${error.instancePath} ${error.message}`);
+    }
+    process.exit(1);
+  }
+
+  const payload = JSON.stringify(out, null, 2);
+
+  // Every chapter validated and the output satisfies the schema the writer
+  // applies, so a staged re-pin is now safe to record. It is bound to this exact
+  // payload and only applied by the writer once the artifact is on disk.
+  commitStoryReferenceLock(createHash('sha256').update(payload).digest('hex'));
+
+  process.stdout.write(payload);
 }
 
 if (isDirectExecution(import.meta.url)) {

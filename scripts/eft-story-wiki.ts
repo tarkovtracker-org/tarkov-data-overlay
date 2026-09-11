@@ -96,17 +96,170 @@ export function cleanObjectiveLine(line: string): WikiStoryObjective {
   return { text, optional };
 }
 
+/**
+ * A header opening a mutually exclusive branch, e.g.
+ * `'''If the [[Armored case]] was given to [[Prapor]]'''` or
+ * `===If you accept Mr. Kerman's offer===`.
+ *
+ * Distinguished from an unconditional sequencing header like
+ * `'''Once you have the case'''` or `'''After completing [[Stick to It]]'''`,
+ * which apply to every player and therefore close the branch before them.
+ */
+const CONDITIONAL_HEADER = /^(?:only\s+)?if\b/i;
+
+/** `<hr/>` closes a group of branch alternatives and resumes the trunk. */
+const RULE_LINE = /^<hr\s*\/?>/i;
+
+/** Header text without its bold/heading delimiters. */
+function headerText(line: string): string {
+  return line
+    .replace(/^[='\s]+/, '')
+    .replace(/[='\s]+$/, '')
+    .trim();
+}
+
 export function parseObjectives(wikitext: string): WikiStoryObjective[] {
   const match = /==\s*Objectives\s*==([\s\S]*?)(\n==[^=]|$)/.exec(wikitext);
   if (!match) return [];
-  const out: WikiStoryObjective[] = [];
+
+  // Objectives under an "If ..." header only apply to players who took that
+  // branch, so they are not universally required. The page marks individually
+  // optional items inline, but says nothing per-bullet about branch membership -
+  // it is carried by the header - so without tracking it every branch objective
+  // reads as required and consumers block players who chose the other path.
+  //
+  // Two nesting levels are tracked because the pages mix them: `===If ...===`
+  // wraps a whole ending, and `'''...'''` sub-headers appear inside it. A bold
+  // sub-header must not be able to close the heading-level branch containing it,
+  // which would leak that ending's objectives out as universally required.
+  type Entry = WikiStoryObjective & {
+    group: number;
+    alt: number;
+    inline: boolean;
+    /** A conditional context encloses this entry's alternative. */
+    ancestor: boolean;
+  };
+  const entries: Entry[] = [];
+  let headingBranch = false;
+  let boldBranch = false;
+  // Consecutive alternatives share a group; `alt` identifies one alternative.
+  let group = 0;
+  let alt = 0;
+  let inGroup = false;
+  // Which header level owns the current alternative. A bold group nested inside a
+  // conditional heading has that heading as a conditional ancestor, so convergence
+  // within the group must not promote a step to universally required.
+  let altLevel: 'heading' | 'bold' | null = null;
+  const endGroup = () => {
+    if (inGroup) group += 1;
+    inGroup = false;
+  };
+
   for (const raw of match[1].split('\n')) {
     const line = raw.trim();
-    if (!line.startsWith('*')) continue; // skip conditional headers ('''If...'''), <hr/>, blanks
+    if (!line) continue;
+    if (!line.startsWith('*')) {
+      if (RULE_LINE.test(line)) {
+        // A rule ends the alternatives it follows and the universal storyline
+        // resumes after it. That holds whether the alternatives were opened by a
+        // bold sub-header (Boreas) or a conditional heading, so every branch
+        // level resets here; leaving a heading branch open would mark post-rule
+        // trunk objectives optional. No current chapter mixes the two forms, and
+        // this keeps both readings of a rule consistent.
+        boldBranch = false;
+        headingBranch = false;
+        endGroup();
+        altLevel = null;
+      } else if (line.startsWith('=')) {
+        headingBranch = CONDITIONAL_HEADER.test(headerText(line));
+        boldBranch = false;
+        if (headingBranch) {
+          // Consecutive conditional headings are alternatives of one group, so the
+          // group must not be closed between them - otherwise each ending lands in
+          // its own group and convergence can never be detected.
+          inGroup = true;
+          alt += 1;
+          altLevel = 'heading';
+        } else {
+          endGroup();
+          altLevel = null;
+        }
+      } else if (line.startsWith("'''")) {
+        boldBranch = CONDITIONAL_HEADER.test(headerText(line));
+        if (boldBranch) {
+          inGroup = true;
+          alt += 1;
+          altLevel = 'bold';
+        } else {
+          endGroup();
+          altLevel = null;
+        }
+      }
+      // Anything else (stray markup) leaves the current branch state alone.
+      continue;
+    }
     const { text, optional } = cleanObjectiveLine(line);
-    if (text) out.push({ text, optional });
+    if (text) {
+      entries.push({
+        text,
+        optional: optional || headingBranch || boldBranch,
+        inline: optional,
+        group,
+        alt: headingBranch || boldBranch ? alt : 0,
+        // Nothing encloses a heading-level alternative; a bold one inherits the
+        // conditionality of the heading it sits under.
+        ancestor: altLevel === 'bold' && headingBranch,
+      });
+    }
   }
-  return out;
+
+  // Branch alternatives often converge: the same closing step is repeated under
+  // every variant ("Tell Mechanic that you found transport", "Hand over the AMG-10
+  // fluid"). Something every alternative requires is not branch-specific, so it
+  // stays required rather than being published optional to everyone.
+  const altsByGroup = new Map<number, Set<number>>();
+  for (const entry of entries) {
+    if (entry.alt === 0) continue;
+    const alts = altsByGroup.get(entry.group) ?? new Set<number>();
+    alts.add(entry.alt);
+    altsByGroup.set(entry.group, alts);
+  }
+  const seenAlts = new Map<string, Set<number>>();
+  for (const entry of entries) {
+    if (entry.alt === 0) continue;
+    const key = `${entry.group}\u0000${entry.text.toLowerCase()}`;
+    const alts = seenAlts.get(key) ?? new Set<number>();
+    alts.add(entry.alt);
+    seenAlts.set(key, alts);
+  }
+
+  // An objective stated outside any branch is required for everyone, so other
+  // occurrences of the same step inside a branch cannot make it optional.
+  const trunk = new Set(
+    entries.filter((entry) => entry.alt === 0 && !entry.optional).map((e) => e.text.toLowerCase())
+  );
+
+  return entries.map(({ text, optional, inline, ancestor, group: g, alt: a }) => {
+    if (!optional) return { text, optional };
+    // An explicit `(''Optional'')` marker is direct evidence from the page, so
+    // neither inference below may override it. The same wording can appear as an
+    // optional hint under one step and as a required step later (Boreas "Reach the
+    // engine room"), and only the marker distinguishes them.
+    if (inline) return { text, optional: true };
+    if (trunk.has(text.toLowerCase())) return { text, optional: false };
+    // Convergence across nested alternatives only proves the step is unavoidable
+    // *within* the enclosing branch. If that branch is itself conditional, players
+    // who never enter it never see the step, so it must stay optional.
+    if (a !== 0 && !ancestor) {
+      const groupAlts = altsByGroup.get(g);
+      const textAlts = seenAlts.get(`${g}\u0000${text.toLowerCase()}`);
+      // Present in every alternative of its group, so no choice avoids it.
+      if (groupAlts && textAlts && groupAlts.size > 1 && textAlts.size === groupAlts.size) {
+        return { text, optional: false };
+      }
+    }
+    return { text, optional };
+  });
 }
 
 async function main(): Promise<void> {

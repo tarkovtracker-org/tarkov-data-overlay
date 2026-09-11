@@ -341,23 +341,43 @@
     experience: 10000, // Was: 18000 (all modes, stale pre-1.1 value)
   },
 
-  // Collector - minimum player level in 1.1.0.0
+  // Collector - prerequisite set; preserve upstream's derived player-level floor
   // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //        https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
   //
-  // The 1.1-pve data carries a single mode-free Level condition (value 40);
-  // tarkov.dev serves the stale pre-1.1 figure (42) in every mode. The wiki
-  // lists no player level for Collector (only Scav karma + trader loyalties),
-  // so it cannot adjudicate. Previously shipped as a PvE-only correction.
-  // The same client capture also requires Chemical - Part 4, Shooter Born in
-  // Heaven, The Tarkov Shooter - Part 4, and Sew it Good - Part 2. The live API
-  // has Chemical - Part 3 and an extra Postman Pat - Part 2 edge in all modes.
+  // Removed minPlayerLevel: 40 (Was upstream: 42). The lower explicit Level
+  // condition does not make upstream wrong: Collector also requires Ragman LL4,
+  // which requires player level 42. Both wiki Requirements sections corroborate
+  // that floor; json.tarkov.dev serves the gate and level 42 in all three modes.
+  // Per AGENTS.md, preserve a correct trader-derived floor rather than replacing
+  // it with the task's explicit gate. No replacement level override is needed.
+  //
+  // taskRequirements: the two captures agree on three edges (Shooter Born in
+  // Heaven, The Tarkov Shooter - Part 4, Sew it Good - Part 2) and both omit the
+  // Postman Pat - Part 2 edge the API adds, which is why that edge is dropped -
+  // and the wiki Requirements section lists the same four quests with no Postman
+  // Pat, so that removal has capture AND wiki backing.
+  // They disagree on the Chemical edge: PvE has Chemical - Part 4 accepting
+  // complete-or-failed, regular has Chemical - Part 3 accepting complete. The
+  // wiki Requirements section lists Chemical - Part 3, agreeing with regular, so
+  // Chemical - Part 3 is the shared value here and the PvE variant is scoped to
+  // src/overrides/modes/pve/tasks.json5 rather than forced into every mode.
+  //
+  // Why the shared file and not a regular-only override: `taskRequirements`
+  // replaces the whole array, so every mode this task exists in needs a complete
+  // set. pvp-season is included by that choice, and the seasonal capture does not
+  // contain Collector - so seasonal is NOT independently verified here. It rests
+  // on the wiki, which lists Chemical - Part 3 and is a source independent of the
+  // regular capture; this is "seasonal gets the wiki-corroborated value absent
+  // contrary evidence", not "seasonal is assumed equal to regular". If a seasonal
+  // capture ever shows a different Chemical edge, split it into
+  // src/overrides/modes/pvp-season/tasks.json5 rather than widening this entry.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
-    minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
     taskRequirements: [
       {
-        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
-        status: ['complete', 'failed'],
+        task: { id: '597a0e5786f77426d66c0636', name: 'Chemical - Part 3' },
+        status: ['complete'],
       },
       {
         task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
@@ -371,7 +391,7 @@
         task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
         status: ['complete'],
       },
-    ], // Was: Chemical - Part 3 + Postman Pat - Part 2 (and the three shared edges)
+    ], // Was: + Postman Pat - Part 2 (no Quest condition in either capture)
   },
 
   // Long Road - Scav kill count reworked in 1.1.0.0 (wiki lags)
@@ -445,6 +465,18 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pyramid_Scheme
   // Verified: the 1.1-pve data; wiki agrees.
   '6572e876dc0d635f633a5714': {
+    // Loyalty gate kept on Skier despite the wiki naming Peacekeeper.
+    //
+    // The wiki Requirements line reads "Obtain level 3 loyalty with
+    // [[Peacekeeper]]" (since revision 352415, 2026-08-08), but nothing
+    // corroborates it and the surrounding data contradicts it: Skier gives the
+    // quest, its only start condition is GlobalVariableValue
+    // 6a5a115181116e807b55f258, and every one of that variable's six quests is a
+    // Skier quest - two of which (Safe Corridor, From Hand to Hand) have wiki
+    // Requirements lines reading "Loyalty Level 3 with [[Skier]]". A lone wiki
+    // line against its own cohort is conflicting evidence, not proof, so the
+    // corroborated Skier LL3 gate stands until a capture or a corrected wiki
+    // revision settles it.
     traderRequirements: [
       {
         id: 'overlay.6572e876dc0d635f633a5714.58330581ace78e27b8b10cee.level.>=.3',
@@ -626,6 +658,34 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
   // Wiki objective text explicitly states "found in raid" dogtags.
   '6179b5b06e9dd54ac275e409': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits. The
+    // BEAR faction line on the same page is already served correctly upstream.
+    // Unlike the other entries in the 2026-09-10 group, this one carries NO
+    // capture corroboration: the task is BEAR-only and both 1.1 captures are
+    // USEC profiles, so the client never returned its template (0 of upstream's
+    // 6 BEAR-only tasks appear in either capture). Per AGENTS.md the wiki is the
+    // authority for `traderRequirements` regardless, and absence from a capture
+    // that cannot contain the task is not counter-evidence.
+    // The gate upstream does serve is a `globalVariable` start condition on
+    // Prapor's tier cohort variable (6a32651a811905ed0cac0973). That variable's
+    // identity is what indicates the tier; its threshold is NOT the loyalty
+    // level - the number is a task count, and sibling tasks on the same variable
+    // carry thresholds that do not match their documented requirement. See
+    // docs/GLOBAL_VARIABLE_MECHANICS.md. Left in place, so the merged shape is
+    // "loyalty AND counter" rather than a double gate.
+    // Precedent: Ironclad Proof (59ca1a6286f774509a270942), the USEC mirror of
+    // this quest, carries the same reviewed Prapor LL3 override.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land?oldid=357228
+    //        ("Must reach Loyalty Level 3 with Prapor to obtain this quest.")
+    traderRequirements: [
+      {
+        id: 'overlay.6179b5b06e9dd54ac275e409.54cb50c76803fa8b248b4571.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 3,
+      }, // Was: []
+    ],
     objectives: {
       '6194fbf785a6d62c481a7aee': {
         foundInRaid: true, // Was: false
@@ -650,6 +710,19 @@
   // S1: exp 3000, +0.1, 673 Dollars (Intelligence Center L2), 3 CPU fans;
   // RB-AO key reward removed. Base dollars derived from IC2 (673 / 1.15 = 585).
   '5a0449d586f77474e66227b7': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Master_Key
+    //        ("Must be Loyalty Level 1 to start this quest" - quest giver
+    //        Peacekeeper, per the infobox `given by`)
+    traderRequirements: [
+      {
+        id: 'overlay.5a0449d586f77474e66227b7.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.02 (upstream now serves 0.1)
@@ -701,6 +774,14 @@
   // serves the S1 category objectives); exp 3000, +0.1,
   // 673 Dollars (IC2, base = 673 / 1.15 = 585); Vector/mags/M67/Toolset rewards removed.
   '5a0327ba86f77456b9154236': {
+    // No loyalty gate. The wiki Requirements line reads "Must be Loyalty Level 1
+    // to start this quest" (naming no trader, so it would be attributed to the
+    // quest giver by inference), but both 1.1 captures serve this task with an
+    // empty `AvailableForStart` - no `TraderLoyalty`, no `GlobalVariableValue`, no
+    // condition of any kind - and the API serves `traderRequirements: []`. The
+    // "wiki is the source because the gate hides in a global variable" argument
+    // does not apply where the client carries no start condition at all, so the
+    // gate stays out until something corroborates it.
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.03 (upstream now serves 0.1)
@@ -717,6 +798,18 @@
   // objective); exp 10000, +0.25, 1347 Dollars (IC2, base = 1347 / 1.15 = 1171),
   // 2 Military flash drives.
   '5a03296886f774569778596a': {
+    // 2026-09-10: wiki Requirements gives a loyalty gate the API omits.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/I_Need_More_Power
+    //        ("Must reach Loyalty Level 2 with Peacekeeper to obtain this quest.")
+    traderRequirements: [
+      {
+        id: 'overlay.5a03296886f774569778596a.5935c25fb3acc3127c3d8cd9.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 2,
+      }, // Was: []
+    ],
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.25 }, // Was: 0.03 (upstream now serves 0.25)
@@ -740,6 +833,10 @@
   // the restructured objective); exp 3000, +0.1, 570 Dollars (655 with IC2);
   // RB-ST key and Jaeger -0.01 removed.
   '5a27bafb86f7741c73584017': {
+    // No loyalty gate. The wiki Requirements line reads "Obtain level 1 loyalty
+    // with Peacekeeper", but both 1.1 captures serve this task with an empty
+    // `AvailableForStart` (no condition of any kind) and the API serves
+    // `traderRequirements: []`. See Fuel Shortage above for the same call.
     finishRewards: {
       traderStanding: [
         { trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' }, standing: 0.1 }, // Was: 0.04 (+ -0.01 Jaeger) (upstream now serves 0.1)
@@ -1853,6 +1950,14 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Insomnia
   //
   // 2026-08-10 - S1: now requires Peacekeeper LL4 instead of player level
+  // 2026-09-10: no faction gate. The wiki added "This quest is only obtainable by
+  // [[BEAR]] PMCs." on 2026-08-31 (revid 357247), but the client contradicts it:
+  // a USEC profile's quest list contains Insomnia while containing 0 of the 6
+  // BEAR-only tasks and all 6 USEC-only ones, so the client is filtering by
+  // faction and is not filtering this quest. The same wiki edit calls
+  // Counteraction "the USEC counterpart quest", which is really the USEC half of
+  // the Our Own Land / Counteraction pair - the likely source of the confusion.
+  // tarkov.dev serves factionName "Any", which matches the client.
   '5c0bd01e86f7747cdd799e56': {
     traderRequirements: [
       {
@@ -2885,7 +2990,15 @@
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/One_Less_Loose_End
   //
-  // 2026-08-10 - S1: now requires Peacekeeper LL1 instead of player level
+  // 2026-08-10 - S1: now requires Peacekeeper loyalty instead of player level
+  // 2026-09-10: tier kept at 1 despite the wiki reading "Must be Loyalty Level 2
+  // to start this quest" (since revision 349612, 2026-08-04). That sentence names
+  // no trader, so its trader is already inferred from the quest giver, and the
+  // tier disagrees with every corroborating page: the task's only start condition
+  // is GlobalVariableValue 6a5ba40fe5c4eaef5610f232, and all five other quests on
+  // that variable (New Paths, Tigr Safari, Master Key, Hiking, Metal Birds) have
+  // wiki Requirements lines reading Peacekeeper Loyalty Level 1. Conflicting
+  // evidence keeps the existing value rather than shipping the higher gate.
   '669fa38fad7f1eac2607ed46': {
     traderRequirements: [
       {
@@ -3238,5 +3351,242 @@
   // Wiki Requirements: "This quest is only obtainable by USEC PMCs."
   '67af4c17f4f1fb58a907f8f6': {
     factionName: 'USEC', // Was: Any
+  },
+
+  // ---------------------------------------------------------------------------
+  // 2026-09-10: trader-loyalty gates the wiki documents and tarkov.dev omits.
+  //
+  // Found by parsing the Requirements section of every task page and comparing it
+  // against the API, the overlay, and the client captures. Patch 1.1.0.0 expresses
+  // these gates as opaque `GlobalVariableValue` start conditions, so the client
+  // shows no `TraderLoyalty` condition for them and cannot confirm or deny a tier
+  // - which is exactly why AGENTS.md makes the wiki the source for
+  // `traderRequirements`. Every entry below was checked against the 1.1 captures
+  // and does carry such a `GlobalVariableValue` start condition, with one
+  // disclosed exception: Our Own Land is BEAR-only and both captures are USEC
+  // profiles, so the client never returned its template at all (0 of upstream's
+  // 6 BEAR-only tasks appear in either capture, against 6/6 and 5/6 of the
+  // USEC-only ones). Absence there is a coverage gap, not counter-evidence, and
+  // that entry rests on the wiki Requirements line alone - which AGENTS.md
+  // already makes the authority for this field. Three candidates that were
+  // present and carried no start condition at all were dropped instead of
+  // shipped (see Fuel Shortage, Chemical Experiments, All This Filth...).
+  //
+  // What makes the wiki field trustworthy here is that where the client *is*
+  // explicit it agrees with the wiki: the 1.1 PvE capture carries 108 explicit
+  // `TraderLoyalty` conditions across 95 tasks (103 across 90 in the 1.1 PvP
+  // capture), and the wiki Requirements sections matched them.
+  //
+  // Each entry below has API `traderRequirements: []` and `minPlayerLevel: 0`,
+  // i.e. upstream dropped the pre-1.1 player-level gate without adding the
+  // loyalty gate that replaced it.
+  // ---------------------------------------------------------------------------
+
+  // Metal Birds - Peacekeeper LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Metal_Birds
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Peacekeeper to obtain this quest."
+  '5b4794cb86f774598100d5d4': {
+    traderRequirements: [
+      {
+        id: 'overlay.5b4794cb86f774598100d5d4.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
+  },
+
+  // From Hand to Hand - Skier LL3
+  // Proof: https://escapefromtarkov.fandom.com/wiki/From_Hand_to_Hand
+  // Wiki Requirements: "Must reach Loyalty Level 3 with Skier to obtain this quest."
+  '5c0d0f1886f77457b8210226': {
+    traderRequirements: [
+      {
+        id: 'overlay.5c0d0f1886f77457b8210226.58330581ace78e27b8b10cee.level.>=.3',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
+        value: 3,
+      }, // Was: []
+    ],
+  },
+
+  // All This Filth... - no loyalty gate added
+  // Proof: https://escapefromtarkov.fandom.com/wiki/All_This_Filth...
+  // The wiki Requirements line reads "Must reach Loyalty Level 4 with Jaeger to
+  // obtain this quest", but both 1.1 captures serve this task with an empty
+  // `AvailableForStart` - no `TraderLoyalty`, no `GlobalVariableValue`, nothing -
+  // so nothing corroborates the tier, and Jaeger LL4 is restrictive enough that
+  // shipping it unverified would hide a task players can actually take. Left to
+  // upstream (`traderRequirements: []`) until a capture shows the gate.
+
+  // Paramedic - Therapist LL2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Paramedic
+  // Wiki Requirements: "Must reach Loyalty Level 2 with Therapist to obtain this quest."
+  '64f3176921045e77405d63b5': {
+    traderRequirements: [
+      {
+        id: 'overlay.64f3176921045e77405d63b5.54cb57776803fa99248b456e.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
+  // Fall Ailment - Therapist LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Fall_Ailment
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Therapist to obtain this quest."
+  '6a5424ae135497b9df0c68be': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5424ae135497b9df0c68be.54cb57776803fa99248b456e.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb57776803fa99248b456e', name: 'Therapist' },
+        value: 1,
+      }, // Was: []
+    ],
+  },
+
+  // Secret Message - Peacekeeper LL2
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Secret_Message
+  // Wiki Requirements: "Must reach Loyalty Level 2 with Peacekeeper to obtain this quest."
+  '6a5ccda873f06065630d61b0': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5ccda873f06065630d61b0.5935c25fb3acc3127c3d8cd9.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
+  // Hiking - Peacekeeper LL1
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Hiking
+  // Wiki Requirements: "Must reach Loyalty Level 1 with Peacekeeper to obtain this quest."
+  '6a5c1578f2689567c30eb0f3': {
+    traderRequirements: [
+      {
+        id: 'overlay.6a5c1578f2689567c30eb0f3.5935c25fb3acc3127c3d8cd9.level.>=.1',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5935c25fb3acc3127c3d8cd9', name: 'Peacekeeper' },
+        value: 1,
+      }, // Was: []
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Retired Lightkeeper access chain (2026-09-10).
+  //
+  // The whole pre-1.1 route to Lightkeeper was replaced by the "To the Light -
+  // ..." series. The wiki marked all seven of these pages
+  // `{{Historical content}}` in one coordinated sweep on 2026-09-08
+  // (20:21-20:48 UTC) and rewrote each opening line to the past tense
+  // ("'''X''' was a Quest in Escape from Tarkov"), which is the same standard
+  // already used for the 33 other disabled tasks in this file. The Lightkeeper
+  // trader page no longer documents THIS chain: it now routes access through the
+  // replacement series ("The questline to obtain one starts with [[To the Light
+  // - Trust but Verify]]").
+  //
+  // tarkov.dev still serves all seven in regular, pve and pvp-season.
+  //
+  // Evidence limit worth recording: the newest local client capture is
+  // 2026-08-11 (PvE) and still contains the chain wired together, i.e. it
+  // predates the change; the 2026-08-27 regular capture does not contain them,
+  // but that capture covers only ~63% of upstream tasks so its silence is not
+  // proof. The wiki is therefore the freshest source here, and the
+  // `{{Historical content}}` marker is what these entries rest on.
+  //
+  // Replacement data is NOT added here: none of the ten "To the Light - ..."
+  // quests exists in tarkov.dev, and none appears in any local capture locale,
+  // so their IDs are unknown. Adding them needs a post-2026-09-08 capture.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Lightkeeper
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365
+  // ---------------------------------------------------------------------------
+
+  // Network Provider - Part 1 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1
+  '625d6ff5ddc94657c21a1625': {
+    disabled: true, // Was: active
+  },
+
+  // Network Provider - Part 2 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2
+  '625d6ffaf7308432be1d44c5': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 1 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_1
+  '625d6ffcaa168e51321d69d7': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 2 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_2
+  '625d6fff4149f1149b5b12c9': {
+    disabled: true, // Was: active
+  },
+
+  // Assessment - Part 3 ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Assessment_-_Part_3
+  '625d7001c4874104f230c0c5': {
+    disabled: true, // Was: active
+  },
+
+  // Key to the Tower ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Key_to_the_Tower
+  '625d70031ed3bb5bcc5bd9e5': {
+    disabled: true, // Was: active
+  },
+
+  // Knock-Knock ({{Historical content}})
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Knock-Knock
+  '625d7005a4eb80027c4f2e09': {
+    disabled: true, // Was: active
+  },
+
+  // Getting Acquainted -> To the Light - Getting Acquainted (renamed, NOT retired)
+  // Proof: https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted
+  //
+  // This is the one member of the old chain that survived the rework, so it is
+  // renamed rather than disabled. The old page is now literally
+  // `#REDIRECT [[To the Light - Getting Acquainted]]`, and the identity is
+  // confirmed field-by-field: same trader (Mechanic), and all four of upstream's
+  // objective IDs carry text matching the new page's objective list one-for-one
+  // (6391e2f9e705511c8a4a1b85 obtain the V3
+  // flash drive, 6391e31bfa894f0a866afdec reflash the transmitter,
+  // 6391e329c115f907b14700b1 hand over the flash drive, 63ab727b1287ef0b827d0c95
+  // visit the Lighthouse building).
+  //
+  // Only the name and wiki link are corrected here. `taskRequirements` is
+  // deliberately left alone even though its sole upstream edge (Knock-Knock) is
+  // disabled above:
+  //   - Asserting a replacement edge would mean trusting the wiki's `previous`
+  //     field, which AGENTS.md rules out as proof of an unlock edge.
+  //   - Asserting `taskRequirements: []` is not licensed either: the 2026-08-11
+  //     capture carries a real `Quest` start condition for this task, so an empty
+  //     list would contradict the reference rather than record an absence.
+  // Explicit active-successor exception, covered for both IDs and all modes in
+  // tests/task-corrections.test.ts: task-unlocks returns `unknown`, never
+  // `available`, when the filtered prerequisite has no recorded status. Consumers
+  // must preserve that third state rather than treating missing tasks as complete.
+  // These quests are active; disabling them would assert an unsupported removal.
+  // Consequence to be aware of: consumers that filter disabled tasks will see
+  // this task and Information Source (63966faeea19ac7ed845db2c) gated behind a
+  // filtered prerequisite until a post-2026-09-08 capture establishes the real
+  // wiring. The wiki's own reading is that this task now follows "To the Light -
+  // The Other Side" and still leads to Information Source; neither edge is
+  // expressible today, because the "To the Light - ..." quests are absent from
+  // tarkov.dev entirely.
+  '625d700cc48e6c62a440fab5': {
+    name: 'To the Light - Getting Acquainted', // Was: Getting Acquainted
+    wikiLink: 'https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted', // Was: .../Getting_Acquainted (now a redirect)
   },
 }

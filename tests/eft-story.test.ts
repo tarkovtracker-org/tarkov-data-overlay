@@ -5,14 +5,826 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { fileURLToPath } from 'node:url';
 import { join } from 'path';
 import JSON5 from 'json5';
 import { sequenceRatio } from '../scripts/lib/sequence-matcher.js';
 import { cleanObjectiveLine, parseObjectives } from '../scripts/eft-story-wiki.js';
-import { bareId, normalizeStoryText, matchOptional } from '../scripts/eft-story-generate.js';
+import {
+  bareId,
+  exclusiveCounterparts,
+  expandChapterObjectives,
+  indexQuests,
+  matchOptional,
+  normalizeStoryText,
+  pendingLockSidecar,
+  storyReferenceCandidates,
+  unwrapAnnotatedText,
+} from '../scripts/eft-story-generate.js';
 import { renderStoryChaptersJson5 } from '../scripts/eft-story-write.js';
-import { getProjectPaths } from '../src/lib/index.js';
+import { getProjectPaths, STORY_ENDINGS } from '../src/lib/index.js';
+
+/**
+ * A complete provenance record, matching what `commitStoryReferenceLock` stages
+ * from `fingerprint()`. Promotion requires every field, so partial locks in these
+ * fixtures would be refused as unusable rather than exercising the path intended.
+ */
+const FULL_LOCK = {
+  file: 'eft/capture.json',
+  sha256: 'a'.repeat(64),
+  bytes: 4096,
+  clientVersion: 'test-client',
+  gameMode: 'pve',
+  capturedAt: '2026-06-30T12:00:00Z',
+  quests: 12,
+  chapterQuests: 3,
+  objectiveTexts: 7,
+};
+
+/**
+ * Binding token used by the loadReference-only helpers below; it only has to be
+ * equal between `commitStoryReferenceLock` and `promoteStoryReferenceLock`.
+ */
+const STAGE_SHA = 'd'.repeat(64);
+
+describe('story reference provenance enforcement', () => {
+  it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        timestamp: 'wrong-response-time',
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const lockFile = join(dir, 'scripts/story-reference.lock.json');
+    const run = (update = '0') =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock('${STAGE_SHA}'); promoteStoryReferenceLock('${STAGE_SHA}');`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: update },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+      expect(() => run()).toThrow(/no scripts\/story-reference.lock.json/);
+      run('1');
+      const lock = JSON.parse(readFileSync(lockFile, 'utf-8'));
+      expect(lock).toMatchObject({
+        capturedAt: '2026-06-30T12:00:00Z',
+        clientVersion: 'test-client',
+        gameMode: 'pve',
+        sha256: createHash('sha256').update(capture).digest('hex'),
+      });
+      writeFileSync(lockFile, JSON.stringify({ ...lock, clientVersion: 'wrong' }));
+      expect(() => run()).toThrow(/provenance mismatch for clientVersion/);
+      writeFileSync(lockFile, JSON.stringify({ ...lock, file: 'moved/original.json' }));
+      expect(() => run()).not.toThrow();
+      writeFileSync(file, `${capture}\n`);
+      expect(() => run()).toThrow(/does not match/);
+      const before = readFileSync(lockFile, 'utf-8');
+      writeFileSync(file, JSON.stringify({ data: [{ _id: '68cbd33676fe74b1e80bfd91' }] }));
+      expect(() => run('1')).toThrow(/no chapter quests or objective texts/);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('stages a re-pin without writing it until generation is committed', () => {
+    // A capture can resolve chapter data yet still fail a later per-chapter
+    // validation. The lock is the only record of which capture produced the
+    // committed chapters, so it must not be re-pinned by a run that never got
+    // as far as emitting them.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-defer-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const lockFile = join(dir, 'scripts/story-reference.lock.json');
+    const runScript = (body: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; ${body}`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+
+      // loadReference alone stages the pin; nothing is written.
+      runScript('loadReference();');
+      expect(existsSync(lockFile)).toBe(false);
+
+      // Simulating a validation failure after loadReference still writes nothing.
+      expect(() =>
+        runScript('loadReference(); throw new Error("late validation failed");')
+      ).toThrow();
+      expect(existsSync(lockFile)).toBe(false);
+
+      // Only an explicit commit stages it, now to the sidecar the writer promotes.
+      runScript(`loadReference(); commitStoryReferenceLock('${STAGE_SHA}');`);
+      expect(existsSync(lockFile)).toBe(false);
+      const sidecar = join(dir, pendingLockSidecar(STAGE_SHA));
+      expect(existsSync(sidecar)).toBe(true);
+      expect(JSON.parse(readFileSync(sidecar, 'utf-8')).lock).toMatchObject({
+        sha256: createHash('sha256').update(capture).digest('hex'),
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves a staged pin generated for different output for its own run', () => {
+    // A sidecar can outlive a run whose write never happened, or belong to a
+    // concurrent generation whose writer has not run yet. Promoting it beside
+    // unrelated data would pin a capture that did not produce the artifact, so
+    // the pin is bound to the payload hash the generator staged - and a mismatch
+    // is refused without destroying the other run's sidecar.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-mismatch-'));
+    const promoted = 'c'.repeat(64);
+    // Addressed by the payload being promoted, but carrying another payload's binding.
+    const sidecar = join(dir, pendingLockSidecar(promoted));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (hash: string) =>
+      spawnSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(
+        sidecar,
+        `${JSON.stringify({
+          lock: FULL_LOCK,
+          outputSha256: 'b'.repeat(64),
+        })}\n`
+      );
+
+      const result = promote(promoted);
+      expect(result.status, result.stderr.toString()).toBe(0);
+      expect(result.stdout.toString().trim()).toBe('false');
+      // The refusal names the mismatched binding, proving this is the addressed
+      // sidecar being refused and not a lookup that resolved to a missing file.
+      expect(result.stderr.toString()).toMatch(/refused the staged binding/);
+      expect(existsSync(lockFile), 'lock written despite payload mismatch').toBe(false);
+      // It may belong to a run still in progress, so refusal must not delete it.
+      expect(existsSync(sidecar), 'sidecar belonging to another payload was discarded').toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps overlapping generations on separate bindings', () => {
+    // Two `npm run eft:story` shells must not consume or invalidate each other's
+    // binding: each sidecar is addressed by its own payload hash, so promotion
+    // reads, applies and removes only the file naming that payload.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-overlap-'));
+    const first = '1'.repeat(64);
+    const second = '2'.repeat(64);
+    const firstSidecar = join(dir, pendingLockSidecar(first));
+    const secondSidecar = join(dir, pendingLockSidecar(second));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (hash: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(
+        firstSidecar,
+        `${JSON.stringify({ lock: { ...FULL_LOCK, file: 'eft/first.json' }, outputSha256: first })}\n`
+      );
+      writeFileSync(
+        secondSidecar,
+        `${JSON.stringify({
+          lock: { ...FULL_LOCK, file: 'eft/second.json', sha256: 'f'.repeat(64) },
+          outputSha256: second,
+        })}\n`
+      );
+
+      expect(promote(first)).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/first.json');
+      expect(existsSync(firstSidecar)).toBe(false);
+      // The other generation's binding is untouched by this promotion.
+      expect(existsSync(secondSidecar), "another run's binding was consumed").toBe(true);
+
+      expect(promote(second)).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/second.json');
+      expect(existsSync(secondSidecar)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses to replace another run's binding for the same payload", () => {
+    // A normal run and a re-pin can emit byte-identical payloads, so they share a
+    // binding address. Replacing the other run's binding would let its writer
+    // promote the wrong capture and, in the re-pin case, silently confirm the old
+    // lock, so staging is exclusive and a different binding is a hard error.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-collision-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const binding = 'e'.repeat(64);
+    const run = (body: string) =>
+      spawnSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; ${body}`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '0' },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+
+      // First run publishes a real lock; it stages, commits and promotes normally.
+      const first = spawnSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock(${JSON.stringify(binding)}); promoteStoryReferenceLock(${JSON.stringify(binding)});`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+          stdio: 'pipe',
+        }
+      );
+      expect(first.status, first.stderr.toString()).toBe(0);
+
+      // Re-staging the binding this run promoted is idempotent, not a clash.
+      const realLock = JSON.parse(
+        readFileSync(join(dir, 'scripts', 'story-reference.lock.json'), 'utf-8')
+      );
+      writeFileSync(
+        join(dir, pendingLockSidecar(binding)),
+        `${JSON.stringify({ lock: realLock, outputSha256: binding })}\n`
+      );
+      const repeat = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
+      expect(repeat.status, repeat.stderr.toString()).toBe(0);
+
+      // Another capture's binding for the same payload is refused, not replaced.
+      const foreign = `${JSON.stringify({
+        lock: { ...FULL_LOCK, file: 'eft/other.json', sha256: 'f'.repeat(64) },
+        outputSha256: binding,
+      })}\n`;
+      writeFileSync(join(dir, pendingLockSidecar(binding)), foreign);
+      const collision = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
+      expect(collision.status, collision.stderr.toString()).not.toBe(0);
+      expect(collision.stderr.toString()).toMatch(/refusing to replace the staged binding/);
+      expect(readFileSync(join(dir, pendingLockSidecar(binding)), 'utf-8')).toBe(foreign);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves the committed lock intact when the sidecar carries no usable lock', () => {
+    // The sidecar lives in the gitignored data/ tree, so an interrupted run or a
+    // hand edit can leave JSON that parses but omits `lock`. Serializing that
+    // straight through would write the literal `undefined` over the committed
+    // lock and break every later run that parses it.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unusable-'));
+    const promoted = 'b'.repeat(64);
+    const sidecar = join(dir, pendingLockSidecar(promoted));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(lockFile, committed);
+
+      for (const payload of [
+        JSON.stringify({ outputSha256: 'b'.repeat(64) }), // no lock at all
+        JSON.stringify({ lock: { sha256: 'a'.repeat(64) }, outputSha256: null }), // no file
+        JSON.stringify({ lock: 'not-an-object', outputSha256: null }),
+        // Parses and names a capture, but drops the provenance the lock exists to
+        // record, so promoting it would leave the committed chapters unauditable.
+        JSON.stringify({
+          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        }),
+        JSON.stringify({ lock: { ...FULL_LOCK, bytes: 'not-a-number' } }),
+        '{ truncated', // never finished being written
+      ]) {
+        writeFileSync(sidecar, `${payload}\n`);
+        const promoted = execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
+          ],
+          { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+        )
+          .toString()
+          .trim();
+
+        expect(promoted, `promoted an unusable sidecar: ${payload}`).toBe('false');
+        expect(readFileSync(lockFile, 'utf-8'), `lock corrupted by: ${payload}`).toBe(committed);
+        expect(existsSync(sidecar), `unusable sidecar kept: ${payload}`).toBe(false);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects a committed lock that is not a complete provenance record', () => {
+    // `{}` used to reach `existsSync(lock.file)` and fail as an opaque TypeError.
+    // The committed lock is held to the same contract as a staged one, so it fails
+    // by name with the remedy instead.
+    const dir = mkdtempSync(join(tmpdir(), 'story-lock-shape-'));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const load = () =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; try { loadReference(); } catch (error) { console.log(error.message); }`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+
+      writeFileSync(lockFile, '{}\n');
+      expect(load()).toMatch(/not a complete provenance record/);
+
+      // A digest-shaped check too: a hand-edited stub must not pass for a real hash.
+      writeFileSync(lockFile, `${JSON.stringify({ ...FULL_LOCK, sha256: 'x' })}\n`);
+      expect(load()).toMatch(/not a complete provenance record/);
+
+      writeFileSync(lockFile, '{ truncated\n');
+      expect(load()).toMatch(/is not valid JSON/);
+
+      // The error names re-pinning as the remedy, so that remedy has to work: an
+      // explicit update run treats the unusable lock as absent and replaces it
+      // rather than failing before the update path is reached.
+      const loadUpdating = () =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; try { loadReference(); } catch (error) { console.log(error.message); }`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+          .toString()
+          .trim();
+      for (const broken of ['{}\n', '{ truncated\n']) {
+        writeFileSync(lockFile, broken);
+        // Gets past readLock to the ordinary "no capture here" failure.
+        expect(loadUpdating(), `re-pin blocked by ${broken.trim()}`).not.toMatch(
+          /provenance record|not valid JSON/
+        );
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a staged pin that is not bound to the payload being committed', () => {
+    // `outputSha256: null` used to act as a wildcard, so a sidecar that never
+    // recorded which payload it was staged for could be promoted beside unrelated
+    // data. The sidecar is now addressed by the payload hash, and the file at
+    // that address must also carry that binding.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unbound-'));
+    const promoted = 'b'.repeat(64);
+    const sidecar = join(dir, pendingLockSidecar(promoted));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (hash: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    const stage = (boundTo: string | null) =>
+      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: boundTo })}\n`);
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+
+      stage(null);
+      expect(promote(promoted), 'promoted an unbound sidecar').toBe('false');
+      expect(existsSync(lockFile), 'lock written from an unbound sidecar').toBe(false);
+
+      // The same address with the matching binding is still applied.
+      stage(promoted);
+      expect(promote(promoted)).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({ file: FULL_LOCK.file });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('requires a staged binding before replacing the story artifact', () => {
+    // The writer cannot show on its own that a payload came from the pinned
+    // capture, so it only publishes input carrying a staged binding for exactly
+    // those bytes. Promotion is attempted after the artifact write so a failed
+    // write cannot advance the pin; ordering must not let a *refused* promotion
+    // pass silently either.
+    const dir = mkdtempSync(join(tmpdir(), 'story-write-refuse-'));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const dest = join(dir, 'src', 'additions', 'storyChapters.json5');
+    const input = join(dir, 'story-final.json');
+    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    const previousArtifact = '{ /* previous */ }\n';
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'src', 'additions'), { recursive: true });
+      mkdirSync(join(dir, 'src', 'schemas'), { recursive: true });
+      writeFileSync(
+        join(dir, 'src', 'schemas', 'story-chapter.schema.json'),
+        readFileSync(join(getProjectPaths().schemasDir, 'story-chapter.schema.json'))
+      );
+      writeFileSync(lockFile, committed);
+      writeFileSync(dest, previousArtifact);
+      const inputPayload = JSON.stringify({
+        'test-chapter': {
+          id: 'test-chapter',
+          name: 'Test Chapter',
+          normalizedName: 'test-chapter',
+          wikiLink: 'https://example.test/',
+          order: 1,
+          chapterQuestId: '68cbd33676fe74b1e80bfd91',
+          referenceCoverage: {
+            referencedSubquests: 0,
+            resolvedSubquests: 0,
+            partial: false,
+          },
+        },
+      });
+      writeFileSync(input, inputPayload);
+      const inputSha256 = createHash('sha256').update(inputPayload).digest('hex');
+      const sidecar = join(dir, pendingLockSidecar(inputSha256));
+      // Staged at this payload's address but carrying another payload's binding.
+      writeFileSync(
+        sidecar,
+        `${JSON.stringify({
+          lock: { ...FULL_LOCK, file: 'eft/newer.json', sha256: 'c'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        })}\n`
+      );
+
+      const run = () => {
+        let status = 0;
+        let stderr = '';
+        try {
+          execFileSync(
+            process.execPath,
+            [
+              '--import',
+              import.meta.resolve('tsx'),
+              fileURLToPath(new URL('../scripts/eft-story-write.ts', import.meta.url)),
+              input,
+            ],
+            { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+          );
+        } catch (error: any) {
+          status = error.status ?? 1;
+          stderr = error.stderr?.toString() ?? '';
+        }
+        return { status, stderr };
+      };
+
+      const mismatched = run();
+      expect(mismatched.status, 'writer exited successfully despite a refused re-pin').not.toBe(0);
+      expect(mismatched.stderr).toMatch(/refusing to write/);
+      // Neither side moved, so the pin still describes the committed artifact.
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // Same refusal for a sidecar that cannot be read as a lock at all: the
+      // artifact must not be replaced on the strength of a pin that cannot land.
+      writeFileSync(sidecar, '{ truncated\n');
+      const unusable = run();
+      expect(unusable.status, 'writer accepted an unusable staged re-pin').not.toBe(0);
+      expect(unusable.stderr).toMatch(/refusing to write/);
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // An unbound input has no staged provenance, so the writer refuses rather
+      // than publishing data the lock cannot be shown to describe.
+      rmSync(sidecar, { force: true });
+      const unbound = run();
+      expect(unbound.status, 'writer published an unbound input').not.toBe(0);
+      expect(unbound.stderr).toMatch(/refusing to write/);
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // A binding for exactly this payload lets the write proceed and records the
+      // capture the generator vouched for.
+      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: inputSha256 })}\n`);
+      const bound = run();
+      expect(bound.status, bound.stderr).toBe(0);
+      expect(readFileSync(dest, 'utf-8')).not.toBe(previousArtifact);
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({ file: FULL_LOCK.file });
+      expect(existsSync(sidecar), 'consumed binding was not removed').toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to pin a capture from a mode the storyline is not shared with', () => {
+    // The committed addition is stamped "shared between PVP and PVE". A seasonal
+    // character is a separate progression with independently divergent quest
+    // data, and an advanced one can out-score every other capture on chapter
+    // coverage, so discovery and explicit replacement both have to exclude it.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-mode-'));
+    const seasonal = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pvp-season.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, seasonal);
+      expect(() =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+      ).toThrow(/pvp-season.*shared between regular and pve|shared between regular and pve/s);
+      expect(existsSync(join(dir, 'scripts/story-reference.lock.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to pin a capture whose mode cannot be identified', () => {
+    // "Unknown" is not a safe default here: a capture with no recognizable
+    // request URL cannot be shown to belong to the shared storyline's modes, and
+    // accepting it would let a seasonal-derived capture through the same gap.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unknown-'));
+    const unknownMode = JSON.stringify({
+      data: [
+        {
+          _id: '68cbd33676fe74b1e80bfd91',
+          conditions: {
+            AvailableForFinish: [{ conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' }],
+          },
+        },
+        {
+          _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+          conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+          localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+        },
+      ],
+    });
+    const file = join(dir, 'quest_list.json');
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, unknownMode);
+      expect(() =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+      ).toThrow(/unknown/);
+      expect(existsSync(join(dir, 'scripts/story-reference.lock.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('promotes a staged pin only once the artifact is written', () => {
+    // The lock records which capture produced the committed chapters, so it must
+    // move with the artifact: the generator stages it, and eft-story-write.ts
+    // promotes it after storyChapters.json5 is on disk.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-promote-'));
+    const sidecar = join(dir, pendingLockSidecar('b'.repeat(64)));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      const staged = `${JSON.stringify(
+        {
+          lock: FULL_LOCK,
+          outputSha256: 'b'.repeat(64),
+        },
+        null,
+        2
+      )}\n`;
+      writeFileSync(sidecar, staged);
+
+      const promoted = execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+
+      expect(promoted).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({
+        file: 'eft/capture.json',
+        sha256: 'a'.repeat(64),
+      });
+      // Sidecar consumed, so a later run cannot re-apply a stale pin.
+      expect(existsSync(sidecar)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
 
 describe('sequenceRatio (difflib SequenceMatcher.ratio port)', () => {
   // Expected values computed with CPython difflib.SequenceMatcher(None, a, b).ratio()
@@ -106,12 +918,204 @@ describe('parseObjectives', () => {
     '* Not an objective',
   ].join('\n');
 
-  it('parses only bullet lines inside the Objectives section', () => {
+  it('parses bullet lines and treats a conditional branch as not required', () => {
     const objectives = parseObjectives(wikitext);
     expect(objectives).toEqual([
       { text: 'First objective', optional: false },
       { text: 'Second objective', optional: true },
-      { text: 'Third objective', optional: false },
+      // Under "'''If you side with them:'''", so it applies only to players who
+      // took that branch. Marking it required would block everyone else.
+      { text: 'Third objective', optional: true },
+    ]);
+  });
+
+  it('closes a conditional branch at an unconditional header', () => {
+    const branched = [
+      '== Objectives ==',
+      '* Always required',
+      "'''If the case was given away'''",
+      '* Branch only',
+      "'''Once you have the case'''",
+      '* Required again',
+      '=== If you accept the offer ===',
+      '* Ending branch',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(branched)).toEqual([
+      { text: 'Always required', optional: false },
+      { text: 'Branch only', optional: true },
+      // "Once you have the case" states sequence, not a choice, so it ends the
+      // branch rather than extending it.
+      { text: 'Required again', optional: false },
+      // Heading-delimited branches count too, not just bold ones.
+      { text: 'Ending branch', optional: true },
+    ]);
+  });
+
+  it('ends a group of branch alternatives at a horizontal rule', () => {
+    // Shaped after the real Boreas Objectives section, where each `<hr/>` closes a
+    // set of "If ..." variants and the universal storyline resumes after it.
+    // Treating the rule as a no-op left the last branch open and published trunk
+    // objectives as optional.
+    const boreasShaped = [
+      '== Objectives ==',
+      '* Arrange a transport to the icebreaker',
+      "'''If you gave the Armored case to Prapor'''",
+      '* Hand over the AMG-10 fluid to Prapor',
+      "'''If you have not completed Falling Skies'''",
+      '* Eliminate any 30 targets on Reserve',
+      '<hr/>',
+      '* Find an alternative transport to the icebreaker',
+      '* Board the smuggler hovercraft',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(boreasShaped)).toEqual([
+      { text: 'Arrange a transport to the icebreaker', optional: false },
+      { text: 'Hand over the AMG-10 fluid to Prapor', optional: true },
+      { text: 'Eliminate any 30 targets on Reserve', optional: true },
+      // Post-rule trunk: required for everyone regardless of the branch taken.
+      { text: 'Find an alternative transport to the icebreaker', optional: false },
+      { text: 'Board the smuggler hovercraft', optional: false },
+    ]);
+  });
+
+  it('does not promote a nested convergence out of its enclosing ending', () => {
+    // Convergence across nested alternatives only proves the step is unavoidable
+    // *within* the enclosing branch. If that branch is itself conditional, players
+    // who never enter the ending never see the step.
+    const nested = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      "'''If you have the case'''",
+      '* Step A',
+      '* Common step',
+      "'''If you lack the case'''",
+      '* Step B',
+      '* Common step',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(nested)).toEqual([
+      { text: 'Step A', optional: true },
+      { text: 'Common step', optional: true },
+      { text: 'Step B', optional: true },
+      { text: 'Common step', optional: true },
+    ]);
+  });
+
+  it('detects convergence across heading-delimited alternatives too', () => {
+    // The Ticket's endings are `===If ...===` sections. Closing the group between
+    // them would put each ending in its own group and make convergence undetectable,
+    // so a step every ending requires would be published optional.
+    const endings = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      '* Accept it',
+      '* Arrive at the Terminal',
+      '=== If you refuse the offer ===',
+      '* Refuse it',
+      '* Arrive at the Terminal',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(endings)).toEqual([
+      { text: 'Accept it', optional: true },
+      { text: 'Arrive at the Terminal', optional: false },
+      { text: 'Refuse it', optional: true },
+      { text: 'Arrive at the Terminal', optional: false },
+    ]);
+  });
+
+  it('keeps a step required when every branch alternative repeats it', () => {
+    // Boreas converges: each "If ..." variant ends on the same closing step, so no
+    // choice avoids it and publishing it optional would understate the storyline.
+    const converging = [
+      '== Objectives ==',
+      "'''If you have completed The Price of Independence'''",
+      '* Return to the Hideout',
+      '* Tell Mechanic that you found transport',
+      "'''If you have completed Choose Your Friends Wisely'''",
+      '* Hand over 200 rounds',
+      '* Tell Mechanic that you found transport',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(converging)).toEqual([
+      // Present in one alternative only, so genuinely branch-specific.
+      { text: 'Return to the Hideout', optional: true },
+      { text: 'Tell Mechanic that you found transport', optional: false },
+      { text: 'Hand over 200 rounds', optional: true },
+      { text: 'Tell Mechanic that you found transport', optional: false },
+    ]);
+  });
+
+  it('keeps a step required when it also appears outside any branch', () => {
+    const alsoTrunk = [
+      '== Objectives ==',
+      "'''If you took the long way'''",
+      '* Return to the BTR driver',
+      '<hr/>',
+      '* Return to the BTR driver',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(alsoTrunk)).toEqual([
+      // Stated unconditionally later, so the branch occurrence is not a choice.
+      { text: 'Return to the BTR driver', optional: false },
+      { text: 'Return to the BTR driver', optional: false },
+    ]);
+  });
+
+  it('never overrides an explicit optional marker with branch inference', () => {
+    // Boreas uses "Reach the engine room" both as an (Optional) hint under one step
+    // and as a required step later. Only the inline marker separates them, so the
+    // trunk inference must not promote the marked one to required.
+    const markedAndTrunk = [
+      '== Objectives ==',
+      '* Access the engine room',
+      "** (''Optional'') Reach the engine room",
+      '* Reach the engine room',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(markedAndTrunk)).toEqual([
+      { text: 'Access the engine room', optional: false },
+      { text: 'Reach the engine room', optional: true },
+      { text: 'Reach the engine room', optional: false },
+    ]);
+  });
+
+  it('does not let a bold sub-header close the ending it sits inside', () => {
+    // The Ticket nests bold sub-headers under `===If ...===` ending sections. A
+    // sub-header closing the outer branch would leak that ending's objectives out
+    // as universally required.
+    const nested = [
+      '== Objectives ==',
+      '* Contact Mr. Kerman',
+      "=== If you accept Mr. Kerman's offer ===",
+      '* Accept the offer',
+      "'''After the completion of Prapor's tasks'''",
+      '* Hand over the case to Prapor',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(nested)).toEqual([
+      { text: 'Contact Mr. Kerman', optional: false },
+      { text: 'Accept the offer', optional: true },
+      // Still inside the ending branch, despite the unconditional sub-header.
+      { text: 'Hand over the case to Prapor', optional: true },
+    ]);
+  });
+
+  it('ends a conditional heading branch at a horizontal rule', () => {
+    // A rule is a branch terminator for headings the same way it is for bold
+    // sub-headers: an unconditional step after it belongs to the trunk, not to
+    // the alternative section that happens to contain the rule.
+    const mixed = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      '* Accept the offer',
+      '<hr/>',
+      '* Return to Mechanic',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(mixed)).toEqual([
+      { text: 'Accept the offer', optional: true },
+      { text: 'Return to Mechanic', optional: false },
     ]);
   });
 
@@ -148,6 +1152,245 @@ describe('bareId', () => {
     expect(bareId('68cbd33676fe74b1e80bfd91')).toBe('68cbd33676fe74b1e80bfd91');
     expect(bareId('not an id')).toBeNull();
     expect(bareId(42)).toBeNull();
+  });
+});
+
+describe('unwrapAnnotatedText', () => {
+  it('recovers the client value from the enrichment wrapper', () => {
+    // The enriched capture rewrites values as `[<original>] <resolved>`; the
+    // plain 1.1 capture gives this objective id exactly "Escape from Tarkov".
+    expect(unwrapAnnotatedText('[Escape from Tarkov] ESCAPE FROM TARKOV')).toBe(
+      'Escape from Tarkov'
+    );
+    expect(unwrapAnnotatedText('[68da33fe00868edcb6025ac4 name] The Ticket')).toBe(
+      '68da33fe00868edcb6025ac4 name'
+    );
+  });
+
+  it('leaves plain text and unresolvable markers alone', () => {
+    expect(unwrapAnnotatedText('Pass the security check')).toBe('Pass the security check');
+    // Empty brackets are the tool's "could not resolve" marker: there is no
+    // original to recover, and the tail is an unrelated string.
+    expect(unwrapAnnotatedText('[] Experience bonus {0}')).toBe('[] Experience bonus {0}');
+  });
+});
+
+describe('expandChapterObjectives', () => {
+  const capture = [
+    {
+      _id: '[68da33fe00868edcb6025ac4] Chapter',
+      conditions: {
+        AvailableForFinish: [
+          { conditionType: 'Quest', target: ['[aaaaaaaaaaaaaaaaaaaaaaaa] sub'] },
+          { conditionType: 'Quest', target: '[aaaaaaaaaaaaaaaaaaaaaaaa] sub' }, // duplicate ref
+          { conditionType: 'Quest', target: '67bdf8c066ca1d79a202463a' }, // ending gate
+          { conditionType: 'Quest', target: 'cccccccccccccccccccccccc' }, // unresolved
+          { conditionType: 'CounterCreator' }, // not a sub-quest ref
+        ],
+      },
+    },
+    {
+      _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+      localization: { en: { o1: 'First objective', o3: 'Third objective' } },
+      conditions: {
+        AvailableForFinish: [
+          { id: 'o1' },
+          { id: 'o2' }, // no localized text -> skipped
+          {}, // no id -> skipped
+          { id: 'o3' },
+        ],
+      },
+    },
+    {
+      _id: '67bdf8c066ca1d79a202463a',
+      localization: { en: { g1: 'Reach the evacuation area' } },
+      conditions: {
+        AvailableForFinish: [{ id: 'g1' }],
+        // Only startable if the other resolved sub-quest failed -> exclusive.
+        AvailableForStart: [
+          { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: [5] },
+        ],
+        // The counterpart is not a resolved sub-quest of this chapter, so it
+        // is outside the chapter-local completion-pair model.
+        Fail: [{ conditionType: 'Quest', target: '67460662d0fbbc74ca0f7229', status: [4] }],
+      },
+    },
+  ];
+
+  it('collects objectives once per referenced sub-quest and tags ending gates', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    expect(expansion.objectives.map((o) => o.id)).toEqual(['o1', 'o3', 'g1']);
+    expect(expansion.objectives[0]).toEqual({
+      id: 'o1',
+      text: 'First objective',
+      sourceQuestId: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+    });
+    // The gate sub-quest's objective carries the real ending id.
+    expect(expansion.objectives[2].endingId).toBe(STORY_ENDINGS[0].id);
+  });
+
+  it('reports referenced vs resolved sub-quests for coverage', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    // Three distinct refs (the duplicate collapses), one of which is missing.
+    expect(expansion.referencedSubquests).toEqual([
+      'aaaaaaaaaaaaaaaaaaaaaaaa',
+      '67bdf8c066ca1d79a202463a',
+      'cccccccccccccccccccccccc',
+    ]);
+    expect(expansion.resolvedSubquests).toEqual([
+      'aaaaaaaaaaaaaaaaaaaaaaaa',
+      '67bdf8c066ca1d79a202463a',
+    ]);
+  });
+
+  it('returns nothing for a chapter quest the capture lacks', () => {
+    const expansion = expandChapterObjectives('ffffffffffffffffffffffff', indexQuests([]));
+    expect(expansion.objectives).toEqual([]);
+    expect(expansion.referencedSubquests).toEqual([]);
+    expect(expansion.resolvedSubquests).toEqual([]);
+    expect(expansion.missingObjectiveTexts).toBe(0);
+    expect(expansion.exclusivePairs).toEqual([]);
+  });
+
+  it('keeps exclusive pairs only between resolved sub-quests of the chapter', () => {
+    const expansion = expandChapterObjectives(
+      '68da33fe00868edcb6025ac4',
+      indexQuests(capture as never)
+    );
+    expect(expansion.exclusivePairs).toEqual([
+      ['67bdf8c066ca1d79a202463a', 'aaaaaaaaaaaaaaaaaaaaaaaa'],
+    ]);
+  });
+});
+
+describe('exclusiveCounterparts', () => {
+  it('reads a fail-on-completion condition as exclusivity', () => {
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status: [4] }],
+        },
+      })
+    ).toEqual(['aaaaaaaaaaaaaaaaaaaaaaaa']);
+    // "fails once the other is even started" is stronger exclusivity, not weaker.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'bbbbbbbbbbbbbbbbbbbbbbbb', status: [2, 4] }],
+        },
+      })
+    ).toEqual(['bbbbbbbbbbbbbbbbbbbbbbbb']);
+  });
+
+  it('reads a start-only-if-failed condition as exclusivity', () => {
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: '[cccccccccccccccccccccccc] Other', status: [5] },
+          ],
+        },
+      })
+    ).toEqual(['cccccccccccccccccccccccc']);
+  });
+
+  it.each([
+    { status: [2, 5] },
+    { status: [1, 5] },
+    { status: [4, 5] },
+    { status: [] },
+    { status: [2] },
+  ])(
+    'does not infer exclusivity when failure is not the only accepted state: $status',
+    ({ status }) => {
+      expect(
+        exclusiveCounterparts({
+          conditions: {
+            AvailableForStart: [
+              { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa', status },
+            ],
+          },
+        })
+      ).toEqual([]);
+    }
+  );
+
+  it('does not treat cascade failure or ordinary prerequisites as exclusivity', () => {
+    // Fails because its predecessor failed - the chain dies together, it is not
+    // an alternative branch.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          Fail: [{ conditionType: 'Quest', target: 'dddddddddddddddddddddddd', status: [5] }],
+        },
+      })
+    ).toEqual([]);
+    // Ordinary unlock edge.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: 'eeeeeeeeeeeeeeeeeeeeeeee', status: [4] },
+          ],
+        },
+      })
+    ).toEqual([]);
+    // "completed or failed" accepts success, so it excludes nothing.
+    expect(
+      exclusiveCounterparts({
+        conditions: {
+          AvailableForStart: [
+            { conditionType: 'Quest', target: 'ffffffffffffffffffffffff', status: [4, 5] },
+          ],
+        },
+      })
+    ).toEqual([]);
+    // Non-Quest conditions and missing quests contribute nothing.
+    expect(
+      exclusiveCounterparts({
+        conditions: { Fail: [{ conditionType: 'CounterCreator', status: [4] }] },
+      })
+    ).toEqual([]);
+    expect(exclusiveCounterparts(undefined)).toEqual([]);
+  });
+});
+
+describe('storyReferenceCandidates', () => {
+  it('discovers captures in a filesystem-independent order', () => {
+    // readdirSync order is not portable, so discovery sorts; enriched captures
+    // still rank first because they carry the localization block.
+    const root = mkdtempSync(join(tmpdir(), 'story-candidates-'));
+    try {
+      mkdirSync(join(root, 'zdir'));
+      mkdirSync(join(root, 'adir'));
+      for (const file of [
+        'quest_list.b.json',
+        'quest_list.a.json',
+        'quest_list.rollinglatest.modified.json',
+        'not-a-capture.json',
+        'quest_list.txt',
+      ]) {
+        writeFileSync(join(root, file), '{}');
+      }
+      writeFileSync(join(root, 'zdir', 'quest-list.z.json'), '{}');
+      writeFileSync(join(root, 'adir', 'quest_list.nested.json'), '{}');
+
+      expect(storyReferenceCandidates(root)).toEqual([
+        join(root, 'quest_list.rollinglatest.modified.json'),
+        join(root, 'adir', 'quest_list.nested.json'),
+        join(root, 'quest_list.a.json'),
+        join(root, 'quest_list.b.json'),
+        join(root, 'zdir', 'quest-list.z.json'),
+      ]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

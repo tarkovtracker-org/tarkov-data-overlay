@@ -159,14 +159,14 @@ interface NormalizedOutput {
 }
 
 /** Pull the quest array out of the reference-file envelope. */
-function readEnvelope(file: string): {
+export function readEnvelope(file: string): {
   quests: Record<string, unknown>[];
   url?: string;
   appVersion?: string;
   capturedAt?: string;
 } {
   const raw = JSON.parse(readFileSync(file, 'utf-8')) as any;
-  const decoded = raw?.response?.decoded_response;
+  const decoded = raw?.response?.decoded_response ?? raw?.response?.body_response;
   const data = decoded?.data ?? raw?.data ?? raw;
   if (!Array.isArray(data)) {
     throw new Error(`Unexpected quest reference shape in ${file}: expected an array of quests`);

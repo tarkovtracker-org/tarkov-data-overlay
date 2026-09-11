@@ -72,7 +72,11 @@ const MAPS: Registry = {
     join('src', 'overrides', 'tasks.json5'),
     join('src', 'additions', 'storyChapters.json5'),
     join('src', 'additions', 'tasksAdd.json5'),
-    join('src', 'overrides', 'modes', 'regular', 'tasks.json5'),
+    // src/overrides/modes/regular/tasks.json5 is deliberately absent: its only
+    // map references came from the Easy-Breezy / Power of Persuasion objective
+    // overrides, which were removed once the regular client capture showed both
+    // objectives identical to PvE. The walk still scans that file; it simply has
+    // no map pairs to contribute now.
   ],
 };
 

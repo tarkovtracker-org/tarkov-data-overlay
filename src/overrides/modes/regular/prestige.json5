@@ -77,8 +77,8 @@
       {
         type: 'storyObjectiveStatus',
         storyChapter: 'the-ticket',
-        objective: 'the-ticket-main-10',
-        name: 'Obtain the Ticket from Tarkov',
+        objective: '68e2ecfeb88d405a420774f8', // Was: the-ticket-main-10 (fabricated id); real client objective "Obtain the \"Ticket\""
+        name: 'Obtain the "Ticket"',
         status: ['complete'],
       },
     ],
@@ -116,8 +116,8 @@
       {
         type: 'storyObjectiveStatus',
         storyChapter: 'the-ticket',
-        objective: 'the-ticket-main-10',
-        name: 'Obtain the Ticket from Tarkov',
+        objective: '68e2ecfeb88d405a420774f8', // Was: the-ticket-main-10 (fabricated id); real client objective "Obtain the \"Ticket\""
+        name: 'Obtain the "Ticket"',
         status: ['complete'],
       },
     ],

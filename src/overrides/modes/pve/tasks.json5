@@ -1,6 +1,8 @@
 {
-  // PvE-specific objective corrections only. Shared task requirements belong in
-  // src/overrides/tasks.json5, even when the supporting capture came from PvE.
+  // PvE-specific corrections only - objective patches plus the few task-level
+  // fields that genuinely differ in PvE (`taskRequirements`, `disabled`).
+  // Anything true of every mode belongs in src/overrides/tasks.json5, even when
+  // the supporting capture came from PvE.
 
   // Pathfinder - objective description differs from the value served upstream.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
@@ -25,5 +27,61 @@
         description: 'Stash a Cultist knife at the river village marked circle on Woods', // Was: sawmill
       },
     },
+  },
+
+  // Collector - PvE uses a different Chemical prerequisite than regular.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  //
+  // The 1.1-pve capture's Quest start condition targets Chemical - Part 4
+  // (597a0f5686f774273b74f676) and accepts status [4, 5] = complete or failed.
+  // The 2026-08-27 regular capture instead targets Chemical - Part 3 accepting
+  // complete only, and the wiki Requirements section agrees with regular - so
+  // Chemical - Part 3 is the shared value in src/overrides/tasks.json5 and this
+  // PvE-only entry restores the PvE edge. The other three edges are identical in
+  // both captures and stay shared.
+  '5c51aac186f77432ea65c552': {
+    taskRequirements: [
+      {
+        task: { id: '597a0f5686f774273b74f676', name: 'Chemical - Part 4' },
+        status: ['complete', 'failed'],
+      }, // Was (shared/API): Chemical - Part 3, complete only
+      {
+        task: { id: '5c0bde0986f77479cf22c2f8', name: 'Shooter Born in Heaven' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5bc480a686f7741af0342e29', name: 'The Tarkov Shooter - Part 4' },
+        status: ['complete'],
+      },
+      {
+        task: { id: '5ae4497b86f7744cf402ed00', name: 'Sew it Good - Part 2' },
+        status: ['complete'],
+      },
+    ],
+  },
+
+  // New Beginning - prestige track, and PvE has no prestige.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/362
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/319
+  //        https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_1)
+  //
+  // This task is not an ordinary trader quest: it is the Quest start condition
+  // on prestige element 672df12f97f0469cea52f55e (Prestige 1), returned by
+  // `client/prestige/list`. Upstream itself agrees PvE has no prestige -
+  // `json.tarkov.dev/pve/tasks` serves `prestige: []` while
+  // `json.tarkov.dev/regular/tasks` serves all six prestige elements - yet it
+  // still lists the quest whose only purpose is to gate Prestige 1. The local
+  // captures agree: no PvE session is served `client/prestige/list`, and this
+  // repository already scopes every prestige correction to
+  // src/overrides/modes/regular/prestige.json5.
+  //
+  // Two independent reporters at levels 35 and 36 (both above the wiki's level-25
+  // requirement) confirm the quest never appears in PvE.
+  //
+  // Note the PvE capture is build 1.1.0.1.46699 rather than the 46911 used for
+  // the other modes, so the endpoint evidence alone would carry a version
+  // caveat; the empty upstream `prestige` array for PvE is what removes it.
+  '6761f28a022f60bb320f3e95': {
+    disabled: true, // Was: active (pve has no prestige track)
   },
 }

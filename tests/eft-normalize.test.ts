@@ -2,7 +2,7 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { writeFileSync, mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { normalizeQuestData } from '../scripts/eft-normalize.js';
+import { normalizeQuestData, readEnvelope } from '../scripts/eft-normalize.js';
 
 // Minimal enriched reference fixture: wrapped ids + localization.en objective text.
 const FIXTURE = {
@@ -69,6 +69,18 @@ writeFileSync(file, JSON.stringify(FIXTURE));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe('eft-normalize', () => {
+  it('reads current body_response captures with the same quests and provenance', () => {
+    const current = join(dir, 'current.json');
+    writeFileSync(
+      current,
+      JSON.stringify({
+        request: FIXTURE.request,
+        response: { body_response: FIXTURE.response.decoded_response },
+      })
+    );
+    expect(readEnvelope(current)).toEqual(readEnvelope(file));
+    expect(normalizeQuestData(current).quests).toEqual(normalizeQuestData(file).quests);
+  });
   const out = normalizeQuestData(file);
   const quest = out.quests['60e71dc0a94be721b065bbfc'];
 

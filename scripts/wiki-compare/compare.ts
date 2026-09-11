@@ -14,7 +14,7 @@ import {
   WikiTaskData,
   getPriority,
 } from './types.js';
-import { TaskSuppressionEntry, isObjectiveSuppressed } from './overlay.js';
+import { TaskSuppressionEntry, isObjectiveSuppressed, nextTaskKey } from './overlay.js';
 import {
   ObjectiveItemRef,
   aliasSetIntersects,
@@ -43,6 +43,13 @@ import {
 } from './normalize.js';
 import { normalizeTaskName } from './api.js';
 import { extractCount } from './wiki.js';
+
+/**
+ * Fence, whose trader reputation *is* Scav karma. Matched by id rather than name
+ * because a display name can be localized or renamed upstream, while the id is
+ * the merge identity consumers use (see TARKOV_TRADER_NAMES_BY_ID).
+ */
+const FENCE_TRADER_ID = '579dc571d53a0658a154fbec';
 
 /**
  * Log a set-difference summary when two name sets disagree. Shared by the
@@ -135,6 +142,128 @@ export function compareTasks(
         );
     } else if (verbose) {
       console.log(`${icons.success} minPlayerLevel matches (${apiTask.minPlayerLevel})`);
+    }
+  }
+
+  // traderRequirements (loyalty gates)
+  //
+  // Patch 1.1.0.0 moved most quest gates from a player level onto a trader
+  // loyalty tier and expresses them as opaque `GlobalVariableValue` start
+  // conditions, so the client cannot confirm a tier and the wiki Requirements
+  // section is the source for this field (see AGENTS.md). Compare only when the
+  // wiki actually states a gate: wiki silence is not evidence of absence, since
+  // many pages still document the pre-1.1 player level instead.
+  if (wiki.traderLoyalty.length > 0) {
+    // The comparator is part of the gate, not decoration: `Prapor >= 3` and
+    // `Prapor <= 3` describe opposite availability. Dropping it let an
+    // API record with the right trader and tier but the wrong direction read as
+    // correct. The wiki phrasing ("Must reach Loyalty Level N") is always a
+    // minimum, so `>=` is the expected direction. All 335 loyalty requirements
+    // tarkov.dev currently serves across the three modes use `>=`, so this adds
+    // no noise today and reports a direction regression if one appears.
+    const apiLoyalty = (apiTask.traderRequirements ?? [])
+      .filter((req) => req.requirementType === 'level')
+      .map((req) => `${req.trader?.name}:${req.compareMethod ?? '?'}:${req.value}`)
+      .sort();
+    const wikiLoyalty = wiki.traderLoyalty.map((ll) => `${ll.trader}:>=:${ll.level}`).sort();
+    if (wikiLoyalty.some((gate) => !apiLoyalty.includes(gate))) {
+      // Mark attributions the wiki sentence did not state: the tier is quoted,
+      // the trader is inferred from the infobox quest giver, and a reviewer must
+      // be able to tell those apart before writing an override.
+      const reported = wiki.traderLoyalty
+        .map((ll) => `${ll.trader}:${ll.level}${ll.inferredTrader ? ' (trader inferred)' : ''}`)
+        .sort();
+      discrepancies.push({
+        taskId,
+        taskName,
+        field: 'traderRequirements',
+        apiValue: apiLoyalty.join(', ') || '(none)',
+        wikiValue: reported.join(', '),
+        priority: getPriority('traderRequirements'),
+        trustsWiki: !wiki.traderLoyalty.some((entry) => entry.inferredTrader),
+        wikiLastEdit,
+        wikiEditDaysAgo,
+        wikiEditedPost1_0,
+      });
+      if (verbose)
+        console.log(
+          `${icons.warning} traderRequirements: API=${apiLoyalty.join(', ') || '(none)'}, Wiki=${reported.join(', ')}`
+        );
+    } else if (verbose) {
+      console.log(`${icons.success} traderRequirements match (${wikiLoyalty.join(', ')})`);
+    }
+  }
+
+  // scavKarma (Fence reputation gate)
+  //
+  // json.tarkov.dev models Scav karma as a `reputation` trader requirement on
+  // Fence (a `level` requirement is a loyalty tier, compared above), so a wiki
+  // karma sentence is comparable to API data. Reported, never auto-generated:
+  // like every trader requirement the gate is progression-critical and a wiki
+  // sentence states the threshold without always making the direction explicit,
+  // so a mismatch is escalated for a human to confirm.
+  //
+  // One-directional on purpose, for the same reason as the loyalty block: a wiki
+  // page with no karma sentence is not evidence that the task has no karma gate,
+  // so an API-only gate is not reported as a wiki disagreement.
+  if (wiki.scavKarma !== undefined) {
+    const apiKarma = (apiTask.traderRequirements ?? []).filter(
+      (req) => req.requirementType === 'reputation' && req.trader?.id === FENCE_TRADER_ID
+    );
+    const karma = wiki.scavKarma;
+    const wikiKarma = `${karma.compareMethod ?? '(direction unspecified)'} ${karma.value}`;
+    const matches = apiKarma.some(
+      (req) =>
+        req.value === karma.value &&
+        karma.compareMethod !== undefined &&
+        req.compareMethod === karma.compareMethod
+    );
+    if (!matches) {
+      discrepancies.push({
+        taskId,
+        taskName,
+        field: 'scavKarma',
+        apiValue:
+          apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') || '(none)',
+        wikiValue: wikiKarma,
+        priority: getPriority('scavKarma'),
+        trustsWiki: karma.compareMethod !== undefined,
+        wikiLastEdit,
+        wikiEditDaysAgo,
+        wikiEditedPost1_0,
+      });
+      if (verbose)
+        console.log(
+          `${icons.warning} scavKarma: API=${
+            apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') ||
+            '(none)'
+          }, Wiki=${wikiKarma}`
+        );
+    } else if (verbose) {
+      console.log(`${icons.success} scavKarma matches (${wikiKarma})`);
+    }
+  }
+
+  // factionName (USEC/BEAR-only quests)
+  if (wiki.factionName !== undefined) {
+    const apiFaction = apiTask.factionName ?? 'Any';
+    if (apiFaction !== wiki.factionName) {
+      discrepancies.push({
+        taskId,
+        taskName,
+        field: 'factionName',
+        apiValue: apiFaction,
+        wikiValue: wiki.factionName,
+        priority: getPriority('factionName'),
+        trustsWiki: true,
+        wikiLastEdit,
+        wikiEditDaysAgo,
+        wikiEditedPost1_0,
+      });
+      if (verbose)
+        console.log(`${icons.warning} factionName: API=${apiFaction}, Wiki=${wiki.factionName}`);
+    } else if (verbose) {
+      console.log(`${icons.success} factionName matches (${apiFaction})`);
     }
   }
 
@@ -618,7 +747,11 @@ export function compareTasks(
 
   // Next tasks (unlocks)
   {
-    const apiNextNames = nextTaskMap?.get(taskId) ?? [];
+    // Mode-qualified: under the default `both` scope the same task id appears
+    // once per mode, and a mode-divergent prerequisite must not be read back
+    // into the other mode's comparison.
+    const apiNextNames =
+      nextTaskMap?.get(nextTaskKey(apiTask.gameModes?.[0] ?? 'regular', taskId)) ?? [];
     const apiSet = toNormalizedSet(apiNextNames, normalizeTaskName);
     const wikiSet = toNormalizedSet(wiki.nextTasks ?? [], normalizeTaskName);
 

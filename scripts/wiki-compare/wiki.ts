@@ -34,6 +34,7 @@ import {
   stripWikiMarkup,
   uniqueList,
 } from './normalize.js';
+import { TARKOV_TRADER_NAMES_BY_ID } from '../../src/lib/index.js';
 
 export type WikiFetchResult = {
   title: string;
@@ -138,12 +139,207 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
   return { title, wikitext, lastRevision };
 }
 
+/**
+ * The player-level gate from a wiki Requirements section.
+ *
+ * Patch 1.1.0.0 moved most quest gates from a player level onto a trader
+ * loyalty tier, and the wiki writes those as "Must reach Loyalty **Level 3**
+ * with Ragman". A bare `/level (\d+)/` therefore reported the *loyalty tier* as
+ * a player level on 90 of the 286 pages that carry a Requirements section, and
+ * both `wiki:compare` and `eft:wiki` consumed that number as the wiki's witness
+ * for `minPlayerLevel`. Loyalty phrases are excluded first, and the
+ * remaining match must look like a player-level sentence rather than any
+ * incidental "level N" (e.g. Stick to It's "Talk to the scientist on level 1
+ * via the intercom", or "Reach the damaged door on level 3", which are building
+ * floors).
+ */
+const LOYALTY_MENTION = /loyalt/i;
+const PLAYER_LEVEL_PATTERNS = [
+  /\bmust\s+be\s+(?:at\s+least\s+)?level\s+(\d+)\b/i,
+  /\bmust\s+reach\s+level\s+(\d+)\b/i,
+  /\brequires?\s+(?:player\s+)?level\s+(\d+)\b/i,
+  /\bplayer\s+level\s+(\d+)\b/i,
+  /\blevel\s+(\d+)\s+to\s+start\b/i,
+];
+
 export function parseMinLevel(requirements: string[]): number | undefined {
   for (const line of requirements) {
-    const match = stripWikiMarkup(line).match(/level\s+(\d+)/i);
-    if (match && match[1]) {
-      return Number(match[1]);
+    const text = stripWikiMarkup(line).replace(
+      /\bloyalty\s+level\s*(?:\d+|iv|i{1,3})\b|\blevel\s*(?:\d+|iv|i{1,3})\s+loyalty\b/gi,
+      ''
+    );
+    for (const pattern of PLAYER_LEVEL_PATTERNS) {
+      const match = pattern.exec(text);
+      if (match?.[1]) return Number(match[1]);
     }
+  }
+  return undefined;
+}
+
+/** Roman numerals the wiki uses for loyalty tiers ("Loyalty Level II with Prapor"). */
+const ROMAN_TIERS = new Map([
+  ['i', 1],
+  ['ii', 2],
+  ['iii', 3],
+  ['iv', 4],
+]);
+
+/**
+ * Trader loyalty gates from a wiki Requirements section.
+ *
+ * Every phrasing observed across the corpus is handled:
+ *   - "Must reach Loyalty Level 3 with [[Ragman]] to obtain this quest."
+ *   - "Obtain level 2 loyalty with [[Peacekeeper]]"
+ *   - "Reach Loyalty Level 4 with [[Prapor]], [[Therapist]] and [[Jaeger]]"
+ *   - "Loyalty Level II with Prapor."
+ *   - "Must be Loyalty Level 2 to start this quest" - names no trader, so the
+ *     quest giver from the infobox `given by` field is used instead. Callers
+ *     that cannot supply it get no entry rather than a guessed trader.
+ *
+ * `traderNames` restricts which words count as traders so prose cannot invent
+ * one; pass the canonical tarkov.dev trader names.
+ */
+export function parseTraderLoyalty(
+  requirements: string[],
+  traderNames: Iterable<string>,
+  questGiver?: string
+): Array<{ trader: string; level: number; inferredTrader?: boolean }> {
+  const known = new Map<string, string>();
+  for (const name of traderNames) known.set(name.toLowerCase(), name);
+
+  const out: Array<{ trader: string; level: number; inferredTrader?: boolean }> = [];
+  const seen = new Set<string>();
+  const add = (trader: string, level: number, inferredTrader = false) => {
+    const key = `${trader}:${level}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(inferredTrader ? { trader, level, inferredTrader } : { trader, level });
+  };
+
+  for (const line of requirements) {
+    const text = stripWikiMarkup(line);
+    if (!LOYALTY_MENTION.test(text)) continue;
+
+    // Match the tier paired with loyalty, not a player level or building floor.
+    // A line can carry more than one gate ("Loyalty Level 3 with Prapor and
+    // Loyalty Level 2 with Skier"), so collect every tier with its position
+    // rather than taking the first and applying it to the whole line.
+    const tiers: Array<{ index: number; level: number }> = [];
+    for (const match of text.matchAll(
+      /\bloyalty\s+level\s*(\d+|iv|i{1,3})\b|\blevel\s*(\d+|iv|i{1,3})\s+loyalty\b/gi
+    )) {
+      const value = match[1] ?? match[2];
+      if (!value) continue;
+      const level = ROMAN_TIERS.get(value.toLowerCase()) ?? Number(value);
+      if (!Number.isInteger(level) || level < 1 || level > 4) continue;
+      tiers.push({ index: match.index, level });
+    }
+    if (tiers.length === 0) continue;
+
+    // Tokenized per span: punctuation and wiki markup collapse to single spaces, so
+    // a known name matches only on whole-word boundaries and "NotBTR Driver" cannot
+    // match "BTR Driver". Token equality is used rather than a constructed pattern,
+    // so no regular expression is ever built from wiki text.
+    const namedInOrder = (span: string): string[] => {
+      const words = span
+        .toLowerCase()
+        .split(/[^a-z0-9_]+/)
+        .filter(Boolean);
+      const found: Array<{ trader: string; at: number }> = [];
+      for (const [lower, canonical] of known) {
+        const parts = lower.split(/[^a-z0-9_]+/).filter(Boolean);
+        if (parts.length === 0) continue;
+        for (let i = 0; i + parts.length <= words.length; i += 1) {
+          if (parts.every((part, j) => words[i + j] === part)) {
+            found.push({ trader: canonical, at: i });
+            break;
+          }
+        }
+      }
+      return found.sort((a, b) => a.at - b.at).map((entry) => entry.trader);
+    };
+
+    const named = namedInOrder(text);
+
+    if (named.length > 0) {
+      if (tiers.length === 1) {
+        // One tier governs the whole line, including "Level 4 with X, Y and Z".
+        for (const trader of named) add(trader, tiers[0].level);
+      } else if (named.length === tiers.length) {
+        // Equal counts: gates are written one per trader, so pair them in the order
+        // they appear. This holds for either word order - "Level 3 with Prapor and
+        // Level 2 with Skier" and "Prapor at Level 3 and Skier at Level 2" - and for
+        // a line that mixes the two, which a per-line order rule would mis-pair.
+        named.forEach((trader, i) => add(trader, tiers[i].level));
+      } else {
+        // Counts disagree, so fall back to reading each tier's own span. Which side
+        // of a tier its traders sit on is decided once per line from whether
+        // anything is named before the first tier.
+        const traderFirst = namedInOrder(text.slice(0, tiers[0].index)).length > 0;
+        const assigned = new Set<string>();
+        tiers.forEach((tier, i) => {
+          const span = traderFirst
+            ? text.slice(i === 0 ? 0 : tiers[i - 1].index, tier.index)
+            : text.slice(tier.index, tiers[i + 1]?.index ?? text.length);
+          for (const trader of namedInOrder(span)) {
+            assigned.add(trader);
+            add(trader, tier.level);
+          }
+        });
+        // A name outside every span still had a gate on this line. The fallback
+        // follows the line's order - the last tier when tiers trail their traders,
+        // the first when they lead - so it stays visible without inventing a tier
+        // from the opposite end of the sentence.
+        const fallback = (traderFirst ? tiers[tiers.length - 1] : tiers[0]).level;
+        for (const trader of named) if (!assigned.has(trader)) add(trader, fallback);
+      }
+    } else if (questGiver && known.has(questGiver.toLowerCase())) {
+      // "Must be Loyalty Level N to start this quest" - the tier belongs to the
+      // quest giver, which the sentence leaves implicit. That is an inference,
+      // not a quoted requirement, so mark it: trader loyalty is
+      // progression-critical, and a reviewer must be able to see which entries
+      // came from the sentence naming a trader and which came from the infobox.
+      add(known.get(questGiver.toLowerCase())!, tiers[0].level, true);
+    }
+  }
+  return out;
+}
+
+/** The PMC faction gate ("This quest is only obtainable by [[USEC]] PMCs."). */
+export function parseFactionRequirement(requirements: string[]): 'USEC' | 'BEAR' | undefined {
+  for (const line of requirements) {
+    const text = stripWikiMarkup(line);
+    if (!/only\s+obtainable\s+by/i.test(text)) continue;
+    if (/\busec\b/i.test(text)) return 'USEC';
+    if (/\bbear\b/i.test(text)) return 'BEAR';
+  }
+  return undefined;
+}
+
+/**
+ * The Scav karma gate. The wiki writes both bounds, e.g. "Scav karma of at
+ * least +3" and "Scav karma of -6", so the sign is preserved.
+ */
+export function parseScavKarma(
+  requirements: string[]
+): { value: number; compareMethod?: '>=' | '<=' | '>' | '<' } | undefined {
+  for (const line of requirements) {
+    const text = stripWikiMarkup(line);
+    if (!/scav\s*karma/i.test(text)) continue;
+    const match =
+      /scav\s*karma\s+of\s+(?:(at least|at most|more than|less than)\s+)?([+-]?\s*\d+(?:\.\d+)?)/i.exec(
+        text
+      );
+    if (!match) continue;
+    const value = Number(match[2].replace(/\s+/g, ''));
+    const directions = {
+      'at least': '>=',
+      'at most': '<=',
+      'more than': '>',
+      'less than': '<',
+    } as const;
+    const phrase = match[1]?.toLowerCase() as keyof typeof directions | undefined;
+    return phrase ? { value, compareMethod: directions[phrase] } : { value };
   }
   return undefined;
 }
@@ -509,7 +705,10 @@ export function parseWikiTask(
   pageTitle: string,
   wikitext: string,
   mapAliasMap: Map<string, string>,
-  lastRevision?: WikiTaskData['lastRevision']
+  lastRevision?: WikiTaskData['lastRevision'],
+  traderNames: Iterable<string> = Object.values(TARKOV_TRADER_NAMES_BY_ID).filter(
+    (name): name is string => typeof name === 'string'
+  )
 ): WikiTaskData {
   const requirements = extractSectionLines(wikitext, 'Requirements');
   const objectivesLines = extractSectionLines(wikitext, 'Objectives');
@@ -558,6 +757,13 @@ export function parseWikiTask(
     objectives: parseObjectives(objectivesLines, mapAliasMap),
     rewards: parseRewards(rewardsLines),
     minPlayerLevel: parseMinLevel(requirements),
+    traderLoyalty: parseTraderLoyalty(
+      requirements,
+      traderNames,
+      parseInfoboxLinks(wikitext, 'given by')[0] ?? parseInfoboxLinks(wikitext, 'given_by')[0]
+    ),
+    factionName: parseFactionRequirement(requirements),
+    scavKarma: parseScavKarma(requirements),
     previousTasks: parseInfoboxLinks(wikitext, 'previous'),
     nextTasks,
     maps: Array.from(mapsFromInfobox),
@@ -593,6 +799,23 @@ export function printWikiData(wiki: WikiTaskData): void {
   }
   if (wiki.minPlayerLevel !== undefined) {
     console.log(`  ${dim(`Detected level requirement: ${wiki.minPlayerLevel}`)}`);
+  }
+  if (wiki.traderLoyalty.length > 0) {
+    // An inferred trader is flagged inline: the sentence stated a tier without
+    // naming a trader, so the attribution to the quest giver needs confirming
+    // before it becomes an override.
+    const gates = wiki.traderLoyalty
+      .map((ll) => `${ll.trader} LL${ll.level}${ll.inferredTrader ? ' (trader inferred)' : ''}`)
+      .join(', ');
+    console.log(`  ${dim(`Detected trader loyalty: ${gates}`)}`);
+  }
+  if (wiki.factionName !== undefined) {
+    console.log(`  ${dim(`Detected faction restriction: ${wiki.factionName}`)}`);
+  }
+  if (wiki.scavKarma !== undefined) {
+    console.log(
+      `  ${dim(`Detected Scav karma requirement: ${wiki.scavKarma.compareMethod ?? '(direction unspecified)'} ${wiki.scavKarma.value}`)}`
+    );
   }
   if (wiki.maps.length > 0) {
     console.log(`  ${dim(`Detected map(s): ${wiki.maps.join(', ')}`)}`);

@@ -281,17 +281,27 @@ overlays that do not contain a valid build digest.
 
 ## Network Provider - Part 1
 
-The old 13-task override was removed. It was a plausible
+**Retired.** This task was part of the pre-1.1 Lightkeeper access chain, which
+the wiki marked `{{Historical content}}` and which the
+["To the Light - ..."](https://escapefromtarkov.fandom.com/wiki/Lightkeeper)
+series replaced. The overlay now ships it as `disabled: true`, so an integrator
+that honours `disabled` filters it out and no unlock evaluation applies to it.
+tarkov.dev still serves the task, which is why the override exists. See
+[issue #365](https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365).
+
+The chapter-level `questUnlocks` entries that previously pointed at this task
+were removed from `src/additions/storyChapters.json5` along with it, so the
+"Batya / The Ticket story alternatives" the overlay used to expose for it are
+gone; do not expect alternative-unlock evaluation for this task.
+
+Historical context, for anyone reading an older overlay: before it was retired, a
+13-task prerequisite override was removed from this task. That list was a
+plausible
 [wiki](https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1)
-transcription,
-but the current static task data does not publish those prerequisites, the
-current BSG capture only proves the Fence reputation gate, and the current wiki
-page leaves the third quest path unresolved. Keeping that list made a false
-AND graph and could hide valid paths. The overlay now retains the explicit
-Batya and The Ticket story alternatives, the API's Fence reputation gate, and
-the Lightkeeper/trader account gates. Until the unresolved third path is
-independently verified, it remains `unknown` rather than being guessed. This
-addresses the false-positive report tracked in
+transcription, but the static task data did not publish those prerequisites and
+the capture only proved the Fence reputation gate, so keeping it made a false AND
+graph that could hide valid paths. That removal addressed the false-positive
+report tracked in
 [issue #254](https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/254).
 
 For the general upstream data contract, see the

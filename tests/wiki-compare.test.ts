@@ -18,7 +18,11 @@ import { normalizeTaskName, resolveTask } from '../scripts/wiki-compare/api.js';
 import {
   extractCount,
   MAX_LINK_PATTERN_COUNT,
+  parseFactionRequirement,
+  parseMinLevel,
   parseObjectives,
+  parseScavKarma,
+  parseTraderLoyalty,
 } from '../scripts/wiki-compare/wiki.js';
 import type { TaskData } from '../src/lib/types.js';
 
@@ -30,6 +34,7 @@ function makeWiki(overrides: Partial<WikiTaskData> = {}): WikiTaskData {
     requirements: [],
     objectives: [],
     rewards: { reputations: [], items: [], raw: [] },
+    traderLoyalty: [],
     previousTasks: [],
     nextTasks: [],
     maps: [],
@@ -144,6 +149,201 @@ describe('compareTasks', () => {
     });
     const result = compareTasks(baseApi, wiki, EMPTY_ALIASES, false);
     expect(result.some((d) => d.field === 'objectives.count')).toBe(true);
+  });
+
+  it('does not interpret an omitted wiki loyalty gate as contradicting the API', () => {
+    const api = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 2,
+        },
+        {
+          id: 't',
+          trader: { id: 't', name: 'Therapist' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 2,
+        },
+      ],
+    } as ExtendedTaskData;
+    expect(
+      compareTasks(
+        api,
+        makeWiki({ traderLoyalty: [{ trader: 'Prapor', level: 2 }] }),
+        EMPTY_ALIASES,
+        false
+      ).some((entry) => entry.field === 'traderRequirements')
+    ).toBe(false);
+  });
+
+  it('reports a loyalty gate whose comparator points the wrong way', () => {
+    // The comparator is part of the gate: `Prapor >= 3` and `Prapor <= 3`
+    // describe opposite availability. Matching on trader and tier alone let an
+    // API record with the wrong direction read as correct.
+    // `TraderLevelRequirement` types compareMethod as '>=', but that is an
+    // unvalidated assumption about live API data, so the cast models what
+    // upstream could actually send.
+    const wrongDirection = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '<=',
+          value: 3,
+        },
+      ],
+    } as unknown as ExtendedTaskData;
+    const wiki = makeWiki({ traderLoyalty: [{ trader: 'Prapor', level: 3 }] });
+    expect(
+      compareTasks(wrongDirection, wiki, EMPTY_ALIASES, false).some(
+        (entry) => entry.field === 'traderRequirements'
+      ),
+      'wrong-direction loyalty gate not reported'
+    ).toBe(true);
+
+    // The same gate with the direction the wiki phrasing implies still matches.
+    const rightDirection = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 3,
+        },
+      ],
+    } as ExtendedTaskData;
+    expect(
+      compareTasks(rightDirection, wiki, EMPTY_ALIASES, false).some(
+        (entry) => entry.field === 'traderRequirements'
+      )
+    ).toBe(false);
+  });
+
+  it('does not trust inferred trader attribution as a verified gate', () => {
+    const wiki = makeWiki({
+      traderLoyalty: [{ trader: 'Prapor', level: 2, inferredTrader: true }],
+    });
+    const discrepancy = compareTasks(baseApi, wiki, EMPTY_ALIASES, false).find(
+      (entry) => entry.field === 'traderRequirements'
+    );
+    expect(discrepancy?.trustsWiki).toBe(false);
+    expect(discrepancy?.wikiValue).toContain('trader inferred');
+  });
+
+  it('compares a wiki Scav karma gate against the API Fence reputation entry', () => {
+    // json.tarkov.dev models Scav karma as a Fence `reputation` requirement, so
+    // a wiki karma sentence is comparable rather than merely informational.
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
+    const matching = compareTasks(
+      {
+        ...baseApi,
+        traderRequirements: [
+          {
+            id: 'r1',
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
+            requirementType: 'reputation',
+            compareMethod: '>=',
+            value: 3,
+          },
+        ],
+      } as ExtendedTaskData,
+      wiki,
+      EMPTY_ALIASES,
+      false
+    );
+    expect(matching.some((d) => d.field === 'scavKarma')).toBe(false);
+    const unspecified = compareTasks(
+      baseApi,
+      makeWiki({ scavKarma: { value: -6 } }),
+      EMPTY_ALIASES,
+      false
+    ).find((entry) => entry.field === 'scavKarma');
+    expect(unspecified?.wikiValue).toContain('direction unspecified');
+    expect(unspecified?.trustsWiki).toBe(false);
+
+    const missing = compareTasks(baseApi, wiki, EMPTY_ALIASES, false);
+    const karma = missing.find((d) => d.field === 'scavKarma');
+    expect(karma).toBeDefined();
+    expect(karma?.apiValue).toBe('(none)');
+    expect(karma?.wikiValue).toBe('>= 3');
+    expect(karma?.priority).toBe('high');
+  });
+
+  it('reports opposite directions even with an equal karma threshold', () => {
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
+    const result = compareTasks(
+      {
+        ...baseApi,
+        traderRequirements: [
+          {
+            id: 'r1',
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
+            requirementType: 'reputation',
+            compareMethod: '<=',
+            value: 3,
+          },
+        ],
+      } as ExtendedTaskData,
+      wiki,
+      EMPTY_ALIASES,
+      false
+    );
+    expect(result.find((d) => d.field === 'scavKarma')?.apiValue).toBe('<= 3');
+  });
+
+  it('does not read another trader\u2019s reputation as Scav karma', () => {
+    // Only Fence reputation is karma; Prapor reputation is trader rep.
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
+    const result = compareTasks(
+      {
+        ...baseApi,
+        traderRequirements: [
+          {
+            id: 'r1',
+            trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+            requirementType: 'reputation',
+            compareMethod: '>=',
+            value: 3,
+          },
+        ],
+      } as ExtendedTaskData,
+      wiki,
+      EMPTY_ALIASES,
+      false
+    );
+    expect(result.some((d) => d.field === 'scavKarma')).toBe(true);
+  });
+
+  it('does not read a Fence loyalty tier as a karma gate', () => {
+    // A `level` requirement is a loyalty tier; only `reputation` carries karma.
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 6, compareMethod: '>=' } });
+    const result = compareTasks(
+      {
+        ...baseApi,
+        traderRequirements: [
+          {
+            id: 'r1',
+            trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 4,
+          },
+        ],
+      } as ExtendedTaskData,
+      wiki,
+      EMPTY_ALIASES,
+      false
+    );
+    expect(result.some((d) => d.field === 'scavKarma')).toBe(true);
   });
 
   it('honors nested objective field suppressions', () => {
@@ -299,6 +499,209 @@ describe('extractCount', () => {
     expect(extractCount('Survive for 5 minutes while suffering from dehydration')).toBeUndefined();
     expect(extractCount('Visit the pier within 20 minutes of the raid start')).toBeUndefined();
     expect(extractCount('Eliminate Scavs from over 40 meters away')).toBeUndefined();
+  });
+});
+
+describe('1.1 Requirements-section parsing', () => {
+  const TRADERS = ['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Mechanic', 'Ragman', 'Jaeger'];
+
+  describe('parseMinLevel', () => {
+    it('reads a player-level gate', () => {
+      expect(parseMinLevel(['Must be level 25 to start this quest.'])).toBe(25);
+    });
+
+    // Regression: patch 1.1.0.0 rewrote most gates as trader loyalty tiers, and
+    // a bare /level (\d+)/ returned the TIER as a player level on 90 of the 286
+    // pages carrying a Requirements section. Both wiki:compare and eft:wiki
+    // consumed that number as the wiki's minPlayerLevel witness.
+    it.each([
+      'Must reach Loyalty Level 3 with [[Ragman]] to obtain this quest.',
+      'Must be Loyalty Level 3 to start this quest',
+      'Obtain level 3 loyalty with [[Peacekeeper]]',
+      'Loyalty Level II with Prapor.',
+      'Reach Loyalty Level 4 with [[Prapor]], [[Therapist]] and [[Jaeger]]',
+    ])('never reports a loyalty tier as a player level: %s', (line) => {
+      expect(parseMinLevel([line])).toBeUndefined();
+    });
+
+    it('ignores incidental "level N" that is not a player gate', () => {
+      // Stick to It: these are building floors, not requirements on the player.
+      expect(parseMinLevel(['Talk to the scientist on level 1 via the intercom.'])).toBeUndefined();
+      expect(parseMinLevel(['Reach the damaged door on level 3.'])).toBeUndefined();
+    });
+
+    it('still finds the player level when a loyalty line comes first', () => {
+      expect(
+        parseMinLevel([
+          'Must reach Loyalty Level 2 with [[Skier]] to obtain this quest.',
+          'Must be level 20 to start this quest.',
+        ])
+      ).toBe(20);
+    });
+  });
+
+  describe('parseTraderLoyalty', () => {
+    it('parses the "Must reach Loyalty Level N with X" form', () => {
+      expect(
+        parseTraderLoyalty(
+          ['Must reach Loyalty Level 3 with [[Ragman]] to obtain this quest.'],
+          TRADERS
+        )
+      ).toEqual([{ trader: 'Ragman', level: 3 }]);
+    });
+
+    it('parses the "Obtain level N loyalty with X" form', () => {
+      expect(parseTraderLoyalty(['Obtain level 2 loyalty with [[Prapor]].'], TRADERS)).toEqual([
+        { trader: 'Prapor', level: 2 },
+      ]);
+    });
+
+    it('parses roman-numeral tiers', () => {
+      expect(parseTraderLoyalty(['Loyalty Level II with Prapor.'], TRADERS)).toEqual([
+        { trader: 'Prapor', level: 2 },
+      ]);
+    });
+
+    it('parses a multi-trader gate', () => {
+      const got = parseTraderLoyalty(
+        ['Reach Loyalty Level 4 with [[Prapor]], [[Therapist]] and [[Jaeger]]'],
+        TRADERS
+      );
+      expect(got).toHaveLength(3);
+      expect(got.map((x) => x.trader).sort()).toEqual(['Jaeger', 'Prapor', 'Therapist']);
+      expect(new Set(got.map((x) => x.level))).toEqual(new Set([4]));
+    });
+
+    it('pairs each tier with its own trader when a line carries several gates', () => {
+      // Previously the first tier on the line was applied to every trader named
+      // on it, so Skier silently inherited Prapor's level. Loyalty is
+      // progression-critical, so a wrong tier here misreports a real gate.
+      const got = parseTraderLoyalty(
+        [
+          'Must reach Loyalty Level 3 with [[Prapor]] and Loyalty Level 2 with [[Skier]] to obtain this quest.',
+        ],
+        TRADERS
+      );
+      expect(got).toEqual([
+        { trader: 'Prapor', level: 3 },
+        { trader: 'Skier', level: 2 },
+      ]);
+    });
+
+    it('pairs tiers across three gates on one line', () => {
+      const got = parseTraderLoyalty(
+        [
+          'Loyalty Level 1 with [[Prapor]], Loyalty Level 2 with [[Skier]] and Loyalty Level 3 with [[Ragman]].',
+        ],
+        TRADERS
+      );
+      expect(Object.fromEntries(got.map((entry) => [entry.trader, entry.level]))).toEqual({
+        Prapor: 1,
+        Skier: 2,
+        Ragman: 3,
+      });
+    });
+
+    it('pairs tiers when the trader is written before its level', () => {
+      // The wiki's usual phrasing puts the tier first, so the association rule is
+      // chosen from whichever comes first on the line rather than assumed.
+      const got = parseTraderLoyalty(
+        ['Prapor must be at Loyalty Level 3 and Skier at Loyalty Level 2.'],
+        TRADERS
+      );
+      expect(Object.fromEntries(got.map((entry) => [entry.trader, entry.level]))).toEqual({
+        Prapor: 3,
+        Skier: 2,
+      });
+    });
+
+    it('falls back to the quest giver when the line names no trader, marking it inferred', () => {
+      expect(
+        parseTraderLoyalty(['Must be Loyalty Level 2 to start this quest'], TRADERS, 'Peacekeeper')
+      ).toEqual([{ trader: 'Peacekeeper', level: 2, inferredTrader: true }]);
+    });
+
+    it('returns nothing rather than guessing when no trader is available', () => {
+      expect(parseTraderLoyalty(['Must be Loyalty Level 2 to start this quest'], TRADERS)).toEqual(
+        []
+      );
+    });
+
+    it('keeps a cross-trader gate rather than assuming the quest giver', () => {
+      // Pyramid Scheme is given by Skier but gated on Peacekeeper LL3.
+      expect(
+        parseTraderLoyalty(['Obtain level 3 loyalty with [[Peacekeeper]]'], TRADERS, 'Skier')
+      ).toEqual([{ trader: 'Peacekeeper', level: 3 }]);
+    });
+
+    it('does not mark a named trader as inferred', () => {
+      const [gate] = parseTraderLoyalty(['Obtain level 2 loyalty with [[Prapor]].'], TRADERS);
+      expect(gate.inferredTrader).toBeUndefined();
+    });
+
+    it('ignores non-loyalty requirement lines', () => {
+      expect(
+        parseTraderLoyalty(
+          [
+            'Must be level 25 to start this quest.',
+            'This quest is only obtainable by [[USEC]] PMCs.',
+          ],
+          TRADERS
+        )
+      ).toEqual([]);
+    });
+  });
+
+  describe('parseFactionRequirement', () => {
+    it('reads USEC and BEAR gates', () => {
+      expect(parseFactionRequirement(['This quest is only obtainable by [[USEC]] PMCs.'])).toBe(
+        'USEC'
+      );
+      expect(parseFactionRequirement(['This quest is only obtainable by [[BEAR]] PMCs'])).toBe(
+        'BEAR'
+      );
+    });
+
+    it('does not invent a faction from unrelated prose', () => {
+      expect(parseFactionRequirement(['Must be level 25 to start this quest.'])).toBeUndefined();
+    });
+  });
+
+  it('recognizes multi-word trader names without matching partial names', () => {
+    expect(parseTraderLoyalty(['Loyalty Level 2 with [[BTR Driver]]'], ['BTR Driver'])).toEqual([
+      { trader: 'BTR Driver', level: 2 },
+    ]);
+    expect(parseTraderLoyalty(['Loyalty Level 2 with NotBTR Driver'], ['BTR Driver'])).toEqual([]);
+  });
+
+  it('separates player and loyalty levels on the same requirements line', () => {
+    const requirements = [
+      'Must be level 20 and Loyalty Level 3 with [[Prapor]] to obtain this quest.',
+    ];
+    expect(parseMinLevel(requirements)).toBe(20);
+    expect(parseTraderLoyalty(requirements, ['Prapor'])).toEqual([{ trader: 'Prapor', level: 3 }]);
+    expect(
+      parseTraderLoyalty(['Obtain level 2 loyalty with [[Peacekeeper]]'], ['Peacekeeper'])
+    ).toEqual([{ trader: 'Peacekeeper', level: 2 }]);
+    expect(parseTraderLoyalty(['Loyalty Level 3 with NotPrapor'], ['Prapor'])).toEqual([]);
+  });
+
+  describe('parseScavKarma', () => {
+    it('reads positive and negative karma gates', () => {
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of at least +3'])).toEqual({
+        value: 3,
+        compareMethod: '>=',
+      });
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of -6'])).toEqual({ value: -6 });
+      expect(parseScavKarma(['Scav karma of at most 3'])).toEqual({
+        value: 3,
+        compareMethod: '<=',
+      });
+    });
+
+    it('ignores lines without a karma mention', () => {
+      expect(parseScavKarma(['Must be level 25 to start this quest.'])).toBeUndefined();
+    });
   });
 });
 

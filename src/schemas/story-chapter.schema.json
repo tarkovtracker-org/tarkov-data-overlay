@@ -6,7 +6,15 @@
   "type": "object",
   "additionalProperties": {
     "type": "object",
-    "required": ["id", "name", "normalizedName", "wikiLink", "order"],
+    "required": [
+      "id",
+      "name",
+      "normalizedName",
+      "wikiLink",
+      "order",
+      "chapterQuestId",
+      "referenceCoverage"
+    ],
     "properties": {
       "id": {
         "description": "Unique identifier for the story chapter",
@@ -33,6 +41,94 @@
         "description": "tarkov.dev/EFT story quest id this chapter maps to (the narrator-trader Completion quest). Traceability to the source game data.",
         "type": "string",
         "pattern": "^[0-9a-f]{24}$"
+      },
+      "referenceCoverage": {
+        "description": "How much of the chapter the pinned reference capture resolved. The client only returns a story sub-quest template once the player has reached it, so `partial: true` means the objective list is a projection of the capture, not the complete chapter, and a missing objective is not evidence that none exists.",
+        "type": "object",
+        "required": ["referencedSubquests", "resolvedSubquests", "partial"],
+        "properties": {
+          "referencedSubquests": {
+            "description": "Distinct sub-quests the chapter quest references",
+            "type": "integer",
+            "minimum": 0
+          },
+          "resolvedSubquests": {
+            "description": "Referenced sub-quests whose templates the capture resolved",
+            "type": "integer",
+            "minimum": 0
+          },
+          "missingObjectiveTexts": {
+            "description": "Finish conditions omitted because English objective text was unavailable; omitted when zero.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "partial": {
+            "description": "True when sub-quest templates or objective texts are missing",
+            "type": "boolean"
+          }
+        },
+        "allOf": [
+          {
+            "$comment": "Omitted objective text means the list is a projection, so `partial` cannot be false. Without this a consumer could read `missingObjectiveTexts: 2, partial: false` and treat an incomplete chapter as complete. The resolved-vs-referenced half of the invariant compares two properties, which JSON Schema cannot express, and is enforced in tests/story-chapters.test.ts instead.",
+            "if": {
+              "required": ["missingObjectiveTexts"],
+              "properties": { "missingObjectiveTexts": { "minimum": 1 } }
+            },
+            "then": { "properties": { "partial": { "const": true } } }
+          }
+        ],
+        "additionalProperties": false
+      },
+      "mutuallyExclusiveQuestPairs": {
+        "description": "Unordered pairs of resolved chapter sub-quest IDs that cannot both be completed. Each pair is emitted once in ID order. Partial objective progress on both quests is allowed; do not apply these as objective exclusions.",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[0-9a-f]{24}$" }
+        }
+      },
+      "endings": {
+        "description": "Endings this chapter branches into, restated from the client's ending_list so the whole branch set is visible without scanning objectives. Present only on a chapter whose quest references ending gate sub-quests.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "systemName", "gateQuestId", "objectiveCount", "resolvedInReference"],
+          "properties": {
+            "id": {
+              "description": "Real ending id from client/ending_list. Closed on purpose: a new ending shipped by the game must be added here deliberately (see STORY_ENDINGS in src/lib/types.ts, which tests keep in sync with this enum).",
+              "type": "string",
+              "enum": [
+                "68a6e8f1a7455e5e23099ad8",
+                "68a6e8c834a37e244710d516",
+                "68a6e8e4a8d0bee0b5324d96",
+                "68a6028ef4c23ebbbc49da4b"
+              ]
+            },
+            "systemName": {
+              "description": "The client's own name for the ending",
+              "type": "string"
+            },
+            "gateQuestId": {
+              "description": "Sub-quest whose completion gates this ending (the ending record's only Quest condition)",
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
+            },
+            "objectiveCount": {
+              "description": "Objectives in this chapter attributed to the gate sub-quest; 0 means the capture proves no objective-level evidence for this branch",
+              "type": "integer",
+              "minimum": 0
+            },
+            "resolvedInReference": {
+              "description": "Whether the pinned reference resolved the gate sub-quest's template",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
       },
       "autoStart": {
         "description": "Whether the chapter starts automatically (true) or must be discovered in-world (false)",
@@ -128,11 +224,12 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["id", "type", "description"],
+          "required": ["id", "type", "description", "sourceQuestId"],
           "properties": {
             "id": {
-              "description": "Objective ID. Generated chapters use the stable source objective id (24-hex); curated chapters (The Ticket) use {chapter}-{main|opt}-{n}.",
-              "type": "string"
+              "description": "Objective ID: the stable source objective id from the client (24-hex). Every chapter is generated from the quest reference, so fabricated positional ids are not accepted.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
             },
             "sourceQuestId": {
               "description": "EFT sub-quest id backing this objective (traceability to source game data)",
@@ -166,9 +263,9 @@
               "type": ["string", "null"]
             },
             "mutuallyExclusiveWith": {
-              "description": "Objective IDs that are mutually exclusive with this objective",
+              "description": "Real objective IDs (24-hex) that are mutually exclusive with this objective",
               "type": "array",
-              "items": { "type": "string" }
+              "items": { "type": "string", "pattern": "^[0-9a-f]{24}$" }
             },
             "count": {
               "description": "Item or action count for the objective",
@@ -323,9 +420,14 @@
               }
             },
             "endingId": {
-              "description": "Canonical ending this objective is tied to",
+              "description": "Ending this objective is tied to, as the real ending id from client/ending_list (the objective belongs to that ending's gate sub-quest). Slugs (savior/survivor/fallen/debtor) are not used: consumers align endings by id. Values must be one of the ids the chapter declares in `endings`.",
               "type": "string",
-              "enum": ["savior", "survivor", "fallen", "debtor"]
+              "enum": [
+                "68a6e8f1a7455e5e23099ad8",
+                "68a6e8c834a37e244710d516",
+                "68a6e8e4a8d0bee0b5324d96",
+                "68a6028ef4c23ebbbc49da4b"
+              ]
             },
             "unlocks": {
               "description": "Unlocks tied to objective completion",
