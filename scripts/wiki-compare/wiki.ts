@@ -757,7 +757,9 @@ export function printWikiData(wiki: WikiTaskData): void {
     console.log(`  ${dim(`Detected faction restriction: ${wiki.factionName}`)}`);
   }
   if (wiki.scavKarma !== undefined) {
-    console.log(`  ${dim(`Detected Scav karma requirement: ${wiki.scavKarma}`)}`);
+    console.log(
+      `  ${dim(`Detected Scav karma requirement: ${wiki.scavKarma.compareMethod ?? '(direction unspecified)'} ${wiki.scavKarma.value}`)}`
+    );
   }
   if (wiki.maps.length > 0) {
     console.log(`  ${dim(`Detected map(s): ${wiki.maps.join(', ')}`)}`);

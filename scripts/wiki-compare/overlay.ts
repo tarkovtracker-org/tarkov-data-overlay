@@ -239,7 +239,14 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
         field === 'finishRewards' ||
         field === 'map'
       ) {
-        suppressed.add(`${taskId}:${field}`);
+        // Only an array replaces the full requirement set. ID-keyed patches
+        // leave other gates untouched and cannot suppress a task-wide report.
+        if (
+          field !== 'traderRequirements' ||
+          Array.isArray((fields as Record<string, unknown>)[field])
+        ) {
+          suppressed.add(`${taskId}:${field}`);
+        }
 
         // A loyalty-only override does not answer a missing Fence karma gate.
         if (field === 'traderRequirements') {

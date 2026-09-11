@@ -173,7 +173,7 @@ export function compareTasks(
         apiValue: apiLoyalty.join(', ') || '(none)',
         wikiValue: reported.join(', '),
         priority: getPriority('traderRequirements'),
-        trustsWiki: true,
+        trustsWiki: !wiki.traderLoyalty.some((entry) => entry.inferredTrader),
         wikiLastEdit,
         wikiEditDaysAgo,
         wikiEditedPost1_0,

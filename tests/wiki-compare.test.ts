@@ -151,6 +151,17 @@ describe('compareTasks', () => {
     expect(result.some((d) => d.field === 'objectives.count')).toBe(true);
   });
 
+  it('does not trust inferred trader attribution as a verified gate', () => {
+    const wiki = makeWiki({
+      traderLoyalty: [{ trader: 'Prapor', level: 2, inferredTrader: true }],
+    });
+    const discrepancy = compareTasks(baseApi, wiki, EMPTY_ALIASES, false).find(
+      (entry) => entry.field === 'traderRequirements'
+    );
+    expect(discrepancy?.trustsWiki).toBe(false);
+    expect(discrepancy?.wikiValue).toContain('trader inferred');
+  });
+
   it('compares a wiki Scav karma gate against the API Fence reputation entry', () => {
     // json.tarkov.dev models Scav karma as a Fence `reputation` requirement, so
     // a wiki karma sentence is comparable rather than merely informational.

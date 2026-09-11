@@ -37,7 +37,23 @@ describe('story reference provenance enforcement', () => {
       },
       response: {
         timestamp: 'wrong-response-time',
-        body_response: { data: [{ _id: '68cbd33676fe74b1e80bfd91' }] },
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
       },
     });
     const file = join(dir, 'quest_list.json');
@@ -74,6 +90,10 @@ describe('story reference provenance enforcement', () => {
       expect(() => run()).not.toThrow();
       writeFileSync(file, `${capture}\n`);
       expect(() => run()).toThrow(/does not match/);
+      const before = readFileSync(lockFile, 'utf-8');
+      writeFileSync(file, JSON.stringify({ data: [{ _id: '68cbd33676fe74b1e80bfd91' }] }));
+      expect(() => run('1')).toThrow(/no chapter quests or objective texts/);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(before);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

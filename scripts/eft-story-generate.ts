@@ -536,8 +536,8 @@ export function loadReference(): JsonRecord[] {
   }
 
   const { lock: current, quests } = fingerprint(file);
-  if (current.chapterQuests === 0) {
-    throw new Error(`story reference ${file} resolves no chapter quests`);
+  if (current.chapterQuests === 0 || current.objectiveTexts === 0) {
+    throw new Error(`story reference ${file} resolves no chapter quests or objective texts`);
   }
 
   if (lock && !updating) {
