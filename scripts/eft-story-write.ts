@@ -142,9 +142,28 @@ function main(): void {
   // still checked rather than assumed, because the sidecar is a separate file that
   // could change between the two reads. If it does, the artifact is rolled back so
   // the pair never disagrees about which capture produced the committed chapters.
-  if (staged.status === 'ready' && !promoteStoryReferenceLock(inputSha256)) {
+  const rollback = () => {
     if (previous === null) rmSync(dest, { force: true });
     else writeFileSync(dest, previous);
+  };
+
+  // Promotion can also *throw* rather than refuse - a read-only lock file or an
+  // I/O error surfaces from its write - and that leaves exactly the mismatch the
+  // rollback exists to prevent, so failure is caught rather than only tested.
+  let promoted: boolean;
+  try {
+    promoted = staged.status !== 'ready' || promoteStoryReferenceLock(inputSha256);
+  } catch (error) {
+    rollback();
+    console.error(
+      `error: the source-capture lock could not be updated after ${dest} was written, so the ` +
+        'artifact has been rolled back and the pin left unchanged.'
+    );
+    throw error;
+  }
+
+  if (!promoted) {
+    rollback();
     console.error(
       `error: the staged re-pin at ${PENDING_LOCK_SIDECAR} was refused after ${dest} was ` +
         'written, so it changed mid-run. The artifact has been rolled back and the ' +

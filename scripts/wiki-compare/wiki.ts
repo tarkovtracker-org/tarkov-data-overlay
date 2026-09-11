@@ -280,9 +280,12 @@ export function parseTraderLoyalty(
             add(trader, tier.level);
           }
         });
-        // A name outside every span still had a gate on this line; attributing it
-        // to the first tier keeps it visible rather than dropping it silently.
-        for (const trader of named) if (!assigned.has(trader)) add(trader, tiers[0].level);
+        // A name outside every span still had a gate on this line. The fallback
+        // follows the line's order - the last tier when tiers trail their traders,
+        // the first when they lead - so it stays visible without inventing a tier
+        // from the opposite end of the sentence.
+        const fallback = (traderFirst ? tiers[tiers.length - 1] : tiers[0]).level;
+        for (const trader of named) if (!assigned.has(trader)) add(trader, fallback);
       }
     } else if (questGiver && known.has(questGiver.toLowerCase())) {
       // "Must be Loyalty Level N to start this quest" - the tier belongs to the

@@ -675,12 +675,52 @@ describe('parseObjectives', () => {
     '* Not an objective',
   ].join('\n');
 
-  it('parses only bullet lines inside the Objectives section', () => {
+  it('parses bullet lines and treats a conditional branch as not required', () => {
     const objectives = parseObjectives(wikitext);
     expect(objectives).toEqual([
       { text: 'First objective', optional: false },
       { text: 'Second objective', optional: true },
-      { text: 'Third objective', optional: false },
+      // Under "'''If you side with them:'''", so it applies only to players who
+      // took that branch. Marking it required would block everyone else.
+      { text: 'Third objective', optional: true },
+    ]);
+  });
+
+  it('closes a conditional branch at an unconditional header', () => {
+    const branched = [
+      '== Objectives ==',
+      '* Always required',
+      "'''If the case was given away'''",
+      '* Branch only',
+      "'''Once you have the case'''",
+      '* Required again',
+      '=== If you accept the offer ===',
+      '* Ending branch',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(branched)).toEqual([
+      { text: 'Always required', optional: false },
+      { text: 'Branch only', optional: true },
+      // "Once you have the case" states sequence, not a choice, so it ends the
+      // branch rather than extending it.
+      { text: 'Required again', optional: false },
+      // Heading-delimited branches count too, not just bold ones.
+      { text: 'Ending branch', optional: true },
+    ]);
+  });
+
+  it('does not let a horizontal rule end a conditional branch', () => {
+    const withRule = [
+      '== Objectives ==',
+      "'''If you refuse'''",
+      '* First branch step',
+      '<hr/>',
+      '* Second branch step',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(withRule)).toEqual([
+      { text: 'First branch step', optional: true },
+      { text: 'Second branch step', optional: true },
     ]);
   });
 

@@ -7326,13 +7326,13 @@
         },
         {
           "id": "67bc700fbbf2563b14c50abc",
-          "type": "main",
+          "type": "optional",
           "description": "Locate the camp of Prapor's people on Lighthouse",
           "sourceQuestId": "67bc6acd21692c74e700bc66"
         },
         {
           "id": "68d9a1a4b21940c70508506e",
-          "type": "main",
+          "type": "optional",
           "description": "Find any clues about Prapor's people's intentions",
           "sourceQuestId": "67bc6acd21692c74e700bc66"
         },
@@ -7344,55 +7344,55 @@
         },
         {
           "id": "68dabd4ad16134208310ad64",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Lightkeeper",
           "sourceQuestId": "67bc79321d99d6ebe5014b5a"
         },
         {
           "id": "692eb8a5997e309c890d4ac1",
-          "type": "main",
+          "type": "optional",
           "description": "Gain access to Lightkeeper",
           "sourceQuestId": "67bc79321d99d6ebe5014b5a"
         },
         {
           "id": "68f4dc0c8ea1b5f183d9c25b",
-          "type": "main",
+          "type": "optional",
           "description": "Stay on good terms with Lightkeeper",
           "sourceQuestId": "67bc79321d99d6ebe5014b5a"
         },
         {
           "id": "67bc79d9d5807d6fa5b18466",
-          "type": "main",
+          "type": "optional",
           "description": "Obtain the item: TerraGroup \"Blue Folders\" materials",
           "sourceQuestId": "67bc798e612537def10eac17"
         },
         {
           "id": "67bc79ed0e70fe1ee20ca3eb",
-          "type": "main",
+          "type": "optional",
           "description": "Bring the found items to Lightkeeper",
           "sourceQuestId": "67bc798e612537def10eac17"
         },
         {
           "id": "67bc7aeb828af7a5f180b291",
-          "type": "main",
+          "type": "optional",
           "description": "Launch a yellow signal flare in front of ULTRA's main entrance on Interchange",
           "sourceQuestId": "67bc7abc7801bf5c41017b68"
         },
         {
           "id": "67bc7afbff2e9e386993ea66",
-          "type": "main",
+          "type": "optional",
           "description": "Eliminate any target in one raid on Interchange",
           "sourceQuestId": "67bc7abc7801bf5c41017b68"
         },
         {
           "id": "68dacb518adba673600f2536",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Lightkeeper",
           "sourceQuestId": "68dac755bf449210f60f0e6e"
         },
         {
           "id": "68e1d036248463ac81787373",
-          "type": "main",
+          "type": "optional",
           "description": "Get the armored case from Lightkeeper",
           "sourceQuestId": "68dac755bf449210f60f0e6e"
         },
@@ -7434,7 +7434,7 @@
         },
         {
           "id": "68e2eb699fdd17b8c4065264",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Mechanic",
           "sourceQuestId": "67bc86024e7dbc3aa202431b"
         },
@@ -7458,7 +7458,7 @@
         },
         {
           "id": "68e2e61ba1f1d0daa8d25101",
-          "type": "main",
+          "type": "optional",
           "description": "Accept Mr. Kerman's offer",
           "sourceQuestId": "67bc8c817801bf5c41017b73"
         },
@@ -7470,7 +7470,7 @@
         },
         {
           "id": "67bc943b38c9039da6e5a284",
-          "type": "main",
+          "type": "optional",
           "description": "Activate the RFID card from the case",
           "sourceQuestId": "67bc93e6adb794ecb40f574d"
         },
@@ -7482,13 +7482,13 @@
         },
         {
           "id": "67bc9970a23671dbdd023d3a",
-          "type": "main",
+          "type": "optional",
           "description": "Obtain the Laboratory master pass",
           "sourceQuestId": "67bc9970a23671dbdd023d38"
         },
         {
           "id": "67bc9a1bee1bde80279ca7d4",
-          "type": "main",
+          "type": "optional",
           "description": "Use the Laboratory master pass to activate Kruglov's keycard",
           "sourceQuestId": "67bc9970a23671dbdd023d38"
         },
@@ -7518,7 +7518,7 @@
         },
         {
           "id": "68fcc20ed1efc371307d4e47",
-          "type": "main",
+          "type": "optional",
           "description": "Obtain an RFID card encryption device",
           "sourceQuestId": "67bc9d70adb794ecb40f5755"
         },
@@ -7530,19 +7530,19 @@
         },
         {
           "id": "68e6a2cdfed9106cf6c920d2",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Mechanic",
           "sourceQuestId": "67bc9e3e7801bf5c41017b82"
         },
         {
           "id": "68e6a6b0a2fae0a7a812325d",
-          "type": "main",
+          "type": "optional",
           "description": "Wait for a response from Mechanic",
           "sourceQuestId": "68e6a5b42a3fa47e9100c196"
         },
         {
           "id": "67bc9f527b52304e9e27ee5a",
-          "type": "main",
+          "type": "optional",
           "description": "Hand over the Physical Bitcoins to Mechanic",
           "sourceQuestId": "67bc9eda1d99d6ebe5014b65"
         },
@@ -7560,13 +7560,13 @@
         },
         {
           "id": "67bca0d332f7486973bcabbb",
-          "type": "main",
+          "type": "optional",
           "description": "Collect the RFID card encryption device",
           "sourceQuestId": "67bca04f21692c74e700bc72"
         },
         {
           "id": "67bca11cf4b9a801e92f1958",
-          "type": "main",
+          "type": "optional",
           "description": "Use the RFID card encryption device to activate Kruglov's keycard",
           "sourceQuestId": "67bca04f21692c74e700bc72"
         },
@@ -7578,13 +7578,13 @@
         },
         {
           "id": "67bdafe5be7a35664013f1ad",
-          "type": "main",
+          "type": "optional",
           "description": "Arrive at the entrance pathway to the port Terminal",
           "sourceQuestId": "67bdafa17c1ef7a64804319c"
         },
         {
           "id": "68e6b9b1ecabcb4c973b2cf4",
-          "type": "main",
+          "type": "optional",
           "description": "Swipe the keycard at the intercom reader",
           "sourceQuestId": "67bdafa17c1ef7a64804319c"
         },
@@ -7596,7 +7596,7 @@
         },
         {
           "id": "691e693540966bb93bd1d6a6",
-          "type": "main",
+          "type": "optional",
           "description": "Agree to find dirt on TerraGroup for Mr. Kerman",
           "sourceQuestId": "68e7e20801bd936405037bee"
         },
@@ -7608,73 +7608,73 @@
         },
         {
           "id": "68f018886f7970e2c2cb4db7",
-          "type": "main",
+          "type": "optional",
           "description": "Deliver the minor TerraGroup evidence to Mr. Kerman",
           "sourceQuestId": "67bdeeee884b40ea9d08b5c4"
         },
         {
           "id": "68f0154a0066922971815219",
-          "type": "main",
+          "type": "optional",
           "description": "Deliver the major TerraGroup evidence to Mr. Kerman",
           "sourceQuestId": "67bdeeee884b40ea9d08b5c4"
         },
         {
           "id": "68f27802133262374f6aa07e",
-          "type": "main",
+          "type": "optional",
           "description": "Confirm with Mr. Kerman that all the evidence has been delivered",
           "sourceQuestId": "67bdeeee884b40ea9d08b5c4"
         },
         {
           "id": "68e90a73a3d110355b03e3a4",
-          "type": "main",
+          "type": "optional",
           "description": "Wait for Mr. Kerman's trusted contact to get in touch",
           "sourceQuestId": "68e90a73a3d110355b03e3a2"
         },
         {
           "id": "68ead7cf17dfeaf7227a5a66",
-          "type": "main",
+          "type": "optional",
           "description": "Talk to Fence",
           "sourceQuestId": "68ea9b0b8bfb4ae0aa04ddf9"
         },
         {
           "id": "68f107ca9efb74c9cf93f699",
-          "type": "main",
+          "type": "optional",
           "description": "Complete Fence's assignment",
           "sourceQuestId": "67bdf2cecf0cc29475092199"
         },
         {
           "id": "68f6c3264d2db3fea5ea145b",
-          "type": "main",
+          "type": "optional",
           "description": "Keep the reputation with Fence above 4.0",
           "sourceQuestId": "67bdf2cecf0cc29475092199"
         },
         {
           "id": "68f6c4c66b0d110ab742a742",
-          "type": "main",
+          "type": "optional",
           "description": "Tell Fence that the assignment is complete",
           "sourceQuestId": "67bdf2cecf0cc29475092199"
         },
         {
           "id": "69247e3953de0941eff6df58",
-          "type": "main",
+          "type": "optional",
           "description": "Eliminate PMC operatives on Interchange (in one raid)",
           "sourceQuestId": "69247ccc803723e83c0439fd"
         },
         {
           "id": "6924820dbf8cf5498b05dac2",
-          "type": "main",
+          "type": "optional",
           "description": "Eliminate PMC operatives on Shoreline (in one raid)",
           "sourceQuestId": "6924820dbf8cf5498b05dac0"
         },
         {
           "id": "68eadb1dd5f0fec15aecfa7d",
-          "type": "main",
+          "type": "optional",
           "description": "Reach 0.4 reputation with BTR Driver",
           "sourceQuestId": "68e9156369a053d132045c56"
         },
         {
           "id": "67bdf920f72ddfffed2b9b8d",
-          "type": "main",
+          "type": "optional",
           "description": "Arrive at the entrance pathway to the port Terminal",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
           "endingId": "68a6e8f1a7455e5e23099ad8"
@@ -7695,7 +7695,7 @@
         },
         {
           "id": "68efcc353316ee1b07b4b2ba",
-          "type": "main",
+          "type": "optional",
           "description": "Swipe the keycard at the intercom reader",
           "sourceQuestId": "67bdf8c066ca1d79a202463a",
           "endingId": "68a6e8f1a7455e5e23099ad8"
@@ -7835,7 +7835,7 @@
         },
         {
           "id": "68f174e12488a7ab54dedeb7",
-          "type": "main",
+          "type": "optional",
           "description": "Negotiate with Mr. Kerman",
           "sourceQuestId": "68f16d504a7305f74f0c746b"
         }
@@ -7956,13 +7956,13 @@
         },
         {
           "id": "69b41c86118b43d3e0f5adb2",
-          "type": "main",
+          "type": "optional",
           "description": "Tell Mechanic you found transport to the icebreaker",
           "sourceQuestId": "69b2bb74ac1e735d5c0f9a57"
         },
         {
           "id": "69b04db832f7814b4b7df1f3",
-          "type": "main",
+          "type": "optional",
           "description": "Find an alternative transport to the icebreaker",
           "sourceQuestId": "69b04c7ff4183ed66406e50c"
         },
@@ -7974,43 +7974,43 @@
         },
         {
           "id": "69b2b143b6449f7050b302ed",
-          "type": "main",
+          "type": "optional",
           "description": "Hand over the AMG-10 fluid to Prapor",
           "sourceQuestId": "69b2b0cc0a7db6b331031267"
         },
         {
           "id": "69b41af35e0e9ae61396da9d",
-          "type": "main",
+          "type": "optional",
           "description": "Return to the Hideout",
           "sourceQuestId": "69b41843dc22acbf90051e3f"
         },
         {
           "id": "69b418d182d12863d121cdc3",
-          "type": "main",
+          "type": "optional",
           "description": "Return to the BTR driver",
           "sourceQuestId": "69b41843dc22acbf90051e3f"
         },
         {
           "id": "69ba8d651b499fbada0cd5ae",
-          "type": "main",
+          "type": "optional",
           "description": "Board the smuggler hovercraft on Shoreline",
           "sourceQuestId": "69ba8cd91c440c14bb09a955"
         },
         {
           "id": "69ba8dcbd7922704ff3ed3e2",
-          "type": "main",
+          "type": "optional",
           "description": "Arrive at the icebreaker",
           "sourceQuestId": "69ba8cd91c440c14bb09a955"
         },
         {
           "id": "69d4f17c837544d785bbd4ac",
-          "type": "main",
+          "type": "optional",
           "description": "Check if any crew members survived on the ship",
           "sourceQuestId": "69ba8cd91c440c14bb09a955"
         },
         {
           "id": "69ba8dfa4d29dbfc39cac747",
-          "type": "main",
+          "type": "optional",
           "description": "Access the engine room",
           "sourceQuestId": "69ba8cd91c440c14bb09a955"
         },
@@ -8022,7 +8022,7 @@
         },
         {
           "id": "69ba8ef59b8dfa643e494308",
-          "type": "main",
+          "type": "optional",
           "description": "Find a way into the icebreaker superstructure",
           "sourceQuestId": "69ba8cd91c440c14bb09a955"
         },
@@ -8046,19 +8046,19 @@
         },
         {
           "id": "69ba958a2b1917db221bce57",
-          "type": "main",
+          "type": "optional",
           "description": "Ask Mechanic about explosives",
           "sourceQuestId": "69ba91078fe4c6a8d400a1ab"
         },
         {
           "id": "69baa3e897561a821460fa47",
-          "type": "main",
+          "type": "optional",
           "description": "Ask Prapor about explosives",
           "sourceQuestId": "69ba91078fe4c6a8d400a1ab"
         },
         {
           "id": "69baae00923698875e7b2941",
-          "type": "main",
+          "type": "optional",
           "description": "Arrive at the icebreaker",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
@@ -8076,7 +8076,7 @@
         },
         {
           "id": "69bab557f31c7fb31a72591e",
-          "type": "main",
+          "type": "optional",
           "description": "Reach the damaged door on the roof of the engine room",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
@@ -8088,13 +8088,13 @@
         },
         {
           "id": "69bab5811e7544b19ccd5e90",
-          "type": "main",
+          "type": "optional",
           "description": "Break the chain on the door on the roof of the engine room using the SZ-1 charge",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
         {
           "id": "69bab59e8e59c8f34c271c22",
-          "type": "main",
+          "type": "optional",
           "description": "Enter the icebreaker superstructure from the roof of the engine room",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
@@ -8106,13 +8106,13 @@
         },
         {
           "id": "69bab5d9a808cc922348458b",
-          "type": "main",
+          "type": "optional",
           "description": "Find a way to the upper decks of the icebreaker superstructure",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
         {
           "id": "69c6abd4808c26f357532e2a",
-          "type": "main",
+          "type": "optional",
           "description": "Ask the surviving scientist how to open the code-locked door on level 6",
           "sourceQuestId": "69baaaae8f45d6b3fa020ade"
         },
@@ -8136,25 +8136,25 @@
         },
         {
           "id": "69babaf27ce5c2b328d6bb2e",
-          "type": "main",
+          "type": "optional",
           "description": "Ask Mechanic for help with finding the second part of the code for the locked door on level 6",
           "sourceQuestId": "69baba34790f8452d305ae08"
         },
         {
           "id": "69bbd7d580a1ca5ec83a0da5",
-          "type": "main",
+          "type": "optional",
           "description": "Plant the hacking device in the server room in The Lab",
           "sourceQuestId": "69bbd63fcc93b653fd061f39"
         },
         {
           "id": "69bbd8105270cff3a16f1bd1",
-          "type": "main",
+          "type": "optional",
           "description": "Return to Mechanic",
           "sourceQuestId": "69bbd63fcc93b653fd061f39"
         },
         {
           "id": "69bbfae89ce356593c0e2f39",
-          "type": "main",
+          "type": "optional",
           "description": "Arrive at the icebreaker",
           "sourceQuestId": "69bbfae89ce356593c0e2f35"
         },
@@ -8172,13 +8172,13 @@
         },
         {
           "id": "69bbfae89ce356593c0e2f47",
-          "type": "main",
+          "type": "optional",
           "description": "Reach the damaged door on the roof of the engine room",
           "sourceQuestId": "69bbfae89ce356593c0e2f35"
         },
         {
           "id": "69bbfae89ce356593c0e2f45",
-          "type": "main",
+          "type": "optional",
           "description": "Break the chain on the door on the roof of the engine room using the SZ-1 charge",
           "sourceQuestId": "69bbfae89ce356593c0e2f35"
         },
@@ -8292,7 +8292,7 @@
         },
         {
           "id": "69ea74c990de7d2e5eb02907",
-          "type": "main",
+          "type": "optional",
           "description": "Inspect the upper decks of the icebreaker superstructure",
           "sourceQuestId": "69bbfae89ce356593c0e2f35"
         },
@@ -8340,7 +8340,7 @@
         },
         {
           "id": "6a1051db5338d166e444483b",
-          "type": "main",
+          "type": "optional",
           "description": "Return to the BTR driver",
           "sourceQuestId": "69c151fd9c9149a8dd01a29a"
         },
@@ -8388,25 +8388,25 @@
         },
         {
           "id": "69c25db20ae364365b933df5",
-          "type": "main",
+          "type": "optional",
           "description": "Ask the BTR driver what to do next",
           "sourceQuestId": "69c151fd9c9149a8dd01a29a"
         },
         {
           "id": "6a05e06bd8462d56fffb5a31",
-          "type": "main",
+          "type": "optional",
           "description": "Return to the BTR driver",
           "sourceQuestId": "6a05dfd31681410e9e0b9afc"
         },
         {
           "id": "6a05e47ec8c57a62940cd74c",
-          "type": "main",
+          "type": "optional",
           "description": "Continue exploring the icebreaker",
           "sourceQuestId": "6a05e47ec8c57a62940cd74a"
         },
         {
           "id": "6a10769d3795c09172e840a2",
-          "type": "main",
+          "type": "optional",
           "description": "Return to the BTR driver",
           "sourceQuestId": "6a05e47ec8c57a62940cd74a"
         }
@@ -9648,7 +9648,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-11T02:51:50.050Z",
-    "sha256": "1aec5615f66568c542c1bc79c298f3f4641065eb4f5b8bd29b4545425110067a"
+    "generated": "2026-09-11T06:08:33.578Z",
+    "sha256": "ad7366c2a9804bc1817e73d9feb2288c8728bc4fd267f3bb46cd0f38afd33611"
   }
 }

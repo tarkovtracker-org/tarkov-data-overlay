@@ -96,15 +96,51 @@ export function cleanObjectiveLine(line: string): WikiStoryObjective {
   return { text, optional };
 }
 
+/**
+ * A header opening a mutually exclusive branch, e.g.
+ * `'''If the [[Armored case]] was given to [[Prapor]]'''` or
+ * `===If you accept Mr. Kerman's offer===`.
+ *
+ * Distinguished from an unconditional sequencing header like
+ * `'''Once you have the case'''`, which applies to every player and therefore
+ * closes any branch that preceded it.
+ */
+const CONDITIONAL_HEADER = /^(?:only\s+)?if\b/i;
+
+/** True for a bold or `=`-delimited header line (not an objective bullet). */
+function isHeaderLine(line: string): boolean {
+  return line.startsWith("'''") || line.startsWith('=');
+}
+
+/** Header text without its bold/heading delimiters. */
+function headerText(line: string): string {
+  return line
+    .replace(/^[='\s]+/, '')
+    .replace(/[='\s]+$/, '')
+    .trim();
+}
+
 export function parseObjectives(wikitext: string): WikiStoryObjective[] {
   const match = /==\s*Objectives\s*==([\s\S]*?)(\n==[^=]|$)/.exec(wikitext);
   if (!match) return [];
   const out: WikiStoryObjective[] = [];
+  // Objectives under an "If ..." header only apply to players who took that
+  // branch, so they are not universally required. The page marks individually
+  // optional items inline, but says nothing per-bullet about branch membership -
+  // it is carried by the header - so without tracking it every branch objective
+  // reads as required and consumers block players who chose the other path.
+  let conditional = false;
   for (const raw of match[1].split('\n')) {
     const line = raw.trim();
-    if (!line.startsWith('*')) continue; // skip conditional headers ('''If...'''), <hr/>, blanks
+    if (!line) continue;
+    if (!line.startsWith('*')) {
+      // Only headers delimit branches. Other non-bullet lines (`<hr/>`, stray
+      // markup) leave the current branch intact rather than ending it early.
+      if (isHeaderLine(line)) conditional = CONDITIONAL_HEADER.test(headerText(line));
+      continue;
+    }
     const { text, optional } = cleanObjectiveLine(line);
-    if (text) out.push({ text, optional });
+    if (text) out.push({ text, optional: optional || conditional });
   }
   return out;
 }

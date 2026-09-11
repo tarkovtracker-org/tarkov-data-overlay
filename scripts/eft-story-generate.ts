@@ -638,7 +638,8 @@ function isReferenceLock(value: unknown): value is ReferenceLock {
   const lock = value as Partial<ReferenceLock>;
   const nonEmptyString = (field: unknown): boolean => typeof field === 'string' && field.length > 0;
   const stringOrNull = (field: unknown): boolean => typeof field === 'string' || field === null;
-  const count = (field: unknown): boolean => typeof field === 'number' && Number.isFinite(field);
+  const count = (field: unknown): boolean =>
+    typeof field === 'number' && Number.isInteger(field) && field >= 0;
   return (
     nonEmptyString(lock.file) &&
     nonEmptyString(lock.sha256) &&

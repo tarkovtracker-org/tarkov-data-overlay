@@ -334,4 +334,27 @@ describe('story chapters (EFT-sourced)', () => {
       }
     }
   });
+
+  it('keeps the documented authoring sample valid against the schema', () => {
+    // docs/MASTER_SAMPLES.md advertises a copy-paste story chapter. Tightening
+    // the schema without updating it hands contributors an example that fails
+    // `npm run validate`, which is how it silently went stale before.
+    const { rootDir, schemasDir } = getProjectPaths();
+    const md = readFileSync(join(rootDir, 'docs', 'MASTER_SAMPLES.md'), 'utf8');
+    const heading = md.indexOf('### Story Chapter (map-ready objective fields)');
+    expect(heading, 'story chapter sample section missing').toBeGreaterThan(-1);
+    const block = /```json5\n([\s\S]*?)\n```/.exec(md.slice(heading));
+    expect(block, 'story chapter sample code block missing').not.toBeNull();
+
+    const sample = JSON5.parse(block![1]);
+    const schema = JSON.parse(readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8'));
+    const validate = new Ajv({ allErrors: true, strict: false }).compile(schema);
+    const valid = validate(sample);
+    expect(
+      valid,
+      `docs sample violates story-chapter.schema.json: ${(validate.errors ?? [])
+        .map((error) => `${error.instancePath} ${error.message}`)
+        .join('; ')}`
+    ).toBe(true);
+  });
 });
