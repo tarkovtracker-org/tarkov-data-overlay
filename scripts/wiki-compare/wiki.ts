@@ -236,46 +236,52 @@ export function parseTraderLoyalty(
     }
     if (tiers.length === 0) continue;
 
-    // Tokenized per span: punctuation and wiki markup collapse to single spaces,
-    // so a known name matches only on whole-word boundaries and "NotBTR Driver"
-    // cannot match "BTR Driver". No pattern is built from the text.
-    const namedIn = (span: string): string[] => {
-      const words = ` ${span
+    // Tokenized per span: punctuation and wiki markup collapse to single spaces, so
+    // a known name matches only on whole-word boundaries and "NotBTR Driver" cannot
+    // match "BTR Driver". Token equality is used rather than a constructed pattern,
+    // so no regular expression is ever built from wiki text.
+    const namedInOrder = (span: string): string[] => {
+      const words = span
         .toLowerCase()
         .split(/[^a-z0-9_]+/)
-        .filter(Boolean)
-        .join(' ')} `;
-      const found: string[] = [];
+        .filter(Boolean);
+      const found: Array<{ trader: string; at: number }> = [];
       for (const [lower, canonical] of known) {
-        const phrase = lower
-          .split(/[^a-z0-9_]+/)
-          .filter(Boolean)
-          .join(' ');
-        if (phrase && words.includes(` ${phrase} `)) found.push(canonical);
+        const parts = lower.split(/[^a-z0-9_]+/).filter(Boolean);
+        if (parts.length === 0) continue;
+        for (let i = 0; i + parts.length <= words.length; i += 1) {
+          if (parts.every((part, j) => words[i + j] === part)) {
+            found.push({ trader: canonical, at: i });
+            break;
+          }
+        }
       }
-      return found;
+      return found.sort((a, b) => a.at - b.at).map((entry) => entry.trader);
     };
 
-    const named = namedIn(text);
+    const named = namedInOrder(text);
 
     if (named.length > 0) {
       if (tiers.length === 1) {
         // One tier governs the whole line, including "Level 4 with X, Y and Z".
         for (const trader of named) add(trader, tiers[0].level);
+      } else if (named.length === tiers.length) {
+        // Equal counts: gates are written one per trader, so pair them in the order
+        // they appear. This holds for either word order - "Level 3 with Prapor and
+        // Level 2 with Skier" and "Prapor at Level 3 and Skier at Level 2" - and for
+        // a line that mixes the two, which a per-line order rule would mis-pair.
+        named.forEach((trader, i) => add(trader, tiers[i].level));
       } else {
-        // Several gates on one line: split the line at the tier positions and read
-        // each tier's own traders out of its span. Which side of a tier its
-        // traders sit on depends on the line's word order - the wiki's usual
-        // phrasing puts the tier first ("Level 3 with Prapor and Level 2 with
-        // Skier"), but "Prapor at Level 3 and Skier at Level 2" puts it after.
-        // Anything named before the first tier settles that for the whole line.
-        const traderFirst = namedIn(text.slice(0, tiers[0].index)).length > 0;
+        // Counts disagree, so fall back to reading each tier's own span. Which side
+        // of a tier its traders sit on is decided once per line from whether
+        // anything is named before the first tier.
+        const traderFirst = namedInOrder(text.slice(0, tiers[0].index)).length > 0;
         const assigned = new Set<string>();
         tiers.forEach((tier, i) => {
           const span = traderFirst
             ? text.slice(i === 0 ? 0 : tiers[i - 1].index, tier.index)
             : text.slice(tier.index, tiers[i + 1]?.index ?? text.length);
-          for (const trader of namedIn(span)) {
+          for (const trader of namedInOrder(span)) {
             assigned.add(trader);
             add(trader, tier.level);
           }

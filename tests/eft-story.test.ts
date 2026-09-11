@@ -288,6 +288,43 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
+  it('rejects a committed lock that is not a complete provenance record', () => {
+    // `{}` used to reach `existsSync(lock.file)` and fail as an opaque TypeError.
+    // The committed lock is held to the same contract as a staged one, so it fails
+    // by name with the remedy instead.
+    const dir = mkdtempSync(join(tmpdir(), 'story-lock-shape-'));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const load = () =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; try { loadReference(); } catch (error) { console.log(error.message); }`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+
+      writeFileSync(lockFile, '{}\n');
+      expect(load()).toMatch(/not a complete provenance record/);
+
+      // A digest-shaped check too: a hand-edited stub must not pass for a real hash.
+      writeFileSync(lockFile, `${JSON.stringify({ ...FULL_LOCK, sha256: 'x' })}\n`);
+      expect(load()).toMatch(/not a complete provenance record/);
+
+      writeFileSync(lockFile, '{ truncated\n');
+      expect(load()).toMatch(/is not valid JSON/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('refuses a staged pin that is not bound to the payload being committed', () => {
     // `outputSha256: null` used to act as a wildcard, so a sidecar that never
     // recorded which payload it was staged for could be promoted beside unrelated
@@ -733,6 +770,28 @@ describe('parseObjectives', () => {
       // Post-rule trunk: required for everyone regardless of the branch taken.
       { text: 'Find an alternative transport to the icebreaker', optional: false },
       { text: 'Board the smuggler hovercraft', optional: false },
+    ]);
+  });
+
+  it('detects convergence across heading-delimited alternatives too', () => {
+    // The Ticket's endings are `===If ...===` sections. Closing the group between
+    // them would put each ending in its own group and make convergence undetectable,
+    // so a step every ending requires would be published optional.
+    const endings = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      '* Accept it',
+      '* Arrive at the Terminal',
+      '=== If you refuse the offer ===',
+      '* Refuse it',
+      '* Arrive at the Terminal',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(endings)).toEqual([
+      { text: 'Accept it', optional: true },
+      { text: 'Arrive at the Terminal', optional: false },
+      { text: 'Refuse it', optional: true },
+      { text: 'Arrive at the Terminal', optional: false },
     ]);
   });
 

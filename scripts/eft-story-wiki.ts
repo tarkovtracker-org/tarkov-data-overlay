@@ -158,10 +158,14 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
       } else if (line.startsWith('=')) {
         headingBranch = CONDITIONAL_HEADER.test(headerText(line));
         boldBranch = false;
-        endGroup();
         if (headingBranch) {
+          // Consecutive conditional headings are alternatives of one group, so the
+          // group must not be closed between them - otherwise each ending lands in
+          // its own group and convergence can never be detected.
           inGroup = true;
           alt += 1;
+        } else {
+          endGroup();
         }
       } else if (line.startsWith("'''")) {
         boldBranch = CONDITIONAL_HEADER.test(headerText(line));

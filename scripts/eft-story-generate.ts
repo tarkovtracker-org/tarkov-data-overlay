@@ -517,8 +517,9 @@ function readLock(): ReferenceLock | null {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw error;
   }
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as ReferenceLock;
+    parsed = JSON.parse(raw);
   } catch (error) {
     // A raw SyntaxError here names no file and suggests no remedy, and the lock is
     // committed, so restoring it is usually a one-line fix.
@@ -527,6 +528,17 @@ function readLock(): ReferenceLock | null {
         'or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
     );
   }
+  // Held to the same contract as a staged lock, so a truncated or hand-edited
+  // committed lock fails here by name instead of as an opaque TypeError deeper in
+  // loadReference.
+  if (!isReferenceLock(parsed)) {
+    throw new Error(
+      `${LOCK} is not a complete provenance record (needs file, 64-hex sha256, bytes, ` +
+        'clientVersion, gameMode, capturedAt, quests, chapterQuests, objectiveTexts). Restore it ' +
+        'from version control, or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+    );
+  }
+  return parsed;
 }
 
 /** Fingerprint a capture: content hash plus the provenance in its envelope. */
@@ -642,7 +654,10 @@ function isReferenceLock(value: unknown): value is ReferenceLock {
     typeof field === 'number' && Number.isInteger(field) && field >= 0;
   return (
     nonEmptyString(lock.file) &&
-    nonEmptyString(lock.sha256) &&
+    // A digest, not merely a non-empty string: a hand-edited `"sha256": "x"` must
+    // not be able to replace the committed provenance record.
+    typeof lock.sha256 === 'string' &&
+    /^[0-9a-f]{64}$/i.test(lock.sha256) &&
     count(lock.bytes) &&
     stringOrNull(lock.clientVersion) &&
     stringOrNull(lock.gameMode) &&
@@ -718,7 +733,21 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
 
   const { lock } = staged;
   writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
-  rmSync(PENDING_LOCK_SIDECAR, { force: true });
+  // The lock write is the commit point. Removing the consumed sidecar afterwards
+  // is best-effort: letting an EPERM/EBUSY here throw would unwind the caller and
+  // roll the artifact back while the lock stayed advanced, breaking exactly the
+  // pairing this function exists to keep. A leftover sidecar is harmless - the
+  // next run refuses to promote one that is not bound to its own output - so it is
+  // reported rather than escalated.
+  try {
+    rmSync(PENDING_LOCK_SIDECAR, { force: true });
+  } catch (error) {
+    console.error(
+      `warning: ${LOCK} was updated but the consumed sidecar at ${PENDING_LOCK_SIDECAR} could ` +
+        `not be removed (${(error as Error).message}). Delete it manually; it will not be ` +
+        're-applied to a different generation.'
+    );
+  }
   console.error(`re-pinned ${LOCK} -> ${lock.file} (sha256=${lock.sha256.slice(0, 12)}…)`);
   return true;
 }
