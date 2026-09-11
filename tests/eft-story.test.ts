@@ -773,6 +773,29 @@ describe('parseObjectives', () => {
     ]);
   });
 
+  it('does not promote a nested convergence out of its enclosing ending', () => {
+    // Convergence across nested alternatives only proves the step is unavoidable
+    // *within* the enclosing branch. If that branch is itself conditional, players
+    // who never enter the ending never see the step.
+    const nested = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      "'''If you have the case'''",
+      '* Step A',
+      '* Common step',
+      "'''If you lack the case'''",
+      '* Step B',
+      '* Common step',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(nested)).toEqual([
+      { text: 'Step A', optional: true },
+      { text: 'Common step', optional: true },
+      { text: 'Step B', optional: true },
+      { text: 'Common step', optional: true },
+    ]);
+  });
+
   it('detects convergence across heading-delimited alternatives too', () => {
     // The Ticket's endings are `===If ...===` sections. Closing the group between
     // them would put each ending in its own group and make convergence undetectable,

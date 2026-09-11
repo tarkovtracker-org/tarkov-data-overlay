@@ -132,7 +132,13 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
   // wraps a whole ending, and `'''...'''` sub-headers appear inside it. A bold
   // sub-header must not be able to close the heading-level branch containing it,
   // which would leak that ending's objectives out as universally required.
-  type Entry = WikiStoryObjective & { group: number; alt: number; inline: boolean };
+  type Entry = WikiStoryObjective & {
+    group: number;
+    alt: number;
+    inline: boolean;
+    /** A conditional context encloses this entry's alternative. */
+    ancestor: boolean;
+  };
   const entries: Entry[] = [];
   let headingBranch = false;
   let boldBranch = false;
@@ -140,6 +146,10 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
   let group = 0;
   let alt = 0;
   let inGroup = false;
+  // Which header level owns the current alternative. A bold group nested inside a
+  // conditional heading has that heading as a conditional ancestor, so convergence
+  // within the group must not promote a step to universally required.
+  let altLevel: 'heading' | 'bold' | null = null;
   const endGroup = () => {
     if (inGroup) group += 1;
     inGroup = false;
@@ -164,16 +174,20 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
           // its own group and convergence can never be detected.
           inGroup = true;
           alt += 1;
+          altLevel = 'heading';
         } else {
           endGroup();
+          altLevel = null;
         }
       } else if (line.startsWith("'''")) {
         boldBranch = CONDITIONAL_HEADER.test(headerText(line));
         if (boldBranch) {
           inGroup = true;
           alt += 1;
+          altLevel = 'bold';
         } else {
           endGroup();
+          altLevel = null;
         }
       }
       // Anything else (stray markup) leaves the current branch state alone.
@@ -187,6 +201,9 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
         inline: optional,
         group,
         alt: headingBranch || boldBranch ? alt : 0,
+        // Nothing encloses a heading-level alternative; a bold one inherits the
+        // conditionality of the heading it sits under.
+        ancestor: altLevel === 'bold' && headingBranch,
       });
     }
   }
@@ -217,7 +234,7 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
     entries.filter((entry) => entry.alt === 0 && !entry.optional).map((e) => e.text.toLowerCase())
   );
 
-  return entries.map(({ text, optional, inline, group: g, alt: a }) => {
+  return entries.map(({ text, optional, inline, ancestor, group: g, alt: a }) => {
     if (!optional) return { text, optional };
     // An explicit `(''Optional'')` marker is direct evidence from the page, so
     // neither inference below may override it. The same wording can appear as an
@@ -225,7 +242,10 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
     // engine room"), and only the marker distinguishes them.
     if (inline) return { text, optional: true };
     if (trunk.has(text.toLowerCase())) return { text, optional: false };
-    if (a !== 0) {
+    // Convergence across nested alternatives only proves the step is unavoidable
+    // *within* the enclosing branch. If that branch is itself conditional, players
+    // who never enter it never see the step, so it must stay optional.
+    if (a !== 0 && !ancestor) {
       const groupAlts = altsByGroup.get(g);
       const textAlts = seenAlts.get(`${g}\u0000${text.toLowerCase()}`);
       // Present in every alternative of its group, so no choice avoids it.
