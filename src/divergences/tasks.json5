@@ -460,52 +460,12 @@
     },
   },
 
-  // Collector (converged, base override - 1.1 unification)
-  '5c51aac186f77432ea65c552': {
-    name: 'Collector',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Collector',
-    status: 'converged',
-    fields: {
-      minPlayerLevel: {
-        regular: 40,
-        pve: 40,
-        'pvp-season': 40,
-        confidence: 'medium',
-        regularSource: 'in-game',
-        pveSource: 'in-game',
-        pvpSeasonSource: 'patch-notes',
-        verified: '1.1-regular',
-        // UNRESOLVED - do not escalate this entry's confidence without settling
-        // the derived-floor conflict below.
-        //
-        // Both the 1.1-pve capture and the 2026-08-27 regular capture carry an
-        // explicit `Level >= 40` start condition, so the recorded 40 is the
-        // explicit in-game gate and regular is no longer inferred from patch
-        // notes. That part is solid.
-        //
-        // What is NOT settled: upstream's 42 is not simply a stale pre-1.1
-        // figure. Collector is loyalty-gated, and AGENTS.md requires checking
-        // trader-derived floors before correcting minPlayerLevel. The same
-        // captures carry `TraderLoyalty Ragman >= 4` alongside the Level
-        // condition; the wiki Requirements section corroborates it ('Reach
-        // Loyalty Level 4 with Prapor, Therapist, Skier, Peacekeeper, Mechanic,
-        // Ragman and Jaeger'); and json.tarkov.dev serves Ragman LL4
-        // `requiredPlayerLevel: 42` in all three modes. So upstream's 42 matches
-        // the Ragman-LL4-derived floor exactly, which is the one case AGENTS.md
-        // says must NOT be corrected ('only correct the field when upstream's
-        // value matches none of them'). The effective floor is 42, because
-        // Ragman LL4 is unreachable below 42.
-        //
-        // The base override therefore ships minPlayerLevel 40 while leaving
-        // upstream's Ragman LL4 `traderRequirements` unmodified, so consumers
-        // merge 'startable at 40' against a gate that needs 42. Resolving this
-        // means deciding whether minPlayerLevel should report the explicit gate
-        // (40) or the effective floor (42); it predates this entry's update and
-        // is tracked separately rather than settled here.
-        note: 'Explicit `Level >= 40` start condition in both the 1.1-pve and 2026-08-27 regular captures. Conflict pending resolution: upstream serves 42, which matches the Ragman-LL4 trader-derived floor (Ragman LL4 requiredPlayerLevel = 42 in all modes, corroborated by the wiki Requirements loyalty line), so 42 is not merely a stale pre-1.1 figure and the wiki does adjudicate indirectly via that floor. The effective startability floor is 42. The base override corrects all modes to the explicit gate; see the comment above before changing it. pvp-season rests on the 1.1 all-modes patch-note statement - the seasonal capture does not contain this task.',
-      },
-    },
-  },
+  // Collector's minPlayerLevel record was retired with its level-40 override:
+  // upstream's 42 matches the Ragman-LL4-derived floor, not a stale value.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //        https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
+  // The task's explicit Level condition is not the effective minimum. Keeping
+  // the old record would make check-overrides recommend the same bad correction.
 
   // Long Road (converged, base override - 1.1 unification)
   '6193850f60b34236ee0483de': {

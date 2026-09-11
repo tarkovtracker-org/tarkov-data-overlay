@@ -43,6 +43,7 @@ import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
 import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
+import { writeFileAtomicSync } from './lib/atomic-write.js';
 
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
@@ -749,7 +750,7 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
   }
 
   const { lock } = staged;
-  writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
+  writeFileAtomicSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
   // The lock write is the commit point. Removing the consumed sidecar afterwards
   // is best-effort: letting an EPERM/EBUSY here throw would unwind the caller and
   // roll the artifact back while the lock stayed advanced, breaking exactly the

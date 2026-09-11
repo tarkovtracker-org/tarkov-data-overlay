@@ -9,11 +9,12 @@
  */
 
 import { createHash } from 'crypto';
-import { readFileSync, rmSync, writeFileSync } from 'fs';
+import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
 import { isDirectExecution } from '../src/lib/index.js';
+import { writeFileAtomicSync } from './lib/atomic-write.js';
 import {
   inspectStagedReferenceLock,
   PENDING_LOCK_SIDECAR,
@@ -130,7 +131,7 @@ function main(): void {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
   }
 
-  writeFileSync(dest, out);
+  writeFileAtomicSync(dest, out);
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
 
   // The artifact is on disk, so a staged re-pin can now be applied. Doing it here
@@ -144,7 +145,7 @@ function main(): void {
   // the pair never disagrees about which capture produced the committed chapters.
   const rollback = () => {
     if (previous === null) rmSync(dest, { force: true });
-    else writeFileSync(dest, previous);
+    else writeFileAtomicSync(dest, previous);
   };
 
   // Promotion can also *throw* rather than refuse - a read-only lock file or an

@@ -341,23 +341,16 @@
     experience: 10000, // Was: 18000 (all modes, stale pre-1.1 value)
   },
 
-  // Collector - minimum player level in 1.1.0.0 + prerequisite set
+  // Collector - prerequisite set; preserve upstream's derived player-level floor
   // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
+  //        https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
   //
-  // minPlayerLevel: both the 1.1-pve capture and the 2026-08-27 regular capture
-  // carry an explicit `Level >= 40` start condition, so 40 is the explicit
-  // in-game gate in both modes.
-  //
-  // UNRESOLVED, do not treat 40 as settled: upstream's 42 is not simply stale.
-  // Collector is loyalty-gated (the captures carry `TraderLoyalty Ragman >= 4`
-  // and the wiki Requirements section lists Loyalty Level 4 across seven
-  // traders), and json.tarkov.dev serves Ragman LL4 `requiredPlayerLevel: 42` in
-  // all three modes - so 42 is exactly the trader-derived floor AGENTS.md
-  // requires checking before correcting this field, and the effective floor is 42
-  // because Ragman LL4 is unreachable below it. This override ships 40 while
-  // leaving upstream's Ragman LL4 `traderRequirements` untouched, so consumers
-  // merge "startable at 40" against a gate needing 42. The value predates this
-  // entry's rewrite; see src/divergences/tasks.json5 for the full record.
+  // Removed minPlayerLevel: 40 (Was upstream: 42). The lower explicit Level
+  // condition does not make upstream wrong: Collector also requires Ragman LL4,
+  // which requires player level 42. Both wiki Requirements sections corroborate
+  // that floor; json.tarkov.dev serves the gate and level 42 in all three modes.
+  // Per AGENTS.md, preserve a correct trader-derived floor rather than replacing
+  // it with the task's explicit gate. No replacement level override is needed.
   //
   // taskRequirements: the two captures agree on three edges (Shooter Born in
   // Heaven, The Tarkov Shooter - Part 4, Sew it Good - Part 2) and both omit the
@@ -381,7 +374,6 @@
   // src/overrides/modes/pvp-season/tasks.json5 rather than widening this entry.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
-    minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)
     taskRequirements: [
       {
         task: { id: '597a0e5786f77426d66c0636', name: 'Chemical - Part 3' },

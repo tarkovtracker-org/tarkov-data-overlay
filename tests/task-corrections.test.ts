@@ -24,6 +24,7 @@ const TASK_IDS = {
   relentless: '60e71e8ed54b755a3b53eb67',
   flashDrive: '5979ed3886f77431307dc512',
   easyBreezy: '669fa3a40c828825de06d6a1',
+  collector: '5c51aac186f77432ea65c552',
   vacateThePremises: '67d03be712fb5f8fd2096332',
 } as const;
 
@@ -135,6 +136,50 @@ describe('task correction data', () => {
 });
 
 describe('mode-specific task correction consumption', () => {
+  it.each(SUPPORTED_GAME_MODES)(
+    "preserves Collector's upstream loyalty-derived level floor in %s",
+    (mode) => {
+      // Public proof: Collector requires Ragman LL4, which requires level 42.
+      // The task's lower explicit Level condition must not erase that floor.
+      // https://escapefromtarkov.fandom.com/wiki/Collector
+      // https://escapefromtarkov.fandom.com/wiki/Ragman#Loyalty_Level_Requirements
+      const overlay = {
+        tasks: loadTaskOverrides(),
+        modes: {
+          [mode]: {
+            tasks: loadJson5File<Record<string, TaskOverride>>(
+              join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+            ),
+          },
+        },
+      };
+      const upstream = {
+        id: TASK_IDS.collector,
+        name: 'Collector',
+        minPlayerLevel: 42,
+        objectives: [],
+        traderRequirements: [
+          {
+            requirementType: 'level',
+            compareMethod: '>=',
+            value: 4,
+            trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
+          },
+        ],
+      };
+      const override = getTaskOverrideForMode(TASK_IDS.collector, overlay as never, mode);
+      expect(override).not.toHaveProperty('minPlayerLevel');
+      const effective = applyTaskOverride(upstream, override) as TaskData | null;
+      expect(effective?.minPlayerLevel).toBe(upstream.minPlayerLevel);
+      expect(effective?.traderRequirements).toEqual(upstream.traderRequirements);
+
+      const divergences = loadJson5File<Record<string, { fields: Record<string, unknown> }>>(
+        join(paths.srcDir, 'divergences', 'tasks.json5')
+      );
+      expect(divergences[TASK_IDS.collector]?.fields.minPlayerLevel).toBeUndefined();
+    }
+  );
+
   it('keeps active Lightkeeper successors fail-closed when their retired prerequisite is filtered', () => {
     // Explicit exception: missing replacement wiring is unknown, not available
     // and not proof that these surviving quests have themselves been retired.

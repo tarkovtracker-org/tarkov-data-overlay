@@ -461,7 +461,6 @@
       "experience": 10000
     },
     "5c51aac186f77432ea65c552": {
-      "minPlayerLevel": 40,
       "taskRequirements": [
         {
           "task": {
@@ -9648,7 +9647,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-11T06:38:27.945Z",
-    "sha256": "5338b71ec22f1f3c7c3bdfb94f3364e8fbaa5145e224c93159e537201209d347"
+    "generated": "2026-09-11T09:23:46.387Z",
+    "sha256": "57dc5b43a092b11ca1b65371907ee1071826830b92c223c3147b58e26498b473"
   }
 }
