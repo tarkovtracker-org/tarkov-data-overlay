@@ -9,7 +9,7 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { readFileSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
@@ -119,7 +119,17 @@ function main(): void {
     process.exit(1);
   }
 
-  const previous = existsSync(dest) ? readFileSync(dest) : null;
+  // Read directly instead of checking for existence first: a stat-then-read pair
+  // is a race, and absence is an ordinary outcome here (the artifact is generated,
+  // so the first run has nothing to preserve). ENOENT means "nothing to roll back
+  // to"; any other error is a real filesystem problem and should not be swallowed.
+  let previous: Buffer | null = null;
+  try {
+    previous = readFileSync(dest);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+
   writeFileSync(dest, out);
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
 
