@@ -66,7 +66,7 @@ describe('story reference provenance enforcement', () => {
           import.meta.resolve('tsx'),
           '--input-type=module',
           '-e',
-          `import { loadReference, commitStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock();`,
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock(); promoteStoryReferenceLock();`,
         ],
         {
           cwd: dir,
@@ -165,12 +165,161 @@ describe('story reference provenance enforcement', () => {
       ).toThrow();
       expect(existsSync(lockFile)).toBe(false);
 
-      // Only an explicit commit persists it.
+      // Only an explicit commit stages it, now to the sidecar the writer promotes.
       runScript('loadReference(); commitStoryReferenceLock();');
-      expect(existsSync(lockFile)).toBe(true);
-      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({
+      expect(existsSync(lockFile)).toBe(false);
+      const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+      expect(existsSync(sidecar)).toBe(true);
+      expect(JSON.parse(readFileSync(sidecar, 'utf-8')).lock).toMatchObject({
         sha256: createHash('sha256').update(capture).digest('hex'),
       });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('discards a staged pin generated for different output', () => {
+    // A sidecar can outlive a run whose write never happened. Promoting it beside
+    // unrelated data would pin a capture that did not produce the artifact, so the
+    // pin is bound to the payload hash the generator staged.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-mismatch-'));
+    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (hash: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(
+        sidecar,
+        `${JSON.stringify({
+          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        })}\n`
+      );
+
+      expect(promote('c'.repeat(64))).toBe('false');
+      expect(existsSync(lockFile), 'lock written despite payload mismatch').toBe(false);
+      // Provably stale, so it is removed rather than left to be applied later.
+      expect(existsSync(sidecar)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to pin a capture from a mode the storyline is not shared with', () => {
+    // The committed addition is stamped "shared between PVP and PVE". A seasonal
+    // character is a separate progression with independently divergent quest
+    // data, and an advanced one can out-score every other capture on chapter
+    // coverage, so discovery and explicit replacement both have to exclude it.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-mode-'));
+    const seasonal = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pvp-season.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, seasonal);
+      expect(() =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+      ).toThrow(/pvp-season.*shared between regular and pve|shared between regular and pve/s);
+      expect(existsSync(join(dir, 'scripts/story-reference.lock.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('promotes a staged pin only once the artifact is written', () => {
+    // The lock records which capture produced the committed chapters, so it must
+    // move with the artifact: the generator stages it, and eft-story-write.ts
+    // promotes it after storyChapters.json5 is on disk.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-promote-'));
+    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      const staged = `${JSON.stringify(
+        {
+          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        },
+        null,
+        2
+      )}\n`;
+      writeFileSync(sidecar, staged);
+
+      const promoted = execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+
+      expect(promoted).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({
+        file: 'eft/capture.json',
+        sha256: 'a'.repeat(64),
+      });
+      // Sidecar consumed, so a later run cannot re-apply a stale pin.
+      expect(existsSync(sidecar)).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

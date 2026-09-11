@@ -14,7 +14,7 @@ import {
   WikiTaskData,
   getPriority,
 } from './types.js';
-import { TaskSuppressionEntry, isObjectiveSuppressed } from './overlay.js';
+import { TaskSuppressionEntry, isObjectiveSuppressed, nextTaskKey } from './overlay.js';
 import {
   ObjectiveItemRef,
   aliasSetIntersects,
@@ -740,7 +740,11 @@ export function compareTasks(
 
   // Next tasks (unlocks)
   {
-    const apiNextNames = nextTaskMap?.get(taskId) ?? [];
+    // Mode-qualified: under the default `both` scope the same task id appears
+    // once per mode, and a mode-divergent prerequisite must not be read back
+    // into the other mode's comparison.
+    const apiNextNames =
+      nextTaskMap?.get(nextTaskKey(apiTask.gameModes?.[0] ?? 'regular', taskId)) ?? [];
     const apiSet = toNormalizedSet(apiNextNames, normalizeTaskName);
     const wikiSet = toNormalizedSet(wiki.nextTasks ?? [], normalizeTaskName);
 

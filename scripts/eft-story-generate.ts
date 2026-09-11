@@ -29,8 +29,16 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'fs';
+import { dirname, join } from 'path';
 import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
 import { modeFromRequestUrl } from './eft-compare.js';
@@ -372,15 +380,6 @@ export function expandChapterObjectives(
 }
 
 /**
- * Unwrap a capture envelope to the quest array, tolerating the older
- * `decoded_response`, the newer `body_response`, an already-unwrapped
- * `{data: [...]}`, or a bare array.
- */
-function readReferenceFile(file: string): JsonRecord[] {
-  return parseReferenceEnvelope(file, readFileSync(file)).quests;
-}
-
-/**
  * Parse a capture's bytes into its quest array plus the envelope provenance.
  *
  * The bytes are passed in rather than re-read so that the hash recorded in the
@@ -460,6 +459,18 @@ export function storyReferenceCandidates(root = 'eft'): string[] {
 }
 
 /**
+ * Capture modes the committed storyline is allowed to come from.
+ *
+ * `eft-story-write.ts` stamps "The storyline is shared between PVP and PVE" onto
+ * the generated addition, and consumers merge `storyChapters` for those modes.
+ * `pvp-season` is a separate BSG character with independently divergent quest
+ * data, so a seasonal capture must never become the shared storyline even when
+ * an advanced Seasonal character would out-score every other capture on chapter
+ * coverage.
+ */
+export const STORY_SHARED_MODES: readonly string[] = ['regular', 'pve'];
+
+/**
  * Rank capture candidates for a lock refresh.
  *
  * Story chapters are not served like ordinary quests: the client returns a
@@ -472,14 +483,21 @@ export function storyReferenceCandidates(root = 'eft'): string[] {
  * Candidates are therefore ranked by how much of the storyline each can resolve:
  * chapter quests present first, then objective texts, then file path so equal
  * scores resolve to one deterministic winner instead of discovery order.
+ *
+ * Captures from modes outside {@link STORY_SHARED_MODES} are dropped before
+ * ranking, so seasonal coverage cannot win the auto-selection.
  */
 export function rankStoryReferences(
   candidates: string[]
-): Array<{ file: string; chapters: number; texts: number }> {
-  const scored: Array<{ file: string; chapters: number; texts: number }> = [];
+): Array<{ file: string; chapters: number; texts: number; gameMode: string | null }> {
+  const scored: Array<{ file: string; chapters: number; texts: number; gameMode: string | null }> =
+    [];
   for (const file of candidates) {
     try {
-      scored.push({ file, ...scoreReference(readReferenceFile(file)) });
+      const envelope = parseReferenceEnvelope(file, readFileSync(file));
+      const gameMode = modeFromRequestUrl(envelope.request?.url);
+      if (gameMode !== null && !STORY_SHARED_MODES.includes(gameMode)) continue;
+      scored.push({ file, gameMode, ...scoreReference(envelope.quests) });
     } catch {
       continue; // unreadable or wrong-shaped capture
     }
@@ -538,19 +556,74 @@ function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] 
 let pendingLock: ReferenceLock | undefined;
 
 /**
- * Write a staged re-pin. No-op unless `STORY_REFERENCE_UPDATE_LOCK=1` staged one.
+ * Sidecar carrying a staged re-pin across the generate -> write process boundary.
  *
- * Call only after every generation validation has passed: the lock is the sole
- * audit trail for which capture produced the committed story data, so pinning a
- * capture whose generation failed would leave later runs silently using it.
+ * The generator only emits JSON on stdout; `eft-story-write.ts` is what persists
+ * `src/additions/storyChapters.json5`. The lock's whole purpose is to record
+ * which capture produced the *committed* data, so it must not land until that
+ * write succeeds - otherwise a failed redirect or a writer error leaves the lock
+ * describing an artifact that was never updated. Lives under the gitignored
+ * data/ tree and is consumed and removed by the writer.
  */
-export function commitStoryReferenceLock(): void {
+export const PENDING_LOCK_SIDECAR = join('data', 'eft', 'story-reference.lock.pending.json');
+
+/**
+ * Stage a re-pin for the writer to promote. No-op unless
+ * `STORY_REFERENCE_UPDATE_LOCK=1` staged one.
+ *
+ * `outputSha256` binds the staged pin to the exact generated payload, so a
+ * sidecar left behind by a run whose write never happened cannot later be
+ * promoted alongside different data.
+ */
+export function commitStoryReferenceLock(outputSha256?: string): void {
   if (!pendingLock) return;
-  writeFileSync(LOCK, `${JSON.stringify(pendingLock, null, 2)}\n`);
+  mkdirSync(dirname(PENDING_LOCK_SIDECAR), { recursive: true });
+  writeFileSync(
+    PENDING_LOCK_SIDECAR,
+    `${JSON.stringify({ lock: pendingLock, outputSha256: outputSha256 ?? null }, null, 2)}\n`
+  );
   console.error(
-    `re-pinned ${LOCK} -> ${pendingLock.file} (sha256=${pendingLock.sha256.slice(0, 12)}…)`
+    `staged re-pin recorded at ${PENDING_LOCK_SIDECAR}; ` +
+      `${LOCK} updates once the story artifact is written`
   );
   pendingLock = undefined;
+}
+
+/**
+ * Promote a staged re-pin to the committed lock. Returns true when one was
+ * applied.
+ *
+ * Called by `eft-story-write.ts` after it has written
+ * `src/additions/storyChapters.json5`, so the lock and the artifact it describes
+ * move together. When `outputSha256` is supplied it must match what the
+ * generator staged; a mismatch means the sidecar belongs to a different
+ * generation, so it is discarded rather than applied.
+ */
+export function promoteStoryReferenceLock(outputSha256?: string): boolean {
+  if (!existsSync(PENDING_LOCK_SIDECAR)) return false;
+  const staged = JSON.parse(readFileSync(PENDING_LOCK_SIDECAR, 'utf-8')) as {
+    lock: ReferenceLock;
+    outputSha256: string | null;
+  };
+  if (
+    outputSha256 !== undefined &&
+    staged.outputSha256 !== null &&
+    staged.outputSha256 !== outputSha256
+  ) {
+    rmSync(PENDING_LOCK_SIDECAR, { force: true });
+    console.error(
+      `warning: discarded a staged re-pin at ${PENDING_LOCK_SIDECAR}; it was generated for ` +
+        `different output than the artifact just written, so ${LOCK} was left unchanged. ` +
+        'Re-run the generator with STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
+    );
+    return false;
+  }
+  writeFileSync(LOCK, `${JSON.stringify(staged.lock, null, 2)}\n`);
+  rmSync(PENDING_LOCK_SIDECAR, { force: true });
+  console.error(
+    `re-pinned ${LOCK} -> ${staged.lock.file} (sha256=${staged.lock.sha256.slice(0, 12)}…)`
+  );
+  return true;
 }
 
 export function loadReference(): JsonRecord[] {
@@ -595,6 +668,18 @@ export function loadReference(): JsonRecord[] {
   const { lock: current, quests } = fingerprint(file);
   if (current.chapterQuests === 0 || current.objectiveTexts === 0) {
     throw new Error(`story reference ${file} resolves no chapter quests or objective texts`);
+  }
+  // Enforced for explicit replacements too, not just auto-discovery: the
+  // committed addition is declared shared between PVP and PvE, so pinning a
+  // seasonal capture would publish independently divergent data as the shared
+  // storyline. Only checked when re-pinning - an already-pinned capture is
+  // identified by hash and must keep validating even if this list later changes.
+  if (updating && current.gameMode !== null && !STORY_SHARED_MODES.includes(current.gameMode)) {
+    throw new Error(
+      `story reference ${file} is a '${current.gameMode}' capture; the committed storyline is ` +
+        `shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a capture from one of ` +
+        'those modes.'
+    );
   }
 
   if (lock && !updating) {
@@ -794,11 +879,14 @@ function main(): void {
     process.exit(1);
   }
 
-  // Every chapter validated and the output satisfies the schema the writer
-  // applies, so a staged re-pin is now safe to persist.
-  commitStoryReferenceLock();
+  const payload = JSON.stringify(out, null, 2);
 
-  process.stdout.write(JSON.stringify(out, null, 2));
+  // Every chapter validated and the output satisfies the schema the writer
+  // applies, so a staged re-pin is now safe to record. It is bound to this exact
+  // payload and only applied by the writer once the artifact is on disk.
+  commitStoryReferenceLock(createHash('sha256').update(payload).digest('hex'));
+
+  process.stdout.write(payload);
 }
 
 if (isDirectExecution(import.meta.url)) {

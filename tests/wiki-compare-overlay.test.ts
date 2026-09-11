@@ -15,6 +15,7 @@ import {
   loadSuppressedFields,
   loadTaskRequirementOverrides,
   buildNextTaskMap,
+  nextTaskKey,
 } from '../scripts/wiki-compare/overlay.js';
 import { compareSubset, valuesEqual, formatValue } from '../src/lib/index.js';
 
@@ -248,21 +249,19 @@ describe('buildNextTaskMap', () => {
     // Collector as unlocked by Chemical - Part 4 in regular as well.
     const overrides = loadTaskRequirementOverrides('both');
     const tasks = [
-      {
-        id: '5c51aac186f77432ea65c552',
-        name: 'Collector (regular)',
-        gameModes: ['regular'],
-      },
-      {
-        id: '5c51aac186f77432ea65c552',
-        name: 'Collector (pve)',
-        gameModes: ['pve'],
-      },
+      { id: '5c51aac186f77432ea65c552', name: 'Collector', gameModes: ['regular'] },
+      { id: '5c51aac186f77432ea65c552', name: 'Collector', gameModes: ['pve'] },
     ] as unknown as Parameters<typeof buildNextTaskMap>[0];
 
     const next = buildNextTaskMap(tasks, overrides);
-    expect(next.get('597a0e5786f77426d66c0636')).toEqual(['Collector (regular)']);
-    expect(next.get('597a0f5686f774273b74f676')).toEqual(['Collector (pve)']);
+    const PART3 = '597a0e5786f77426d66c0636';
+    const PART4 = '597a0f5686f774273b74f676';
+
+    expect(next.get(nextTaskKey('regular', PART3))).toEqual(['Collector']);
+    expect(next.get(nextTaskKey('pve', PART4))).toEqual(['Collector']);
+    // The leak: keying by task id alone let each mode read the other's edge.
+    expect(next.get(nextTaskKey('regular', PART4))).toBeUndefined();
+    expect(next.get(nextTaskKey('pve', PART3))).toBeUndefined();
   });
 
   it('falls back to the API requirements when no override applies', () => {
@@ -276,6 +275,6 @@ describe('buildNextTaskMap', () => {
     ] as unknown as Parameters<typeof buildNextTaskMap>[0];
 
     const next = buildNextTaskMap(tasks, loadTaskRequirementOverrides('both'));
-    expect(next.get('bbbbbbbbbbbbbbbbbbbbbbbb')).toEqual(['Unoverridden']);
+    expect(next.get(nextTaskKey('regular', 'bbbbbbbbbbbbbbbbbbbbbbbb'))).toEqual(['Unoverridden']);
   });
 });

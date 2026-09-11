@@ -363,6 +363,18 @@ export function loadTaskRequirementOverrides(
   return byMode;
 }
 
+/**
+ * Key for {@link buildNextTaskMap} lookups.
+ *
+ * The map is keyed by mode *and* predecessor id. Keying by id alone let a
+ * divergent prerequisite cross modes even once the overrides themselves were
+ * resolved per mode: Collector's PvE entry contributed a `Chemical - Part 4`
+ * edge that the regular comparison then read back, and vice versa.
+ */
+export function nextTaskKey(mode: GameMode, taskId: string): string {
+  return `${mode}:${taskId}`;
+}
+
 export function buildNextTaskMap(
   tasks: ExtendedTaskData[],
   requirementOverrides?: TaskRequirementOverridesByMode
@@ -380,9 +392,10 @@ export function buildNextTaskMap(
     for (const req of requirements) {
       const reqTaskId = req?.task?.id;
       if (!reqTaskId) continue;
-      const set = nextMap.get(reqTaskId) ?? new Set<string>();
+      const key = nextTaskKey(mode, reqTaskId);
+      const set = nextMap.get(key) ?? new Set<string>();
       set.add(task.name);
-      nextMap.set(reqTaskId, set);
+      nextMap.set(key, set);
     }
   }
 

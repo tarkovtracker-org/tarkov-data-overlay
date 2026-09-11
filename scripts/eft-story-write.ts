@@ -8,11 +8,13 @@
  * Run via: npm run eft:story  (or: tsx scripts/eft-story-write.ts <input.json>)
  */
 
+import { createHash } from 'crypto';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
 import { isDirectExecution } from '../src/lib/index.js';
+import { promoteStoryReferenceLock } from './eft-story-generate.js';
 
 const HEADER =
   '  // Story chapters (Edge of Darkness storyline) - not present in the tarkov.dev API.\n' +
@@ -74,7 +76,8 @@ export function renderStoryChaptersJson5(data: StoryChapterMap): string {
 
 function main(): void {
   const input = process.argv[2] || 'data/eft/story-final.json';
-  const data: StoryChapterMap = JSON.parse(readFileSync(input, 'utf8'));
+  const raw = readFileSync(input, 'utf8');
+  const data: StoryChapterMap = JSON.parse(raw);
 
   // Validate against the story-chapter schema before writing.
   const schema = JSON.parse(
@@ -93,6 +96,14 @@ function main(): void {
   const dest = join('src', 'additions', 'storyChapters.json5');
   writeFileSync(dest, out);
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
+
+  // The artifact is on disk, so a staged re-pin can now be applied. Doing it here
+  // rather than in the generator keeps the lock and the data it describes in
+  // step: a failed redirect or a write error above leaves the previous pin
+  // intact, matching the lock's purpose of recording which capture produced the
+  // committed chapters. The hash ties the pin to this exact input, so a sidecar
+  // left over from an unrelated generation is discarded instead of applied.
+  promoteStoryReferenceLock(createHash('sha256').update(raw).digest('hex'));
 }
 
 if (isDirectExecution(import.meta.url)) {
