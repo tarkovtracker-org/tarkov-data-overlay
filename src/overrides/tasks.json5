@@ -647,6 +647,12 @@
   '6179b5b06e9dd54ac275e409': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits. The
     // BEAR faction line on the same page is already served correctly upstream.
+    // Unlike the other entries in the 2026-09-10 group, this one carries NO
+    // capture corroboration: the task is BEAR-only and both 1.1 captures are
+    // USEC profiles, so the client never returned its template (0 of upstream's
+    // 6 BEAR-only tasks appear in either capture). Per AGENTS.md the wiki is the
+    // authority for `traderRequirements` regardless, and absence from a capture
+    // that cannot contain the task is not counter-evidence.
     // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
     //        ("Must reach Loyalty Level 3 with Prapor to obtain this quest.")
     traderRequirements: [
@@ -3334,9 +3340,15 @@
   // shows no `TraderLoyalty` condition for them and cannot confirm or deny a tier
   // - which is exactly why AGENTS.md makes the wiki the source for
   // `traderRequirements`. Every entry below was checked against the 1.1 captures
-  // and does carry such a `GlobalVariableValue` start condition; three candidates
-  // that carried no start condition at all were dropped instead of shipped (see
-  // Fuel Shortage, Chemical Experiments, All This Filth...).
+  // and does carry such a `GlobalVariableValue` start condition, with one
+  // disclosed exception: Our Own Land is BEAR-only and both captures are USEC
+  // profiles, so the client never returned its template at all (0 of upstream's
+  // 6 BEAR-only tasks appear in either capture, against 6/6 and 5/6 of the
+  // USEC-only ones). Absence there is a coverage gap, not counter-evidence, and
+  // that entry rests on the wiki Requirements line alone - which AGENTS.md
+  // already makes the authority for this field. Three candidates that were
+  // present and carried no start condition at all were dropped instead of
+  // shipped (see Fuel Shortage, Chemical Experiments, All This Filth...).
   //
   // What makes the wiki field trustworthy here is that where the client *is*
   // explicit it agrees with the wiki: the 1.1 PvE capture carries 108 explicit
@@ -3456,8 +3468,9 @@
   // (20:21-20:48 UTC) and rewrote each opening line to the past tense
   // ("'''X''' was a Quest in Escape from Tarkov"), which is the same standard
   // already used for the 33 other disabled tasks in this file. The Lightkeeper
-  // trader page no longer documents an unlock chain at all - access now runs
-  // through the story chapters.
+  // trader page no longer documents THIS chain: it now routes access through the
+  // replacement series ("The questline to obtain one starts with [[To the Light
+  // - Trust but Verify]]").
   //
   // tarkov.dev still serves all seven in regular, pve and pvp-season.
   //
@@ -3523,8 +3536,9 @@
   // This is the one member of the old chain that survived the rework, so it is
   // renamed rather than disabled. The old page is now literally
   // `#REDIRECT [[To the Light - Getting Acquainted]]`, and the identity is
-  // confirmed field-by-field: same trader (Mechanic) and all four objective IDs
-  // match the new page's objective list (6391e2f9e705511c8a4a1b85 obtain the V3
+  // confirmed field-by-field: same trader (Mechanic), and all four of upstream's
+  // objective IDs carry text matching the new page's objective list one-for-one
+  // (6391e2f9e705511c8a4a1b85 obtain the V3
   // flash drive, 6391e31bfa894f0a866afdec reflash the transmitter,
   // 6391e329c115f907b14700b1 hand over the flash drive, 63ab727b1287ef0b827d0c95
   // visit the Lighthouse building).

@@ -56,14 +56,11 @@ describe('prestige override (issue #207)', () => {
     expect(storyNames(prestige[PRESTIGE_IDS.p1])).toEqual([]);
     expect(storyNames(prestige[PRESTIGE_IDS.p2])).toEqual(['Tour']);
     expect(storyNames(prestige[PRESTIGE_IDS.p3])).toEqual(['Tour', 'Falling Skies']);
-    expect(storyNames(prestige[PRESTIGE_IDS.p4])).toEqual([
-      'Tour',
-      'Obtain the Ticket from Tarkov',
-    ]);
+    expect(storyNames(prestige[PRESTIGE_IDS.p4])).toEqual(['Tour', 'Obtain the "Ticket"']);
     expect(storyNames(prestige[PRESTIGE_IDS.p5])).toEqual([
       'Tour',
       'They Are Already Here',
-      'Obtain the Ticket from Tarkov',
+      'Obtain the "Ticket"',
     ]);
     expect(storyNames(prestige[PRESTIGE_IDS.p6])).toEqual(['The Ticket']);
   });
@@ -146,7 +143,7 @@ describe('prestige override (issue #207)', () => {
             {
               type: 'storyObjectiveStatus',
               storyChapter: 'the-ticket',
-              name: 'Obtain the Ticket from Tarkov',
+              name: 'Obtain the "Ticket"',
               status: ['complete'],
             },
           ],

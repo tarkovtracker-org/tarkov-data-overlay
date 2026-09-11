@@ -55,7 +55,7 @@
               "type": "storyObjectiveStatus",
               "storyChapter": "the-ticket",
               "objective": "68e2ecfeb88d405a420774f8",
-              "name": "Obtain the Ticket from Tarkov",
+              "name": "Obtain the \"Ticket\"",
               "status": [
                 "complete"
               ]
@@ -94,7 +94,7 @@
               "type": "storyObjectiveStatus",
               "storyChapter": "the-ticket",
               "objective": "68e2ecfeb88d405a420774f8",
-              "name": "Obtain the Ticket from Tarkov",
+              "name": "Obtain the \"Ticket\"",
               "status": [
                 "complete"
               ]
@@ -9648,7 +9648,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-11T01:37:01.216Z",
-    "sha256": "ea41e953a47c4071b5f9507d7a2ca1723064b5babdc0f744571adc0f1741a1c8"
+    "generated": "2026-09-11T02:51:50.050Z",
+    "sha256": "1aec5615f66568c542c1bc79c298f3f4641065eb4f5b8bd29b4545425110067a"
   }
 }

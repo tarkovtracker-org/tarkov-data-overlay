@@ -1,6 +1,8 @@
 {
-  // PvE-specific objective corrections only. Shared task requirements belong in
-  // src/overrides/tasks.json5, even when the supporting capture came from PvE.
+  // PvE-specific corrections only - objective patches plus the few task-level
+  // fields that genuinely differ in PvE (`taskRequirements`, `disabled`).
+  // Anything true of every mode belongs in src/overrides/tasks.json5, even when
+  // the supporting capture came from PvE.
 
   // Pathfinder - objective description differs from the value served upstream.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder

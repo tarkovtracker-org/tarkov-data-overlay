@@ -22,21 +22,32 @@
     },
   },
 
-  // Provide Viewership - the API invents a prerequisite in regular only.
+  // Provide Viewership - regular-only prerequisite the capture does not support.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/324
   //        https://escapefromtarkov.fandom.com/wiki/Provide_Viewership
   //
   // The 2026-08-27 regular capture carries `AvailableForStart: []` for this task
   // - an explicitly empty list on a present template, which is what licenses
   // `taskRequirements: []` here rather than an absent-from-capture guess. The
-  // 1.1-pve capture is identical, and tarkov.dev's pve record already serves no
-  // prerequisite; only its regular record adds Easy Money - Part 2 [PVP ZONE]
-  // (66058cb5ae4719735349b9e8). The wiki page lists no Requirements section.
+  // 1.1-pve capture is identical. Only tarkov.dev's regular record adds Easy
+  // Money - Part 2 [PVP ZONE] (66058cb5ae4719735349b9e8).
   //
-  // That spurious edge is also the most likely cause of #324: it is the only
-  // link from a mode-shared task into the PVP-ZONE Easy Money chain, so a
-  // consumer that walks the regular graph surfaces a [PVP ZONE] task for
-  // players who never see it.
+  // Two things this is NOT resting on. The wiki does document the edge as
+  // narrative order - Provide Viewership `|previous = Accept [[Easy Money -
+  // Part 2]]`, and Easy Money - Part 2 `|leads to = ... [[Provide
+  // Viewership]]`, the "Accept" wording even lining up with upstream's
+  // active|complete statuses - so upstream did not invent it from nothing. Per
+  // AGENTS.md the infobox `previous` field is narrative order and not proof of
+  // an unlock edge, so the empty explicit start-condition list on a present
+  // template outranks it; the wiki page has no Requirements section at all.
+  // Nor is pve corroboration: the target task is absent from the pve and
+  // pvp-season lists entirely, so those modes serving no prerequisite follows
+  // from the target not existing there and says nothing about regular.
+  //
+  // That edge is also the most likely cause of #324: it is the only link from a
+  // mode-shared task into the PVP-ZONE Easy Money chain, so a consumer that
+  // walks the regular graph surfaces a [PVP ZONE] task for players who never
+  // see it.
   '675c15fbf7da9792a4059871': {
     taskRequirements: [], // Was: Easy Money - Part 2 [PVP ZONE] (active, complete)
   },
@@ -50,8 +61,8 @@
   // Power of Persuasion (63a5cf262964a7488f5243ce) and Easy-Breezy
   // (669fa3a40c828825de06d6a1) used to be corrected here from the wiki. The
   // 2026-08-27 regular client capture shows both objectives byte-identical to
-  // PvE (5 kills on Woods/Ground Zero/Interchange/Customs, and 30 on
-  // Reserve/Lighthouse), which is also exactly what tarkov.dev serves for
+  // PvE (5 kills on Woods/Ground Zero/Ground Zero 21+/Interchange/Customs, and
+  // 30 on Reserve/Lighthouse), which is also exactly what tarkov.dev serves for
   // regular - so the overrides were injecting stale pre-1.1 wiki values into a
   // correct upstream record. Removed; see issue #356. The now-redundant
   // divergence records were also retired to git history.
