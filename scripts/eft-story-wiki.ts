@@ -160,11 +160,16 @@ export function parseObjectives(wikitext: string): WikiStoryObjective[] {
     if (!line) continue;
     if (!line.startsWith('*')) {
       if (RULE_LINE.test(line)) {
-        // A rule ends the alternatives it follows. On Boreas each `<hr/>` closes a
-        // group of "If ..." variants and the universal storyline resumes after it,
-        // so leaving the branch open here marks trunk objectives optional.
+        // A rule ends the alternatives it follows and the universal storyline
+        // resumes after it. That holds whether the alternatives were opened by a
+        // bold sub-header (Boreas) or a conditional heading, so every branch
+        // level resets here; leaving a heading branch open would mark post-rule
+        // trunk objectives optional. No current chapter mixes the two forms, and
+        // this keeps both readings of a rule consistent.
         boldBranch = false;
+        headingBranch = false;
         endGroup();
+        altLevel = null;
       } else if (line.startsWith('=')) {
         headingBranch = CONDITIONAL_HEADER.test(headerText(line));
         boldBranch = false;

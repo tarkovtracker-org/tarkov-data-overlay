@@ -1101,6 +1101,24 @@ describe('parseObjectives', () => {
     ]);
   });
 
+  it('ends a conditional heading branch at a horizontal rule', () => {
+    // A rule is a branch terminator for headings the same way it is for bold
+    // sub-headers: an unconditional step after it belongs to the trunk, not to
+    // the alternative section that happens to contain the rule.
+    const mixed = [
+      '== Objectives ==',
+      '=== If you accept the offer ===',
+      '* Accept the offer',
+      '<hr/>',
+      '* Return to Mechanic',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(mixed)).toEqual([
+      { text: 'Accept the offer', optional: true },
+      { text: 'Return to Mechanic', optional: false },
+    ]);
+  });
+
   it('returns empty when no Objectives section exists', () => {
     expect(parseObjectives('== Rewards ==\n* something')).toEqual([]);
   });
