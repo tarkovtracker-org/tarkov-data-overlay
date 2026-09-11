@@ -295,8 +295,8 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
         }
       }
 
-      // Also add the raw field name for flexibility
-      suppressed.add(`${taskId}:${field}`);
+      // Trader requirements use the full-replacement guard above.
+      if (field !== 'traderRequirements') suppressed.add(`${taskId}:${field}`);
 
       overlayCount += suppressed.size - beforeSize;
     }

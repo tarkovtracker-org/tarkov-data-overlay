@@ -6,7 +6,8 @@
  * new. That noise is why the regular-mode experience regression stayed hidden.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import * as fs from 'node:fs';
 import { join } from 'path';
 import {
   taskOverlayFiles,
@@ -95,6 +96,23 @@ describe('loadSuppressedFields', () => {
     const { suppressed } = loadSuppressedFields();
     // Never Too Late To Learn - wiki says USEC-only, upstream serves Any.
     expect(suppressed.has('67af4c17f4f1fb58a907f8f6:factionName')).toBe(true);
+  });
+
+  it('does not suppress a task-wide report for ID-keyed trader patches', () => {
+    const original = fs.readFileSync;
+    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation(((
+      file: unknown,
+      ...args: unknown[]
+    ) => {
+      if (String(file).endsWith(base))
+        return JSON.stringify({ fixture: { traderRequirements: { requirementId: { value: 3 } } } });
+      return (original as (...values: unknown[]) => unknown)(file, ...args);
+    }) as typeof fs.readFileSync);
+    try {
+      expect(loadSuppressedFields().suppressed.has('fixture:traderRequirements')).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('does not suppress Scav karma for a loyalty-only override', () => {
