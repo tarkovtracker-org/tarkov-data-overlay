@@ -67,6 +67,16 @@
             "type": "boolean"
           }
         },
+        "allOf": [
+          {
+            "$comment": "Omitted objective text means the list is a projection, so `partial` cannot be false. Without this a consumer could read `missingObjectiveTexts: 2, partial: false` and treat an incomplete chapter as complete. The resolved-vs-referenced half of the invariant compares two properties, which JSON Schema cannot express, and is enforced in tests/story-chapters.test.ts instead.",
+            "if": {
+              "required": ["missingObjectiveTexts"],
+              "properties": { "missingObjectiveTexts": { "minimum": 1 } }
+            },
+            "then": { "properties": { "partial": { "const": true } } }
+          }
+        ],
         "additionalProperties": false
       },
       "mutuallyExclusiveQuestPairs": {

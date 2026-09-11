@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
+import Ajv from 'ajv';
 import {
   getProjectPaths,
   loadAllJson5FromDir,
@@ -171,6 +172,55 @@ describe('story chapters (EFT-sourced)', () => {
     expect(chapterSchema.objectives.items.properties.endingId.enum.slice().sort()).toEqual(
       expected.slice().sort()
     );
+  });
+
+  it('rejects reference coverage that omits objective text yet claims completeness', () => {
+    // `missingObjectiveTexts > 0` with `partial: false` is contradictory: a
+    // consumer reading it would treat an incomplete chapter as complete. The
+    // generator never emits that pair, but eft-story-write.ts validates against
+    // this schema, so the schema is what stops it entering the artifact.
+    const { schemasDir } = getProjectPaths();
+    const schema = JSON5.parse(
+      readFileSync(join(schemasDir, 'story-chapter.schema.json'), 'utf8')
+    ) as object;
+    const ajv = new Ajv({ allErrors: true, strict: false });
+    const validate = ajv.compile(schema);
+
+    const chapter = (coverage: Record<string, unknown>) => ({
+      'blue-fire': {
+        id: 'blue-fire',
+        name: 'Blue Fire',
+        normalizedName: 'blue-fire',
+        wikiLink: 'https://escapefromtarkov.fandom.com/wiki/Blue_Fire',
+        order: 1,
+        chapterQuestId: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        objectives: [],
+        referenceCoverage: coverage,
+        autoStart: false,
+        chapterRequirements: [],
+      },
+    });
+
+    expect(
+      validate(chapter({ referencedSubquests: 10, resolvedSubquests: 8, partial: true })),
+      'valid coverage rejected'
+    ).toBe(true);
+    expect(
+      validate(
+        chapter({
+          referencedSubquests: 10,
+          resolvedSubquests: 8,
+          missingObjectiveTexts: 2,
+          partial: false,
+        })
+      ),
+      'contradictory coverage accepted'
+    ).toBe(false);
+    // Zero missing text with full resolution may legitimately be complete.
+    expect(
+      validate(chapter({ referencedSubquests: 5, resolvedSubquests: 5, partial: false })),
+      'complete coverage rejected'
+    ).toBe(true);
   });
 
   it('keeps the objective the prestige overrides depend on', () => {
