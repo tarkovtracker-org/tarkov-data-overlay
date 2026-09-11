@@ -637,6 +637,31 @@ export function commitStoryReferenceLock(outputSha256: string): void {
   if (!pendingLock) return;
   const sidecar = pendingLockSidecar(outputSha256);
   mkdirSync(dirname(sidecar), { recursive: true });
+  // Two runs can produce byte-identical payloads - a normal run and a re-pin
+  // whose capture changed only provenance, say - so the later run replaces the
+  // earlier run's binding. Warn when it does: the earlier run's writer promotes
+  // whatever is staged here, and a re-pin silently degrading to a confirmation
+  // is the audit failure the lock exists to prevent. Isolating the two would
+  // need a run token carried through the shell pipeline, which has no channel
+  // for one; the write lock plus this warning keep the outcome visible instead.
+  if (existsSync(sidecar)) {
+    let existingLock: unknown;
+    try {
+      existingLock = (JSON.parse(readFileSync(sidecar, 'utf-8')) as { lock?: unknown }).lock;
+    } catch {
+      existingLock = undefined;
+    }
+    if (
+      !isReferenceLock(existingLock) ||
+      JSON.stringify(existingLock) !== JSON.stringify(pendingLock)
+    ) {
+      console.error(
+        `warning: replacing a staged binding at ${sidecar} that records a different capture ` +
+          'for the same payload. If another story run is still active, one of the two runs will ' +
+          'fail or degrade to a confirmation instead of its intended pin.'
+      );
+    }
+  }
   // Atomic so a concurrent reader (the writer, or another generation) never sees
   // a half-written sidecar and mistakes it for an unusable one.
   writeFileAtomicSync(sidecar, `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`);
@@ -793,8 +818,9 @@ export function promoteStoryReferenceLock(outputSha256: string): boolean {
     );
   }
   console.error(
-    `${changed ? 're-pinned' : 'confirmed'} ${LOCK} -> ${lock.file} ` +
-      `(sha256=${lock.sha256.slice(0, 12)}…)`
+    changed
+      ? `re-pinned ${LOCK} -> ${lock.file} (sha256=${lock.sha256.slice(0, 12)}…)`
+      : `confirmed ${LOCK} -> ${lock.file} (unchanged: already pinned to this capture)`
   );
   return true;
 }

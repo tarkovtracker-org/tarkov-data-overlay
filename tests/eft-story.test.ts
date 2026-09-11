@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
@@ -215,7 +215,7 @@ describe('story reference provenance enforcement', () => {
     const sidecar = join(dir, pendingLockSidecar(promoted));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     const promote = (hash: string) =>
-      execFileSync(
+      spawnSync(
         process.execPath,
         [
           '--import',
@@ -225,9 +225,7 @@ describe('story reference provenance enforcement', () => {
           `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
         ],
         { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
-      )
-        .toString()
-        .trim();
+      );
     try {
       mkdirSync(join(dir, 'scripts'), { recursive: true });
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
@@ -239,7 +237,12 @@ describe('story reference provenance enforcement', () => {
         })}\n`
       );
 
-      expect(promote(JSON.stringify(promoted))).toBe('false');
+      const result = promote(promoted);
+      expect(result.status, result.stderr.toString()).toBe(0);
+      expect(result.stdout.toString().trim()).toBe('false');
+      // The refusal names the mismatched binding, proving this is the addressed
+      // sidecar being refused and not a lookup that resolved to a missing file.
+      expect(result.stderr.toString()).toMatch(/refused the staged binding/);
       expect(existsSync(lockFile), 'lock written despite payload mismatch').toBe(false);
       // It may belong to a run still in progress, so refusal must not delete it.
       expect(existsSync(sidecar), 'sidecar belonging to another payload was discarded').toBe(true);
@@ -296,6 +299,99 @@ describe('story reference provenance enforcement', () => {
       expect(promote(second)).toBe('true');
       expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/second.json');
       expect(existsSync(secondSidecar)).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("warns when a second run replaces another run's binding for the same payload", () => {
+    // A normal run and a re-pin can emit byte-identical payloads, so they share a
+    // binding address. The later generation replacing an earlier binding must not
+    // be silent: the earlier writer promotes whatever is staged, and a re-pin
+    // degrading to a confirmation is the audit failure the lock prevents.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-collision-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const binding = 'e'.repeat(64);
+    const run = (body: string) =>
+      spawnSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; ${body}`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '0' },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+
+      // First run publishes a real lock; it stages, commits and promotes normally.
+      const first = spawnSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock(${JSON.stringify(binding)}); promoteStoryReferenceLock(${JSON.stringify(binding)});`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+          stdio: 'pipe',
+        }
+      );
+      expect(first.status, first.stderr.toString()).toBe(0);
+
+      // A second run stages a different capture's binding at the same address.
+      writeFileSync(
+        join(dir, pendingLockSidecar(binding)),
+        `${JSON.stringify({
+          lock: { ...FULL_LOCK, file: 'eft/other.json', sha256: 'f'.repeat(64) },
+          outputSha256: binding,
+        })}\n`
+      );
+      const collision = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
+      expect(collision.status, collision.stderr.toString()).toBe(0);
+      expect(collision.stderr.toString()).toMatch(/replacing a staged binding/);
+
+      // Re-staging the same binding is not a collision.
+      const repeat = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
+      expect(repeat.status, repeat.stderr.toString()).toBe(0);
+      expect(repeat.stderr.toString()).not.toMatch(/replacing a staged binding/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

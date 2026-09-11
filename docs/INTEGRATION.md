@@ -711,7 +711,9 @@ Story chapters are an addition — tarkov.dev serves no storyline data — so re
 > changes landing with it:
 >
 > - `StoryObjective.sourceQuestId` is now present on every objective, naming the
->   sub-quest it came from. It was absent entirely before.
+>   sub-quest it came from. Before it was missing only from The Ticket's 44
+>   curated objectives; the other 344 already carried it, so only persisted
+>   Ticket objective records need re-keying.
 > - Objective `endingId` now holds a real `client/ending_list` id instead of a
 >   descriptive slug. The old values were `savior`, `fallen`, `survivor` and
 >   `debtor`, so `StoryEndingId` is a different set of values.
