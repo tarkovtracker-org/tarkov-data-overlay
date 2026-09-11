@@ -181,6 +181,53 @@ describe('compareTasks', () => {
     ).toBe(false);
   });
 
+  it('reports a loyalty gate whose comparator points the wrong way', () => {
+    // The comparator is part of the gate: `Prapor >= 3` and `Prapor <= 3`
+    // describe opposite availability. Matching on trader and tier alone let an
+    // API record with the wrong direction read as correct.
+    // `TraderLevelRequirement` types compareMethod as '>=', but that is an
+    // unvalidated assumption about live API data, so the cast models what
+    // upstream could actually send.
+    const wrongDirection = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '<=',
+          value: 3,
+        },
+      ],
+    } as unknown as ExtendedTaskData;
+    const wiki = makeWiki({ traderLoyalty: [{ trader: 'Prapor', level: 3 }] });
+    expect(
+      compareTasks(wrongDirection, wiki, EMPTY_ALIASES, false).some(
+        (entry) => entry.field === 'traderRequirements'
+      ),
+      'wrong-direction loyalty gate not reported'
+    ).toBe(true);
+
+    // The same gate with the direction the wiki phrasing implies still matches.
+    const rightDirection = {
+      ...baseApi,
+      traderRequirements: [
+        {
+          id: 'p',
+          trader: { id: 'p', name: 'Prapor' },
+          requirementType: 'level',
+          compareMethod: '>=',
+          value: 3,
+        },
+      ],
+    } as ExtendedTaskData;
+    expect(
+      compareTasks(rightDirection, wiki, EMPTY_ALIASES, false).some(
+        (entry) => entry.field === 'traderRequirements'
+      )
+    ).toBe(false);
+  });
+
   it('does not trust inferred trader attribution as a verified gate', () => {
     const wiki = makeWiki({
       traderLoyalty: [{ trader: 'Prapor', level: 2, inferredTrader: true }],

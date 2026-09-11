@@ -154,11 +154,18 @@ export function compareTasks(
   // wiki actually states a gate: wiki silence is not evidence of absence, since
   // many pages still document the pre-1.1 player level instead.
   if (wiki.traderLoyalty.length > 0) {
+    // The comparator is part of the gate, not decoration: `Prapor >= 3` and
+    // `Prapor <= 3` describe opposite availability. Dropping it let an
+    // API record with the right trader and tier but the wrong direction read as
+    // correct. The wiki phrasing ("Must reach Loyalty Level N") is always a
+    // minimum, so `>=` is the expected direction. All 335 loyalty requirements
+    // tarkov.dev currently serves across the three modes use `>=`, so this adds
+    // no noise today and reports a direction regression if one appears.
     const apiLoyalty = (apiTask.traderRequirements ?? [])
       .filter((req) => req.requirementType === 'level')
-      .map((req) => `${req.trader?.name}:${req.value}`)
+      .map((req) => `${req.trader?.name}:${req.compareMethod ?? '?'}:${req.value}`)
       .sort();
-    const wikiLoyalty = wiki.traderLoyalty.map((ll) => `${ll.trader}:${ll.level}`).sort();
+    const wikiLoyalty = wiki.traderLoyalty.map((ll) => `${ll.trader}:>=:${ll.level}`).sort();
     if (wikiLoyalty.some((gate) => !apiLoyalty.includes(gate))) {
       // Mark attributions the wiki sentence did not state: the tier is quoted,
       // the trader is inferred from the infobox quest giver, and a reviewer must

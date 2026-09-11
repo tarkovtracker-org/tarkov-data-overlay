@@ -279,6 +279,54 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
+  it('refuses to pin a capture whose mode cannot be identified', () => {
+    // "Unknown" is not a safe default here: a capture with no recognizable
+    // request URL cannot be shown to belong to the shared storyline's modes, and
+    // accepting it would let a seasonal-derived capture through the same gap.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unknown-'));
+    const unknownMode = JSON.stringify({
+      data: [
+        {
+          _id: '68cbd33676fe74b1e80bfd91',
+          conditions: {
+            AvailableForFinish: [{ conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' }],
+          },
+        },
+        {
+          _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+          conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+          localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+        },
+      ],
+    });
+    const file = join(dir, 'quest_list.json');
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, unknownMode);
+      expect(() =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+      ).toThrow(/unknown/);
+      expect(existsSync(join(dir, 'scripts/story-reference.lock.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('promotes a staged pin only once the artifact is written', () => {
     // The lock records which capture produced the committed chapters, so it must
     // move with the artifact: the generator stages it, and eft-story-write.ts

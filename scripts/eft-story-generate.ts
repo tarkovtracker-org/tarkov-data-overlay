@@ -496,7 +496,9 @@ export function rankStoryReferences(
     try {
       const envelope = parseReferenceEnvelope(file, readFileSync(file));
       const gameMode = modeFromRequestUrl(envelope.request?.url);
-      if (gameMode !== null && !STORY_SHARED_MODES.includes(gameMode)) continue;
+      // Unknown mode is dropped as well: a capture whose request URL does not
+      // identify it cannot be shown to belong to the shared storyline's modes.
+      if (gameMode === null || !STORY_SHARED_MODES.includes(gameMode)) continue;
       scored.push({ file, gameMode, ...scoreReference(envelope.quests) });
     } catch {
       continue; // unreadable or wrong-shaped capture
@@ -672,13 +674,16 @@ export function loadReference(): JsonRecord[] {
   // Enforced for explicit replacements too, not just auto-discovery: the
   // committed addition is declared shared between PVP and PvE, so pinning a
   // seasonal capture would publish independently divergent data as the shared
-  // storyline. Only checked when re-pinning - an already-pinned capture is
-  // identified by hash and must keep validating even if this list later changes.
-  if (updating && current.gameMode !== null && !STORY_SHARED_MODES.includes(current.gameMode)) {
+  // storyline. An unidentifiable mode is refused rather than allowed through -
+  // a capture with no recognizable request URL cannot be shown to be in scope,
+  // and treating "unknown" as acceptable would reopen the same hole. Only
+  // checked when re-pinning - an already-pinned capture is identified by hash
+  // and must keep validating even if this list later changes.
+  if (updating && !(current.gameMode !== null && STORY_SHARED_MODES.includes(current.gameMode))) {
     throw new Error(
-      `story reference ${file} is a '${current.gameMode}' capture; the committed storyline is ` +
-        `shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a capture from one of ` +
-        'those modes.'
+      `story reference ${file} reports game mode '${current.gameMode ?? 'unknown'}'; the ` +
+        `committed storyline is shared between ${STORY_SHARED_MODES.join(' and ')} only. Pin a ` +
+        'capture whose request URL identifies it as one of those modes.'
     );
   }
 
