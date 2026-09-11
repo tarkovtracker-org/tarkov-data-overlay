@@ -21,6 +21,7 @@ import {
   indexQuests,
   matchOptional,
   normalizeStoryText,
+  pendingLockSidecar,
   storyReferenceCandidates,
   unwrapAnnotatedText,
 } from '../scripts/eft-story-generate.js';
@@ -43,6 +44,12 @@ const FULL_LOCK = {
   chapterQuests: 3,
   objectiveTexts: 7,
 };
+
+/**
+ * Binding token used by the loadReference-only helpers below; it only has to be
+ * equal between `commitStoryReferenceLock` and `promoteStoryReferenceLock`.
+ */
+const STAGE_SHA = 'd'.repeat(64);
 
 describe('story reference provenance enforcement', () => {
   it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
@@ -84,7 +91,7 @@ describe('story reference provenance enforcement', () => {
           import.meta.resolve('tsx'),
           '--input-type=module',
           '-e',
-          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock(); promoteStoryReferenceLock();`,
+          `import { loadReference, commitStoryReferenceLock, promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock('${STAGE_SHA}'); promoteStoryReferenceLock('${STAGE_SHA}');`,
         ],
         {
           cwd: dir,
@@ -184,9 +191,9 @@ describe('story reference provenance enforcement', () => {
       expect(existsSync(lockFile)).toBe(false);
 
       // Only an explicit commit stages it, now to the sidecar the writer promotes.
-      runScript('loadReference(); commitStoryReferenceLock();');
+      runScript(`loadReference(); commitStoryReferenceLock('${STAGE_SHA}');`);
       expect(existsSync(lockFile)).toBe(false);
-      const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+      const sidecar = join(dir, pendingLockSidecar(STAGE_SHA));
       expect(existsSync(sidecar)).toBe(true);
       expect(JSON.parse(readFileSync(sidecar, 'utf-8')).lock).toMatchObject({
         sha256: createHash('sha256').update(capture).digest('hex'),
@@ -203,7 +210,9 @@ describe('story reference provenance enforcement', () => {
     // the pin is bound to the payload hash the generator staged - and a mismatch
     // is refused without destroying the other run's sidecar.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-mismatch-'));
-    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const promoted = 'c'.repeat(64);
+    // Addressed by the payload being promoted, but carrying another payload's binding.
+    const sidecar = join(dir, pendingLockSidecar(promoted));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     const promote = (hash: string) =>
       execFileSync(
@@ -230,10 +239,63 @@ describe('story reference provenance enforcement', () => {
         })}\n`
       );
 
-      expect(promote('c'.repeat(64))).toBe('false');
+      expect(promote(JSON.stringify(promoted))).toBe('false');
       expect(existsSync(lockFile), 'lock written despite payload mismatch').toBe(false);
       // It may belong to a run still in progress, so refusal must not delete it.
       expect(existsSync(sidecar), 'sidecar belonging to another payload was discarded').toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps overlapping generations on separate bindings', () => {
+    // Two `npm run eft:story` shells must not consume or invalidate each other's
+    // binding: each sidecar is addressed by its own payload hash, so promotion
+    // reads, applies and removes only the file naming that payload.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-overlap-'));
+    const first = '1'.repeat(64);
+    const second = '2'.repeat(64);
+    const firstSidecar = join(dir, pendingLockSidecar(first));
+    const secondSidecar = join(dir, pendingLockSidecar(second));
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (hash: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(
+        firstSidecar,
+        `${JSON.stringify({ lock: { ...FULL_LOCK, file: 'eft/first.json' }, outputSha256: first })}\n`
+      );
+      writeFileSync(
+        secondSidecar,
+        `${JSON.stringify({
+          lock: { ...FULL_LOCK, file: 'eft/second.json', sha256: 'f'.repeat(64) },
+          outputSha256: second,
+        })}\n`
+      );
+
+      expect(promote(first)).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/first.json');
+      expect(existsSync(firstSidecar)).toBe(false);
+      // The other generation's binding is untouched by this promotion.
+      expect(existsSync(secondSidecar), "another run's binding was consumed").toBe(true);
+
+      expect(promote(second)).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8')).file).toBe('eft/second.json');
+      expect(existsSync(secondSidecar)).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -245,7 +307,8 @@ describe('story reference provenance enforcement', () => {
     // straight through would write the literal `undefined` over the committed
     // lock and break every later run that parses it.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-unusable-'));
-    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const promoted = 'b'.repeat(64);
+    const sidecar = join(dir, pendingLockSidecar(promoted));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
     try {
@@ -359,12 +422,13 @@ describe('story reference provenance enforcement', () => {
   it('refuses a staged pin that is not bound to the payload being committed', () => {
     // `outputSha256: null` used to act as a wildcard, so a sidecar that never
     // recorded which payload it was staged for could be promoted beside unrelated
-    // data. A caller that supplies a hash is asserting what it is committing, so
-    // an unbound pin is refused rather than trusted.
+    // data. The sidecar is now addressed by the payload hash, and the file at
+    // that address must also carry that binding.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-unbound-'));
-    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const promoted = 'b'.repeat(64);
+    const sidecar = join(dir, pendingLockSidecar(promoted));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
-    const promote = (arg: string) =>
+    const promote = (hash: string) =>
       execFileSync(
         process.execPath,
         [
@@ -372,26 +436,25 @@ describe('story reference provenance enforcement', () => {
           import.meta.resolve('tsx'),
           '--input-type=module',
           '-e',
-          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${arg}));`,
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${JSON.stringify(hash)}));`,
         ],
         { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
       )
         .toString()
         .trim();
-    const stage = () =>
-      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: null })}\n`);
+    const stage = (boundTo: string | null) =>
+      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: boundTo })}\n`);
     try {
       mkdirSync(join(dir, 'scripts'), { recursive: true });
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
 
-      stage();
-      expect(promote(JSON.stringify('b'.repeat(64))), 'promoted an unbound sidecar').toBe('false');
+      stage(null);
+      expect(promote(promoted), 'promoted an unbound sidecar').toBe('false');
       expect(existsSync(lockFile), 'lock written from an unbound sidecar').toBe(false);
 
-      // Omitting the hash is the "not committing an artifact" path, where there is
-      // nothing to bind to and the pin still applies.
-      stage();
-      expect(promote('')).toBe('true');
+      // The same address with the matching binding is still applied.
+      stage(promoted);
+      expect(promote(promoted)).toBe('true');
       expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({ file: FULL_LOCK.file });
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -405,7 +468,6 @@ describe('story reference provenance enforcement', () => {
     // write cannot advance the pin; ordering must not let a *refused* promotion
     // pass silently either.
     const dir = mkdtempSync(join(tmpdir(), 'story-write-refuse-'));
-    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     const dest = join(dir, 'src', 'additions', 'storyChapters.json5');
     const input = join(dir, 'story-final.json');
@@ -422,25 +484,25 @@ describe('story reference provenance enforcement', () => {
       );
       writeFileSync(lockFile, committed);
       writeFileSync(dest, previousArtifact);
-      writeFileSync(
-        input,
-        JSON.stringify({
-          'test-chapter': {
-            id: 'test-chapter',
-            name: 'Test Chapter',
-            normalizedName: 'test-chapter',
-            wikiLink: 'https://example.test/',
-            order: 1,
-            chapterQuestId: '68cbd33676fe74b1e80bfd91',
-            referenceCoverage: {
-              referencedSubquests: 0,
-              resolvedSubquests: 0,
-              partial: false,
-            },
+      const inputPayload = JSON.stringify({
+        'test-chapter': {
+          id: 'test-chapter',
+          name: 'Test Chapter',
+          normalizedName: 'test-chapter',
+          wikiLink: 'https://example.test/',
+          order: 1,
+          chapterQuestId: '68cbd33676fe74b1e80bfd91',
+          referenceCoverage: {
+            referencedSubquests: 0,
+            resolvedSubquests: 0,
+            partial: false,
           },
-        })
-      );
-      // Staged for output that is not what the writer is about to read.
+        },
+      });
+      writeFileSync(input, inputPayload);
+      const inputSha256 = createHash('sha256').update(inputPayload).digest('hex');
+      const sidecar = join(dir, pendingLockSidecar(inputSha256));
+      // Staged at this payload's address but carrying another payload's binding.
       writeFileSync(
         sidecar,
         `${JSON.stringify({
@@ -497,7 +559,6 @@ describe('story reference provenance enforcement', () => {
 
       // A binding for exactly this payload lets the write proceed and records the
       // capture the generator vouched for.
-      const inputSha256 = createHash('sha256').update(readFileSync(input)).digest('hex');
       writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: inputSha256 })}\n`);
       const bound = run();
       expect(bound.status, bound.stderr).toBe(0);
@@ -622,7 +683,7 @@ describe('story reference provenance enforcement', () => {
     // move with the artifact: the generator stages it, and eft-story-write.ts
     // promotes it after storyChapters.json5 is on disk.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-promote-'));
-    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const sidecar = join(dir, pendingLockSidecar('b'.repeat(64)));
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
     try {
       mkdirSync(join(dir, 'scripts'), { recursive: true });

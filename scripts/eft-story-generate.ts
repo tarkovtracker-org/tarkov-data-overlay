@@ -611,7 +611,19 @@ let pendingLock: ReferenceLock | undefined;
  * was never updated. Lives under the gitignored data/ tree and is consumed and
  * removed by the writer after a successful promotion.
  */
-export const PENDING_LOCK_SIDECAR = join('data', 'eft', 'story-reference.lock.pending.json');
+/**
+ * Path to the staged binding for one generated payload.
+ *
+ * Addressed by the payload's SHA-256, so overlapping `npm run eft:story` runs
+ * cannot consume or overwrite each other's binding: a generation only ever
+ * writes, promotes and removes the file naming its own payload. The binding is
+ * still validated against the lock contract before it can be applied, and the
+ * writer takes an exclusive lock around publication, so a payload-addressed file
+ * that outlives its run is refused rather than applied to something else.
+ */
+export function pendingLockSidecar(outputSha256: string): string {
+  return join('data', 'eft', `story-reference.lock.pending.${outputSha256}.json`);
+}
 
 /**
  * Stage a provenance binding for the writer to promote. No-op only when
@@ -621,17 +633,15 @@ export const PENDING_LOCK_SIDECAR = join('data', 'eft', 'story-reference.lock.pe
  * sidecar left behind by a run whose write never happened cannot later be
  * promoted alongside different data.
  */
-export function commitStoryReferenceLock(outputSha256?: string): void {
+export function commitStoryReferenceLock(outputSha256: string): void {
   if (!pendingLock) return;
-  mkdirSync(dirname(PENDING_LOCK_SIDECAR), { recursive: true });
+  const sidecar = pendingLockSidecar(outputSha256);
+  mkdirSync(dirname(sidecar), { recursive: true });
   // Atomic so a concurrent reader (the writer, or another generation) never sees
   // a half-written sidecar and mistakes it for an unusable one.
-  writeFileAtomicSync(
-    PENDING_LOCK_SIDECAR,
-    `${JSON.stringify({ lock: pendingLock, outputSha256: outputSha256 ?? null }, null, 2)}\n`
-  );
+  writeFileAtomicSync(sidecar, `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`);
   console.error(
-    `staged provenance binding at ${PENDING_LOCK_SIDECAR}; ` +
+    `staged provenance binding at ${sidecar}; ` +
       `${LOCK} updates once the story artifact is written`
   );
   pendingLock = undefined;
@@ -694,18 +704,18 @@ function isReferenceLock(value: unknown): value is ReferenceLock {
  * *before* it replaces the committed artifact, while the sidecar is still
  * available for {@link promoteStoryReferenceLock} to consume afterwards.
  *
- * Passing `outputSha256` asserts "this is the payload I am about to commit", so
- * the staged pin must be bound to it: an unbound sidecar (no `outputSha256`) is
- * refused rather than treated as a wildcard, since nothing then ties it to the
- * data being written. Omitting the argument skips the binding check entirely,
- * which is how callers that are not committing an artifact inspect a sidecar.
+ * Passing `outputSha256` asserts "this is the payload I am about to commit":
+ * the sidecar addressed by that hash must exist and carry a complete lock bound
+ * to it. A sidecar addressed by a payload hash but carrying a different binding
+ * is refused rather than trusted.
  */
-export function inspectStagedReferenceLock(outputSha256?: string): StagedLockInspection {
-  if (!existsSync(PENDING_LOCK_SIDECAR)) return { status: 'none' };
+export function inspectStagedReferenceLock(outputSha256: string): StagedLockInspection {
+  const sidecar = pendingLockSidecar(outputSha256);
+  if (!existsSync(sidecar)) return { status: 'none' };
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(PENDING_LOCK_SIDECAR, 'utf-8'));
+    parsed = JSON.parse(readFileSync(sidecar, 'utf-8'));
   } catch {
     return { status: 'unusable' };
   }
@@ -716,7 +726,7 @@ export function inspectStagedReferenceLock(outputSha256?: string): StagedLockIns
   if (stagedOutput !== null && typeof stagedOutput !== 'string') return { status: 'unusable' };
   if (!isReferenceLock(staged.lock)) return { status: 'unusable' };
 
-  if (outputSha256 !== undefined && stagedOutput !== outputSha256) {
+  if (stagedOutput !== outputSha256) {
     return { status: 'mismatched', lock: staged.lock };
   }
   return { status: 'ready', lock: staged.lock };
@@ -734,21 +744,22 @@ export function inspectStagedReferenceLock(outputSha256?: string): StagedLockIns
  * a concurrent run). An unusable sidecar is discarded, leaving the committed
  * lock untouched.
  */
-export function promoteStoryReferenceLock(outputSha256?: string): boolean {
+export function promoteStoryReferenceLock(outputSha256: string): boolean {
   const staged = inspectStagedReferenceLock(outputSha256);
   if (staged.status === 'none') return false;
+  const sidecar = pendingLockSidecar(outputSha256);
 
   if (staged.status === 'unusable' || staged.status === 'mismatched') {
     const reason =
       staged.status === 'unusable'
         ? 'it is not a complete provenance record'
         : 'it is not bound to the artifact just written';
-    // A mismatched sidecar may belong to a concurrent generation whose writer has
-    // not run yet, so it is left for that run rather than destroyed here. Only a
-    // sidecar that cannot be a staged lock at all is removed.
-    if (staged.status === 'unusable') rmSync(PENDING_LOCK_SIDECAR, { force: true });
+    // A mismatched sidecar is left in place: it may describe a payload whose run
+    // has not finished, or a hand-copied file a human is mid-way through fixing.
+    // Only a sidecar that cannot be a staged lock at all is removed.
+    if (staged.status === 'unusable') rmSync(sidecar, { force: true });
     console.error(
-      `warning: refused the staged binding at ${PENDING_LOCK_SIDECAR}; ${reason}, so ${LOCK} ` +
+      `warning: refused the staged binding at ${sidecar}; ${reason}, so ${LOCK} ` +
         'was left unchanged. Re-run the generator to stage a binding for the data being written.'
     );
     return false;
@@ -769,11 +780,14 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
   // pairing this function exists to keep. A leftover sidecar is harmless - the
   // next run refuses to promote one that is not bound to its own output - so it is
   // reported rather than escalated.
+  // The path is payload-addressed, so removing it can only affect a run that
+  // staged a binding for these exact bytes; the exclusive write lock means no
+  // other promotion is in flight either.
   try {
-    rmSync(PENDING_LOCK_SIDECAR, { force: true });
+    rmSync(sidecar, { force: true });
   } catch (error) {
     console.error(
-      `warning: ${LOCK} was updated but the consumed sidecar at ${PENDING_LOCK_SIDECAR} could ` +
+      `warning: ${LOCK} was updated but the consumed sidecar at ${sidecar} could ` +
         `not be removed (${(error as Error).message}). Delete it manually; it will not be ` +
         're-applied to a different generation.'
     );

@@ -14,6 +14,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { writeFileAtomicSync } from '../scripts/lib/atomic-write.js';
+import { pendingLockSidecar } from '../scripts/eft-story-generate.js';
 
 const writer = fileURLToPath(new URL('../scripts/eft-story-write.ts', import.meta.url));
 const PREVIOUS_ARTIFACT = '{ /* previous artifact */ }\n';
@@ -25,8 +26,9 @@ function setupWorkspace(prefix: string) {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   const artifact = join(dir, 'src', 'additions', 'storyChapters.json5');
   const lock = join(dir, 'scripts', 'story-reference.lock.json');
-  const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
   const input = join(dir, 'story-final.json');
+  const outputSha256 = createHash('sha256').update(PAYLOAD).digest('hex');
+  const sidecar = join(dir, pendingLockSidecar(outputSha256));
   for (const path of ['src/additions', 'src/schemas', 'scripts', 'data/eft']) {
     mkdirSync(join(dir, path), { recursive: true });
   }
@@ -49,10 +51,10 @@ function setupWorkspace(prefix: string) {
       chapterQuests: 1,
       objectiveTexts: 1,
     },
-    outputSha256: createHash('sha256').update(PAYLOAD).digest('hex'),
+    outputSha256,
   });
   writeFileSync(sidecar, pending);
-  return { dir, artifact, lock, sidecar, input, pending };
+  return { dir, artifact, lock, sidecar, input, pending, outputSha256 };
 }
 
 /**
@@ -154,7 +156,8 @@ describe('story artifact and provenance write failures', () => {
     // genuinely full disk would. Rollback must therefore not need to write the
     // previous artifact back: it restores a renameable backup. A byte-copy
     // rollback fails here and leaves the new artifact beside the old lock.
-    const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-enospc-');
+    const { dir, artifact, lock, sidecar, input, pending, outputSha256 } =
+      setupWorkspace('story-enospc-');
     try {
       expect(() =>
         runWriter(
@@ -183,7 +186,9 @@ describe('story artifact and provenance write failures', () => {
       expect(readFileSync(sidecar, 'utf8')).toBe(pending);
       expect(readdirSync(join(dir, 'src', 'additions'))).toEqual(['storyChapters.json5']);
       expect(readdirSync(join(dir, 'scripts'))).toEqual(['story-reference.lock.json']);
-      expect(readdirSync(join(dir, 'data', 'eft'))).toEqual(['story-reference.lock.pending.json']);
+      expect(readdirSync(join(dir, 'data', 'eft'))).toEqual([
+        `story-reference.lock.pending.${outputSha256}.json`,
+      ]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

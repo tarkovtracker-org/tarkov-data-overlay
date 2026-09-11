@@ -34,7 +34,7 @@ import { writeFileAtomicSync } from './lib/atomic-write.js';
 import {
   inspectStagedReferenceLock,
   LOCK,
-  PENDING_LOCK_SIDECAR,
+  pendingLockSidecar,
   promoteStoryReferenceLock,
 } from './eft-story-generate.js';
 
@@ -175,7 +175,7 @@ function publishStory(): void {
   if (staged.status !== 'ready') {
     const reason =
       staged.status === 'none'
-        ? `no provenance binding has been staged at ${PENDING_LOCK_SIDECAR}`
+        ? `no provenance binding has been staged at ${pendingLockSidecar(inputSha256)}`
         : staged.status === 'mismatched'
           ? 'the staged binding was generated for a different payload'
           : 'the staged binding could not be read as a complete lock';
@@ -267,7 +267,7 @@ function publishStory(): void {
     restore();
     discardBackup();
     throw new PublicationRefused(
-      `error: the staged binding at ${PENDING_LOCK_SIDECAR} was refused after ${dest} was ` +
+      `error: the staged binding at ${pendingLockSidecar(inputSha256)} was refused after ${dest} was ` +
         'written, so it changed mid-run. The artifact has been rolled back and the ' +
         'source-capture lock left unchanged. Re-run `npm run eft:story`.'
     );
