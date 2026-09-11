@@ -592,9 +592,6 @@ export function commitStoryReferenceLock(outputSha256?: string): void {
 }
 
 /**
-export type StagedLockStatus = 'none' | 'ready' | 'mismatched' | 'unusable';
-
-/**
  * Result of examining the sidecar.
  *
  * A `lock` is present exactly for the statuses that carry one, so the committed
@@ -604,35 +601,39 @@ export type StagedLockStatus = 'none' | 'ready' | 'mismatched' | 'unusable';
 export type StagedLockInspection =
   | { status: 'none' }
   | { status: 'unusable' }
-  | { status: 'ready'; lock: PromotableLock }
-  | { status: 'mismatched'; lock: PromotableLock };
+  | { status: 'ready'; lock: ReferenceLock }
+  | { status: 'mismatched'; lock: ReferenceLock };
 
 /**
- * The {@link ReferenceLock} fields the promotion path dereferences.
- *
- * Narrower than `ReferenceLock` on purpose: this is what the sidecar must supply
- * for promotion to be safe, and claiming more than is checked is what allowed
- * the corruption this guard prevents.
- */
-type PromotableLock = Pick<ReferenceLock, 'file' | 'sha256'> & Partial<ReferenceLock>;
-
-/**
- * Validate the fields {@link promoteStoryReferenceLock} actually dereferences.
+ * Validate the complete provenance record before it can replace the committed lock.
  *
  * The sidecar lives in the gitignored data/ tree and can be truncated by an
  * interrupted run or hand-edited, so its shape is not guaranteed by having
  * parsed as JSON. Without this check a payload that omits `lock` would make
  * `JSON.stringify(undefined)` write the literal `undefined` over the committed
  * lock, corrupting the provenance record that every later run parses.
+ *
+ * Every field is required, not just the two the write dereferences: the lock's
+ * purpose is to record byte size, client version, game mode, capture timestamp
+ * and coverage counts, so promoting a partial record would silently drop the
+ * evidence that makes the committed chapters auditable.
  */
-function isPromotableLock(value: unknown): value is PromotableLock {
+function isReferenceLock(value: unknown): value is ReferenceLock {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const lock = value as Partial<ReferenceLock>;
+  const nonEmptyString = (field: unknown): boolean => typeof field === 'string' && field.length > 0;
+  const stringOrNull = (field: unknown): boolean => typeof field === 'string' || field === null;
+  const count = (field: unknown): boolean => typeof field === 'number' && Number.isFinite(field);
   return (
-    typeof lock.file === 'string' &&
-    lock.file.length > 0 &&
-    typeof lock.sha256 === 'string' &&
-    lock.sha256.length > 0
+    nonEmptyString(lock.file) &&
+    nonEmptyString(lock.sha256) &&
+    count(lock.bytes) &&
+    stringOrNull(lock.clientVersion) &&
+    stringOrNull(lock.gameMode) &&
+    stringOrNull(lock.capturedAt) &&
+    count(lock.quests) &&
+    count(lock.chapterQuests) &&
+    count(lock.objectiveTexts)
   );
 }
 
@@ -642,6 +643,12 @@ function isPromotableLock(value: unknown): value is PromotableLock {
  * Side-effect free so the writer can decide whether a re-pin will be refused
  * *before* it replaces the committed artifact, while the sidecar is still
  * available for {@link promoteStoryReferenceLock} to consume afterwards.
+ *
+ * Passing `outputSha256` asserts "this is the payload I am about to commit", so
+ * the staged pin must be bound to it: an unbound sidecar (no `outputSha256`) is
+ * refused rather than treated as a wildcard, since nothing then ties it to the
+ * data being written. Omitting the argument skips the binding check entirely,
+ * which is how callers that are not committing an artifact inspect a sidecar.
  */
 export function inspectStagedReferenceLock(outputSha256?: string): StagedLockInspection {
   if (!existsSync(PENDING_LOCK_SIDECAR)) return { status: 'none' };
@@ -657,9 +664,9 @@ export function inspectStagedReferenceLock(outputSha256?: string): StagedLockIns
   const staged = parsed as { lock?: unknown; outputSha256?: unknown };
   const stagedOutput = staged.outputSha256 ?? null;
   if (stagedOutput !== null && typeof stagedOutput !== 'string') return { status: 'unusable' };
-  if (!isPromotableLock(staged.lock)) return { status: 'unusable' };
+  if (!isReferenceLock(staged.lock)) return { status: 'unusable' };
 
-  if (outputSha256 !== undefined && stagedOutput !== null && stagedOutput !== outputSha256) {
+  if (outputSha256 !== undefined && stagedOutput !== outputSha256) {
     return { status: 'mismatched', lock: staged.lock };
   }
   return { status: 'ready', lock: staged.lock };
@@ -683,8 +690,8 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
   if (staged.status === 'unusable' || staged.status === 'mismatched') {
     const reason =
       staged.status === 'unusable'
-        ? 'it could not be read as a lock'
-        : 'it was generated for different output than the artifact just written';
+        ? 'it is not a complete provenance record'
+        : 'it is not bound to the artifact just written';
     rmSync(PENDING_LOCK_SIDECAR, { force: true });
     console.error(
       `warning: discarded a staged re-pin at ${PENDING_LOCK_SIDECAR}; ${reason}, so ${LOCK} was ` +

@@ -9,7 +9,7 @@
  */
 
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
@@ -119,6 +119,7 @@ function main(): void {
     process.exit(1);
   }
 
+  const previous = existsSync(dest) ? readFileSync(dest) : null;
   writeFileSync(dest, out);
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
 
@@ -129,12 +130,16 @@ function main(): void {
   // committed chapters. Only a sidecar the pre-write check found usable and bound
   // to this input reaches promotion, so this call is expected to succeed; it is
   // still checked rather than assumed, because the sidecar is a separate file that
-  // could change between the two reads.
+  // could change between the two reads. If it does, the artifact is rolled back so
+  // the pair never disagrees about which capture produced the committed chapters.
   if (staged.status === 'ready' && !promoteStoryReferenceLock(inputSha256)) {
+    if (previous === null) rmSync(dest, { force: true });
+    else writeFileSync(dest, previous);
     console.error(
-      `error: ${dest} was written but the staged re-pin at ${PENDING_LOCK_SIDECAR} was refused, ` +
-        'so the source-capture lock still describes the previous capture. Re-run the generator ' +
-        'with STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
+      `error: the staged re-pin at ${PENDING_LOCK_SIDECAR} was refused after ${dest} was ` +
+        'written, so it changed mid-run. The artifact has been rolled back and the ' +
+        'source-capture lock left unchanged. Re-run the generator with ' +
+        'STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
     );
     process.exit(1);
   }

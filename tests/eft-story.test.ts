@@ -26,6 +26,23 @@ import {
 import { renderStoryChaptersJson5 } from '../scripts/eft-story-write.js';
 import { getProjectPaths, STORY_ENDINGS } from '../src/lib/index.js';
 
+/**
+ * A complete provenance record, matching what `commitStoryReferenceLock` stages
+ * from `fingerprint()`. Promotion requires every field, so partial locks in these
+ * fixtures would be refused as unusable rather than exercising the path intended.
+ */
+const FULL_LOCK = {
+  file: 'eft/capture.json',
+  sha256: 'a'.repeat(64),
+  bytes: 4096,
+  clientVersion: 'test-client',
+  gameMode: 'pve',
+  capturedAt: '2026-06-30T12:00:00Z',
+  quests: 12,
+  chapterQuests: 3,
+  objectiveTexts: 7,
+};
+
 describe('story reference provenance enforcement', () => {
   it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
@@ -205,7 +222,7 @@ describe('story reference provenance enforcement', () => {
       writeFileSync(
         sidecar,
         `${JSON.stringify({
-          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          lock: FULL_LOCK,
           outputSha256: 'b'.repeat(64),
         })}\n`
       );
@@ -237,6 +254,13 @@ describe('story reference provenance enforcement', () => {
         JSON.stringify({ outputSha256: 'b'.repeat(64) }), // no lock at all
         JSON.stringify({ lock: { sha256: 'a'.repeat(64) }, outputSha256: null }), // no file
         JSON.stringify({ lock: 'not-an-object', outputSha256: null }),
+        // Parses and names a capture, but drops the provenance the lock exists to
+        // record, so promoting it would leave the committed chapters unauditable.
+        JSON.stringify({
+          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        }),
+        JSON.stringify({ lock: { ...FULL_LOCK, bytes: 'not-a-number' } }),
         '{ truncated', // never finished being written
       ]) {
         writeFileSync(sidecar, `${payload}\n`);
@@ -258,6 +282,48 @@ describe('story reference provenance enforcement', () => {
         expect(readFileSync(lockFile, 'utf-8'), `lock corrupted by: ${payload}`).toBe(committed);
         expect(existsSync(sidecar), `unusable sidecar kept: ${payload}`).toBe(false);
       }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a staged pin that is not bound to the payload being committed', () => {
+    // `outputSha256: null` used to act as a wildcard, so a sidecar that never
+    // recorded which payload it was staged for could be promoted beside unrelated
+    // data. A caller that supplies a hash is asserting what it is committing, so
+    // an unbound pin is refused rather than trusted.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unbound-'));
+    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const promote = (arg: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock(${arg}));`,
+        ],
+        { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+      )
+        .toString()
+        .trim();
+    const stage = () =>
+      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: null })}\n`);
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+
+      stage();
+      expect(promote(JSON.stringify('b'.repeat(64))), 'promoted an unbound sidecar').toBe('false');
+      expect(existsSync(lockFile), 'lock written from an unbound sidecar').toBe(false);
+
+      // Omitting the hash is the "not committing an artifact" path, where there is
+      // nothing to bind to and the pin still applies.
+      stage();
+      expect(promote('')).toBe('true');
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({ file: FULL_LOCK.file });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -308,7 +374,7 @@ describe('story reference provenance enforcement', () => {
       writeFileSync(
         sidecar,
         `${JSON.stringify({
-          lock: { file: 'eft/newer.json', sha256: 'c'.repeat(64) },
+          lock: { ...FULL_LOCK, file: 'eft/newer.json', sha256: 'c'.repeat(64) },
           outputSha256: 'b'.repeat(64),
         })}\n`
       );
@@ -481,7 +547,7 @@ describe('story reference provenance enforcement', () => {
       mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
       const staged = `${JSON.stringify(
         {
-          lock: { file: 'eft/capture.json', sha256: 'a'.repeat(64) },
+          lock: FULL_LOCK,
           outputSha256: 'b'.repeat(64),
         },
         null,
