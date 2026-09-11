@@ -709,18 +709,107 @@ describe('parseObjectives', () => {
     ]);
   });
 
-  it('does not let a horizontal rule end a conditional branch', () => {
-    const withRule = [
+  it('ends a group of branch alternatives at a horizontal rule', () => {
+    // Shaped after the real Boreas Objectives section, where each `<hr/>` closes a
+    // set of "If ..." variants and the universal storyline resumes after it.
+    // Treating the rule as a no-op left the last branch open and published trunk
+    // objectives as optional.
+    const boreasShaped = [
       '== Objectives ==',
-      "'''If you refuse'''",
-      '* First branch step',
+      '* Arrange a transport to the icebreaker',
+      "'''If you gave the Armored case to Prapor'''",
+      '* Hand over the AMG-10 fluid to Prapor',
+      "'''If you have not completed Falling Skies'''",
+      '* Eliminate any 30 targets on Reserve',
       '<hr/>',
-      '* Second branch step',
+      '* Find an alternative transport to the icebreaker',
+      '* Board the smuggler hovercraft',
       '== Rewards ==',
     ].join('\n');
-    expect(parseObjectives(withRule)).toEqual([
-      { text: 'First branch step', optional: true },
-      { text: 'Second branch step', optional: true },
+    expect(parseObjectives(boreasShaped)).toEqual([
+      { text: 'Arrange a transport to the icebreaker', optional: false },
+      { text: 'Hand over the AMG-10 fluid to Prapor', optional: true },
+      { text: 'Eliminate any 30 targets on Reserve', optional: true },
+      // Post-rule trunk: required for everyone regardless of the branch taken.
+      { text: 'Find an alternative transport to the icebreaker', optional: false },
+      { text: 'Board the smuggler hovercraft', optional: false },
+    ]);
+  });
+
+  it('keeps a step required when every branch alternative repeats it', () => {
+    // Boreas converges: each "If ..." variant ends on the same closing step, so no
+    // choice avoids it and publishing it optional would understate the storyline.
+    const converging = [
+      '== Objectives ==',
+      "'''If you have completed The Price of Independence'''",
+      '* Return to the Hideout',
+      '* Tell Mechanic that you found transport',
+      "'''If you have completed Choose Your Friends Wisely'''",
+      '* Hand over 200 rounds',
+      '* Tell Mechanic that you found transport',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(converging)).toEqual([
+      // Present in one alternative only, so genuinely branch-specific.
+      { text: 'Return to the Hideout', optional: true },
+      { text: 'Tell Mechanic that you found transport', optional: false },
+      { text: 'Hand over 200 rounds', optional: true },
+      { text: 'Tell Mechanic that you found transport', optional: false },
+    ]);
+  });
+
+  it('keeps a step required when it also appears outside any branch', () => {
+    const alsoTrunk = [
+      '== Objectives ==',
+      "'''If you took the long way'''",
+      '* Return to the BTR driver',
+      '<hr/>',
+      '* Return to the BTR driver',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(alsoTrunk)).toEqual([
+      // Stated unconditionally later, so the branch occurrence is not a choice.
+      { text: 'Return to the BTR driver', optional: false },
+      { text: 'Return to the BTR driver', optional: false },
+    ]);
+  });
+
+  it('never overrides an explicit optional marker with branch inference', () => {
+    // Boreas uses "Reach the engine room" both as an (Optional) hint under one step
+    // and as a required step later. Only the inline marker separates them, so the
+    // trunk inference must not promote the marked one to required.
+    const markedAndTrunk = [
+      '== Objectives ==',
+      '* Access the engine room',
+      "** (''Optional'') Reach the engine room",
+      '* Reach the engine room',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(markedAndTrunk)).toEqual([
+      { text: 'Access the engine room', optional: false },
+      { text: 'Reach the engine room', optional: true },
+      { text: 'Reach the engine room', optional: false },
+    ]);
+  });
+
+  it('does not let a bold sub-header close the ending it sits inside', () => {
+    // The Ticket nests bold sub-headers under `===If ...===` ending sections. A
+    // sub-header closing the outer branch would leak that ending's objectives out
+    // as universally required.
+    const nested = [
+      '== Objectives ==',
+      '* Contact Mr. Kerman',
+      "=== If you accept Mr. Kerman's offer ===",
+      '* Accept the offer',
+      "'''After the completion of Prapor's tasks'''",
+      '* Hand over the case to Prapor',
+      '== Rewards ==',
+    ].join('\n');
+    expect(parseObjectives(nested)).toEqual([
+      { text: 'Contact Mr. Kerman', optional: false },
+      { text: 'Accept the offer', optional: true },
+      // Still inside the ending branch, despite the unconditional sub-header.
+      { text: 'Hand over the case to Prapor', optional: true },
     ]);
   });
 

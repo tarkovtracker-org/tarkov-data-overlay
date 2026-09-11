@@ -102,15 +102,13 @@ export function cleanObjectiveLine(line: string): WikiStoryObjective {
  * `===If you accept Mr. Kerman's offer===`.
  *
  * Distinguished from an unconditional sequencing header like
- * `'''Once you have the case'''`, which applies to every player and therefore
- * closes any branch that preceded it.
+ * `'''Once you have the case'''` or `'''After completing [[Stick to It]]'''`,
+ * which apply to every player and therefore close the branch before them.
  */
 const CONDITIONAL_HEADER = /^(?:only\s+)?if\b/i;
 
-/** True for a bold or `=`-delimited header line (not an objective bullet). */
-function isHeaderLine(line: string): boolean {
-  return line.startsWith("'''") || line.startsWith('=');
-}
+/** `<hr/>` closes a group of branch alternatives and resumes the trunk. */
+const RULE_LINE = /^<hr\s*\/?>/i;
 
 /** Header text without its bold/heading delimiters. */
 function headerText(line: string): string {
@@ -123,26 +121,116 @@ function headerText(line: string): string {
 export function parseObjectives(wikitext: string): WikiStoryObjective[] {
   const match = /==\s*Objectives\s*==([\s\S]*?)(\n==[^=]|$)/.exec(wikitext);
   if (!match) return [];
-  const out: WikiStoryObjective[] = [];
+
   // Objectives under an "If ..." header only apply to players who took that
   // branch, so they are not universally required. The page marks individually
   // optional items inline, but says nothing per-bullet about branch membership -
   // it is carried by the header - so without tracking it every branch objective
   // reads as required and consumers block players who chose the other path.
-  let conditional = false;
+  //
+  // Two nesting levels are tracked because the pages mix them: `===If ...===`
+  // wraps a whole ending, and `'''...'''` sub-headers appear inside it. A bold
+  // sub-header must not be able to close the heading-level branch containing it,
+  // which would leak that ending's objectives out as universally required.
+  type Entry = WikiStoryObjective & { group: number; alt: number; inline: boolean };
+  const entries: Entry[] = [];
+  let headingBranch = false;
+  let boldBranch = false;
+  // Consecutive alternatives share a group; `alt` identifies one alternative.
+  let group = 0;
+  let alt = 0;
+  let inGroup = false;
+  const endGroup = () => {
+    if (inGroup) group += 1;
+    inGroup = false;
+  };
+
   for (const raw of match[1].split('\n')) {
     const line = raw.trim();
     if (!line) continue;
     if (!line.startsWith('*')) {
-      // Only headers delimit branches. Other non-bullet lines (`<hr/>`, stray
-      // markup) leave the current branch intact rather than ending it early.
-      if (isHeaderLine(line)) conditional = CONDITIONAL_HEADER.test(headerText(line));
+      if (RULE_LINE.test(line)) {
+        // A rule ends the alternatives it follows. On Boreas each `<hr/>` closes a
+        // group of "If ..." variants and the universal storyline resumes after it,
+        // so leaving the branch open here marks trunk objectives optional.
+        boldBranch = false;
+        endGroup();
+      } else if (line.startsWith('=')) {
+        headingBranch = CONDITIONAL_HEADER.test(headerText(line));
+        boldBranch = false;
+        endGroup();
+        if (headingBranch) {
+          inGroup = true;
+          alt += 1;
+        }
+      } else if (line.startsWith("'''")) {
+        boldBranch = CONDITIONAL_HEADER.test(headerText(line));
+        if (boldBranch) {
+          inGroup = true;
+          alt += 1;
+        } else {
+          endGroup();
+        }
+      }
+      // Anything else (stray markup) leaves the current branch state alone.
       continue;
     }
     const { text, optional } = cleanObjectiveLine(line);
-    if (text) out.push({ text, optional: optional || conditional });
+    if (text) {
+      entries.push({
+        text,
+        optional: optional || headingBranch || boldBranch,
+        inline: optional,
+        group,
+        alt: headingBranch || boldBranch ? alt : 0,
+      });
+    }
   }
-  return out;
+
+  // Branch alternatives often converge: the same closing step is repeated under
+  // every variant ("Tell Mechanic that you found transport", "Hand over the AMG-10
+  // fluid"). Something every alternative requires is not branch-specific, so it
+  // stays required rather than being published optional to everyone.
+  const altsByGroup = new Map<number, Set<number>>();
+  for (const entry of entries) {
+    if (entry.alt === 0) continue;
+    const alts = altsByGroup.get(entry.group) ?? new Set<number>();
+    alts.add(entry.alt);
+    altsByGroup.set(entry.group, alts);
+  }
+  const seenAlts = new Map<string, Set<number>>();
+  for (const entry of entries) {
+    if (entry.alt === 0) continue;
+    const key = `${entry.group}\u0000${entry.text.toLowerCase()}`;
+    const alts = seenAlts.get(key) ?? new Set<number>();
+    alts.add(entry.alt);
+    seenAlts.set(key, alts);
+  }
+
+  // An objective stated outside any branch is required for everyone, so other
+  // occurrences of the same step inside a branch cannot make it optional.
+  const trunk = new Set(
+    entries.filter((entry) => entry.alt === 0 && !entry.optional).map((e) => e.text.toLowerCase())
+  );
+
+  return entries.map(({ text, optional, inline, group: g, alt: a }) => {
+    if (!optional) return { text, optional };
+    // An explicit `(''Optional'')` marker is direct evidence from the page, so
+    // neither inference below may override it. The same wording can appear as an
+    // optional hint under one step and as a required step later (Boreas "Reach the
+    // engine room"), and only the marker distinguishes them.
+    if (inline) return { text, optional: true };
+    if (trunk.has(text.toLowerCase())) return { text, optional: false };
+    if (a !== 0) {
+      const groupAlts = altsByGroup.get(g);
+      const textAlts = seenAlts.get(`${g}\u0000${text.toLowerCase()}`);
+      // Present in every alternative of its group, so no choice avoids it.
+      if (groupAlts && textAlts && groupAlts.size > 1 && textAlts.size === groupAlts.size) {
+        return { text, optional: false };
+      }
+    }
+    return { text, optional };
+  });
 }
 
 async function main(): Promise<void> {
