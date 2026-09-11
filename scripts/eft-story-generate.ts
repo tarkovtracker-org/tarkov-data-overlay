@@ -35,7 +35,7 @@ import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
 import { modeFromRequestUrl } from './eft-compare.js';
 import { sequenceRatio } from './lib/sequence-matcher.js';
-import { writeFileAtomicSync } from './lib/atomic-write.js';
+import { writeFileAtomicSync, writeFileExclusiveSync } from './lib/atomic-write.js';
 
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
@@ -638,13 +638,14 @@ export function commitStoryReferenceLock(outputSha256: string): void {
   const sidecar = pendingLockSidecar(outputSha256);
   mkdirSync(dirname(sidecar), { recursive: true });
   // Two runs can produce byte-identical payloads - a normal run and a re-pin
-  // whose capture changed only provenance, say - so the later run replaces the
-  // earlier run's binding. Warn when it does: the earlier run's writer promotes
-  // whatever is staged here, and a re-pin silently degrading to a confirmation
-  // is the audit failure the lock exists to prevent. Isolating the two would
-  // need a run token carried through the shell pipeline, which has no channel
-  // for one; the write lock plus this warning keep the outcome visible instead.
-  if (existsSync(sidecar)) {
+  // whose capture changed only provenance, say - so they share a binding
+  // address. Replacing the other run's binding would let its writer promote the
+  // wrong capture and, in the re-pin case, silently confirm the old lock, so
+  // staging is exclusive: an identical binding is left in place, and a binding
+  // recording a different capture is refused rather than clobbered. A binding
+  // left by a failed run must be removed (or completed) before re-staging.
+  const staged = `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`;
+  if (!writeFileExclusiveSync(sidecar, staged)) {
     let existingLock: unknown;
     try {
       existingLock = (JSON.parse(readFileSync(sidecar, 'utf-8')) as { lock?: unknown }).lock;
@@ -655,16 +656,14 @@ export function commitStoryReferenceLock(outputSha256: string): void {
       !isReferenceLock(existingLock) ||
       JSON.stringify(existingLock) !== JSON.stringify(pendingLock)
     ) {
-      console.error(
-        `warning: replacing a staged binding at ${sidecar} that records a different capture ` +
-          'for the same payload. If another story run is still active, one of the two runs will ' +
-          'fail or degrade to a confirmation instead of its intended pin.'
+      throw new Error(
+        `refusing to replace the staged binding at ${sidecar}: it records a different capture for the ` +
+          'same payload, so replacing it could promote the wrong pin. If another story run is active, ' +
+          'let it finish; otherwise remove that file and re-run.'
       );
     }
+    // Identical binding already staged by another run of the same capture.
   }
-  // Atomic so a concurrent reader (the writer, or another generation) never sees
-  // a half-written sidecar and mistakes it for an unusable one.
-  writeFileAtomicSync(sidecar, `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`);
   console.error(
     `staged provenance binding at ${sidecar}; ` +
       `${LOCK} updates once the story artifact is written`

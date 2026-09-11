@@ -13,7 +13,7 @@ import {
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { writeFileAtomicSync } from '../scripts/lib/atomic-write.js';
+import { writeFileAtomicSync, writeFileExclusiveSync } from '../scripts/lib/atomic-write.js';
 import { pendingLockSidecar } from '../scripts/eft-story-generate.js';
 
 const writer = fileURLToPath(new URL('../scripts/eft-story-write.ts', import.meta.url));
@@ -107,6 +107,21 @@ describe('writeFileAtomicSync', () => {
       expect(() => writeFileAtomicSync(dest, 'new')).toThrow();
       expect(readFileSync(join(dest, 'keep'), 'utf8')).toBe('original');
       expect(readdirSync(dir)).toEqual(['existing-directory']);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('creates exclusively and leaves an occupied path untouched', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'atomic-exclusive-'));
+    const dest = join(dir, 'binding.json');
+    try {
+      expect(writeFileExclusiveSync(dest, 'first')).toBe(true);
+      expect(readFileSync(dest, 'utf8')).toBe('first');
+      // The second write must not clobber another run's binding.
+      expect(writeFileExclusiveSync(dest, 'second')).toBe(false);
+      expect(readFileSync(dest, 'utf8')).toBe('first');
+      expect(readdirSync(dir)).toEqual(['binding.json']);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -304,11 +304,11 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
-  it("warns when a second run replaces another run's binding for the same payload", () => {
+  it("refuses to replace another run's binding for the same payload", () => {
     // A normal run and a re-pin can emit byte-identical payloads, so they share a
-    // binding address. The later generation replacing an earlier binding must not
-    // be silent: the earlier writer promotes whatever is staged, and a re-pin
-    // degrading to a confirmation is the audit failure the lock prevents.
+    // binding address. Replacing the other run's binding would let its writer
+    // promote the wrong capture and, in the re-pin case, silently confirm the old
+    // lock, so staging is exclusive and a different binding is a hard error.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-collision-'));
     const capture = JSON.stringify({
       request: {
@@ -376,22 +376,27 @@ describe('story reference provenance enforcement', () => {
       );
       expect(first.status, first.stderr.toString()).toBe(0);
 
-      // A second run stages a different capture's binding at the same address.
+      // Re-staging the binding this run promoted is idempotent, not a clash.
+      const realLock = JSON.parse(
+        readFileSync(join(dir, 'scripts', 'story-reference.lock.json'), 'utf-8')
+      );
       writeFileSync(
         join(dir, pendingLockSidecar(binding)),
-        `${JSON.stringify({
-          lock: { ...FULL_LOCK, file: 'eft/other.json', sha256: 'f'.repeat(64) },
-          outputSha256: binding,
-        })}\n`
+        `${JSON.stringify({ lock: realLock, outputSha256: binding })}\n`
       );
-      const collision = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
-      expect(collision.status, collision.stderr.toString()).toBe(0);
-      expect(collision.stderr.toString()).toMatch(/replacing a staged binding/);
-
-      // Re-staging the same binding is not a collision.
       const repeat = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
       expect(repeat.status, repeat.stderr.toString()).toBe(0);
-      expect(repeat.stderr.toString()).not.toMatch(/replacing a staged binding/);
+
+      // Another capture's binding for the same payload is refused, not replaced.
+      const foreign = `${JSON.stringify({
+        lock: { ...FULL_LOCK, file: 'eft/other.json', sha256: 'f'.repeat(64) },
+        outputSha256: binding,
+      })}\n`;
+      writeFileSync(join(dir, pendingLockSidecar(binding)), foreign);
+      const collision = run(`loadReference(); commitStoryReferenceLock('${binding}');`);
+      expect(collision.status, collision.stderr.toString()).not.toBe(0);
+      expect(collision.stderr.toString()).toMatch(/refusing to replace the staged binding/);
+      expect(readFileSync(join(dir, pendingLockSidecar(binding)), 'utf-8')).toBe(foreign);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

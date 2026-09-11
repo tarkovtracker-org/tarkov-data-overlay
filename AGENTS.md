@@ -160,7 +160,10 @@ name what it does and does not reproduce.
   the capture to the exact payload it emits, and `eft-story-write.ts` refuses to
   replace the artifact without one - so an edited or unrelated
   `data/eft/story-final.json` cannot be published under the committed lock.
-  Note the pinned capture is not
+  Where another run already staged a binding for the same payload, staging is
+  exclusive: an identical binding is idempotent, a binding for a different
+  capture is refused rather than clobbered, so overlapping runs cannot promote
+  each other's pin. Note the pinned capture is not
   necessarily the newest one: the client returns a story sub-quest template only
   once the player has reached it, so an older capture from an advanced character
   resolves more of the storyline than a fresh one from an early character, and
