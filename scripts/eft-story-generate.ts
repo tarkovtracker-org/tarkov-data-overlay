@@ -592,6 +592,80 @@ export function commitStoryReferenceLock(outputSha256?: string): void {
 }
 
 /**
+export type StagedLockStatus = 'none' | 'ready' | 'mismatched' | 'unusable';
+
+/**
+ * Result of examining the sidecar.
+ *
+ * A `lock` is present exactly for the statuses that carry one, so the committed
+ * lock can never be written from an absent value - the compiler rejects it
+ * rather than serializing `undefined`.
+ */
+export type StagedLockInspection =
+  | { status: 'none' }
+  | { status: 'unusable' }
+  | { status: 'ready'; lock: PromotableLock }
+  | { status: 'mismatched'; lock: PromotableLock };
+
+/**
+ * The {@link ReferenceLock} fields the promotion path dereferences.
+ *
+ * Narrower than `ReferenceLock` on purpose: this is what the sidecar must supply
+ * for promotion to be safe, and claiming more than is checked is what allowed
+ * the corruption this guard prevents.
+ */
+type PromotableLock = Pick<ReferenceLock, 'file' | 'sha256'> & Partial<ReferenceLock>;
+
+/**
+ * Validate the fields {@link promoteStoryReferenceLock} actually dereferences.
+ *
+ * The sidecar lives in the gitignored data/ tree and can be truncated by an
+ * interrupted run or hand-edited, so its shape is not guaranteed by having
+ * parsed as JSON. Without this check a payload that omits `lock` would make
+ * `JSON.stringify(undefined)` write the literal `undefined` over the committed
+ * lock, corrupting the provenance record that every later run parses.
+ */
+function isPromotableLock(value: unknown): value is PromotableLock {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const lock = value as Partial<ReferenceLock>;
+  return (
+    typeof lock.file === 'string' &&
+    lock.file.length > 0 &&
+    typeof lock.sha256 === 'string' &&
+    lock.sha256.length > 0
+  );
+}
+
+/**
+ * Read and validate the staged sidecar without modifying anything on disk.
+ *
+ * Side-effect free so the writer can decide whether a re-pin will be refused
+ * *before* it replaces the committed artifact, while the sidecar is still
+ * available for {@link promoteStoryReferenceLock} to consume afterwards.
+ */
+export function inspectStagedReferenceLock(outputSha256?: string): StagedLockInspection {
+  if (!existsSync(PENDING_LOCK_SIDECAR)) return { status: 'none' };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(PENDING_LOCK_SIDECAR, 'utf-8'));
+  } catch {
+    return { status: 'unusable' };
+  }
+  if (typeof parsed !== 'object' || parsed === null) return { status: 'unusable' };
+
+  const staged = parsed as { lock?: unknown; outputSha256?: unknown };
+  const stagedOutput = staged.outputSha256 ?? null;
+  if (stagedOutput !== null && typeof stagedOutput !== 'string') return { status: 'unusable' };
+  if (!isPromotableLock(staged.lock)) return { status: 'unusable' };
+
+  if (outputSha256 !== undefined && stagedOutput !== null && stagedOutput !== outputSha256) {
+    return { status: 'mismatched', lock: staged.lock };
+  }
+  return { status: 'ready', lock: staged.lock };
+}
+
+/**
  * Promote a staged re-pin to the committed lock. Returns true when one was
  * applied.
  *
@@ -599,32 +673,30 @@ export function commitStoryReferenceLock(outputSha256?: string): void {
  * `src/additions/storyChapters.json5`, so the lock and the artifact it describes
  * move together. When `outputSha256` is supplied it must match what the
  * generator staged; a mismatch means the sidecar belongs to a different
- * generation, so it is discarded rather than applied.
+ * generation, so it is discarded rather than applied. An unusable sidecar is
+ * likewise discarded, leaving the committed lock untouched.
  */
 export function promoteStoryReferenceLock(outputSha256?: string): boolean {
-  if (!existsSync(PENDING_LOCK_SIDECAR)) return false;
-  const staged = JSON.parse(readFileSync(PENDING_LOCK_SIDECAR, 'utf-8')) as {
-    lock: ReferenceLock;
-    outputSha256: string | null;
-  };
-  if (
-    outputSha256 !== undefined &&
-    staged.outputSha256 !== null &&
-    staged.outputSha256 !== outputSha256
-  ) {
+  const staged = inspectStagedReferenceLock(outputSha256);
+  if (staged.status === 'none') return false;
+
+  if (staged.status === 'unusable' || staged.status === 'mismatched') {
+    const reason =
+      staged.status === 'unusable'
+        ? 'it could not be read as a lock'
+        : 'it was generated for different output than the artifact just written';
     rmSync(PENDING_LOCK_SIDECAR, { force: true });
     console.error(
-      `warning: discarded a staged re-pin at ${PENDING_LOCK_SIDECAR}; it was generated for ` +
-        `different output than the artifact just written, so ${LOCK} was left unchanged. ` +
-        'Re-run the generator with STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
+      `warning: discarded a staged re-pin at ${PENDING_LOCK_SIDECAR}; ${reason}, so ${LOCK} was ` +
+        'left unchanged. Re-run the generator with STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
     );
     return false;
   }
-  writeFileSync(LOCK, `${JSON.stringify(staged.lock, null, 2)}\n`);
+
+  const { lock } = staged;
+  writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
   rmSync(PENDING_LOCK_SIDECAR, { force: true });
-  console.error(
-    `re-pinned ${LOCK} -> ${staged.lock.file} (sha256=${staged.lock.sha256.slice(0, 12)}…)`
-  );
+  console.error(`re-pinned ${LOCK} -> ${lock.file} (sha256=${lock.sha256.slice(0, 12)}…)`);
   return true;
 }
 

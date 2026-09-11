@@ -674,7 +674,16 @@
     // 6 BEAR-only tasks appear in either capture). Per AGENTS.md the wiki is the
     // authority for `traderRequirements` regardless, and absence from a capture
     // that cannot contain the task is not counter-evidence.
-    // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
+    // The gate upstream does serve is a `globalVariable` start condition on
+    // Prapor's tier cohort variable (6a32651a811905ed0cac0973). That variable's
+    // identity is what indicates the tier; its threshold is NOT the loyalty
+    // level - the number is a task count, and sibling tasks on the same variable
+    // carry thresholds that do not match their documented requirement. See
+    // docs/GLOBAL_VARIABLE_MECHANICS.md. Left in place, so the merged shape is
+    // "loyalty AND counter" rather than a double gate.
+    // Precedent: Ironclad Proof (59ca1a6286f774509a270942), the USEC mirror of
+    // this quest, carries the same reviewed Prapor LL3 override.
+    // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land?oldid=357228
     //        ("Must reach Loyalty Level 3 with Prapor to obtain this quest.")
     traderRequirements: [
       {

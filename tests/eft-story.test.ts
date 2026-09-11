@@ -219,6 +219,148 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
+  it('leaves the committed lock intact when the sidecar carries no usable lock', () => {
+    // The sidecar lives in the gitignored data/ tree, so an interrupted run or a
+    // hand edit can leave JSON that parses but omits `lock`. Serializing that
+    // straight through would write the literal `undefined` over the committed
+    // lock and break every later run that parses it.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-unusable-'));
+    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(lockFile, committed);
+
+      for (const payload of [
+        JSON.stringify({ outputSha256: 'b'.repeat(64) }), // no lock at all
+        JSON.stringify({ lock: { sha256: 'a'.repeat(64) }, outputSha256: null }), // no file
+        JSON.stringify({ lock: 'not-an-object', outputSha256: null }),
+        '{ truncated', // never finished being written
+      ]) {
+        writeFileSync(sidecar, `${payload}\n`);
+        const promoted = execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { promoteStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; console.log(promoteStoryReferenceLock('${'b'.repeat(64)}'));`,
+          ],
+          { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+        )
+          .toString()
+          .trim();
+
+        expect(promoted, `promoted an unusable sidecar: ${payload}`).toBe('false');
+        expect(readFileSync(lockFile, 'utf-8'), `lock corrupted by: ${payload}`).toBe(committed);
+        expect(existsSync(sidecar), `unusable sidecar kept: ${payload}`).toBe(false);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to replace the story artifact when a staged re-pin does not match it', () => {
+    // Promotion is deliberately attempted after the artifact write so a failed
+    // write cannot advance the pin. That ordering must not let a *refused*
+    // promotion pass silently: the result would be freshly generated chapters
+    // described by the previous capture's lock.
+    const dir = mkdtempSync(join(tmpdir(), 'story-write-refuse-'));
+    const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
+    const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
+    const dest = join(dir, 'src', 'additions', 'storyChapters.json5');
+    const input = join(dir, 'story-final.json');
+    const committed = `${JSON.stringify({ file: 'eft/original.json', sha256: 'a'.repeat(64) }, null, 2)}\n`;
+    const previousArtifact = '{ /* previous */ }\n';
+    try {
+      mkdirSync(join(dir, 'scripts'), { recursive: true });
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      mkdirSync(join(dir, 'src', 'additions'), { recursive: true });
+      mkdirSync(join(dir, 'src', 'schemas'), { recursive: true });
+      writeFileSync(
+        join(dir, 'src', 'schemas', 'story-chapter.schema.json'),
+        readFileSync(join(getProjectPaths().schemasDir, 'story-chapter.schema.json'))
+      );
+      writeFileSync(lockFile, committed);
+      writeFileSync(dest, previousArtifact);
+      writeFileSync(
+        input,
+        JSON.stringify({
+          'test-chapter': {
+            id: 'test-chapter',
+            name: 'Test Chapter',
+            normalizedName: 'test-chapter',
+            wikiLink: 'https://example.test/',
+            order: 1,
+            chapterQuestId: '68cbd33676fe74b1e80bfd91',
+            referenceCoverage: {
+              referencedSubquests: 0,
+              resolvedSubquests: 0,
+              partial: false,
+            },
+          },
+        })
+      );
+      // Staged for output that is not what the writer is about to read.
+      writeFileSync(
+        sidecar,
+        `${JSON.stringify({
+          lock: { file: 'eft/newer.json', sha256: 'c'.repeat(64) },
+          outputSha256: 'b'.repeat(64),
+        })}\n`
+      );
+
+      const run = () => {
+        let status = 0;
+        let stderr = '';
+        try {
+          execFileSync(
+            process.execPath,
+            [
+              '--import',
+              import.meta.resolve('tsx'),
+              new URL('../scripts/eft-story-write.ts', import.meta.url).pathname,
+              input,
+            ],
+            { cwd: dir, env: { ...process.env }, stdio: 'pipe' }
+          );
+        } catch (error: any) {
+          status = error.status ?? 1;
+          stderr = error.stderr?.toString() ?? '';
+        }
+        return { status, stderr };
+      };
+
+      const mismatched = run();
+      expect(mismatched.status, 'writer exited successfully despite a refused re-pin').not.toBe(0);
+      expect(mismatched.stderr).toMatch(/refusing to write/);
+      // Neither side moved, so the pin still describes the committed artifact.
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // Same refusal for a sidecar that cannot be read as a lock at all: the
+      // artifact must not be replaced on the strength of a pin that cannot land.
+      writeFileSync(sidecar, '{ truncated\n');
+      const unusable = run();
+      expect(unusable.status, 'writer accepted an unusable staged re-pin').not.toBe(0);
+      expect(unusable.stderr).toMatch(/refusing to write/);
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // With no sidecar there is no pin to move, so generation proceeds.
+      rmSync(sidecar, { force: true });
+      const clean = run();
+      expect(clean.status, clean.stderr).toBe(0);
+      expect(readFileSync(dest, 'utf-8')).not.toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8'), 'lock moved without a staged re-pin').toBe(committed);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('refuses to pin a capture from a mode the storyline is not shared with', () => {
     // The committed addition is stamped "shared between PVP and PVE". A seasonal
     // character is a separate progression with independently divergent quest
