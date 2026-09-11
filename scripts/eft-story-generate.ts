@@ -29,15 +29,7 @@
  */
 
 import { createHash } from 'crypto';
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'fs';
 import { dirname, join } from 'path';
 import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
@@ -47,7 +39,7 @@ import { writeFileAtomicSync } from './lib/atomic-write.js';
 
 const META = 'scripts/story-chapter-meta.json';
 const WIKI = 'data/eft/story-wiki-objectives.json';
-const LOCK = 'scripts/story-reference.lock.json';
+export const LOCK = 'scripts/story-reference.lock.json';
 export const NARRATOR_TRADER = '67f7af56c117b6140af2a607';
 const ID_RE = /[0-9a-fA-F]{24}/;
 const MATCH_THRESHOLD = 0.6;
@@ -595,42 +587,51 @@ function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] 
  *   lock, so a source switch always lands as a reviewable diff.
  */
 /**
- * Lock staged by {@link loadReference} under `STORY_REFERENCE_UPDATE_LOCK=1`.
+ * Lock staged by {@link loadReference} for the writer to bind to its output.
  *
- * Held until {@link commitStoryReferenceLock} runs so a re-pin only lands when
- * generation actually produced the chapters it claims to describe.
+ * Staged on every run, not only on an explicit re-pin: the writer replaces the
+ * committed artifact, so it must be able to tie that write to a capture the
+ * generator vouched for. On a normal run the staged lock is the committed one;
+ * under `STORY_REFERENCE_UPDATE_LOCK=1` it is the newly selected capture.
+ *
+ * Held until {@link commitStoryReferenceLock} runs so a staged pin only lands
+ * when generation actually produced the chapters it claims to describe.
  */
 let pendingLock: ReferenceLock | undefined;
 
 /**
- * Sidecar carrying a staged re-pin across the generate -> write process boundary.
+ * Sidecar carrying a staged provenance binding across the generate -> write process boundary.
  *
  * The generator only emits JSON on stdout; `eft-story-write.ts` is what persists
  * `src/additions/storyChapters.json5`. The lock's whole purpose is to record
- * which capture produced the *committed* data, so it must not land until that
- * write succeeds - otherwise a failed redirect or a writer error leaves the lock
- * describing an artifact that was never updated. Lives under the gitignored
- * data/ tree and is consumed and removed by the writer.
+ * which capture produced the *committed* data, so the writer refuses to replace
+ * the artifact unless the sidecar is bound to the exact payload it is about to
+ * write. The binding must not land until that write succeeds - otherwise a
+ * failed redirect or a writer error leaves the lock describing an artifact that
+ * was never updated. Lives under the gitignored data/ tree and is consumed and
+ * removed by the writer after a successful promotion.
  */
 export const PENDING_LOCK_SIDECAR = join('data', 'eft', 'story-reference.lock.pending.json');
 
 /**
- * Stage a re-pin for the writer to promote. No-op unless
- * `STORY_REFERENCE_UPDATE_LOCK=1` staged one.
+ * Stage a provenance binding for the writer to promote. No-op only when
+ * {@link loadReference} found no lock to stage.
  *
- * `outputSha256` binds the staged pin to the exact generated payload, so a
+ * `outputSha256` binds the staged binding to the exact generated payload, so a
  * sidecar left behind by a run whose write never happened cannot later be
  * promoted alongside different data.
  */
 export function commitStoryReferenceLock(outputSha256?: string): void {
   if (!pendingLock) return;
   mkdirSync(dirname(PENDING_LOCK_SIDECAR), { recursive: true });
-  writeFileSync(
+  // Atomic so a concurrent reader (the writer, or another generation) never sees
+  // a half-written sidecar and mistakes it for an unusable one.
+  writeFileAtomicSync(
     PENDING_LOCK_SIDECAR,
     `${JSON.stringify({ lock: pendingLock, outputSha256: outputSha256 ?? null }, null, 2)}\n`
   );
   console.error(
-    `staged re-pin recorded at ${PENDING_LOCK_SIDECAR}; ` +
+    `staged provenance binding at ${PENDING_LOCK_SIDECAR}; ` +
       `${LOCK} updates once the story artifact is written`
   );
   pendingLock = undefined;
@@ -729,8 +730,9 @@ export function inspectStagedReferenceLock(outputSha256?: string): StagedLockIns
  * `src/additions/storyChapters.json5`, so the lock and the artifact it describes
  * move together. When `outputSha256` is supplied it must match what the
  * generator staged; a mismatch means the sidecar belongs to a different
- * generation, so it is discarded rather than applied. An unusable sidecar is
- * likewise discarded, leaving the committed lock untouched.
+ * generation, so it is refused without destroying it (the sidecar may belong to
+ * a concurrent run). An unusable sidecar is discarded, leaving the committed
+ * lock untouched.
  */
 export function promoteStoryReferenceLock(outputSha256?: string): boolean {
   const staged = inspectStagedReferenceLock(outputSha256);
@@ -741,16 +743,26 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
       staged.status === 'unusable'
         ? 'it is not a complete provenance record'
         : 'it is not bound to the artifact just written';
-    rmSync(PENDING_LOCK_SIDECAR, { force: true });
+    // A mismatched sidecar may belong to a concurrent generation whose writer has
+    // not run yet, so it is left for that run rather than destroyed here. Only a
+    // sidecar that cannot be a staged lock at all is removed.
+    if (staged.status === 'unusable') rmSync(PENDING_LOCK_SIDECAR, { force: true });
     console.error(
-      `warning: discarded a staged re-pin at ${PENDING_LOCK_SIDECAR}; ${reason}, so ${LOCK} was ` +
-        'left unchanged. Re-run the generator with STORY_REFERENCE_UPDATE_LOCK=1 to re-pin.'
+      `warning: refused the staged binding at ${PENDING_LOCK_SIDECAR}; ${reason}, so ${LOCK} ` +
+        'was left unchanged. Re-run the generator to stage a binding for the data being written.'
     );
     return false;
   }
 
   const { lock } = staged;
-  writeFileAtomicSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
+  const serialized = `${JSON.stringify(lock, null, 2)}\n`;
+  let changed = true;
+  try {
+    changed = readFileSync(LOCK, 'utf-8') !== serialized;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  writeFileAtomicSync(LOCK, serialized);
   // The lock write is the commit point. Removing the consumed sidecar afterwards
   // is best-effort: letting an EPERM/EBUSY here throw would unwind the caller and
   // roll the artifact back while the lock stayed advanced, breaking exactly the
@@ -766,7 +778,10 @@ export function promoteStoryReferenceLock(outputSha256?: string): boolean {
         're-applied to a different generation.'
     );
   }
-  console.error(`re-pinned ${LOCK} -> ${lock.file} (sha256=${lock.sha256.slice(0, 12)}…)`);
+  console.error(
+    `${changed ? 're-pinned' : 'confirmed'} ${LOCK} -> ${lock.file} ` +
+      `(sha256=${lock.sha256.slice(0, 12)}…)`
+  );
   return true;
 }
 
@@ -852,18 +867,22 @@ export function loadReference(): JsonRecord[] {
     }
   }
 
-  if (updating) {
-    // Staged, not written: re-pinning must not outlive a failed generation.
-    // `main()` commits only after every chapter validation passes, so a capture
-    // that resolves some data but leaves a chapter empty (or drops wiki matching
-    // below MIN_MATCH_PCT) cannot leave the committed lock pointing at a capture
-    // that never produced the committed chapters.
-    pendingLock = current;
-    console.error(
-      `staged re-pin of ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…); ` +
-        'writes after generation succeeds'
-    );
-  }
+  // Stage the provenance binding in every mode, not only on an explicit re-pin.
+  // `main()` commits it only after every chapter validation passes, and the
+  // writer refuses to replace the artifact without a binding for its exact
+  // payload - so a capture that resolves some data but leaves a chapter empty
+  // (or drops wiki matching below MIN_MATCH_PCT) can neither re-pin the lock nor
+  // get different data published under the current pin.
+  pendingLock = updating ? current : (lock ?? undefined);
+  console.error(
+    updating
+      ? `staged re-pin of ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…); ` +
+          'writes after generation succeeds'
+      : pendingLock
+        ? `staged provenance binding for ${LOCK} -> ${pendingLock.file}; ` +
+          'writes after generation succeeds'
+        : 'warning: no lock available to stage a provenance binding'
+  );
 
   console.error(
     `story reference: ${current.file} ` +

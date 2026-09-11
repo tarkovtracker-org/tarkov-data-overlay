@@ -196,10 +196,12 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
-  it('discards a staged pin generated for different output', () => {
-    // A sidecar can outlive a run whose write never happened. Promoting it beside
-    // unrelated data would pin a capture that did not produce the artifact, so the
-    // pin is bound to the payload hash the generator staged.
+  it('leaves a staged pin generated for different output for its own run', () => {
+    // A sidecar can outlive a run whose write never happened, or belong to a
+    // concurrent generation whose writer has not run yet. Promoting it beside
+    // unrelated data would pin a capture that did not produce the artifact, so
+    // the pin is bound to the payload hash the generator staged - and a mismatch
+    // is refused without destroying the other run's sidecar.
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-mismatch-'));
     const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
@@ -230,8 +232,8 @@ describe('story reference provenance enforcement', () => {
 
       expect(promote('c'.repeat(64))).toBe('false');
       expect(existsSync(lockFile), 'lock written despite payload mismatch').toBe(false);
-      // Provably stale, so it is removed rather than left to be applied later.
-      expect(existsSync(sidecar)).toBe(false);
+      // It may belong to a run still in progress, so refusal must not delete it.
+      expect(existsSync(sidecar), 'sidecar belonging to another payload was discarded').toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -396,11 +398,12 @@ describe('story reference provenance enforcement', () => {
     }
   });
 
-  it('refuses to replace the story artifact when a staged re-pin does not match it', () => {
-    // Promotion is deliberately attempted after the artifact write so a failed
-    // write cannot advance the pin. That ordering must not let a *refused*
-    // promotion pass silently: the result would be freshly generated chapters
-    // described by the previous capture's lock.
+  it('requires a staged binding before replacing the story artifact', () => {
+    // The writer cannot show on its own that a payload came from the pinned
+    // capture, so it only publishes input carrying a staged binding for exactly
+    // those bytes. Promotion is attempted after the artifact write so a failed
+    // write cannot advance the pin; ordering must not let a *refused* promotion
+    // pass silently either.
     const dir = mkdtempSync(join(tmpdir(), 'story-write-refuse-'));
     const sidecar = join(dir, 'data', 'eft', 'story-reference.lock.pending.json');
     const lockFile = join(dir, 'scripts', 'story-reference.lock.json');
@@ -483,12 +486,24 @@ describe('story reference provenance enforcement', () => {
       expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
       expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
 
-      // With no sidecar there is no pin to move, so generation proceeds.
+      // An unbound input has no staged provenance, so the writer refuses rather
+      // than publishing data the lock cannot be shown to describe.
       rmSync(sidecar, { force: true });
-      const clean = run();
-      expect(clean.status, clean.stderr).toBe(0);
+      const unbound = run();
+      expect(unbound.status, 'writer published an unbound input').not.toBe(0);
+      expect(unbound.stderr).toMatch(/refusing to write/);
+      expect(readFileSync(dest, 'utf-8')).toBe(previousArtifact);
+      expect(readFileSync(lockFile, 'utf-8')).toBe(committed);
+
+      // A binding for exactly this payload lets the write proceed and records the
+      // capture the generator vouched for.
+      const inputSha256 = createHash('sha256').update(readFileSync(input)).digest('hex');
+      writeFileSync(sidecar, `${JSON.stringify({ lock: FULL_LOCK, outputSha256: inputSha256 })}\n`);
+      const bound = run();
+      expect(bound.status, bound.stderr).toBe(0);
       expect(readFileSync(dest, 'utf-8')).not.toBe(previousArtifact);
-      expect(readFileSync(lockFile, 'utf-8'), 'lock moved without a staged re-pin').toBe(committed);
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({ file: FULL_LOCK.file });
+      expect(existsSync(sidecar), 'consumed binding was not removed').toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
