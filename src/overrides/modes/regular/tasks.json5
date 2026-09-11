@@ -53,7 +53,7 @@
   // PvE (5 kills on Woods/Ground Zero/Interchange/Customs, and 30 on
   // Reserve/Lighthouse), which is also exactly what tarkov.dev serves for
   // regular - so the overrides were injecting stale pre-1.1 wiki values into a
-  // correct upstream record. Removed; see issue #356 and the converged entries
-  // in src/divergences/tasks.json5.
+  // correct upstream record. Removed; see issue #356. The now-redundant
+  // divergence records were also retired to git history.
   // ---------------------------------------------------------------------------
 }
