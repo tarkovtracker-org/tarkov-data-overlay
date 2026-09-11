@@ -523,6 +523,12 @@ function readLock(): ReferenceLock | null {
   } catch (error) {
     // A raw SyntaxError here names no file and suggests no remedy, and the lock is
     // committed, so restoring it is usually a one-line fix.
+    if (process.env.STORY_REFERENCE_UPDATE_LOCK === '1') {
+      console.error(
+        `warning: ${LOCK} is not valid JSON; re-pinning replaces it. Check the resulting lock diff.`
+      );
+      return null;
+    }
     throw new Error(
       `${LOCK} is not valid JSON (${(error as Error).message}). Restore it from version control, ` +
         'or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
@@ -532,6 +538,17 @@ function readLock(): ReferenceLock | null {
   // committed lock fails here by name instead of as an opaque TypeError deeper in
   // loadReference.
   if (!isReferenceLock(parsed)) {
+    // An explicit re-pin rewrites the lock, so refusing to run is what would make
+    // the situation unrecoverable - and the error below names that as the remedy.
+    // Treat the unusable lock as absent and let the update path replace it; the
+    // result still lands as a reviewable lock diff.
+    if (process.env.STORY_REFERENCE_UPDATE_LOCK === '1') {
+      console.error(
+        `warning: ${LOCK} is not a complete provenance record; re-pinning replaces it. ` +
+          'Check the resulting lock diff.'
+      );
+      return null;
+    }
     throw new Error(
       `${LOCK} is not a complete provenance record (needs file, 64-hex sha256, bytes, ` +
         'clientVersion, gameMode, capturedAt, quests, chapterQuests, objectiveTexts). Restore it ' +

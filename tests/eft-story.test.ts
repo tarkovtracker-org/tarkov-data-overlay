@@ -320,6 +320,35 @@ describe('story reference provenance enforcement', () => {
 
       writeFileSync(lockFile, '{ truncated\n');
       expect(load()).toMatch(/is not valid JSON/);
+
+      // The error names re-pinning as the remedy, so that remedy has to work: an
+      // explicit update run treats the unusable lock as absent and replaces it
+      // rather than failing before the update path is reached.
+      const loadUpdating = () =>
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            import.meta.resolve('tsx'),
+            '--input-type=module',
+            '-e',
+            `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; try { loadReference(); } catch (error) { console.log(error.message); }`,
+          ],
+          {
+            cwd: dir,
+            env: { ...process.env, STORY_REFERENCE_UPDATE_LOCK: '1' },
+            stdio: 'pipe',
+          }
+        )
+          .toString()
+          .trim();
+      for (const broken of ['{}\n', '{ truncated\n']) {
+        writeFileSync(lockFile, broken);
+        // Gets past readLock to the ordinary "no capture here" failure.
+        expect(loadUpdating(), `re-pin blocked by ${broken.trim()}`).not.toMatch(
+          /provenance record|not valid JSON/
+        );
+      }
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
