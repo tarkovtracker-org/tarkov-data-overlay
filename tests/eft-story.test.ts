@@ -9,6 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
+import { fileURLToPath } from 'node:url';
 import { join } from 'path';
 import JSON5 from 'json5';
 import { sequenceRatio } from '../scripts/lib/sequence-matcher.js';
@@ -388,7 +389,7 @@ describe('story reference provenance enforcement', () => {
             [
               '--import',
               import.meta.resolve('tsx'),
-              new URL('../scripts/eft-story-write.ts', import.meta.url).pathname,
+              fileURLToPath(new URL('../scripts/eft-story-write.ts', import.meta.url)),
               input,
             ],
             { cwd: dir, env: { ...process.env }, stdio: 'pipe' }

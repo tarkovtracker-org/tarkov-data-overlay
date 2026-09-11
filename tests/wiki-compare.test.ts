@@ -572,6 +572,49 @@ describe('1.1 Requirements-section parsing', () => {
       expect(new Set(got.map((x) => x.level))).toEqual(new Set([4]));
     });
 
+    it('pairs each tier with its own trader when a line carries several gates', () => {
+      // Previously the first tier on the line was applied to every trader named
+      // on it, so Skier silently inherited Prapor's level. Loyalty is
+      // progression-critical, so a wrong tier here misreports a real gate.
+      const got = parseTraderLoyalty(
+        [
+          'Must reach Loyalty Level 3 with [[Prapor]] and Loyalty Level 2 with [[Skier]] to obtain this quest.',
+        ],
+        TRADERS
+      );
+      expect(got).toEqual([
+        { trader: 'Prapor', level: 3 },
+        { trader: 'Skier', level: 2 },
+      ]);
+    });
+
+    it('pairs tiers across three gates on one line', () => {
+      const got = parseTraderLoyalty(
+        [
+          'Loyalty Level 1 with [[Prapor]], Loyalty Level 2 with [[Skier]] and Loyalty Level 3 with [[Ragman]].',
+        ],
+        TRADERS
+      );
+      expect(Object.fromEntries(got.map((entry) => [entry.trader, entry.level]))).toEqual({
+        Prapor: 1,
+        Skier: 2,
+        Ragman: 3,
+      });
+    });
+
+    it('pairs tiers when the trader is written before its level', () => {
+      // The wiki's usual phrasing puts the tier first, so the association rule is
+      // chosen from whichever comes first on the line rather than assumed.
+      const got = parseTraderLoyalty(
+        ['Prapor must be at Loyalty Level 3 and Skier at Loyalty Level 2.'],
+        TRADERS
+      );
+      expect(Object.fromEntries(got.map((entry) => [entry.trader, entry.level]))).toEqual({
+        Prapor: 3,
+        Skier: 2,
+      });
+    });
+
     it('falls back to the quest giver when the line names no trader, marking it inferred', () => {
       expect(
         parseTraderLoyalty(['Must be Loyalty Level 2 to start this quest'], TRADERS, 'Peacekeeper')

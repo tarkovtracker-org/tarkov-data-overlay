@@ -221,21 +221,33 @@ export function parseTraderLoyalty(
     if (!LOYALTY_MENTION.test(text)) continue;
 
     // Match the tier paired with loyalty, not a player level or building floor.
-    const tier =
-      /\bloyalty\s+level\s*(\d+|iv|i{1,3})\b|\blevel\s*(\d+|iv|i{1,3})\s+loyalty\b/i.exec(text);
-    const value = tier?.[1] ?? tier?.[2];
-    if (!value) continue;
-    const level = ROMAN_TIERS.get(value.toLowerCase()) ?? Number(value);
-    if (!Number.isInteger(level) || level < 1 || level > 4) continue;
+    // A line can carry more than one gate ("Loyalty Level 3 with Prapor and
+    // Loyalty Level 2 with Skier"), so collect every tier with its position
+    // rather than taking the first and applying it to the whole line.
+    const tiers: Array<{ index: number; level: number }> = [];
+    for (const match of text.matchAll(
+      /\bloyalty\s+level\s*(\d+|iv|i{1,3})\b|\blevel\s*(\d+|iv|i{1,3})\s+loyalty\b/gi
+    )) {
+      const value = match[1] ?? match[2];
+      if (!value) continue;
+      const level = ROMAN_TIERS.get(value.toLowerCase()) ?? Number(value);
+      if (!Number.isInteger(level) || level < 1 || level > 4) continue;
+      tiers.push({ index: match.index, level });
+    }
+    if (tiers.length === 0) continue;
+
+    // Tokenized once per line: punctuation and wiki markup collapse to single
+    // spaces, so a known name matches only on whole-word boundaries and
+    // "NotBTR Driver" cannot match "BTR Driver".
+    const words = ` ${text
+      .toLowerCase()
+      .split(/[^a-z0-9_]+/)
+      .filter(Boolean)
+      .join(' ')} `;
 
     // Traders named on the line, matched against the known set only.
     const named: string[] = [];
     for (const [lower, canonical] of known) {
-      const words = ` ${text
-        .toLowerCase()
-        .split(/[^a-z0-9_]+/)
-        .filter(Boolean)
-        .join(' ')} `;
       const phrase = lower
         .split(/[^a-z0-9_]+/)
         .filter(Boolean)
@@ -244,17 +256,56 @@ export function parseTraderLoyalty(
     }
 
     if (named.length > 0) {
-      for (const trader of named) add(trader, level);
+      // One tier governs the whole line, including the "Level 4 with X, Y and Z"
+      // form. With several, each trader takes the tier it is written next to.
+      // Which side to look at depends on the line's word order: "Level 3 with
+      // Prapor and Level 2 with Skier" puts each tier before its trader, while
+      // "Prapor at Level 3 and Skier at Level 2" puts it after. Deciding once per
+      // line from whichever comes first keeps both forms consistent, where
+      // nearest-by-distance would mis-assign the common tier-first phrasing.
+      const positions = new Map(named.map((trader) => [trader, traderIndex(text, trader)]));
+      const firstTrader = Math.min(
+        ...[...positions.values()].filter((at) => at >= 0).concat(Number.MAX_SAFE_INTEGER)
+      );
+      const tierFirst = tiers[0].index < firstTrader;
+      const levelFor = (trader: string): number => {
+        if (tiers.length === 1) return tiers[0].level;
+        const at = positions.get(trader) ?? -1;
+        if (at < 0) return tiers[0].level;
+        const before = tiers.filter((tier) => tier.index <= at);
+        const after = tiers.filter((tier) => tier.index >= at);
+        const preceding = before.length > 0 ? before[before.length - 1] : undefined;
+        const following = after[0];
+        const chosen = tierFirst ? (preceding ?? following) : (following ?? preceding);
+        return (chosen ?? tiers[0]).level;
+      };
+      for (const trader of named) add(trader, levelFor(trader));
     } else if (questGiver && known.has(questGiver.toLowerCase())) {
       // "Must be Loyalty Level N to start this quest" - the tier belongs to the
       // quest giver, which the sentence leaves implicit. That is an inference,
       // not a quoted requirement, so mark it: trader loyalty is
       // progression-critical, and a reviewer must be able to see which entries
       // came from the sentence naming a trader and which came from the infobox.
-      add(known.get(questGiver.toLowerCase())!, level, true);
+      add(known.get(questGiver.toLowerCase())!, tiers[0].level, true);
     }
   }
   return out;
+}
+
+/**
+ * Position of a trader name in a requirements line, or -1 when not found.
+ *
+ * Words are separated the same way the token match collapses them, so a
+ * multi-word name still matches across wiki markup and punctuation.
+ */
+function traderIndex(text: string, trader: string): number {
+  const parts = trader
+    .split(/[^A-Za-z0-9_]+/)
+    .filter(Boolean)
+    .map(escapeRegExp);
+  if (parts.length === 0) return -1;
+  const match = new RegExp(`\\b${parts.join('[^A-Za-z0-9_]+')}\\b`, 'i').exec(text);
+  return match ? match.index : -1;
 }
 
 /** The PMC faction gate ("This quest is only obtainable by [[USEC]] PMCs."). */

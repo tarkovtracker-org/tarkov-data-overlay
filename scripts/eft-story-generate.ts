@@ -510,8 +510,23 @@ export function rankStoryReferences(
 }
 
 function readLock(): ReferenceLock | null {
-  if (!existsSync(LOCK)) return null;
-  return JSON.parse(readFileSync(LOCK, 'utf-8')) as ReferenceLock;
+  let raw: string;
+  try {
+    raw = readFileSync(LOCK, 'utf-8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+  try {
+    return JSON.parse(raw) as ReferenceLock;
+  } catch (error) {
+    // A raw SyntaxError here names no file and suggests no remedy, and the lock is
+    // committed, so restoring it is usually a one-line fix.
+    throw new Error(
+      `${LOCK} is not valid JSON (${(error as Error).message}). Restore it from version control, ` +
+        'or re-pin with STORY_REFERENCE_UPDATE_LOCK=1.'
+    );
+  }
 }
 
 /** Fingerprint a capture: content hash plus the provenance in its envelope. */
