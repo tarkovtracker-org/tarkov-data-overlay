@@ -222,6 +222,22 @@ export function unwrapAnnotatedText(text: string): string {
 }
 
 /**
+ * True when a localized string is the enrichment tool's unresolved marker.
+ *
+ * `[] Experience bonus {0}` means the tool could not resolve the string, so the
+ * bracketed original is absent and the tail is an unrelated lookup.
+ * {@link unwrapAnnotatedText} deliberately returns such a value untouched
+ * because there is nothing to recover - which means callers must not treat it as
+ * usable objective text. Emitting it would ship the marker as an objective
+ * description while still counting the objective as resolved, letting a chapter
+ * report complete coverage over text the capture never actually provided.
+ */
+export function isUnresolvedAnnotation(text: string): boolean {
+  const match = /^\[([^\]]*)\]/.exec(text);
+  return match !== null && match[1].trim().length === 0;
+}
+
+/**
  * Return {optional, ratio} for the closest wiki match.
  *
  * When the best match is below MATCH_THRESHOLD the objective is treated as
@@ -301,9 +317,18 @@ export function expandChapterObjectives(
     const localized: Record<string, string> = subQuest?.localization?.en ?? {};
     for (const objective of subQuest?.conditions?.AvailableForFinish ?? []) {
       const objectiveId = objective?.id;
-      if (!objectiveId) continue; // skip conditions without an id
-      const text = unwrapAnnotatedText((localized[objectiveId] ?? '').trim()).trim();
-      if (!text) {
+      if (!objectiveId) {
+        // A finish condition with no id cannot become a stable objective. Count
+        // it so coverage reports `partial` instead of silently claiming this
+        // chapter was fully resolved.
+        missingObjectiveTexts += 1;
+        continue;
+      }
+      const raw = (localized[objectiveId] ?? '').trim();
+      const text = unwrapAnnotatedText(raw).trim();
+      // An unresolved `[]` marker is not usable text: emitting it would ship the
+      // marker as the description AND count the objective as resolved.
+      if (!text || isUnresolvedAnnotation(text)) {
         missingObjectiveTexts += 1;
         continue;
       }
@@ -503,6 +528,30 @@ function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] 
  *   capture: it ranks candidates (or takes `STORY_REFERENCE`) and rewrites the
  *   lock, so a source switch always lands as a reviewable diff.
  */
+/**
+ * Lock staged by {@link loadReference} under `STORY_REFERENCE_UPDATE_LOCK=1`.
+ *
+ * Held until {@link commitStoryReferenceLock} runs so a re-pin only lands when
+ * generation actually produced the chapters it claims to describe.
+ */
+let pendingLock: ReferenceLock | undefined;
+
+/**
+ * Write a staged re-pin. No-op unless `STORY_REFERENCE_UPDATE_LOCK=1` staged one.
+ *
+ * Call only after every generation validation has passed: the lock is the sole
+ * audit trail for which capture produced the committed story data, so pinning a
+ * capture whose generation failed would leave later runs silently using it.
+ */
+export function commitStoryReferenceLock(): void {
+  if (!pendingLock) return;
+  writeFileSync(LOCK, `${JSON.stringify(pendingLock, null, 2)}\n`);
+  console.error(
+    `re-pinned ${LOCK} -> ${pendingLock.file} (sha256=${pendingLock.sha256.slice(0, 12)}…)`
+  );
+  pendingLock = undefined;
+}
+
 export function loadReference(): JsonRecord[] {
   const explicit = process.env.STORY_REFERENCE;
   const updating = process.env.STORY_REFERENCE_UPDATE_LOCK === '1';
@@ -571,8 +620,16 @@ export function loadReference(): JsonRecord[] {
   }
 
   if (updating) {
-    writeFileSync(LOCK, `${JSON.stringify(current, null, 2)}\n`);
-    console.error(`re-pinned ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…)`);
+    // Staged, not written: re-pinning must not outlive a failed generation.
+    // `main()` commits only after every chapter validation passes, so a capture
+    // that resolves some data but leaves a chapter empty (or drops wiki matching
+    // below MIN_MATCH_PCT) cannot leave the committed lock pointing at a capture
+    // that never produced the committed chapters.
+    pendingLock = current;
+    console.error(
+      `staged re-pin of ${LOCK} -> ${current.file} (sha256=${current.sha256.slice(0, 12)}…); ` +
+        'writes after generation succeeds'
+    );
   }
 
   console.error(
@@ -719,6 +776,9 @@ function main(): void {
     console.error(`error: wiki match below ${MIN_MATCH_PCT}% for: ${detail}`);
     process.exit(1);
   }
+
+  // Every chapter validated, so a staged re-pin is now safe to persist.
+  commitStoryReferenceLock();
 
   process.stdout.write(JSON.stringify(out, null, 2));
 }

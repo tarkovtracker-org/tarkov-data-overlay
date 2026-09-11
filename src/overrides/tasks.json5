@@ -345,19 +345,40 @@
   // Proof: https://escapefromtarkov.fandom.com/wiki/Collector
   //
   // minPlayerLevel: both the 1.1-pve capture and the 2026-08-27 regular capture
-  // carry an explicit `Level >= 40` start condition, so 40 is now witnessed
-  // in-game in both modes; tarkov.dev serves the stale pre-1.1 figure (42) in
-  // every mode. The wiki lists no player level for Collector (only Scav karma +
-  // trader loyalties), so it cannot adjudicate that field.
+  // carry an explicit `Level >= 40` start condition, so 40 is the explicit
+  // in-game gate in both modes.
+  //
+  // UNRESOLVED, do not treat 40 as settled: upstream's 42 is not simply stale.
+  // Collector is loyalty-gated (the captures carry `TraderLoyalty Ragman >= 4`
+  // and the wiki Requirements section lists Loyalty Level 4 across seven
+  // traders), and json.tarkov.dev serves Ragman LL4 `requiredPlayerLevel: 42` in
+  // all three modes - so 42 is exactly the trader-derived floor AGENTS.md
+  // requires checking before correcting this field, and the effective floor is 42
+  // because Ragman LL4 is unreachable below it. This override ships 40 while
+  // leaving upstream's Ragman LL4 `traderRequirements` untouched, so consumers
+  // merge "startable at 40" against a gate needing 42. The value predates this
+  // entry's rewrite; see src/divergences/tasks.json5 for the full record.
   //
   // taskRequirements: the two captures agree on three edges (Shooter Born in
   // Heaven, The Tarkov Shooter - Part 4, Sew it Good - Part 2) and both omit the
-  // Postman Pat - Part 2 edge the API adds, which is why that edge is dropped.
+  // Postman Pat - Part 2 edge the API adds, which is why that edge is dropped -
+  // and the wiki Requirements section lists the same four quests with no Postman
+  // Pat, so that removal has capture AND wiki backing.
   // They disagree on the Chemical edge: PvE has Chemical - Part 4 accepting
   // complete-or-failed, regular has Chemical - Part 3 accepting complete. The
   // wiki Requirements section lists Chemical - Part 3, agreeing with regular, so
   // Chemical - Part 3 is the shared value here and the PvE variant is scoped to
   // src/overrides/modes/pve/tasks.json5 rather than forced into every mode.
+  //
+  // Why the shared file and not a regular-only override: `taskRequirements`
+  // replaces the whole array, so every mode this task exists in needs a complete
+  // set. pvp-season is included by that choice, and the seasonal capture does not
+  // contain Collector - so seasonal is NOT independently verified here. It rests
+  // on the wiki, which lists Chemical - Part 3 and is a source independent of the
+  // regular capture; this is "seasonal gets the wiki-corroborated value absent
+  // contrary evidence", not "seasonal is assumed equal to regular". If a seasonal
+  // capture ever shows a different Chemical edge, split it into
+  // src/overrides/modes/pvp-season/tasks.json5 rather than widening this entry.
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
   '5c51aac186f77432ea65c552': {
     minPlayerLevel: 40, // Was: 42 (all modes, stale pre-1.1 value)

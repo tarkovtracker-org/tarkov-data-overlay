@@ -476,8 +476,15 @@ export interface StoryObjective {
   id: string;
   type: 'main' | 'optional';
   description: string;
-  /** EFT sub-quest id backing this objective (source traceability) */
-  sourceQuestId?: string;
+  /**
+   * EFT sub-quest id backing this objective (source traceability).
+   *
+   * Required, matching `story-chapter.schema.json`: every chapter is generated
+   * from the quest reference, so an objective with no source sub-quest cannot be
+   * produced. Kept non-optional so TypeScript consumers cannot construct a
+   * `StoryChapter` that compiles but fails schema validation.
+   */
+  sourceQuestId: string;
   notes?: string | null;
   mutuallyExclusiveWith?: string[];
   endingId?: StoryEndingId;

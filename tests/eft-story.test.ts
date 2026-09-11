@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import JSON5 from 'json5';
@@ -66,7 +66,7 @@ describe('story reference provenance enforcement', () => {
           import.meta.resolve('tsx'),
           '--input-type=module',
           '-e',
-          `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+          `import { loadReference, commitStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference(); commitStoryReferenceLock();`,
         ],
         {
           cwd: dir,
@@ -96,6 +96,81 @@ describe('story reference provenance enforcement', () => {
       writeFileSync(file, JSON.stringify({ data: [{ _id: '68cbd33676fe74b1e80bfd91' }] }));
       expect(() => run('1')).toThrow(/no chapter quests or objective texts/);
       expect(readFileSync(lockFile, 'utf-8')).toBe(before);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('stages a re-pin without writing it until generation is committed', () => {
+    // A capture can resolve chapter data yet still fail a later per-chapter
+    // validation. The lock is the only record of which capture produced the
+    // committed chapters, so it must not be re-pinned by a run that never got
+    // as far as emitting them.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-defer-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        body_response: {
+          data: [
+            {
+              _id: '68cbd33676fe74b1e80bfd91',
+              conditions: {
+                AvailableForFinish: [
+                  { conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
+                ],
+              },
+            },
+            {
+              _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+              conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+              localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+            },
+          ],
+        },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const lockFile = join(dir, 'scripts/story-reference.lock.json');
+    const runScript = (body: string) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference, commitStoryReferenceLock } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; ${body}`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+
+      // loadReference alone stages the pin; nothing is written.
+      runScript('loadReference();');
+      expect(existsSync(lockFile)).toBe(false);
+
+      // Simulating a validation failure after loadReference still writes nothing.
+      expect(() =>
+        runScript('loadReference(); throw new Error("late validation failed");')
+      ).toThrow();
+      expect(existsSync(lockFile)).toBe(false);
+
+      // Only an explicit commit persists it.
+      runScript('loadReference(); commitStoryReferenceLock();');
+      expect(existsSync(lockFile)).toBe(true);
+      expect(JSON.parse(readFileSync(lockFile, 'utf-8'))).toMatchObject({
+        sha256: createHash('sha256').update(capture).digest('hex'),
+      });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

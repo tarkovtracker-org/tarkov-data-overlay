@@ -13,6 +13,8 @@ import {
   taskOverlayFiles,
   loadDivergentFieldKeys,
   loadSuppressedFields,
+  loadTaskRequirementOverrides,
+  buildNextTaskMap,
 } from '../scripts/wiki-compare/overlay.js';
 import { compareSubset, valuesEqual, formatValue } from '../src/lib/index.js';
 
@@ -196,5 +198,84 @@ describe('shared compare helpers', () => {
   it('distinguishes null from undefined when formatting', () => {
     expect(formatValue(null)).toBe('null');
     expect(formatValue(undefined)).toBe('undefined');
+  });
+});
+
+describe('loadTaskRequirementOverrides (mode-aware)', () => {
+  // A shared-file value and a mode-file value for the same task used to collapse
+  // into one task-id map, so whichever file was read last won for every mode.
+  // Collector is the live case: base has Chemical - Part 3 (complete), PvE has
+  // Chemical - Part 4 (complete-or-failed).
+  const COLLECTOR = '5c51aac186f77432ea65c552';
+  const chemicalEdge = (
+    reqs: ReturnType<typeof loadTaskRequirementOverrides>,
+    mode: 'regular' | 'pve'
+  ) =>
+    reqs
+      .get(mode)
+      ?.get(COLLECTOR)
+      ?.find((req) => /Chemical/.test(req?.task?.name ?? ''));
+
+  it('keeps each mode on its own resolved requirement set', () => {
+    const overrides = loadTaskRequirementOverrides('both');
+    expect([...overrides.keys()]).toEqual(['regular', 'pve']);
+
+    const regular = chemicalEdge(overrides, 'regular');
+    const pve = chemicalEdge(overrides, 'pve');
+    expect(regular?.task?.name).toBe('Chemical - Part 3');
+    expect(regular?.status).toEqual(['complete']);
+    expect(pve?.task?.name).toBe('Chemical - Part 4');
+    expect(pve?.status).toEqual(['complete', 'failed']);
+  });
+
+  it('does not leak a mode-specific override into the other mode', () => {
+    const overrides = loadTaskRequirementOverrides('both');
+    const regularNames = (overrides.get('regular')?.get(COLLECTOR) ?? []).map((r) => r?.task?.name);
+    expect(regularNames).not.toContain('Chemical - Part 4');
+  });
+
+  it('scopes a single mode to that mode only', () => {
+    const regularOnly = loadTaskRequirementOverrides('regular');
+    expect([...regularOnly.keys()]).toEqual(['regular']);
+    expect(chemicalEdge(regularOnly, 'regular')?.task?.name).toBe('Chemical - Part 3');
+  });
+});
+
+describe('buildNextTaskMap', () => {
+  it('attributes unlocks using each task entry\u2019s own game mode', () => {
+    // Under the default "both" scope every task entry carries its mode, so a
+    // divergent prerequisite must not be applied across modes: that would report
+    // Collector as unlocked by Chemical - Part 4 in regular as well.
+    const overrides = loadTaskRequirementOverrides('both');
+    const tasks = [
+      {
+        id: '5c51aac186f77432ea65c552',
+        name: 'Collector (regular)',
+        gameModes: ['regular'],
+      },
+      {
+        id: '5c51aac186f77432ea65c552',
+        name: 'Collector (pve)',
+        gameModes: ['pve'],
+      },
+    ] as unknown as Parameters<typeof buildNextTaskMap>[0];
+
+    const next = buildNextTaskMap(tasks, overrides);
+    expect(next.get('597a0e5786f77426d66c0636')).toEqual(['Collector (regular)']);
+    expect(next.get('597a0f5686f774273b74f676')).toEqual(['Collector (pve)']);
+  });
+
+  it('falls back to the API requirements when no override applies', () => {
+    const tasks = [
+      {
+        id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        name: 'Unoverridden',
+        gameModes: ['regular'],
+        taskRequirements: [{ task: { id: 'bbbbbbbbbbbbbbbbbbbbbbbb', name: 'Predecessor' } }],
+      },
+    ] as unknown as Parameters<typeof buildNextTaskMap>[0];
+
+    const next = buildNextTaskMap(tasks, loadTaskRequirementOverrides('both'));
+    expect(next.get('bbbbbbbbbbbbbbbbbbbbbbbb')).toEqual(['Unoverridden']);
   });
 });

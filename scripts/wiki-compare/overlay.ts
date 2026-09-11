@@ -324,30 +324,59 @@ export function loadSuppressedFields(scope: SuppressionScope = 'both'): Suppress
   return { suppressed, overlayCount, wikiIncorrectCount, wikiIncorrectKeys };
 }
 
+/**
+ * Task-requirement overrides resolved per game mode.
+ *
+ * Keyed by mode because the base file and a mode file can disagree: Collector
+ * has `Chemical - Part 3` (complete) in the shared file and `Chemical - Part 4`
+ * (complete-or-failed) in PvE. Collapsing both into one task-id map made
+ * whichever file was read last win for *every* mode, so under the default
+ * `both` scope the PvE prerequisite silently became regular's too.
+ */
+export type TaskRequirementOverridesByMode = Map<GameMode, Map<string, TaskRequirement[]>>;
+
+/**
+ * Load `taskRequirements` overrides, resolved separately for each in-scope mode.
+ *
+ * Each mode's map is the base file overlaid with that mode's file, matching the
+ * documented base -> mode merge precedence that consumers apply.
+ */
 export function loadTaskRequirementOverrides(
   scope: SuppressionScope = 'both'
-): Map<string, TaskRequirement[]> {
-  const overrides = new Map<string, TaskRequirement[]>();
+): TaskRequirementOverridesByMode {
+  const modes = scope === 'both' ? WIKI_COMPARE_MODES : [scope];
+  const byMode: TaskRequirementOverridesByMode = new Map();
 
-  // Later files win, matching the documented base -> mode merge precedence.
-  for (const [taskId, fields] of overlayFields(scope)) {
-    const reqs = fields.taskRequirements;
-    if (Array.isArray(reqs)) {
-      overrides.set(taskId, reqs as TaskRequirement[]);
+  for (const mode of modes) {
+    const overrides = new Map<string, TaskRequirement[]>();
+    // Scoping to the single mode keeps the other mode's file out of this map;
+    // within it, the mode file still wins over the base file.
+    for (const [taskId, fields] of overlayFields(mode)) {
+      const reqs = fields.taskRequirements;
+      if (Array.isArray(reqs)) {
+        overrides.set(taskId, reqs as TaskRequirement[]);
+      }
     }
+    byMode.set(mode, overrides);
   }
 
-  return overrides;
+  return byMode;
 }
 
 export function buildNextTaskMap(
   tasks: ExtendedTaskData[],
-  requirementOverrides?: Map<string, TaskRequirement[]>
+  requirementOverrides?: TaskRequirementOverridesByMode
 ): Map<string, string[]> {
   const nextMap = new Map<string, Set<string>>();
 
   for (const task of tasks) {
-    const requirements = requirementOverrides?.get(task.id) ?? task.taskRequirements ?? [];
+    // Each task entry carries its own mode under the `both` scope, so resolve
+    // the override from that mode rather than from a merged map.
+    const mode: GameMode = task.gameModes?.[0] ?? 'regular';
+    const forMode =
+      requirementOverrides?.get(mode) ??
+      (requirementOverrides?.size === 1 ? requirementOverrides.values().next().value : undefined);
+    const requirements = forMode?.get(task.id) ?? task.taskRequirements ?? [];
     for (const req of requirements) {
       const reqTaskId = req?.task?.id;
       if (!reqTaskId) continue;
