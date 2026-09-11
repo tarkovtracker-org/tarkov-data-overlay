@@ -101,7 +101,7 @@ describe('loadSuppressedFields', () => {
     // Karma is served inside traderRequirements (a Fence reputation entry), so an
     // override of that field answers the karma report for the same task too.
     const { suppressed } = loadSuppressedFields();
-    expect(suppressed.has('6572e876dc0d635f633a5714:scavKarma')).toBe(true);
+    expect(suppressed.has('6572e876dc0d635f633a5714:scavKarma')).toBe(false);
   });
 });
 

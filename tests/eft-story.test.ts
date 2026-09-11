@@ -5,6 +5,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -23,6 +25,60 @@ import {
 } from '../scripts/eft-story-generate.js';
 import { renderStoryChaptersJson5 } from '../scripts/eft-story-write.js';
 import { getProjectPaths, STORY_ENDINGS } from '../src/lib/index.js';
+
+describe('story reference provenance enforcement', () => {
+  it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
+    const capture = JSON.stringify({
+      request: {
+        timestamp: '2026-06-30T12:00:00Z',
+        url: 'https://gw-pve.example/client/quest_list',
+        headers: { 'App-Version': 'test-client' },
+      },
+      response: {
+        timestamp: 'wrong-response-time',
+        body_response: { data: [{ _id: '68cbd33676fe74b1e80bfd91' }] },
+      },
+    });
+    const file = join(dir, 'quest_list.json');
+    const lockFile = join(dir, 'scripts/story-reference.lock.json');
+    const run = (update = '0') =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          import.meta.resolve('tsx'),
+          '--input-type=module',
+          '-e',
+          `import { loadReference } from ${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)}; loadReference();`,
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: update },
+          stdio: 'pipe',
+        }
+      );
+    try {
+      mkdirSync(join(dir, 'scripts'));
+      writeFileSync(file, capture);
+      expect(() => run()).toThrow(/no scripts\/story-reference.lock.json/);
+      run('1');
+      const lock = JSON.parse(readFileSync(lockFile, 'utf-8'));
+      expect(lock).toMatchObject({
+        capturedAt: '2026-06-30T12:00:00Z',
+        clientVersion: 'test-client',
+        gameMode: 'pve',
+        sha256: createHash('sha256').update(capture).digest('hex'),
+      });
+      writeFileSync(lockFile, JSON.stringify({ ...lock, file: 'moved/original.json' }));
+      expect(() => run()).not.toThrow();
+      writeFileSync(file, `${capture}\n`);
+      expect(() => run()).toThrow(/does not match/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
 
 describe('sequenceRatio (difflib SequenceMatcher.ratio port)', () => {
   // Expected values computed with CPython difflib.SequenceMatcher(None, a, b).ratio()

@@ -370,7 +370,7 @@ function parseReferenceEnvelope(
   return {
     quests: data as JsonRecord[],
     request: raw?.request,
-    capturedAt: raw?.response?.timestamp,
+    capturedAt: raw?.request?.timestamp,
   };
 }
 
@@ -496,10 +496,16 @@ function fingerprint(file: string): { lock: ReferenceLock; quests: JsonRecord[] 
  *   capture: it ranks candidates (or takes `STORY_REFERENCE`) and rewrites the
  *   lock, so a source switch always lands as a reviewable diff.
  */
-function loadReference(): JsonRecord[] {
+export function loadReference(): JsonRecord[] {
   const explicit = process.env.STORY_REFERENCE;
   const updating = process.env.STORY_REFERENCE_UPDATE_LOCK === '1';
   const lock = readLock();
+
+  if (!lock && !updating && explicit) {
+    throw new Error(
+      `no ${LOCK} to pin the story reference; re-pin with STORY_REFERENCE_UPDATE_LOCK=1.`
+    );
+  }
 
   let file: string | undefined = explicit;
   if (!file && lock && !updating) {

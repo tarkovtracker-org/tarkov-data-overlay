@@ -147,7 +147,7 @@ export async function fetchWikiWikitext(pageTitle: string): Promise<WikiFetchRes
  * with Ragman". A bare `/level (\d+)/` therefore reported the *loyalty tier* as
  * a player level on 90 of the 286 pages that carry a Requirements section, and
  * both `wiki:compare` and `eft:wiki` consumed that number as the wiki's witness
- * for `minPlayerLevel`. Lines mentioning loyalty are excluded first, and the
+ * for `minPlayerLevel`. Loyalty phrases are excluded first, and the
  * remaining match must look like a player-level sentence rather than any
  * incidental "level N" (e.g. Stick to It's "Talk to the scientist on level 1
  * via the intercom", or "Reach the damaged door on level 3", which are building
@@ -164,8 +164,10 @@ const PLAYER_LEVEL_PATTERNS = [
 
 export function parseMinLevel(requirements: string[]): number | undefined {
   for (const line of requirements) {
-    const text = stripWikiMarkup(line);
-    if (LOYALTY_MENTION.test(text)) continue;
+    const text = stripWikiMarkup(line).replace(
+      /\bloyalty\s+level\s*(?:\d+|iv|i{1,3})\b|\blevel\s*(?:\d+|iv|i{1,3})\s+loyalty\b/gi,
+      ''
+    );
     for (const pattern of PLAYER_LEVEL_PATTERNS) {
       const match = pattern.exec(text);
       if (match?.[1]) return Number(match[1]);
@@ -218,22 +220,19 @@ export function parseTraderLoyalty(
     const text = stripWikiMarkup(line);
     if (!LOYALTY_MENTION.test(text)) continue;
 
-    // Tier: an arabic numeral or a roman numeral adjacent to "level".
-    let level: number | undefined;
-    const arabic = /level\s+(\d+)/i.exec(text) ?? /\blevel\s*(\d+)/i.exec(text);
-    if (arabic?.[1]) {
-      level = Number(arabic[1]);
-    } else {
-      const roman = /level\s+(i{1,3}v?|iv)\b/i.exec(text);
-      if (roman?.[1]) level = ROMAN_TIERS.get(roman[1].toLowerCase());
-    }
-    if (level === undefined) continue;
+    // Match the tier paired with loyalty, not a player level or building floor.
+    const tier =
+      /\bloyalty\s+level\s*(\d+|iv|i{1,3})\b|\blevel\s*(\d+|iv|i{1,3})\s+loyalty\b/i.exec(text);
+    const value = tier?.[1] ?? tier?.[2];
+    if (!value) continue;
+    const level = ROMAN_TIERS.get(value.toLowerCase()) ?? Number(value);
+    if (!Number.isInteger(level) || level < 1 || level > 4) continue;
 
     // Traders named on the line, matched against the known set only.
     const named: string[] = [];
     for (const [lower, canonical] of known) {
-      const pattern = new RegExp(`\\b${escapeRegExp(lower)}\\b`, 'i');
-      if (pattern.test(text.toLowerCase())) named.push(canonical);
+      const words = text.toLowerCase().split(/[^a-z0-9_]+/);
+      if (words.includes(lower)) named.push(canonical);
     }
 
     if (named.length > 0) {
@@ -265,12 +264,26 @@ export function parseFactionRequirement(requirements: string[]): 'USEC' | 'BEAR'
  * The Scav karma gate. The wiki writes both bounds, e.g. "Scav karma of at
  * least +3" and "Scav karma of -6", so the sign is preserved.
  */
-export function parseScavKarma(requirements: string[]): number | undefined {
+export function parseScavKarma(
+  requirements: string[]
+): { value: number; compareMethod?: '>=' | '<=' | '>' | '<' } | undefined {
   for (const line of requirements) {
     const text = stripWikiMarkup(line);
     if (!/scav\s*karma/i.test(text)) continue;
-    const match = /([+-]\s*\d+(?:\.\d+)?)/.exec(text);
-    if (match?.[1]) return Number(match[1].replace(/\s+/g, ''));
+    const match =
+      /scav\s*karma\s+of\s+(?:(at least|at most|more than|less than)\s+)?([+-]?\s*\d+(?:\.\d+)?)/i.exec(
+        text
+      );
+    if (!match) continue;
+    const value = Number(match[2].replace(/\s+/g, ''));
+    const directions = {
+      'at least': '>=',
+      'at most': '<=',
+      'more than': '>',
+      'less than': '<',
+    } as const;
+    const phrase = match[1]?.toLowerCase() as keyof typeof directions | undefined;
+    return phrase ? { value, compareMethod: directions[phrase] } : { value };
   }
   return undefined;
 }

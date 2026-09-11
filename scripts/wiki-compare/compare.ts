@@ -203,10 +203,13 @@ export function compareTasks(
     const apiKarma = (apiTask.traderRequirements ?? []).filter(
       (req) => req.requirementType === 'reputation' && req.trader?.id === FENCE_TRADER_ID
     );
-    // The wiki writes the threshold ("at least +3", "-6") and the API carries the
-    // direction, so the value is what can be compared; the direction travels with
-    // the report so a reviewer sees it.
-    const matches = apiKarma.some((req) => req.value === wiki.scavKarma);
+    const karma = wiki.scavKarma;
+    const wikiKarma = `${karma.compareMethod ?? '(direction unspecified)'} ${karma.value}`;
+    const matches = apiKarma.some(
+      (req) =>
+        req.value === karma.value &&
+        (karma.compareMethod === undefined || req.compareMethod === karma.compareMethod)
+    );
     if (!matches) {
       discrepancies.push({
         taskId,
@@ -214,7 +217,7 @@ export function compareTasks(
         field: 'scavKarma',
         apiValue:
           apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') || '(none)',
-        wikiValue: `${wiki.scavKarma}`,
+        wikiValue: wikiKarma,
         priority: getPriority('scavKarma'),
         trustsWiki: true,
         wikiLastEdit,
@@ -226,10 +229,10 @@ export function compareTasks(
           `${icons.warning} scavKarma: API=${
             apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') ||
             '(none)'
-          }, Wiki=${wiki.scavKarma}`
+          }, Wiki=${wikiKarma}`
         );
     } else if (verbose) {
-      console.log(`${icons.success} scavKarma matches (${wiki.scavKarma})`);
+      console.log(`${icons.success} scavKarma matches (${wikiKarma})`);
     }
   }
 

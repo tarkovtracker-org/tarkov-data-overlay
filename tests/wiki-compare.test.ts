@@ -154,7 +154,7 @@ describe('compareTasks', () => {
   it('compares a wiki Scav karma gate against the API Fence reputation entry', () => {
     // json.tarkov.dev models Scav karma as a Fence `reputation` requirement, so
     // a wiki karma sentence is comparable rather than merely informational.
-    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: 3 });
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
     const matching = compareTasks(
       {
         ...baseApi,
@@ -178,12 +178,12 @@ describe('compareTasks', () => {
     const karma = missing.find((d) => d.field === 'scavKarma');
     expect(karma).toBeDefined();
     expect(karma?.apiValue).toBe('(none)');
-    expect(karma?.wikiValue).toBe('3');
+    expect(karma?.wikiValue).toBe('>= 3');
     expect(karma?.priority).toBe('high');
   });
 
-  it('reports the API compare method alongside a mismatched karma threshold', () => {
-    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: 3 });
+  it('reports opposite directions even with an equal karma threshold', () => {
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
     const result = compareTasks(
       {
         ...baseApi,
@@ -193,7 +193,7 @@ describe('compareTasks', () => {
             trader: { id: '579dc571d53a0658a154fbec', name: 'Fence' },
             requirementType: 'reputation',
             compareMethod: '<=',
-            value: -6,
+            value: 3,
           },
         ],
       } as ExtendedTaskData,
@@ -201,12 +201,12 @@ describe('compareTasks', () => {
       EMPTY_ALIASES,
       false
     );
-    expect(result.find((d) => d.field === 'scavKarma')?.apiValue).toBe('<= -6');
+    expect(result.find((d) => d.field === 'scavKarma')?.apiValue).toBe('<= 3');
   });
 
   it('does not read another trader\u2019s reputation as Scav karma', () => {
     // Only Fence reputation is karma; Prapor reputation is trader rep.
-    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: 3 });
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 3, compareMethod: '>=' } });
     const result = compareTasks(
       {
         ...baseApi,
@@ -229,7 +229,7 @@ describe('compareTasks', () => {
 
   it('does not read a Fence loyalty tier as a karma gate', () => {
     // A `level` requirement is a loyalty tier; only `reputation` carries karma.
-    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: 6 });
+    const wiki = makeWiki({ minPlayerLevel: 10, scavKarma: { value: 6, compareMethod: '>=' } });
     const result = compareTasks(
       {
         ...baseApi,
@@ -528,10 +528,29 @@ describe('1.1 Requirements-section parsing', () => {
     });
   });
 
+  it('separates player and loyalty levels on the same requirements line', () => {
+    const requirements = [
+      'Must be level 20 and Loyalty Level 3 with [[Prapor]] to obtain this quest.',
+    ];
+    expect(parseMinLevel(requirements)).toBe(20);
+    expect(parseTraderLoyalty(requirements, ['Prapor'])).toEqual([{ trader: 'Prapor', level: 3 }]);
+    expect(
+      parseTraderLoyalty(['Obtain level 2 loyalty with [[Peacekeeper]]'], ['Peacekeeper'])
+    ).toEqual([{ trader: 'Peacekeeper', level: 2 }]);
+    expect(parseTraderLoyalty(['Loyalty Level 3 with NotPrapor'], ['Prapor'])).toEqual([]);
+  });
+
   describe('parseScavKarma', () => {
     it('reads positive and negative karma gates', () => {
-      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of at least +3'])).toBe(3);
-      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of -6'])).toBe(-6);
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of at least +3'])).toEqual({
+        value: 3,
+        compareMethod: '>=',
+      });
+      expect(parseScavKarma(['[[Scavs#Scav karma|Scav karma]] of -6'])).toEqual({ value: -6 });
+      expect(parseScavKarma(['Scav karma of at most 3'])).toEqual({
+        value: 3,
+        compareMethod: '<=',
+      });
     });
 
     it('ignores lines without a karma mention', () => {

@@ -21,7 +21,8 @@
   //   pve      -> `in-game`: PvE values verified in-game on the PvE profile
   //               (read off the quest screens). PvE is the mode we verify
   //               directly, so it is treated as authoritative here.
-  //   regular  -> `wiki` when the page is current, `patch-notes` when the
+  //   regular  -> `in-game` for regular client captures (`verified: 1.1-regular`),
+  //               `wiki` when the page is current, `patch-notes` when the
   //               wiki still documents a pre-1.1 figure: the Season 1 patch
   //               notes state the task-reward rebalance applies to ALL game
   //               modes (PvP Season, PvP Zone, PvE Zone), and the 1.1-pve
@@ -521,42 +522,6 @@
         pveSource: 'in-game',
         verified: '1.1-pve',
         note: 'The wiki documents a mode split for this objective; the PvE count is confirmed by the 1.1-pve data.',
-      },
-    },
-  },
-
-  // Power of Persuasion (converged - regular capture matches PvE)
-  '63a5cf262964a7488f5243ce': {
-    name: 'Power of Persuasion',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Power_of_Persuasion',
-    status: 'converged',
-    fields: {
-      'objective[63a5cf262964a7488f5243d1].count': {
-        regular: 5,
-        pve: 5,
-        confidence: 'high',
-        regularSource: 'in-game',
-        pveSource: 'in-game',
-        verified: '1.1-regular',
-        note: 'Recorded as divergent (regular 20) from the wiki while no regular capture existed. The 2026-08-27 regular client capture carries the same condition as PvE byte-for-byte: value 5, Kills target AnyPmc with the MP5 + suppressor mod, Location [Woods, Sandbox_high, Sandbox, Interchange, bigmap]. tarkov.dev already serves 5 in both modes, so no override is needed; the wiki page (20 kills on Streets) is a stale pre-1.1 description.',
-      },
-    },
-  },
-
-  // Easy-Breezy (converged - regular capture matches PvE)
-  '669fa3a40c828825de06d6a1': {
-    name: 'Easy-Breezy',
-    proof: 'https://escapefromtarkov.fandom.com/wiki/Easy-Breezy',
-    status: 'converged',
-    fields: {
-      'objective[66a0f5a7f9eae6761253114c].count': {
-        regular: 30,
-        pve: 30,
-        confidence: 'high',
-        regularSource: 'in-game',
-        pveSource: 'in-game',
-        verified: '1.1-regular',
-        note: 'Recorded as divergent (regular 50) from the wiki while no regular capture existed. The 2026-08-27 regular client capture carries the same condition as PvE byte-for-byte: value 30, Location [RezervBase, Lighthouse], SR-2M plus suppressor and sight mods. tarkov.dev already serves 30 in both modes, so no override is needed; the wiki page (50 targets on Factory) is a stale pre-1.1 description.',
       },
     },
   },

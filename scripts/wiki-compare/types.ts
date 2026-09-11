@@ -76,7 +76,7 @@ export type WikiTaskData = {
    * json.tarkov.dev models karma - a `level` requirement is a loyalty tier and
    * is compared separately.
    */
-  scavKarma?: number;
+  scavKarma?: { value: number; compareMethod?: '>=' | '<=' | '>' | '<' };
   previousTasks: string[];
   nextTasks: string[];
   maps: string[];

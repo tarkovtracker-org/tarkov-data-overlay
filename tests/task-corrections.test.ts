@@ -5,6 +5,9 @@ import {
   loadJson5File,
   loadJsonFile,
   SUPPORTED_GAME_MODES,
+  deriveTaskUnlockDefinition,
+  evaluateTaskUnlock,
+  type TaskData,
   type TaskOverride,
 } from '../src/lib/index.js';
 import { applyTaskOverride, getTaskOverrideForMode } from '../examples/apply-overlay.js';
@@ -132,6 +135,40 @@ describe('task correction data', () => {
 });
 
 describe('mode-specific task correction consumption', () => {
+  it('keeps active Lightkeeper successors fail-closed when their retired prerequisite is filtered', () => {
+    // Explicit exception: missing replacement wiring is unknown, not available
+    // and not proof that these surviving quests have themselves been retired.
+    const tasks = loadTaskOverrides();
+    const retiredId = '625d7005a4eb80027c4f2e09';
+    expect(tasks[retiredId]?.disabled).toBe(true);
+    for (const mode of SUPPORTED_GAME_MODES) {
+      const modeTasks = loadJson5File<Record<string, TaskOverride>>(
+        join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+      );
+      for (const id of ['625d700cc48e6c62a440fab5', '63966faeea19ac7ed845db2c']) {
+        const task = {
+          id,
+          name: id,
+          minPlayerLevel: 0,
+          objectives: [],
+          taskRequirements: [
+            { task: { id: retiredId, name: 'Knock-Knock' }, status: ['complete'] },
+          ],
+        };
+        const effective = applyTaskOverride(task, {
+          ...tasks[id],
+          ...modeTasks[id],
+        }) as TaskData | null;
+        expect(effective).not.toBeNull();
+        const definition = deriveTaskUnlockDefinition(effective!);
+        const result = evaluateTaskUnlock(effective!, definition, { taskStatuses: {} });
+        expect(result.status).toBe('unknown');
+        expect(result.unknown.some((entry) => entry.condition.type === 'taskStatus')).toBe(true);
+        expect(effective!.taskRequirements).toEqual(task.taskRequirements);
+      }
+    }
+  });
+
   it('filters every obsolete duplicate out of every game mode', () => {
     // End-to-end proof over the shipped artifact: a consumer following
     // docs/INTEGRATION.md must get `null` (task hidden) for each removed

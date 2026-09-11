@@ -3537,6 +3537,11 @@
   //   - Asserting `taskRequirements: []` is not licensed either: the 2026-08-11
   //     capture carries a real `Quest` start condition for this task, so an empty
   //     list would contradict the reference rather than record an absence.
+  // Explicit active-successor exception, covered for both IDs and all modes in
+  // tests/task-corrections.test.ts: task-unlocks returns `unknown`, never
+  // `available`, when the filtered prerequisite has no recorded status. Consumers
+  // must preserve that third state rather than treating missing tasks as complete.
+  // These quests are active; disabling them would assert an unsupported removal.
   // Consequence to be aware of: consumers that filter disabled tasks will see
   // this task and Information Source (63966faeea19ac7ed845db2c) gated behind a
   // filtered prerequisite until a post-2026-09-08 capture establishes the real

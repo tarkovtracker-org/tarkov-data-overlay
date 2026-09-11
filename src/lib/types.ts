@@ -517,7 +517,7 @@ export interface StoryChapter {
   /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
   chapterQuestId: string;
   /** How much of the chapter the pinned reference capture resolved */
-  referenceCoverage?: StoryReferenceCoverage;
+  referenceCoverage: StoryReferenceCoverage;
   autoStart?: boolean;
   chapterRequirements?: Array<{ id: string; name: string }>;
   activation?: StoryChapterActivation;
