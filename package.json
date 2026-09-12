@@ -47,7 +47,7 @@
   "devDependencies": {
     "@types/node": "^24.13.4",
     "ajv": "^8.20.0",
-    "fallow": "^3.22.0",
+    "fallow": "^3.23.0",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.23.2",
     "prettier": "^3.9.6",
