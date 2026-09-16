@@ -51,6 +51,37 @@ const FULL_LOCK = {
  */
 const STAGE_SHA = 'd'.repeat(64);
 
+/**
+ * A capture `loadReference` accepts, used by the staging-race tests below. Only
+ * its shape matters: those tests exercise the staging path, not the quest data.
+ */
+function makeStoryCapture(): string {
+  return JSON.stringify({
+    request: {
+      timestamp: '2026-06-30T12:00:00Z',
+      url: 'https://gw-pve.example/client/quest_list',
+      headers: { 'App-Version': 'test-client' },
+    },
+    response: {
+      body_response: {
+        data: [
+          {
+            _id: '68cbd33676fe74b1e80bfd91',
+            conditions: {
+              AvailableForFinish: [{ conditionType: 'Quest', target: 'aaaaaaaaaaaaaaaaaaaaaaaa' }],
+            },
+          },
+          {
+            _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+            conditions: { AvailableForFinish: [{ id: 'bbbbbbbbbbbbbbbbbbbbbbbb' }] },
+            localization: { en: { bbbbbbbbbbbbbbbbbbbbbbbb: 'Visit the location' } },
+          },
+        ],
+      },
+    },
+  });
+}
+
 describe('story reference provenance enforcement', () => {
   it('requires a lock, verifies relocated bytes, and refreshes request provenance only on opt-in', () => {
     const dir = mkdtempSync(join(tmpdir(), 'story-pin-'));
@@ -397,6 +428,112 @@ describe('story reference provenance enforcement', () => {
       expect(collision.status, collision.stderr.toString()).not.toBe(0);
       expect(collision.stderr.toString()).toMatch(/refusing to replace the staged binding/);
       expect(readFileSync(join(dir, pendingLockSidecar(binding)), 'utf-8')).toBe(foreign);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  /**
+   * Run `loadReference()` + `commitStoryReferenceLock()` in a child whose
+   * `readFileSync` handles the pending sidecar with `inject`.
+   */
+  function runStaging(dir: string, file: string, binding: string, inject: string): void {
+    const bootstrap = `
+      import fs from 'node:fs';
+      import { syncBuiltinESMExports } from 'node:module';
+      const read = fs.readFileSync;
+      ${inject}
+      syncBuiltinESMExports();
+      const { loadReference, commitStoryReferenceLock } = await import(${JSON.stringify(new URL('../scripts/eft-story-generate.ts', import.meta.url).href)});
+      loadReference();
+      commitStoryReferenceLock(${JSON.stringify(binding)});
+    `;
+    execFileSync(
+      process.execPath,
+      ['--import', import.meta.resolve('tsx'), '--input-type=module', '-e', bootstrap],
+      {
+        cwd: dir,
+        env: { ...process.env, STORY_REFERENCE: file, STORY_REFERENCE_UPDATE_LOCK: '1' },
+        stdio: 'pipe',
+      }
+    );
+  }
+
+  it('retries exclusive staging when the sidecar vanishes before the read', () => {
+    // `writeFileExclusiveSync` returning false only means the path exists, but
+    // another run can promote its binding and remove the sidecar before the read
+    // that inspects it. The vanished file must not be mistaken for a conflicting
+    // capture: nothing is left to conflict with, so the staging retries.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-vanish-'));
+    const file = join(dir, 'quest_list.json');
+    const binding = 'c'.repeat(64);
+    try {
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, makeStoryCapture());
+      // A stale binding occupies the address, and the simulated read reports it
+      // as already promoted and removed - freeing the path for the retry.
+      writeFileSync(join(dir, pendingLockSidecar(binding)), '{ "lock": {} }\n');
+      runStaging(
+        dir,
+        file,
+        binding,
+        `
+        let vanished = false;
+        fs.readFileSync = (path, ...args) => {
+          if (!vanished && String(path).includes('story-reference.lock.pending')) {
+            vanished = true;
+            fs.rmSync(path, { force: true });
+            const error = new Error('ENOENT: simulated promotion by another run');
+            error.code = 'ENOENT';
+            throw error;
+          }
+          return read(path, ...args);
+        };
+        `
+      );
+
+      // The retry staged this run's own binding, not the vanished one.
+      const sidecar = join(dir, pendingLockSidecar(binding));
+      expect(JSON.parse(readFileSync(sidecar, 'utf-8')).lock).toMatchObject({
+        clientVersion: 'test-client',
+        gameMode: 'pve',
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('fails after bounded retries when the sidecar keeps vanishing', () => {
+    // A pathological race must not spin forever: each retry re-arms the path, so
+    // the attempt bound is what ends the loop.
+    const dir = mkdtempSync(join(tmpdir(), 'story-pin-gone-'));
+    const file = join(dir, 'quest_list.json');
+    const binding = 'c'.repeat(64);
+    try {
+      mkdirSync(join(dir, 'data', 'eft'), { recursive: true });
+      writeFileSync(file, makeStoryCapture());
+      writeFileSync(join(dir, pendingLockSidecar(binding)), '{ "lock": {} }\n');
+      expect(() =>
+        runStaging(
+          dir,
+          file,
+          binding,
+          `
+        fs.readFileSync = (path, ...args) => {
+          if (String(path).includes('story-reference.lock.pending')) {
+            // Another run promotes its binding and stages a new one in the same
+            // window every time this run tries to inspect the sidecar.
+            fs.rmSync(path, { force: true });
+            fs.writeFileSync(path, '{ "lock": {} }\\n');
+            const error = new Error('ENOENT: simulated promotion by another run');
+            error.code = 'ENOENT';
+            throw error;
+          }
+          return read(path, ...args);
+        };
+        `
+        )
+      ).toThrow(/kept disappearing/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

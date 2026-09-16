@@ -626,6 +626,83 @@ export function pendingLockSidecar(outputSha256: string): string {
 }
 
 /**
+ * Attempts before giving up on a sidecar that keeps vanishing under us.
+ *
+ * Only another run promoting and removing its binding makes the path disappear
+ * between the failed exclusive create and the read, so a few attempts cover the
+ * interleaving without looping forever.
+ */
+const STAGE_ATTEMPTS = 3;
+
+/** Lock recorded by a staged sidecar, or undefined when its JSON is unusable. */
+function stagedLockOf(content: string): unknown {
+  try {
+    return (JSON.parse(content) as { lock?: unknown }).lock;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Whether a staged sidecar already records exactly this capture. */
+function isSameStagedLock(existingLock: unknown, lock: ReferenceLock): boolean {
+  return isReferenceLock(existingLock) && JSON.stringify(existingLock) === JSON.stringify(lock);
+}
+
+/**
+ * Read a sidecar, or undefined when another run removed it before the read.
+ *
+ * `ENOENT` here is not a failure to inspect a conflicting binding: the binding
+ * this run collided with was promoted and consumed, so the path is free again.
+ */
+function readSidecarIfPresent(sidecar: string): string | undefined {
+  try {
+    return readFileSync(sidecar, 'utf-8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw error;
+  }
+}
+
+/**
+ * Stage the binding exclusively once.
+ *
+ * Returns false when the sidecar vanished before the read, so the caller can
+ * retry. Returns true when this run owns the binding, whether it created it now
+ * or an identical one was already staged by another run of the same capture. A
+ * readable sidecar recording a different capture is refused, not clobbered.
+ */
+function stageBindingOnce(sidecar: string, staged: string, lock: ReferenceLock): boolean {
+  if (writeFileExclusiveSync(sidecar, staged)) return true;
+  const existing = readSidecarIfPresent(sidecar);
+  if (existing === undefined) return false;
+  if (isSameStagedLock(stagedLockOf(existing), lock)) return true;
+  throw new Error(
+    `refusing to replace the staged binding at ${sidecar}: it records a different capture for the ` +
+      'same payload, so replacing it could promote the wrong pin. If another story run is active, ' +
+      'let it finish; otherwise remove that file and re-run.'
+  );
+}
+
+/**
+ * Stage the binding, retrying when the sidecar disappears between the exclusive
+ * create and the read.
+ *
+ * Another run can promote its binding and remove the sidecar in that window.
+ * Treating the vanished file as a conflict would abort a run that has nothing to
+ * conflict with, so the staging is retried instead; the attempt bound keeps a
+ * pathological race from spinning forever.
+ */
+function stageBindingExclusively(sidecar: string, staged: string, lock: ReferenceLock): void {
+  for (let attempt = 0; attempt < STAGE_ATTEMPTS; attempt += 1) {
+    if (stageBindingOnce(sidecar, staged, lock)) return;
+  }
+  throw new Error(
+    `could not stage the provenance binding at ${sidecar}: the file kept disappearing between the ` +
+      'exclusive create and the read. Let any other story run finish and re-run.'
+  );
+}
+
+/**
  * Stage a provenance binding for the writer to promote. No-op only when
  * {@link loadReference} found no lock to stage.
  *
@@ -645,25 +722,7 @@ export function commitStoryReferenceLock(outputSha256: string): void {
   // recording a different capture is refused rather than clobbered. A binding
   // left by a failed run must be removed (or completed) before re-staging.
   const staged = `${JSON.stringify({ lock: pendingLock, outputSha256 }, null, 2)}\n`;
-  if (!writeFileExclusiveSync(sidecar, staged)) {
-    let existingLock: unknown;
-    try {
-      existingLock = (JSON.parse(readFileSync(sidecar, 'utf-8')) as { lock?: unknown }).lock;
-    } catch {
-      existingLock = undefined;
-    }
-    if (
-      !isReferenceLock(existingLock) ||
-      JSON.stringify(existingLock) !== JSON.stringify(pendingLock)
-    ) {
-      throw new Error(
-        `refusing to replace the staged binding at ${sidecar}: it records a different capture for the ` +
-          'same payload, so replacing it could promote the wrong pin. If another story run is active, ' +
-          'let it finish; otherwise remove that file and re-run.'
-      );
-    }
-    // Identical binding already staged by another run of the same capture.
-  }
+  stageBindingExclusively(sidecar, staged, pendingLock);
   console.error(
     `staged provenance binding at ${sidecar}; ` +
       `${LOCK} updates once the story artifact is written`
