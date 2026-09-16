@@ -732,7 +732,8 @@ Story chapters are an addition — tarkov.dev serves no storyline data — so re
 >   that gate against stored progress reads it as unmet until the objective is
 >   recorded again under the new id.
 >
-> **Migration:** consumers that persist story progress keyed by objective id will> not find The Ticket's stored ids after upgrading, and that progress will read as
+> **Migration:** consumers that persist story progress keyed by objective id will
+> not find The Ticket's stored ids after upgrading, and that progress will read as
 > incomplete rather than failing loudly. There is no mapping from the old ids to
 > the real ones, because the old ids encoded position rather than identity —
 > matching on objective text does not recover one either: of the 44 old
