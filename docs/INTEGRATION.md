@@ -1013,6 +1013,86 @@ interface StoryChapter {
   id: string;
   name: string;
   normalizedName: string;
+  wikiLink: string;
+  order: number;
+  /** EFT/tarkov.dev story quest id this chapter maps to (source traceability) */
+  chapterQuestId: string;
+  /** How much of the chapter the pinned reference capture resolved */
+  referenceCoverage: StoryReferenceCoverage;
+  autoStart?: boolean;
+  chapterRequirements?: Array<{ id: string; name: string }>;
+  activation?: StoryChapterActivation;
+  mapUnlocks?: Array<{ id: string; name: string }>;
+  traderUnlocks?: Array<{ id: string; name: string }>;
+  questUnlocks?: Array<{ id: string; name: string }>;
+  description?: string | null;
+  notes?: string | null;
+  objectives?: StoryObjective[];
+  /** Endings this chapter branches into, keyed by the real `client/ending_list` id */
+  endings?: StoryChapterEnding[];
+  /**
+   * Unordered sub-quest id pairs that cannot both be completed. Partial
+   * objective progress on both quests is legal; do not expand a pair into
+   * objective exclusions.
+   */
+  mutuallyExclusiveQuestPairs?: Array<[string, string]>;
+  rewards?: { description: string } | null;
+}
+
+interface StoryReferenceCoverage {
+  /** Sub-quests the chapter quest references (distinct ids) */
+  referencedSubquests: number;
+  /** Referenced sub-quests whose templates the capture resolved */
+  resolvedSubquests: number;
+  /** Finish conditions omitted because English objective text was unavailable */
+  missingObjectiveTexts?: number;
+  /** True when the objective list is a projection of the capture, not the whole chapter */
+  partial: boolean;
+}
+
+interface StoryChapterEnding {
+  id: StoryEndingId;
+  systemName: string;
+  /** Sub-quest whose completion gates this ending */
+  gateQuestId: string;
+  /** Objectives in this chapter attributed to the gate sub-quest */
+  objectiveCount: number;
+  /** Whether the pinned reference resolved the gate sub-quest's template */
+  resolvedInReference: boolean;
+}
+
+// Real `client/ending_list` id; see STORY_ENDINGS in src/lib/types.ts for the set
+type StoryEndingId = string;
+
+interface StoryChapterActivation {
+  summary: string;
+  locations?: Array<{ map: string; detail: string }>;
+}
+
+interface StoryObjective {
+  id: string;
+  type: 'main' | 'optional';
+  description: string;
+  /** EFT sub-quest id backing this objective (source traceability) */
+  sourceQuestId: string;
+  notes?: string | null;
+  mutuallyExclusiveWith?: string[];
+  endingId?: StoryEndingId;
+  unlocks?: Array<{
+    type: 'achievement' | 'barter' | 'map' | 'quest' | 'trader' | 'other';
+    id?: string;
+    name: string;
+    note?: string;
+  }>;
+  maps?: Array<{ id: string; name: string }>;
+  count?: number;
+  foundInRaid?: boolean;
+  item?: { id: string; name: string; shortName?: string };
+  items?: Array<{ id: string; name: string; shortName?: string }>;
+  markerItem?: { id: string; name: string; shortName?: string };
+  questItem?: { id: string; name: string; shortName?: string };
+  requiredKeys?: Array<Array<{ id: string; name: string; shortName?: string }>>;
+  // zones / possibleLocations: see src/lib/types.ts for the full shapes
 }
 
 interface PrestigeOverride {
@@ -1048,3 +1128,7 @@ interface PrestigeOverride {
   >;
 }
 ```
+
+The interfaces above mirror the canonical declarations in
+[`src/lib/types.ts`](https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/src/lib/types.ts);
+that file is the source of truth if they ever disagree.
