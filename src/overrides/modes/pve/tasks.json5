@@ -23,12 +23,13 @@
     ],
   },
 
-  // Pathfinder's old PvE-only objective text ("Survive and extract on
-  // Interchange 7 times") is gone: the 1.1 client has no extract-7-times
-  // objective left. All three AvailableForFinish conditions are VisitPlace
-  // counters (shorl_exit_ne, shorl_exit_se, shorl_exit_pp) that match the
-  // upstream "Visit the ... exit" objectives in every mode, so the override was
-  // removed rather than corrected.
+  // Pathfinder's old PvE-only objective text is gone: the 1.1 client has no
+  // extract-7-times objective left.
+  // Was: Survive and extract on Interchange 7 times
+  // All three AvailableForFinish conditions are VisitPlace counters
+  // (shorl_exit_ne, shorl_exit_se, shorl_exit_pp) that match the upstream
+  // "Visit the ... exit" objectives in every mode, so the override was removed
+  // rather than corrected.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
   //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/387
 
