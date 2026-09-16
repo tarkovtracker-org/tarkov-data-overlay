@@ -61,7 +61,7 @@ pattern as `editions.json5`.
 - `npm run check-overrides` compares overrides to the live tarkov.dev API.
 - `npm run typecheck` runs `tsc --noEmit` (also run in CI).
 - `npm test` runs the Vitest suite (also run in CI); `npm run test:watch` keeps it running.
-- `npm run format` / `npm run format:check` run Prettier over the TypeScript sources.
+- `npm run format` / `npm run format:check` run Prettier over the TypeScript, JSON/JSON5, and Markdown sources (`format:check` also runs in CI).
 - Example single test: `npx vitest run tests/file-loader.test.ts`.
 
 ### Reference cross-check tooling (local-only)
