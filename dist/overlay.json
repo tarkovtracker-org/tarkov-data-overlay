@@ -9506,13 +9506,6 @@
             }
           }
         },
-        "5b478d0f86f7744d190d91b5": {
-          "objectives": {
-            "6a60b0d2b5ca989d33e5b7e0": {
-              "description": "Übergib im Raid gefundene Werkzeuge"
-            }
-          }
-        },
         "5c10f94386f774227172c572": {
           "name": "Kleine Dinge, große Hilfe"
         },
@@ -9647,7 +9640,7 @@
   },
   "$meta": {
     "version": "1.92",
-    "generated": "2026-09-11T09:23:46.387Z",
-    "sha256": "57dc5b43a092b11ca1b65371907ee1071826830b92c223c3147b58e26498b473"
+    "generated": "2026-09-16T03:17:43.522Z",
+    "sha256": "7096aa80bb3c23fbfb94b9f8f667ec9695c97518da9757ddb6a3e1e0db00b670"
   }
 }
