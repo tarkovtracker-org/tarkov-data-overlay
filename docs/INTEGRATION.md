@@ -732,8 +732,7 @@ Story chapters are an addition — tarkov.dev serves no storyline data — so re
 >   that gate against stored progress reads it as unmet until the objective is
 >   recorded again under the new id.
 >
-> **Migration:** consumers that persist story progress keyed by objective id will
-> not find The Ticket's stored ids after upgrading, and that progress will read as
+> **Migration:** consumers that persist story progress keyed by objective id will> not find The Ticket's stored ids after upgrading, and that progress will read as
 > incomplete rather than failing loudly. There is no mapping from the old ids to
 > the real ones, because the old ids encoded position rather than identity —
 > matching on objective text does not recover one either: of the 44 old
@@ -755,6 +754,14 @@ Story chapters are an addition — tarkov.dev serves no storyline data — so re
 > reached it, so a missing objective is not evidence that none exists. The same
 > applies to an ending whose `objectiveCount` is 0 — the branch is real, but this
 > capture holds no objective-level evidence for it.
+>
+> **Detecting the change:** do not gate on `$meta.version` if you read the
+> `@main` URL. The committed artifact is stamped with the latest existing tag, and
+> only the release build stamps the new one, so `@main` serves this payload as
+> `1.92` until the release commit lands (and jsDelivr may cache a branch URL for
+> hours after that). Released `v1.93` and later carry `1.93`. A shape check is
+> reliable either way: every chapter gains `referenceCoverage`, every objective
+> gains `sourceQuestId`, and `the-ticket.endings` becomes non-empty.
 
 ---
 

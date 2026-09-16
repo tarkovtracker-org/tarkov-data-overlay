@@ -289,6 +289,14 @@ that honours `disabled` filters it out and no unlock evaluation applies to it.
 tarkov.dev still serves the task, which is why the override exists. See
 [issue #365](https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/365).
 
+The whole chain is disabled together, not just this task: Network Provider -
+Part 1 and Part 2, Assessment - Part 1 through Part 3, Key to the Tower, and
+Knock-Knock. An integrator that honours `disabled` therefore loses seven tasks at
+once. Knock-Knock stays an upstream prerequisite of the active "To the Light -
+Getting Acquainted" and Information Source, so a consumer that resolves
+prerequisites strictly will see those gated behind a task it filters out; that
+edge needs a newer client capture to rewire and is not invented here.
+
 The chapter-level `questUnlocks` entries that previously pointed at this task
 were removed from `src/additions/storyChapters.json5` along with it, so the
 "Batya / The Ticket story alternatives" the overlay used to expose for it are
