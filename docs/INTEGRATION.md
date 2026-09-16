@@ -1061,8 +1061,12 @@ interface StoryChapterEnding {
   resolvedInReference: boolean;
 }
 
-// Real `client/ending_list` id; see STORY_ENDINGS in src/lib/types.ts for the set
-type StoryEndingId = string;
+// Real `client/ending_list` id; mirrors STORY_ENDINGS in src/lib/types.ts
+type StoryEndingId =
+  | '68a6e8f1a7455e5e23099ad8'
+  | '68a6e8c834a37e244710d516'
+  | '68a6e8e4a8d0bee0b5324d96'
+  | '68a6028ef4c23ebbbc49da4b';
 
 interface StoryChapterActivation {
   summary: string;
@@ -1092,7 +1096,27 @@ interface StoryObjective {
   markerItem?: { id: string; name: string; shortName?: string };
   questItem?: { id: string; name: string; shortName?: string };
   requiredKeys?: Array<Array<{ id: string; name: string; shortName?: string }>>;
-  // zones / possibleLocations: see src/lib/types.ts for the full shapes
+  zones?: StoryObjectiveZone[];
+  possibleLocations?: StoryObjectiveLocation[];
+}
+
+interface StoryObjectiveMapPosition {
+  x: number;
+  y?: number;
+  z: number;
+}
+
+interface StoryObjectiveZone {
+  map: { id: string; name: string };
+  outline?: StoryObjectiveMapPosition[];
+  position?: StoryObjectiveMapPosition;
+  top?: number;
+  bottom?: number;
+}
+
+interface StoryObjectiveLocation {
+  map: { id: string; name: string };
+  positions: StoryObjectiveMapPosition[];
 }
 
 interface PrestigeOverride {
