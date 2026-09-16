@@ -4,15 +4,33 @@
   // Anything true of every mode belongs in src/overrides/tasks.json5, even when
   // the supporting capture came from PvE.
 
-  // Pathfinder - objective description differs from the value served upstream.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
-  '5ae449c386f7744bde357697': {
-    objectives: {
-      '5bb60cbc88a45011a8235cc5': {
-        description: 'Survive and extract on Interchange 7 times', // Was: "Survive and extract from Interchange"
-      },
-    },
+  // Building Foundations - the PvE client roots this task at A Helping Hand,
+  // while regular and pvp-season upstream require Swift Retribution (complete
+  // or failed). The shared override had been forcing the PvE edge into every
+  // mode, which made the task appear available in PvP once A Helping Hand was
+  // done. The PvP report and the wiki's Requirements section both place the
+  // task behind Swift Retribution / Inevitable Response, so only PvE keeps the
+  // A Helping Hand edge.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Building_Foundations
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/384
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '673f629c5b555b53460cf827': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      }, // Was (shared/API): Swift Retribution, complete or failed
+    ],
   },
+
+  // Pathfinder's old PvE-only objective text ("Survive and extract on
+  // Interchange 7 times") is gone: the 1.1 client has no extract-7-times
+  // objective left. All three AvailableForFinish conditions are VisitPlace
+  // counters (shorl_exit_ne, shorl_exit_se, shorl_exit_pp) that match the
+  // upstream "Visit the ... exit" objectives in every mode, so the override was
+  // removed rather than corrected.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Pathfinder
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/387
 
   // Small Business - Part 3 - the two Woods objective texts are swapped relative
   // to their actual map markers. The game data's zone IDs/positions are correct;

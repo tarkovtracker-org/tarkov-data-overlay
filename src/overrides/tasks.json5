@@ -339,6 +339,27 @@
       }, // Was: [] (player level requirement, minPlayerLevel 25)
     ],
     experience: 10000, // Was: 18000 (all modes, stale pre-1.1 value)
+    objectives: {
+      // The kill location moved to Streets of Tarkov, Shoreline and Ground Zero
+      // (both variants). tarkov.dev still serves the pre-1.1 Lighthouse,
+      // Customs, Reserve set in every mode, and its English objective text still
+      // says "Eliminate 20 PMCs" even though the count is 10. Both the
+      // 2026-08-11 PvE and 2026-08-27 regular captures carry the counter's
+      // Location condition TarkovStreets, Shoreline, Sandbox_high, Sandbox. The
+      // wiki's last content edit (2026-08-07) predates both captures and is
+      // stale for the maps here.
+      // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
+      //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/389
+      '64f5deac39e45b527a7c4235': {
+        description: 'Eliminate 10 PMCs with AK-12 with the proprietary suppressor and PS-320 scope on Streets of Tarkov, Shoreline, or Ground Zero', // Was: "Eliminate 20 PMCs with AK-12 with the proprietary suppressor and PS-320 scope on Lighthouse, Customs, or Reserve"
+        maps: [
+          { id: '5714dc692459777137212e12', name: 'Streets of Tarkov' },
+          { id: '5704e554d2720bac5b8b456e', name: 'Shoreline' },
+          { id: '65b8d6f5cdde2479cb2a3125', name: 'Ground Zero 21+' },
+          { id: '653e6760052c01c1c805532f', name: 'Ground Zero' },
+        ], // Was: Lighthouse, Customs, Reserve
+      },
+    },
   },
 
   // Collector - prerequisite set; preserve upstream's derived player-level floor
@@ -3241,18 +3262,6 @@
         status: ['complete'],
       },
     ], // Was: Shipping Delay - Part 1
-  },
-
-  // Building Foundations - the client roots this task at A Helping Hand; the
-  // API instead points at Swift Retribution in all three modes.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  '673f629c5b555b53460cf827': {
-    taskRequirements: [
-      {
-        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
-        status: ['complete'],
-      },
-    ], // Was: Swift Retribution
   },
 
   // The Higher They Fly - the client roots this task at A Helping Hand; the
