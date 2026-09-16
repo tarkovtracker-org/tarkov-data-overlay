@@ -704,7 +704,7 @@ const allTasks = [...tasksFromApi, ...addedTasks];
 Story chapters are an addition — tarkov.dev serves no storyline data — so read
 `overlay.storyChapters` directly rather than merging it into an API response.
 
-> **Breaking change in overlay v1.92:** story chapter objectives are now keyed by
+> **Breaking change in overlay v1.93:** story chapter objectives are now keyed by
 > the real client objective id from the pinned source capture. Previously The
 > Ticket's objectives carried generated positional ids (`the-ticket-main-1` and
 > similar); all 44 were replaced, and none of the old ids survives. Related
@@ -723,16 +723,32 @@ Story chapters are an addition — tarkov.dev serves no storyline data — so re
 > - `the-ticket.endings` is now populated with all four real ending ids (with
 >   per-ending `objectiveCount`). No chapter previously carried a non-empty
 >   `endings` array.
-> - The Ticket grew from 44 to 86 objectives as more of the chapter resolved.
+> - The Ticket grew from 44 to 86 objectives as more of the chapter resolved, and
+>   the split shifted from 31 `main` / 13 `optional` to 26 `main` / 60 `optional`.
+>   A consumer that measures chapter completion over `type: 'main'` objectives
+>   gets a different denominator, not just a longer list.
+> - The prestige `storyObjectiveStatus` requirement for The Ticket moves with the
+>   re-key: it now names `68e2ecfeb88d405a420774f8`, so a consumer that evaluates
+>   that gate against stored progress reads it as unmet until the objective is
+>   recorded again under the new id.
 >
 > **Migration:** consumers that persist story progress keyed by objective id will
 > not find The Ticket's stored ids after upgrading, and that progress will read as
 > incomplete rather than failing loudly. There is no mapping from the old ids to
-> the real ones, because the old ids encoded position rather than identity. Either
-> reset stored story progress for that chapter, or pin the overlay to a tag
-> published before v1.92 until you are ready to migrate. Progress keyed by chapter
-> id is unaffected. Consumers matching on the old ending slugs must switch to the
-> real ids.
+> the real ones, because the old ids encoded position rather than identity —
+> matching on objective text does not recover one either: of the 44 old
+> descriptions only 6 have exactly one identical match among the 86 new
+> objectives, 3 match several (`Talk to Mr. Kerman` alone occurs five times), and
+> 35 match none. Either reset stored story progress for that chapter, or pin the
+> overlay to `v1.92` or earlier until you are ready to migrate. Progress keyed by
+> chapter id is unaffected. Consumers matching on the old ending slugs must switch
+> to the real ids.
+>
+> `mutuallyExclusiveQuestPairs` replaces the objective-level exclusions The Ticket
+> used to carry, and it constrains completed sub-quests only. Partial objective
+> progress on both sides of a pair is legal, so a consumer must not expand a pair
+> into objective exclusions or disable an objective toggle because the opposing
+> route has progress.
 >
 > `referenceCoverage.partial` is also worth reading before treating a chapter as
 > complete: the client only returns a story sub-quest template once the player has
