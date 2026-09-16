@@ -746,17 +746,6 @@
       },
     },
 
-    // Minibus (Lv 0)
-    // Proof: https://json.tarkov.dev/regular/tasks_de (5b478d0f86f7744d190d91b5)
-    '5b478d0f86f7744d190d91b5': {
-      objectives: {
-        // Was: Hand over any found in raid items from the Tools category
-        '6a60b0d2b5ca989d33e5b7e0': {
-          description: 'Übergib im Raid gefundene Werkzeuge',
-        },
-      },
-    },
-
     // Was: Small Things, Big Help
     // Proof: https://json.tarkov.dev/regular/tasks_de (5c10f94386f774227172c572)
     '5c10f94386f774227172c572': {
