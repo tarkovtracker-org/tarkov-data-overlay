@@ -147,12 +147,18 @@
     },
     "pve": {
       "tasks": {
-        "5ae449c386f7744bde357697": {
-          "objectives": {
-            "5bb60cbc88a45011a8235cc5": {
-              "description": "Survive and extract on Interchange 7 times"
+        "673f629c5b555b53460cf827": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "6752f6d83038f7df520c83e8",
+                "name": "A Helping Hand"
+              },
+              "status": [
+                "complete"
+              ]
             }
-          }
+          ]
         },
         "66631493312343839d032d22": {
           "objectives": {
@@ -458,7 +464,30 @@
           "value": 2
         }
       ],
-      "experience": 10000
+      "experience": 10000,
+      "objectives": {
+        "64f5deac39e45b527a7c4235": {
+          "description": "Eliminate 10 PMCs with AK-12 with the proprietary suppressor and PS-320 scope on Streets of Tarkov, Shoreline, or Ground Zero",
+          "maps": [
+            {
+              "id": "5714dc692459777137212e12",
+              "name": "Streets of Tarkov"
+            },
+            {
+              "id": "5704e554d2720bac5b8b456e",
+              "name": "Shoreline"
+            },
+            {
+              "id": "65b8d6f5cdde2479cb2a3125",
+              "name": "Ground Zero 21+"
+            },
+            {
+              "id": "653e6760052c01c1c805532f",
+              "name": "Ground Zero"
+            }
+          ]
+        }
+      }
     },
     "5c51aac186f77432ea65c552": {
       "taskRequirements": [
@@ -3080,19 +3109,6 @@
       "taskRequirements": []
     },
     "673f4e956f1b89c7bc0f56ef": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "6752f6d83038f7df520c83e8",
-            "name": "A Helping Hand"
-          },
-          "status": [
-            "complete"
-          ]
-        }
-      ]
-    },
-    "673f629c5b555b53460cf827": {
       "taskRequirements": [
         {
           "task": {
@@ -9933,7 +9949,7 @@
   },
   "$meta": {
     "version": "1.96",
-    "generated": "2026-09-17T00:11:51.049Z",
-    "sha256": "47a70317e31099ac954fd084a1515236b270b9de2309c3774aecbcd40e7775af"
+    "generated": "2026-09-17T00:13:42.961Z",
+    "sha256": "89d562087f54c13b365def0abb8eb4cfacc26c1a412585f8103520281e42203c"
   }
 }
