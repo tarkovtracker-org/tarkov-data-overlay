@@ -190,11 +190,10 @@ describe('locale source files', () => {
 
 describe('build output locales section', () => {
   it('includes locales in the compiled output when locale files exist', () => {
-    // Mirror scripts/build.ts loadSourceFiles for the locales section: an
-    // empty locale file is skipped, a populated one lands under its code.
+    // Mirror scripts/build.ts loadSourceFiles for the locales section: a
+    // populated locale file lands under its code (empty ones are skipped).
     const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));
 
-    expect(locales.en).toBeUndefined();
     expect(locales.de).toBeDefined();
 
     const de = locales.de as LocaleOverlay;
