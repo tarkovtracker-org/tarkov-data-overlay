@@ -2,7 +2,7 @@
  * Tests for the per-locale override system
  *
  * Covers the locale-override schema contract (valid/invalid cases), the
- * seeded en.json5 corrections, and inclusion of the locales section in the
+ * committed locale files, and inclusion of the locales section in the
  * compiled overlay output.
  */
 
@@ -176,36 +176,28 @@ describe('locale source files', () => {
     }
   });
 
-  it('keeps the New Beginning corrections that remain broken upstream', () => {
+  it('does not reintroduce the New Beginning patches tarkov.dev fixed upstream', () => {
+    // The en bundle used to resolve these names to the German "Neuanfang"; it
+    // now serves "New Beginning" in every mode, and check-overrides
+    // --fail-on-stale rejects a patch the bundle already matches.
     const en = loadJson5File<LocaleOverlay>(join(srcDir, 'overrides', 'locales', 'en.json5'));
 
-    expect(en.tasks).toBeDefined();
-    expect(Object.keys(en.tasks ?? {}).sort()).toEqual([...NEW_BEGINNING_TASK_IDS].sort());
-
     for (const taskId of NEW_BEGINNING_TASK_IDS) {
-      const patch = en.tasks?.[taskId];
-      expect(patch?.name).toBe('New Beginning');
-      expect(patch?.wikiLink).toMatch(
-        /^https:\/\/escapefromtarkov\.fandom\.com\/wiki\/New_Beginning_\(Prestige_[2-4]\)$/
-      );
+      expect(en.tasks?.[taskId]).toBeUndefined();
     }
-
-    // Each prestige quest links to a distinct wiki page
-    const wikiLinks = NEW_BEGINNING_TASK_IDS.map((id) => en.tasks?.[id]?.wikiLink);
-    expect(new Set(wikiLinks).size).toBe(NEW_BEGINNING_TASK_IDS.length);
   });
 });
 
 describe('build output locales section', () => {
   it('includes locales in the compiled output when locale files exist', () => {
-    // Mirror scripts/build.ts loadSourceFiles for the locales section
+    // Mirror scripts/build.ts loadSourceFiles for the locales section: an
+    // empty locale file is skipped, a populated one lands under its code.
     const locales = loadAllJson5FromDir(join(srcDir, 'overrides', 'locales'));
 
-    expect(locales.en).toBeDefined();
+    expect(locales.en).toBeUndefined();
+    expect(locales.de).toBeDefined();
 
-    const en = locales.en as LocaleOverlay;
-    for (const taskId of NEW_BEGINNING_TASK_IDS) {
-      expect(en.tasks?.[taskId]?.name).toBe('New Beginning');
-    }
+    const de = locales.de as LocaleOverlay;
+    expect(Object.keys(de.tasks ?? {}).length).toBeGreaterThan(0);
   });
 });
