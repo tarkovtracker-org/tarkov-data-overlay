@@ -8,31 +8,17 @@
   // show X" (other locale bundles may already be correct). Consumers apply
   // these only when rendering the matching locale, after data overrides.
   //
-  // Why this file exists: the English bundle (regular/tasks_en) currently
-  // resolves the New Beginning prestige quest names to the German string
-  // "Neuanfang", and their wikiLink points at the German wiki page.
+  // An empty object is valid and skipped at build time; the file stays so
+  // status-locale and the locale tests have a stable English baseline to read.
+  //
+  // New Beginning (Prestige 2/3/4) - 6761ff17cdc36bd66102e9d0,
+  // 6848100b00afffa81f09e365, 68481881f43abfdda2058369. The en bundle used to
+  // resolve their name to the German string and their wikiLink to the German
+  // wiki page; tarkov.dev now serves "New Beginning" and the English
+  // New_Beginning_(Prestige_N) pages in every mode, so the patches were removed
+  // after `npm run check-overrides -- --fail-on-stale` reported all six fields
+  // as "bundle now matches override".
+  // Was: name 'Neuanfang', wikiLink https://escapefromtarkov.fandom.com/wiki/Neuanfang
   // Proof: https://json.tarkov.dev/regular/tasks_en (keys "<task-id> name")
-
-  tasks: {
-    // New Beginning (Prestige 2)
-    // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
-    '6761ff17cdc36bd66102e9d0': {
-      name: 'New Beginning', // Was: Neuanfang (German string in the en bundle)
-      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)', // Was: https://escapefromtarkov.fandom.com/wiki/Neuanfang
-    },
-
-    // New Beginning (Prestige 3)
-    // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)
-    '6848100b00afffa81f09e365': {
-      name: 'New Beginning', // Was: Neuanfang (German string in the en bundle)
-      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)', // Was: https://escapefromtarkov.fandom.com/wiki/Neuanfang
-    },
-
-    // New Beginning (Prestige 4)
-    // Proof: https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)
-    '68481881f43abfdda2058369': {
-      name: 'New Beginning', // Was: Neuanfang (German string in the en bundle)
-      wikiLink: 'https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)', // Was: https://escapefromtarkov.fandom.com/wiki/Neuanfang
-    },
-  },
+  //        https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)
 }

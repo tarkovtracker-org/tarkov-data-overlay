@@ -538,10 +538,11 @@ Notes and caveats:
 ## Applying Locale Overrides
 
 Sometimes a specific tarkov.dev locale bundle is broken — for example, the
-English bundle currently returns the German string "Neuanfang" for the New
-Beginning prestige quest names. The overlay's `locales` section carries
-fixes for exactly these cases, keyed by locale code
-(`locales[localeCode][entityType][entityId][fieldName]`).
+English bundle used to return the German string "Neuanfang" for the New
+Beginning prestige quest names until tarkov.dev fixed it upstream. The
+overlay's `locales` section carries fixes for exactly these cases, keyed by
+locale code (`locales[localeCode][entityType][entityId][fieldName]`). A locale
+with no open fixes is simply absent from the section.
 
 Locale overrides are different from data overrides:
 

@@ -147,18 +147,12 @@
     },
     "pve": {
       "tasks": {
-        "673f629c5b555b53460cf827": {
-          "taskRequirements": [
-            {
-              "task": {
-                "id": "6752f6d83038f7df520c83e8",
-                "name": "A Helping Hand"
-              },
-              "status": [
-                "complete"
-              ]
+        "5ae449c386f7744bde357697": {
+          "objectives": {
+            "5bb60cbc88a45011a8235cc5": {
+              "description": "Survive and extract on Interchange 7 times"
             }
-          ]
+          }
         },
         "66631493312343839d032d22": {
           "objectives": {
@@ -464,30 +458,7 @@
           "value": 2
         }
       ],
-      "experience": 10000,
-      "objectives": {
-        "64f5deac39e45b527a7c4235": {
-          "description": "Eliminate 10 PMCs with AK-12 with the proprietary suppressor and PS-320 scope on Streets of Tarkov, Shoreline, or Ground Zero",
-          "maps": [
-            {
-              "id": "5714dc692459777137212e12",
-              "name": "Streets of Tarkov"
-            },
-            {
-              "id": "5704e554d2720bac5b8b456e",
-              "name": "Shoreline"
-            },
-            {
-              "id": "65b8d6f5cdde2479cb2a3125",
-              "name": "Ground Zero 21+"
-            },
-            {
-              "id": "653e6760052c01c1c805532f",
-              "name": "Ground Zero"
-            }
-          ]
-        }
-      }
+      "experience": 10000
     },
     "5c51aac186f77432ea65c552": {
       "taskRequirements": [
@@ -3109,6 +3080,19 @@
       "taskRequirements": []
     },
     "673f4e956f1b89c7bc0f56ef": {
+      "taskRequirements": [
+        {
+          "task": {
+            "id": "6752f6d83038f7df520c83e8",
+            "name": "A Helping Hand"
+          },
+          "status": [
+            "complete"
+          ]
+        }
+      ]
+    },
+    "673f629c5b555b53460cf827": {
       "taskRequirements": [
         {
           "task": {
@@ -9945,27 +9929,11 @@
           }
         }
       }
-    },
-    "en": {
-      "tasks": {
-        "6761ff17cdc36bd66102e9d0": {
-          "name": "New Beginning",
-          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_2)"
-        },
-        "6848100b00afffa81f09e365": {
-          "name": "New Beginning",
-          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_3)"
-        },
-        "68481881f43abfdda2058369": {
-          "name": "New Beginning",
-          "wikiLink": "https://escapefromtarkov.fandom.com/wiki/New_Beginning_(Prestige_4)"
-        }
-      }
     }
   },
   "$meta": {
-    "version": "1.95",
-    "generated": "2026-09-16T23:54:27.740Z",
-    "sha256": "c89ae4ee1520aba66644fee9a962e4d80e9e0ae79be8a0855991a216815a1d1f"
+    "version": "1.96",
+    "generated": "2026-09-17T00:11:51.049Z",
+    "sha256": "47a70317e31099ac954fd084a1515236b270b9de2309c3774aecbcd40e7775af"
   }
 }

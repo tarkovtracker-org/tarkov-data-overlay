@@ -255,8 +255,8 @@ export async function statusLocale(locale: string): Promise<number> {
   //   asks for 15 headshot kills where the API says "any target". A locale
   //   file records the corrected wording, because that is what a reader sees.
   //
-  //   locales/en.json5 fixes the English bundle itself, which carries the
-  //   German string for the New Beginning quests.
+  //   locales/en.json5 fixes the English bundle itself (it once carried the
+  //   German string for the New Beginning quests). It may be empty.
   const english: Record<string, unknown> = { ...en.tasksLocale };
   for (const [key, value] of readDataCorrections(join(srcDir, 'overrides', 'tasks.json5'))) {
     english[key] = value;
