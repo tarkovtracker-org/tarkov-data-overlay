@@ -9109,6 +9109,12 @@
             }
           }
         },
+        "5bc4856986f77454c317bea7": {
+          "name": "Der Tarkov Schütze – Teil 6"
+        },
+        "5bc4893c86f774626f5ebf3e": {
+          "name": "Der Tarkov Schütze – Teil 7"
+        },
         "657315df034d76585f032e01": {
           "objectives": {
             "6a54a310b22ea41cf1c54a20": {
@@ -9697,8 +9703,23 @@
         },
         "5c0d4e61d09282029f53920e": {
           "objectives": {
+            "5c0e6876d09282029e2fffe0": {
+              "description": "Überlebe und entkomme aus Woods oder Interchange mit dem Status „Überlebt“"
+            },
+            "5c13982286f774365a69cc4d": {
+              "description": "Überlebe und entkomme aus Shoreline oder Reserve mit dem Status „Überlebt“"
+            },
+            "5c13989886f7747878361a50": {
+              "description": "Überlebe und entkomme aus Factory oder Customs mit dem Status „Überlebt“"
+            },
+            "5c1931e686f7747ce71bcbea": {
+              "description": "Überlebe und entkomme aus The Lab oder Lighthouse mit dem Status „Überlebt“"
+            },
             "6a5cdc97790159682d2bc19e": {
               "description": "Eliminiere ein beliebiges Ziel"
+            },
+            "65e08b7a2f82d184fcf9ef61": {
+              "description": "Überlebe und entkomme aus Ground Zero oder Streets of Tarkov mit dem Status „Überlebt“"
             }
           }
         },
@@ -9722,6 +9743,9 @@
               "description": "Übergib die im Raid gefundene Tasche von Sanitar"
             }
           }
+        },
+        "6a4532e48e82d8ffea0c3eae": {
+          "name": "Pfad des Jägers - Kontrolle"
         },
         "5a27bafb86f7741c73584017": {
           "objectives": {
@@ -9949,7 +9973,7 @@
   },
   "$meta": {
     "version": "1.97",
-    "generated": "2026-09-17T00:19:28.698Z",
-    "sha256": "0bcd5cf062b7fe442e8753b0b707317235539d103f5be2777f24e85281f50ca1"
+    "generated": "2026-09-18T03:06:12.677Z",
+    "sha256": "b4cc161a5192f17d053d76e8045186e2593f07777582c64405e3475f1d811624"
   }
 }
