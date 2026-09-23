@@ -96,16 +96,22 @@ describe('task correction data', () => {
     expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({ factionName: 'USEC' });
   });
 
-  it('applies the level, map, name, and objective corrections', () => {
+  it('applies the level, name, and objective corrections', () => {
     expect(overrides[TASK_IDS.goodTimes]).toMatchObject({ minPlayerLevel: 27 });
+    // The maps fix (Was: Interchange) has been served upstream since
+    // 2026-09-23 and must not come back; only the unverified-coordinates
+    // suppression remains. Public API snapshot:
+    // https://json.tarkov.dev/regular/tasks (also pve and pvp-season)
     expect(overrides[TASK_IDS.supplements]).toMatchObject({
       objectives: {
         '6a5ab1920a2a6d86771ee14a': {
-          maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
           possibleLocations: [],
         },
       },
     });
+    expect(overrides[TASK_IDS.supplements]?.objectives ?? {}).not.toHaveProperty(
+      '6a5ab1920a2a6d86771ee14a.maps'
+    );
     expect(overrides[TASK_IDS.relentless]).toMatchObject({
       minPlayerLevel: 0,
       traderRequirements: [

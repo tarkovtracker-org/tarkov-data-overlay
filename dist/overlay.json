@@ -1878,12 +1878,6 @@
       ],
       "objectives": {
         "6a5ab1920a2a6d86771ee14a": {
-          "maps": [
-            {
-              "id": "56f40101d2720b2a4d8b45d6",
-              "name": "Customs"
-            }
-          ],
           "possibleLocations": []
         }
       }
@@ -9937,7 +9931,7 @@
   },
   "$meta": {
     "version": "1.97",
-    "generated": "2026-09-23T17:23:01.289Z",
-    "sha256": "eadfa5b30e0e748c3149fcbf69a3071cd4710a8e9575e5f3535effd5e69d884a"
+    "generated": "2026-09-23T18:10:40.457Z",
+    "sha256": "14c05bb65c7984217b0d1313cdaba40ff0de269a98bf5efafad29467bea9109b"
   }
 }
