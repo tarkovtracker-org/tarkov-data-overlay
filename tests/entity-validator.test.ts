@@ -209,10 +209,19 @@ describe('checkStoryChapterIntegrity', () => {
 
   it('detects requirements naming a chapter that does not exist', () => {
     const issues = checkStoryChapterIntegrity({
-      a: { id: 'a', chapterRequirements: [{ storyChapter: 'ghost' }] },
+      a: { id: 'a', chapterRequirements: [{ id: 'ghost', name: 'Ghost' }] },
     });
 
     expect(issues[0].kind).toBe('UNKNOWN_CHAPTER_REF');
+  });
+
+  it('accepts requirements naming an existing chapter', () => {
+    const issues = checkStoryChapterIntegrity({
+      a: { id: 'a' },
+      b: { id: 'b', chapterRequirements: [{ id: 'a', name: 'A' }] },
+    });
+
+    expect(issues).toHaveLength(0);
   });
 });
 
@@ -247,6 +256,17 @@ describe('checkTaskSuppressionStaleness', () => {
   it('marks a task-level suppression (no objectives) for manual review, not stale', () => {
     const results = checkTaskSuppressionStaleness({ t1: { experience: true } }, [task]);
 
+    expect(results[0].stale).toBe(false);
+    expect(results[0].objectiveId).toBeUndefined();
+    expect(results[0].message).toContain('verify manually');
+  });
+
+  it('routes an array-valued objectives entry to manual review, not per-index staleness', () => {
+    // The schema requires objectives to be an id-keyed object; an array would
+    // otherwise produce bogus staleness rows for keys '0', '1', ...
+    const results = checkTaskSuppressionStaleness({ t1: { objectives: ['dup1'] } }, [task]);
+
+    expect(results).toHaveLength(1);
     expect(results[0].stale).toBe(false);
     expect(results[0].objectiveId).toBeUndefined();
     expect(results[0].message).toContain('verify manually');

@@ -347,7 +347,9 @@ export function checkStoryChapterIntegrity(
 
     for (const requirement of asArray(chapter.chapterRequirements)) {
       if (!requirement || typeof requirement !== 'object') continue;
-      const ref = (requirement as Record<string, unknown>).storyChapter;
+      // Requirements are { id, name } references (see story-chapter.schema.json),
+      // so the referenced chapter key lives on `id`.
+      const ref = (requirement as Record<string, unknown>).id;
       if (typeof ref === 'string' && !chapterKeys.has(ref)) {
         issues.push({
           chapterId,
@@ -439,7 +441,7 @@ export function checkTaskSuppressionStaleness(
     const entry = rawEntry as Record<string, unknown>;
 
     const objectives = entry.objectives;
-    if (!objectives || typeof objectives !== 'object') {
+    if (!objectives || typeof objectives !== 'object' || Array.isArray(objectives)) {
       results.push({
         taskId,
         stale: false,

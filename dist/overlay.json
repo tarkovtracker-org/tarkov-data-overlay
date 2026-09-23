@@ -9091,6 +9091,12 @@
             }
           }
         },
+        "5bc4856986f77454c317bea7": {
+          "name": "Der Tarkov Schütze – Teil 6"
+        },
+        "5bc4893c86f774626f5ebf3e": {
+          "name": "Der Tarkov Schütze – Teil 7"
+        },
         "657315df034d76585f032e01": {
           "objectives": {
             "6a54a310b22ea41cf1c54a20": {
@@ -9679,8 +9685,23 @@
         },
         "5c0d4e61d09282029f53920e": {
           "objectives": {
+            "5c0e6876d09282029e2fffe0": {
+              "description": "Überlebe und entkomme aus Woods oder Interchange mit dem Status „Überlebt“"
+            },
+            "5c13982286f774365a69cc4d": {
+              "description": "Überlebe und entkomme aus Shoreline oder Reserve mit dem Status „Überlebt“"
+            },
+            "5c13989886f7747878361a50": {
+              "description": "Überlebe und entkomme aus Factory oder Customs mit dem Status „Überlebt“"
+            },
+            "5c1931e686f7747ce71bcbea": {
+              "description": "Überlebe und entkomme aus The Lab oder Lighthouse mit dem Status „Überlebt“"
+            },
             "6a5cdc97790159682d2bc19e": {
               "description": "Eliminiere ein beliebiges Ziel"
+            },
+            "65e08b7a2f82d184fcf9ef61": {
+              "description": "Überlebe und entkomme aus Ground Zero oder Streets of Tarkov mit dem Status „Überlebt“"
             }
           }
         },
@@ -9704,6 +9725,9 @@
               "description": "Übergib die im Raid gefundene Tasche von Sanitar"
             }
           }
+        },
+        "6a4532e48e82d8ffea0c3eae": {
+          "name": "Pfad des Jägers - Kontrolle"
         },
         "5a27bafb86f7741c73584017": {
           "objectives": {
@@ -9930,8 +9954,8 @@
     }
   },
   "$meta": {
-    "version": "1.98",
-    "generated": "2026-09-23T20:14:12.492Z",
-    "sha256": "c048e1ed80f885b420ddbab2f42fd5dcc9bbaad93b9ea28dac7f0fefab1ca1ec"
+    "version": "1.101",
+    "generated": "2026-09-23T20:47:02.701Z",
+    "sha256": "7c9cd0c1b50d821975e68942e026b6acbfcfc250e3036caef2aca597dc67cf48"
   }
 }

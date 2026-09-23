@@ -82,6 +82,22 @@
       },
     },
 
+    // The Tarkov Shooter - Part 6 / Der Tarkov Schütze – Teil 6
+    // The task name was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4856986f77454c317bea7)
+    '5bc4856986f77454c317bea7': {
+      // Was: The Tarkov Shooter - Part 6
+      name: 'Der Tarkov Schütze – Teil 6',
+    },
+
+    // The Tarkov Shooter - Part 7 / Der Tarkov Schütze – Teil 7
+    // The task name was left in English in the German bundle.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (5bc4893c86f774626f5ebf3e)
+    '5bc4893c86f774626f5ebf3e': {
+      // Was: The Tarkov Shooter - Part 7
+      name: 'Der Tarkov Schütze – Teil 7',
+    },
+
     // Dosenschießen / Shooting Cans (Lv 1)
     // Proof: https://json.tarkov.dev/regular/tasks_de (657315df034d76585f032e01)
     '657315df034d76585f032e01': {
@@ -1076,13 +1092,42 @@
     },
 
     // Der Fremdenführer / The Guide
-    // Objective was left in English in the German bundle.
-    // Proof: https://json.tarkov.dev/regular/tasks_de (5c0d4e61d09282029f53920e)
+    // tasks_de and tasks_en both carry these "<id> description" entries, but
+    // tasks_de holds the untranslated English text in each one, so the German
+    // UI shows English. Map names stay English because maps_de itself lists
+    // them that way (the sole exception, "Factory bei Nacht", does not occur
+    // here). The exit status is kept; other German bundle entries drop it
+    // ("Überlebe und entkomme von Shoreline"), which loses information.
+    // Proof: https://json.tarkov.dev/regular/tasks_de and tasks_en
+    //        (5c0d4e61d09282029f53920e) - the untranslated English values are
+    //        the "Was:" strings below - with the objective ids and their maps
+    //        from https://json.tarkov.dev/regular/tasks, cross-checked against
+    //        https://json.tarkov.dev/regular/maps_en and maps_de
     '5c0d4e61d09282029f53920e': {
       objectives: {
+        // Was: Survive and extract from Woods or Interchange with the "Survived" exit status
+        '5c0e6876d09282029e2fffe0': {
+          description: 'Überlebe und entkomme aus Woods oder Interchange mit dem Status „Überlebt“',
+        },
+        // Was: Survive and extract from Shoreline or Reserve with the "Survived" exit status
+        '5c13982286f774365a69cc4d': {
+          description: 'Überlebe und entkomme aus Shoreline oder Reserve mit dem Status „Überlebt“',
+        },
+        // Was: Survive and extract from Factory or Customs with the "Survived" exit status
+        '5c13989886f7747878361a50': {
+          description: 'Überlebe und entkomme aus Factory oder Customs mit dem Status „Überlebt“',
+        },
+        // Was: Survive and extract from The Lab or Lighthouse with the "Survived" exit status
+        '5c1931e686f7747ce71bcbea': {
+          description: 'Überlebe und entkomme aus The Lab oder Lighthouse mit dem Status „Überlebt“',
+        },
         // Was: Eliminate any target
         '6a5cdc97790159682d2bc19e': {
           description: 'Eliminiere ein beliebiges Ziel',
+        },
+        // Was: Survive and extract from Ground Zero or Streets of Tarkov with the "Survived" exit status
+        '65e08b7a2f82d184fcf9ef61': {
+          description: 'Überlebe und entkomme aus Ground Zero oder Streets of Tarkov mit dem Status „Überlebt“',
         },
       },
     },
@@ -1124,6 +1169,18 @@
           description: 'Übergib die im Raid gefundene Tasche von Sanitar',
         },
       },
+    },
+
+    // The Huntsman Path - Control / Pfad des Jägers - Kontrolle
+    // The task name was left in English in the German bundle. Task
+    // 5d25e2d886f77442734d335e (The Huntsman Path - Controller) already
+    // occupies "Pfad des Jägers - Kontrolle behalten" in the German bundle,
+    // so this one is named "Kontrolle" to avoid a name collision between
+    // two distinct tasks.
+    // Proof: https://json.tarkov.dev/regular/tasks_de (6a4532e48e82d8ffea0c3eae)
+    '6a4532e48e82d8ffea0c3eae': {
+      // Was: The Huntsman Path - Control
+      name: 'Pfad des Jägers - Kontrolle',
     },
 
     // Chemical Experiments
