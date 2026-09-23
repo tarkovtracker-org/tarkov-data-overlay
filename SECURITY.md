@@ -73,3 +73,12 @@ branch-protected, so none of these block a merge — treat a red check as a requ
 investigate, not a hard stop that someone else will enforce. Dependabot security updates,
 secret scanning, and push protection are enabled. GitHub Actions are pinned to commit SHAs
 and the workflows declare explicit `permissions` blocks.
+
+The dependency-audit launcher removes only the inherited
+`npm_config_allow_scripts` environment variable (case-insensitively) before
+invoking npm. npm 11.17 exports a user `.npmrc` `allow-scripts` policy into the
+`npm run` environment; the nested npm then misclassifies it as a forbidden
+project-scoped CLI/environment policy and throws `EALLOWSCRIPTS`, even for a
+read-only audit. The launcher lets npm read the original `.npmrc` policy normally,
+without changing the user's configuration or the high-severity failure threshold.
+It forwards audit arguments and propagates npm's failure status.

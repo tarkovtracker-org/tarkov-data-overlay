@@ -18,7 +18,7 @@
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
     "check:monitor": "node --check monitor/server.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
-    "audit:dependencies": "npm audit --audit-level=high",
+    "audit:dependencies": "node scripts/audit-dependencies.cjs",
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",
     "fallow:audit": "fallow audit",
