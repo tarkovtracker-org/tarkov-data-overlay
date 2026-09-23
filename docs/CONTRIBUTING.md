@@ -272,6 +272,28 @@ to Prestige 3 either — upstream shows a deliberate escalating chain: P1/P2 ext
 from The Lab, P3 transits Lab → Streets then extracts from Streets, P4 adds
 Streets → Interchange.
 
+**To Great Heights! - Part 5** (`66058cc9ae4719735349b9ea`). As checked on
+2026-09-19, [regular tasks](https://json.tarkov.dev/regular/tasks) no longer
+references objective `662ba87106e44407b79e9ab2`. Its replacement,
+`6978a38c3df6fd9e18d5ed3b`, already has the "claiming at least 2nd place" text in
+[tasks_en](https://json.tarkov.dev/regular/tasks_en), matching the
+[wiki objective](https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_5?oldid=359840).
+The old description override was a no-op and has been removed, not retargeted.
+The task is absent from PvE and seasonal upstream payloads.
+
+**Our Own Land** (`6179b5b06e9dd54ac275e409`). On 2026-09-19 all three
+upstream modes serve only the shoot objective `6193dc1e6623e330c82e0be9` (Rogues
+with a GP-25). The old `foundInRaid` patch targeted the absent dogtag objective
+`6194fbf785a6d62c481a7aee` and did nothing, so it was removed. This does **not**
+prove the current upstream objective is correct: the
+[wiki](https://escapefromtarkov.fandom.com/wiki/Our_Own_Land?oldid=359536) still
+describes USEC kills and found-in-raid dogtags, and the available USEC-profile
+captures cannot adjudicate this BEAR-only task. Status: needs investigation;
+obtain a current BEAR capture or in-game objective screenshot before restoring
+an objective correction or adding a missing objective. Keep the independently
+supported Prapor LL3 gate. Never transfer `foundInRaid` to a shoot objective or
+recreate an objective from an obsolete ID alone.
+
 **The Tarkov Shooter - Part 5** (`5bc4836986f7740c0152911c`, issue #356). Two
 different tasks carry this name, so check the ID first: `5bc4826c86f774106d22d88b`
 is the obsolete duplicate that this overlay sets `disabled: true` on (issue #322),
@@ -312,6 +334,15 @@ in-game marker screenshot, not a wiki reading.
 If a task is removed from gameplay but still present in the API, you can set
 `disabled: true` in `src/overrides/tasks.json5`. The `check-overrides` script
 will flag these as still present in the API so we can keep them under review.
+
+The 2026-09-19 review retained all 43 warnings: 40 shared task pages still carry
+`{{Historical content}}`; the remaining shared entry is the obsolete Tarkov
+Shooter - Part 5 ID documented above. Its surviving sibling is still the ID
+required by Part 6 in all three upstream modes. The other two warnings are New
+Beginning (Prestige 1) in PvE and seasonal: both upstream modes still expose no
+prestige records, versus six in regular, so their mode-specific exclusions remain
+intentional. API presence alone is not evidence that a disabled task should be
+re-enabled.
 
 ---
 

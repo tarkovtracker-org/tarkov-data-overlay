@@ -675,9 +675,14 @@
     },
   },
 
-  // Our Own Land - Objective foundInRaid flag incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
-  // Wiki objective text explicitly states "found in raid" dogtags.
+  // Our Own Land - missing Prapor loyalty requirement
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land?oldid=359536
+  // The old dogtag objective patch (6194fbf785a6d62c481a7aee, foundInRaid:
+  // false -> true) was retired on 2026-09-19: that ID is absent from all three
+  // json.tarkov.dev/<mode>/tasks payloads. The wiki still describes dogtags,
+  // so the objective disagreement remains unverified, not resolved upstream.
+  // Do not retarget foundInRaid onto the current shoot objective or invent an
+  // objectivesAdd entry without current in-game proof. See docs/CONTRIBUTING.md.
   '6179b5b06e9dd54ac275e409': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits. The
     // BEAR faction line on the same page is already served correctly upstream.
@@ -707,11 +712,6 @@
         value: 3,
       }, // Was: []
     ],
-    objectives: {
-      '6194fbf785a6d62c481a7aee': {
-        foundInRaid: true, // Was: false
-      },
-    },
   },
 
   // Hidden Layer - One objective map still shows 'Any' when it should say 'Shoreline'
