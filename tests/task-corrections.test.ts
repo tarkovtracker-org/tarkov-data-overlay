@@ -96,16 +96,22 @@ describe('task correction data', () => {
     expect(overrides[TASK_IDS.tigrSafari]).toMatchObject({ factionName: 'USEC' });
   });
 
-  it('applies the level, map, name, and objective corrections', () => {
+  it('applies the level, name, and objective corrections', () => {
     expect(overrides[TASK_IDS.goodTimes]).toMatchObject({ minPlayerLevel: 27 });
+    // The maps fix (Was: Interchange) has been served upstream since
+    // 2026-09-23 and must not come back; only the unverified-coordinates
+    // suppression remains. Public API snapshot:
+    // https://json.tarkov.dev/regular/tasks (also pve and pvp-season)
     expect(overrides[TASK_IDS.supplements]).toMatchObject({
       objectives: {
         '6a5ab1920a2a6d86771ee14a': {
-          maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }],
           possibleLocations: [],
         },
       },
     });
+    expect(overrides[TASK_IDS.supplements]?.objectives ?? {}).not.toHaveProperty(
+      '6a5ab1920a2a6d86771ee14a.maps'
+    );
     expect(overrides[TASK_IDS.relentless]).toMatchObject({
       minPlayerLevel: 0,
       traderRequirements: [
@@ -239,6 +245,79 @@ describe('mode-specific task correction consumption', () => {
         expect(applyTaskOverride(upstreamTask, override), reason).toBeNull();
       }
     }
+  });
+
+  it.each(SUPPORTED_GAME_MODES)(
+    'does not patch a missing Our Own Land dogtag objective in %s',
+    (mode) => {
+      // Public API snapshot, 2026-09-19: all modes have only this shoot objective.
+      // The wiki still describes dogtags, but that cannot establish a current ID.
+      // https://json.tarkov.dev/regular/tasks (also pve and pvp-season)
+      const taskId = '6179b5b06e9dd54ac275e409';
+      const upstream = {
+        id: taskId,
+        name: 'Our Own Land',
+        minPlayerLevel: 0,
+        objectives: [
+          {
+            id: '6193dc1e6623e330c82e0be9',
+            type: 'shoot',
+            description: 'Eliminate Rogues with a GP-25 grenade launcher',
+            count: 10,
+          },
+        ],
+      };
+      const overlay = {
+        tasks: loadTaskOverrides(),
+        modes: {
+          [mode]: {
+            tasks: loadJson5File<Record<string, TaskOverride>>(
+              join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5')
+            ),
+          },
+        },
+      };
+      const override = getTaskOverrideForMode(taskId, overlay as never, mode);
+      expect(override?.objectives ?? {}).not.toHaveProperty('6194fbf785a6d62c481a7aee');
+      const effective = applyTaskOverride(upstream, override) as TaskData | null;
+      expect(effective?.objectives).toEqual(upstream.objectives);
+      expect(effective?.traderRequirements).toEqual([
+        expect.objectContaining({
+          requirementType: 'level',
+          value: 3,
+          trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        }),
+      ]);
+    }
+  );
+
+  it('preserves the corrected upstream To Great Heights Part 5 objective', () => {
+    // The replacement objective is already correct; do not retarget the old patch.
+    // https://json.tarkov.dev/regular/tasks and /regular/tasks_en, 2026-09-19
+    // https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_5?oldid=359840
+    const taskId = '66058cc9ae4719735349b9ea';
+    const upstream = {
+      id: taskId,
+      name: 'To Great Heights! - Part 5 [PVP ZONE]',
+      minPlayerLevel: 0,
+      objectives: [
+        {
+          id: '6978a38c3df6fd9e18d5ed3b',
+          description:
+            'Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode',
+        },
+      ],
+    };
+    const regularOverrides = loadJson5File<Record<string, TaskOverride>>(
+      join(paths.srcDir, 'overrides', 'modes', 'regular', 'tasks.json5')
+    );
+    const overlay = {
+      tasks: loadTaskOverrides(),
+      modes: { regular: { tasks: regularOverrides } },
+    };
+    const override = getTaskOverrideForMode(taskId, overlay as never, 'regular');
+    expect(override).toBeUndefined();
+    expect(applyTaskOverride(upstream, override)).toEqual(upstream);
   });
 
   it('applies regular Vacate the Premises data without leaking it into PvE', () => {

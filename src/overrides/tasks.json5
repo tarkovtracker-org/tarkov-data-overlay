@@ -675,9 +675,14 @@
     },
   },
 
-  // Our Own Land - Objective foundInRaid flag incorrect
-  // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land
-  // Wiki objective text explicitly states "found in raid" dogtags.
+  // Our Own Land - missing Prapor loyalty requirement
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Our_Own_Land?oldid=359536
+  // The old dogtag objective patch (6194fbf785a6d62c481a7aee, foundInRaid:
+  // false -> true) was retired on 2026-09-19: that ID is absent from all three
+  // json.tarkov.dev/<mode>/tasks payloads. The wiki still describes dogtags,
+  // so the objective disagreement remains unverified, not resolved upstream.
+  // Do not retarget foundInRaid onto the current shoot objective or invent an
+  // objectivesAdd entry without current in-game proof. See docs/CONTRIBUTING.md.
   '6179b5b06e9dd54ac275e409': {
     // 2026-09-10: wiki Requirements gives a loyalty gate the API omits. The
     // BEAR faction line on the same page is already served correctly upstream.
@@ -707,11 +712,6 @@
         value: 3,
       }, // Was: []
     ],
-    objectives: {
-      '6194fbf785a6d62c481a7aee': {
-        foundInRaid: true, // Was: false
-      },
-    },
   },
 
   // Hidden Layer - One objective map still shows 'Any' when it should say 'Shoreline'
@@ -1935,6 +1935,12 @@
   // player-level gate with Skier LL2. USEC-only per wiki Requirements ("This
   // quest is only obtainable by USEC PMCs.") (issues #288, #291). The chemical
   // vial objective is on Customs, matching the objective text (issue #321).
+  // 2026-09-23: the maps fix (Was: Interchange) is now served identically
+  // upstream in all three modes, so the patch was retired as a stale no-op.
+  // Only the possibleLocations suppression remains: the original Interchange
+  // coordinates are gone and upstream now serves map-consistent Customs
+  // coordinates, but their exact positions are unverified in-game, so the
+  // suppression stands until a capture or screenshot confirms them.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Supplements
   '5b478ff486f7744d184ecbbf': {
     factionName: 'USEC', // Was: Any
@@ -1949,7 +1955,7 @@
     ],
     objectives: {
       '6a5ab1920a2a6d86771ee14a': {
-        maps: [{ id: '56f40101d2720b2a4d8b45d6', name: 'Customs' }], // Was: Interchange
+        // maps patch retired 2026-09-23: upstream serves Customs in all modes.
         possibleLocations: [], // Was: Interchange coordinates (unverified)
       },
     },
