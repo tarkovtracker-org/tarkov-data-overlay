@@ -15,7 +15,7 @@
   // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/324
   //        https://escapefromtarkov.fandom.com/wiki/Provide_Viewership
   //
-  // The 2026-08-27 regular capture carries `AvailableForStart: []` for this task
+  // A 1.1 regular capture carries `AvailableForStart: []` for this task
   // - an explicitly empty list on a present template, which is what licenses
   // `taskRequirements: []` here rather than an absent-from-capture guess. The
   // 1.1-pve capture is identical. Only tarkov.dev's regular record adds Easy
@@ -48,8 +48,8 @@
   // src/divergences/tasks.json5 for the recorded per-mode counts.
   //
   // Power of Persuasion (63a5cf262964a7488f5243ce) and Easy-Breezy
-  // (669fa3a40c828825de06d6a1) used to be corrected here from the wiki. The
-  // 2026-08-27 regular client capture shows both objectives byte-identical to
+  // (669fa3a40c828825de06d6a1) used to be corrected here from the wiki. A
+  // 1.1 regular client capture shows both objectives byte-identical to
   // PvE (5 kills on Woods/Ground Zero/Ground Zero 21+/Interchange/Customs, and
   // 30 on Reserve/Lighthouse), which is also exactly what tarkov.dev serves for
   // regular - so the overrides were injecting stale pre-1.1 wiki values into a

@@ -343,11 +343,11 @@
       // The kill location moved to Streets of Tarkov, Shoreline and Ground Zero
       // (both variants). tarkov.dev still serves the pre-1.1 Lighthouse,
       // Customs, Reserve set in every mode, and its English objective text still
-      // says "Eliminate 20 PMCs" even though the count is 10. Both the
-      // 2026-08-11 PvE and 2026-08-27 regular captures carry the counter's
-      // Location condition TarkovStreets, Shoreline, Sandbox_high, Sandbox. The
-      // wiki's last content edit (2026-08-07) predates both captures and is
-      // stale for the maps here.
+      // says "Eliminate 20 PMCs" even though the count is 10. Both a
+      // 1.1 PvE and a 1.1 regular capture carry the counter's Location
+      // condition TarkovStreets, Shoreline, Sandbox_high, Sandbox. The wiki's
+      // last content edit (2026-08-07) predates both captures and is stale for
+      // the maps here.
       // Proof: https://escapefromtarkov.fandom.com/wiki/Job_for_a_Patriot
       //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/389
       '64f5deac39e45b527a7c4235': {
@@ -3500,9 +3500,9 @@
   //
   // tarkov.dev still serves all seven in regular, pve and pvp-season.
   //
-  // Evidence limit worth recording: the newest local client capture is
-  // 2026-08-11 (PvE) and still contains the chain wired together, i.e. it
-  // predates the change; the 2026-08-27 regular capture does not contain them,
+  // Evidence limit worth recording: the newest 1.1 PvE capture predates the
+  // change and still contains the chain wired together; the newer 1.1 regular
+  // capture does not contain them,
   // but that capture covers only ~63% of upstream tasks so its silence is not
   // proof. The wiki is therefore the freshest source here, and the
   // `{{Historical content}}` marker is what these entries rest on.

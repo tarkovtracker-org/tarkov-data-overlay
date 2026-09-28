@@ -543,41 +543,7 @@ translation lookup, so a script can call it instead of resolving keys by hand.
 
 ### Why this document is tracked
 
-`AGENTS.md` says of the numeric `eft:*` cross-check tooling: "Never commit the
-reference or anything derived from it; PRs carry only the resulting JSON5
-corrections plus proof links." That prohibition is about republishing the
-reference's contents — the raw capture and the field-by-field diffs the `eft:*`
-tools emit, which is why their output goes to gitignored `data/`.
-
-It is not a blanket ban on reference-informed output, and the repository already
-commits such output deliberately: `src/additions/storyChapters.json5` is tracked,
-declares "Source: local quest reference (structure/ordering)", and carries 344
-per-objective `sourceQuestId` references, because those story quests exist nowhere
-else. `AGENTS.md` sanctions that explicitly — "unlike the numeric `eft:*` tools
-this one produces committed additions, not a gitignored diff. The reference itself
-stays gitignored; only the generated JSON5 is committed."
-
-This document sits well inside that boundary, and the boundary is checkable rather
-than asserted:
-
-- Every one of the 27 identifiers it names is published by
-  `json.tarkov.dev/pve/tasks`. No capture-only identifier appears — two were
-  removed for that reason while this document was in review.
-- Every threshold and gated task name is re-derivable from public endpoints with
-  the command above.
-- Capture-informed content is mostly aggregate: the `Children` and `Pool` integers,
-  the reconciliation counts, condition-type and `compareMethod` distributions, and
-  the caveats. A few observations are per-task rather than aggregate — which tier-1
-  tasks are gated on a plain variable, and that two named Prapor tier-2 tasks
-  declare an explicit `GlobalVariable` success reward. Those name tasks only by
-  their public identifiers and report the presence of a condition, never a
-  reference field value.
-- No reference field values appear at all — no experience, no `minPlayerLevel`, no
-  objective counts — and no quest, objective or child-variable identifier that
-  tarkov.dev does not already publish.
-
-That is less reference detail than the committed `storyChapters.json5` already
-carries. If a maintainer prefers a stricter line, the affected material is the
-aggregate columns and counts plus those per-task observations; the resolution rule
-and the guidance would go with them, since `variable_group` is a client endpoint
-and cannot be described from public data at all.
+It references capture evidence as `AGENTS.md` allows (reference cross-check
+tooling): it describes what the capture shows, names tasks only by identifiers
+tarkov.dev already publishes, and reproduces no raw capture contents or reference
+field values.
