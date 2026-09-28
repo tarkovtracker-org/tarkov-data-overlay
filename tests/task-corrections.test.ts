@@ -378,12 +378,12 @@ describe('availability corrections scoped by capture evidence', () => {
 
   /**
    * Escort's upstream level 46 is a stale pre-1.1 gate: no capture carries a
-   * `Level` condition and Prapor LL4 only needs level 36, so the level is
-   * cleared and the Prapor LL4 requirement carries the gate (issue #360).
+   * `Level` condition, so the level falls back to the Prapor LL4 tier floor
+   * (36) rather than zero, alongside the Prapor LL4 requirement (issue #360).
    */
-  it('gates Escort on Prapor LL4 rather than a stale player level', () => {
+  it('gates Escort on Prapor LL4 and its level floor rather than a stale level', () => {
     expect(shared['60e71b62a0beca400d69efc4']).toMatchObject({
-      minPlayerLevel: 0,
+      minPlayerLevel: 36,
       traderRequirements: [
         { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 },
       ],
