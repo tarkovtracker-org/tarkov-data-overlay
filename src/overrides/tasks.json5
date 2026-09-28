@@ -3574,7 +3574,7 @@
   // disabled above:
   //   - Asserting a replacement edge would mean trusting the wiki's `previous`
   //     field, which AGENTS.md rules out as proof of an unlock edge.
-  //   - Asserting `taskRequirements: []` is not licensed either: the 2026-08-11
+  //   - Asserting `taskRequirements: []` is not licensed either: the 1.1 PvE
   //     capture carries a real `Quest` start condition for this task, so an empty
   //     list would contradict the reference rather than record an absence.
   // Explicit active-successor exception, covered for both IDs and all modes in
