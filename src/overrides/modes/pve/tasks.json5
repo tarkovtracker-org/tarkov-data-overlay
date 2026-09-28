@@ -53,7 +53,7 @@
   //
   // The 1.1-pve capture's Quest start condition targets Chemical - Part 4
   // (597a0f5686f774273b74f676) and accepts status [4, 5] = complete or failed.
-  // The 2026-08-27 regular capture instead targets Chemical - Part 3 accepting
+  // A 1.1 regular capture instead targets Chemical - Part 3 accepting
   // complete only, and the wiki Requirements section agrees with regular - so
   // Chemical - Part 3 is the shared value in src/overrides/tasks.json5 and this
   // PvE-only entry restores the PvE edge. The other three edges are identical in

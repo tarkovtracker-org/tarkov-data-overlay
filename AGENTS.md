@@ -74,16 +74,20 @@ Versioned captures go in subdirectories (`eft/eft-1.1-pve/`); `findReferenceFile
 scans recursively and auto-detects the most recently captured `quest_list`
 reference, so a fresh dump supersedes an older one without touching the tooling
 call sites (pass an explicit `eftDir` to pin a specific capture).
-Never commit the reference or anything derived from it; PRs carry only the
-resulting JSON5 corrections plus proof links. That prohibition covers the raw
-capture and the field-by-field diffs these tools emit — not every artifact
-informed by the reference. Deliberate, documented exceptions exist and are called
-out where they apply: `src/additions/storyChapters.json5` and its provenance lock
-`scripts/story-reference.lock.json` (both below) and
-`docs/GLOBAL_VARIABLE_MECHANICS.md`, which records aggregates plus a few per-task
-observations, using only publicly published identifiers and no reference field
-values. Anything new in that category needs the same explicit rationale and must
-name what it does and does not reproduce.
+Keep the raw reference (captures, dumps) and the tools' field-by-field diff
+output out of the repo; they stay in the gitignored `eft/` and `data/`. Captures
+and dumps are provided anonymously and privately to update the data — naming
+that a value comes from an in-game capture or dump is fine. Beyond that,
+capture evidence may be referenced openly: comments, PR and issue text, and
+docs can say a value was verified against an in-game capture and describe the
+game data it shows (conditions, rewards, quest/item/recipe ids, client version,
+game mode). Keep public proof links alongside it where they exist.
+
+Protect the provider, not the game data. Never expose specifics of a capture
+itself or of the person who made it: no local filesystem paths, exact capture
+dates or timestamps, session or file names, account/profile/character
+identifiers, server hosts, or other PII or sensitive details. Refer to a
+capture generically instead (for example "a 1.1 PvE capture").
 
 - `npm run eft:normalize` distills the local reference into a clean
   tarkov.dev-shaped `data/eft/quests.<mode>.json`.
@@ -145,11 +149,13 @@ name what it does and does not reproduce.
 
   Generation is local-only and cannot run in CI or for a contributor without the
   capture. What keeps the committed output auditable is
-  `scripts/story-reference.lock.json`, a committed provenance lock — the second
-  deliberate exception to "never commit anything derived from the reference".
-  It records only which capture was used: path, SHA-256, byte size, client
-  version, game mode, capture timestamp, and how much of the storyline that
-  capture resolved (quest count, chapter quests, objective texts). It reproduces
+  `scripts/story-reference.lock.json`, a committed provenance lock. It is the one
+  committed place that records capture provenance: relative filename, SHA-256,
+  byte size, client version, game mode, capture timestamp, and how much of the
+  storyline that capture resolved (quest count, chapter quests, objective
+  texts). Keep the filename relative (never absolute or user-specific local
+  paths) and never include account/profile/character identifiers, server hosts,
+  or other provider PII. It reproduces
   no field values — no experience, no level gates, no objective text, no ids.
   The generator refuses to guess: it uses the locked capture and fails if the
   hash no longer matches, and `STORY_REFERENCE_UPDATE_LOCK=1` is the only way to

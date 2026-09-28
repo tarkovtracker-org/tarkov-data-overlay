@@ -71,8 +71,9 @@ validation also fails closed when a consumer bypasses source validation.
 Before marking an entry verified, establish the contributor identities, contribution
 amount, relevant completion state, alternate producers, initial value, and reset
 behavior for that mode/revision. A matching sum in one profile does not prove these
-properties. Re-verify after a progression rework. Keep captures and derived research
-in gitignored local directories; publish only permitted corrections with public proof.
+properties. Re-verify after a progression rework. Keep raw captures and derived research
+in gitignored local directories; publish corrections with proof, following the
+capture-evidence rules in `AGENTS.md`.
 
 ## Evaluation rules
 
