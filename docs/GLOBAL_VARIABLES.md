@@ -17,10 +17,23 @@ observations short of this document's evidence bar — see
 
 ## What ships today
 
-The overlay exposes an optional `progressionCounters` registry, initially empty.
-No real task-to-counter mapping is asserted by this feature. Existing
-`otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
-not use the new registry can continue their current integration.
+The overlay exposes a mode-scoped `progressionCounters` registry (`regular`, `pve`,
+and `pvp-season`), covering all 27 published trader-tier variable groups across 248 tasks:
+
+- **23 Reconciling Groups** (e.g. Mechanic LL1–LL2, Prapor LL1–LL3, Skier LL1–LL4,
+  Therapist LL1–LL4, Jaeger LL1–LL4, Peacekeeper LL1–LL4, Ragman LL2–LL3):
+  These are published as `verification: "verified"` and `coverage: "complete"`.
+  Empirical profile captures match the completed count of their candidate task pools 1:1,
+  allowing consumers to automatically derive effective counter values as players mark tasks complete.
+- **4 Caveat Groups** (Mechanic Tier 3 & 4, Prapor Tier 4, Ragman Tier 1):
+  Published fail-closed as `verification: "unresolved"` and `coverage: "partial"`.
+  These groups exhibit empirical count shortfalls in reference profile captures (see
+  [Caveats in mechanics doc](GLOBAL_VARIABLE_MECHANICS.md#caveats)). Consumers implementing the
+  registry contract do not infer automatic values for these 4 groups, keeping them blocked or
+  requiring in-game confirmation until individual task contributors are proven.
+
+Existing `otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
+not use the registry can continue their current integration.
 
 `evaluateTaskProgression` computes a value only when a mapping is verified,
 complete, and matches the selected mode and revision. Otherwise a global-variable
