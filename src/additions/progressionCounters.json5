@@ -1,5 +1,1890 @@
 {
-  // No contributor mapping currently meets the complete, verified evidence requirement.
-  // Consumers retain global-variable gates as unknown without resolved account values.
-  // See docs/GLOBAL_VARIABLES.md before adding mode-scoped entries.
+  // Mode-scoped progression counters mapping trader-tier pools to variable groups.
+  // 23 groups reconcile with empirical profile data (verified, complete).
+  // 4 groups with known count discrepancies are marked unresolved/partial fail-closed.
+  // See docs/GLOBAL_VARIABLE_MECHANICS.md for mechanics research and caveats.
+  regular: {
+    // Jaeger Tier 1 (10 tasks)
+    '6a43a01ccc83aceedd35f09c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d24b81486f77439c92d6ba8',
+          '5d25e2c386f77443e7549029',
+          '5d25e2ee86f77443e35162ea',
+          '5d25e43786f7740a212217fa',
+          '5d25e44386f77409453bce7b',
+          '5d25e46e86f77409453bce7c',
+          '600302d73b897b11364cd161',
+          '60e729cf5698ee7b05057439',
+          '66b38c7bf85b8bf7250f9cb6',
+          '675c1cf4a757ddd00404f0a3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 2 (11 tasks)
+    '6a43a095bfef0cd74c298963': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2e286f77444001e2e48',
+          '5d25e48186f77443e625e386',
+          '5d25e4ad86f77443e625e387',
+          '60c0c018f7afb4354815096a',
+          '639136e84ed9512be67647db',
+          '63a88045abf76d719f42d715',
+          '64e7b971f9d6fa49d6769b44',
+          '6578eb36e5020875d64645cd',
+          '669fa3979b0ce3feae01a130',
+          '669fa3a08b4a64b332041ff7',
+          '66b38e144f2ab7cc530c3fe7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 3 (12 tasks)
+    '6a43a13633c97d216dfc85de': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2b486f77409de05bba0',
+          '5d25e2cc86f77443e47ae019',
+          '5d25e44f86f77443e625e385',
+          '5d25e45e86f77408251c4bfa',
+          '5d25e4b786f77408251c4bfc',
+          '5d25e4d586f77443e625e388',
+          '608a768d82e40b3c727fd17d',
+          '6179ad0a6e9dd54ac275e3f2',
+          '61904daa7d0d857927447b9c',
+          '639136df4b15ca31f76bc31f',
+          '66ab9da7eb102b9bcd08591c',
+          '6a45208043b8d7604d00b8d5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 4 (6 tasks)
+    '6a43a16dde81644a7951f31b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e4ca86f77409dd5cdf2c',
+          '5edab4b1218d181e29451435',
+          '60e71e8ed54b755a3b53eb67',
+          '626bdcc3a371ee3a7a3514c5',
+          '63a9b36cc31b00242d28a99f',
+          '6a4532e48e82d8ffea0c3eae',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 1 (9 tasks)
+    '6a3171c927ca9591bf4db1c4': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac23c6186f7741247042bad',
+          '5ac2426c86f774138762edfe',
+          '5ac2428686f77412450b42bf',
+          '5ac3462b86f7741d6118b983',
+          '5ac3475486f7741d6224abd3',
+          '60e71d6d7fcf9c556f325055',
+          '657315e4a6af4ab4b50f3459',
+          '6578ec473dbd035d04531a8d',
+          '675c1570526ff496850895d9',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 2 (12 tasks)
+    '6a3c0fefbea2d2ad581c090b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac345dc86f774288030817f',
+          '5ac3467986f7741d6224abc2',
+          '5ac346a886f7744e1b083d67',
+          '5ac3477486f7741d651d6885',
+          '5ae3267986f7742a413592fe',
+          '5f04886a3937dc337a6b8238',
+          '639135e8c115f907b14700aa',
+          '639136fa9444fb141f4e6eee',
+          '639872f9decada40426d3447',
+          '6573382e557ff128bf3da536',
+          '669fa39b91b0a8c9680fc467',
+          '66aa74571e5e199ecd094f18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 3 (16 tasks)
+    '6a3cf95c6b35530c4a4f532e': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac244eb86f7741356335af1',
+          '5ac3464c86f7741d651d6877',
+          '5ae3270f86f77445ba41d4dd',
+          '5ae3277186f7745973054106',
+          '5ae327c886f7745c7b3f2f3f',
+          '5ae3280386f7742a41359364',
+          '5b47799d86f7746c5d6a5fd8',
+          '5c1128e386f7746565181106',
+          '5c139eb686f7747878361a6f',
+          '6089732b59b92115597ad789',
+          '6089736efa70fc097863b8f6',
+          '6179b3a12153c15e937d52bc',
+          '6179b3bdc7560e13d23eeb8d',
+          '639872fa9b4fb827b200d8e5',
+          '639872fc93ae507d5858c3a6',
+          '64ee9df4496db64f9b7a4432',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 4 (5 tasks)
+    '6a3d1c0990e9ffe15463e961': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bde0986f77479cf22c2f8',
+          '5c0be13186f7746f016734aa',
+          '60e71d23c1bfa3050473b8e6',
+          '68db9c7557bc51a8c804c14b',
+          '6942b44f891369fc790e385a',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 1 (9 tasks)
+    '6a5ba40fe5c4eaef5610f232': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a0327ba86f77456b9154236',
+          '5a0449d586f77474e66227b7',
+          '5a27b7a786f774579c3eb376',
+          '5a27bafb86f7741c73584017',
+          '5b4794cb86f774598100d5d4',
+          '669fa38fad7f1eac2607ed46',
+          '66aa58245ab22944110db6e9',
+          '675c1d6d59b0575973008fc7',
+          '6a5c1578f2689567c30eb0f3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 2 (12 tasks)
+    '6a5ba450a7851e16ce0bde44': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a03153686f77442d90e2171',
+          '5a03296886f774569778596a',
+          '5a27b75b86f7742e97191958',
+          '5a27b7d686f77460d847e6a6',
+          '5a27b80086f774429a5d7e20',
+          '5a27b87686f77460de0252a8',
+          '5a27b9de86f77464e5044585',
+          '5a27ba1c86f77461ea5a3c56',
+          '639135534b15ca31f76bc317',
+          '639135f286e646067c176a87',
+          '639282134ed9512be67647ed',
+          '6a5ccda873f06065630d61b0',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 3 (8 tasks)
+    '6a5ba48b8cfd0bddb3d4d2e1': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a27bb1e86f7741f27621b7e',
+          '5a27bb3d86f77411ea361a21',
+          '6086c852c945025d41566124',
+          '60e71c9ad54b755a3b53eb66',
+          '6179aff8f57fb279792c60a1',
+          '6179b4d1bca27a099552e04e',
+          '61958c366726521dd96828ec',
+          '6a5cd2178fd7c2b201032f3f',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 4 (9 tasks)
+    '6a5ba4c57cbb93b629051591': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bd01e86f7747cdd799e56',
+          '5c0d4c12d09282029f539173',
+          '5c0d4e61d09282029f53920e',
+          '5edac020218d181e29451446',
+          '5edac63b930f5454f51e128b',
+          '60e71ccb5688f6424c7bfec4',
+          '60e71ce009d7c801eb0c0ec6',
+          '6179b5eabca27a099552e052',
+          '63a9b229813bba58a50c9ee5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 1 (11 tasks)
+    '6a20540cf1b67a977cc5a088': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5936d90786f7742b1420ba5b',
+          '5936da9e86f7742d65037edf',
+          '59674cd986f7744ab26e32f2',
+          '5967530a86f77462ba22226b',
+          '5967725e86f774601a446662',
+          '59c124d686f774189b3c843f',
+          '5fd9fad9c1ce6b1a3b486d00',
+          '63a5cf262964a7488f5243ce',
+          '657315df034d76585f032e01',
+          '657315e1dccd301f1301416a',
+          '675c3507a06634b5110e3c18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 2 (13 tasks)
+    '6a2688488bba18e0b0187a04': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59674eb386f774539f14813a',
+          '59675d6c86f7740a842fc482',
+          '59675ea386f77414b32bded2',
+          '5c0d190cd09282029f5390d8',
+          '5eda19f0edce541157209cee',
+          '60e71b9bbd90872cb85440f3',
+          '6391359b9444fb141f4e6ee6',
+          '639136f086e646067c176a8b',
+          '64e7b9bffd30422ed03dad38',
+          '64f5aac4b63b74469b6c14c2',
+          '64f5deac39e45b527a7c4232',
+          '6573397ef3f8344c4575cd87',
+          '669fa399033a3ce9870338a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 3 (9 tasks)
+    '6a32651a811905ed0cac0973': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59ca1a6286f774509a270942',
+          '5c0bd94186f7747a727f09b2',
+          '5ede55112c95834b583f052a',
+          '60896b7bfa70fc097863b8f5',
+          '60896bca6ee58f38c417d4f2',
+          '6179ac7511973d018217d0b9',
+          '626bd75c71bd851e971b82a5',
+          '669fa3a40c828825de06d6a1',
+          '66ab970848ddbe9d4a0c49a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 4 (8 tasks)
+    '6a326525789ae12ecb0b2807': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d4bec3486f7743cac246665',
+          '60e71b62a0beca400d69efc4',
+          '60e71bb4e456d449cd47ca75',
+          '63a9ae24009ffc6a551631a5',
+          '6574e0dedc0d635f633a5805',
+          '675c1ff1a757ddd00404f0aa',
+          '67b45467814ab0ffa000c7e7',
+          '68ee1c18b4e5bc9a68018cd7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 1 (9 tasks)
+    '6a4b339f18db62e03b4f7ded': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448bf86f7744d733e55ee',
+          '5ae448f286f77448d73c0131',
+          '5ae4490786f7744ca822adcc',
+          '5ae4493486f7744efa289417',
+          '5ae4493d86f7744b8e15aa8f',
+          '5ae449b386f77446d8741719',
+          '5ae449c386f7744bde357697',
+          '5c10f94386f774227172c572',
+          '60e71dc0a94be721b065bbfc',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 2 (10 tasks)
+    '6a4b4e6a30dac4b01af220aa': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448e586f7744dcf0c2a67',
+          '5ae4498786f7744bde357695',
+          '5ae449d986f774453a54a7e1',
+          '5b478b1886f7744d1b23c57d',
+          '5b478d0f86f7744d190d91b5',
+          '638fcd23dc65553116701d33',
+          '639135a7e705511c8a4a1b78',
+          '65734c186dc1e402c80dc19e',
+          '65802b627b44fa5e14638899',
+          '675c085d59b0575973005f52',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 3 (7 tasks)
+    '6a4b9c9a60b56d421cceea18': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5b47891f86f7744d1b23c571',
+          '5c112d7e86f7740d6f647486',
+          '608974af4b05530f55550c21',
+          '608974d01a66564e74191fc0',
+          '60e71dc67fcf9c556f325056',
+          '639135bbc115f907b14700a6',
+          '66aa61663aa37705c5024277',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 1 (9 tasks)
+    '6a59f3ba06c8949abad30871': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b36c586f77450d6045ad2',
+          '596b43fb86f77457ca186186',
+          '5979ed3886f77431307dc512',
+          '5979eee086f774311955e614',
+          '5979f8bb86f7743ec214c7a6',
+          '5b47926a86f7747ccc057c15',
+          '657315e270bb0b8dba00cc48',
+          '658027799634223183395339',
+          '675c3582f6ddc329a90f9c6d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 2 (12 tasks)
+    '6a5a111de1f417ac80a163e5': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b455186f77457cb50eccb',
+          '5a27c99a86f7747d2c6bdd8e',
+          '5b478eca86f7744642012254',
+          '5b478ff486f7744d184ecbbf',
+          '5b4795fb86f7745876267770',
+          '5c1234c286f77406fa13baeb',
+          '639135c3744e452011470807',
+          '639dbaf17c898a131e1cffff',
+          '64f5e20652fc01298e2c61e3',
+          '64f6aafd67e11a7c6206e0d0',
+          '669fa395c4c5c04798002497',
+          '669fa39c64ea11e84c0642a6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 3 (8 tasks)
+    '6a5a115181116e807b55f258': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d0f1886f77457b8210226',
+          '5edabd13218d181e29451442',
+          '60896888e4a85c72ef3fa300',
+          '6089743983426423753cd58a',
+          '6179b4f16e9dd54ac275e407',
+          '6193850f60b34236ee0483de',
+          '626bd75d5bef5d7d590bd415',
+          '6572e876dc0d635f633a5714',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 4 (4 tasks)
+    '6a5a1192efde11cc7105b18f': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bbaa886f7746941031d82',
+          '5c0bc91486f7746ab41857a2',
+          '60e71c11d54b755a3b53eb65',
+          '6764174c86addd02bc033d68',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 1 (9 tasks)
+    '6a4e4ab3ecd1145894d00990': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5967733e86f774602332fc84',
+          '59689fbd86f7740d137ebfc4',
+          '5968eb3186f7741dde183a4d',
+          '5969f9e986f7741dde183a50',
+          '596a0e1686f7741ddf17dbee',
+          '657315ddab5a49b71f098853',
+          '675c03d1f7da9792a405549a',
+          '675c047fa46173572a0bd878',
+          '6a5424ae135497b9df0c68be',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 2 (9 tasks)
+    '6a4e4aed3ded7a18126603f6': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59689ee586f7740d1570bbd5',
+          '596a1e6c86f7741ddc2d3206',
+          '59c9392986f7742f6923add2',
+          '639135d89444fb141f4e6eea',
+          '639135e0fa894f0a866afde6',
+          '64f3176921045e77405d63b5',
+          '64f731ab83cfca080a361e42',
+          '669fa39ee749756c920d02c8',
+          '67a09673972c11a3f507731d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 3 (8 tasks)
+    '6a4e4b28629dc64c4001967c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5969f90786f77420d2328015',
+          '596a218586f77420d232807c',
+          '5edab736cc183c769d778bc2',
+          '5edaba7c0c502106f869bc02',
+          '60896e28e4a85c72ef3fa301',
+          '6179ad56c760af5ad2053587',
+          '6179afd0bca27a099552e040',
+          '626bd75b05f287031503c7f6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 4 (3 tasks)
+    '6a56925b1c30ba5a77c7c518': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d1c4cd0928202a02a6f5c',
+          '60e71c48c1bfa3050473b8e5',
+          '66aba85403e0ee3101042877',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+  },
+  pve: {
+    // Jaeger Tier 1 (10 tasks)
+    '6a43a01ccc83aceedd35f09c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d24b81486f77439c92d6ba8',
+          '5d25e2c386f77443e7549029',
+          '5d25e2ee86f77443e35162ea',
+          '5d25e43786f7740a212217fa',
+          '5d25e44386f77409453bce7b',
+          '5d25e46e86f77409453bce7c',
+          '600302d73b897b11364cd161',
+          '60e729cf5698ee7b05057439',
+          '66b38c7bf85b8bf7250f9cb6',
+          '675c1cf4a757ddd00404f0a3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 2 (11 tasks)
+    '6a43a095bfef0cd74c298963': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2e286f77444001e2e48',
+          '5d25e48186f77443e625e386',
+          '5d25e4ad86f77443e625e387',
+          '60c0c018f7afb4354815096a',
+          '639136e84ed9512be67647db',
+          '63a88045abf76d719f42d715',
+          '64e7b971f9d6fa49d6769b44',
+          '6578eb36e5020875d64645cd',
+          '669fa3979b0ce3feae01a130',
+          '669fa3a08b4a64b332041ff7',
+          '66b38e144f2ab7cc530c3fe7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 3 (12 tasks)
+    '6a43a13633c97d216dfc85de': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2b486f77409de05bba0',
+          '5d25e2cc86f77443e47ae019',
+          '5d25e44f86f77443e625e385',
+          '5d25e45e86f77408251c4bfa',
+          '5d25e4b786f77408251c4bfc',
+          '5d25e4d586f77443e625e388',
+          '608a768d82e40b3c727fd17d',
+          '6179ad0a6e9dd54ac275e3f2',
+          '61904daa7d0d857927447b9c',
+          '639136df4b15ca31f76bc31f',
+          '66ab9da7eb102b9bcd08591c',
+          '6a45208043b8d7604d00b8d5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 4 (6 tasks)
+    '6a43a16dde81644a7951f31b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e4ca86f77409dd5cdf2c',
+          '5edab4b1218d181e29451435',
+          '60e71e8ed54b755a3b53eb67',
+          '626bdcc3a371ee3a7a3514c5',
+          '63a9b36cc31b00242d28a99f',
+          '6a4532e48e82d8ffea0c3eae',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 1 (9 tasks)
+    '6a3171c927ca9591bf4db1c4': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac23c6186f7741247042bad',
+          '5ac2426c86f774138762edfe',
+          '5ac2428686f77412450b42bf',
+          '5ac3462b86f7741d6118b983',
+          '5ac3475486f7741d6224abd3',
+          '60e71d6d7fcf9c556f325055',
+          '657315e4a6af4ab4b50f3459',
+          '6578ec473dbd035d04531a8d',
+          '675c1570526ff496850895d9',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 2 (12 tasks)
+    '6a3c0fefbea2d2ad581c090b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac345dc86f774288030817f',
+          '5ac3467986f7741d6224abc2',
+          '5ac346a886f7744e1b083d67',
+          '5ac3477486f7741d651d6885',
+          '5ae3267986f7742a413592fe',
+          '5f04886a3937dc337a6b8238',
+          '639135e8c115f907b14700aa',
+          '639136fa9444fb141f4e6eee',
+          '639872f9decada40426d3447',
+          '6573382e557ff128bf3da536',
+          '669fa39b91b0a8c9680fc467',
+          '66aa74571e5e199ecd094f18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 3 (16 tasks)
+    '6a3cf95c6b35530c4a4f532e': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac244eb86f7741356335af1',
+          '5ac3464c86f7741d651d6877',
+          '5ae3270f86f77445ba41d4dd',
+          '5ae3277186f7745973054106',
+          '5ae327c886f7745c7b3f2f3f',
+          '5ae3280386f7742a41359364',
+          '5b47799d86f7746c5d6a5fd8',
+          '5c1128e386f7746565181106',
+          '5c139eb686f7747878361a6f',
+          '6089732b59b92115597ad789',
+          '6089736efa70fc097863b8f6',
+          '6179b3a12153c15e937d52bc',
+          '6179b3bdc7560e13d23eeb8d',
+          '639872fa9b4fb827b200d8e5',
+          '639872fc93ae507d5858c3a6',
+          '64ee9df4496db64f9b7a4432',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 4 (5 tasks)
+    '6a3d1c0990e9ffe15463e961': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bde0986f77479cf22c2f8',
+          '5c0be13186f7746f016734aa',
+          '60e71d23c1bfa3050473b8e6',
+          '68db9c7557bc51a8c804c14b',
+          '6942b44f891369fc790e385a',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 1 (9 tasks)
+    '6a5ba40fe5c4eaef5610f232': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a0327ba86f77456b9154236',
+          '5a0449d586f77474e66227b7',
+          '5a27b7a786f774579c3eb376',
+          '5a27bafb86f7741c73584017',
+          '5b4794cb86f774598100d5d4',
+          '669fa38fad7f1eac2607ed46',
+          '66aa58245ab22944110db6e9',
+          '675c1d6d59b0575973008fc7',
+          '6a5c1578f2689567c30eb0f3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 2 (12 tasks)
+    '6a5ba450a7851e16ce0bde44': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a03153686f77442d90e2171',
+          '5a03296886f774569778596a',
+          '5a27b75b86f7742e97191958',
+          '5a27b7d686f77460d847e6a6',
+          '5a27b80086f774429a5d7e20',
+          '5a27b87686f77460de0252a8',
+          '5a27b9de86f77464e5044585',
+          '5a27ba1c86f77461ea5a3c56',
+          '639135534b15ca31f76bc317',
+          '639135f286e646067c176a87',
+          '639282134ed9512be67647ed',
+          '6a5ccda873f06065630d61b0',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 3 (8 tasks)
+    '6a5ba48b8cfd0bddb3d4d2e1': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a27bb1e86f7741f27621b7e',
+          '5a27bb3d86f77411ea361a21',
+          '6086c852c945025d41566124',
+          '60e71c9ad54b755a3b53eb66',
+          '6179aff8f57fb279792c60a1',
+          '6179b4d1bca27a099552e04e',
+          '61958c366726521dd96828ec',
+          '6a5cd2178fd7c2b201032f3f',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 4 (9 tasks)
+    '6a5ba4c57cbb93b629051591': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bd01e86f7747cdd799e56',
+          '5c0d4c12d09282029f539173',
+          '5c0d4e61d09282029f53920e',
+          '5edac020218d181e29451446',
+          '5edac63b930f5454f51e128b',
+          '60e71ccb5688f6424c7bfec4',
+          '60e71ce009d7c801eb0c0ec6',
+          '6179b5eabca27a099552e052',
+          '63a9b229813bba58a50c9ee5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 1 (11 tasks)
+    '6a20540cf1b67a977cc5a088': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5936d90786f7742b1420ba5b',
+          '5936da9e86f7742d65037edf',
+          '59674cd986f7744ab26e32f2',
+          '5967530a86f77462ba22226b',
+          '5967725e86f774601a446662',
+          '59c124d686f774189b3c843f',
+          '5fd9fad9c1ce6b1a3b486d00',
+          '63a5cf262964a7488f5243ce',
+          '657315df034d76585f032e01',
+          '657315e1dccd301f1301416a',
+          '675c3507a06634b5110e3c18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 2 (13 tasks)
+    '6a2688488bba18e0b0187a04': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59674eb386f774539f14813a',
+          '59675d6c86f7740a842fc482',
+          '59675ea386f77414b32bded2',
+          '5c0d190cd09282029f5390d8',
+          '5eda19f0edce541157209cee',
+          '60e71b9bbd90872cb85440f3',
+          '6391359b9444fb141f4e6ee6',
+          '639136f086e646067c176a8b',
+          '64e7b9bffd30422ed03dad38',
+          '64f5aac4b63b74469b6c14c2',
+          '64f5deac39e45b527a7c4232',
+          '6573397ef3f8344c4575cd87',
+          '669fa399033a3ce9870338a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 3 (9 tasks)
+    '6a32651a811905ed0cac0973': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59ca1a6286f774509a270942',
+          '5c0bd94186f7747a727f09b2',
+          '5ede55112c95834b583f052a',
+          '60896b7bfa70fc097863b8f5',
+          '60896bca6ee58f38c417d4f2',
+          '6179ac7511973d018217d0b9',
+          '626bd75c71bd851e971b82a5',
+          '669fa3a40c828825de06d6a1',
+          '66ab970848ddbe9d4a0c49a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 4 (8 tasks)
+    '6a326525789ae12ecb0b2807': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d4bec3486f7743cac246665',
+          '60e71b62a0beca400d69efc4',
+          '60e71bb4e456d449cd47ca75',
+          '63a9ae24009ffc6a551631a5',
+          '6574e0dedc0d635f633a5805',
+          '675c1ff1a757ddd00404f0aa',
+          '67b45467814ab0ffa000c7e7',
+          '68ee1c18b4e5bc9a68018cd7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 1 (9 tasks)
+    '6a4b339f18db62e03b4f7ded': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448bf86f7744d733e55ee',
+          '5ae448f286f77448d73c0131',
+          '5ae4490786f7744ca822adcc',
+          '5ae4493486f7744efa289417',
+          '5ae4493d86f7744b8e15aa8f',
+          '5ae449b386f77446d8741719',
+          '5ae449c386f7744bde357697',
+          '5c10f94386f774227172c572',
+          '60e71dc0a94be721b065bbfc',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 2 (10 tasks)
+    '6a4b4e6a30dac4b01af220aa': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448e586f7744dcf0c2a67',
+          '5ae4498786f7744bde357695',
+          '5ae449d986f774453a54a7e1',
+          '5b478b1886f7744d1b23c57d',
+          '5b478d0f86f7744d190d91b5',
+          '638fcd23dc65553116701d33',
+          '639135a7e705511c8a4a1b78',
+          '65734c186dc1e402c80dc19e',
+          '65802b627b44fa5e14638899',
+          '675c085d59b0575973005f52',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 3 (7 tasks)
+    '6a4b9c9a60b56d421cceea18': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5b47891f86f7744d1b23c571',
+          '5c112d7e86f7740d6f647486',
+          '608974af4b05530f55550c21',
+          '608974d01a66564e74191fc0',
+          '60e71dc67fcf9c556f325056',
+          '639135bbc115f907b14700a6',
+          '66aa61663aa37705c5024277',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 1 (9 tasks)
+    '6a59f3ba06c8949abad30871': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b36c586f77450d6045ad2',
+          '596b43fb86f77457ca186186',
+          '5979ed3886f77431307dc512',
+          '5979eee086f774311955e614',
+          '5979f8bb86f7743ec214c7a6',
+          '5b47926a86f7747ccc057c15',
+          '657315e270bb0b8dba00cc48',
+          '658027799634223183395339',
+          '675c3582f6ddc329a90f9c6d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 2 (12 tasks)
+    '6a5a111de1f417ac80a163e5': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b455186f77457cb50eccb',
+          '5a27c99a86f7747d2c6bdd8e',
+          '5b478eca86f7744642012254',
+          '5b478ff486f7744d184ecbbf',
+          '5b4795fb86f7745876267770',
+          '5c1234c286f77406fa13baeb',
+          '639135c3744e452011470807',
+          '639dbaf17c898a131e1cffff',
+          '64f5e20652fc01298e2c61e3',
+          '64f6aafd67e11a7c6206e0d0',
+          '669fa395c4c5c04798002497',
+          '669fa39c64ea11e84c0642a6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 3 (8 tasks)
+    '6a5a115181116e807b55f258': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d0f1886f77457b8210226',
+          '5edabd13218d181e29451442',
+          '60896888e4a85c72ef3fa300',
+          '6089743983426423753cd58a',
+          '6179b4f16e9dd54ac275e407',
+          '6193850f60b34236ee0483de',
+          '626bd75d5bef5d7d590bd415',
+          '6572e876dc0d635f633a5714',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 4 (4 tasks)
+    '6a5a1192efde11cc7105b18f': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bbaa886f7746941031d82',
+          '5c0bc91486f7746ab41857a2',
+          '60e71c11d54b755a3b53eb65',
+          '6764174c86addd02bc033d68',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 1 (9 tasks)
+    '6a4e4ab3ecd1145894d00990': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5967733e86f774602332fc84',
+          '59689fbd86f7740d137ebfc4',
+          '5968eb3186f7741dde183a4d',
+          '5969f9e986f7741dde183a50',
+          '596a0e1686f7741ddf17dbee',
+          '657315ddab5a49b71f098853',
+          '675c03d1f7da9792a405549a',
+          '675c047fa46173572a0bd878',
+          '6a5424ae135497b9df0c68be',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 2 (9 tasks)
+    '6a4e4aed3ded7a18126603f6': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59689ee586f7740d1570bbd5',
+          '596a1e6c86f7741ddc2d3206',
+          '59c9392986f7742f6923add2',
+          '639135d89444fb141f4e6eea',
+          '639135e0fa894f0a866afde6',
+          '64f3176921045e77405d63b5',
+          '64f731ab83cfca080a361e42',
+          '669fa39ee749756c920d02c8',
+          '67a09673972c11a3f507731d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 3 (8 tasks)
+    '6a4e4b28629dc64c4001967c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5969f90786f77420d2328015',
+          '596a218586f77420d232807c',
+          '5edab736cc183c769d778bc2',
+          '5edaba7c0c502106f869bc02',
+          '60896e28e4a85c72ef3fa301',
+          '6179ad56c760af5ad2053587',
+          '6179afd0bca27a099552e040',
+          '626bd75b05f287031503c7f6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 4 (3 tasks)
+    '6a56925b1c30ba5a77c7c518': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d1c4cd0928202a02a6f5c',
+          '60e71c48c1bfa3050473b8e5',
+          '66aba85403e0ee3101042877',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+  },
+  'pvp-season': {
+    // Jaeger Tier 1 (10 tasks)
+    '6a43a01ccc83aceedd35f09c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d24b81486f77439c92d6ba8',
+          '5d25e2c386f77443e7549029',
+          '5d25e2ee86f77443e35162ea',
+          '5d25e43786f7740a212217fa',
+          '5d25e44386f77409453bce7b',
+          '5d25e46e86f77409453bce7c',
+          '600302d73b897b11364cd161',
+          '60e729cf5698ee7b05057439',
+          '66b38c7bf85b8bf7250f9cb6',
+          '675c1cf4a757ddd00404f0a3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 2 (11 tasks)
+    '6a43a095bfef0cd74c298963': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2e286f77444001e2e48',
+          '5d25e48186f77443e625e386',
+          '5d25e4ad86f77443e625e387',
+          '60c0c018f7afb4354815096a',
+          '639136e84ed9512be67647db',
+          '63a88045abf76d719f42d715',
+          '64e7b971f9d6fa49d6769b44',
+          '6578eb36e5020875d64645cd',
+          '669fa3979b0ce3feae01a130',
+          '669fa3a08b4a64b332041ff7',
+          '66b38e144f2ab7cc530c3fe7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 3 (12 tasks)
+    '6a43a13633c97d216dfc85de': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e2b486f77409de05bba0',
+          '5d25e2cc86f77443e47ae019',
+          '5d25e44f86f77443e625e385',
+          '5d25e45e86f77408251c4bfa',
+          '5d25e4b786f77408251c4bfc',
+          '5d25e4d586f77443e625e388',
+          '608a768d82e40b3c727fd17d',
+          '6179ad0a6e9dd54ac275e3f2',
+          '61904daa7d0d857927447b9c',
+          '639136df4b15ca31f76bc31f',
+          '66ab9da7eb102b9bcd08591c',
+          '6a45208043b8d7604d00b8d5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Jaeger Tier 4 (6 tasks)
+    '6a43a16dde81644a7951f31b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d25e4ca86f77409dd5cdf2c',
+          '5edab4b1218d181e29451435',
+          '60e71e8ed54b755a3b53eb67',
+          '626bdcc3a371ee3a7a3514c5',
+          '63a9b36cc31b00242d28a99f',
+          '6a4532e48e82d8ffea0c3eae',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 1 (9 tasks)
+    '6a3171c927ca9591bf4db1c4': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac23c6186f7741247042bad',
+          '5ac2426c86f774138762edfe',
+          '5ac2428686f77412450b42bf',
+          '5ac3462b86f7741d6118b983',
+          '5ac3475486f7741d6224abd3',
+          '60e71d6d7fcf9c556f325055',
+          '657315e4a6af4ab4b50f3459',
+          '6578ec473dbd035d04531a8d',
+          '675c1570526ff496850895d9',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 2 (12 tasks)
+    '6a3c0fefbea2d2ad581c090b': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac345dc86f774288030817f',
+          '5ac3467986f7741d6224abc2',
+          '5ac346a886f7744e1b083d67',
+          '5ac3477486f7741d651d6885',
+          '5ae3267986f7742a413592fe',
+          '5f04886a3937dc337a6b8238',
+          '639135e8c115f907b14700aa',
+          '639136fa9444fb141f4e6eee',
+          '639872f9decada40426d3447',
+          '6573382e557ff128bf3da536',
+          '669fa39b91b0a8c9680fc467',
+          '66aa74571e5e199ecd094f18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 3 (16 tasks)
+    '6a3cf95c6b35530c4a4f532e': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ac244eb86f7741356335af1',
+          '5ac3464c86f7741d651d6877',
+          '5ae3270f86f77445ba41d4dd',
+          '5ae3277186f7745973054106',
+          '5ae327c886f7745c7b3f2f3f',
+          '5ae3280386f7742a41359364',
+          '5b47799d86f7746c5d6a5fd8',
+          '5c1128e386f7746565181106',
+          '5c139eb686f7747878361a6f',
+          '6089732b59b92115597ad789',
+          '6089736efa70fc097863b8f6',
+          '6179b3a12153c15e937d52bc',
+          '6179b3bdc7560e13d23eeb8d',
+          '639872fa9b4fb827b200d8e5',
+          '639872fc93ae507d5858c3a6',
+          '64ee9df4496db64f9b7a4432',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Mechanic Tier 4 (5 tasks)
+    '6a3d1c0990e9ffe15463e961': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bde0986f77479cf22c2f8',
+          '5c0be13186f7746f016734aa',
+          '60e71d23c1bfa3050473b8e6',
+          '68db9c7557bc51a8c804c14b',
+          '6942b44f891369fc790e385a',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 1 (9 tasks)
+    '6a5ba40fe5c4eaef5610f232': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a0327ba86f77456b9154236',
+          '5a0449d586f77474e66227b7',
+          '5a27b7a786f774579c3eb376',
+          '5a27bafb86f7741c73584017',
+          '5b4794cb86f774598100d5d4',
+          '669fa38fad7f1eac2607ed46',
+          '66aa58245ab22944110db6e9',
+          '675c1d6d59b0575973008fc7',
+          '6a5c1578f2689567c30eb0f3',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 2 (12 tasks)
+    '6a5ba450a7851e16ce0bde44': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a03153686f77442d90e2171',
+          '5a03296886f774569778596a',
+          '5a27b75b86f7742e97191958',
+          '5a27b7d686f77460d847e6a6',
+          '5a27b80086f774429a5d7e20',
+          '5a27b87686f77460de0252a8',
+          '5a27b9de86f77464e5044585',
+          '5a27ba1c86f77461ea5a3c56',
+          '639135534b15ca31f76bc317',
+          '639135f286e646067c176a87',
+          '639282134ed9512be67647ed',
+          '6a5ccda873f06065630d61b0',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 3 (8 tasks)
+    '6a5ba48b8cfd0bddb3d4d2e1': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5a27bb1e86f7741f27621b7e',
+          '5a27bb3d86f77411ea361a21',
+          '6086c852c945025d41566124',
+          '60e71c9ad54b755a3b53eb66',
+          '6179aff8f57fb279792c60a1',
+          '6179b4d1bca27a099552e04e',
+          '61958c366726521dd96828ec',
+          '6a5cd2178fd7c2b201032f3f',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Peacekeeper Tier 4 (9 tasks)
+    '6a5ba4c57cbb93b629051591': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bd01e86f7747cdd799e56',
+          '5c0d4c12d09282029f539173',
+          '5c0d4e61d09282029f53920e',
+          '5edac020218d181e29451446',
+          '5edac63b930f5454f51e128b',
+          '60e71ccb5688f6424c7bfec4',
+          '60e71ce009d7c801eb0c0ec6',
+          '6179b5eabca27a099552e052',
+          '63a9b229813bba58a50c9ee5',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 1 (11 tasks)
+    '6a20540cf1b67a977cc5a088': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5936d90786f7742b1420ba5b',
+          '5936da9e86f7742d65037edf',
+          '59674cd986f7744ab26e32f2',
+          '5967530a86f77462ba22226b',
+          '5967725e86f774601a446662',
+          '59c124d686f774189b3c843f',
+          '5fd9fad9c1ce6b1a3b486d00',
+          '63a5cf262964a7488f5243ce',
+          '657315df034d76585f032e01',
+          '657315e1dccd301f1301416a',
+          '675c3507a06634b5110e3c18',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 2 (13 tasks)
+    '6a2688488bba18e0b0187a04': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59674eb386f774539f14813a',
+          '59675d6c86f7740a842fc482',
+          '59675ea386f77414b32bded2',
+          '5c0d190cd09282029f5390d8',
+          '5eda19f0edce541157209cee',
+          '60e71b9bbd90872cb85440f3',
+          '6391359b9444fb141f4e6ee6',
+          '639136f086e646067c176a8b',
+          '64e7b9bffd30422ed03dad38',
+          '64f5aac4b63b74469b6c14c2',
+          '64f5deac39e45b527a7c4232',
+          '6573397ef3f8344c4575cd87',
+          '669fa399033a3ce9870338a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 3 (9 tasks)
+    '6a32651a811905ed0cac0973': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59ca1a6286f774509a270942',
+          '5c0bd94186f7747a727f09b2',
+          '5ede55112c95834b583f052a',
+          '60896b7bfa70fc097863b8f5',
+          '60896bca6ee58f38c417d4f2',
+          '6179ac7511973d018217d0b9',
+          '626bd75c71bd851e971b82a5',
+          '669fa3a40c828825de06d6a1',
+          '66ab970848ddbe9d4a0c49a8',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Prapor Tier 4 (8 tasks)
+    '6a326525789ae12ecb0b2807': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5d4bec3486f7743cac246665',
+          '60e71b62a0beca400d69efc4',
+          '60e71bb4e456d449cd47ca75',
+          '63a9ae24009ffc6a551631a5',
+          '6574e0dedc0d635f633a5805',
+          '675c1ff1a757ddd00404f0aa',
+          '67b45467814ab0ffa000c7e7',
+          '68ee1c18b4e5bc9a68018cd7',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 1 (9 tasks)
+    '6a4b339f18db62e03b4f7ded': {
+      revision: '1.1.0',
+      verification: 'unresolved',
+      coverage: 'partial',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448bf86f7744d733e55ee',
+          '5ae448f286f77448d73c0131',
+          '5ae4490786f7744ca822adcc',
+          '5ae4493486f7744efa289417',
+          '5ae4493d86f7744b8e15aa8f',
+          '5ae449b386f77446d8741719',
+          '5ae449c386f7744bde357697',
+          '5c10f94386f774227172c572',
+          '60e71dc0a94be721b065bbfc',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 2 (10 tasks)
+    '6a4b4e6a30dac4b01af220aa': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5ae448e586f7744dcf0c2a67',
+          '5ae4498786f7744bde357695',
+          '5ae449d986f774453a54a7e1',
+          '5b478b1886f7744d1b23c57d',
+          '5b478d0f86f7744d190d91b5',
+          '638fcd23dc65553116701d33',
+          '639135a7e705511c8a4a1b78',
+          '65734c186dc1e402c80dc19e',
+          '65802b627b44fa5e14638899',
+          '675c085d59b0575973005f52',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Ragman Tier 3 (7 tasks)
+    '6a4b9c9a60b56d421cceea18': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5b47891f86f7744d1b23c571',
+          '5c112d7e86f7740d6f647486',
+          '608974af4b05530f55550c21',
+          '608974d01a66564e74191fc0',
+          '60e71dc67fcf9c556f325056',
+          '639135bbc115f907b14700a6',
+          '66aa61663aa37705c5024277',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 1 (9 tasks)
+    '6a59f3ba06c8949abad30871': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b36c586f77450d6045ad2',
+          '596b43fb86f77457ca186186',
+          '5979ed3886f77431307dc512',
+          '5979eee086f774311955e614',
+          '5979f8bb86f7743ec214c7a6',
+          '5b47926a86f7747ccc057c15',
+          '657315e270bb0b8dba00cc48',
+          '658027799634223183395339',
+          '675c3582f6ddc329a90f9c6d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 2 (12 tasks)
+    '6a5a111de1f417ac80a163e5': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '596b455186f77457cb50eccb',
+          '5a27c99a86f7747d2c6bdd8e',
+          '5b478eca86f7744642012254',
+          '5b478ff486f7744d184ecbbf',
+          '5b4795fb86f7745876267770',
+          '5c1234c286f77406fa13baeb',
+          '639135c3744e452011470807',
+          '639dbaf17c898a131e1cffff',
+          '64f5e20652fc01298e2c61e3',
+          '64f6aafd67e11a7c6206e0d0',
+          '669fa395c4c5c04798002497',
+          '669fa39c64ea11e84c0642a6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 3 (8 tasks)
+    '6a5a115181116e807b55f258': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d0f1886f77457b8210226',
+          '5edabd13218d181e29451442',
+          '60896888e4a85c72ef3fa300',
+          '6089743983426423753cd58a',
+          '6179b4f16e9dd54ac275e407',
+          '6193850f60b34236ee0483de',
+          '626bd75d5bef5d7d590bd415',
+          '6572e876dc0d635f633a5714',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Skier Tier 4 (4 tasks)
+    '6a5a1192efde11cc7105b18f': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0bbaa886f7746941031d82',
+          '5c0bc91486f7746ab41857a2',
+          '60e71c11d54b755a3b53eb65',
+          '6764174c86addd02bc033d68',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 1 (9 tasks)
+    '6a4e4ab3ecd1145894d00990': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5967733e86f774602332fc84',
+          '59689fbd86f7740d137ebfc4',
+          '5968eb3186f7741dde183a4d',
+          '5969f9e986f7741dde183a50',
+          '596a0e1686f7741ddf17dbee',
+          '657315ddab5a49b71f098853',
+          '675c03d1f7da9792a405549a',
+          '675c047fa46173572a0bd878',
+          '6a5424ae135497b9df0c68be',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 2 (9 tasks)
+    '6a4e4aed3ded7a18126603f6': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '59689ee586f7740d1570bbd5',
+          '596a1e6c86f7741ddc2d3206',
+          '59c9392986f7742f6923add2',
+          '639135d89444fb141f4e6eea',
+          '639135e0fa894f0a866afde6',
+          '64f3176921045e77405d63b5',
+          '64f731ab83cfca080a361e42',
+          '669fa39ee749756c920d02c8',
+          '67a09673972c11a3f507731d',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 3 (8 tasks)
+    '6a4e4b28629dc64c4001967c': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5969f90786f77420d2328015',
+          '596a218586f77420d232807c',
+          '5edab736cc183c769d778bc2',
+          '5edaba7c0c502106f869bc02',
+          '60896e28e4a85c72ef3fa301',
+          '6179ad56c760af5ad2053587',
+          '6179afd0bca27a099552e040',
+          '626bd75b05f287031503c7f6',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+    // Therapist Tier 4 (3 tasks)
+    '6a56925b1c30ba5a77c7c518': {
+      revision: '1.1.0',
+      verification: 'verified',
+      coverage: 'complete',
+      derivation: {
+        type: 'distinctTaskCompletions',
+        taskIds: [
+          '5c0d1c4cd0928202a02a6f5c',
+          '60e71c48c1bfa3050473b8e5',
+          '66aba85403e0ee3101042877',
+        ],
+      },
+      proof: [
+        'https://github.com/tarkovtracker-org/tarkov-data-overlay/blob/main/docs/GLOBAL_VARIABLE_MECHANICS.md',
+      ],
+    },
+  },
 }
