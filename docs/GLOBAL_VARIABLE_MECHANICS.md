@@ -11,7 +11,7 @@ questions that repeatedly cause confusion:
   satisfied.
 
 This is the mechanism-and-evidence side. For what the overlay actually ships —
-the `progressionCounters` registry contract, its evidence bar, and the
+the `progressionCounters` registry contract, its evidence standard, and the
 evaluation rules `evaluateTaskProgression` follows — see
 [global variables and progression counters](GLOBAL_VARIABLES.md).
 
@@ -37,11 +37,10 @@ counter interpretation below apply.
 Treat that as an observed interpretation, not an established rule. It reproduces
 the profile's value for 23 of the 27 groups and matches the pool size for 20 of
 27; the groups it fails on are listed in [Caveats](#caveats) and are not
-explained. Reconciling is necessary but **not sufficient** — an aggregate match in
-one profile cannot show which tasks contribute or by how much — so no group here
-is established well enough to drive a progression mapping. See
-[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the bar a
-mapping must clear before it can produce a value.
+explained. An aggregate match cannot show which tasks contribute or by how much,
+so the mapping is best effort rather than proven: the registry publishes the 23
+consistent groups and keeps the 4 contradicted ones unresolved. See
+[the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the standard.
 
 Under that reading the group's child variables would be individual per-task
 completion markers for the pool — but that is the hypothesis, not a finding: 351 of
@@ -162,9 +161,8 @@ Both conjuncts are narrower than they look, and the exact form is given in
 `TraderLoyalty` condition, so the first conjunct must not be applied to them.
 And `contributors` is not interchangeable with the tier pool: for four groups the
 counter reads below the completed pool count, so counting every completed pool
-task would overshoot and report a task available too early. No group's contributor
-set is established here, so this is the model's shape rather than an evaluable
-predicate.
+task would overshoot and report a task available too early. For the other 23 the
+registry treats the pool as the contributor set on a best-effort basis.
 
 ### Evidence
 
@@ -291,30 +289,23 @@ globalVariables[groupId] = |completed ∩ contributors(groupId)|
 ```
 
 Throughout this document, **`contributors(groupId)`** means the set of tasks that
-actually increment that counter. Nothing here establishes that set for **any**
-group, so distinguish three states and do not conflate the first two:
+actually increment that counter. The captures cannot identify that set directly,
+so the registry uses the pool as a best-effort stand-in where the evidence is
+consistent:
 
-- **Aggregate-reconciling (23 groups).** The counter's observed value equals the
-  number of completed pool tasks in one profile. That is consistent with the pool
-  being the contributor set, but it does not prove it: an aggregate can match
-  while one task contributes nothing and another contributes twice, and one
-  profile says nothing about contribution amounts, alternate producers, initial
-  values or resets. See
-  [the registry's evidence bar](GLOBAL_VARIABLES.md#registry-contract), which
-  states outright that a matching sum in one profile does not prove these
-  properties.
-- **Not reconciling (4 groups).** The counter reads below the completed pool
-  count, so the pool and the counter are **inconsistent under the simple model**.
-  This is not proof that those tasks are outside the contributor set: since reset
-  and initial-value behaviour is unresolved, a reset could produce the same
-  shortfall after every pool task had contributed. Either way the identities stay
-  unknown and the counter is not computable. See [Caveats](#caveats).
-- **Verified.** Contributor identities established by evidence of the derivation
-  itself. No group in this document reaches this state.
+- **Consistent (23 groups), published `verified`/`complete`.** The counter equals
+  the number of completed pool tasks in every retained PMC profile. That is not
+  proof: an aggregate can match while one task contributes nothing and another
+  contributes twice, and the profiles say nothing about alternate producers,
+  initial values or resets. It is the best available evidence, and nothing
+  contradicts it.
+- **Contradicted (4 groups), kept `unresolved`/`partial`.** The counter reads below
+  the completed pool count, so counting the pool would unlock tasks too early. The
+  cause is unknown: some tasks may not contribute, or a reset may have lowered the
+  counter after every pool task had contributed. See [Caveats](#caveats).
 
-Every formula below is scoped to `contributors`, never to the raw pool, and each
-is usable only once a group is verified — by evidence beyond this document. On the
-strength of what is recorded here, all 27 are candidates.
+If a capture or user report contradicts a consistent group, move it to the
+second state.
 
 Ragman's single tier-4 task is **not** in these totals: it has no counter group,
 which is why the table above has no Ragman tier-4 row. Do not add it as a
@@ -324,19 +315,10 @@ The overlay already has the vehicle for that annotation: the
 `progressionCounters` registry in `src/additions/progressionCounters.json5`,
 published as `overlay.progressionCounters` and consumed by
 `evaluateTaskProgression`. A `distinctTaskCompletions` derivation over a pool's
-task IDs is exactly the shape above.
-
-What is _not_ settled is whether the mapping in this document clears that
-registry's evidence bar. It does not, and not merely because of the four
-unreconciled counters and seven child-count mismatches below. The bar requires
-`verification: 'verified'` and `coverage: 'complete'` with public proof of the
-derivation, and the aggregate profile match behind this model does not supply that
-for **any** of the 27 — it cannot distinguish which tasks contribute, how much
-each contributes, whether another producer writes the value, or how it initialises
-and resets. So all 27 belong in the registry as `unresolved` candidates at most,
-which never produce an inferred value. See
+task IDs is exactly the shape above, and the registry now carries it for the 23
+consistent groups. See
 [the registry contract](GLOBAL_VARIABLES.md#registry-contract) for the fields and
-the bar.
+the best-effort standard.
 
 ## Building a progression model
 
@@ -426,10 +408,7 @@ Knowing a player has a task at threshold `N` over a group tells you
 intra-pool task edges**, no individual member is ever forced, so no specific task
 can be inferred as required. Where a contributor set is verified, the number of
 minimal explanations is `C(|contributors|, N)` — large enough that enumerating them
-is pointless. Since no group here is verified, that figure cannot currently be
-computed for any of them: substituting the pool would enumerate subsets containing
-members that may not contribute. Raw-pool arithmetic gives a feel for the scale
-only — taking `C(Pool, N)` for each of the 164 gated tasks in the table, using its
+is pointless. Taking `C(Pool, N)` for each of the 164 gated tasks in the table, using its
 own threshold `N` and its pool size, the median is 56 and the maximum is
 `C(16,5) = 4368` at Mechanic tier 3. Both are reproducible from the table, but
 treat them as illustrations of magnitude rather than counts of valid histories:

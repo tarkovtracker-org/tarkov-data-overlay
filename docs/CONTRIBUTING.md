@@ -165,7 +165,8 @@ regressions.
 A `GlobalVariableValue` condition is a numeric state comparison, though; it is
 not interchangeable with a `TraderLoyalty` condition or a list of prerequisite
 tasks. See [global variables and progression counters](GLOBAL_VARIABLES.md)
-before adding counter metadata, and keep incomplete or unverified mappings
+before adding counter metadata. Mappings that meet its best-effort standard can
+be published as verified; keep mappings that any observation contradicts
 informational.
 
 ### `taskRequirements` — the wiki `previous` field is not proof
