@@ -153,6 +153,22 @@
             }
           ]
         },
+        "6745fae369a58fceba10343d": {
+          "taskRequirements": [
+            {
+              "task": {
+                "id": "6752f6d83038f7df520c83e8",
+                "name": "A Helping Hand"
+              },
+              "status": [
+                "complete"
+              ]
+            }
+          ]
+        },
+        "67a0970744893b9f3f0d9b68": {
+          "taskRequirements": []
+        },
         "66631493312343839d032d22": {
           "objectives": {
             "666733e565831d5bafa18bbb": {
@@ -316,6 +332,7 @@
       "disabled": true
     },
     "60e71b62a0beca400d69efc4": {
+      "minPlayerLevel": 36,
       "traderRequirements": [
         {
           "id": "overlay.60e71b62a0beca400d69efc4.54cb50c76803fa8b248b4571.level.>=.4",
@@ -3084,23 +3101,7 @@
     "61904daa7d0d857927447b9c": {
       "taskRequirements": []
     },
-    "67a0970744893b9f3f0d9b68": {
-      "taskRequirements": []
-    },
     "673f4e956f1b89c7bc0f56ef": {
-      "taskRequirements": [
-        {
-          "task": {
-            "id": "6752f6d83038f7df520c83e8",
-            "name": "A Helping Hand"
-          },
-          "status": [
-            "complete"
-          ]
-        }
-      ]
-    },
-    "6745fae369a58fceba10343d": {
       "taskRequirements": [
         {
           "task": {
@@ -9951,8 +9952,8 @@
     }
   },
   "$meta": {
-    "version": "1.107",
-    "generated": "2026-09-28T07:40:49.972Z",
-    "sha256": "825ea3be7f5618361d35489c8599beb81aba7435de0db63223aaa54d34fa8baf"
+    "version": "1.108",
+    "generated": "2026-09-28T09:06:33.736Z",
+    "sha256": "f7fc421db581911a96fd4dd3cde6982695a1efccdbe7f60481998cadc813c8bd"
   }
 }
