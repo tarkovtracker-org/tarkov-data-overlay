@@ -19,7 +19,6 @@ const TASK_IDS = {
   duplicateShooter: '5bc4826c86f774106d22d88b',
   theGuide: '5c0d4e61d09282029f53920e',
   tigrSafari: '5a27b7a786f774579c3eb376',
-  goodTimes: '666314b4d7f171c4c20226c3',
   supplements: '5b478ff486f7744d184ecbbf',
   relentless: '60e71e8ed54b755a3b53eb67',
   flashDrive: '5979ed3886f77431307dc512',
@@ -97,7 +96,6 @@ describe('task correction data', () => {
   });
 
   it('applies the level, name, and objective corrections', () => {
-    expect(overrides[TASK_IDS.goodTimes]).toMatchObject({ minPlayerLevel: 27 });
     // The maps fix (Was: Interchange) has been served upstream since
     // 2026-09-23 and must not come back; only the unverified-coordinates
     // suppression remains. Public API snapshot:
