@@ -31,6 +31,8 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           # dist/overlay.json has a single writer: the release workflow commits it
@@ -42,7 +44,7 @@ jobs:
             base="$(git merge-base "$BASE_SHA" HEAD)"
           fi
           if ! git diff --quiet "$base" HEAD -- dist/; then
-            echo "::error file=dist/overlay.json::dist/overlay.json is generated and committed by the release workflow after merge. Drop it from this PR: git checkout origin/main -- dist/overlay.json"
+            echo "::error file=dist/overlay.json::dist/overlay.json is generated and committed by the release workflow after merge. Drop it from this PR by restoring the base copy: git fetch https://github.com/${BASE_REPO}.git ${BASE_REF} && git checkout FETCH_HEAD -- dist/overlay.json"
             exit 1
           fi
 

@@ -89,7 +89,9 @@ Edit the appropriate file in `src/overrides/`:
 5. Run `npm run build` to confirm the overlay still builds, but do not commit
    `dist/overlay.json`; the release workflow regenerates and commits it after
    merge, and CI rejects pull requests that change it (restore it with
-   `git checkout origin/main -- dist/overlay.json`)
+   `git fetch https://github.com/tarkovtracker-org/tarkov-data-overlay.git main`
+   then `git checkout FETCH_HEAD -- dist/overlay.json`, which works from forks
+   too)
 6. Record the commands you ran in the PR
 7. Submit a PR using the template
 
