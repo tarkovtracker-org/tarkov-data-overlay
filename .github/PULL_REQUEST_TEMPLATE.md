@@ -24,13 +24,13 @@
 - [ ] Field names match tarkov.dev schema exactly (camelCase)
 - [ ] Validation passes locally (`npm run validate`)
 - [ ] Type-check and tests pass when relevant (`npm run typecheck`, `npm test`)
-- [ ] For data changes, I ran `npm run build` and committed the regenerated `dist/overlay.json`
+- [ ] `npm run build` succeeds and `dist/overlay.json` is not part of this PR (the release workflow commits it)
 
 ## Commands Run
 
 <!--
 List the commands you ran and their result, e.g.
-`npm run validate` ✅ · `npm run build` ✅ (regenerated dist/overlay.json) · `npm run typecheck` ✅ · `npm test` ✅
+`npm run validate` ✅ · `npm run build` ✅ · `npm run typecheck` ✅ · `npm test` ✅
 -->
 
 ## Related Issues

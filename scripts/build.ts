@@ -160,7 +160,7 @@ function checkGeneratedOutput(
   const expected = JSON.stringify(canonicalize(withoutMetadata(output)));
   const actual = JSON.stringify(canonicalize(withoutMetadata(existing)));
   if (expected !== actual) {
-    throw new Error(`Generated overlay is stale: run 'npm run build' and commit ${outputPath}`);
+    throw new Error(`Generated overlay is stale relative to source data: ${outputPath}`);
   }
 }
 

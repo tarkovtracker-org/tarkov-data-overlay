@@ -33,7 +33,7 @@ Additions live in `src/additions/` and should include the full object.
 - `src/overrides/`: Corrections to existing tarkov.dev entities (tasks, items, traders, hideout).
 - `src/additions/`: New entities not present in tarkov.dev (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
 - `src/schemas/`: JSON Schemas used by `npm run validate`.
-- `dist/overlay.json`: Generated output from `npm run build` (committed to the repo; regenerate it whenever you change source data).
+- `dist/overlay.json`: Generated output from `npm run build`. Only the release workflow commits it (after each merge to `main`); pull requests must leave it unchanged.
   Overrides are keyed by tarkov.dev IDs; additions are keyed by local IDs and
   appear under their source filenames in the output (`tasksAdd`, `editions`, `itemsAdd`, `storyChapters`, `seasonalPerks`, `craftsAdd`).
 
@@ -86,9 +86,11 @@ Edit the appropriate file in `src/overrides/`:
 3. Make your changes
 4. Run `npm run validate` (and `npm run typecheck` / `npm test` when you touch
    `src/lib/`, `scripts/`, or tests)
-5. For any data change, run `npm run build` and commit the regenerated
-   `dist/overlay.json`
-6. Record the commands you ran — and call out any regenerated output — in the PR
+5. Run `npm run build` to confirm the overlay still builds, but do not commit
+   `dist/overlay.json`; the release workflow regenerates and commits it after
+   merge, and CI rejects pull requests that change it (restore it with
+   `git checkout origin/main -- dist/overlay.json`)
+6. Record the commands you ran in the PR
 7. Submit a PR using the template
 
 ---
@@ -450,11 +452,8 @@ npm run validate
 # Type-check scripts and tests
 npm run typecheck
 
-# Build the overlay locally (commit the regenerated dist/overlay.json for data changes)
+# Build the overlay locally (do not commit dist/overlay.json; the release workflow does)
 npm run build
-
-# Confirm the committed generated output still matches source data
-npm run build:check
 
 # Run the test suite (required when changing src/lib/, scripts/, or tests)
 npm test

@@ -104,6 +104,10 @@ npm run build:check
 npm test
 ```
 
+`npm run build:check` can briefly report stale output right after a merge,
+until the release workflow commits the regenerated `dist/overlay.json`; if it
+does, check the latest Release overlay run before treating it as a defect.
+
 Use a unique path that is not an existing worktree, and run every subsequent
 inspection and check from this detached `origin/main` worktree. Remove the
 temporary worktree after triage with:

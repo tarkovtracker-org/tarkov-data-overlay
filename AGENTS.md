@@ -27,6 +27,7 @@ The wiki comparison tool is modular: `scripts/wiki-compare.ts` is a thin entry p
 
 1. `scripts/validate.ts` - Validates JSON5 source files against schemas using AJV
 2. `scripts/build.ts` - Compiles JSON5 sources into single `dist/overlay.json` with metadata
+3. `.github/workflows/release.yml` - After CI passes on `main`, verifies the CI-built overlay against sources (`build:check`) and commits it as `chore: build overlay [skip ci]`. It is the only writer of `dist/overlay.json`; PR CI rejects changes to that file so merges never conflict on generated output.
 
 ### Output Structure
 
@@ -229,7 +230,7 @@ overlay would not.
 
 ## Commit & Pull Request Guidelines
 
-Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). If you updated generated output, call that out explicitly.
+Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `refactor:`; build commits use `chore: build overlay [skip ci]`. Keep commits focused. PRs should include a clear summary, proof links for data changes, and the commands you ran (at least `npm run validate`). Never commit `dist/overlay.json` in a PR: the release workflow is its only writer and commits it after each merge, and CI rejects PRs that change it.
 
 ### PR review bots
 
@@ -286,7 +287,7 @@ satisfy that rule and a fresh approving review will be needed.
   entry. Consumers resolve these by `id`, so a correct `name` beside the wrong
   `id` silently points at another map or trader;
   `tests/entity-references.test.ts` enforces the pairing.
-- Run `npm run validate` and `npm run build` before submitting.
+- Run `npm run validate` and `npm run build` before submitting; leave `dist/overlay.json` out of the PR.
 
 ## Issue Triage
 
