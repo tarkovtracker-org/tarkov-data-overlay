@@ -5,7 +5,8 @@
   // contribution amounts, alternate producers, initial values or resets.
   // The modes share one variable-group catalogue (identical variable_group
   // payloads in the PVE, PvP and seasonal captures) and tarkov.dev serves the
-  // same gates in each, so the three blocks are identical.
+  // same gates in each, so the three blocks are identical. Pool membership is
+  // observed in full only in PVE; docs/GLOBAL_VARIABLES.md gives each mode's scope.
   // See docs/GLOBAL_VARIABLES.md (registry contract) before marking any entry verified.
   regular: {
     // Jaeger Tier 1 (10 tasks)

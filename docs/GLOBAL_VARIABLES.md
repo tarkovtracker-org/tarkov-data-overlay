@@ -28,9 +28,13 @@ explains why that falls short of the bar below.
 The `regular`, `pve` and `pvp-season` blocks are identical because the modes share
 one variable-group catalogue: the `variable_group` payload is identical in the
 PVE, PvP and seasonal captures, and tarkov.dev serves the same 164 gates over the
-same 27 variables in each mode. Where the PvP capture includes a pool's tasks, it
-places them in the same trader tier. Re-check each mode after a progression
-rework rather than assuming the equality persists.
+same 27 variables in each mode, with every candidate task present in each mode's
+task list. Pool membership itself was observed only as far as each capture
+reaches: the PVE capture contains all 248 candidate tasks, the PvP capture 226 and
+the seasonal capture 12, and every observed task sits in the same trader tier as
+in PVE. The rest of the PvP and seasonal membership rests on the shared catalogue.
+Re-check each mode after a progression rework rather than assuming the equality
+persists.
 
 Existing `otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
 not use the registry can continue their current integration.
