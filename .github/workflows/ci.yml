@@ -27,6 +27,27 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
+      - name: Reject changes to the generated overlay
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # dist/overlay.json has a single writer: the release workflow commits it
+          # after each merge to main. Compare the PR merge commit with its first
+          # parent (current main) so bot commits landing mid-review never count.
+          if git rev-parse --quiet --verify HEAD^2 >/dev/null; then
+            base=HEAD^1
+          else
+            base="$(git merge-base "$BASE_SHA" HEAD)"
+          fi
+          if ! git diff --quiet "$base" HEAD -- dist/; then
+            echo "::error file=dist/overlay.json::dist/overlay.json is generated and committed by the release workflow after merge. Drop it from this PR by restoring the base copy: git fetch https://github.com/${BASE_REPO}.git ${BASE_REF} && git checkout FETCH_HEAD -- dist/overlay.json"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
 
@@ -48,15 +69,8 @@ jobs:
       - name: Check monitor JavaScript
         run: npm run check:monitor
 
-      - name: Run tests
-        run: npm test
-
       - name: Validate source files
         run: npm run validate
-
-      - name: Check overlay for data now supplied by tarkov.dev
-        timeout-minutes: 15
-        run: npm run check-overrides -- --fail-on-stale
 
       - name: Compute next overlay version
         id: version
@@ -71,9 +85,6 @@ jobs:
           fi
           echo "next_tag=$next_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Check generated overlay
-        run: npm run build:check
-
       - name: Build overlay for release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
@@ -85,6 +96,13 @@ jobs:
       - name: Build overlay
         if: github.event_name != 'push' || github.ref != 'refs/heads/main'
         run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check overlay for data now supplied by tarkov.dev
+        timeout-minutes: 15
+        run: npm run check-overrides -- --fail-on-stale
 
       - name: Upload validated release overlay
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
