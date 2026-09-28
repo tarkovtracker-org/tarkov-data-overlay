@@ -29,7 +29,7 @@ unknown results; see the [counter data contract](docs/GLOBAL_VARIABLES.md).
 
 ## Monitor
 
-Browse the hosted monitor at [monitor.nivmizz7.fr](https://monitor.nivmizz7.fr), or run it locally with:
+Browse the hosted monitor at [monitor.nivmizz7.dev](https://monitor.nivmizz7.dev), or run it locally with:
 
 ```bash
 npm run monitor
