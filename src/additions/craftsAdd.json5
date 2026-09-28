@@ -289,7 +289,7 @@
     },
   },
   // Radio repeater  (level 1) [quest-gated]
-  // Unlock: the 2026-08-11 capture grants this recipe as a `Started`
+  // Unlock: a pre-replacement 1.1 capture grants this recipe as a `Started`
   // ProductionScheme reward of Network Provider - Part 2
   // (625d6ffaf7308432be1d44c5), but that task is disabled here: the pre-1.1
   // Lightkeeper chain was replaced by the "To the Light" series on 2026-09-08,
