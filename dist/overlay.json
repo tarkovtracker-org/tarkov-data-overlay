@@ -3081,9 +3081,6 @@
         }
       ]
     },
-    "666314b4d7f171c4c20226c3": {
-      "minPlayerLevel": 27
-    },
     "61904daa7d0d857927447b9c": {
       "taskRequirements": []
     },
@@ -9955,7 +9952,7 @@
   },
   "$meta": {
     "version": "1.104",
-    "generated": "2026-09-28T06:29:51.622Z",
-    "sha256": "3da18cec5c3832ed6c1b7384829ac045de62b50879ff565b8159a1bf9b05d8ce"
+    "generated": "2026-09-28T06:37:53.163Z",
+    "sha256": "33ffa175b2c44abb377f6ead8d3c6d8f0419d3ff3edc98c4e96a68160ab8923a"
   }
 }
