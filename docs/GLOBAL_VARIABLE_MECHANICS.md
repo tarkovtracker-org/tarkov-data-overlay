@@ -227,7 +227,13 @@ the 1.1 story traders gate through plain variables instead (next section).
 Ragman has no tier-4 group; that tier holds a single task. Whether the one implies
 the other is not established.
 
-Rows where Children ≠ Pool are unresolved; see Caveats.
+Children ≠ Pool is not by itself a contradiction. Surplus children (Prapor tier 2
+and 3, Ragman tier 3, Skier tier 4) do not stop the counter from equalling the
+completed pool count, and in every retained profile it does for these four, so
+the registry publishes them on a best-effort basis. What keeps a group unresolved
+is a counter that disagrees with its completed pool count: Mechanic tier 3 and
+Ragman tier 1 (fewer children than tasks) and Mechanic tier 4 and Prapor tier 4
+(not fewer). See Caveats.
 
 ## The second family: plain variables
 
@@ -463,9 +469,10 @@ route planning to verified contributors.
   the counter reset at some point after contributions landed. Nothing here
   distinguishes them, so no contributor identity is established for these groups.
 - **Seven groups where children ≠ pool size**, including Prapor tier 2
-  (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). Extra children are
-  never set in the observed profile, so they are plausibly retired or
-  mode-specific markers, but that is unverified.
+  (18 children vs 13 tasks) and Prapor tier 3 (13 vs 9). The surplus children are
+  plausibly retired or mode-specific markers, which is unverified. For the four
+  surplus groups whose counter matches the completed pool count in every retained
+  profile, the mismatch does not contradict the count, so they are published.
 - **351 of 374 child variables have no writer anywhere in the client payloads.**
   That makes their producer **unknown**, not confirmed: the write happens
   server-side, but nothing here shows it happens on task completion rather than at
