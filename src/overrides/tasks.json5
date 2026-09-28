@@ -3232,17 +3232,6 @@
   // the links even though the corresponding quest pages document them.
   // ---------------------------------------------------------------------------
 
-  // The Good Times - Part 1 - requires level 27. Issue #343 reports its successor
-  // Quality Standard (666314b696a9349baa021bac) appearing at level 21; the
-  // successor's own gate is right, so the fix belongs on this predecessor whose
-  // level 27 gate upstream understates as 12. No `taskRequirements`: the client
-  // gates this task with five TraderLoyalty LL2 conditions that upstream already
-  // serves, not with a Quest condition on Shooting Cans.
-  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Good_Times_-_Part_1
-  '666314b4d7f171c4c20226c3': {
-    minPlayerLevel: 27, // Was: 12
-  },
-
   // The Hermit - the client has no Quest AvailableForStart condition, while
   // the API incorrectly adds Tough Guy in all three modes. Keep the explicit
   // empty array so the upstream edge is cleared.
