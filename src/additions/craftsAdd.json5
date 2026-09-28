@@ -289,11 +289,15 @@
     },
   },
   // Radio repeater  (level 1) [quest-gated]
+  // Unlock: Network Provider - Part 2 grants this recipe as a `Started`
+  // ProductionScheme reward (unlocked on accepting the task; Workbench level 1,
+  // product 63a0b2eabea67a6d93009e52) in the 1.1 capture.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_2
   '6617cdb6b24b0ea24505f618': {
     id: '6617cdb6b24b0ea24505f618',
     station: '5d484fda654e7600681d9315',
     level: 1,
-    taskUnlock: null,
+    taskUnlock: '625d6ffaf7308432be1d44c5', // Was: null
     duration: 1800,
     requiredItems: [
       {
@@ -426,6 +430,8 @@
     },
   },
   // Moreman's audio tape #1  (level 1) [quest-gated]
+  // Unlock: story quest 68caba2f28ffeb58ad030255 (Batya chapter), which tarkov.dev
+  // does not serve, so taskUnlock stays null.
   '68dbdd31cbbef1fa710f5311': {
     id: '68dbdd31cbbef1fa710f5311',
     station: '5d484fda654e7600681d9315',
@@ -465,6 +471,8 @@
     },
   },
   // Moreman's audio tape #2  (level 1) [quest-gated]
+  // Unlock: story quest 68caba2f28ffeb58ad030255 (Batya chapter), which tarkov.dev
+  // does not serve, so taskUnlock stays null.
   '68dbddc362392833810125f7': {
     id: '68dbddc362392833810125f7',
     station: '5d484fda654e7600681d9315',
@@ -800,6 +808,8 @@
     },
   },
   // Decrypted Sliderkey flash drive marked with A.P.  (level 1) [quest-gated]
+  // Unlock: story quest 67ced018d1e611aa410235e5 (The Unheard chapter), which
+  // tarkov.dev does not serve, so taskUnlock stays null.
   '690a8dac7c24a3e1eb052b5d': {
     id: '690a8dac7c24a3e1eb052b5d',
     station: '5d484fdf654e7600691aadf8',
