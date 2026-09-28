@@ -63,8 +63,9 @@ Existing player-level, trader, dialogue, map, story, and timing gates still appl
 Task completion alone cannot resolve all of them.
 
 For verified mappings, `result.counters` explains each value and its contributor
-progress. The registry starts empty: this release supplies the model, not speculative
-game mappings. See [global variables and progression counters](GLOBAL_VARIABLES.md)
+progress. No shipped mapping is verified yet (see
+[what ships today](GLOBAL_VARIABLES.md#what-ships-today)): this release supplies the
+model, not verified game mappings. See [global variables and progression counters](GLOBAL_VARIABLES.md)
 for the data contract, evidence requirements, and safe backward-inference boundary.
 
 The helpers are source-level exports, not a published npm runtime package. Consumers

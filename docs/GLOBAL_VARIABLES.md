@@ -17,20 +17,20 @@ observations short of this document's evidence bar — see
 
 ## What ships today
 
-The overlay exposes a mode-scoped `progressionCounters` registry (`regular`, `pve`,
-and `pvp-season`), covering all 27 published trader-tier variable groups across 248 tasks:
+The `progressionCounters` registry lists a candidate pool for each of the 27
+published trader-tier groups (248 tasks). Every entry is `unresolved` with
+`partial` coverage, so none produces an inferred value. The pools match observed
+profile counters only in aggregate, and for four groups the counter reads below the
+completed pool count in at least one profile;
+[what is missing to evaluate these gates](GLOBAL_VARIABLE_MECHANICS.md#what-is-missing-to-evaluate-these-gates)
+explains why that falls short of the bar below.
 
-- **23 Reconciling Groups** (e.g. Mechanic LL1–LL2, Prapor LL1–LL3, Skier LL1–LL4,
-  Therapist LL1–LL4, Jaeger LL1–LL4, Peacekeeper LL1–LL4, Ragman LL2–LL3):
-  These are published as `verification: "verified"` and `coverage: "complete"`.
-  Empirical profile captures match the completed count of their candidate task pools 1:1,
-  allowing consumers to automatically derive effective counter values as players mark tasks complete.
-- **4 Caveat Groups** (Mechanic Tier 3 & 4, Prapor Tier 4, Ragman Tier 1):
-  Published fail-closed as `verification: "unresolved"` and `coverage: "partial"`.
-  These groups exhibit empirical count shortfalls in reference profile captures (see
-  [Caveats in mechanics doc](GLOBAL_VARIABLE_MECHANICS.md#caveats)). Consumers implementing the
-  registry contract do not infer automatic values for these 4 groups, keeping them blocked or
-  requiring in-game confirmation until individual task contributors are proven.
+The `regular`, `pve` and `pvp-season` blocks are identical because the modes share
+one variable-group catalogue: the `variable_group` payload is identical in the
+PVE, PvP and seasonal captures, and tarkov.dev serves the same 164 gates over the
+same 27 variables in each mode. Where the PvP capture includes a pool's tasks, it
+places them in the same trader tier. Re-check each mode after a progression
+rework rather than assuming the equality persists.
 
 Existing `otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
 not use the registry can continue their current integration.

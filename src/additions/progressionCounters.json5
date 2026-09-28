@@ -1,14 +1,18 @@
 {
-  // Mode-scoped progression counters mapping trader-tier pools to variable groups.
-  // 23 groups reconcile with empirical profile data (verified, complete).
-  // 4 groups with known count discrepancies are marked unresolved/partial fail-closed.
-  // See docs/GLOBAL_VARIABLE_MECHANICS.md for mechanics research and caveats.
+  // Candidate trader-tier pools for the 27 published tier-group variables.
+  // Every entry is unresolved/partial and never derives a counter value: an
+  // aggregate profile match does not establish contributor identities,
+  // contribution amounts, alternate producers, initial values or resets.
+  // The modes share one variable-group catalogue (identical variable_group
+  // payloads in the PVE, PvP and seasonal captures) and tarkov.dev serves the
+  // same gates in each, so the three blocks are identical.
+  // See docs/GLOBAL_VARIABLES.md (registry contract) before marking any entry verified.
   regular: {
     // Jaeger Tier 1 (10 tasks)
     '6a43a01ccc83aceedd35f09c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -31,8 +35,8 @@
     // Jaeger Tier 2 (11 tasks)
     '6a43a095bfef0cd74c298963': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -56,8 +60,8 @@
     // Jaeger Tier 3 (12 tasks)
     '6a43a13633c97d216dfc85de': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -82,8 +86,8 @@
     // Jaeger Tier 4 (6 tasks)
     '6a43a16dde81644a7951f31b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -102,8 +106,8 @@
     // Mechanic Tier 1 (9 tasks)
     '6a3171c927ca9591bf4db1c4': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -125,8 +129,8 @@
     // Mechanic Tier 2 (12 tasks)
     '6a3c0fefbea2d2ad581c090b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -200,8 +204,8 @@
     // Peacekeeper Tier 1 (9 tasks)
     '6a5ba40fe5c4eaef5610f232': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -223,8 +227,8 @@
     // Peacekeeper Tier 2 (12 tasks)
     '6a5ba450a7851e16ce0bde44': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -249,8 +253,8 @@
     // Peacekeeper Tier 3 (8 tasks)
     '6a5ba48b8cfd0bddb3d4d2e1': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -271,8 +275,8 @@
     // Peacekeeper Tier 4 (9 tasks)
     '6a5ba4c57cbb93b629051591': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -294,8 +298,8 @@
     // Prapor Tier 1 (11 tasks)
     '6a20540cf1b67a977cc5a088': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -319,8 +323,8 @@
     // Prapor Tier 2 (13 tasks)
     '6a2688488bba18e0b0187a04': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -346,8 +350,8 @@
     // Prapor Tier 3 (9 tasks)
     '6a32651a811905ed0cac0973': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -414,8 +418,8 @@
     // Ragman Tier 2 (10 tasks)
     '6a4b4e6a30dac4b01af220aa': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -438,8 +442,8 @@
     // Ragman Tier 3 (7 tasks)
     '6a4b9c9a60b56d421cceea18': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -459,8 +463,8 @@
     // Skier Tier 1 (9 tasks)
     '6a59f3ba06c8949abad30871': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -482,8 +486,8 @@
     // Skier Tier 2 (12 tasks)
     '6a5a111de1f417ac80a163e5': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -508,8 +512,8 @@
     // Skier Tier 3 (8 tasks)
     '6a5a115181116e807b55f258': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -530,8 +534,8 @@
     // Skier Tier 4 (4 tasks)
     '6a5a1192efde11cc7105b18f': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -548,8 +552,8 @@
     // Therapist Tier 1 (9 tasks)
     '6a4e4ab3ecd1145894d00990': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -571,8 +575,8 @@
     // Therapist Tier 2 (9 tasks)
     '6a4e4aed3ded7a18126603f6': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -594,8 +598,8 @@
     // Therapist Tier 3 (8 tasks)
     '6a4e4b28629dc64c4001967c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -616,8 +620,8 @@
     // Therapist Tier 4 (3 tasks)
     '6a56925b1c30ba5a77c7c518': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -635,8 +639,8 @@
     // Jaeger Tier 1 (10 tasks)
     '6a43a01ccc83aceedd35f09c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -659,8 +663,8 @@
     // Jaeger Tier 2 (11 tasks)
     '6a43a095bfef0cd74c298963': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -684,8 +688,8 @@
     // Jaeger Tier 3 (12 tasks)
     '6a43a13633c97d216dfc85de': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -710,8 +714,8 @@
     // Jaeger Tier 4 (6 tasks)
     '6a43a16dde81644a7951f31b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -730,8 +734,8 @@
     // Mechanic Tier 1 (9 tasks)
     '6a3171c927ca9591bf4db1c4': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -753,8 +757,8 @@
     // Mechanic Tier 2 (12 tasks)
     '6a3c0fefbea2d2ad581c090b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -828,8 +832,8 @@
     // Peacekeeper Tier 1 (9 tasks)
     '6a5ba40fe5c4eaef5610f232': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -851,8 +855,8 @@
     // Peacekeeper Tier 2 (12 tasks)
     '6a5ba450a7851e16ce0bde44': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -877,8 +881,8 @@
     // Peacekeeper Tier 3 (8 tasks)
     '6a5ba48b8cfd0bddb3d4d2e1': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -899,8 +903,8 @@
     // Peacekeeper Tier 4 (9 tasks)
     '6a5ba4c57cbb93b629051591': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -922,8 +926,8 @@
     // Prapor Tier 1 (11 tasks)
     '6a20540cf1b67a977cc5a088': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -947,8 +951,8 @@
     // Prapor Tier 2 (13 tasks)
     '6a2688488bba18e0b0187a04': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -974,8 +978,8 @@
     // Prapor Tier 3 (9 tasks)
     '6a32651a811905ed0cac0973': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1042,8 +1046,8 @@
     // Ragman Tier 2 (10 tasks)
     '6a4b4e6a30dac4b01af220aa': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1066,8 +1070,8 @@
     // Ragman Tier 3 (7 tasks)
     '6a4b9c9a60b56d421cceea18': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1087,8 +1091,8 @@
     // Skier Tier 1 (9 tasks)
     '6a59f3ba06c8949abad30871': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1110,8 +1114,8 @@
     // Skier Tier 2 (12 tasks)
     '6a5a111de1f417ac80a163e5': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1136,8 +1140,8 @@
     // Skier Tier 3 (8 tasks)
     '6a5a115181116e807b55f258': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1158,8 +1162,8 @@
     // Skier Tier 4 (4 tasks)
     '6a5a1192efde11cc7105b18f': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1176,8 +1180,8 @@
     // Therapist Tier 1 (9 tasks)
     '6a4e4ab3ecd1145894d00990': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1199,8 +1203,8 @@
     // Therapist Tier 2 (9 tasks)
     '6a4e4aed3ded7a18126603f6': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1222,8 +1226,8 @@
     // Therapist Tier 3 (8 tasks)
     '6a4e4b28629dc64c4001967c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1244,8 +1248,8 @@
     // Therapist Tier 4 (3 tasks)
     '6a56925b1c30ba5a77c7c518': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1263,8 +1267,8 @@
     // Jaeger Tier 1 (10 tasks)
     '6a43a01ccc83aceedd35f09c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1287,8 +1291,8 @@
     // Jaeger Tier 2 (11 tasks)
     '6a43a095bfef0cd74c298963': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1312,8 +1316,8 @@
     // Jaeger Tier 3 (12 tasks)
     '6a43a13633c97d216dfc85de': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1338,8 +1342,8 @@
     // Jaeger Tier 4 (6 tasks)
     '6a43a16dde81644a7951f31b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1358,8 +1362,8 @@
     // Mechanic Tier 1 (9 tasks)
     '6a3171c927ca9591bf4db1c4': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1381,8 +1385,8 @@
     // Mechanic Tier 2 (12 tasks)
     '6a3c0fefbea2d2ad581c090b': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1456,8 +1460,8 @@
     // Peacekeeper Tier 1 (9 tasks)
     '6a5ba40fe5c4eaef5610f232': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1479,8 +1483,8 @@
     // Peacekeeper Tier 2 (12 tasks)
     '6a5ba450a7851e16ce0bde44': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1505,8 +1509,8 @@
     // Peacekeeper Tier 3 (8 tasks)
     '6a5ba48b8cfd0bddb3d4d2e1': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1527,8 +1531,8 @@
     // Peacekeeper Tier 4 (9 tasks)
     '6a5ba4c57cbb93b629051591': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1550,8 +1554,8 @@
     // Prapor Tier 1 (11 tasks)
     '6a20540cf1b67a977cc5a088': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1575,8 +1579,8 @@
     // Prapor Tier 2 (13 tasks)
     '6a2688488bba18e0b0187a04': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1602,8 +1606,8 @@
     // Prapor Tier 3 (9 tasks)
     '6a32651a811905ed0cac0973': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1670,8 +1674,8 @@
     // Ragman Tier 2 (10 tasks)
     '6a4b4e6a30dac4b01af220aa': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1694,8 +1698,8 @@
     // Ragman Tier 3 (7 tasks)
     '6a4b9c9a60b56d421cceea18': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1715,8 +1719,8 @@
     // Skier Tier 1 (9 tasks)
     '6a59f3ba06c8949abad30871': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1738,8 +1742,8 @@
     // Skier Tier 2 (12 tasks)
     '6a5a111de1f417ac80a163e5': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1764,8 +1768,8 @@
     // Skier Tier 3 (8 tasks)
     '6a5a115181116e807b55f258': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1786,8 +1790,8 @@
     // Skier Tier 4 (4 tasks)
     '6a5a1192efde11cc7105b18f': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1804,8 +1808,8 @@
     // Therapist Tier 1 (9 tasks)
     '6a4e4ab3ecd1145894d00990': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1827,8 +1831,8 @@
     // Therapist Tier 2 (9 tasks)
     '6a4e4aed3ded7a18126603f6': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1850,8 +1854,8 @@
     // Therapist Tier 3 (8 tasks)
     '6a4e4b28629dc64c4001967c': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
@@ -1872,8 +1876,8 @@
     // Therapist Tier 4 (3 tasks)
     '6a56925b1c30ba5a77c7c518': {
       revision: '1.1.0',
-      verification: 'verified',
-      coverage: 'complete',
+      verification: 'unresolved',
+      coverage: 'partial',
       derivation: {
         type: 'distinctTaskCompletions',
         taskIds: [
