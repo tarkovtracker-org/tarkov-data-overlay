@@ -681,11 +681,26 @@ export const TARKOV_TRADER_NAMES_BY_ID: Readonly<Partial<Record<string, string>>
   '688246958448b05efd61d462': 'Voevoda',
 };
 
+export interface MapExtractAddition {
+  id?: string;
+  name: string;
+  faction: 'pmc' | 'scav' | 'shared';
+  position: { x: number; y: number; z: number };
+  top?: number;
+  bottom?: number;
+}
+
+export interface MapOverride {
+  disabled?: boolean;
+  extractsAdd?: MapExtractAddition[];
+}
+
 /** Mode-specific overlay data */
 export interface ModeOverlay {
   tasks?: Record<string, TaskOverride>;
   tasksAdd?: Record<string, TaskAddition>;
   prestige?: Record<string, PrestigeOverride>;
+  maps?: Record<string, MapOverride>;
 }
 
 /**
@@ -902,6 +917,7 @@ export interface OverlayOutput {
   items?: Record<string, unknown>;
   traders?: Record<string, unknown>;
   hideout?: Record<string, unknown>;
+  maps?: Record<string, MapOverride>;
   editions?: Record<string, unknown>;
   storyChapters?: Record<string, StoryChapter>;
   /** Seasonal perks (BSG Seasonal Character mechanic); absent from tarkov.dev. */
@@ -1016,9 +1032,13 @@ export interface DivergenceResult {
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/maps.json5', schemaFile: 'map-override.schema.json' },
   { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/regular/maps.json5', schemaFile: 'map-override.schema.json' },
   { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/pve/maps.json5', schemaFile: 'map-override.schema.json' },
   { pattern: 'overrides/modes/pvp-season/tasks.json5', schemaFile: 'task-override.schema.json' },
+  { pattern: 'overrides/modes/pvp-season/maps.json5', schemaFile: 'map-override.schema.json' },
   { pattern: 'additions/tasksAdd.json5', schemaFile: 'task-additions.schema.json' },
   { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
   { pattern: 'additions/seasonalPerks.json5', schemaFile: 'seasonal-perk.schema.json' },

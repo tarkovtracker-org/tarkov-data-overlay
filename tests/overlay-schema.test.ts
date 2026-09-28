@@ -129,6 +129,7 @@ describe('overlay.schema.json', () => {
       'locale-override.schema.json',
       'seasonal-perk.schema.json',
       'craft-additions.schema.json',
+      'map-override.schema.json',
     ];
 
     for (const schemaFile of referencedSchemas) {

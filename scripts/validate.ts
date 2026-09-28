@@ -289,6 +289,7 @@ export function buildLocalLocaleEntityIdIndex(): LocaleEntityIdIndex {
   addJson5Keys(index.items, 'overrides/items.json5');
   addJson5Keys(index.items, 'additions/itemsAdd.json5');
   addJson5Keys(index.traders, 'overrides/traders.json5');
+  addJson5Keys(index.maps, 'overrides/maps.json5');
   addJson5Keys(index.prestige, 'overrides/modes/regular/prestige.json5');
   addJson5Keys(index.storyChapters, 'additions/storyChapters.json5');
 
