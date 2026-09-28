@@ -360,3 +360,53 @@ describe('mode-specific task correction consumption', () => {
     });
   });
 });
+
+describe('availability corrections scoped by capture evidence', () => {
+  const shared = loadTaskOverrides();
+  const modeOverrides = (mode: string): Record<string, TaskOverride> =>
+    loadJson5File(join(paths.srcDir, 'overrides', 'modes', mode, 'tasks.json5'));
+  const overlay = {
+    tasks: shared,
+    modes: Object.fromEntries(
+      SUPPORTED_GAME_MODES.map((mode) => [mode, { tasks: modeOverrides(mode) }])
+    ),
+  };
+
+  const requirementsIn = (id: string, mode: string) =>
+    (getTaskOverrideForMode(id, overlay as never, mode as never) as TaskOverride | undefined)
+      ?.taskRequirements;
+
+  /**
+   * Escort's upstream level 46 is a stale pre-1.1 gate: no capture carries a
+   * `Level` condition, so the level falls back to the Prapor LL4 tier floor
+   * (36) rather than zero, alongside the Prapor LL4 requirement (issue #360).
+   */
+  it('gates Escort on Prapor LL4 and its level floor rather than a stale level', () => {
+    expect(shared['60e71b62a0beca400d69efc4']).toMatchObject({
+      minPlayerLevel: 36,
+      traderRequirements: [
+        { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, value: 4 },
+      ],
+    });
+  });
+
+  /**
+   * Only the PvE capture supports these edges; the regular capture contradicts
+   * (Offensive Reconnaissance, issue #378) or does not cover (The Higher They
+   * Fly, issue #356) them, so regular and pvp-season must keep upstream's edges.
+   */
+  it.each([
+    ['Offensive Reconnaissance', '67a0970744893b9f3f0d9b68', []],
+    [
+      'The Higher They Fly',
+      '6745fae369a58fceba10343d',
+      [{ task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' }, status: ['complete'] }],
+    ],
+  ])('scopes the %s prerequisite correction to PvE', (_label, id, expected) => {
+    expect(shared[id]?.taskRequirements).toBeUndefined();
+    expect(requirementsIn(id, 'pve')).toEqual(expected);
+    for (const mode of SUPPORTED_GAME_MODES.filter((mode) => mode !== 'pve')) {
+      expect(requirementsIn(id, mode), `${mode} must keep upstream's edge`).toBeUndefined();
+    }
+  });
+});

@@ -133,8 +133,20 @@
 
   // Escort - quest XP reworked in 1.1.0.0
   // Proof: https://escapefromtarkov.fandom.com/wiki/Escort
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/360
   // Verified: the 1.1-pve data; wiki agrees.
+  //
+  // minPlayerLevel 36, the Prapor LL4 tier floor: upstream's 46 is neither an
+  // explicit client `Level` condition (neither the 1.1 PvE nor the 1.1 regular
+  // capture has one; the only start condition is the Prapor LL4 tier variable)
+  // nor the LL4 floor (Prapor LL4 requires level 36), so it is a stale pre-1.1
+  // leftover. Per AGENTS.md the missing `Level` condition means "no explicit
+  // gate", not "no gate", so the loyalty-derived floor is kept rather than
+  // zeroed. The wiki's 2026-09-19 update replaced "Must be level 46" with "Must
+  // reach Loyalty Level 4 with Prapor", and two reporters (#360 PvE, #390 PvP)
+  // received the task at level 42.
   '60e71b62a0beca400d69efc4': {
+    minPlayerLevel: 36, // Was: 46 (stale pre-1.1 gate; 36 = Prapor LL4 floor)
     traderRequirements: [
       {
         id: 'overlay.60e71b62a0beca400d69efc4.54cb50c76803fa8b248b4571.level.>=.4',
@@ -3240,12 +3252,8 @@
     taskRequirements: [], // Was: The Survivalist Path - Tough Guy
   },
 
-  // Offensive Reconnaissance - the client has no Quest AvailableForStart
-  // condition, while the API incorrectly adds Hidden Layer in all three modes.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  '67a0970744893b9f3f0d9b68': {
-    taskRequirements: [], // Was: Hidden Layer
-  },
+  // Offensive Reconnaissance - the empty `taskRequirements` correction is
+  // PvE-only; see src/overrides/modes/pve/tasks.json5 (issue #378).
 
   // Hot Wheels - the client roots this task at A Helping Hand; the API instead
   // points at Shipping Delay - Part 1 in all three modes.
@@ -3259,17 +3267,8 @@
     ], // Was: Shipping Delay - Part 1
   },
 
-  // The Higher They Fly - the client roots this task at A Helping Hand; the
-  // API instead points at Building Foundations in all three modes.
-  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
-  '6745fae369a58fceba10343d': {
-    taskRequirements: [
-      {
-        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
-        status: ['complete'],
-      },
-    ], // Was: Building Foundations
-  },
+  // The Higher They Fly - the A Helping Hand edge is PvE-only; see
+  // src/overrides/modes/pve/tasks.json5 (issue #356).
 
   // ---------------------------------------------------------------------------
   // FACTION-LOCKED QUESTS (issues #288, #291)

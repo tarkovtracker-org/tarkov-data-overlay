@@ -23,6 +23,34 @@
     ],
   },
 
+  // The Higher They Fly - the 1.1 PvE capture roots this task at A Helping
+  // Hand, while upstream points at Building Foundations (active or complete) in
+  // every mode. The 1.1 regular capture does not include the task, so there is
+  // no evidence for the PvE edge outside PvE; it was previously shared and has
+  // been scoped here like Building Foundations, its upstream predecessor.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '6745fae369a58fceba10343d': {
+    taskRequirements: [
+      {
+        task: { id: '6752f6d83038f7df520c83e8', name: 'A Helping Hand' },
+        status: ['complete'],
+      }, // Was (shared/API): Building Foundations, active or complete
+    ],
+  },
+
+  // Offensive Reconnaissance - the 1.1 PvE capture's only start condition is
+  // TraderLoyalty Mechanic >= 3, with no Quest condition, while upstream adds
+  // Hidden Layer in every mode. This was previously a shared override, but the
+  // 1.1 regular capture points the other way: it includes Hidden Layer and
+  // several other Mechanic LL3-gated quests yet not Offensive Reconnaissance,
+  // so the regular client did not offer it on Mechanic LL3 alone. Regular and
+  // pvp-season therefore keep upstream's Hidden Layer edge.
+  // Proof: https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/378
+  //        https://github.com/tarkovtracker-org/tarkov-data-overlay/issues/356
+  '67a0970744893b9f3f0d9b68': {
+    taskRequirements: [], // Was: Hidden Layer, complete
+  },
+
   // Pathfinder's old PvE-only objective text is gone: the 1.1 client has no
   // extract-7-times objective left.
   // Was: Survive and extract on Interchange 7 times
