@@ -252,36 +252,37 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 
 ### PR review bots
 
-Three bots review pull requests here. cubic re-reviews automatically on every
-push. Codex reviews on open, on ready-for-review, and on a `@codex review`
-comment, but only because the Codex GitHub integration is enabled for this
-repository; that comment does nothing where it is not. CodeRabbit reviews on push
-and on `@coderabbitai review`, subject to the allowance below.
+Automatic Codex reviews are intended to be off, but the checked-in repository
+files do not establish the current dashboard or integration settings. Push-triggered
+reviews depend on those settings; do not assume a push will or will not trigger a
+review. Check the PR's actual base branch and current review state when planning a
+review. Never use a stale local `main` as the review base.
 
-Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
-allowance is metered from recent usage (CodeRabbit has reported it as one review
-per hour here), and when it is exhausted the bot answers a review request with
-`Review rate limited` while still reporting its own check as **passing**. It also
-"does not re-review already reviewed commits", so a green CodeRabbit check is not
-evidence that the head commit was reviewed. Get the coverage another way:
+Commit locally as often as useful, then push stabilized batches after relevant
+checks. Address a whole PR review round before the next correction push rather
+than pushing per finding. For each stabilized executable change, run one local
+CodeRabbit review when available against a freshly fetched ref for the actual PR base. Follow the installed CLI's help for supported options. Review
+the findings and fix validated, in-scope issues in a batch; do not apply every
+suggestion blindly. Docs, translations and mechanical formatting need self-review
+and deterministic checks only. Record the checked commit, worktree state, checks,
+and any missing review evidence in the PR summary.
 
-- Run a supplemental local CodeRabbit review. It is not the same artifact as a PR
-  review — different context, and no PR threads come out of it — but it surfaces
-  findings while the PR allowance is closed: `coderabbit review --base main --agent`
-  for structured findings, with `--committed` / `--uncommitted` to scope which
-  changes are considered, `coderabbit review findings` to re-read the last local
-  run, and `coderabbit pullrequest <number> --agent` to pull findings CodeRabbit
-  already posted on a PR. Subcommands and their flags vary by CLI version, so
-  confirm against `coderabbit review --help` and `coderabbit pullrequest --help`
-  before relying on one; the top-level `coderabbit --help` lists subcommands and
-  global options only. A local run has completed a full
-  review while the GitHub PR allowance was exhausted, so the two are metered
-  separately in practice — but CLI runs are still review events counted against the
-  account's limits and can draw on usage-based billing, so treat them as costed
-  rather than free. The CLI has its own small included pool and reports
-  `errorType: rate_limit` with a wait time when it is spent; when that happens fall
-  through to the bots below rather than waiting for it either.
-- Comment `@codex review` for a fresh pass on the current head commit.
+Rate limits do not stop useful implementation. Continue validated work, commits
+and pushes in useful batches when a review channel is limited, and record missing
+review evidence. Required independent review still must be complete before merge.
+CLI and PR reviews have separate limited allowances; do not enable paid over-limit
+reviews without authorization or retry in a loop. Reuse review evidence when the
+relevant changes are unchanged. Rerun a review only for substantial new behavior
+or unresolved significant findings. A substantial follow-up needs a manual
+`@coderabbitai review` before merge unless recorded local or independent review
+evidence covers the final changes.
+
+Use `@codex review` only as an exceptional fallback when both CodeRabbit review
+channels are limited, or for a final review of a risky change. Do not run Codex
+reviews locally. Auth, billing, migrations and concurrency changes require an
+independent review before merge; use CodeRabbit or another independent reviewer
+as appropriate and record the evidence. A rate-limited or incomplete review does
+not count as that required review.
 
 Reply to each review thread naming the commit that fixed it and what changed, then
 resolve the thread; the reply is what makes the trail auditable later.
