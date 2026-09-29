@@ -4,6 +4,24 @@
 
 Community-maintained data overlay for tarkov.dev API corrections and additions. Provides a JSON overlay file that consumers merge with tarkov.dev API responses to fix incorrect data or add missing data types (like game editions).
 
+## Evidence Standard
+
+The overlay is **best effort**, not a proof system. Ship a correction or addition
+when the best available evidence supports it and nothing known contradicts it.
+Record the evidence and its scope (which modes, captures or sources it covers) in
+comments, docs or PR text so the next contributor can judge it. When a capture,
+public data or a user report contradicts a shipped value, correct it or flip it
+back; that is the normal feedback loop, not a failure.
+
+- Hold data back only when concrete evidence contradicts it, not because the
+  underlying game mechanism is unproven.
+- The field-authority rules below (`taskRequirements`, `minPlayerLevel`,
+  `traderRequirements`) stay binding: each one exists because getting it wrong
+  shipped a regression.
+- Reviewers, human or bot: report contradictions, unsourced values, rule
+  violations and overstated evidence scope. Do not block a change solely because
+  a best-effort value lacks mechanism-level proof.
+
 ## Project Structure & Module Organization
 
 `src/overrides/` holds JSON5 corrections keyed by tarkov.dev IDs, while `src/additions/` contains new data types (for example game editions). `src/schemas/` stores JSON Schemas, and `src/lib/` houses shared TypeScript utilities used by scripts in `scripts/`. Built output lands in `dist/overlay.json`. Tests live in `tests/`, with docs in `docs/`. The `data/` directory is used for local cache/results from validation tooling.
@@ -110,8 +128,8 @@ capture generically instead (for example "a 1.1 PvE capture").
   `TraderLoyalty` conditions, and tarkov.dev serves those as
   `otherRequirements` `globalVariable` entries. A `GlobalVariableValue` is a
   numeric state gate, though — not automatically a loyalty condition or a task
-  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for counter evidence
-  requirements. That distinction drives all three rules below:
+  prerequisite list. See `docs/GLOBAL_VARIABLES.md` for the counter evidence
+  standard. That distinction drives all three rules below:
   - `taskRequirements` — preserve explicit `Quest` start conditions and their
     accepted statuses. The wiki's infobox `previous` field is narrative order,
     **not** proof of an unlock edge. Distinguish a present template carrying no

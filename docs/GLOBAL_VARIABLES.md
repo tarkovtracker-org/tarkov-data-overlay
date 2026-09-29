@@ -12,15 +12,34 @@ separate condition. Do not infer an additional loyalty gate from cohort metadata
 
 For the underlying mechanism — how a target resolves to a group or a scalar, what
 the counters were observed to represent, and the open questions that keep those
-observations short of this document's evidence bar — see
+observations the registry's pools are based on — see
 [`GlobalVariableValue` task gates](GLOBAL_VARIABLE_MECHANICS.md).
 
 ## What ships today
 
-The overlay exposes an optional `progressionCounters` registry, initially empty.
-No real task-to-counter mapping is asserted by this feature. Existing
-`otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
-not use the new registry can continue their current integration.
+The `progressionCounters` registry maps each of the 27 published trader-tier groups
+to its pool (248 tasks). It is best effort, under the standard in
+[registry contract](#registry-contract):
+
+- **23 groups are `verified`/`complete`.** In every retained 1.1 PMC profile (one
+  PVE, two PvP, two seasonal) the group's counter equals the number of completed
+  pool tasks, and no capture contradicts the pool.
+- **4 groups are `unresolved`/`partial`:** Mechanic tier 3 and 4, Prapor tier 4 and
+  Ragman tier 1. Their counter reads below the completed pool count in at least one
+  profile, so counting the pool would unlock tasks too early. See
+  [Caveats](GLOBAL_VARIABLE_MECHANICS.md#caveats).
+
+The `regular`, `pve` and `pvp-season` blocks are identical because the modes share
+one variable-group catalogue: the `variable_group` payload is identical in the
+PVE, PvP and seasonal captures, and tarkov.dev serves the same 164 gates over the
+same 27 variables in each mode, with every pool task present in each mode's task
+list. Pool membership itself was observed only as far as each capture reaches:
+the PVE capture contains all 248 pool tasks, the PvP capture 226 and the seasonal
+capture 12, and every observed task sits in the same trader tier as in PVE. The
+rest of the PvP and seasonal membership rests on the shared catalogue.
+
+Existing `otherRequirements` and `taskRequirements` remain unchanged, so consumers that do
+not use the registry can continue their current integration.
 
 `evaluateTaskProgression` computes a value only when a mapping is verified,
 complete, and matches the selected mode and revision. Otherwise a global-variable
@@ -57,23 +76,34 @@ validation also fails closed when a consumer bypasses source validation.
 - `revision`: a maintainer-assigned identifier for the applicable game rules.
   It is not automatically the overlay version. Consumers must deliberately select
   the same identifier; omitted or mismatched revisions cannot derive a value.
-- `verification`: `verified` requires evidence of the derivation, not merely a
-  similar task count. `unresolved` entries are informational candidates.
-- `coverage`: `complete` means the entire contributor set is established.
-  `partial` mappings never produce an inferred value, even if marked verified.
+- `verification`: `verified` means the mapping meets the best-effort standard
+  below. `unresolved` entries are informational candidates.
+- `coverage`: `complete` means the listed tasks are the whole pool as far as the
+  evidence shows. `partial` mappings never produce an inferred value, even if
+  marked verified.
 - `distinctTaskCompletions`: each listed task contributes exactly one when
   complete in the current progression run. Duplicate events do not add points.
   This derivation is unsuitable for counters with repeat contributions, resets
   independent of task progress, shared markers, or non-task producers.
-- `proof`: public evidence links for the complete rule and its scope. These are
-  review evidence, not a cryptographic guarantee that a supplied mapping is true.
+- `proof`: public evidence links for the rule and its scope. These are review
+  evidence, not a guarantee that a supplied mapping is true.
 
-Before marking an entry verified, establish the contributor identities, contribution
-amount, relevant completion state, alternate producers, initial value, and reset
-behavior for that mode/revision. A matching sum in one profile does not prove these
-properties. Re-verify after a progression rework. Keep raw captures and derived research
-in gitignored local directories; publish corrections with proof, following the
-capture-evidence rules in `AGENTS.md`.
+### Evidence standard
+
+The registry is best effort, like the rest of the overlay. It does not need
+proof of the server-side mechanism. Mark an entry `verified`/`complete` when:
+
+- the counter equals the completed-pool count in every retained profile for which
+  the comparison is informative (a counter of 0 with no completed pool tasks
+  counts as consistent, not as support), and
+- no capture, public data or user report contradicts the pool.
+
+Keep an entry `unresolved`/`partial` while any observation contradicts it, for
+example a counter reading below its completed pool count. When new evidence
+contradicts a `verified` entry, flip it back rather than waiting for a full
+explanation. Re-check after a progression rework. Keep raw captures and derived
+research in gitignored local directories and follow the capture-evidence rules
+in `AGENTS.md`.
 
 ## Evaluation rules
 
