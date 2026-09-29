@@ -271,8 +271,8 @@ export function validateTaskSourceFile(
   return idResult.valid ? result : idResult;
 }
 
-function addJson5Keys(index: Set<string>, relPath: string): void {
-  const filePath = join(srcDir, relPath);
+function addJson5Keys(index: Set<string>, relPath: string, root = srcDir): void {
+  const filePath = join(root, relPath);
   if (!existsSync(filePath)) return;
   const data = loadJson5File(filePath);
   if (isRecord(data)) {
@@ -281,21 +281,22 @@ function addJson5Keys(index: Set<string>, relPath: string): void {
 }
 
 /** Build the local entity ID set locale overrides are allowed to patch. */
-export function buildLocalLocaleEntityIdIndex(): LocaleEntityIdIndex {
+export function buildLocalLocaleEntityIdIndex(root = srcDir): LocaleEntityIdIndex {
   const index = createLocaleEntityIdIndex();
 
-  addJson5Keys(index.tasks, 'overrides/tasks.json5');
-  addJson5Keys(index.tasks, 'additions/tasksAdd.json5');
-  addJson5Keys(index.items, 'overrides/items.json5');
-  addJson5Keys(index.items, 'additions/itemsAdd.json5');
-  addJson5Keys(index.traders, 'overrides/traders.json5');
-  addJson5Keys(index.maps, 'overrides/maps.json5');
-  addJson5Keys(index.prestige, 'overrides/modes/regular/prestige.json5');
-  addJson5Keys(index.storyChapters, 'additions/storyChapters.json5');
+  addJson5Keys(index.tasks, 'overrides/tasks.json5', root);
+  addJson5Keys(index.tasks, 'additions/tasksAdd.json5', root);
+  addJson5Keys(index.items, 'overrides/items.json5', root);
+  addJson5Keys(index.items, 'additions/itemsAdd.json5', root);
+  addJson5Keys(index.traders, 'overrides/traders.json5', root);
+  addJson5Keys(index.maps, 'overrides/maps.json5', root);
+  addJson5Keys(index.prestige, 'overrides/modes/regular/prestige.json5', root);
+  addJson5Keys(index.storyChapters, 'additions/storyChapters.json5', root);
 
   for (const mode of SUPPORTED_GAME_MODES) {
-    addJson5Keys(index.tasks, `overrides/modes/${mode}/tasks.json5`);
-    addJson5Keys(index.tasks, `additions/modes/${mode}/tasksAdd.json5`);
+    addJson5Keys(index.tasks, `overrides/modes/${mode}/tasks.json5`, root);
+    addJson5Keys(index.tasks, `additions/modes/${mode}/tasksAdd.json5`, root);
+    addJson5Keys(index.maps, `overrides/modes/${mode}/maps.json5`, root);
   }
 
   return index;
