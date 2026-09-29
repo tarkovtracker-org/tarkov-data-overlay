@@ -13,17 +13,19 @@
         "type": "boolean"
       },
       "extractsAdd": {
-        "description": "Extract additions for missing API extracts",
+        "description": "Extracts missing from the API, appended to the map's extracts unless an extract with the same id or name already exists",
         "type": "array",
         "items": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "faction": {
               "type": "string",
@@ -46,7 +48,7 @@
               "type": "number"
             }
           },
-          "required": ["name", "faction", "position"]
+          "required": ["id", "name", "faction", "position"]
         }
       }
     }

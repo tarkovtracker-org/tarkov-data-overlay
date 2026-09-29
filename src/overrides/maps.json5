@@ -2,7 +2,11 @@
   // Map corrections and additions
   // Lighthouse
   '5704e4dad2720bb55b8b4567': {
+    // Was: absent from json.tarkov.dev extracts
     extractsAdd: [
+      // Hideout Under the Landing Stage (Scav-only exit)
+      // Proof: https://attackofthefanboy.com/guides/all-lighthouse-exits-loot-keys-stashes-in-escape-from-tarkov/
+      // Position: landing stage (pier) on the southern shore, placed from the map geometry
       {
         id: 'SCAV_Underboat_Hideout',
         name: 'Hideout Under the Landing Stage',

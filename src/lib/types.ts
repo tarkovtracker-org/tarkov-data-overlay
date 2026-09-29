@@ -682,7 +682,7 @@ export const TARKOV_TRADER_NAMES_BY_ID: Readonly<Partial<Record<string, string>>
 };
 
 export interface MapExtractAddition {
-  id?: string;
+  id: string;
   name: string;
   faction: 'pmc' | 'scav' | 'shared';
   position: { x: number; y: number; z: number };
