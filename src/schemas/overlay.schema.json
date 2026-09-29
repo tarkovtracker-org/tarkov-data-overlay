@@ -57,6 +57,9 @@
       "description": "Trader corrections",
       "type": "object"
     },
+    "maps": {
+      "$ref": "map-override.schema.json"
+    },
     "locales": {
       "additionalProperties": {
         "$ref": "locale-override.schema.json"
@@ -76,7 +79,8 @@
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
             "tasksAdd": { "$ref": "task-additions.schema.json" },
-            "prestige": { "$ref": "prestige-override.schema.json" }
+            "prestige": { "$ref": "prestige-override.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         },
@@ -84,7 +88,8 @@
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
-            "tasksAdd": { "$ref": "task-additions.schema.json" }
+            "tasksAdd": { "$ref": "task-additions.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         },
@@ -92,7 +97,8 @@
           "type": "object",
           "properties": {
             "tasks": { "$ref": "task-override.schema.json" },
-            "tasksAdd": { "$ref": "task-additions.schema.json" }
+            "tasksAdd": { "$ref": "task-additions.schema.json" },
+            "maps": { "$ref": "map-override.schema.json" }
           },
           "additionalProperties": false
         }

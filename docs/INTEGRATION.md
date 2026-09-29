@@ -605,6 +605,36 @@ where present.
 
 ---
 
+## Applying Map Extract Additions
+
+`maps.<mapId>.extractsAdd` lists extracts tarkov.dev is missing. It is an
+overlay operation, not a tarkov.dev field, so a plain shallow merge only
+attaches an unused array. Consumers should:
+
+- Merge the shared `maps` record with `modes.<mode>.maps` first. Arrays are
+  replaced, not concatenated, so a mode-level `extractsAdd` for a map replaces
+  the shared list for that map.
+- Append each addition to the map's `extracts` unless an existing extract
+  already has the same `id` or `name`, so the entry retires itself once
+  tarkov.dev publishes it.
+- Drop `extractsAdd` from the merged map.
+
+`faction` uses the upstream lowercase vocabulary (`pmc`, `scav`, `shared`), so
+added and upstream extracts filter the same way.
+
+```typescript
+function applyExtractAdditions(map: { extracts?: Extract[]; extractsAdd?: Extract[] }) {
+  const { extractsAdd = [], ...rest } = map;
+  const extracts = [...(rest.extracts ?? [])];
+  for (const add of extractsAdd) {
+    if (!extracts.some((ext) => ext.id === add.id || ext.name === add.name)) extracts.push(add);
+  }
+  return { ...rest, extracts };
+}
+```
+
+---
+
 ## Applying Prestige Corrections
 
 tarkov.dev exposes prestige levels as a `prestige` array, each item shaped like
