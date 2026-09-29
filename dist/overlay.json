@@ -233,6 +233,22 @@
       }
     }
   },
+  "maps": {
+    "5704e4dad2720bb55b8b4567": {
+      "extractsAdd": [
+        {
+          "id": "SCAV_Underboat_Hideout",
+          "name": "Hideout Under the Landing Stage",
+          "faction": "scav",
+          "position": {
+            "x": 143.13,
+            "y": 0.73,
+            "z": -159.34
+          }
+        }
+      ]
+    }
+  },
   "tasks": {
     "59ca1a6286f774509a270942": {
       "factionName": "USEC",
@@ -9952,8 +9968,8 @@
     }
   },
   "$meta": {
-    "version": "1.109",
-    "generated": "2026-09-29T00:53:38.518Z",
-    "sha256": "f44559e3760e64489f0919036616e947e4e08118287cfa954ceeb41ccdaebc02"
+    "version": "1.110",
+    "generated": "2026-09-29T00:58:20.693Z",
+    "sha256": "64f971b905e02e56ee28401913b7f332850a82f3a4aae5d4bcd7583a407d3844"
   }
 }
