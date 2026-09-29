@@ -253,10 +253,21 @@ Recent history favors Conventional Commit prefixes like `feat:`, `chore:`, and `
 ### PR review bots
 
 Three bots review pull requests here. cubic re-reviews automatically on every
-push. Codex reviews on open, on ready-for-review, and on a `@codex review`
-comment, but only because the Codex GitHub integration is enabled for this
-repository; that comment does nothing where it is not. CodeRabbit reviews on push
-and on `@coderabbitai review`, subject to the allowance below.
+push. Codex automatic reviews are disabled; Codex reviews only on a `@codex review`
+comment. CodeRabbit reviews on push and on `@coderabbitai review`, subject to the
+allowance below.
+
+Every push spends PR reviews against shared limits, so review locally first. The
+CodeRabbit CLI is metered separately from PR reviews (see below). Commit locally as
+often as useful, run `coderabbit review --base main --agent` on the stabilized diff,
+and fix its findings before pushing. Never run Codex reviews locally. Push a batch
+once `npm run validate`, tests and the local review pass; fix all findings from
+one PR review round, then push them together, never per finding. Update from `main`
+only for conflicts or right before merge. A rate-limited reviewer does not stop
+work: keep going with local reviews and record the PR review as incomplete.
+
+Codex usage is scarce. Comment `@codex review` only when CodeRabbit is rate-limited
+on both PR and CLI, or as the final pre-merge check of a risky change.
 
 Never idle waiting for CodeRabbit's GitHub review allowance to reopen. That
 allowance is metered from recent usage (CodeRabbit has reported it as one review
@@ -281,7 +292,8 @@ evidence that the head commit was reviewed. Get the coverage another way:
   rather than free. The CLI has its own small included pool and reports
   `errorType: rate_limit` with a wait time when it is spent; when that happens fall
   through to the bots below rather than waiting for it either.
-- Comment `@codex review` for a fresh pass on the current head commit.
+- Comment `@codex review` for a fresh pass on the current head commit, within the
+  Codex limits above.
 
 Reply to each review thread naming the commit that fixed it and what changed, then
 resolve the thread; the reply is what makes the trail auditable later.
