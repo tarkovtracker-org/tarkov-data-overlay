@@ -1,0 +1,56 @@
+{
+  "$id": "map-override.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Map Override Schema",
+  "description": "Schema for map corrections and additions keyed by tarkov.dev map ID",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      "disabled": {
+        "description": "Mark map as disabled/removed from standard gameplay.",
+        "type": "boolean"
+      },
+      "extractsAdd": {
+        "description": "Extracts missing from the API, appended to the map's extracts unless an extract with the same id or name already exists",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "faction": {
+              "type": "string",
+              "enum": ["pmc", "scav", "shared"]
+            },
+            "position": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "z": { "type": "number" }
+              },
+              "required": ["x", "y", "z"]
+            },
+            "top": {
+              "type": "number"
+            },
+            "bottom": {
+              "type": "number"
+            }
+          },
+          "required": ["id", "name", "faction", "position"]
+        }
+      }
+    }
+  }
+}
