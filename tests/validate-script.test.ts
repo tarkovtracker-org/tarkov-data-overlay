@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { join } from 'path';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import {
   getProjectPaths,
@@ -700,6 +700,22 @@ describe('scripts/validate helpers', () => {
       expect(result.errors?.[0]).toContain('/tasks/missing');
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('indexes map IDs that exist only in mode-specific map overrides', () => {
+    const root = mkdtempSync(join(tmpdir(), 'validate-index-'));
+    mkdirSync(join(root, 'overrides', 'modes', 'pve'), { recursive: true });
+    writeFileSync(
+      join(root, 'overrides', 'modes', 'pve', 'maps.json5'),
+      "{ 'pve-only-map': { disabled: true } }",
+      'utf-8'
+    );
+
+    try {
+      expect(buildLocalLocaleEntityIdIndex(root).maps.has('pve-only-map')).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
   });
 
