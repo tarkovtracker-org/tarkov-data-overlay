@@ -420,6 +420,90 @@
       ],
       "experience": 10000
     },
+    "60e71b9bbd90872cb85440f3": {
+      "traderRequirements": [
+        {
+          "id": "overlay.60e71b9bbd90872cb85440f3.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "6391359b9444fb141f4e6ee6": {
+      "traderRequirements": [
+        {
+          "id": "overlay.6391359b9444fb141f4e6ee6.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "669fa399033a3ce9870338a8": {
+      "traderRequirements": [
+        {
+          "id": "overlay.669fa399033a3ce9870338a8.54cb50c76803fa8b248b4571.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "54cb50c76803fa8b248b4571",
+            "name": "Prapor"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "64e7b971f9d6fa49d6769b44": {
+      "traderRequirements": [
+        {
+          "id": "overlay.64e7b971f9d6fa49d6769b44.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "5d25e2e286f77444001e2e48": {
+      "traderRequirements": [
+        {
+          "id": "overlay.5d25e2e286f77444001e2e48.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
+    "60c0c018f7afb4354815096a": {
+      "traderRequirements": [
+        {
+          "id": "overlay.60c0c018f7afb4354815096a.5c0647fdd443bc2504c2d371.level.>=.2",
+          "requirementType": "level",
+          "compareMethod": ">=",
+          "trader": {
+            "id": "5c0647fdd443bc2504c2d371",
+            "name": "Jaeger"
+          },
+          "value": 2
+        }
+      ]
+    },
     "675c1ff1a757ddd00404f0aa": {
       "traderRequirements": [
         {
@@ -11772,8 +11856,8 @@
     }
   },
   "$meta": {
-    "version": "1.113",
-    "generated": "2026-09-29T22:17:45.532Z",
-    "sha256": "0d77496cc5165c8f9aa5727c3f8fcd687d03b7916c18325f79bf343a10c2f19e"
+    "version": "1.114",
+    "generated": "2026-09-30T01:45:53.686Z",
+    "sha256": "4e6b1284eb290d24e25565d50cd2f6f1e09402046747cced4f0dd1835cb30653"
   }
 }
