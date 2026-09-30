@@ -504,6 +504,38 @@
         }
       ]
     },
+    "5d2495a886f77425cd51e403": {
+      "otherRequirements": [
+        {
+          "id": "overlay.5d2495a886f77425cd51e403.tour.talk-to-mechanic",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c41dde2ddd4581cfc7531c",
+            "name": "Talk to Mechanic"
+          }
+        }
+      ]
+    },
+    "5ae449c386f7744bde357697": {
+      "otherRequirements": [
+        {
+          "id": "overlay.5ae449c386f7744bde357697.tour.talk-to-ragman",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c15e129c0090b717977bd4",
+            "name": "Talk to Ragman"
+          }
+        }
+      ]
+    },
     "675c1ff1a757ddd00404f0aa": {
       "traderRequirements": [
         {
@@ -733,6 +765,20 @@
             "name": "Ragman"
           },
           "value": 1
+        }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.5ae448f286f77448d73c0131.tour.talk-to-ragman",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c15e129c0090b717977bd4",
+            "name": "Talk to Ragman"
+          }
         }
       ],
       "objectives": {
@@ -1342,6 +1388,20 @@
           },
           "value": 1
         }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.59689fbd86f7740d137ebfc4.tour.talk-to-therapist",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c81d6e82b7593afaa638e0",
+            "name": "Talk to Therapist"
+          }
+        }
       ]
     },
     "5968eb3186f7741dde183a4d": {
@@ -1384,6 +1444,20 @@
           },
           "value": 1
         }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.596a0e1686f7741ddf17dbee.tour.talk-to-therapist",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c81d6e82b7593afaa638e0",
+            "name": "Talk to Therapist"
+          }
+        }
       ]
     },
     "596a1e6c86f7741ddc2d3206": {
@@ -1425,6 +1499,20 @@
             "name": "Skier"
           },
           "value": 1
+        }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.596b36c586f77450d6045ad2.tour.talk-to-skier",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c2c0907a45d1fc06b150a2",
+            "name": "Talk to Skier"
+          }
         }
       ]
     },
@@ -1626,6 +1714,20 @@
           },
           "value": 1
         }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.5ac23c6186f7741247042bad.tour.talk-to-mechanic",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c41dde2ddd4581cfc7531c",
+            "name": "Talk to Mechanic"
+          }
+        }
       ]
     },
     "5ac2426c86f774138762edfe": {
@@ -1807,6 +1909,20 @@
             "name": "Ragman"
           },
           "value": 1
+        }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.5ae448bf86f7744d733e55ee.tour.talk-to-ragman",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c15e129c0090b717977bd4",
+            "name": "Talk to Ragman"
+          }
         }
       ]
     },
@@ -2916,6 +3032,20 @@
           },
           "value": 1
         }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.657315ddab5a49b71f098853.tour.talk-to-therapist",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c81d6e82b7593afaa638e0",
+            "name": "Talk to Therapist"
+          }
+        }
       ]
     },
     "657315e1dccd301f1301416a": {
@@ -2944,6 +3074,20 @@
           },
           "value": 1
         }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.657315e270bb0b8dba00cc48.tour.talk-to-skier",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c2c0907a45d1fc06b150a2",
+            "name": "Talk to Skier"
+          }
+        }
       ]
     },
     "657315e4a6af4ab4b50f3459": {
@@ -2957,6 +3101,20 @@
             "name": "Mechanic"
           },
           "value": 1
+        }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.657315e4a6af4ab4b50f3459.tour.talk-to-mechanic",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c41dde2ddd4581cfc7531c",
+            "name": "Talk to Mechanic"
+          }
         }
       ]
     },
@@ -3139,6 +3297,20 @@
             "name": "Mechanic"
           },
           "value": 1
+        }
+      ],
+      "otherRequirements": [
+        {
+          "id": "overlay.675c1570526ff496850895d9.tour.talk-to-mechanic",
+          "type": "storyObjective",
+          "storyChapter": {
+            "id": "tour",
+            "name": "Tour"
+          },
+          "objective": {
+            "id": "68c41dde2ddd4581cfc7531c",
+            "name": "Talk to Mechanic"
+          }
         }
       ]
     },
@@ -11856,8 +12028,8 @@
     }
   },
   "$meta": {
-    "version": "1.114",
-    "generated": "2026-09-30T01:45:53.686Z",
-    "sha256": "4e6b1284eb290d24e25565d50cd2f6f1e09402046747cced4f0dd1835cb30653"
+    "version": "1.115",
+    "generated": "2026-09-30T03:14:01.768Z",
+    "sha256": "75271d60e981d9dbdbf5a901b25d10a7890dd769456bd1b68ffca6dc5f8b19f4"
   }
 }
