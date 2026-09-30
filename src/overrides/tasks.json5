@@ -358,6 +358,51 @@
     ],
   },
 
+  // Tour "Talk to <trader>" gates (served upstream as `dialogue`)
+  //
+  // Upstream serves twelve tasks with a single `dialogue` otherRequirement. In
+  // the 1.1 PvE and PvP captures each one is a GlobalVariableValue >= 1 start
+  // condition on one per-trader flag, and the only writer of each flag is a
+  // "Talk to <trader>" objective of the Tour story chapter (its finish condition
+  // checks the same variable). The trader dialogues only read the flags. The
+  // gate is therefore that Tour objective, expressed as a storyObjective so the
+  // story tracker drives it:
+  //   Therapist 68c81cf8d242d0b184959530 <- Talk to Therapist 68c81d6e82b7593afaa638e0
+  //   Mechanic  68c41b22c5e8a18a3692d395 <- Talk to Mechanic  68c41dde2ddd4581cfc7531c
+  //   Skier     68c2bf4f8c7b5c191d5ec0df <- Talk to Skier     68c2c0907a45d1fc06b150a2
+  //   Ragman    68c15c231582be58295e06b6 <- Talk to Ragman    68c15e129c0090b717977bd4
+  // Tour is added automatically at game start and its talk steps unlock the
+  // early traders and maps; nothing in the captures sets these flags another
+  // way. Proof: https://escapefromtarkov.fandom.com/wiki/Tour
+  // The other ten tasks carry the same gate in their existing entries: First in
+  // Line, Operation Aquarius, Supply Plans, Saving the Mole, Gunsmith - MP-133,
+  // Passion for Ergonomics, Burning Rubber, Supplier, Make ULTRA Great Again,
+  // Fuel Crisis.
+  // Introduction
+  '5d2495a886f77425cd51e403': {
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3d2b4f3e1b25e87035d40a' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.5d2495a886f77425cd51e403.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
+    ],
+  },
+  // Pathfinder
+  '5ae449c386f7744bde357697': {
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b3757c4724593f07e762d' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae449c386f7744bde357697.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
+    ],
+  },
+
   // Unique Experience - quest XP reworked in 1.1.0.0 (wiki lags)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
   // Verified: the 1.1-pve data; wiki still shows the old value.
@@ -649,6 +694,15 @@
         trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b390edce9a13bbb6c6be6' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae448f286f77448d73c0131.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
     ],
     objectives: {
       '5ae452de86f77450595c4333': {
@@ -1372,6 +1426,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 6)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a541aee0f558b660e06709d' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.59689fbd86f7740d137ebfc4.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Blood_in_the_Water
   //
@@ -1415,6 +1478,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 13)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a541bbff43cda8994db38b7' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.596a0e1686f7741ddf17dbee.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/General_Wares
   //
@@ -1456,6 +1528,15 @@
         trader: { id: '58330581ace78e27b8b10cee', name: 'Skier' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 5)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a5a8e2360cf004801084b67' }] (Tour "Talk to Skier" flag)
+      {
+        id: 'overlay.596b36c586f77450d6045ad2.tour.talk-to-skier',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c2c0907a45d1fc06b150a2', name: 'Talk to Skier' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Extortionist
@@ -1671,6 +1752,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 2)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3bda9a408ef52190ac78ca' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.5ac23c6186f7741247042bad.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_AKS-74U
   //
@@ -1862,6 +1952,15 @@
         trader: { id: '5ac3b934156ae10c4430e83c', name: 'Ragman' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 15)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a4b3845723a4707a0ad4420' }] (Tour "Talk to Ragman" flag)
+      {
+        id: 'overlay.5ae448bf86f7744d733e55ee.tour.talk-to-ragman',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c15e129c0090b717977bd4', name: 'Talk to Ragman' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Big_Sale
@@ -3038,6 +3137,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '68dfd6d220b777b168d7ef72' }] (Tour "Talk to Therapist" flag)
+      {
+        id: 'overlay.657315ddab5a49b71f098853.tour.talk-to-therapist',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c81d6e82b7593afaa638e0', name: 'Talk to Therapist' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Luxurious_Life
   //
@@ -3066,6 +3174,15 @@
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
     ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6917b4c8e0ec62f3d7a46246' }] (Tour "Talk to Skier" flag)
+      {
+        id: 'overlay.657315e270bb0b8dba00cc48.tour.talk-to-skier',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c2c0907a45d1fc06b150a2', name: 'Talk to Skier' },
+      },
+    ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Saving_the_Mole
   //
@@ -3079,6 +3196,15 @@
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 1)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '68dfd865aaf6f3c722200252' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.657315e4a6af4ab4b50f3459.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/The_Secret_to_Productivity
@@ -3274,6 +3400,15 @@
         trader: { id: '5a7c2eca46aef81a7ca2145d', name: 'Mechanic' },
         value: 1,
       }, // Was: [] (player level requirement, minPlayerLevel 12)
+    ],
+    otherRequirements: [
+      // Was: [{ type: 'dialogue', id: '6a3bee21f93d55d68c9bd900' }] (Tour "Talk to Mechanic" flag)
+      {
+        id: 'overlay.675c1570526ff496850895d9.tour.talk-to-mechanic',
+        type: 'storyObjective',
+        storyChapter: { id: 'tour', name: 'Tour' },
+        objective: { id: '68c41dde2ddd4581cfc7531c', name: 'Talk to Mechanic' },
+      },
     ],
   },
   // Proof: https://escapefromtarkov.fandom.com/wiki/Work_Smarter

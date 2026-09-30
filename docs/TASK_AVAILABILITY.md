@@ -148,6 +148,9 @@ The `otherRequirements` field currently contains two important types:
   the trader interaction. Track the condition ID in `completedConditionIds` or
   provide it in `dialogues`. Do not infer dialogue completion from the task
   name or from merely having the trader unlocked.
+  Where the captures show that a Tour "Talk to <trader>" objective is the only
+  writer of the gated flag, the overlay replaces the `dialogue` entry with a
+  `storyObjective` gate on that objective (see `src/overrides/tasks.json5`).
 
 Unknown future `otherRequirements` types are retained by the adapter and
 evaluate as `unknown` until TarkovTracker adds a state adapter. This is safer
