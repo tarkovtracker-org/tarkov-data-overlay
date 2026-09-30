@@ -262,10 +262,11 @@ have.
 **Introduction** (`5d2495a886f77425cd51e403`). Its wiki Requirements section
 still reads "Must be level 2 to start this quest". That is pre-1.1.0.0: the
 client carries no `Level` condition for it, and upstream's `minPlayerLevel` is
-already `0`. Its gate is a **dialogue** requirement — upstream serves a single
-`otherRequirements` entry of `type: 'dialogue'`, not `globalVariable`, and the
-two are mutually exclusive types. Track it by its condition ID through
-`completedConditionIds` / `dialogues` rather than as numeric variable state, and
+already `0`. Upstream serves its gate as a single `otherRequirements` entry of
+`type: 'dialogue'`, but in the captures it is the per-trader flag that the Tour
+chapter's "Talk to Mechanic" objective sets, so `src/overrides/tasks.json5`
+replaces it with a `storyObjective` gate on that objective (see the "Tour
+'Talk to <trader>' gates" section there). Track it through story progress, and
 do not re-add a level gate from that wiki line.
 
 **New Beginning (Prestige 1)** (`6761f28a022f60bb320f3e95`). An override here

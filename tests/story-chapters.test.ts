@@ -357,4 +357,29 @@ describe('story chapters (EFT-sourced)', () => {
         .join('; ')}`
     ).toBe(true);
   });
+
+  it('points every task storyObjective gate at a real chapter objective', () => {
+    // Task overrides gate on story objectives by id (e.g. the Tour "Talk to
+    // <trader>" steps); regeneration must not drop or renumber them.
+    const { srcDir } = getProjectPaths();
+    const overrides = JSON5.parse(
+      readFileSync(join(srcDir, 'overrides', 'tasks.json5'), 'utf8')
+    ) as Record<string, { otherRequirements?: Array<Record<string, any>> }>;
+    const gates = Object.entries(overrides).flatMap(([taskId, task]) =>
+      (task.otherRequirements ?? [])
+        .filter((gate) => gate.type === 'storyObjective')
+        .map((gate) => ({ taskId, gate }))
+    );
+    expect(gates.length).toBeGreaterThanOrEqual(12);
+    for (const { taskId, gate } of gates) {
+      const chapter = chapters[gate.storyChapter.id];
+      expect(chapter?.name, `${taskId}: chapter ${gate.storyChapter.id}`).toBe(
+        gate.storyChapter.name
+      );
+      const objective = (chapter.objectives ?? []).find((o) => o.id === gate.objective.id);
+      expect(objective?.description, `${taskId}: objective ${gate.objective.id}`).toBe(
+        gate.objective.name
+      );
+    }
+  });
 });
