@@ -148,8 +148,13 @@ group 6a3c0fefbea2d2ad581c090b  (Mechanic, trader level 2, 12 children)
 
 Tier access itself is a separate, ordinary condition. In the reference the
 per-task `tierAccessory` field and the `TraderLoyalty` condition never
-disagree: `tierAccessory` 2/3/4 pairs only with `TraderLoyalty` value 2/3/4,
-and `tierAccessory` 1 carries no loyalty condition. So the shape of the unlock is:
+disagree: where a tier-pool task carries `TraderLoyalty`, its value equals the
+task's `tierAccessory` 2/3/4, and `tierAccessory` 1 carries no loyalty condition.
+Tier 2–4 tasks do not always carry one, though. Counter-gated tasks usually
+don't, and eight tier-2 tasks (four Prapor, four Jaeger) have an empty
+`AvailableForStart`, so `tierAccessory` is their only loyalty gate and
+tarkov.dev serves them with none. `src/overrides/tasks.json5` supplies that
+gate as a `traderRequirements` level entry. So the shape of the unlock is:
 
 ```text
 (explicit TraderLoyalty condition, if the task has one)

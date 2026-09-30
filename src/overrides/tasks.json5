@@ -261,6 +261,103 @@
     experience: 10000, // Was: 6600 (all modes, stale pre-1.1 value)
   },
 
+  // Tier-2 tasks with no start condition at all (loyalty implied by tier)
+  //
+  // The 1.1 PvE and PvP captures hold exactly eight tier-2 tasks whose
+  // AvailableForStart is empty: tierAccessory 2 is their only loyalty gate, so
+  // neither the client conditions nor tarkov.dev expose it and the tasks read
+  // as available at LL1. Each sits in its trader's Tier 2 pool in
+  // src/additions/progressionCounters.json5, so leaving one ungated also lets
+  // that pool's counter advance below LL2. Every other tier-2/3/4 task carries
+  // either an explicit TraderLoyalty condition or a tier-counter gate.
+  // District Patrol (above) and Crooked Cop (below) are two of the eight and
+  // were already gated; the remaining six are here.
+  //
+  // Prapor
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Capturing_Outposts
+  //        https://escapefromtarkov.fandom.com/wiki/You've_Got_Mail
+  //        https://escapefromtarkov.fandom.com/wiki/Possessor
+  //        (each infobox: LL requirement = 2)
+  // Capturing Outposts
+  '60e71b9bbd90872cb85440f3': {
+    traderRequirements: [
+      {
+        id: 'overlay.60e71b9bbd90872cb85440f3.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // You've Got Mail
+  '6391359b9444fb141f4e6ee6': {
+    traderRequirements: [
+      {
+        id: 'overlay.6391359b9444fb141f4e6ee6.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // Possessor
+  '669fa399033a3ce9870338a8': {
+    traderRequirements: [
+      {
+        id: 'overlay.669fa399033a3ce9870338a8.54cb50c76803fa8b248b4571.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // Jaeger
+  // Proof: https://escapefromtarkov.fandom.com/wiki/The_Huntsman_Path_-_Crooked_Cop
+  //        (the one page in this Jaeger cohort that states a loyalty gate: LL2)
+  // These three pages predate 1.1 and state no loyalty requirement either
+  // way (Sellout still lists a player-level 32 gate that neither the capture
+  // nor tarkov.dev carries). The capture's tierAccessory 2 is the evidence,
+  // backed by the five wiki-checkable members of the cohort all reading LL2.
+  // The Huntsman Path - Big Game
+  '64e7b971f9d6fa49d6769b44': {
+    traderRequirements: [
+      {
+        id: 'overlay.64e7b971f9d6fa49d6769b44.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // The Huntsman Path - Sellout
+  '5d25e2e286f77444001e2e48': {
+    traderRequirements: [
+      {
+        id: 'overlay.5d25e2e286f77444001e2e48.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+  // The Huntsman Path - Factory Chief
+  '60c0c018f7afb4354815096a': {
+    traderRequirements: [
+      {
+        id: 'overlay.60c0c018f7afb4354815096a.5c0647fdd443bc2504c2d371.level.>=.2',
+        requirementType: 'level',
+        compareMethod: '>=',
+        trader: { id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' },
+        value: 2,
+      }, // Was: []
+    ],
+  },
+
   // Unique Experience - quest XP reworked in 1.1.0.0 (wiki lags)
   // Proof: https://escapefromtarkov.fandom.com/wiki/Unique_Experience
   // Verified: the 1.1-pve data; wiki still shows the old value.
