@@ -110,30 +110,38 @@ const FLAGS: FlagDescriptor[] = [
   },
 ];
 
+function findFlag(arg: string): FlagDescriptor | undefined {
+  return FLAGS.find(
+    (flag) =>
+      flag.names.includes(arg) || (flag.kind !== 'flag' && arg.startsWith(`${flag.names[0]}=`))
+  );
+}
+
+function applyFlag(
+  descriptor: FlagDescriptor,
+  arg: string,
+  next: string | undefined,
+  options: ParsedOptions
+): boolean {
+  const inline = arg.startsWith(`${descriptor.names[0]}=`);
+  const consume = descriptor.kind !== 'optional' || Boolean(next && !next.startsWith('-'));
+  const value = inline ? arg.slice(descriptor.names[0].length + 1) : consume ? next : undefined;
+  const accepted = descriptor.apply(options, value);
+  // Invalid enum values remain available as positional names, matching the CLI contract.
+  return accepted && !inline && descriptor.kind !== 'flag' && consume;
+}
+
 export function parseArgs(argv: string[]): ParsedOptions {
   const options: ParsedOptions = {};
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (!arg) continue;
-    const descriptor = FLAGS.find(
-      (flag) =>
-        flag.names.includes(arg) || (flag.kind !== 'flag' && arg.startsWith(`${flag.names[0]}=`))
-    );
+    const descriptor = findFlag(arg);
     if (!descriptor) {
       if (!options.name) options.name = arg;
       continue;
     }
-    const inline = arg.startsWith(`${descriptor.names[0]}=`);
-    const next = argv[i + 1];
-    const optionalValue = descriptor.kind !== 'optional' || (next && !next.startsWith('-'));
-    const value = inline
-      ? arg.slice(descriptor.names[0].length + 1)
-      : optionalValue
-        ? next
-        : undefined;
-    const accepted = descriptor.apply(options, value);
-    // Invalid enum values remain available as positional names, matching the CLI contract.
-    if (accepted && !inline && descriptor.kind !== 'flag' && optionalValue) i += 1;
+    if (applyFlag(descriptor, arg, argv[i + 1], options)) i += 1;
   }
   return options;
 }

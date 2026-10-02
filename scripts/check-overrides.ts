@@ -1338,46 +1338,42 @@ async function checkEntityData(): Promise<GateCounts> {
   return { actionable, staleProblems, upstreamProblems: 0 };
 }
 
+function addAdditionIds(ids: Set<string>, additions: Record<string, TaskAddition>): void {
+  for (const [key, addition] of Object.entries(additions)) {
+    ids.add(key);
+    if (typeof addition.id === 'string') ids.add(addition.id);
+  }
+}
+
+function knownStoryQuestIds(
+  apiTasksByMode: TasksByMode,
+  additions: Record<string, TaskAddition>
+): Set<string> | undefined {
+  const reference = loadReferenceQuestIds();
+  if (!reference) return undefined;
+  const ids = new Set(reference);
+  for (const mode of SUPPORTED_GAME_MODES) {
+    for (const task of apiTasksByMode[mode] ?? []) ids.add(task.id);
+    addAdditionIds(ids, loadModeTaskAdditions(mode));
+  }
+  addAdditionIds(ids, additions);
+  return ids;
+}
+
 function checkStoryData(
   apiTasksByMode: TasksByMode,
   additions: Record<string, TaskAddition>
 ): GateCounts {
-  let actionable = 0;
-  // Story chapters: overlay-authored, so check references rather than values.
   const storyChapters = loadOptional('additions', 'storyChapters.json5');
-  if (Object.keys(storyChapters).length > 0) {
-    // Story quests are NOT in the tarkov.dev task list, so their IDs can only
-    // be resolved against the local EFT reference. Without it, only internal
-    // consistency is checkable.
-    const referenceQuestIds = loadReferenceQuestIds();
-    let knownQuestIds: Set<string> | undefined;
-
-    if (referenceQuestIds) {
-      knownQuestIds = new Set(referenceQuestIds);
-      for (const mode of SUPPORTED_GAME_MODES) {
-        for (const task of apiTasksByMode[mode] ?? []) knownQuestIds.add(task.id);
-      }
-      for (const [key, addition] of Object.entries(additions)) {
-        knownQuestIds.add(key);
-        const id = (addition as { id?: unknown }).id;
-        if (typeof id === 'string') knownQuestIds.add(id);
-      }
-      for (const mode of SUPPORTED_GAME_MODES) {
-        for (const [key, addition] of Object.entries(loadModeTaskAdditions(mode))) {
-          knownQuestIds.add(key);
-          const id = (addition as { id?: unknown }).id;
-          if (typeof id === 'string') knownQuestIds.add(id);
-        }
-      }
-    }
-
-    actionable += printStoryChapterIssues(
-      checkStoryChapterIntegrity(storyChapters, knownQuestIds),
-      knownQuestIds !== undefined
-    ).errors;
-  }
-
-  return { actionable, staleProblems: 0, upstreamProblems: 0 };
+  if (Object.keys(storyChapters).length === 0)
+    return { actionable: 0, staleProblems: 0, upstreamProblems: 0 };
+  // Story quests are absent upstream: without the local reference only internal consistency is checkable.
+  const known = knownStoryQuestIds(apiTasksByMode, additions);
+  const { errors } = printStoryChapterIssues(
+    checkStoryChapterIntegrity(storyChapters, known),
+    known !== undefined
+  );
+  return { actionable: errors, staleProblems: 0, upstreamProblems: 0 };
 }
 
 function checkSuppressions(apiTasks: TaskData[], apiTasksByMode: TasksByMode): GateCounts {
@@ -1401,6 +1397,46 @@ function checkSuppressions(apiTasks: TaskData[], apiTasksByMode: TasksByMode): G
   }
 
   return { actionable, staleProblems: 0, upstreamProblems: 0 };
+}
+
+function checkModeOverrides(
+  mode: GameMode,
+  overrides: Record<string, TaskOverride>,
+  tasks: TaskData[]
+): number {
+  if (Object.keys(overrides).length === 0) return 0;
+  printProgress(`Validating ${mode} mode overrides...\n`);
+  const report = printResults(validateAllOverrides(overrides, tasks), {
+    titlePrefix: mode.toUpperCase(),
+    overridePath: `src/overrides/modes/${mode}/tasks.json5`,
+  });
+  return report.obsoleteEntries + report.staleFields;
+}
+
+function checkModeAdditions(
+  mode: GameMode,
+  additions: Record<string, TaskAddition>,
+  tasks: TaskData[]
+): number {
+  if (Object.keys(additions).length === 0) return 0;
+  printProgress(`Checking ${mode} mode additions against API...\n`);
+  return printAdditionResults(checkTaskAdditions(additions, tasks), mode.toUpperCase()).resolved;
+}
+
+function resolvedAdditionKeys(results: AdditionResult[], keys: Set<string>): void {
+  for (const result of results) if (result.status === 'RESOLVED') keys.add(result.key);
+}
+
+function checkSharedModeAdditions(
+  mode: GameMode,
+  additions: Record<string, TaskAddition>,
+  tasks: TaskData[],
+  keys: Set<string>
+): void {
+  if (mode === 'regular') return;
+  const results = checkTaskAdditions(additions, tasks);
+  resolvedAdditionKeys(results, keys);
+  printAdditionResults(results, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
 }
 
 async function checkModeTasks(
@@ -1434,35 +1470,11 @@ async function checkModeTasks(
     printSuccess(`Fetched ${modeApiTasks.length} ${mode} tasks from API\n`);
 
     const modeOverrideCount = Object.keys(modeOverrides).length;
-    const modeAdditionCount = Object.keys(modeAdditions).length;
 
-    if (modeOverrideCount > 0) {
-      crossCheckGroups.push({ label: mode, overrides: modeOverrides });
-
-      printProgress(`Validating ${mode} mode overrides...\n`);
-      const modeResults = validateAllOverrides(modeOverrides, modeApiTasks);
-      const modeTaskReport = printResults(modeResults, {
-        titlePrefix: mode.toUpperCase(),
-        overridePath: `src/overrides/modes/${mode}/tasks.json5`,
-      });
-      staleProblems += modeTaskReport.obsoleteEntries + modeTaskReport.staleFields;
-    }
-
-    if (modeAdditionCount > 0) {
-      printProgress(`Checking ${mode} mode additions against API...\n`);
-      const modeAdditionResults = checkTaskAdditions(modeAdditions, modeApiTasks);
-      staleProblems += printAdditionResults(modeAdditionResults, mode.toUpperCase()).resolved;
-    }
-
-    // Shared additions apply to every mode, so an entry appearing upstream in
-    // any one mode is stale as a shared addition and must be mode-scoped or removed.
-    if (mode !== 'regular') {
-      const sharedAdditionResults = checkTaskAdditions(additions, modeApiTasks);
-      for (const result of sharedAdditionResults) {
-        if (result.status === 'RESOLVED') resolvedSharedKeys.add(result.key);
-      }
-      printAdditionResults(sharedAdditionResults, `SHARED ADDITIONS VS ${mode.toUpperCase()}`);
-    }
+    if (modeOverrideCount > 0) crossCheckGroups.push({ label: mode, overrides: modeOverrides });
+    staleProblems += checkModeOverrides(mode, modeOverrides, modeApiTasks);
+    staleProblems += checkModeAdditions(mode, modeAdditions, modeApiTasks);
+    checkSharedModeAdditions(mode, additions, modeApiTasks, resolvedSharedKeys);
   }
   staleProblems += resolvedSharedKeys.size;
 
@@ -1480,6 +1492,61 @@ async function checkModeTasks(
   printBaseCrossModeSummary(baseResultsByMode);
 
   return { apiTasksByMode, modeOverridesByMode, staleProblems, upstreamProblems };
+}
+
+function checkModeDivergences(
+  overrides: Record<string, TaskOverride>,
+  tasksByMode: TasksByMode,
+  overridesByMode: Partial<Record<GameMode, Record<string, TaskOverride>>>
+): number {
+  const divergences = loadDivergences();
+  printDivergenceCoverage(divergences);
+  const modes = Object.fromEntries(
+    SUPPORTED_GAME_MODES.map((mode) => [
+      mode,
+      tasksByMode[mode]
+        ? { apiTasks: tasksByMode[mode], modeOverrides: overridesByMode[mode] ?? {} }
+        : undefined,
+    ])
+  );
+  return printDivergenceReport(validateDivergences(divergences, overrides, modes)).actionable;
+}
+
+function printGateProblems({
+  strict,
+  failOnStale,
+  failOnUpstream,
+  actionable,
+  staleProblems,
+  upstreamProblems,
+}: ValidationGateCounts): void {
+  // Printed whenever the count is non-zero, gate or no gate: the whole point
+  // of issue #276 is that this must not pass silently. Only the exit code is
+  // opt-in.
+  if (upstreamProblems > 0) {
+    printError(
+      `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
+        'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
+        'an overlay.* id for them - the same shape our own additions use. An overlay ' +
+        'addition can therefore collide with a real upstream requirement instead of ' +
+        'being added alongside it. Nothing here can fix it; report it upstream.' +
+        (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
+    );
+  }
+
+  if (actionable > 0 && strict) {
+    printError(
+      `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
+        'Data is being served incorrectly or the overlay is inconsistent.'
+    );
+  }
+
+  if (staleProblems > 0 && failOnStale) {
+    printError(
+      `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
+        'Remove data now supplied upstream or scope it to the modes where it is still missing.'
+    );
+  }
 }
 
 /**
@@ -1538,9 +1605,7 @@ async function main(): Promise<void> {
     printProgress('Checking additions against API...\n');
     const staleSharedAdditionKeys = new Set<string>();
     const regularAdditionResults = checkTaskAdditions(additions, apiTasks);
-    for (const result of regularAdditionResults) {
-      if (result.status === 'RESOLVED') staleSharedAdditionKeys.add(result.key);
-    }
+    resolvedAdditionKeys(regularAdditionResults, staleSharedAdditionKeys);
     printAdditionResults(regularAdditionResults);
 
     const modeCounts = await checkModeTasks(
@@ -1558,27 +1623,7 @@ async function main(): Promise<void> {
     const missingEditionRefs = checkEditionTaskReferences(editions, apiTasks);
     printEditionReferenceResults(missingEditionRefs);
 
-    // Mode-divergence registry: the check that detects a mirror-direction flip.
-    const divergences = loadDivergences();
-    printDivergenceCoverage(divergences);
-    const divergenceResults = validateDivergences(divergences, overrides, {
-      regular: apiTasksByMode.regular
-        ? {
-            apiTasks: apiTasksByMode.regular,
-            modeOverrides: modeOverridesByMode.regular ?? {},
-          }
-        : undefined,
-      pve: apiTasksByMode.pve
-        ? { apiTasks: apiTasksByMode.pve, modeOverrides: modeOverridesByMode.pve ?? {} }
-        : undefined,
-      'pvp-season': apiTasksByMode['pvp-season']
-        ? {
-            apiTasks: apiTasksByMode['pvp-season'],
-            modeOverrides: modeOverridesByMode['pvp-season'] ?? {},
-          }
-        : undefined,
-    });
-    actionable += printDivergenceReport(divergenceResults).actionable;
+    actionable += checkModeDivergences(overrides, apiTasksByMode, modeOverridesByMode);
 
     const entityCounts = await checkEntityData();
     const storyCounts = checkStoryData(apiTasksByMode, additions);
@@ -1608,33 +1653,14 @@ async function main(): Promise<void> {
       upstreamProblems,
     });
 
-    // Printed whenever the count is non-zero, gate or no gate: the whole point
-    // of issue #276 is that this must not pass silently. Only the exit code is
-    // opt-in.
-    if (upstreamProblems > 0) {
-      printError(
-        `\n${upstreamProblems} upstream data-quality problem(s) found : ${icons.error}. ` +
-          'Trader requirements arrived without a merge id, so the adapter synthesizes ' +
-          'an overlay.* id for them - the same shape our own additions use. An overlay ' +
-          'addition can therefore collide with a real upstream requirement instead of ' +
-          'being added alongside it. Nothing here can fix it; report it upstream.' +
-          (failOnUpstream ? '' : ' (not gated; pass --fail-on-upstream to fail on this)')
-      );
-    }
-
-    if (actionable > 0 && strict) {
-      printError(
-        `\n${actionable} actionable problem(s) found (--strict) : ${icons.error}. ` +
-          'Data is being served incorrectly or the overlay is inconsistent.'
-      );
-    }
-
-    if (staleProblems > 0 && failOnStale) {
-      printError(
-        `\n${staleProblems} stale overlay field/entry problem(s) found (--fail-on-stale) : ${icons.error}. ` +
-          'Remove data now supplied upstream or scope it to the modes where it is still missing.'
-      );
-    }
+    printGateProblems({
+      strict,
+      failOnStale,
+      failOnUpstream,
+      actionable,
+      staleProblems,
+      upstreamProblems,
+    });
 
     process.exit(exitCode);
   } catch (error) {

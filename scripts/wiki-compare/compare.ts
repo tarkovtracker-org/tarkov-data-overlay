@@ -111,25 +111,29 @@ function createReporter(
     });
 }
 
-function compareTaskFields({ apiTask, wiki, verbose, report }: ComparisonContext): void {
-  // minPlayerLevel
-  if (wiki.minPlayerLevel !== undefined) {
-    if (apiTask.minPlayerLevel !== wiki.minPlayerLevel) {
-      report({
-        field: 'minPlayerLevel',
-        apiValue: apiTask.minPlayerLevel,
-        wikiValue: wiki.minPlayerLevel,
-        trustsWiki: true,
-      });
-      if (verbose)
-        console.log(
-          `${icons.warning} minPlayerLevel: API=${apiTask.minPlayerLevel}, Wiki=${wiki.minPlayerLevel}`
-        );
-    } else if (verbose) {
-      console.log(`${icons.success} minPlayerLevel matches (${apiTask.minPlayerLevel})`);
-    }
+function compareKnownValue(
+  { verbose, report }: ComparisonContext,
+  field: string,
+  apiValue: string | number | undefined,
+  wikiValue: string | number,
+  matches = apiValue === wikiValue
+): void {
+  if (!matches) {
+    report({ field, apiValue, wikiValue, trustsWiki: true });
+    if (verbose) console.log(`${icons.warning} ${field}: API=${apiValue}, Wiki=${wikiValue}`);
+  } else if (verbose) {
+    console.log(`${icons.success} ${field} matches (${apiValue})`);
   }
+}
 
+function comparePlayerLevel(context: ComparisonContext): void {
+  const { apiTask, wiki } = context;
+  if (wiki.minPlayerLevel !== undefined) {
+    compareKnownValue(context, 'minPlayerLevel', apiTask.minPlayerLevel, wiki.minPlayerLevel);
+  }
+}
+
+function compareTraderLoyalty({ apiTask, wiki, verbose, report }: ComparisonContext): void {
   // traderRequirements (loyalty gates)
   //
   // Patch 1.1.0.0 moved most quest gates from a player level onto a trader
@@ -172,7 +176,9 @@ function compareTaskFields({ apiTask, wiki, verbose, report }: ComparisonContext
       console.log(`${icons.success} traderRequirements match (${wikiLoyalty.join(', ')})`);
     }
   }
+}
 
+function compareScavKarma({ apiTask, wiki, verbose, report }: ComparisonContext): void {
   // scavKarma (Fence reputation gate)
   //
   // json.tarkov.dev models Scav karma as a `reputation` trader requirement on
@@ -216,56 +222,153 @@ function compareTaskFields({ apiTask, wiki, verbose, report }: ComparisonContext
       console.log(`${icons.success} scavKarma matches (${wikiKarma})`);
     }
   }
+}
 
-  // factionName (USEC/BEAR-only quests)
+function compareFaction(context: ComparisonContext): void {
+  const { apiTask, wiki } = context;
   if (wiki.factionName !== undefined) {
-    const apiFaction = apiTask.factionName ?? 'Any';
-    if (apiFaction !== wiki.factionName) {
-      report({
-        field: 'factionName',
-        apiValue: apiFaction,
-        wikiValue: wiki.factionName,
-        trustsWiki: true,
-      });
-      if (verbose)
-        console.log(`${icons.warning} factionName: API=${apiFaction}, Wiki=${wiki.factionName}`);
-    } else if (verbose) {
-      console.log(`${icons.success} factionName matches (${apiFaction})`);
-    }
+    compareKnownValue(context, 'factionName', apiTask.factionName ?? 'Any', wiki.factionName);
   }
+}
 
-  // Task-level map/location
+function compareTaskMap(context: ComparisonContext): void {
+  const { apiTask, wiki, verbose } = context;
   const apiMapName = apiTask.map?.name;
   const wikiObjectiveMaps = uniqueList(wiki.objectives.flatMap((obj) => obj.maps ?? []));
   const wikiTaskMaps = wiki.maps.length > 0 ? wiki.maps : wikiObjectiveMaps;
   const wikiTaskMapSet = toNormalizedSet(wikiTaskMaps, normalizeMapName);
-
-  if (wikiTaskMapSet.size > 0) {
-    const apiMapSet = apiMapName ? new Set([normalizeMapName(apiMapName)]) : new Set<string>();
-    const mapsMatch = apiMapName ? setsEqual(apiMapSet, wikiTaskMapSet) : false;
-
-    if (!mapsMatch) {
-      report({
-        field: 'map',
-        apiValue: apiMapName ?? 'none',
-        wikiValue: wikiTaskMaps.join(', ') || 'none',
-        trustsWiki: true,
-      });
-      if (verbose)
-        console.log(
-          `${icons.warning} map: API=${apiMapName ?? 'none'}, Wiki=${
-            wikiTaskMaps.join(', ') || 'none'
-          }`
-        );
-    } else if (verbose) {
-      console.log(`${icons.success} map matches (${apiMapName})`);
+  if (wikiTaskMapSet.size === 0) {
+    if (verbose && apiMapName) {
+      console.log(`${icons.info} map in API: ${apiMapName}, Wiki=none (not specified)`);
     }
-  } else if (verbose && apiMapName) {
-    console.log(`${icons.info} map in API: ${apiMapName}, Wiki=none (not specified)`);
+    return;
   }
+  const apiMapSet = apiMapName ? new Set([normalizeMapName(apiMapName)]) : new Set<string>();
+  compareKnownValue(
+    context,
+    'map',
+    apiMapName ?? 'none',
+    wikiTaskMaps.join(', '),
+    setsEqual(apiMapSet, wikiTaskMapSet)
+  );
+}
+
+function compareTaskFields(context: ComparisonContext): void {
+  comparePlayerLevel(context);
+  compareTraderLoyalty(context);
+  compareScavKarma(context);
+  compareFaction(context);
+  compareTaskMap(context);
+}
+
+type MatchedObjective = {
+  api: ApiObjective;
+  wiki: WikiObjective;
+  matchType: 'text' | 'item';
+};
+type WikiCandidate = {
+  wiki: WikiObjective;
+  index: number;
+  textKey: string;
+  verb: ReturnType<typeof getObjectiveVerbKey>;
+  items: string[];
+};
+type ObjectiveCandidates = {
+  candidates: WikiCandidate[];
+  unmatched: Set<number>;
+};
+
+/** Explicit non-FiR wording must not contribute to either FiR matching rule. */
+function isFoundInRaidObjective(objective: ApiObjective): boolean {
+  const description = objective.description ?? '';
+  return (
+    objective.foundInRaid === true ||
+    (/found in raid/i.test(description) && !/not\s+found in raid/i.test(description))
+  );
+}
+
+function findTextCandidate(textKey: string, { candidates, unmatched }: ObjectiveCandidates) {
+  if (!textKey) return undefined;
+  const exact = candidates.find(
+    (candidate) => unmatched.has(candidate.index) && candidate.textKey === textKey
+  );
+  if (exact) return exact;
+  if (textKey.split(' ').filter(Boolean).length < 4) return undefined;
+  const substringMatches = candidates.filter((candidate) => {
+    if (!unmatched.has(candidate.index) || !candidate.textKey) return false;
+    if (candidate.textKey.split(' ').filter(Boolean).length < 4) return false;
+    return candidate.textKey.includes(textKey) || textKey.includes(candidate.textKey);
+  });
+  return substringMatches.length === 1 ? substringMatches[0] : undefined;
+}
+
+function findItemCandidate(
+  apiObj: ApiObjective,
+  { candidates, unmatched }: ObjectiveCandidates,
+  taskName: string
+) {
+  const verb = getObjectiveVerbKey(apiObj.description ?? '');
+  const items = collectObjectiveItems(apiObj);
+  if (!verb || items.length === 0) return undefined;
+  const findVerb = (candidateVerb: string) =>
+    candidates.find(
+      (candidate) =>
+        unmatched.has(candidate.index) &&
+        candidate.verb === candidateVerb &&
+        hasItemIntersection(items, candidate.items, taskName)
+    );
+  const candidate = findVerb(verb);
+  if (candidate) return candidate;
+  if (verb === 'hand_over' && isFoundInRaidObjective(apiObj)) return findVerb('find');
+  return undefined;
+}
+
+function collectUnmatchedWiki(
+  { candidates, unmatched }: ObjectiveCandidates,
+  objectives: ApiObjective[]
+): WikiObjective[] {
+  const foundInRaidItemSets = objectives
+    .filter(isFoundInRaidObjective)
+    .map((obj) => buildAliasSet(collectObjectiveItems(obj)));
+  return candidates
+    .filter((candidate) => {
+      if (!unmatched.has(candidate.index)) return false;
+      if (candidate.verb !== 'find' || candidate.items.length === 0) return true;
+      return !foundInRaidItemSets.some((aliasSet) => aliasSetIntersects(aliasSet, candidate.items));
+    })
+    .map((candidate) => candidate.wiki);
+}
+
+type ObjectiveMatches = {
+  matchedObjectives: MatchedObjective[];
+  unmatchedApi: ApiObjective[];
+  unmatchedWiki: WikiObjective[];
+  apiQuestItemSet: Set<string>;
+};
+
+function applySingleObjectiveFallback(
+  result: ObjectiveMatches,
+  apiObjectives: ApiObjective[],
+  wikiObjectives: WikiObjective[]
+): void {
+  // Compare a sole objective directly even when its text does not match.
+  if (
+    result.matchedObjectives.length !== 0 ||
+    apiObjectives.length !== 1 ||
+    wikiObjectives.length !== 1
+  )
+    return;
+  result.matchedObjectives.push({
+    api: apiObjectives[0],
+    wiki: wikiObjectives[0],
+    matchType: 'text',
+  });
+  result.unmatchedApi.length = 0;
+  result.unmatchedWiki.length = 0;
 }
 
 function matchObjectives({ apiTask, wiki, mapAliasMap, taskName }: ComparisonContext) {
+  const apiObjectives = apiTask.objectives ?? [];
   // Objective matching by normalized description
   const wikiCandidates = wiki.objectives.map((wikiObj, index) => ({
     wiki: wikiObj,
@@ -275,548 +378,538 @@ function matchObjectives({ apiTask, wiki, mapAliasMap, taskName }: ComparisonCon
     items: uniqueList(wikiObj.items ?? []),
   }));
 
-  const matchedObjectives: Array<{
-    api: ApiObjective;
-    wiki: WikiObjective;
-    matchType: 'text' | 'item';
-  }> = [];
+  const matchedObjectives: MatchedObjective[] = [];
   const unmatchedApi: ApiObjective[] = [];
   const unmatchedWikiIndexes = new Set(wikiCandidates.map((c) => c.index));
   const apiQuestItemSet = toNormalizedSet(
-    (apiTask.objectives ?? [])
-      .map((obj) => obj.questItem?.name)
-      .filter((name): name is string => Boolean(name)),
+    apiObjectives.map((obj) => obj.questItem?.name).filter((name): name is string => Boolean(name)),
     normalizeItemName
   );
 
-  for (const apiObj of apiTask.objectives ?? []) {
-    const apiTextKey = stripMapAliases(
+  const candidates = { candidates: wikiCandidates, unmatched: unmatchedWikiIndexes };
+  for (const apiObj of apiObjectives) {
+    const textKey = stripMapAliases(
       normalizeObjectiveMatchKey(apiObj.description ?? ''),
       mapAliasMap
     );
-    const apiVerb = getObjectiveVerbKey(apiObj.description ?? '');
-    const apiItemRefs = collectObjectiveItems(apiObj);
-    const apiDescription = apiObj.description ?? '';
-    // Match "found in raid" but not the negated "not found in raid" exception,
-    // which would otherwise misclassify an explicit non-FiR objective as FiR.
-    const apiFoundInRaid =
-      apiObj.foundInRaid === true ||
-      (/found in raid/i.test(apiDescription) && !/not\s+found in raid/i.test(apiDescription));
-
-    let matched = false;
-
-    if (apiTextKey.length > 0) {
-      const candidate = wikiCandidates.find(
-        (c) => unmatchedWikiIndexes.has(c.index) && c.textKey === apiTextKey
-      );
-      if (candidate) {
-        matchedObjectives.push({
-          api: apiObj,
-          wiki: candidate.wiki,
-          matchType: 'text',
-        });
-        unmatchedWikiIndexes.delete(candidate.index);
-        matched = true;
-      }
-    }
-
-    if (!matched && apiTextKey.length > 0) {
-      const apiTokens = apiTextKey.split(' ').filter(Boolean);
-      if (apiTokens.length >= 4) {
-        const substringMatches = wikiCandidates.filter((c) => {
-          if (!unmatchedWikiIndexes.has(c.index)) return false;
-          if (!c.textKey || c.textKey.length === 0) return false;
-          const wikiTokens = c.textKey.split(' ').filter(Boolean);
-          if (wikiTokens.length < 4) return false;
-          return c.textKey.includes(apiTextKey) || apiTextKey.includes(c.textKey);
-        });
-
-        if (substringMatches.length === 1) {
-          const candidate = substringMatches[0];
-          matchedObjectives.push({
-            api: apiObj,
-            wiki: candidate.wiki,
-            matchType: 'text',
-          });
-          unmatchedWikiIndexes.delete(candidate.index);
-          matched = true;
-        }
-      }
-    }
-
-    if (!matched && apiVerb && apiItemRefs.length > 0) {
-      let candidate = wikiCandidates.find(
-        (c) =>
-          unmatchedWikiIndexes.has(c.index) &&
-          c.verb === apiVerb &&
-          hasItemIntersection(apiItemRefs, c.items, taskName)
-      );
-      if (!candidate && apiVerb === 'hand_over' && apiFoundInRaid) {
-        candidate = wikiCandidates.find(
-          (c) =>
-            unmatchedWikiIndexes.has(c.index) &&
-            c.verb === 'find' &&
-            hasItemIntersection(apiItemRefs, c.items, taskName)
-        );
-      }
-      if (candidate) {
-        matchedObjectives.push({
-          api: apiObj,
-          wiki: candidate.wiki,
-          matchType: 'item',
-        });
-        unmatchedWikiIndexes.delete(candidate.index);
-        matched = true;
-      }
-    }
-
-    if (!matched) {
+    const textCandidate = findTextCandidate(textKey, candidates);
+    const candidate = textCandidate ?? findItemCandidate(apiObj, candidates, taskName);
+    if (!candidate) {
       unmatchedApi.push(apiObj);
-    }
-  }
-
-  // Match "found in raid" but not the negated "not found in raid" exception,
-  // mirroring the objective-level check above: a non-FiR handover objective
-  // must not contribute its items to the redundant-find filter.
-  const apiFoundInRaidItemSets = (apiTask.objectives ?? [])
-    .filter(
-      (obj) =>
-        obj.foundInRaid === true ||
-        (/found in raid/i.test(obj.description ?? '') &&
-          !/not\s+found in raid/i.test(obj.description ?? ''))
-    )
-    .map((obj) => buildAliasSet(collectObjectiveItems(obj)));
-
-  const unmatchedWiki: WikiObjective[] = [];
-  for (const candidate of wikiCandidates) {
-    if (!unmatchedWikiIndexes.has(candidate.index)) continue;
-
-    if (candidate.verb === 'find' && candidate.items.length > 0) {
-      const redundantFind = apiFoundInRaidItemSets.some((aliasSet) =>
-        aliasSetIntersects(aliasSet, candidate.items)
-      );
-      if (redundantFind) continue;
-    }
-
-    unmatchedWiki.push(candidate.wiki);
-  }
-
-  // If both sides have exactly one objective, compare them directly even if text doesn't match
-  if (
-    matchedObjectives.length === 0 &&
-    (apiTask.objectives ?? []).length === 1 &&
-    wiki.objectives.length === 1
-  ) {
-    matchedObjectives.push({
-      api: (apiTask.objectives ?? [])[0],
-      wiki: wiki.objectives[0],
-      matchType: 'text',
-    });
-    unmatchedApi.length = 0;
-    unmatchedWiki.length = 0;
-  }
-
-  return { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet };
-}
-
-function compareObjectives(context: ComparisonContext): void {
-  const { apiTask, wiki, mapAliasMap, taskId, taskName, verbose, report, taskSuppressions } =
-    context;
-  const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
-  const { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet } =
-    matchObjectives(context);
-  const isSuppressedObjectiveField = (objectiveId: string, field: string): boolean =>
-    taskSuppressions ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field) : false;
-  const pushObjectiveDiscrepancy = (
-    objectiveId: string,
-    field: string,
-    apiValue: string | number | undefined,
-    wikiValue: string | number | undefined,
-    logMessage: () => void
-  ): void => {
-    if (isSuppressedObjectiveField(objectiveId, field)) return;
-    report({
-      field,
-      apiValue,
-      wikiValue,
-      trustsWiki: true,
-    });
-    if (verbose) logMessage();
-  };
-
-  for (const apiObj of unmatchedApi) {
-    if (isSuppressedObjectiveField(apiObj.id, 'objectives.description')) {
       continue;
     }
-    const desc = apiObj.description ?? apiObj.id;
-    report({
-      field: 'objectives.description',
-      apiValue: desc,
-      wikiValue: 'not found',
-      trustsWiki: true,
+    matchedObjectives.push({
+      api: apiObj,
+      wiki: candidate.wiki,
+      matchType: textCandidate ? 'text' : 'item',
     });
-    if (verbose) console.log(`${icons.warning} objective missing in wiki: ${desc}`);
+    unmatchedWikiIndexes.delete(candidate.index);
   }
+  const unmatchedWiki = collectUnmatchedWiki(candidates, apiObjectives);
 
+  const result = { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet };
+  applySingleObjectiveFallback(result, apiObjectives, wiki.objectives);
+  return result;
+}
+
+type ObjectiveReport = (
+  objectiveId: string,
+  field: string,
+  apiValue: string | number | undefined,
+  wikiValue: string | number | undefined,
+  logMessage: () => void
+) => void;
+type ObjectiveContext = ComparisonContext & {
+  apiQuestItemSet: Set<string>;
+  pushObjectiveDiscrepancy: ObjectiveReport;
+};
+
+function objectiveIsSuppressed(
+  { taskSuppressions, taskId }: ComparisonContext,
+  objectiveId: string,
+  field?: string
+): boolean {
+  return taskSuppressions
+    ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field)
+    : false;
+}
+
+function createObjectiveReporter(context: ComparisonContext): ObjectiveReport {
+  return (objectiveId, field, apiValue, wikiValue, logMessage) => {
+    if (objectiveIsSuppressed(context, objectiveId, field)) return;
+    context.report({ field, apiValue, wikiValue, trustsWiki: true });
+    if (context.verbose) logMessage();
+  };
+}
+
+function compareUnmatchedObjectives(
+  context: ObjectiveContext,
+  unmatchedApi: ApiObjective[],
+  unmatchedWiki: WikiObjective[]
+): void {
+  for (const apiObj of unmatchedApi) {
+    const desc = apiObj.description ?? apiObj.id;
+    context.pushObjectiveDiscrepancy(apiObj.id, 'objectives.description', desc, 'not found', () =>
+      console.log(`${icons.warning} objective missing in wiki: ${desc}`)
+    );
+  }
   for (const wikiObj of unmatchedWiki) {
-    report({
+    context.report({
       field: 'objectives.description',
       apiValue: 'not found',
       wikiValue: wikiObj.text,
       trustsWiki: true,
     });
-    if (verbose) console.log(`${icons.warning} objective missing in API: ${wikiObj.text}`);
+    if (context.verbose) console.log(`${icons.warning} objective missing in API: ${wikiObj.text}`);
   }
+}
 
-  for (const { api: apiObj, wiki: wikiObj, matchType } of matchedObjectives) {
-    if (taskSuppressions && isObjectiveSuppressed(taskSuppressions, taskId, apiObj.id)) {
-      continue;
-    }
+function matchingObjectiveRequiredItems(
+  { wiki, taskName }: ObjectiveContext,
+  apiObj: ApiObjective
+): string[] {
+  const apiRequiredKeys = buildAliasSet(
+    Array.isArray(apiObj.requiredKeys) ? (apiObj.requiredKeys.flat() as ObjectiveItemRef[]) : [],
+    taskName
+  );
+  if (apiRequiredKeys.size === 0) return [];
+  return wiki.relatedRequiredItems.filter((item) =>
+    normalizeWikiItemAliases(item, taskName).some((alias) => apiRequiredKeys.has(alias))
+  );
+}
 
-    const apiDesc = normalizeWhitespace(apiObj.description ?? '');
-    const wikiDesc = normalizeWhitespace(wikiObj.text);
-    const objectiveLabel = apiObj.description ?? wikiObj.text ?? apiObj.id;
-    const apiVerb = getObjectiveVerbKey(apiObj.description ?? '');
-    const apiItemRefs = collectObjectiveItems(apiObj);
-    const apiItems = uniqueList(apiItemRefs.map((item) => item.name));
-    const wikiItems = uniqueList(wikiObj.items ?? []);
-    const apiRequiredKeys = buildAliasSet(
-      Array.isArray(apiObj.requiredKeys) ? (apiObj.requiredKeys.flat() as ObjectiveItemRef[]) : [],
-      taskName
+function relatedObjectiveHandoverItems(
+  wiki: WikiTaskData,
+  wikiItems: string[],
+  apiHasQuestItem: boolean,
+  apiVerb: ReturnType<typeof getObjectiveVerbKey>
+): string[] {
+  return wikiItems.length === 0 && (apiHasQuestItem || apiVerb === 'hand_over')
+    ? wiki.relatedHandoverItems
+    : [];
+}
+
+function prepareObjective(
+  context: ObjectiveContext,
+  { api: apiObj, wiki: wikiObj, matchType }: MatchedObjective
+) {
+  const { wiki, taskName } = context;
+  const apiDesc = normalizeWhitespace(apiObj.description ?? '');
+  const wikiDesc = normalizeWhitespace(wikiObj.text);
+  const objectiveLabel = apiObj.description ?? wikiObj.text ?? apiObj.id;
+  const apiVerb = getObjectiveVerbKey(apiObj.description ?? '');
+  const apiItemRefs = collectObjectiveItems(apiObj);
+  const apiItems = uniqueList(apiItemRefs.map((item) => item.name));
+  const wikiItems = uniqueList(wikiObj.items ?? []);
+  const matchingRequiredItems = matchingObjectiveRequiredItems(context, apiObj);
+  const apiHasQuestItem = Boolean(apiObj.questItem);
+  const wikiItemsForCompare = uniqueList([
+    ...wikiItems,
+    ...matchingRequiredItems,
+    ...relatedObjectiveHandoverItems(wiki, wikiItems, apiHasQuestItem, apiVerb),
+  ]);
+  const itemsMatchForDescription =
+    apiItemRefs.length > 0 &&
+    wikiItemsForCompare.length > 0 &&
+    itemsMatch(apiItemRefs, wikiItemsForCompare, taskName);
+
+  return {
+    ...context,
+    apiObj,
+    wikiObj,
+    matchType,
+    apiDesc,
+    wikiDesc,
+    objectiveLabel,
+    apiVerb,
+    apiItemRefs,
+    apiItems,
+    wikiItems,
+    matchingRequiredItems,
+    apiHasQuestItem,
+    wikiItemsForCompare,
+    itemsMatchForDescription,
+  };
+}
+
+type PreparedObjective = ReturnType<typeof prepareObjective>;
+
+function objectiveDescriptionForCompare(description: string, stripCounts: boolean): string {
+  const stripped = stripCounts ? normalizeWhitespace(stripCountPhrases(description)) : description;
+  return stripped.length > 0 ? stripped : description;
+}
+
+function compareObjectiveDescription(objective: PreparedObjective): void {
+  const {
+    apiObj,
+    mapAliasMap,
+    pushObjectiveDiscrepancy,
+    apiDesc,
+    wikiDesc,
+    itemsMatchForDescription,
+    matchType,
+  } = objective;
+  const apiDescForCompare = objectiveDescriptionForCompare(apiDesc, apiObj.count !== undefined);
+  const wikiDescForCompare = objectiveDescriptionForCompare(wikiDesc, apiObj.count !== undefined);
+
+  const normalizedApi = stripMapAliases(normalizeObjectiveText(apiDescForCompare), mapAliasMap);
+  const normalizedWiki = stripMapAliases(normalizeObjectiveText(wikiDescForCompare), mapAliasMap);
+  const normalizedApiKey = stripMapAliases(
+    normalizeObjectiveMatchKey(apiDescForCompare),
+    mapAliasMap
+  );
+  const normalizedWikiKey = stripMapAliases(
+    normalizeObjectiveMatchKey(wikiDescForCompare),
+    mapAliasMap
+  );
+
+  if (
+    matchType === 'text' &&
+    apiDesc &&
+    wikiDesc &&
+    normalizedApi !== normalizedWiki &&
+    normalizedApiKey !== normalizedWikiKey &&
+    !itemsMatchForDescription
+  ) {
+    pushObjectiveDiscrepancy(
+      apiObj.id,
+      'objectives.description',
+      apiDescForCompare,
+      wikiDescForCompare,
+      () =>
+        console.log(
+          `${icons.warning} objective text differs: API="${apiDescForCompare}", Wiki="${wikiDescForCompare}"`
+        )
     );
-    const matchingRequiredItems =
-      apiRequiredKeys.size > 0
-        ? wiki.relatedRequiredItems.filter((item) =>
-            normalizeWikiItemAliases(item, taskName).some((alias) => apiRequiredKeys.has(alias))
-          )
-        : [];
-    const apiHasQuestItem = Boolean(apiObj.questItem);
-    const wikiItemsForCompare = uniqueList([
-      ...wikiItems,
-      ...matchingRequiredItems,
-      ...(wikiItems.length === 0 && (apiHasQuestItem || apiVerb === 'hand_over')
-        ? wiki.relatedHandoverItems
-        : []),
-    ]);
-    const itemsMatchForDescription =
-      apiItemRefs.length > 0 &&
-      wikiItemsForCompare.length > 0 &&
-      itemsMatch(apiItemRefs, wikiItemsForCompare, taskName);
+  }
+}
 
-    const apiCount =
-      apiObj.count ?? extractCount(apiObj.description ?? '', collectObjectiveItemNames(apiObj));
-    const wikiCount =
-      isPveTask && wikiObj.pveCount !== undefined ? wikiObj.pveCount : wikiObj.count;
-    const shouldStripCounts = apiObj.count !== undefined;
-    const apiDescStripped = shouldStripCounts
-      ? normalizeWhitespace(stripCountPhrases(apiDesc))
-      : apiDesc;
-    const wikiDescStripped = shouldStripCounts
-      ? normalizeWhitespace(stripCountPhrases(wikiDesc))
-      : wikiDesc;
-    const apiDescForCompare = apiDescStripped.length > 0 ? apiDescStripped : apiDesc;
-    const wikiDescForCompare = wikiDescStripped.length > 0 ? wikiDescStripped : wikiDesc;
+function wikiObjectiveCount(apiTask: ExtendedTaskData, wikiObj: WikiObjective) {
+  const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
+  return isPveTask && wikiObj.pveCount !== undefined ? wikiObj.pveCount : wikiObj.count;
+}
 
-    const normalizedApi = stripMapAliases(normalizeObjectiveText(apiDescForCompare), mapAliasMap);
-    const normalizedWiki = stripMapAliases(normalizeObjectiveText(wikiDescForCompare), mapAliasMap);
-    const normalizedApiKey = stripMapAliases(
-      normalizeObjectiveMatchKey(apiDescForCompare),
-      mapAliasMap
-    );
-    const normalizedWikiKey = stripMapAliases(
-      normalizeObjectiveMatchKey(wikiDescForCompare),
-      mapAliasMap
-    );
+function matchesWikiCountVariant(apiCount: number, wikiObj: WikiObjective): boolean {
+  return (
+    wikiObj.pveCount !== undefined && (apiCount === wikiObj.count || apiCount === wikiObj.pveCount)
+  );
+}
 
-    if (
-      matchType === 'text' &&
-      apiDesc &&
-      wikiDesc &&
-      normalizedApi !== normalizedWiki &&
-      normalizedApiKey !== normalizedWikiKey &&
-      !itemsMatchForDescription
-    ) {
+function compareObjectiveCount(objective: PreparedObjective): void {
+  const { apiObj, wikiObj, apiTask, verbose, pushObjectiveDiscrepancy, objectiveLabel } = objective;
+  const apiCount =
+    apiObj.count ?? extractCount(apiObj.description ?? '', collectObjectiveItemNames(apiObj));
+  const wikiCount = wikiObjectiveCount(apiTask, wikiObj);
+  if (apiCount !== undefined && wikiCount !== undefined) {
+    const matchesPveVariant = matchesWikiCountVariant(apiCount, wikiObj);
+
+    if (!matchesPveVariant && apiCount !== wikiCount) {
       pushObjectiveDiscrepancy(
         apiObj.id,
-        'objectives.description',
-        apiDescForCompare,
-        wikiDescForCompare,
+        'objectives.count',
+        `${apiCount} (${objectiveLabel})`,
+        `${wikiCount} (${wikiObj.text})`,
         () =>
           console.log(
-            `${icons.warning} objective text differs: API="${apiDescForCompare}", Wiki="${wikiDescForCompare}"`
+            `${icons.warning} objective count: API=${apiCount}, Wiki=${wikiCount} (${objectiveLabel})`
           )
       );
+    } else if (verbose) {
+      console.log(`${icons.success} objective count matches (${apiCount})`);
     }
+  }
+}
 
-    if (apiCount !== undefined && wikiCount !== undefined) {
-      const matchesPveVariant =
-        wikiObj.pveCount !== undefined &&
-        (apiCount === wikiObj.count || apiCount === wikiObj.pveCount);
+function objectiveApiMapNames({ apiObj, mapAliasMap }: PreparedObjective): string[] {
+  const names = uniqueList((apiObj.maps ?? []).map((map) => map.name));
+  return names.length > 0 ? names : extractMapsFromText(apiObj.description ?? '', mapAliasMap);
+}
 
-      if (!matchesPveVariant && apiCount !== wikiCount) {
-        pushObjectiveDiscrepancy(
-          apiObj.id,
-          'objectives.count',
-          `${apiCount} (${objectiveLabel})`,
-          `${wikiCount} (${wikiObj.text})`,
-          () =>
-            console.log(
-              `${icons.warning} objective count: API=${apiCount}, Wiki=${wikiCount} (${objectiveLabel})`
-            )
-        );
-      } else if (verbose) {
-        console.log(`${icons.success} objective count matches (${apiCount})`);
-      }
-    }
+function objectiveMapsMatch(
+  { apiObj, wikiObj, apiVerb }: PreparedObjective,
+  apiMapNames: string[],
+  wikiMapNames: string[]
+): boolean {
+  const apiSet = toNormalizedSet(apiMapNames, normalizeMapName);
+  const wikiSet = toNormalizedSet(wikiMapNames, normalizeMapName);
+  if (setsEqual(apiSet, wikiSet)) return true;
+  if (apiVerb === 'hand_over' && apiSet.size === 0) return true;
+  const descForTransit = `${apiObj.description ?? ''} ${wikiObj.text ?? ''}`;
+  const isTransitObjective = /\btransit\b|\btransfer\b|\bpassage\b|\bleading to\b/i.test(
+    descForTransit
+  );
+  return isTransitObjective && apiSet.size > 0 && isSubset(apiSet, wikiSet);
+}
 
-    let apiMapNames = uniqueList((apiObj.maps ?? []).map((m) => m.name));
-    if (apiMapNames.length === 0) {
-      apiMapNames = extractMapsFromText(apiObj.description ?? '', mapAliasMap);
-    }
-    const wikiMapNames = uniqueList(wikiObj.maps ?? []);
-    if (wikiMapNames.length > 0) {
-      const apiSet = toNormalizedSet(apiMapNames, normalizeMapName);
-      const wikiSet = toNormalizedSet(wikiMapNames, normalizeMapName);
-      const descForTransit = `${apiObj.description ?? ''} ${wikiObj.text ?? ''}`;
-      const isTransitObjective = /\btransit\b|\btransfer\b|\bpassage\b|\bleading to\b/i.test(
-        descForTransit
-      );
-      const allowTransitSuperset =
-        isTransitObjective && apiSet.size > 0 && isSubset(apiSet, wikiSet);
-      const skipMapCompare = apiVerb === 'hand_over' && apiSet.size === 0;
-
-      if (!setsEqual(apiSet, wikiSet) && !allowTransitSuperset && !skipMapCompare) {
-        pushObjectiveDiscrepancy(
-          apiObj.id,
-          'objectives.maps',
-          `${apiMapNames.join(', ') || 'none'} (${objectiveLabel})`,
-          `${wikiMapNames.join(', ') || 'none'} (${wikiObj.text})`,
-          () =>
-            console.log(
-              `${icons.warning} objective maps differ: API=${
-                apiMapNames.join(', ') || 'none'
-              }, Wiki=${wikiMapNames.join(', ') || 'none'}`
-            )
-        );
-      }
-    } else if (verbose && apiMapNames.length > 0) {
+function compareObjectiveMaps(objective: PreparedObjective): void {
+  const { apiObj, wikiObj, verbose, pushObjectiveDiscrepancy, objectiveLabel } = objective;
+  const apiMapNames = objectiveApiMapNames(objective);
+  const wikiMapNames = uniqueList(wikiObj.maps ?? []);
+  if (wikiMapNames.length === 0) {
+    if (verbose && apiMapNames.length > 0) {
       console.log(
         `${icons.info} objective maps: API=${apiMapNames.join(', ')}, Wiki=none (not specified)`
       );
     }
+    return;
+  }
+  if (objectiveMapsMatch(objective, apiMapNames, wikiMapNames)) return;
+  pushObjectiveDiscrepancy(
+    apiObj.id,
+    'objectives.maps',
+    `${apiMapNames.join(', ') || 'none'} (${objectiveLabel})`,
+    `${wikiMapNames.join(', ') || 'none'} (${wikiObj.text})`,
+    () =>
+      console.log(
+        `${icons.warning} objective maps differ: API=${apiMapNames.join(', ') || 'none'}, Wiki=${wikiMapNames.join(', ') || 'none'}`
+      )
+  );
+}
 
-    if (apiItemRefs.length > 0 || wikiItemsForCompare.length > 0) {
-      const apiDescText = apiObj.description ?? '';
-      const isSkillObjective =
-        /\bskill level\b/i.test(apiDescText) || /\bskill level\b/i.test(wikiObj.text ?? '');
-      if (isSkillObjective) {
-        if (verbose)
-          console.log(`${icons.info} objective items: skill requirement, skipping item compare`);
-        continue;
-      }
-      const usesRelatedItems =
-        matchingRequiredItems.length > 0 ||
-        (wikiItems.length === 0 &&
-          (apiHasQuestItem || apiVerb === 'hand_over') &&
-          wiki.relatedHandoverItems.length > 0);
-      const mentionsItemsInText =
-        wikiItems.length > 0 &&
-        wikiItems.every(
-          (item) =>
-            objectiveMentionsItem(item, apiDescText, mapAliasMap) ||
-            objectiveMentionsItem(item, wikiObj.text ?? '', mapAliasMap)
-        );
-      const objectiveText = `${apiDescText} ${wikiObj.text ?? ''}`;
-      const textCoversApiItems =
-        apiItemRefs.length > 0 &&
-        wikiItemsForCompare.length === 0 &&
-        objectiveTextCoversApiItems(apiItemRefs, objectiveText, mapAliasMap);
-      if (
-        apiItemRefs.length === 0 &&
-        !usesRelatedItems &&
-        apiVerb !== 'hand_over' &&
-        mentionsItemsInText
-      ) {
-        if (verbose)
-          console.log(
-            `${icons.info} objective items: item mentioned in text, skipping strict compare`
-          );
-        continue;
-      }
-      const apiAnyItem =
-        /\bany\b/i.test(apiDescText) && apiItemRefs.length >= 8 && wikiItemsForCompare.length === 0;
-      const categoryRequirement =
-        objectiveHasCategoryItemRequirement(apiDescText) ||
-        objectiveHasCategoryItemRequirement(wikiObj.text ?? '');
-      const handoverMatchesQuestItem =
-        apiItemRefs.length === 0 &&
-        apiVerb === 'hand_over' &&
-        wikiItemsForCompare.length > 0 &&
-        Array.from(toNormalizedSet(wikiItemsForCompare, normalizeItemName)).every((item) =>
-          apiQuestItemSet.has(item)
-        );
+function isSkillObjective({ apiObj, wikiObj }: PreparedObjective): boolean {
+  return (
+    /\bskill level\b/i.test(apiObj.description ?? '') || /\bskill level\b/i.test(wikiObj.text ?? '')
+  );
+}
 
-      if (categoryRequirement && wikiItemsForCompare.length === 0) {
-        if (verbose)
-          console.log(
-            `${icons.info} objective items: category requirement, skipping strict compare`
-          );
-      } else if (textCoversApiItems) {
-        if (verbose)
-          console.log(
-            `${icons.info} objective items: objective text covers API items, skipping strict compare`
-          );
-      } else if (apiAnyItem) {
-        if (verbose)
-          console.log(
-            `${icons.info} objective items: API allows any item, skipping strict compare`
-          );
-      } else if (handoverMatchesQuestItem) {
-        if (verbose)
-          console.log(
-            `${icons.info} objective items: handover matches quest item, skipping strict compare`
-          );
-      } else if (!itemsMatch(apiItemRefs, wikiItemsForCompare, taskName)) {
-        pushObjectiveDiscrepancy(
-          apiObj.id,
-          'objectives.items',
-          `${apiItems.join(', ') || 'none'} (${objectiveLabel})`,
-          `${wikiItemsForCompare.join(', ') || 'none'} (${wikiObj.text})`,
-          () =>
-            console.log(
-              `${icons.warning} objective items differ: API=${
-                apiItems.join(', ') || 'none'
-              }, Wiki=${wikiItems.join(', ') || 'none'}`
-            )
-        );
-      }
-    }
+function usesRelatedObjectiveItems(objective: PreparedObjective): boolean {
+  const { matchingRequiredItems, wiki, wikiItems, apiHasQuestItem, apiVerb } = objective;
+  return (
+    matchingRequiredItems.length > 0 ||
+    relatedObjectiveHandoverItems(wiki, wikiItems, apiHasQuestItem, apiVerb).length > 0
+  );
+}
+
+function wikiItemsMentionedInObjective({
+  apiObj,
+  wikiObj,
+  wikiItems,
+  mapAliasMap,
+}: PreparedObjective): boolean {
+  if (wikiItems.length === 0) return false;
+  return wikiItems.every(
+    (item) =>
+      objectiveMentionsItem(item, apiObj.description ?? '', mapAliasMap) ||
+      objectiveMentionsItem(item, wikiObj.text ?? '', mapAliasMap)
+  );
+}
+
+function hasNarrativeItemMention(objective: PreparedObjective): boolean {
+  return (
+    objective.apiItemRefs.length === 0 &&
+    !usesRelatedObjectiveItems(objective) &&
+    objective.apiVerb !== 'hand_over' &&
+    wikiItemsMentionedInObjective(objective)
+  );
+}
+
+function hasCategoryItemRequirement({
+  apiObj,
+  wikiObj,
+  wikiItemsForCompare,
+}: PreparedObjective): boolean {
+  return (
+    wikiItemsForCompare.length === 0 &&
+    (objectiveHasCategoryItemRequirement(apiObj.description ?? '') ||
+      objectiveHasCategoryItemRequirement(wikiObj.text ?? ''))
+  );
+}
+
+function textCoversObjectiveItems(objective: PreparedObjective): boolean {
+  const { apiObj, wikiObj, apiItemRefs, wikiItemsForCompare, mapAliasMap } = objective;
+  return (
+    apiItemRefs.length > 0 &&
+    wikiItemsForCompare.length === 0 &&
+    objectiveTextCoversApiItems(
+      apiItemRefs,
+      `${apiObj.description ?? ''} ${wikiObj.text ?? ''}`,
+      mapAliasMap
+    )
+  );
+}
+
+function allowsAnyObjectiveItem({
+  apiObj,
+  apiItemRefs,
+  wikiItemsForCompare,
+}: PreparedObjective): boolean {
+  return (
+    /\bany\b/i.test(apiObj.description ?? '') &&
+    apiItemRefs.length >= 8 &&
+    wikiItemsForCompare.length === 0
+  );
+}
+
+function handoverMatchesQuestItem(objective: PreparedObjective): boolean {
+  const { apiItemRefs, apiVerb, wikiItemsForCompare, apiQuestItemSet } = objective;
+  return (
+    apiItemRefs.length === 0 &&
+    apiVerb === 'hand_over' &&
+    wikiItemsForCompare.length > 0 &&
+    Array.from(toNormalizedSet(wikiItemsForCompare, normalizeItemName)).every((item) =>
+      apiQuestItemSet.has(item)
+    )
+  );
+}
+
+/** Preserve exception precedence so verbose diagnostics keep the same reason. */
+function objectiveItemSkipReason(objective: PreparedObjective): string | undefined {
+  if (isSkillObjective(objective)) return 'skill requirement, skipping item compare';
+  if (hasNarrativeItemMention(objective)) return 'item mentioned in text, skipping strict compare';
+  if (hasCategoryItemRequirement(objective)) return 'category requirement, skipping strict compare';
+  if (textCoversObjectiveItems(objective))
+    return 'objective text covers API items, skipping strict compare';
+  if (allowsAnyObjectiveItem(objective)) return 'API allows any item, skipping strict compare';
+  if (handoverMatchesQuestItem(objective))
+    return 'handover matches quest item, skipping strict compare';
+  return undefined;
+}
+
+function compareObjectiveItems(objective: PreparedObjective): void {
+  const {
+    apiObj,
+    wikiObj,
+    taskName,
+    verbose,
+    pushObjectiveDiscrepancy,
+    objectiveLabel,
+    apiItemRefs,
+    apiItems,
+    wikiItems,
+    wikiItemsForCompare,
+  } = objective;
+  if (apiItemRefs.length === 0 && wikiItemsForCompare.length === 0) return;
+  const skipReason = objectiveItemSkipReason(objective);
+  if (skipReason) {
+    if (verbose) console.log(`${icons.info} objective items: ${skipReason}`);
+    return;
+  }
+  if (itemsMatch(apiItemRefs, wikiItemsForCompare, taskName)) return;
+  pushObjectiveDiscrepancy(
+    apiObj.id,
+    'objectives.items',
+    `${apiItems.join(', ') || 'none'} (${objectiveLabel})`,
+    `${wikiItemsForCompare.join(', ') || 'none'} (${wikiObj.text})`,
+    () =>
+      console.log(
+        `${icons.warning} objective items differ: API=${apiItems.join(', ') || 'none'}, Wiki=${wikiItems.join(', ') || 'none'}`
+      )
+  );
+}
+
+function compareObjectives(context: ComparisonContext): void {
+  const { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet } =
+    matchObjectives(context);
+  const objectiveContext: ObjectiveContext = {
+    ...context,
+    apiQuestItemSet,
+    pushObjectiveDiscrepancy: createObjectiveReporter(context),
+  };
+  compareUnmatchedObjectives(objectiveContext, unmatchedApi, unmatchedWiki);
+  for (const matched of matchedObjectives) {
+    if (objectiveIsSuppressed(context, matched.api.id)) continue;
+    const objective = prepareObjective(objectiveContext, matched);
+    compareObjectiveDescription(objective);
+    compareObjectiveCount(objective);
+    compareObjectiveMaps(objective);
+    compareObjectiveItems(objective);
   }
 }
 
-function compareUnlockHints({
-  apiTask,
-  wiki,
-  taskId,
-  verbose,
-  report,
-  nextTaskMap,
-}: ComparisonContext): void {
+function compareTaskNames(
+  context: ComparisonContext,
+  field: 'taskRequirements' | 'nextTasks',
+  label: string,
+  apiNames: string[],
+  wikiNames: string[]
+): void {
+  const apiSet = toNormalizedSet(apiNames, normalizeTaskName);
+  const wikiSet = toNormalizedSet(wikiNames, normalizeTaskName);
+  if (apiSet.size === 0 && wikiSet.size === 0) return;
+  if (!setsEqual(apiSet, wikiSet)) {
+    context.report({
+      field,
+      apiValue: apiNames.join(', ') || 'none',
+      wikiValue: wikiNames.join(', ') || 'none',
+      trustsWiki: false,
+    });
+    logTaskSetDiff(context.verbose, label, wikiNames, apiNames, apiSet, wikiSet);
+  } else if (context.verbose) {
+    console.log(`${icons.success} ${label} match`);
+  }
+}
+
+function compareUnlockHints(context: ComparisonContext): void {
   // Narrative order is an investigation hint, never proof of an unlock edge.
-  // Prerequisites (previous tasks)
-  {
-    const apiReqNames = (apiTask.taskRequirements ?? [])
-      .map((req) => req.task?.name)
-      .filter((n): n is string => Boolean(n));
-    const apiSet = toNormalizedSet(apiReqNames, normalizeTaskName);
-    const wikiSet = toNormalizedSet(wiki.previousTasks ?? [], normalizeTaskName);
+  const { apiTask, wiki, taskId, nextTaskMap } = context;
+  const apiReqNames = (apiTask.taskRequirements ?? [])
+    .map((req) => req.task?.name)
+    .filter((name): name is string => Boolean(name));
+  compareTaskNames(context, 'taskRequirements', 'prerequisites', apiReqNames, wiki.previousTasks);
+  // Mode-qualified: a mode-divergent prerequisite must not be read back into
+  // the other mode's comparison when the same task id appears in both modes.
+  const apiNextNames =
+    nextTaskMap?.get(nextTaskKey(apiTask.gameModes?.[0] ?? 'regular', taskId)) ?? [];
+  compareTaskNames(context, 'nextTasks', 'next tasks', apiNextNames, wiki.nextTasks);
+}
 
-    if (apiSet.size > 0 || wikiSet.size > 0) {
-      if (!setsEqual(apiSet, wikiSet)) {
-        report({
-          field: 'taskRequirements',
-          apiValue: apiReqNames.join(', ') || 'none',
-          wikiValue: wiki.previousTasks.join(', ') || 'none',
-          trustsWiki: false,
-        });
-        logTaskSetDiff(verbose, 'prerequisites', wiki.previousTasks, apiReqNames, apiSet, wikiSet);
-      } else if (verbose) {
-        console.log(`${icons.success} prerequisites match`);
-      }
-    }
-  }
-
-  // Next tasks (unlocks)
-  {
-    // Mode-qualified: under the default `both` scope the same task id appears
-    // once per mode, and a mode-divergent prerequisite must not be read back
-    // into the other mode's comparison.
-    const apiNextNames =
-      nextTaskMap?.get(nextTaskKey(apiTask.gameModes?.[0] ?? 'regular', taskId)) ?? [];
-    const apiSet = toNormalizedSet(apiNextNames, normalizeTaskName);
-    const wikiSet = toNormalizedSet(wiki.nextTasks ?? [], normalizeTaskName);
-
-    if (apiSet.size > 0 || wikiSet.size > 0) {
-      if (!setsEqual(apiSet, wikiSet)) {
-        report({
-          field: 'nextTasks',
-          apiValue: apiNextNames.join(', ') || 'none',
-          wikiValue: wiki.nextTasks.join(', ') || 'none',
-          trustsWiki: false,
-        });
-        logTaskSetDiff(verbose, 'next tasks', wiki.nextTasks, apiNextNames, apiSet, wikiSet);
-      } else if (verbose) {
-        console.log(`${icons.success} next tasks match`);
-      }
-    }
+function compareExperience(context: ComparisonContext): void {
+  const { apiTask, wiki } = context;
+  if (wiki.rewards.xp !== undefined && apiTask.experience !== undefined) {
+    compareKnownValue(context, 'experience', apiTask.experience, wiki.rewards.xp);
   }
 }
 
-function compareRewards({ apiTask, wiki, verbose, report }: ComparisonContext): void {
-  // Experience (XP)
-  if (wiki.rewards.xp !== undefined && apiTask.experience !== undefined) {
-    if (apiTask.experience !== wiki.rewards.xp) {
-      report({
-        field: 'experience',
-        apiValue: apiTask.experience,
-        wikiValue: wiki.rewards.xp,
-        trustsWiki: true,
-      });
-      if (verbose)
-        console.log(
-          `${icons.warning} experience: API=${apiTask.experience}, Wiki=${wiki.rewards.xp}`
-        );
-    } else if (verbose) {
-      console.log(`${icons.success} experience matches (${apiTask.experience})`);
+function compareTraderReputation(
+  context: ComparisonContext,
+  wikiRep: WikiTaskData['rewards']['reputations'][number],
+  apiReputations: NonNullable<NonNullable<ExtendedTaskData['finishRewards']>['traderStanding']>
+): void {
+  const { verbose, report } = context;
+  const apiTraderRep = apiReputations.find(
+    (trader) => trader.trader.name.toLowerCase() === wikiRep.trader.toLowerCase()
+  );
+  if (!apiTraderRep) {
+    if (verbose) {
+      console.log(`${icons.info} ${wikiRep.trader} rep: Wiki=${wikiRep.value}, not found in API`);
     }
+    return;
   }
-
-  // Reputation (per trader)
-  if (wiki.rewards.reputations.length > 0 && apiTask.finishRewards?.traderStanding) {
-    for (const wikiRep of wiki.rewards.reputations) {
-      // Find matching trader in API data (case-insensitive)
-      const apiTraderRep = apiTask.finishRewards.traderStanding.find(
-        (t) => t.trader.name.toLowerCase() === wikiRep.trader.toLowerCase()
+  if (Math.abs(apiTraderRep.standing - wikiRep.value) > 0.001) {
+    report({
+      field: `reputation.${wikiRep.trader}`,
+      apiValue: apiTraderRep.standing,
+      wikiValue: wikiRep.value,
+      trustsWiki: true,
+    });
+    if (verbose)
+      console.log(
+        `${icons.warning} ${wikiRep.trader} rep: API=${apiTraderRep.standing}, Wiki=${wikiRep.value}`
       );
-
-      if (apiTraderRep) {
-        if (Math.abs(apiTraderRep.standing - wikiRep.value) > 0.001) {
-          report({
-            field: `reputation.${wikiRep.trader}`,
-            apiValue: apiTraderRep.standing,
-            wikiValue: wikiRep.value,
-            trustsWiki: true,
-          });
-          if (verbose) {
-            console.log(
-              `${icons.warning} ${wikiRep.trader} rep: API=${apiTraderRep.standing}, Wiki=${wikiRep.value}`
-            );
-          }
-        } else if (verbose) {
-          console.log(`${icons.success} ${wikiRep.trader} rep matches (${apiTraderRep.standing})`);
-        }
-      } else if (verbose) {
-        console.log(`${icons.info} ${wikiRep.trader} rep: Wiki=${wikiRep.value}, not found in API`);
-      }
-    }
+  } else if (verbose) {
+    console.log(`${icons.success} ${wikiRep.trader} rep matches (${apiTraderRep.standing})`);
   }
+}
 
-  // Money (Roubles)
-  if (wiki.rewards.money !== undefined && apiTask.finishRewards?.items) {
-    const apiMoney = apiTask.finishRewards.items.find((i) => i.item.name === 'Roubles')?.count;
-    if (apiMoney !== undefined && apiMoney !== wiki.rewards.money) {
-      report({
-        field: 'money',
-        apiValue: apiMoney,
-        wikiValue: wiki.rewards.money,
-        trustsWiki: true,
-      });
-      if (verbose)
-        console.log(`${icons.warning} money: API=${apiMoney}, Wiki=${wiki.rewards.money}`);
-    } else if (verbose && apiMoney !== undefined) {
-      console.log(`${icons.success} money matches (${apiMoney})`);
-    }
+function compareReputation(context: ComparisonContext): void {
+  const apiReputations = context.apiTask.finishRewards?.traderStanding;
+  if (!apiReputations) return;
+  for (const wikiRep of context.wiki.rewards.reputations) {
+    compareTraderReputation(context, wikiRep, apiReputations);
   }
+}
+
+function compareMoney(context: ComparisonContext): void {
+  const { apiTask, wiki } = context;
+  if (wiki.rewards.money === undefined || !apiTask.finishRewards?.items) return;
+  const apiMoney = apiTask.finishRewards.items.find((item) => item.item.name === 'Roubles')?.count;
+  if (apiMoney !== undefined) compareKnownValue(context, 'money', apiMoney, wiki.rewards.money);
+}
+
+function compareRewards(context: ComparisonContext): void {
+  compareExperience(context);
+  compareReputation(context);
+  compareMoney(context);
 }
 
 export function compareTasks(
