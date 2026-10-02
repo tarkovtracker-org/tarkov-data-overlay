@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { createHash } from 'crypto';
 import { execFileSync } from 'child_process';
 import {
+  closeSync,
   existsSync,
+  fstatSync,
   mkdirSync,
   mkdtempSync,
+  openSync,
   readFileSync,
   readdirSync,
   rmSync,
@@ -165,7 +168,9 @@ describe('story artifact and provenance write failures', () => {
 
   it('keeps the artifact present when interrupted immediately before atomic replacement', () => {
     const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-interrupt-');
-    const previousInode = statSync(artifact).ino;
+    // Keep a stable handle to the original inode while the child writer runs.
+    const originalArtifact = openSync(artifact, 'r');
+    const previousInode = fstatSync(originalArtifact).ino;
     try {
       expect(() =>
         runWriter(
@@ -201,6 +206,7 @@ describe('story artifact and provenance write failures', () => {
       // publish over a run whose provenance promotion might have been interrupted.
       expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(true);
     } finally {
+      closeSync(originalArtifact);
       rmSync(dir, { recursive: true, force: true });
     }
   });
