@@ -71,19 +71,25 @@ function logTaskSetDiff(
   if (extra.length > 0) console.log(`${icons.warning} ${label} extra in API: ${extra.join(', ')}`);
 }
 
-export function compareTasks(
+type DiscrepancyInput = Pick<Discrepancy, 'field' | 'apiValue' | 'wikiValue' | 'trustsWiki'>;
+type Report = (input: DiscrepancyInput) => void;
+type ComparisonContext = {
+  apiTask: ExtendedTaskData;
+  wiki: WikiTaskData;
+  mapAliasMap: Map<string, string>;
+  verbose: boolean;
+  taskId: string;
+  taskName: string;
+  report: Report;
+  nextTaskMap?: Map<string, string[]>;
+  taskSuppressions?: Map<string, TaskSuppressionEntry>;
+};
+
+function createReporter(
   apiTask: ExtendedTaskData,
   wiki: WikiTaskData,
-  mapAliasMap: Map<string, string>,
-  verbose = true,
-  nextTaskMap?: Map<string, string[]>,
-  taskSuppressions?: Map<string, TaskSuppressionEntry>
-): Discrepancy[] {
-  const discrepancies: Discrepancy[] = [];
-  const taskId = apiTask.id;
-  const taskName = apiTask.name;
-
-  // Calculate wiki edit age for discrepancy context
+  discrepancies: Discrepancy[]
+): Report {
   let wikiLastEdit: string | undefined;
   let wikiEditDaysAgo: number | undefined;
   let wikiEditedPost1_0: boolean | undefined;
@@ -93,48 +99,27 @@ export function compareTasks(
     wikiEditDaysAgo = Math.floor((Date.now() - revDate.getTime()) / (1000 * 60 * 60 * 24));
     wikiEditedPost1_0 = revDate >= TARKOV_1_0_LAUNCH;
   }
-
-  if (verbose) printHeader('COMPARISON');
-
-  const isSuppressedObjectiveField = (objectiveId: string, field: string): boolean =>
-    taskSuppressions ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field) : false;
-  const pushObjectiveDiscrepancy = (
-    objectiveId: string,
-    field: string,
-    apiValue: string | number | undefined,
-    wikiValue: string | number | undefined,
-    logMessage: () => void
-  ): void => {
-    if (isSuppressedObjectiveField(objectiveId, field)) return;
+  return (input) =>
     discrepancies.push({
-      taskId,
-      taskName,
-      field,
-      apiValue,
-      wikiValue,
-      priority: getPriority(field),
-      trustsWiki: true,
+      taskId: apiTask.id,
+      taskName: apiTask.name,
+      ...input,
+      priority: getPriority(input.field),
       wikiLastEdit,
       wikiEditDaysAgo,
       wikiEditedPost1_0,
     });
-    if (verbose) logMessage();
-  };
+}
 
+function compareTaskFields({ apiTask, wiki, verbose, report }: ComparisonContext): void {
   // minPlayerLevel
   if (wiki.minPlayerLevel !== undefined) {
     if (apiTask.minPlayerLevel !== wiki.minPlayerLevel) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'minPlayerLevel',
         apiValue: apiTask.minPlayerLevel,
         wikiValue: wiki.minPlayerLevel,
-        priority: getPriority('minPlayerLevel'),
         trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(
@@ -173,17 +158,11 @@ export function compareTasks(
       const reported = wiki.traderLoyalty
         .map((ll) => `${ll.trader}:${ll.level}${ll.inferredTrader ? ' (trader inferred)' : ''}`)
         .sort();
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'traderRequirements',
         apiValue: apiLoyalty.join(', ') || '(none)',
         wikiValue: reported.join(', '),
-        priority: getPriority('traderRequirements'),
         trustsWiki: !wiki.traderLoyalty.some((entry) => entry.inferredTrader),
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(
@@ -219,18 +198,12 @@ export function compareTasks(
         req.compareMethod === karma.compareMethod
     );
     if (!matches) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'scavKarma',
         apiValue:
           apiKarma.map((req) => `${req.compareMethod ?? '>='} ${req.value}`).join(', ') || '(none)',
         wikiValue: wikiKarma,
-        priority: getPriority('scavKarma'),
         trustsWiki: karma.compareMethod !== undefined,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(
@@ -248,17 +221,11 @@ export function compareTasks(
   if (wiki.factionName !== undefined) {
     const apiFaction = apiTask.factionName ?? 'Any';
     if (apiFaction !== wiki.factionName) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'factionName',
         apiValue: apiFaction,
         wikiValue: wiki.factionName,
-        priority: getPriority('factionName'),
         trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(`${icons.warning} factionName: API=${apiFaction}, Wiki=${wiki.factionName}`);
@@ -266,8 +233,6 @@ export function compareTasks(
       console.log(`${icons.success} factionName matches (${apiFaction})`);
     }
   }
-
-  const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
 
   // Task-level map/location
   const apiMapName = apiTask.map?.name;
@@ -280,17 +245,11 @@ export function compareTasks(
     const mapsMatch = apiMapName ? setsEqual(apiMapSet, wikiTaskMapSet) : false;
 
     if (!mapsMatch) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'map',
         apiValue: apiMapName ?? 'none',
         wikiValue: wikiTaskMaps.join(', ') || 'none',
-        priority: getPriority('map'),
         trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(
@@ -304,7 +263,9 @@ export function compareTasks(
   } else if (verbose && apiMapName) {
     console.log(`${icons.info} map in API: ${apiMapName}, Wiki=none (not specified)`);
   }
+}
 
+function matchObjectives({ apiTask, wiki, mapAliasMap, taskName }: ComparisonContext) {
   // Objective matching by normalized description
   const wikiCandidates = wiki.objectives.map((wikiObj, index) => ({
     wiki: wikiObj,
@@ -455,38 +416,54 @@ export function compareTasks(
     unmatchedWiki.length = 0;
   }
 
+  return { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet };
+}
+
+function compareObjectives(context: ComparisonContext): void {
+  const { apiTask, wiki, mapAliasMap, taskId, taskName, verbose, report, taskSuppressions } =
+    context;
+  const isPveTask = apiTask.gameModes?.length === 1 && apiTask.gameModes[0] === 'pve';
+  const { matchedObjectives, unmatchedApi, unmatchedWiki, apiQuestItemSet } =
+    matchObjectives(context);
+  const isSuppressedObjectiveField = (objectiveId: string, field: string): boolean =>
+    taskSuppressions ? isObjectiveSuppressed(taskSuppressions, taskId, objectiveId, field) : false;
+  const pushObjectiveDiscrepancy = (
+    objectiveId: string,
+    field: string,
+    apiValue: string | number | undefined,
+    wikiValue: string | number | undefined,
+    logMessage: () => void
+  ): void => {
+    if (isSuppressedObjectiveField(objectiveId, field)) return;
+    report({
+      field,
+      apiValue,
+      wikiValue,
+      trustsWiki: true,
+    });
+    if (verbose) logMessage();
+  };
+
   for (const apiObj of unmatchedApi) {
     if (isSuppressedObjectiveField(apiObj.id, 'objectives.description')) {
       continue;
     }
     const desc = apiObj.description ?? apiObj.id;
-    discrepancies.push({
-      taskId,
-      taskName,
+    report({
       field: 'objectives.description',
       apiValue: desc,
       wikiValue: 'not found',
-      priority: getPriority('objectives.description'),
       trustsWiki: true,
-      wikiLastEdit,
-      wikiEditDaysAgo,
-      wikiEditedPost1_0,
     });
     if (verbose) console.log(`${icons.warning} objective missing in wiki: ${desc}`);
   }
 
   for (const wikiObj of unmatchedWiki) {
-    discrepancies.push({
-      taskId,
-      taskName,
+    report({
       field: 'objectives.description',
       apiValue: 'not found',
       wikiValue: wikiObj.text,
-      priority: getPriority('objectives.description'),
       trustsWiki: true,
-      wikiLastEdit,
-      wikiEditDaysAgo,
-      wikiEditedPost1_0,
     });
     if (verbose) console.log(`${icons.warning} objective missing in API: ${wikiObj.text}`);
   }
@@ -715,7 +692,17 @@ export function compareTasks(
       }
     }
   }
+}
 
+function compareUnlockHints({
+  apiTask,
+  wiki,
+  taskId,
+  verbose,
+  report,
+  nextTaskMap,
+}: ComparisonContext): void {
+  // Narrative order is an investigation hint, never proof of an unlock edge.
   // Prerequisites (previous tasks)
   {
     const apiReqNames = (apiTask.taskRequirements ?? [])
@@ -726,17 +713,11 @@ export function compareTasks(
 
     if (apiSet.size > 0 || wikiSet.size > 0) {
       if (!setsEqual(apiSet, wikiSet)) {
-        discrepancies.push({
-          taskId,
-          taskName,
+        report({
           field: 'taskRequirements',
           apiValue: apiReqNames.join(', ') || 'none',
           wikiValue: wiki.previousTasks.join(', ') || 'none',
-          priority: getPriority('taskRequirements'),
-          trustsWiki: true,
-          wikiLastEdit,
-          wikiEditDaysAgo,
-          wikiEditedPost1_0,
+          trustsWiki: false,
         });
         logTaskSetDiff(verbose, 'prerequisites', wiki.previousTasks, apiReqNames, apiSet, wikiSet);
       } else if (verbose) {
@@ -757,17 +738,11 @@ export function compareTasks(
 
     if (apiSet.size > 0 || wikiSet.size > 0) {
       if (!setsEqual(apiSet, wikiSet)) {
-        discrepancies.push({
-          taskId,
-          taskName,
+        report({
           field: 'nextTasks',
           apiValue: apiNextNames.join(', ') || 'none',
           wikiValue: wiki.nextTasks.join(', ') || 'none',
-          priority: getPriority('nextTasks'),
-          trustsWiki: true,
-          wikiLastEdit,
-          wikiEditDaysAgo,
-          wikiEditedPost1_0,
+          trustsWiki: false,
         });
         logTaskSetDiff(verbose, 'next tasks', wiki.nextTasks, apiNextNames, apiSet, wikiSet);
       } else if (verbose) {
@@ -775,21 +750,17 @@ export function compareTasks(
       }
     }
   }
+}
 
+function compareRewards({ apiTask, wiki, verbose, report }: ComparisonContext): void {
   // Experience (XP)
   if (wiki.rewards.xp !== undefined && apiTask.experience !== undefined) {
     if (apiTask.experience !== wiki.rewards.xp) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'experience',
         apiValue: apiTask.experience,
         wikiValue: wiki.rewards.xp,
-        priority: getPriority('experience'),
         trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(
@@ -810,17 +781,11 @@ export function compareTasks(
 
       if (apiTraderRep) {
         if (Math.abs(apiTraderRep.standing - wikiRep.value) > 0.001) {
-          discrepancies.push({
-            taskId,
-            taskName,
+          report({
             field: `reputation.${wikiRep.trader}`,
             apiValue: apiTraderRep.standing,
             wikiValue: wikiRep.value,
-            priority: getPriority('reputation'),
             trustsWiki: true,
-            wikiLastEdit,
-            wikiEditDaysAgo,
-            wikiEditedPost1_0,
           });
           if (verbose) {
             console.log(
@@ -840,17 +805,11 @@ export function compareTasks(
   if (wiki.rewards.money !== undefined && apiTask.finishRewards?.items) {
     const apiMoney = apiTask.finishRewards.items.find((i) => i.item.name === 'Roubles')?.count;
     if (apiMoney !== undefined && apiMoney !== wiki.rewards.money) {
-      discrepancies.push({
-        taskId,
-        taskName,
+      report({
         field: 'money',
         apiValue: apiMoney,
         wikiValue: wiki.rewards.money,
-        priority: getPriority('money'),
         trustsWiki: true,
-        wikiLastEdit,
-        wikiEditDaysAgo,
-        wikiEditedPost1_0,
       });
       if (verbose)
         console.log(`${icons.warning} money: API=${apiMoney}, Wiki=${wiki.rewards.money}`);
@@ -858,15 +817,40 @@ export function compareTasks(
       console.log(`${icons.success} money matches (${apiMoney})`);
     }
   }
+}
 
+export function compareTasks(
+  apiTask: ExtendedTaskData,
+  wiki: WikiTaskData,
+  mapAliasMap: Map<string, string>,
+  verbose = true,
+  nextTaskMap?: Map<string, string[]>,
+  taskSuppressions?: Map<string, TaskSuppressionEntry>
+): Discrepancy[] {
+  const discrepancies: Discrepancy[] = [];
+  const context: ComparisonContext = {
+    apiTask,
+    wiki,
+    mapAliasMap,
+    verbose,
+    nextTaskMap,
+    taskSuppressions,
+    taskId: apiTask.id,
+    taskName: apiTask.name,
+    report: createReporter(apiTask, wiki, discrepancies),
+  };
+  if (verbose) printHeader('COMPARISON');
+  compareTaskFields(context);
+  compareObjectives(context);
+  compareUnlockHints(context);
+  compareRewards(context);
   if (verbose) {
     console.log();
-    if (discrepancies.length === 0) {
-      printSuccess('No discrepancies detected.');
-    } else {
-      printSuccess(`Detected ${discrepancies.length} discrepancy(ies).`);
-    }
+    printSuccess(
+      discrepancies.length === 0
+        ? 'No discrepancies detected.'
+        : `Detected ${discrepancies.length} discrepancy(ies).`
+    );
   }
-
   return discrepancies;
 }

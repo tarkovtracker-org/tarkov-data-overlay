@@ -22,7 +22,6 @@ import {
   DEFAULT_TASK_NAME,
   Discrepancy,
   ExtendedTaskData,
-  Priority,
   RATE_LIMIT_MS,
 } from './types.js';
 import {
@@ -45,117 +44,97 @@ import { buildMapAliasMap, collectMapNames } from './normalize.js';
 import { fetchExtendedTasks, resolveTask, resolveWikiTitle } from './api.js';
 import { WikiFetchResult, fetchWikiWikitext, parseWikiTask, printWikiData } from './wiki.js';
 import { compareTasks } from './compare.js';
+import { renderDiscrepancies } from './render.js';
 
-export function parseArgs(argv: string[]): CliOptions & { help?: boolean } {
-  const options: CliOptions & { help?: boolean } = {};
+type ParsedOptions = CliOptions & { help?: boolean };
+type FlagDescriptor = {
+  names: string[];
+  kind: 'flag' | 'value' | 'optional';
+  apply: (options: ParsedOptions, value: string | undefined) => boolean;
+};
 
+const FLAGS: FlagDescriptor[] = [
+  { names: ['--help', '-h'], kind: 'flag', apply: (o) => (o.help = true) },
+  { names: ['--all', '-a'], kind: 'flag', apply: (o) => (o.all = true) },
+  { names: ['--cache', '-c'], kind: 'flag', apply: (o) => (o.useCache = true) },
+  { names: ['--refresh', '-r'], kind: 'flag', apply: (o) => (o.refresh = true) },
+  {
+    names: ['--id'],
+    kind: 'value',
+    apply: (o, v) => {
+      o.id = v;
+      return true;
+    },
+  },
+  {
+    names: ['--name'],
+    kind: 'value',
+    apply: (o, v) => {
+      o.name = v;
+      return true;
+    },
+  },
+  {
+    names: ['--wiki'],
+    kind: 'value',
+    apply: (o, v) => {
+      o.wiki = v;
+      return true;
+    },
+  },
+  {
+    names: ['--output', '-o'],
+    kind: 'optional',
+    apply: (o, v) => {
+      o.output = v ?? '';
+      return true;
+    },
+  },
+  {
+    names: ['--gameMode', '-g'],
+    kind: 'value',
+    apply: (o, v) => {
+      if (v !== 'regular' && v !== 'pve' && v !== 'both') return false;
+      o.gameMode = v;
+      return true;
+    },
+  },
+  {
+    names: ['--group-by'],
+    kind: 'value',
+    apply: (o, v) => {
+      if (v !== 'priority' && v !== 'category') return false;
+      o.groupBy = v;
+      return true;
+    },
+  },
+];
+
+export function parseArgs(argv: string[]): ParsedOptions {
+  const options: ParsedOptions = {};
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-
     if (!arg) continue;
-    if (arg === '--help' || arg === '-h') {
-      options.help = true;
+    const descriptor = FLAGS.find(
+      (flag) =>
+        flag.names.includes(arg) || (flag.kind !== 'flag' && arg.startsWith(`${flag.names[0]}=`))
+    );
+    if (!descriptor) {
+      if (!options.name) options.name = arg;
       continue;
     }
-
-    if (arg === '--all' || arg === '-a') {
-      options.all = true;
-      continue;
-    }
-
-    if (arg.startsWith('--id=')) {
-      options.id = arg.slice('--id='.length);
-      continue;
-    }
-    if (arg === '--id') {
-      options.id = argv[i + 1];
-      i += 1;
-      continue;
-    }
-
-    if (arg.startsWith('--name=')) {
-      options.name = arg.slice('--name='.length);
-      continue;
-    }
-    if (arg === '--name') {
-      options.name = argv[i + 1];
-      i += 1;
-      continue;
-    }
-
-    if (arg.startsWith('--wiki=')) {
-      options.wiki = arg.slice('--wiki='.length);
-      continue;
-    }
-    if (arg === '--wiki') {
-      options.wiki = argv[i + 1];
-      i += 1;
-      continue;
-    }
-
-    if (arg === '--cache' || arg === '-c') {
-      options.useCache = true;
-      continue;
-    }
-
-    if (arg === '--refresh' || arg === '-r') {
-      options.refresh = true;
-      continue;
-    }
-
-    if (arg.startsWith('--gameMode=')) {
-      const mode = arg.slice('--gameMode='.length);
-      if (mode === 'regular' || mode === 'pve' || mode === 'both') {
-        options.gameMode = mode;
-      }
-      continue;
-    }
-    if (arg === '--gameMode' || arg === '-g') {
-      const mode = argv[i + 1];
-      if (mode === 'regular' || mode === 'pve' || mode === 'both') {
-        options.gameMode = mode;
-        i += 1;
-      }
-      continue;
-    }
-
-    if (arg.startsWith('--output=')) {
-      options.output = arg.slice('--output='.length);
-      continue;
-    }
-    if (arg === '--output' || arg === '-o') {
-      // Check if next arg exists and isn't a flag
-      const nextArg = argv[i + 1];
-      if (nextArg && !nextArg.startsWith('-')) {
-        options.output = nextArg;
-        i += 1;
-      } else {
-        options.output = ''; // Empty string means auto-generate filename
-      }
-      continue;
-    }
-
-    if (arg.startsWith('--group-by=')) {
-      const groupBy = arg.slice('--group-by='.length);
-      if (groupBy === 'priority' || groupBy === 'category') {
-        options.groupBy = groupBy;
-      }
-      continue;
-    }
-    if (arg === '--group-by') {
-      const groupBy = argv[i + 1];
-      if (groupBy === 'priority' || groupBy === 'category') {
-        options.groupBy = groupBy;
-        i += 1;
-      }
-      continue;
-    }
-
-    if (!options.name) {
-      options.name = arg;
-    }
+    const inline = arg.startsWith(`${descriptor.names[0]}=`);
+    const next = argv[i + 1];
+    const optionalValue = descriptor.kind !== 'optional' || (next && !next.startsWith('-'));
+    const value = inline
+      ? arg.slice(descriptor.names[0].length + 1)
+      : optionalValue
+        ? next
+        : undefined;
+    const accepted = descriptor.apply(options, value);
+    // Invalid enum values remain available as positional names, matching the CLI contract.
+    if (accepted && !inline && descriptor.kind !== 'flag' && optionalValue) i += 1;
   }
-
   return options;
 }
 
@@ -412,188 +391,7 @@ export async function runBulkMode(
   }
   console.log();
 
-  if (newDiscrepancies.length > 0) {
-    const groupBy = options.groupBy ?? 'category';
-
-    // Priority order and labels
-    const priorityOrder: Priority[] = ['high', 'medium', 'low'];
-    const priorityLabels: Record<Priority, string> = {
-      high: colorize('[HIGH]', 'red'),
-      medium: colorize('[MEDIUM]', 'yellow'),
-      low: colorize('[LOW]', 'green'),
-    };
-
-    const priorityIcons: Record<Priority, string> = {
-      high: colorize('[HIGH]', 'red'),
-      medium: colorize('[MEDIUM]', 'yellow'),
-      low: colorize('[LOW]', 'green'),
-    };
-
-    const categoryLabels: Record<string, string> = {
-      minPlayerLevel: 'Level Requirements',
-      traderRequirements: 'Trader Loyalty Requirements',
-      scavKarma: 'Scav Karma Requirements',
-      factionName: 'PMC Faction Restriction',
-      taskRequirements: 'Task Prerequisites',
-      nextTasks: 'Task Next / Unlocks',
-      map: 'Task Map / Location',
-      'objectives.description': 'Objective Descriptions',
-      experience: 'Reward: Experience (XP)',
-      money: 'Reward: Money (Roubles)',
-      'objectives.count': 'Objective Counts',
-      'objectives.maps': 'Objective Maps / Locations',
-      'objectives.items': 'Objective Required Items',
-    };
-
-    // Define category display order (most important first)
-    const categoryOrder = [
-      'minPlayerLevel',
-      'traderRequirements',
-      'scavKarma',
-      'factionName',
-      'taskRequirements',
-      'nextTasks',
-      'map',
-      'objectives.description',
-      'objectives.count',
-      'objectives.maps',
-      'objectives.items',
-      'experience',
-      'money',
-      // Reputation fields will be sorted alphabetically after these
-    ];
-
-    // Helper to get category label (handles dynamic reputation.TraderName fields)
-    const getCategoryLabel = (field: string): string => {
-      if (field.startsWith('reputation.')) {
-        const trader = field.replace('reputation.', '');
-        return `Reward: Reputation (${trader})`;
-      }
-      return categoryLabels[field] ?? field;
-    };
-
-    // Helper to print a single discrepancy
-    const printDiscrepancy = (
-      d: Discrepancy,
-      showPriority: boolean,
-      showCategory: boolean
-    ): void => {
-      const freshness =
-        d.wikiEditedPost1_0 === true
-          ? colorize('[POST-1.0]', 'green')
-          : d.wikiEditedPost1_0 === false
-            ? colorize('[PRE-1.0]', 'red')
-            : dim('[UNKNOWN]');
-      const editInfo = d.wikiEditDaysAgo !== undefined ? `${d.wikiEditDaysAgo}d ago` : '';
-      const priorityPrefix = showPriority ? `${priorityIcons[d.priority]} ` : '  ';
-      const categoryInfo = showCategory ? ` ${dim(`[${getCategoryLabel(d.field)}]`)}` : '';
-
-      console.log(`\n${priorityPrefix}${d.taskName}${categoryInfo}`);
-      console.log(`    ${dim(`ID: ${d.taskId}`)}`);
-      console.log(`    API:  ${d.apiValue}`);
-      console.log(`    Wiki: ${d.wikiValue} ${d.trustsWiki ? dim('← likely correct') : ''}`);
-      if (editInfo) {
-        console.log(`    ${dim(`Wiki edit: ${freshness} ${editInfo}`)}`);
-      }
-    };
-
-    // Group by priority
-    const byPriority = new Map<Priority, Discrepancy[]>();
-    for (const p of priorityOrder) {
-      byPriority.set(p, []);
-    }
-    for (const d of newDiscrepancies) {
-      byPriority.get(d.priority)!.push(d);
-    }
-
-    // Group by category
-    const byCategory = new Map<string, Discrepancy[]>();
-    for (const d of newDiscrepancies) {
-      const field = d.field;
-      if (!byCategory.has(field)) byCategory.set(field, []);
-      byCategory.get(field)!.push(d);
-    }
-
-    const sortedCategories = Array.from(byCategory.keys()).sort((a, b) => {
-      const aIdx = categoryOrder.indexOf(a);
-      const bIdx = categoryOrder.indexOf(b);
-      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-      if (aIdx !== -1) return -1;
-      if (bIdx !== -1) return 1;
-      return a.localeCompare(b);
-    });
-
-    // Print summary
-    printHeader('SUMMARY');
-    console.log(`  Grouping by: ${bold(groupBy.toUpperCase())}`);
-    console.log();
-    console.log('  By Priority:');
-    for (const p of priorityOrder) {
-      const count = byPriority.get(p)!.length;
-      if (count > 0) {
-        console.log(`    ${priorityLabels[p]}: ${count}`);
-      }
-    }
-    console.log();
-    console.log('  By Category:');
-    for (const field of sortedCategories) {
-      const discs = byCategory.get(field)!;
-      const label = getCategoryLabel(field);
-      console.log(`    ${label}: ${discs.length}`);
-    }
-    console.log();
-
-    // Print details based on groupBy mode
-    if (groupBy === 'category') {
-      printHeader('DISCREPANCIES BY CATEGORY');
-
-      for (const field of sortedCategories) {
-        const discs = byCategory.get(field)!;
-        const label = getCategoryLabel(field);
-
-        // Sort by priority within category (high first)
-        discs.sort((a, b) => {
-          const order = { high: 0, medium: 1, low: 2 };
-          return order[a.priority] - order[b.priority];
-        });
-
-        console.log(`\n${'─'.repeat(60)}`);
-        console.log(`${bold(label)} (${discs.length})`);
-        console.log(`${'─'.repeat(60)}`);
-
-        for (const d of discs) {
-          printDiscrepancy(d, true, false);
-        }
-      }
-    } else {
-      // groupBy === 'priority'
-      printHeader('DISCREPANCIES BY PRIORITY');
-
-      for (const p of priorityOrder) {
-        const discs = byPriority.get(p)!;
-        if (discs.length === 0) continue;
-
-        // Sort by category within priority
-        discs.sort((a, b) => {
-          const aIdx = categoryOrder.indexOf(a.field);
-          const bIdx = categoryOrder.indexOf(b.field);
-          if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-          if (aIdx !== -1) return -1;
-          if (bIdx !== -1) return 1;
-          return a.field.localeCompare(b.field);
-        });
-
-        console.log(`\n${'─'.repeat(60)}`);
-        console.log(`${bold(priorityLabels[p])} (${discs.length})`);
-        console.log(`${'─'.repeat(60)}`);
-
-        for (const d of discs) {
-          printDiscrepancy(d, false, true);
-        }
-      }
-    }
-    console.log();
-  }
+  renderDiscrepancies(newDiscrepancies, options.groupBy ?? 'category');
 
   // Save results to file if requested
   const outputFile = resolveOutputFilePath(options.output);
