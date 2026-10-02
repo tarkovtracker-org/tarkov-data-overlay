@@ -1028,17 +1028,22 @@ export interface DivergenceResult {
   mirrored: boolean;
 }
 
+/** Shared dependencies registered before compiling source and output schemas. */
+export const SHARED_SCHEMA_FILES = [
+  'trader-requirement.schema.json',
+  'task-shared.schema.json',
+] as const;
+
 /** Default schema configurations */
 export const SCHEMA_CONFIGS: SchemaConfig[] = [
   { pattern: 'additions/progressionCounters.json5', schemaFile: 'progression-counter.schema.json' },
   { pattern: 'overrides/tasks.json5', schemaFile: 'task-override.schema.json' },
   { pattern: 'overrides/maps.json5', schemaFile: 'map-override.schema.json' },
-  { pattern: 'overrides/modes/regular/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/regular/maps.json5', schemaFile: 'map-override.schema.json' },
-  { pattern: 'overrides/modes/pve/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/pve/maps.json5', schemaFile: 'map-override.schema.json' },
-  { pattern: 'overrides/modes/pvp-season/tasks.json5', schemaFile: 'task-override.schema.json' },
-  { pattern: 'overrides/modes/pvp-season/maps.json5', schemaFile: 'map-override.schema.json' },
+  ...SUPPORTED_GAME_MODES.flatMap((mode) => [
+    { pattern: `overrides/modes/${mode}/tasks.json5`, schemaFile: 'task-override.schema.json' },
+    { pattern: `overrides/modes/${mode}/maps.json5`, schemaFile: 'map-override.schema.json' },
+    { pattern: `additions/modes/${mode}/tasksAdd.json5`, schemaFile: 'task-additions.schema.json' },
+  ]),
   { pattern: 'additions/tasksAdd.json5', schemaFile: 'task-additions.schema.json' },
   { pattern: 'additions/editions.json5', schemaFile: 'edition.schema.json' },
   { pattern: 'additions/seasonalPerks.json5', schemaFile: 'seasonal-perk.schema.json' },

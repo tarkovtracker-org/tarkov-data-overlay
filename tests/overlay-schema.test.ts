@@ -10,6 +10,7 @@ import {
   loadAllJson5FromDir,
   loadJsonFile,
   SUPPORTED_GAME_MODES,
+  SHARED_SCHEMA_FILES,
   type OverlayOutput,
 } from '../src/lib/index.js';
 
@@ -79,7 +80,9 @@ describe('overlay.schema.json', () => {
     (schemaFile) => {
       const { schemasDir } = getProjectPaths();
       const ajv = new Ajv({ strict: false, $data: true });
-      ajv.addSchema(loadJsonFile(join(schemasDir, 'trader-requirement.schema.json')));
+      for (const sharedSchemaFile of SHARED_SCHEMA_FILES) {
+        ajv.addSchema(loadJsonFile(join(schemasDir, sharedSchemaFile)));
+      }
       const validate = ajv.compile(loadJsonFile(join(schemasDir, schemaFile)));
       // Additions describe a whole task, overrides only the patched fields.
       const base =
@@ -123,7 +126,7 @@ describe('overlay.schema.json', () => {
       'prestige-override.schema.json',
       'task-override.schema.json',
       'task-additions.schema.json',
-      'trader-requirement.schema.json',
+      ...SHARED_SCHEMA_FILES,
       'story-chapter.schema.json',
       'progression-counter.schema.json',
       'locale-override.schema.json',
