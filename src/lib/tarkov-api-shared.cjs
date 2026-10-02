@@ -499,7 +499,126 @@ async function buildTaskContext(cache, mode, tasksData, helpers) {
   };
 }
 
+/** Shared reference, objective and reward normalization; transports keep their own policies. */
+function createTaskNormalizers(helpers) {
+  const { isRecord, compact, stringId, translate } = helpers;
+  function resolveItemRecord(id, inline, ctx) {
+    return (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
+  }
+  function resolveItemField(field, raw, inline, ctx) {
+    return (
+      translate(ctx.itemsEn, raw && raw[field]) ??
+      (inline && typeof inline[field] === 'string' ? inline[field] : undefined)
+    );
+  }
+  function resolveItemRef(value, ctx) {
+    const id = stringId(value);
+    const inline = isRecord(value) ? value : undefined;
+    const raw = resolveItemRecord(id, inline, ctx);
+    if (!id && !raw) return undefined;
+    const name = resolveItemField('name', raw, inline, ctx);
+    const shortName = resolveItemField('shortName', raw, inline, ctx);
+    return compact({ id: id ?? '', name, shortName });
+  }
+
+  function resolveItemRefs(value, ctx) {
+    if (!Array.isArray(value)) return undefined;
+    return value.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
+  }
+
+  function resolveItemRefMatrix(value, ctx) {
+    return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
+  }
+
+  function resolveMapRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.mapsById.get(id);
+    return compact({ id, name: translate(ctx.mapsEn, raw && raw.name) });
+  }
+
+  function resolveMapRefs(value, ctx) {
+    if (!Array.isArray(value)) return undefined;
+    return value.map((entry) => resolveMapRef(entry, ctx)).filter(Boolean);
+  }
+
+  function resolveTraderRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.tradersById.get(id);
+    return compact({ id, name: translate(ctx.tradersEn, raw && raw.name) });
+  }
+
+  function resolveTaskRef(value, ctx) {
+    const id = stringId(value);
+    if (!id) return undefined;
+    const raw = ctx.tasksById.get(id);
+    return compact({ id, name: translate(ctx.tasksEn, raw && raw.name) });
+  }
+
+  function resolveRequiredPrestige(value, ctx) {
+    if (value === undefined) return undefined;
+    const id = stringId(value);
+    const inline = isRecord(value) ? value : undefined;
+    const raw = (id ? ctx.prestigeById.get(id) : undefined) ?? inline;
+    return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw && raw.name), raw);
+  }
+
+  function resolveZone(value, ctx) {
+    if (!isRecord(value)) return value;
+    return compact({ ...value, map: resolveMapRef(value.map, ctx) });
+  }
+
+  function adaptObjective(raw, ctx) {
+    return compact({
+      ...raw,
+      id: stringId(raw) ?? '',
+      description: translate(ctx.tasksEn, raw.description),
+      maps: resolveMapRefs(raw.maps, ctx),
+      items: resolveItemRefs(raw.items, ctx),
+      item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
+      markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
+      questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
+      useAny: resolveItemRefs(raw.useAny, ctx),
+      containsAll: resolveItemRefs(raw.containsAll, ctx),
+      usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
+      usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
+      requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
+      wearing: resolveItemRefMatrix(raw.wearing, ctx),
+      notWearing: resolveItemRefs(raw.notWearing, ctx),
+      zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
+      possibleLocations: Array.isArray(raw.possibleLocations)
+        ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
+        : undefined,
+    });
+  }
+
+  function normalizeReward(raw, ctx) {
+    return adaptReward(raw, ctx, {
+      isRecord,
+      compact,
+      resolveItemRef,
+      resolveTraderRef,
+      resolveMapRef,
+    });
+  }
+
+  return {
+    resolveItemRef,
+    resolveItemRefs,
+    resolveItemRefMatrix,
+    resolveMapRef,
+    resolveMapRefs,
+    resolveTraderRef,
+    resolveTaskRef,
+    resolveRequiredPrestige,
+    adaptObjective,
+    adaptReward: normalizeReward,
+  };
+}
+
 module.exports = {
+  createTaskNormalizers,
   MAX_RESPONSE_BYTES: DEFAULT_MAX_RESPONSE_BYTES,
   adaptReward,
   buildTaskContext,

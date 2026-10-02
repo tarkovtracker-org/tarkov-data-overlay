@@ -25,7 +25,6 @@
 import { SYNTHETIC_REQUIREMENT_ID_PREFIX } from './types.js';
 import type {
   TaskData,
-  TaskItemRef,
   TaskObjective,
   TaskRewards,
   TaskRequirement,
@@ -39,14 +38,12 @@ import type {
   TraderAccessData,
 } from './types.js';
 import {
-  adaptReward as adaptSharedReward,
+  createTaskNormalizers,
   buildTaskContext as buildSharedTaskContext,
   fetchCached,
   mapOptionalArray,
-  normalizeRequiredPrestige,
   readResponseJson,
   resolveDialogueTraderRefs as resolveSharedDialogueTraderRefs,
-  resolveReferenceMatrix,
 } from './tarkov-api-shared.cjs';
 
 const TARKOV_JSON_BASE = 'https://json.tarkov.dev';
@@ -291,110 +288,15 @@ type Context = {
   tradersEn: TranslationMap;
 };
 
-/** Select the upstream item record, falling back to an inline reference. */
-function resolveItemRecord(
-  id: string | undefined,
-  inline: JsonRecord | undefined,
-  ctx: Context
-): JsonRecord | undefined {
-  return (id ? (ctx.itemsById.get(id) ?? ctx.questItemsById.get(id)) : undefined) ?? inline;
-}
-
-/** Translate one item display field and preserve an inline fallback value. */
-function resolveItemField(
-  field: 'name' | 'shortName',
-  raw: JsonRecord | undefined,
-  inline: JsonRecord | undefined,
-  ctx: Context
-): string | undefined {
-  return (
-    translate(ctx.itemsEn, raw?.[field]) ??
-    (typeof inline?.[field] === 'string' ? inline[field] : undefined)
-  );
-}
-
-/**
- * Resolve an item reference (string id or inline `{id,...}`) into the
- * `{id,name,shortName}` shape the validator compares against.
- */
-function resolveItemRef(value: unknown, ctx: Context): TaskItemRef | undefined {
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = resolveItemRecord(id, inline, ctx);
-  if (!id && !raw) return undefined;
-  const name = resolveItemField('name', raw, inline, ctx);
-  const shortName = resolveItemField('shortName', raw, inline, ctx);
-  return compact({ id: id ?? '', name, shortName }) as TaskItemRef;
-}
-
-/** Resolve a list of item references and drop entries that cannot be resolved. */
-function resolveItemRefs(value: unknown, ctx: Context): TaskItemRef[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((entry) => resolveItemRef(entry, ctx))
-    .filter((entry): entry is TaskItemRef => Boolean(entry));
-}
-
-/** Resolve a nested item-reference matrix while preserving its groups. */
-function resolveItemRefMatrix(value: unknown, ctx: Context): TaskItemRef[][] | undefined {
-  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
-}
-
-/** Resolve one map reference and its translated display name. */
-function resolveMapRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.mapsById.get(id);
-  const name = translate(ctx.mapsEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/** Resolve a list of map references and drop malformed entries. */
-function resolveMapRefs(
-  value: unknown,
-  ctx: Context
-): Array<{ id: string; name: string }> | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value
-    .map((entry) => resolveMapRef(entry, ctx))
-    .filter((entry): entry is { id: string; name: string } => Boolean(entry));
-}
-
-/** Resolve one trader reference and its translated display name. */
-function resolveTraderRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tradersById.get(id);
-  const name = translate(ctx.tradersEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/** Resolve one task reference and its translated display name. */
-function resolveTaskRef(value: unknown, ctx: Context): { id: string; name: string } | undefined {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tasksById.get(id);
-  const name = translate(ctx.tasksEn, raw?.name);
-  return compact({ id, name }) as { id: string; name: string };
-}
-
-/**
- * Resolve a task `requiredPrestige` reference (a prestige-id string) into the
- * `{id,name,prestigeLevel}` object the validator expects. The prestige level
- * lives in the separate `prestige` array of the tasks payload.
- */
-function resolveRequiredPrestige(
-  value: unknown,
-  ctx: Context
-): { id?: string; name: string; prestigeLevel: number } | undefined {
-  if (value === undefined) return undefined;
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = (id ? ctx.prestigeById.get(id) : undefined) ?? inline;
-  // Preserve a declared but unresolved requirement so the availability model
-  // reports unknown instead of silently treating it as no requirement.
-  return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw?.name), raw);
-}
+const normalizers = createTaskNormalizers({ isRecord, compact, stringId, translate });
+const {
+  resolveItemRef,
+  resolveItemRefs,
+  resolveMapRef,
+  resolveTraderRef,
+  resolveTaskRef,
+  resolveRequiredPrestige,
+} = normalizers;
 
 /** Preserve a declared but unresolved task-giver reference as malformed data. */
 function adaptTaskTrader(value: unknown, ctx: Context): TaskData['trader'] {
@@ -402,46 +304,12 @@ function adaptTaskTrader(value: unknown, ctx: Context): TaskData['trader'] {
   return resolveTraderRef(value, ctx) ?? { id: '', name: 'Unknown trader' };
 }
 
-/** Resolve map data nested inside an objective zone or location. */
-function resolveZone(value: unknown, ctx: Context): unknown {
-  if (!isRecord(value)) return value;
-  return compact({ ...value, map: resolveMapRef(value.map, ctx) });
-}
-
-/** Adapt one objective and resolve its nested entity references. */
 function adaptObjective(raw: JsonRecord, ctx: Context): TaskObjective {
-  return compact({
-    ...raw,
-    id: stringId(raw) ?? '',
-    description: translate(ctx.tasksEn, raw.description),
-    maps: resolveMapRefs(raw.maps, ctx),
-    items: resolveItemRefs(raw.items, ctx),
-    item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
-    markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
-    questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
-    useAny: resolveItemRefs(raw.useAny, ctx),
-    containsAll: resolveItemRefs(raw.containsAll, ctx),
-    usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
-    usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
-    requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
-    wearing: resolveItemRefMatrix(raw.wearing, ctx),
-    notWearing: resolveItemRefs(raw.notWearing, ctx),
-    zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
-    possibleLocations: Array.isArray(raw.possibleLocations)
-      ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
-      : undefined,
-  }) as unknown as TaskObjective;
+  return normalizers.adaptObjective(raw, ctx) as unknown as TaskObjective;
 }
 
-/** Adapt one reward object using the shared reward normalizer. */
 function adaptReward(raw: unknown, ctx: Context): TaskRewards | undefined {
-  return adaptSharedReward<TaskRewards, Context>(raw, ctx, {
-    isRecord,
-    compact,
-    resolveItemRef,
-    resolveTraderRef,
-    resolveMapRef,
-  });
+  return normalizers.adaptReward<TaskRewards>(raw, ctx);
 }
 
 /** Adapt one task prerequisite and resolve its referenced task. */
