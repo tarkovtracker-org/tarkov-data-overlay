@@ -8,6 +8,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'fs';
 import { tmpdir } from 'os';
@@ -129,6 +130,81 @@ describe('writeFileAtomicSync', () => {
 });
 
 describe('story artifact and provenance write failures', () => {
+  it.each(['EACCES', 'ENOENT', 'ENOSPC'])(
+    'aborts publication without changing committed files when the snapshot fails with %s',
+    (code) => {
+      const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-snapshot-');
+      try {
+        expect(() =>
+          runWriter(
+            dir,
+            input,
+            `
+            const link = fs.linkSync;
+            fs.linkSync = (source, destination) => {
+              if (String(destination).includes('-rollback-')) {
+                const error = new Error('${code}: simulated snapshot failure');
+                error.code = '${code}';
+                throw error;
+              }
+              return link(source, destination);
+            };
+            `
+          )
+        ).toThrow(/simulated snapshot failure/);
+        expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+        expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+        expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+        expect(readdirSync(join(dir, 'src', 'additions'))).toEqual(['storyChapters.json5']);
+        expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it('keeps the artifact present when interrupted immediately before atomic replacement', () => {
+    const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-interrupt-');
+    const previousInode = statSync(artifact).ino;
+    try {
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+          const rename = fs.renameSync;
+          fs.renameSync = (source, destination) => {
+            if (String(destination) === 'src/additions/storyChapters.json5') {
+              if (fs.readFileSync(destination, 'utf8') !== ${JSON.stringify(PREVIOUS_ARTIFACT)}) {
+                throw new Error('artifact missing or changed before atomic replacement');
+              }
+              process.stderr.write('interrupted before atomic replacement');
+              process.exit(86);
+            }
+            return rename(source, destination);
+          };
+          `
+        )
+      ).toThrow(/interrupted before atomic replacement/);
+      expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+      expect(statSync(artifact).ino).toBe(previousInode);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+      const rollbackDir = readdirSync(join(dir, 'src', 'additions')).find((name) =>
+        name.includes('-rollback-')
+      );
+      expect(rollbackDir).toBeDefined();
+      const snapshot = join(dir, 'src', 'additions', rollbackDir!, 'previous');
+      expect(statSync(snapshot).ino).toBe(previousInode);
+      expect(statSync(snapshot).nlink).toBe(2);
+      // A crash retains the exclusive lock, so the next writer cannot silently
+      // publish over a run whose provenance promotion might have been interrupted.
+      expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it.each(['storyChapters.json5', 'story-reference.lock.json'])(
     'preserves both committed files when a partial write to %s fails',
     (failingFile) => {
@@ -169,7 +245,7 @@ describe('story artifact and provenance write failures', () => {
   it('restores the previous artifact without another allocation when the disk stays full', () => {
     // The lock write fails, and every later write to the artifact fails too, as a
     // genuinely full disk would. Rollback must therefore not need to write the
-    // previous artifact back: it restores a renameable backup. A byte-copy
+    // previous artifact back: it renames a hard-link snapshot. A byte-copy
     // rollback fails here and leaves the new artifact beside the old lock.
     const { dir, artifact, lock, sidecar, input, pending, outputSha256 } =
       setupWorkspace('story-enospc-');
@@ -204,6 +280,73 @@ describe('story artifact and provenance write failures', () => {
       expect(readdirSync(join(dir, 'data', 'eft'))).toEqual([
         `story-reference.lock.pending.${outputSha256}.json`,
       ]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('retains the rollback snapshot if the restoration rename itself fails', () => {
+    const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-rollback-');
+    try {
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+          const rename = fs.renameSync;
+          fs.renameSync = (source, destination) => {
+            if (String(source).includes('-rollback-')) {
+              throw new Error('EACCES: simulated rollback failure');
+            }
+            return rename(source, destination);
+          };
+          fs.writeFileSync = (file, data, ...args) => {
+            if (String(file).includes('story-reference.lock.json')) {
+              throw new Error('ENOSPC: simulated lock failure');
+            }
+            return write(file, data, ...args);
+          };
+          `
+        )
+      ).toThrow(/simulated rollback failure/);
+      expect(readFileSync(artifact, 'utf8')).not.toBe(PREVIOUS_ARTIFACT);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+      const rollbackDir = readdirSync(join(dir, 'src', 'additions')).find((name) =>
+        name.includes('-rollback-')
+      );
+      expect(rollbackDir).toBeDefined();
+      expect(readFileSync(join(dir, 'src', 'additions', rollbackDir!, 'previous'), 'utf8')).toBe(
+        PREVIOUS_ARTIFACT
+      );
+      expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('removes an initial artifact if provenance promotion fails with no previous artifact', () => {
+    const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-initial-');
+    try {
+      rmSync(artifact);
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+          fs.writeFileSync = (file, data, ...args) => {
+            if (String(file).includes('story-reference.lock.json')) {
+              throw new Error('ENOSPC: simulated lock failure');
+            }
+            return write(file, data, ...args);
+          };
+          `
+        )
+      ).toThrow(/simulated lock failure/);
+      expect(existsSync(artifact)).toBe(false);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+      expect(readdirSync(join(dir, 'src', 'additions'))).toEqual([]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

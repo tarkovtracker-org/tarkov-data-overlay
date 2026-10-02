@@ -17,6 +17,7 @@
 import { createHash } from 'crypto';
 import {
   closeSync,
+  linkSync,
   mkdirSync,
   mkdtempSync,
   openSync,
@@ -186,27 +187,35 @@ function publishStory(): void {
     );
   }
 
-  // Preserve the committed artifact as a renameable backup instead of keeping its
-  // bytes only in memory. Rollback must not allocate a full write: the failures
-  // that trigger it (ENOSPC) tend to make every later write fail too, and a
-  // failed rollback would pair the newly published artifact with the old lock. A
-  // sibling directory keeps the rename on the destination filesystem.
-  const backupDir = mkdtempSync(join(dirname(dest), `.${basename(dest)}-backup-`));
-  const backupFile = join(backupDir, 'previous');
-  let hasBackup = false;
+  // A same-filesystem hard link preserves rollback without removing the
+  // destination: an interruption before atomic replacement leaves the committed
+  // artifact readable. Rollback must not allocate a full write because ENOSPC
+  // can make every later write fail too. Abort if the snapshot cannot be made.
+  const rollbackDir = mkdtempSync(join(dirname(dest), `.${basename(dest)}-rollback-`));
+  const snapshot = join(rollbackDir, 'previous');
+  let hasSnapshot = false;
   try {
     if (statSync(dest).isFile()) {
-      renameSync(dest, backupFile);
-      hasBackup = true;
+      hasSnapshot = true;
     } else {
       throw new Error(`${dest} exists but is not a regular file`);
     }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      rmSync(backupDir, { recursive: true, force: true });
+      rmSync(rollbackDir, { recursive: true, force: true });
       throw error;
     }
     // ENOENT: nothing committed yet, so there is nothing to back up.
+  }
+  if (hasSnapshot) {
+    try {
+      linkSync(dest, snapshot);
+    } catch (error) {
+      // In particular, ENOENT here is a failed snapshot, not permission to
+      // publish without rollback: the existing artifact disappeared mid-run.
+      rmSync(rollbackDir, { recursive: true, force: true });
+      throw error;
+    }
   }
 
   // Roll back only this run's publication. If another run has already replaced
@@ -225,18 +234,17 @@ function publishStory(): void {
       console.error(`note: ${dest} was replaced by another run; leaving it in place.`);
       return;
     }
-    if (hasBackup) renameSync(backupFile, dest);
+    if (hasSnapshot) renameSync(snapshot, dest);
     else rmSync(dest, { force: true });
   };
-  const discardBackup = (): void => rmSync(backupDir, { recursive: true, force: true });
+  const discardSnapshot = (): void => rmSync(rollbackDir, { recursive: true, force: true });
 
   try {
     writeFileAtomicSync(dest, out);
   } catch (error) {
-    // The previous artifact is still in the backup (or there was none), so the
-    // committed state is restored by a metadata-only rename.
-    restore();
-    discardBackup();
+    // The atomic writer leaves the destination intact on write/rename failure;
+    // there is no publication to roll back yet.
+    discardSnapshot();
     throw error;
   }
   console.log(`wrote ${dest} (${out.length} bytes, ${Object.keys(data).length} chapters)`);
@@ -255,7 +263,7 @@ function publishStory(): void {
     promoted = promoteStoryReferenceLock(inputSha256);
   } catch (error) {
     restore();
-    discardBackup();
+    discardSnapshot();
     console.error(
       `error: the source-capture lock could not be updated after ${dest} was written, so the ` +
         'artifact has been rolled back and the pin left unchanged.'
@@ -265,7 +273,7 @@ function publishStory(): void {
 
   if (!promoted) {
     restore();
-    discardBackup();
+    discardSnapshot();
     throw new PublicationRefused(
       `error: the staged binding at ${pendingLockSidecar(inputSha256)} was refused after ${dest} was ` +
         'written, so it changed mid-run. The artifact has been rolled back and the ' +
@@ -273,7 +281,7 @@ function publishStory(): void {
     );
   }
 
-  discardBackup();
+  discardSnapshot();
 }
 
 function main(): void {
