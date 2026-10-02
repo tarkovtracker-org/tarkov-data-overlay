@@ -2,9 +2,9 @@
  * Tests for scripts/validate.ts helpers
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { join } from 'path';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import {
   getProjectPaths,
@@ -31,6 +31,78 @@ describe('scripts/validate helpers', () => {
       expect(getValidator(config.pattern, validators)).not.toBeNull();
     }
     expect(getValidator('unknown.json5', validators)).toBeNull();
+  });
+
+  it.each(SUPPORTED_GAME_MODES)('validates standalone task additions in %s', (mode) => {
+    const validators = initializeValidators();
+    const validate = getValidator(`additions/modes/${mode}/tasksAdd.json5`, validators);
+    expect(validate).not.toBeNull();
+    const task = {
+      id: 'task-id',
+      name: 'Task',
+      wikiLink: 'https://example.com/task',
+      trader: { name: 'Prapor' },
+      objectives: [],
+    };
+    expect(validate?.({ task })).toBe(true);
+    expect(validate?.({ task: { name: 'Missing required addition fields' } })).toBe(false);
+    expect(validate?.({ task: { ...task, objectives: { objective: { count: 1 } } } })).toBe(false);
+    expect(getValidator(`overrides/modes/${mode}/tasks.json5`, validators)).not.toBeNull();
+    expect(getValidator(`overrides/modes/${mode}/maps.json5`, validators)).not.toBeNull();
+  });
+
+  it.each([
+    [
+      'startRewards',
+      { items: [{ item: { id: 'item', name: 'Item' }, count: 1 }] },
+      { items: [{ item: { id: 'item', name: 'Item' }, count: 0 }] },
+    ],
+    [
+      'taskRequirements',
+      [{ task: { id: 'previous', name: 'Previous' }, status: ['complete'] }],
+      [{ task: { id: 'previous', name: 'Previous' }, status: ['bogus'] }],
+    ],
+    ['taskRequirementGroups', [[{ task: { id: 'previous', name: 'Previous' } }]], [[]]],
+    [
+      'otherRequirements',
+      [
+        {
+          id: 'gate',
+          type: 'globalVariable',
+          variableId: 'variable',
+          compareMethod: '>=',
+          value: 1,
+        },
+      ],
+      [{ id: 'gate', type: 'globalVariable' }],
+    ],
+    [
+      'neededKeys',
+      [{ map: { id: 'map', name: 'Map' }, keys: [{ id: 'key', name: 'Key' }] }],
+      [{ map: { id: 'map' }, keys: [] }],
+    ],
+    [
+      'requiredPrestige',
+      { name: 'Prestige', prestigeLevel: 1 },
+      { name: 'Prestige', prestigeLevel: '1' },
+    ],
+  ])('preserves shared %s constraints for additions and overrides', (field, valid, invalid) => {
+    const validators = initializeValidators();
+    const addition = {
+      id: 'task-id',
+      name: 'Task',
+      wikiLink: 'https://example.com/task',
+      trader: { name: 'Prapor' },
+      objectives: [],
+    };
+    for (const [path, base] of [
+      ['overrides/tasks.json5', {}],
+      ['additions/tasksAdd.json5', addition],
+    ] as const) {
+      const validate = getValidator(path, validators);
+      expect(validate?.({ task: { ...base, [field as string]: valid } })).toBe(true);
+      expect(validate?.({ task: { ...base, [field as string]: invalid } })).toBe(false);
+    }
   });
 
   it('requires payloads for known other requirements but preserves unknown types', () => {
@@ -116,11 +188,33 @@ describe('scripts/validate helpers', () => {
       ]),
     ].sort();
 
-    const results = await validateSourceFiles();
-    const files = results.map((result) => result.file).sort();
+    // This checks source traversal and schema validation deterministically. The
+    // separate `npm run validate` CI step checks the current live locale IDs.
+    const taskIds: string[] = JSON.parse(
+      readFileSync(new URL('./fixtures/locale-api-task-ids.json', import.meta.url), 'utf8')
+    );
+    const endpoints = new Map([
+      ['tasks', { tasks: Object.fromEntries(taskIds.map((id) => [id, { id }])) }],
+      ['items', { items: {} }],
+      ['maps', { maps: {} }],
+      ['traders', {}],
+    ]);
+    const fetch = vi.fn(async (url: string) => {
+      const endpoint = new URL(url).pathname.split('/').at(-1)!;
+      if (!endpoints.has(endpoint)) throw new Error(`Unexpected validation endpoint: ${url}`);
+      return new Response(JSON.stringify({ data: endpoints.get(endpoint) }));
+    });
+    vi.stubGlobal('fetch', fetch);
+    try {
+      const results = await validateSourceFiles();
+      const files = results.map((result) => result.file).sort();
 
-    expect(files).toEqual(expectedFiles);
-    expect(results.every((result) => result.valid)).toBe(true);
+      expect(files).toEqual(expectedFiles);
+      expect(results.every((result) => result.valid)).toBe(true);
+      expect(fetch).toHaveBeenCalledTimes(SUPPORTED_GAME_MODES.length * endpoints.size);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('returns an invalid result when JSON5 parsing fails', () => {

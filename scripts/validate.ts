@@ -16,6 +16,7 @@ import {
   listJson5Files,
   fetchTarkovEnvelope,
   SCHEMA_CONFIGS,
+  SHARED_SCHEMA_FILES,
   SUPPORTED_GAME_MODES,
   SYNTHETIC_REQUIREMENT_ID_PREFIX,
   icons,
@@ -85,13 +86,9 @@ export function initializeValidators(): ValidatorCache {
   const cache: ValidatorCache = new Map();
   const schemaCache = new Map<string, ReturnType<Ajv['compile']>>();
 
-  // Task source schemas share this contract. Register it once so both resolve
-  // the same constraints and cannot drift independently.
-  const traderRequirementSchemaFile = 'trader-requirement.schema.json';
-  ajv.addSchema(
-    loadJsonFile(join(schemasDir, traderRequirementSchemaFile)) as object,
-    traderRequirementSchemaFile
-  );
+  for (const schemaFile of SHARED_SCHEMA_FILES) {
+    ajv.addSchema(loadJsonFile(join(schemasDir, schemaFile)) as object, schemaFile);
+  }
 
   for (const config of SCHEMA_CONFIGS) {
     let validator = schemaCache.get(config.schemaFile);
