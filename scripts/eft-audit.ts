@@ -149,6 +149,9 @@ function canonicalConditions(
   for (const condition of conditions) {
     if (!condition.target || !Array.isArray(condition.statuses) || condition.statuses.length === 0)
       return undefined;
+    // Capture parsing has already translated numeric state codes. API/overlay
+    // conditions must use string statuses, as required by consumers and schema.
+    if (condition.statuses.some((status) => typeof status !== 'string')) return undefined;
     const normalized = condition.statuses.map(normalizeTaskStatus);
     if (normalized.some((status) => status === undefined)) return undefined;
     keys.push(`${condition.target} [${[...new Set(normalized)].sort().join(', ')}]`);

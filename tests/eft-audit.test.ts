@@ -356,7 +356,7 @@ describe('eft-audit prerequisite condition semantics', () => {
     ).toBe('UNRESOLVED');
   });
 
-  it.each(['complete', null, 4, [null]])(
+  it.each(['complete', null, 4, [null], [4], [2], ['complete', 4]])(
     'reports malformed API or override status %j as UNRESOLVED',
     (status) => {
       const malformed = { task: { id: target }, status } as never;

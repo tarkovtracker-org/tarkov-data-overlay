@@ -505,6 +505,29 @@ describe('validateTaskOverride', () => {
       expect(result.status).toBe('FIXED');
     });
 
+    it.each([
+      [4, 'complete'],
+      [2, 'active'],
+      [6, 'failed'],
+    ])('rejects capture code %s in API requirement statuses', (code, canonical) => {
+      const task = { id: 'prereq-1', name: 'Task' };
+      const malformed = { task, status: [code] };
+      const correction = { task, status: [canonical] };
+      for (const field of ['taskRequirements', 'taskRequirementGroups'] as const) {
+        const result = validateTaskOverride(
+          'test-task-id',
+          { [field]: field === 'taskRequirements' ? [correction] : [[correction]] },
+          [
+            createApiTask({
+              [field]: field === 'taskRequirements' ? [malformed] : [[malformed]],
+            } as never),
+          ]
+        );
+        expect(result.status).toBe('NEEDED');
+        expect(result.details.find((detail) => detail.field === field)?.status).toBe('needed');
+      }
+    });
+
     it('compares unordered status sets without combining separate AND gates', () => {
       const task = { id: 'prereq-1', name: 'Task' };
       const api = createApiTask({ taskRequirements: [{ task, status: ['complete', 'active'] }] });

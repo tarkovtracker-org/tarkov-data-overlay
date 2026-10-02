@@ -287,7 +287,8 @@ type TaskRequirementLike = {
 
 /** Normalize aliases while preserving distinct evaluator quest states. */
 function normalizeTaskRequirementStatus(status: unknown): string {
-  return normalizeTaskStatus(status) ?? `invalid:${String(status)}`;
+  const normalized = typeof status === 'string' ? normalizeTaskStatus(status) : undefined;
+  return normalized ?? `invalid:${typeof status}:${String(status)}`;
 }
 
 /** Build the semantic identity of one task prerequisite. */
