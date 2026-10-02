@@ -356,6 +356,17 @@ describe('eft-audit prerequisite condition semantics', () => {
     ).toBe('UNRESOLVED');
   });
 
+  it.each(['complete', null, 4, [null]])(
+    'reports malformed API or override status %j as UNRESOLVED',
+    (status) => {
+      const malformed = { task: { id: target }, status } as never;
+      expect(audit(reference(), [malformed])[0].verdict).toBe('UNRESOLVED');
+      expect(
+        audit(reference(), [requirement()], { taskRequirements: [malformed] })[0].verdict
+      ).toBe('UNRESOLVED');
+    }
+  );
+
   it('retains the guard against flattening grouped requirements', () => {
     expect(
       audit(reference(), [], { taskRequirements: [], taskRequirementGroups: [[requirement()]] })

@@ -147,7 +147,8 @@ function canonicalConditions(
 ): string | undefined {
   const keys: string[] = [];
   for (const condition of conditions) {
-    if (!condition.target || !condition.statuses?.length) return undefined;
+    if (!condition.target || !Array.isArray(condition.statuses) || condition.statuses.length === 0)
+      return undefined;
     const normalized = condition.statuses.map(normalizeTaskStatus);
     if (normalized.some((status) => status === undefined)) return undefined;
     keys.push(`${condition.target} [${[...new Set(normalized)].sort().join(', ')}]`);
