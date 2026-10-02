@@ -25,19 +25,12 @@ const {
   valuesEqual,
 } = require("./lib/sections.js");
 const {
-  MAX_RESPONSE_BYTES: TARKOV_JSON_MAX_BYTES,
-  adaptReward: adaptSharedReward,
-  buildTaskContext: buildSharedTaskContext,
-  fetchCached,
   getLatestTagVersion: getSharedLatestTagVersion,
   isVersionStale: isSharedVersionStale,
-  mapOptionalArray,
-  normalizeRequiredPrestige,
-  readResponseJson,
-  resolveDialogueTraderRefs: resolveSharedDialogueTraderRefs,
-  resolveReferenceMatrix,
   verifyOverlaySha256,
 } = require("../src/lib/tarkov-api-shared.cjs");
+
+const {fetchApiTasks, fetchEnvelopeOnce} = require("./lib/tarkov-api.js");
 
 const PORT = config.port;
 const PUBLIC_DIR = config.publicDir;
@@ -47,7 +40,6 @@ const API_POLL_MS = config.apiPollMs;
 const OVERLAY_POLL_MS = config.overlayPollMs;
 const REMOTE_FETCH_TIMEOUT_MS = config.remoteFetchTimeoutMs;
 const REMOTE_FETCH_MAX_BYTES = config.remoteFetchMaxBytes;
-const TARKOV_JSON_BASE = "https://json.tarkov.dev";
 
 // Game modes served by json.tarkov.dev. The list is refreshed at startup from
 // the live /endpoints `gameModes` payload (see startModeDiscovery) so the
@@ -601,12 +593,6 @@ function broadcast(key, event, payload) {
   });
 }
 
-function getValueType(value) {
-  if (value === null) return "null";
-  if (Array.isArray(value)) return "array";
-  return typeof value;
-}
-
 async function loadOverlay() {
   let raw = "";
   let updatedAt = null;
@@ -670,358 +656,6 @@ async function refreshOverlay() {
 // and returns the same TaskData[] shape the summaries already consume. This
 // mirrors src/lib/tarkov-api.ts (the monitor is standalone CommonJS and cannot
 // import the ESM/TS adapter without a build step).
-
-const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
-const MAX_RETRIES = 3;
-const MAX_BACKOFF_MS = 5000;
-const TARKOV_JSON_TIMEOUT_MS = 30000;
-const TARKOV_USER_AGENT =
-  "tarkov-data-overlay (+https://github.com/tarkovtracker-org/tarkov-data-overlay)";
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function isRecord(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function stringId(value) {
-  if (typeof value === "string") return value;
-  if (isRecord(value) && typeof value.id === "string") return value.id;
-  return undefined;
-}
-
-function compact(value) {
-  // Null-prototype result so untrusted keys (e.g. `__proto__` from remote JSON)
-  // cannot pollute Object.prototype.
-  const result = Object.create(null);
-  for (const [key, entry] of Object.entries(value)) {
-    if (UNSAFE_KEYS.has(key)) continue;
-    if (entry !== undefined) result[key] = entry;
-  }
-  return result;
-}
-
-function toLookup(value) {
-  const map = new Map();
-  const records = Array.isArray(value) ? value : isRecord(value) ? Object.values(value) : [];
-  for (const entry of records) {
-    if (isRecord(entry) && typeof entry.id === "string") map.set(entry.id, entry);
-  }
-  return map;
-}
-
-function translate(map, key) {
-  if (typeof key !== "string" || UNSAFE_KEYS.has(key)) return undefined;
-  const value = map[key];
-  return typeof value === "string" ? value : key;
-}
-
-function validateEnvelope(payload, path) {
-  if (!isRecord(payload) || !("data" in payload) || payload.data == null) {
-    const error = new Error(`Invalid json.tarkov.dev response for ${path}: missing data`);
-    error.fatal = true;
-    throw error;
-  }
-  if (payload.translations !== undefined && !Array.isArray(payload.translations)) {
-    const error = new Error(
-      `Invalid json.tarkov.dev response for ${path}: translations is not an array`
-    );
-    error.fatal = true;
-    throw error;
-  }
-  return payload;
-}
-
-async function fetchEnvelopeOnce(path, retryNotFound = true) {
-  if (typeof fetch !== "function") {
-    throw new Error("Global fetch is not available. Node 22.0.0+ is required");
-  }
-  let lastError = null;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TARKOV_JSON_TIMEOUT_MS);
-    try {
-      const response = await fetch(`${TARKOV_JSON_BASE}/${path}`, {
-        headers: { Accept: "application/json", "User-Agent": TARKOV_USER_AGENT },
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        throw new Error(
-          `tarkov.dev request failed: ${response.status} ${response.statusText} (${path})`
-        );
-      }
-      return validateEnvelope(await readResponseJson(response, path, TARKOV_JSON_MAX_BYTES), path);
-    } catch (error) {
-      if (
-        error &&
-        (error.fatal || (!retryNotFound && /request failed: 404\b/.test(error.message)))
-      ) {
-        throw error;
-      }
-      lastError = error instanceof Error ? error : new Error(String(error));
-      if (attempt === MAX_RETRIES) break;
-      await sleep(Math.min(1000 * 2 ** (attempt - 1), MAX_BACKOFF_MS));
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-  throw lastError || new Error(`Failed to fetch ${path}`);
-}
-
-// Cache is scoped to a single fetchApiTasks call so concurrent endpoint reads
-// within one refresh are deduped, while each poll cycle fetches fresh data.
-function fetchEnvelope(cache, path, retryNotFound = true) {
-  return fetchCached(cache, path, (requestedPath) =>
-    fetchEnvelopeOnce(requestedPath, retryNotFound)
-  );
-}
-
-async function fetchTranslations(cache, mode, endpoint) {
-  const optional = mode === "pvp-season" && endpoint === "items";
-  try {
-    const envelope = await fetchEnvelope(cache, `${mode}/${endpoint}_en`, !optional);
-    if (!isRecord(envelope.data)) {
-      const error = new Error(
-        `Invalid json.tarkov.dev response for ${mode}/${endpoint}_en: expected data object`
-      );
-      error.fatal = true;
-      throw error;
-    }
-    return envelope.data;
-  } catch (error) {
-    if (optional && error instanceof Error && /request failed: 404\b/.test(error.message)) {
-      return {};
-    }
-    throw error;
-  }
-}
-
-function resolveItemRef(value, ctx) {
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = (id ? ctx.itemsById.get(id) || ctx.questItemsById.get(id) : undefined) || inline;
-  if (!id && !raw) return undefined;
-  const name =
-    translate(ctx.itemsEn, raw && raw.name) ||
-    (inline && typeof inline.name === "string" ? inline.name : undefined);
-  const shortName =
-    translate(ctx.itemsEn, raw && raw.shortName) ||
-    (inline && typeof inline.shortName === "string" ? inline.shortName : undefined);
-  return compact({ id: id || "", name, shortName });
-}
-
-function resolveItemRefs(value, ctx) {
-  if (!Array.isArray(value)) return undefined;
-  return value.map((entry) => resolveItemRef(entry, ctx)).filter(Boolean);
-}
-
-function resolveItemRefMatrix(value, ctx) {
-  return resolveReferenceMatrix(value, (entry) => resolveItemRef(entry, ctx));
-}
-
-function resolveMapRef(value, ctx) {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.mapsById.get(id);
-  return compact({ id, name: translate(ctx.mapsEn, raw && raw.name) });
-}
-
-function resolveMapRefs(value, ctx) {
-  if (!Array.isArray(value)) return undefined;
-  return value.map((entry) => resolveMapRef(entry, ctx)).filter(Boolean);
-}
-
-function resolveTraderRef(value, ctx) {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tradersById.get(id);
-  return compact({ id, name: translate(ctx.tradersEn, raw && raw.name) });
-}
-
-function resolveTaskRef(value, ctx) {
-  const id = stringId(value);
-  if (!id) return undefined;
-  const raw = ctx.tasksById.get(id);
-  return compact({ id, name: translate(ctx.tasksEn, raw && raw.name) });
-}
-
-function resolveRequiredPrestige(value, ctx) {
-  if (value === undefined) return undefined;
-  const id = stringId(value);
-  const inline = isRecord(value) ? value : undefined;
-  const raw = ctx.prestigeById.get(id) || inline;
-  return normalizeRequiredPrestige(id, translate(ctx.tasksEn, raw && raw.name), raw);
-}
-
-function adaptTaskTrader(value, ctx) {
-  if (value === undefined) return undefined;
-  return resolveTraderRef(value, ctx) || { id: "", name: "Unknown trader" };
-}
-
-function resolveZone(value, ctx) {
-  if (!isRecord(value)) return value;
-  return compact({ ...value, map: resolveMapRef(value.map, ctx) });
-}
-
-function adaptObjective(raw, ctx) {
-  return compact({
-    ...raw,
-    id: stringId(raw) || "",
-    description: translate(ctx.tasksEn, raw.description),
-    maps: resolveMapRefs(raw.maps, ctx),
-    items: resolveItemRefs(raw.items, ctx),
-    item: raw.item !== undefined ? resolveItemRef(raw.item, ctx) : undefined,
-    markerItem: raw.markerItem !== undefined ? resolveItemRef(raw.markerItem, ctx) : undefined,
-    questItem: raw.questItem !== undefined ? resolveItemRef(raw.questItem, ctx) : undefined,
-    useAny: resolveItemRefs(raw.useAny, ctx),
-    containsAll: resolveItemRefs(raw.containsAll, ctx),
-    usingWeapon: resolveItemRefs(raw.usingWeapon, ctx),
-    usingWeaponMods: resolveItemRefMatrix(raw.usingWeaponMods, ctx),
-    requiredKeys: resolveItemRefMatrix(raw.requiredKeys, ctx),
-    wearing: resolveItemRefMatrix(raw.wearing, ctx),
-    notWearing: resolveItemRefs(raw.notWearing, ctx),
-    zones: Array.isArray(raw.zones) ? raw.zones.map((zone) => resolveZone(zone, ctx)) : undefined,
-    possibleLocations: Array.isArray(raw.possibleLocations)
-      ? raw.possibleLocations.map((location) => resolveZone(location, ctx))
-      : undefined,
-  });
-}
-
-function adaptReward(raw, ctx) {
-  return adaptSharedReward(raw, ctx, { isRecord, compact, resolveItemRef, resolveTraderRef });
-}
-
-function adaptTaskRequirement(raw, ctx) {
-  if (!isRecord(raw)) return raw;
-  return compact({ ...raw, task: resolveTaskRef(raw.task, ctx) });
-}
-
-function adaptTaskRequirementGroup(value, ctx) {
-  return Array.isArray(value) ? value.map((req) => adaptTaskRequirement(req, ctx)) : [];
-}
-
-function adaptTraderRequirement(raw, ctx) {
-  if (!isRecord(raw)) return raw;
-  return compact({ ...raw, trader: resolveTraderRef(raw.trader, ctx) });
-}
-
-function adaptOtherRequirement(raw, ctx) {
-  if (!isRecord(raw)) return { id: "malformed-requirement", type: "malformed" };
-  return compact({
-    ...raw,
-    id: typeof raw.id === "string" ? raw.id : "malformed-requirement",
-    type: typeof raw.type === "string" ? raw.type : "malformed",
-    traders: resolveSharedDialogueTraderRefs(raw.traders, ctx, resolveTraderRef),
-  });
-}
-
-function adaptKeyRequirement(raw, ctx) {
-  if (!isRecord(raw)) return raw;
-  return compact({
-    ...raw,
-    map: resolveMapRef(raw.map, ctx),
-    keys: resolveItemRefs(raw.keys, ctx),
-  });
-}
-
-function adaptTask(raw, ctx) {
-  const id = stringId(raw) || "";
-  return compact({
-    id,
-    name: translate(ctx.tasksEn, raw.name) || id,
-    trader: adaptTaskTrader(raw.trader, ctx),
-    minPlayerLevel: raw.minPlayerLevel,
-    wikiLink: typeof raw.wikiLink === "string" ? raw.wikiLink : undefined,
-    map:
-      raw.map === undefined
-        ? undefined
-        : raw.map === null
-          ? null
-          : resolveMapRef(raw.map, ctx) || { id: "", name: "Unknown map" },
-    kappaRequired: typeof raw.kappaRequired === "boolean" ? raw.kappaRequired : undefined,
-    lightkeeperRequired: raw.lightkeeperRequired,
-    factionName: raw.factionName,
-    requiredPrestige: resolveRequiredPrestige(raw.requiredPrestige, ctx),
-    taskRequirements: mapOptionalArray(raw.taskRequirements, (req) =>
-      adaptTaskRequirement(req, ctx)
-    ),
-    taskRequirementGroups: mapOptionalArray(raw.taskRequirementGroups, (group) =>
-      adaptTaskRequirementGroup(group, ctx)
-    ),
-    traderRequirements: mapOptionalArray(raw.traderRequirements, (req) =>
-      adaptTraderRequirement(req, ctx)
-    ),
-    otherRequirements: mapOptionalArray(raw.otherRequirements, (requirement) =>
-      adaptOtherRequirement(requirement, ctx)
-    ),
-    neededKeys: mapOptionalArray(raw.neededKeys, (requirement) =>
-      adaptKeyRequirement(requirement, ctx)
-    ),
-    availableDelaySecondsMin: raw.availableDelaySecondsMin,
-    availableDelaySecondsMax: raw.availableDelaySecondsMax,
-    experience: typeof raw.experience === "number" ? raw.experience : undefined,
-    objectives: Array.isArray(raw.objectives)
-      ? raw.objectives.filter(isRecord).map((objective) => adaptObjective(objective, ctx))
-      : undefined,
-    startRewards: adaptReward(raw.startRewards, ctx),
-    finishRewards: adaptReward(raw.finishRewards, ctx),
-  });
-}
-
-async function buildTaskContext(cache, mode, tasksData) {
-  return buildSharedTaskContext(cache, mode, tasksData, {
-    fetchEnvelope,
-    fetchTranslations,
-    isRecord,
-    toLookup,
-  });
-}
-
-async function fetchApiTasks(mode) {
-  const gameMode = mode || "regular";
-  // Per-call cache: dedupe concurrent endpoint reads within this refresh while
-  // ensuring each poll cycle fetches fresh data from json.tarkov.dev.
-  const cache = new Map();
-  const tasksEnvelope = await fetchEnvelope(cache, `${gameMode}/tasks`);
-  const tasksData = isRecord(tasksEnvelope.data) ? tasksEnvelope.data : undefined;
-  if (!tasksData || !isRecord(tasksData.tasks)) {
-    throw new Error(
-      `Invalid json.tarkov.dev response for ${gameMode}/tasks: expected data.tasks object, got ${getValueType(
-        tasksData && tasksData.tasks
-      )}`
-    );
-  }
-  const ctx = await buildTaskContext(cache, gameMode, tasksData);
-  const tasks = [];
-  const seenIds = new Set();
-  for (const [sourceKey, rawTask] of Object.entries(tasksData.tasks)) {
-    if (!isRecord(rawTask)) {
-      const error = new Error(
-        `Invalid json.tarkov.dev response for ${gameMode}/tasks: task '${sourceKey}' is not an object`
-      );
-      error.fatal = true;
-      throw error;
-    }
-    const id = stringId(rawTask);
-    if (!id) {
-      const error = new Error(
-        `Invalid json.tarkov.dev response for ${gameMode}/tasks: task '${sourceKey}' has no id`
-      );
-      error.fatal = true;
-      throw error;
-    }
-    if (seenIds.has(id)) {
-      const error = new Error(
-        `Invalid json.tarkov.dev response for ${gameMode}/tasks: duplicate task id '${id}'`
-      );
-      error.fatal = true;
-      throw error;
-    }
-    seenIds.add(id);
-    tasks.push(adaptTask(rawTask, ctx));
-  }
-  return tasks;
-}
 
 async function refreshApiTasks(mode) {
   const lock = readLocks[mode];
@@ -1504,6 +1138,12 @@ const server = http.createServer((req, res) => {
         releaseSseSlot();
         handleResponseFailure(res);
       });
+    return;
+  }
+
+  // The monitor has no icon asset; avoid an automatic browser request error.
+  if (pathname === "/favicon.ico") {
+    send(res, 204, "");
     return;
   }
 
