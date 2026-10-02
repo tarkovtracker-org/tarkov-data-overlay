@@ -167,6 +167,116 @@ function canonicalRequirements(
   );
 }
 
+/** Normalize the three prerequisite sources without guessing missing evidence. */
+function prerequisiteValues(eft: EftTask, api: TaskData, override: TaskOverride | undefined) {
+  return {
+    reference: canonicalConditions(
+      eft.prerequisiteConditions ?? (eft.prerequisites.size === 0 ? [] : [{ statuses: undefined }])
+    ),
+    api: canonicalRequirements(api.taskRequirements ?? []),
+    override:
+      override?.taskRequirements === undefined
+        ? undefined
+        : canonicalRequirements(override.taskRequirements),
+  };
+}
+
+/** Missing status evidence cannot license a correction, even if IDs match. */
+function prerequisiteVerdict(
+  values: ReturnType<typeof prerequisiteValues>,
+  hasOverride: boolean
+): Verdict | null {
+  if (
+    values.reference === undefined ||
+    values.api === undefined ||
+    (hasOverride && values.override === undefined)
+  ) {
+    return 'UNRESOLVED';
+  }
+  return classify(values.reference, values.api, values.override);
+}
+
+/** Grouped OR requirements cannot be compared with flat reference AND gates. */
+function hasPrerequisiteGroups(api: TaskData, override: TaskOverride | undefined): boolean {
+  return (
+    (api.taskRequirementGroups?.length ?? 0) > 0 ||
+    (override?.taskRequirementGroups?.length ?? 0) > 0
+  );
+}
+
+/** Audit one flat prerequisite list, preserving unresolved evidence and targets. */
+function prerequisiteRow(
+  eft: EftTask,
+  api: TaskData,
+  override: TaskOverride | undefined,
+  apiTaskIds: ReadonlySet<string>
+): Row | null {
+  if (hasPrerequisiteGroups(api, override)) return null;
+
+  const values = prerequisiteValues(eft, api, override);
+  const row = {
+    taskId: eft.id,
+    taskName: api.name,
+    field: 'taskRequirements' as const,
+    reference: values.reference ?? canonicalJoin(eft.prerequisites),
+    api: values.api,
+    override: values.override,
+  };
+  const missingReferenceTargets = [...eft.prerequisites].filter(
+    (taskId) => !apiTaskIds.has(taskId)
+  );
+
+  // A missing target takes precedence over missing statuses: consumers cannot
+  // safely represent this edge until the task exists in the selected mode.
+  if (missingReferenceTargets.length > 0) {
+    return {
+      ...row,
+      verdict: 'UNRESOLVED',
+      note:
+        `client prerequisite target(s) absent from selected API mode: ${missingReferenceTargets.join(', ')}; ` +
+        'do not add a dangling task override',
+    };
+  }
+  const verdict = prerequisiteVerdict(values, override?.taskRequirements !== undefined);
+  if (verdict === 'UNRESOLVED') {
+    return {
+      ...row,
+      verdict,
+      note: 'prerequisite target or accepted-status evidence unavailable or unsupported; do not infer completion',
+    };
+  }
+  return verdict ? { ...row, verdict } : null;
+}
+
+/** Compare objective counts by condition ID without changing row order. */
+function objectiveCountRows(
+  eft: EftTask,
+  api: TaskData,
+  override: TaskOverride | undefined
+): Row[] {
+  const rows: Row[] = [];
+  const apiObjectives = new Map((api.objectives ?? []).map((o) => [o.id, o]));
+  for (const [objId, refCount] of eft.counts) {
+    const apiObj = apiObjectives.get(objId);
+    const apiCount = typeof apiObj?.count === 'number' ? apiObj.count : undefined;
+    const objOverride = override?.objectives?.[objId];
+    const overrideCount = typeof objOverride?.count === 'number' ? objOverride.count : undefined;
+    const verdict = classify(refCount, apiCount, overrideCount);
+    if (verdict) {
+      rows.push({
+        taskId: eft.id,
+        taskName: api.name,
+        field: `objective[${objId}].count`,
+        reference: refCount,
+        api: apiCount,
+        override: overrideCount,
+        verdict,
+      });
+    }
+  }
+  return rows;
+}
+
 /** Compare reference-backed fields with upstream and effective overrides, flagging missing prerequisite targets. */
 function buildRows(
   eftTasks: Map<string, EftTask>,
@@ -203,93 +313,10 @@ function buildRows(
     scalar('experience', eft.experience);
     scalar('minPlayerLevel', eft.minPlayerLevel);
 
-    // OR groups cannot be flattened into the reference's separate AND gates.
-    // Preserve the grouped-requirement guard until the reference models groups.
-    const hasGroups =
-      (api.taskRequirementGroups?.length ?? 0) > 0 || (ov?.taskRequirementGroups?.length ?? 0) > 0;
+    const prerequisite = prerequisiteRow(eft, api, ov, apiTaskIds);
+    if (prerequisite) rows.push(prerequisite);
 
-    if (!hasGroups) {
-      const referenceEdges = canonicalConditions(
-        eft.prerequisiteConditions ??
-          (eft.prerequisites.size === 0 ? [] : [{ statuses: undefined }])
-      );
-      const referenceDisplay = referenceEdges ?? canonicalJoin(eft.prerequisites);
-      const apiEdges = canonicalRequirements(api.taskRequirements ?? []);
-      const overrideEdges =
-        ov?.taskRequirements === undefined ? undefined : canonicalRequirements(ov.taskRequirements);
-      const missingReferenceTargets = [...eft.prerequisites].filter(
-        (taskId) => !apiTaskIds.has(taskId)
-      );
-
-      // A client edge to a task absent from the selected API mode cannot be
-      // safely represented by a task override: adding it would leave consumers
-      // with a dangling prerequisite. Keep the evidence visible, but do not
-      // call it a GAP that invites an unsafe correction. This is common for
-      // story/seasonal tasks that the task endpoint does not model.
-      if (missingReferenceTargets.length > 0) {
-        rows.push({
-          taskId: eft.id,
-          taskName: name,
-          field: 'taskRequirements',
-          reference: referenceDisplay,
-          api: apiEdges,
-          override: overrideEdges,
-          verdict: 'UNRESOLVED',
-          note:
-            `client prerequisite target(s) absent from selected API mode: ${missingReferenceTargets.join(', ')}; ` +
-            'do not add a dangling task override',
-        });
-      } else if (
-        referenceEdges === undefined ||
-        apiEdges === undefined ||
-        (ov?.taskRequirements !== undefined && overrideEdges === undefined)
-      ) {
-        rows.push({
-          taskId: eft.id,
-          taskName: name,
-          field: 'taskRequirements',
-          reference: referenceDisplay,
-          api: apiEdges,
-          override: overrideEdges,
-          verdict: 'UNRESOLVED',
-          note: 'prerequisite target or accepted-status evidence unavailable or unsupported; do not infer completion',
-        });
-      } else {
-        const edgeVerdict = classify(referenceEdges, apiEdges, overrideEdges);
-        if (edgeVerdict) {
-          rows.push({
-            taskId: eft.id,
-            taskName: name,
-            field: 'taskRequirements',
-            reference: referenceDisplay,
-            api: apiEdges,
-            override: overrideEdges,
-            verdict: edgeVerdict,
-          });
-        }
-      }
-    }
-
-    // Objective counts (keyed by objective/condition id).
-    const apiObjectives = new Map((api.objectives ?? []).map((o) => [o.id, o]));
-    for (const [objId, refCount] of eft.counts) {
-      const apiObj = apiObjectives.get(objId);
-      const apiCount = typeof apiObj?.count === 'number' ? apiObj.count : undefined;
-      const objOverride = ov?.objectives?.[objId];
-      const overrideCount = typeof objOverride?.count === 'number' ? objOverride.count : undefined;
-      const verdict = classify(refCount, apiCount, overrideCount);
-      if (verdict) {
-        rows.push({
-          taskId: eft.id,
-          taskName: name,
-          field: `objective[${objId}].count`,
-          reference: refCount,
-          api: apiCount,
-          override: overrideCount,
-          verdict,
-        });
-      }
-    }
+    rows.push(...objectiveCountRows(eft, api, ov));
   }
 
   return rows;

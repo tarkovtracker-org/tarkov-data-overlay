@@ -124,6 +124,79 @@ describe('eft-audit buildRows', () => {
     expect(rows).toHaveLength(0);
   });
 
+  it('preserves complete rows and scalar/prerequisite/objective ordering', () => {
+    const taskId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    const target = 'dddddddddddddddddddddddd';
+    const reference = parseEftTasks([
+      {
+        _id: taskId,
+        rewards: { Success: [{ type: 'Experience', value: 7500 }] },
+        conditions: {
+          AvailableForStart: [
+            { id: 'level', conditionType: 'Level', value: 10 },
+            { id: 'prerequisite', conditionType: 'Quest', target, status: [4] },
+          ],
+          AvailableForFinish: [
+            { id: 'first', conditionType: 'CounterCreator', value: 36 },
+            { id: 'second', conditionType: 'CounterCreator', value: 3 },
+          ],
+        },
+      },
+    ] as never);
+    const rows = buildRows(
+      reference,
+      [
+        apiTask({
+          experience: 0,
+          minPlayerLevel: 20,
+          taskRequirements: [],
+          objectives: [
+            { id: 'first', count: 24 },
+            { id: 'second', count: 3 },
+          ],
+        }),
+        { id: target, name: 'Prerequisite' },
+      ],
+      { [taskId]: { experience: 7500, objectives: { second: { count: 3 } } } }
+    );
+    const identity = { taskId, taskName: 'Test Task' };
+    expect(rows).toEqual([
+      { ...identity, field: 'experience', reference: 7500, api: 0, override: 7500, verdict: 'OK' },
+      {
+        ...identity,
+        field: 'minPlayerLevel',
+        reference: 10,
+        api: 20,
+        override: undefined,
+        verdict: 'GAP',
+      },
+      {
+        ...identity,
+        field: 'taskRequirements',
+        reference: `${target} [complete]`,
+        api: '(none)',
+        override: undefined,
+        verdict: 'GAP',
+      },
+      {
+        ...identity,
+        field: 'objective[first].count',
+        reference: 36,
+        api: 24,
+        override: undefined,
+        verdict: 'GAP',
+      },
+      {
+        ...identity,
+        field: 'objective[second].count',
+        reference: 3,
+        api: 3,
+        override: 3,
+        verdict: 'STALE',
+      },
+    ]);
+  });
+
   it('reports a client edge to an API-missing task as unresolved', () => {
     const reference = parseEftTasks([
       {
