@@ -508,7 +508,7 @@ describe('validateTaskOverride', () => {
     it.each([
       [4, 'complete'],
       [2, 'active'],
-      [6, 'failed'],
+      [5, 'failed'],
     ])('rejects capture code %s in API requirement statuses', (code, canonical) => {
       const task = { id: 'prereq-1', name: 'Task' };
       const malformed = { task, status: [code] };
