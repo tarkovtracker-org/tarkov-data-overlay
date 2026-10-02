@@ -29,8 +29,16 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'fs';
-import { dirname, join } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  statSync,
+} from 'fs';
+import { dirname, isAbsolute, join, relative, resolve, sep, win32 } from 'path';
 import Ajv from 'ajv';
 import { isDirectExecution, STORY_ENDINGS } from '../src/lib/index.js';
 import { modeFromRequestUrl } from './eft-compare.js';
@@ -421,9 +429,15 @@ function scoreReference(quests: JsonRecord[]): { chapters: number; texts: number
  */
 export function storyReferenceCandidates(root = 'eft'): string[] {
   const found: string[] = [];
+  const visited = new Set<string>();
   const walk = (dir: string): void => {
     let names: string[];
     try {
+      // Directory symlinks can point to ancestors or repeated aliases. Visit
+      // each physical directory once, keeping discovery bounded and deterministic.
+      const directory = realpathSync(dir);
+      if (visited.has(directory)) return;
+      visited.add(directory);
       names = readdirSync(dir);
     } catch {
       return;
@@ -549,6 +563,45 @@ function readLock(): ReferenceLock | null {
     );
   }
   return parsed;
+}
+
+/** Portable, normalized project-relative provenance; it need not exist on this machine. */
+function isSafeReferencePath(file: unknown): file is string {
+  return (
+    typeof file === 'string' &&
+    file.length > 0 &&
+    !isAbsolute(file) &&
+    !win32.isAbsolute(file) &&
+    !/[:\\\0]/.test(file) &&
+    file.split('/').every((part) => part.length > 0 && part !== '.' && part !== '..')
+  );
+}
+
+/** Re-pins may name only a capture physically contained in the project's eft/ directory. */
+function canonicalRepinSource(file: string): string {
+  const project = realpathSync(process.cwd());
+  const referenceDir = resolve('eft');
+  const selected = resolve(file);
+  const within = (root: string, candidate: string): boolean => {
+    const path = relative(root, candidate);
+    return path.length > 0 && path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path);
+  };
+  const refused = (): never => {
+    throw new Error(
+      'story reference re-pin source must be a capture under the project eft/ directory'
+    );
+  };
+  // Check lexical containment before resolving: an outside alias pointing into
+  // eft/ is still an outside source input, and must not become committed provenance.
+  if (!within(referenceDir, selected)) refused();
+  const reference = realpathSync(referenceDir);
+  const source = realpathSync(selected);
+  // Symlinked captures/directories must not escape eft/, nor may eft/ itself
+  // redirect outside the project. Canonicalize inside aliases to their real path.
+  if (!within(project, reference) || !within(reference, source)) refused();
+  const canonical = relative(project, source).split(sep).join('/');
+  if (!isSafeReferencePath(canonical)) refused();
+  return canonical;
 }
 
 /** Fingerprint a capture: content hash plus the provenance in its envelope. */
@@ -760,12 +813,11 @@ export type StagedLockInspection =
 function isReferenceLock(value: unknown): value is ReferenceLock {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const lock = value as Partial<ReferenceLock>;
-  const nonEmptyString = (field: unknown): boolean => typeof field === 'string' && field.length > 0;
   const stringOrNull = (field: unknown): boolean => typeof field === 'string' || field === null;
   const count = (field: unknown): boolean =>
     typeof field === 'number' && Number.isInteger(field) && field >= 0;
   return (
-    nonEmptyString(lock.file) &&
+    isSafeReferencePath(lock.file) &&
     // A digest, not merely a non-empty string: a hand-edited `"sha256": "x"` must
     // not be able to replace the committed provenance record.
     typeof lock.sha256 === 'string' &&
@@ -922,6 +974,7 @@ export function loadReference(): JsonRecord[] {
     file = ranked[0].file;
   }
 
+  if (updating) file = canonicalRepinSource(file);
   const { lock: current, quests } = fingerprint(file);
   if (current.chapterQuests === 0 || current.objectiveTexts === 0) {
     throw new Error(`story reference ${file} resolves no chapter quests or objective texts`);
