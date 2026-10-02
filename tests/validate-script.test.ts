@@ -2,9 +2,9 @@
  * Tests for scripts/validate.ts helpers
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { join } from 'path';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import {
   getProjectPaths,
@@ -116,11 +116,33 @@ describe('scripts/validate helpers', () => {
       ]),
     ].sort();
 
-    const results = await validateSourceFiles();
-    const files = results.map((result) => result.file).sort();
+    // This checks source traversal and schema validation deterministically. The
+    // separate `npm run validate` CI step checks the current live locale IDs.
+    const taskIds: string[] = JSON.parse(
+      readFileSync(new URL('./fixtures/locale-api-task-ids.json', import.meta.url), 'utf8')
+    );
+    const endpoints = new Map([
+      ['tasks', { tasks: Object.fromEntries(taskIds.map((id) => [id, { id }])) }],
+      ['items', { items: {} }],
+      ['maps', { maps: {} }],
+      ['traders', {}],
+    ]);
+    const fetch = vi.fn(async (url: string) => {
+      const endpoint = new URL(url).pathname.split('/').at(-1)!;
+      if (!endpoints.has(endpoint)) throw new Error(`Unexpected validation endpoint: ${url}`);
+      return new Response(JSON.stringify({ data: endpoints.get(endpoint) }));
+    });
+    vi.stubGlobal('fetch', fetch);
+    try {
+      const results = await validateSourceFiles();
+      const files = results.map((result) => result.file).sort();
 
-    expect(files).toEqual(expectedFiles);
-    expect(results.every((result) => result.valid)).toBe(true);
+      expect(files).toEqual(expectedFiles);
+      expect(results.every((result) => result.valid)).toBe(true);
+      expect(fetch).toHaveBeenCalledTimes(SUPPORTED_GAME_MODES.length * endpoints.size);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('returns an invalid result when JSON5 parsing fails', () => {
