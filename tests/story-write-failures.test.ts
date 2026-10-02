@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'crypto';
-import { execFileSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import {
   closeSync,
   existsSync,
@@ -67,7 +67,7 @@ function setupWorkspace(prefix: string) {
  * The injection runs inside the child so patching the built-in cannot affect
  * another test, and returns `throw` to propagate an ENOSPC-style error.
  */
-function runWriter(dir: string, input: string, inject: string): void {
+function runWriter(dir: string, input: string, inject: string) {
   const bootstrap = `
     import fs from 'node:fs';
     import { syncBuiltinESMExports } from 'node:module';
@@ -77,14 +77,51 @@ function runWriter(dir: string, input: string, inject: string): void {
     process.argv = [process.execPath, ${JSON.stringify(writer)}, ${JSON.stringify(input)}];
     await import(${JSON.stringify(new URL('../scripts/eft-story-write.ts', import.meta.url).href)});
   `;
-  execFileSync(
+  const result = spawnSync(
     process.execPath,
     ['--import', import.meta.resolve('tsx'), '--input-type=module', '-e', bootstrap],
     {
       cwd: dir,
       stdio: 'pipe',
+      encoding: 'utf8',
     }
   );
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(
+      `writer failed (${result.status ?? result.signal}): ${result.stdout}${result.stderr}`
+    );
+  }
+  return { stdout: result.stdout, stderr: result.stderr };
+}
+
+/** Read only the synthetic workspace's recovery record; never a real capture. */
+function recoveryState(dir: string, artifactIsPublished = true) {
+  const path = join(dir, 'data', 'eft', 'story-write.lock');
+  const record = readFileSync(path, 'utf8');
+  const [pid, json] = record.trim().split('\n');
+  expect(pid).toMatch(/^\d+$/);
+  const metadata = JSON.parse(json);
+  expect(metadata).toEqual({
+    version: 1,
+    artifact: 'src/additions/storyChapters.json5',
+    snapshot: expect.anything(),
+    artifactSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+    previousArtifactSha256: createHash('sha256').update(PREVIOUS_ARTIFACT).digest('hex'),
+    previousPinSha256: createHash('sha256').update(PREVIOUS_LOCK).digest('hex'),
+  });
+  expect(metadata.snapshot).toMatch(
+    /^src\/additions\/\.storyChapters\.json5-rollback-[^/]+\/previous$/
+  );
+  expect(readFileSync(join(dir, metadata.snapshot), 'utf8')).toBe(PREVIOUS_ARTIFACT);
+  if (artifactIsPublished) {
+    expect(
+      createHash('sha256')
+        .update(readFileSync(join(dir, metadata.artifact)))
+        .digest('hex')
+    ).toBe(metadata.artifactSha256);
+  }
+  return { path, record, metadata };
 }
 
 describe('writeFileAtomicSync', () => {
@@ -211,6 +248,7 @@ describe('story artifact and provenance write failures', () => {
       // A crash retains the exclusive lock, so the next writer cannot silently
       // publish over a run whose provenance promotion might have been interrupted.
       expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(true);
+      recoveryState(dir, false);
     } finally {
       closeSync(originalArtifact);
       rmSync(dir, { recursive: true, force: true });
@@ -320,7 +358,9 @@ describe('story artifact and provenance write failures', () => {
           };
           `
         )
-      ).toThrow(/simulated rollback failure/);
+      ).toThrow(
+        /promotion failed:.*simulated lock failure; rollback was not confirmed:.*simulated rollback failure/
+      );
       expect(readFileSync(artifact, 'utf8')).not.toBe(PREVIOUS_ARTIFACT);
       expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
       expect(readFileSync(sidecar, 'utf8')).toBe(pending);
@@ -331,11 +371,59 @@ describe('story artifact and provenance write failures', () => {
       expect(readFileSync(join(dir, 'src', 'additions', rollbackDir!, 'previous'), 'utf8')).toBe(
         PREVIOUS_ARTIFACT
       );
-      expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+      const recovery = recoveryState(dir);
+      expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+      expect(readFileSync(recovery.path, 'utf8')).toBe(recovery.record);
+      expect(readFileSync(join(dir, recovery.metadata.snapshot), 'utf8')).toBe(PREVIOUS_ARTIFACT);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it.each([false, true])(
+    'handles a post-replacement binding refusal with rollback failure=%s',
+    (rollbackFails) => {
+      const { dir, artifact, lock, sidecar, input } = setupWorkspace('story-binding-refusal-');
+      try {
+        expect(() =>
+          runWriter(
+            dir,
+            input,
+            `
+          const rename = fs.renameSync;
+          fs.renameSync = (source, destination) => {
+            if (String(source).includes('-rollback-')) {
+              if (${rollbackFails}) throw new Error('EACCES: simulated rollback failure');
+              return rename(source, destination);
+            }
+            const result = rename(source, destination);
+            if (String(destination) === 'src/additions/storyChapters.json5') {
+              fs.rmSync(${JSON.stringify(sidecar)});
+            }
+            return result;
+          };
+        `
+          )
+        ).toThrow(
+          rollbackFails
+            ? /promotion failed:.*binding changed or was refused.*rollback was not confirmed:.*simulated rollback failure/
+            : /artifact has been rolled back/
+        );
+        expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+        expect(existsSync(sidecar)).toBe(false);
+        if (rollbackFails) {
+          recoveryState(dir);
+          expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+        } else {
+          expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+          expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+          expect(readdirSync(join(dir, 'src', 'additions'))).toEqual(['storyChapters.json5']);
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  );
 
   it('removes an initial artifact if provenance promotion fails with no previous artifact', () => {
     const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-initial-');
@@ -359,10 +447,203 @@ describe('story artifact and provenance write failures', () => {
       expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
       expect(readFileSync(sidecar, 'utf8')).toBe(pending);
       expect(readdirSync(join(dir, 'src', 'additions'))).toEqual([]);
+      expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('retains the lock when removing an initial publication fails', () => {
+    const { dir, artifact, lock, input } = setupWorkspace('story-initial-recovery-');
+    try {
+      rmSync(artifact);
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+        const remove = fs.rmSync;
+        fs.rmSync = (file, ...args) => {
+          if (String(file) === 'src/additions/storyChapters.json5') {
+            throw new Error('EACCES: simulated removal failure');
+          }
+          return remove(file, ...args);
+        };
+        fs.writeFileSync = (file, data, ...args) => {
+          if (String(file).includes('story-reference.lock.json')) {
+            throw new Error('ENOSPC: simulated lock failure');
+          }
+          return write(file, data, ...args);
+        };
+      `
+        )
+      ).toThrow(
+        /promotion failed:.*simulated lock failure; rollback was not confirmed:.*simulated removal failure/
+      );
+      const writeLock = join(dir, 'data', 'eft', 'story-write.lock');
+      const metadata = JSON.parse(readFileSync(writeLock, 'utf8').trim().split('\n')[1]);
+      expect(metadata.snapshot).toBeNull();
+      expect(metadata.previousArtifactSha256).toBeNull();
+      expect(metadata.previousPinSha256).toBe(
+        createHash('sha256').update(PREVIOUS_LOCK).digest('hex')
+      );
+      expect(metadata.artifactSha256).toBe(
+        createHash('sha256').update(readFileSync(artifact)).digest('hex')
+      );
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+      expect(existsSync(artifact)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('retains recovery evidence when the published destination cannot be read', () => {
+    const { dir, artifact, lock, input } = setupWorkspace('story-unreadable-');
+    try {
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+        const read = fs.readFileSync;
+        let failedPromotion = false;
+        fs.readFileSync = (file, ...args) => {
+          if (failedPromotion && String(file) === 'src/additions/storyChapters.json5') {
+            throw new Error('EACCES: simulated destination read failure');
+          }
+          return read(file, ...args);
+        };
+        fs.writeFileSync = (file, data, ...args) => {
+          if (String(file).includes('story-reference.lock.json')) {
+            failedPromotion = true;
+            throw new Error('ENOSPC: simulated lock failure');
+          }
+          return write(file, data, ...args);
+        };
+      `
+        )
+      ).toThrow(
+        /promotion failed:.*simulated lock failure; rollback was not confirmed:.*simulated destination read failure/
+      );
+      recoveryState(dir);
+      expect(readFileSync(artifact, 'utf8')).not.toBe(PREVIOUS_ARTIFACT);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('retains the publication and snapshot when the provenance pin changed', () => {
+    const { dir, artifact, lock, input } = setupWorkspace('story-changed-pin-');
+    const foreignPin = '{ "file": "eft/foreign.json" }\n';
+    try {
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+        fs.writeFileSync = (file, data, ...args) => {
+          if (String(file).includes('story-reference.lock.json')) {
+            write(${JSON.stringify(lock)}, ${JSON.stringify(foreignPin)});
+            throw new Error('ENOSPC: simulated lock failure');
+          }
+          return write(file, data, ...args);
+        };
+      `
+        )
+      ).toThrow(/rollback was not confirmed:.*no longer matches the previous pin/);
+      recoveryState(dir);
+      expect(readFileSync(artifact, 'utf8')).not.toBe(PREVIOUS_ARTIFACT);
+      expect(readFileSync(lock, 'utf8')).toBe(foreignPin);
+      expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('aborts before replacement if recording recovery metadata fails', () => {
+    const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-metadata-');
+    try {
+      expect(() =>
+        runWriter(
+          dir,
+          input,
+          `
+        fs.writeFileSync = (file, data, ...args) => {
+          if (typeof file === 'number' && String(data).startsWith('{"version":')) {
+            write(file, '{ partial', ...args);
+            throw new Error('ENOSPC: simulated metadata write failure');
+          }
+          return write(file, data, ...args);
+        };
+      `
+        )
+      ).toThrow(/simulated metadata write failure/);
+      expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+      expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+      expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+      expect(readdirSync(join(dir, 'src', 'additions'))).toEqual(['storyChapters.json5']);
+      expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['promotion', 'rollback'])(
+    'warns and releases the lock if snapshot cleanup fails after %s',
+    (outcome) => {
+      const { dir, artifact, lock, sidecar, input, pending } = setupWorkspace('story-cleanup-');
+      try {
+        let diagnostics: string;
+        try {
+          diagnostics = runWriter(
+            dir,
+            input,
+            `
+          const remove = fs.rmSync;
+          fs.rmSync = (file, ...args) => {
+            if (String(file).includes('-rollback-')) {
+              throw new Error('EACCES: simulated snapshot cleanup failure');
+            }
+            return remove(file, ...args);
+          };
+          fs.writeFileSync = (file, data, ...args) => {
+            if (${outcome === 'rollback'} && String(file).includes('story-reference.lock.json')) {
+              throw new Error('ENOSPC: simulated lock failure');
+            }
+            return write(file, data, ...args);
+          };
+        `
+          ).stderr;
+          expect(outcome).toBe('promotion');
+        } catch (error) {
+          if (outcome !== 'rollback') throw error;
+          diagnostics = String(error);
+          expect(diagnostics).toContain('artifact has been rolled back');
+        }
+        expect(diagnostics).toMatch(
+          /warning: could not remove rollback snapshot directory.*simulated snapshot cleanup failure/
+        );
+        expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(false);
+        if (outcome === 'rollback') {
+          expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+          expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
+          expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+        } else {
+          expect(readFileSync(artifact, 'utf8')).not.toBe(PREVIOUS_ARTIFACT);
+          expect(JSON.parse(readFileSync(lock, 'utf8'))).toEqual(JSON.parse(pending).lock);
+          expect(existsSync(sidecar)).toBe(false);
+        }
+        expect(
+          readdirSync(join(dir, 'src', 'additions')).some((name) => name.includes('-rollback-'))
+        ).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  );
 
   it("leaves another run's artifact in place when rolling back", () => {
     // If the destination no longer holds the bytes this run published, restoring
@@ -392,6 +673,9 @@ describe('story artifact and provenance write failures', () => {
       expect(readFileSync(artifact, 'utf8')).toBe(foreign);
       expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
       expect(readFileSync(sidecar, 'utf8')).toBe(pending);
+      recoveryState(dir, false);
+      expect(() => runWriter(dir, input, '')).toThrow(/STORY_PUBLICATION_RECOVERY/);
+      expect(readFileSync(artifact, 'utf8')).toBe(foreign);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
