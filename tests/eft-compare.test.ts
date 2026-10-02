@@ -91,6 +91,31 @@ describe('eft-compare', () => {
     expect(t.counts.get('obj1')).toBe(7);
   });
 
+  it('retains each Quest start condition and its accepted statuses', () => {
+    const parsed = parseEftTasks([
+      {
+        _id: 'task1',
+        conditions: {
+          AvailableForStart: [
+            { id: 'first', conditionType: 'Quest', target: 'task2', status: [4, 2, 4] },
+            { id: 'second', conditionType: 'Quest', target: 'task2', status: [3] },
+            { id: 'missing', conditionType: 'Quest', target: 'task3' },
+            { id: 'unsupported', conditionType: 'Quest', target: 'task4', status: [4, 99] },
+            { id: 'targetless', conditionType: 'Quest', status: [4] },
+          ],
+        },
+      },
+    ] as never).get('task1')!;
+    expect([...parsed.prerequisites]).toEqual(['task2', 'task3', 'task4']);
+    expect(parsed.prerequisiteConditions).toEqual([
+      { target: 'task2', statuses: ['active', 'complete'] },
+      { target: 'task2', statuses: ['availableForFinish'] },
+      { target: 'task3', statuses: undefined },
+      { target: 'task4', statuses: undefined },
+      { target: undefined, statuses: ['complete'] },
+    ]);
+  });
+
   it('flags experience, minPlayerLevel and objective count discrepancies', () => {
     const eft = parseEftTasks(quests as never);
     const api: TaskData[] = [

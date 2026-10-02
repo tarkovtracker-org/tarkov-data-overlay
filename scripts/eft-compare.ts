@@ -47,6 +47,8 @@ import {
   type GameMode,
 } from '../src/lib/index.js';
 
+import { normalizeTaskStatus } from '../src/lib/task-unlocks.js';
+
 // ---------------------------------------------------------------------------
 // Reference-file parsing
 // ---------------------------------------------------------------------------
@@ -66,7 +68,7 @@ interface EftCondition {
   conditionType?: string;
   value?: unknown;
   target?: unknown;
-  status?: number[];
+  status?: unknown;
 }
 
 interface EftQuest {
@@ -106,7 +108,7 @@ interface EftTask {
   counts: Map<string, number>;
   /**
    * Task IDs named by `AvailableForStart` `Quest` conditions - the client's own
-   * prerequisite edges, and therefore the authority for `taskRequirements`.
+   * prerequisite targets. Accepted states live in `prerequisiteConditions`.
    *
    * Unlike `minPlayerLevel`, this is populated densely enough to adjudicate by
    * absence: an empty set means the client really has no quest prerequisite (it
@@ -116,6 +118,10 @@ interface EftTask {
    * entry is not evidence of a `Quest` condition.
    */
   prerequisites: Set<string>;
+  /** Each Quest start condition is a separate AND gate. Missing statuses mean
+   * the reference cannot adjudicate that condition's accepted quest states. */
+  prerequisiteConditions?: Array<{ target?: string; statuses?: string[] }>;
+
   /** objective (condition) id -> canonical English objective text, when the
    * reference file carries a `localization.en` block. Empty otherwise. */
   descriptions: Map<string, string>;
@@ -313,10 +319,18 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
     // a single task id; the enriched reference variant may wrap it as
     // `[<id> name]`, which unwrapId normalizes.
     const prerequisites = new Set<string>();
+    const prerequisiteConditions: NonNullable<EftTask['prerequisiteConditions']> = [];
     for (const c of start) {
       if (c.conditionType !== 'Quest') continue;
-      if (typeof c.target !== 'string') continue;
-      prerequisites.add(unwrapId(c.target));
+      const target =
+        typeof c.target === 'string' && c.target.length > 0 ? unwrapId(c.target) : undefined;
+      if (target !== undefined) prerequisites.add(target);
+      const normalized = Array.isArray(c.status) ? c.status.map(normalizeTaskStatus) : [];
+      const statuses =
+        normalized.length > 0 && normalized.every((status) => status !== undefined)
+          ? [...new Set(normalized as string[])].sort()
+          : undefined;
+      prerequisiteConditions.push({ target, statuses });
     }
 
     const descriptions = new Map<string, string>();
@@ -331,7 +345,15 @@ function parseEftTasks(quests: EftQuest[]): Map<string, EftTask> {
       }
     }
 
-    out.set(id, { id, experience, minPlayerLevel, counts, prerequisites, descriptions });
+    out.set(id, {
+      id,
+      experience,
+      minPlayerLevel,
+      counts,
+      prerequisites,
+      prerequisiteConditions,
+      descriptions,
+    });
   }
   return out;
 }
