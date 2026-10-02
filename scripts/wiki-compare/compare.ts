@@ -103,8 +103,11 @@ function createReporter(
     discrepancies.push({
       taskId: apiTask.id,
       taskName: apiTask.name,
-      ...input,
+      field: input.field,
+      apiValue: input.apiValue,
+      wikiValue: input.wikiValue,
       priority: getPriority(input.field),
+      trustsWiki: input.trustsWiki,
       wikiLastEdit,
       wikiEditDaysAgo,
       wikiEditedPost1_0,
