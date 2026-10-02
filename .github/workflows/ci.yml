@@ -27,35 +27,51 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve maintenance comparison base
+        id: maintenance-base
+        run: npm run maintenance:ci -- base
+
       - name: Reject changes to the generated overlay
         if: github.event_name == 'pull_request'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.maintenance-base.outputs.sha }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           BASE_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          # dist/overlay.json has a single writer: the release workflow commits it
-          # after each merge to main. Compare the PR merge commit with its first
-          # parent (current main) so bot commits landing mid-review never count.
-          if git rev-parse --quiet --verify HEAD^2 >/dev/null; then
-            base=HEAD^1
-          else
-            base="$(git merge-base "$BASE_SHA" HEAD)"
-          fi
+          # The resolver uses the verified PR merge parent to exclude release-only
+          # generated commits that arrived after the event payload's base SHA.
+          base="$BASE_SHA"
           if ! git diff --quiet "$base" HEAD -- dist/; then
             echo "::error file=dist/overlay.json::dist/overlay.json is generated and committed by the release workflow after merge. Drop it from this PR by restoring the base copy: git fetch https://github.com/${BASE_REPO}.git ${BASE_REF} && git checkout FETCH_HEAD -- dist/overlay.json"
             exit 1
           fi
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Audit dependencies
         run: npm run audit:dependencies
 
+      - name: Check dead code
+        run: npm run fallow:check -- --fail-on-issues
+
+      - name: Audit maintenance regressions
+        env:
+          MAINTENANCE_BASE: ${{ steps.maintenance-base.outputs.sha }}
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/fallow-audit.json"
+          status=0
+          npm run fallow:audit -- --base "$MAINTENANCE_BASE" --gate new-only --format json --output-file "$report" || status=$?
+          # Report inherited findings and LOC even when Fallow's verdict fails.
+          npm run maintenance:ci -- report "$MAINTENANCE_BASE" "$report" || status=$?
+          exit "$status"
+
       - name: Run Fallow security analysis
-        run: npm run fallow:security -- --gate new --changed-since "${{ github.event.pull_request.base.sha || github.event.before }}"
+        env:
+          MAINTENANCE_BASE: ${{ steps.maintenance-base.outputs.sha }}
+        run: npm run fallow:security -- --gate new --changed-since "$MAINTENANCE_BASE"
 
       - name: Lint Markdown
         run: npm run lint:markdown

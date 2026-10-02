@@ -29,7 +29,8 @@
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "status:locale": "tsx scripts/status-locale.ts"
+    "status:locale": "tsx scripts/status-locale.ts",
+    "maintenance:ci": "tsx scripts/maintenance-ci.ts"
   },
   "keywords": [
     "tarkov",
