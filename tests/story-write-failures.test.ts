@@ -191,8 +191,13 @@ describe('story artifact and provenance write failures', () => {
           `
         )
       ).toThrow(/interrupted before atomic replacement/);
-      expect(readFileSync(artifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
-      expect(statSync(artifact).ino).toBe(previousInode);
+      const publishedArtifact = openSync(artifact, 'r');
+      try {
+        expect(readFileSync(publishedArtifact, 'utf8')).toBe(PREVIOUS_ARTIFACT);
+        expect(fstatSync(publishedArtifact).ino).toBe(previousInode);
+      } finally {
+        closeSync(publishedArtifact);
+      }
       expect(readFileSync(lock, 'utf8')).toBe(PREVIOUS_LOCK);
       expect(readFileSync(sidecar, 'utf8')).toBe(pending);
       const rollbackDir = readdirSync(join(dir, 'src', 'additions')).find((name) =>
@@ -200,8 +205,9 @@ describe('story artifact and provenance write failures', () => {
       );
       expect(rollbackDir).toBeDefined();
       const snapshot = join(dir, 'src', 'additions', rollbackDir!, 'previous');
-      expect(statSync(snapshot).ino).toBe(previousInode);
-      expect(statSync(snapshot).nlink).toBe(2);
+      const snapshotStats = statSync(snapshot);
+      expect(snapshotStats.ino).toBe(previousInode);
+      expect(snapshotStats.nlink).toBe(2);
       // A crash retains the exclusive lock, so the next writer cannot silently
       // publish over a run whose provenance promotion might have been interrupted.
       expect(existsSync(join(dir, 'data', 'eft', 'story-write.lock'))).toBe(true);
