@@ -52,9 +52,11 @@ any leftover snapshot directory can be removed after verifying the pair.
      hash equals `artifactSha256`; an already-absent artifact needs no removal.
 5. Recheck that the artifact has its recorded previous hash (or is absent as
    recorded), and that the provenance lock still has its recorded previous hash
-   (or is absent as recorded). Remove any remaining verified snapshot directory,
-   then remove `data/eft/story-write.lock` **last**. Retry generation only after
-   the pair is reconciled.
+   (or is absent as recorded). Attempt to remove any remaining verified snapshot
+   directory. If cleanup fails, retain it for later cleanup; this must not block
+   lock removal after the pair is verified. Remove `data/eft/story-write.lock`
+   **last**, after that cleanup attempt. Retry generation only after the pair is
+   reconciled.
 
 If the metadata is missing or incomplete, or any required file is unreadable or
 has an unexpected hash, retain the lock and all evidence. Establish the correct
