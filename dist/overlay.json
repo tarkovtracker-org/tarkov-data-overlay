@@ -2082,6 +2082,48 @@
     },
     "5b478eca86f7744642012254": {
       "factionName": "BEAR",
+      "objectives": {
+        "5b478f6886f774464201225a": {
+          "maps": [
+            {
+              "id": "55f2d3fd4bdc2d5f408b4567",
+              "name": "Factory"
+            },
+            {
+              "id": "59fc81d786f774390775787e",
+              "name": "Night Factory"
+            }
+          ],
+          "possibleLocations": [
+            {
+              "map": {
+                "id": "55f2d3fd4bdc2d5f408b4567",
+                "name": "Factory"
+              },
+              "positions": [
+                {
+                  "x": 29.285004,
+                  "y": 4.4782,
+                  "z": -21.469002
+                }
+              ]
+            },
+            {
+              "map": {
+                "id": "59fc81d786f774390775787e",
+                "name": "Night Factory"
+              },
+              "positions": [
+                {
+                  "x": 29.285004,
+                  "y": 4.4782,
+                  "z": -21.469002
+                }
+              ]
+            }
+          ]
+        }
+      },
       "traderRequirements": [
         {
           "id": "overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2",
@@ -3390,6 +3432,9 @@
       "factionName": "BEAR"
     },
     "6a45208043b8d7604d00b8d5": {
+      "factionName": "USEC"
+    },
+    "5ac244eb86f7741356335af1": {
       "factionName": "USEC"
     },
     "67af4c1cc0e59d55e2010b97": {
@@ -12028,8 +12073,8 @@
     }
   },
   "$meta": {
-    "version": "1.119",
-    "generated": "2026-10-02T15:08:26.129Z",
-    "sha256": "55f2d194c26d78a0e948a8bb2b5cf84d7a319a6dc412d55a6e7790dbe36b9846"
+    "version": "1.120",
+    "generated": "2026-10-02T15:11:37.324Z",
+    "sha256": "66e7e6729ba9dad6f01cfb2d3ec07607ba730255eb382645d575730f1a73f2bc"
   }
 }
