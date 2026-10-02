@@ -13,6 +13,7 @@ import type {
   ValidationStatus,
 } from './types.js';
 import { compareSubset, formatValue, type CompareOptions } from './value-compare.js';
+import { normalizeTaskStatus } from './task-unlocks.js';
 
 /** Field validator function signature */
 type FieldValidator = (override: TaskOverride, apiTask: TaskData) => ValidationDetail | null;
@@ -284,28 +285,9 @@ type TaskRequirementLike = {
   status?: unknown;
 } | null;
 
-const TASK_STATUS_ALIASES: Readonly<Record<string, string>> = {
-  accepted: 'active',
-  availableafter: 'active',
-  availableforfinish: 'active',
-  availableforstart: 'active',
-  completed: 'complete',
-  expired: 'failed',
-  fail: 'failed',
-  failedrestartable: 'failed',
-  markedasfailed: 'failed',
-  started: 'active',
-  success: 'complete',
-};
-
-/** Normalize the status semantics used by the task unlock evaluator. */
+/** Normalize aliases while preserving distinct evaluator quest states. */
 function normalizeTaskRequirementStatus(status: unknown): string {
-  if (typeof status !== 'string') return `invalid:${String(status)}`;
-  const normalized = status
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]/g, '');
-  return TASK_STATUS_ALIASES[normalized] ?? normalized;
+  return normalizeTaskStatus(status) ?? `invalid:${String(status)}`;
 }
 
 /** Build the semantic identity of one task prerequisite. */

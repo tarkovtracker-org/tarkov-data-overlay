@@ -453,6 +453,84 @@ describe('validateTaskOverride', () => {
       ).toBe(true);
     });
 
+    it.each([
+      ['availableForStart', 'active'],
+      ['availableForFinish', 'active'],
+      ['availableAfter', 'active'],
+      ['failedRestartable', 'failed'],
+      ['markedFailed', 'failed'],
+      ['expired', 'failed'],
+    ])('keeps %s distinct from %s in flat requirements and groups', (apiStatus, overrideStatus) => {
+      const apiRequirement = { task: { id: 'prereq-1', name: 'Task' }, status: [apiStatus] };
+      const overrideRequirement = {
+        task: { id: 'prereq-1', name: 'Task' },
+        status: [overrideStatus],
+      };
+      for (const field of ['taskRequirements', 'taskRequirementGroups'] as const) {
+        const result = validateTaskOverride(
+          'test-task-id',
+          {
+            [field]: field === 'taskRequirements' ? [overrideRequirement] : [[overrideRequirement]],
+          },
+          [
+            createApiTask({
+              [field]: field === 'taskRequirements' ? [apiRequirement] : [[apiRequirement]],
+            }),
+          ]
+        );
+        expect(result.status).toBe('NEEDED');
+        expect(result.details.find((detail) => detail.field === field)?.status).toBe('needed');
+      }
+    });
+
+    it.each([
+      ['accepted', 'active'],
+      ['started', 'active'],
+      ['success', 'complete'],
+      ['completed', 'complete'],
+      ['fail', 'failed'],
+      ['marked_as_failed', 'markedFailed'],
+    ])('recognizes the canonical alias %s as %s', (alias, canonical) => {
+      const result = validateTaskOverride(
+        'test-task-id',
+        {
+          taskRequirements: [{ task: { id: 'prereq-1', name: 'Task' }, status: [alias] }],
+        },
+        [
+          createApiTask({
+            taskRequirements: [{ task: { id: 'prereq-1', name: 'Task' }, status: [canonical] }],
+          }),
+        ]
+      );
+      expect(result.status).toBe('FIXED');
+    });
+
+    it('compares unordered status sets without combining separate AND gates', () => {
+      const task = { id: 'prereq-1', name: 'Task' };
+      const api = createApiTask({ taskRequirements: [{ task, status: ['complete', 'active'] }] });
+      expect(
+        validateTaskOverride(
+          'test-task-id',
+          {
+            taskRequirements: [{ task, status: ['accepted', 'completed', 'accepted'] }],
+          },
+          [api]
+        ).status
+      ).toBe('FIXED');
+      expect(
+        validateTaskOverride(
+          'test-task-id',
+          {
+            taskRequirements: [
+              { task, status: ['complete'] },
+              { task, status: ['active'] },
+            ],
+          },
+          [api]
+        ).status
+      ).toBe('NEEDED');
+    });
+
     it('reports an omitted active prerequisite as still needed', () => {
       const apiTask = createApiTask({
         taskRequirements: [{ task: { id: 'prereq-1', name: 'Prereq Task' }, status: ['active'] }],
