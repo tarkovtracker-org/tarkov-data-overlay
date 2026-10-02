@@ -2121,7 +2121,13 @@
       }, // Was: [] (player level requirement, minPlayerLevel 24)
     ],
   },
+  // Vitamins - the chemical container is now in the Factory laboratory.
   // Proof: https://escapefromtarkov.fandom.com/wiki/Vitamins
+  // Issue #433: upstream still includes obsolete Shoreline maps/locations in
+  // regular, pve and pvp-season. The wiki confirms Factory; Factory and Night
+  // Factory coordinates below are retained from all three upstream records,
+  // rather than independently re-measured. Key requirements need separate
+  // evidence: the key's wiki page still claims it is needed for Vitamins.
   //
   // 2026-08-10: renamed in S1 (dropped "- Part 1")
   // 2026-08-10 - S1: now requires Skier LL2 instead of player level
@@ -2129,6 +2135,24 @@
   // BEAR PMCs." (issues #288, #291)
   '5b478eca86f7744642012254': {
     factionName: 'BEAR', // Was: Any
+    objectives: {
+      '5b478f6886f774464201225a': {
+        maps: [
+          { id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' },
+          { id: '59fc81d786f774390775787e', name: 'Night Factory' },
+        ], // Was: Factory, Night Factory, Shoreline
+        possibleLocations: [
+          {
+            map: { id: '55f2d3fd4bdc2d5f408b4567', name: 'Factory' },
+            positions: [{ x: 29.285004, y: 4.4782, z: -21.469002 }],
+          },
+          {
+            map: { id: '59fc81d786f774390775787e', name: 'Night Factory' },
+            positions: [{ x: 29.285004, y: 4.4782, z: -21.469002 }],
+          },
+        ], // Was: also Shoreline at { x: -186.06189, y: -2.7302, z: -86.1152039 }
+      },
+    },
     traderRequirements: [
       {
         id: 'overlay.5b478eca86f7744642012254.58330581ace78e27b8b10cee.level.>=.2',
@@ -3543,6 +3567,13 @@
   // train station on Lighthouse", "Eliminate any 6 targets at the train
   // station territory on Lighthouse") are USEC Exclusive.
   '6a45208043b8d7604d00b8d5': {
+    factionName: 'USEC', // Was: Any
+  },
+
+  // Gunsmith - M4A1 - USEC-only per the wiki Requirements section.
+  // Proof: https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_M4A1
+  // Issue #430: regular, pve and pvp-season all incorrectly serve "Any".
+  '5ac244eb86f7741356335af1': {
     factionName: 'USEC', // Was: Any
   },
 
