@@ -229,12 +229,17 @@ suppressing an item:
   interpolation is wrapped in `escapeRegExp`, so wiki text cannot inject metacharacters.
   The two that are not (`normalize.ts` around the count-word replacements) interpolate
   module-local word lists, not input.
-- **SSRF, 3 items** (`monitor/server.js`, `src/lib/tarkov-api.ts`,
+- **SSRF** (`monitor/lib/tarkov-transport.js`, `src/lib/tarkov-api.ts`,
   `monitor/public/app.js`). Both server-side calls append to a hardcoded
-  `https://json.tarkov.dev` base, so the host cannot be redirected, and the request-derived
+  `https://json.tarkov.dev` base, so callers cannot select the requested host. The
+  monitor transport also restricts paths to `endpoints` or safe-mode
+  task/item/map/trader endpoints and their translations. Its isolated
+  `security-sink` suppression is an independently reviewed tool false positive;
+  keep that file limited to this guarded transport policy. The request-derived
   mode segment passes `normalizeMode` (allowlist with fallback) plus `isSafeModeName`
-  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). The third is a same-origin `fetch` in
-  browser code.
+  (`/^[a-z0-9]+(?:-[a-z0-9]+)*$/`, no separators). Native fetch redirects retain
+  the upstream service's existing behavior. The third is a same-origin `fetch`
+  in browser code.
 
 CodeQL alerts dismissed as false positives should state the reason that actually holds. For
 wiki-derived text the operative reason is that `eft-story-generate.ts` consumes the scraped

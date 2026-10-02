@@ -24,6 +24,7 @@ import {
   parseScavKarma,
   parseTraderLoyalty,
 } from '../scripts/wiki-compare/wiki.js';
+import { parseArgs } from '../scripts/wiki-compare/cli.js';
 import type { TaskData } from '../src/lib/types.js';
 
 const EMPTY_ALIASES = new Map<string, string>();
@@ -719,5 +720,94 @@ describe('parseObjectives map extraction', () => {
   it('does not double-report a map that is both linked and named in text', () => {
     const [objective] = parseObjectives(['Eliminate 5 Scavs on [[Customs]]'], aliasMap);
     expect(objective.maps).toEqual(['Customs']);
+  });
+});
+
+describe('wiki narrative relationships', () => {
+  it('reports previous and next relationships without treating narrative order as unlock evidence', () => {
+    const api = {
+      id: 'task',
+      name: 'Task',
+      taskRequirements: [],
+      objectives: [],
+    } as unknown as ExtendedTaskData;
+    const entries = compareTasks(
+      api,
+      makeWiki({ previousTasks: ['Previous'], nextTasks: ['Next'] }),
+      EMPTY_ALIASES,
+      false
+    );
+    expect(entries.filter((d) => ['taskRequirements', 'nextTasks'].includes(d.field))).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: 'taskRequirements',
+          trustsWiki: false,
+          wikiValue: 'Previous',
+        }),
+        expect.objectContaining({ field: 'nextTasks', trustsWiki: false, wikiValue: 'Next' }),
+      ])
+    );
+  });
+});
+
+describe('wiki CLI arguments', () => {
+  it.each([
+    [['-a', '-c', '-r', '-h'], { all: true, useCache: true, refresh: true, help: true }],
+    [
+      ['--all', '--cache', '--refresh', '--help'],
+      { all: true, useCache: true, refresh: true, help: true },
+    ],
+    [
+      [
+        '--id=123',
+        '--name=Task',
+        '--wiki=Article',
+        '--gameMode=pve',
+        '--group-by=priority',
+        '--output=result.json',
+      ],
+      {
+        id: '123',
+        name: 'Task',
+        wiki: 'Article',
+        gameMode: 'pve',
+        groupBy: 'priority',
+        output: 'result.json',
+      },
+    ],
+    [
+      [
+        '--id',
+        '123',
+        '--name',
+        'Task',
+        '--wiki',
+        'Article',
+        '-g',
+        'regular',
+        '--group-by',
+        'category',
+        '-o',
+        'result.json',
+      ],
+      {
+        id: '123',
+        name: 'Task',
+        wiki: 'Article',
+        gameMode: 'regular',
+        groupBy: 'category',
+        output: 'result.json',
+      },
+    ],
+    [['--output', '--cache', 'Task'], { output: '', useCache: true, name: 'Task' }],
+    [['--gameMode', 'invalid', '--cache'], { name: 'invalid', useCache: true }],
+    [['--gameMode=invalid', 'Task'], { name: 'Task' }],
+    [['--group-by', 'invalid', '-o'], { name: 'invalid', output: '' }],
+    [['--id', '--cache'], { id: '--cache' }],
+    [['--wiki'], { wiki: undefined }],
+    [['Task', 'ignored'], { name: 'Task' }],
+    [['-g=pve'], { name: '-g=pve' }],
+  ])('preserves parsing for %j', (argv, expected) => {
+    expect(parseArgs(argv as string[])).toEqual(expected);
   });
 });

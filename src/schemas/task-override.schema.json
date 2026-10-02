@@ -166,8 +166,12 @@
             "description": "Trader dialogue unlock rewards",
             "items": {
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
               },
               "required": ["id", "name"],
               "type": "object"
@@ -178,8 +182,12 @@
             "description": "Map/location unlock rewards",
             "items": {
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
               },
               "required": ["id", "name"],
               "type": "object"
@@ -234,200 +242,8 @@
         "type": "object"
       },
       "startRewards": {
-        "description": "Rewards given when starting the task",
-        "properties": {
-          "items": {
-            "description": "Item rewards (including money)",
-            "items": {
-              "properties": {
-                "count": {
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "item": {
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "shortName": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["id", "name"],
-                  "type": "object"
-                }
-              },
-              "required": ["item", "count"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "offerUnlock": {
-            "description": "Trader offer unlocks (barter/cash offers)",
-            "items": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "item": {
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "shortName": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["id", "name"],
-                  "type": "object"
-                },
-                "level": {
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "trader": {
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["name"],
-                  "type": "object"
-                }
-              },
-              "required": ["trader", "level", "item"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "traderStanding": {
-            "description": "Trader reputation rewards",
-            "items": {
-              "properties": {
-                "standing": {
-                  "type": "number"
-                },
-                "trader": {
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["name"],
-                  "type": "object"
-                }
-              },
-              "required": ["trader", "standing"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "skillLevelReward": {
-            "description": "Skill level rewards",
-            "items": {
-              "properties": {
-                "level": {
-                  "minimum": 0,
-                  "type": "number"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "skill": {
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "imageLink": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["id", "name"],
-                  "type": "object"
-                }
-              },
-              "required": ["name", "level"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "traderUnlock": {
-            "description": "Trader unlock rewards",
-            "items": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "achievement": {
-            "description": "Achievement rewards",
-            "items": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "customization": {
-            "description": "Customization rewards",
-            "items": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "customizationType": {
-                  "type": "string"
-                },
-                "customizationTypeName": {
-                  "type": "string"
-                },
-                "imageLink": {
-                  "type": ["string", "null"]
-                }
-              },
-              "required": ["name"],
-              "type": "object"
-            },
-            "type": "array"
-          }
-        },
-        "type": "object"
+        "$ref": "task-shared.schema.json#/definitions/startRewards",
+        "description": "Rewards given when starting the task"
       },
       "kappaRequired": {
         "description": "Whether task is required for Kappa container",
@@ -478,20 +294,8 @@
         "type": "string"
       },
       "requiredPrestige": {
-        "description": "Prestige requirement to unlock the task",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "prestigeLevel": {
-            "type": "integer"
-          }
-        },
-        "required": ["name", "prestigeLevel"],
-        "type": "object"
+        "$ref": "task-shared.schema.json#/definitions/requiredPrestige",
+        "description": "Prestige requirement to unlock the task"
       },
       "objectives": {
         "additionalProperties": {
@@ -702,9 +506,15 @@
                     "items": {
                       "additionalProperties": false,
                       "properties": {
-                        "x": { "type": "number" },
-                        "y": { "type": "number" },
-                        "z": { "type": "number" }
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "z": {
+                          "type": "number"
+                        }
                       },
                       "required": ["x", "z"],
                       "type": "object"
@@ -714,15 +524,25 @@
                   "position": {
                     "additionalProperties": false,
                     "properties": {
-                      "x": { "type": "number" },
-                      "y": { "type": "number" },
-                      "z": { "type": "number" }
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
                     },
                     "required": ["x", "z"],
                     "type": "object"
                   },
-                  "top": { "type": "number" },
-                  "bottom": { "type": "number" }
+                  "top": {
+                    "type": "number"
+                  },
+                  "bottom": {
+                    "type": "number"
+                  }
                 },
                 "required": ["map", "outline"],
                 "type": "object"
@@ -736,8 +556,12 @@
                 "properties": {
                   "map": {
                     "properties": {
-                      "id": { "type": "string" },
-                      "name": { "type": "string" }
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
                     },
                     "required": ["id", "name"],
                     "type": "object"
@@ -746,9 +570,15 @@
                     "items": {
                       "additionalProperties": false,
                       "properties": {
-                        "x": { "type": "number" },
-                        "y": { "type": "number" },
-                        "z": { "type": "number" }
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "z": {
+                          "type": "number"
+                        }
                       },
                       "required": ["x", "z"],
                       "type": "object"
@@ -766,9 +596,15 @@
               "items": {
                 "items": {
                   "properties": {
-                    "id": { "type": "string" },
-                    "name": { "type": "string" },
-                    "shortName": { "type": "string" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "shortName": {
+                      "type": "string"
+                    }
                   },
                   "required": ["id", "name"],
                   "type": "object"
@@ -781,9 +617,15 @@
               "description": "Items that must not be worn",
               "items": {
                 "properties": {
-                  "id": { "type": "string" },
-                  "name": { "type": "string" },
-                  "shortName": { "type": "string" }
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "shortName": {
+                    "type": "string"
+                  }
                 },
                 "required": ["id", "name"],
                 "type": "object"
@@ -968,9 +810,15 @@
                     "items": {
                       "additionalProperties": false,
                       "properties": {
-                        "x": { "type": "number" },
-                        "y": { "type": "number" },
-                        "z": { "type": "number" }
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "z": {
+                          "type": "number"
+                        }
                       },
                       "required": ["x", "z"],
                       "type": "object"
@@ -980,15 +828,25 @@
                   "position": {
                     "additionalProperties": false,
                     "properties": {
-                      "x": { "type": "number" },
-                      "y": { "type": "number" },
-                      "z": { "type": "number" }
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "z": {
+                        "type": "number"
+                      }
                     },
                     "required": ["x", "z"],
                     "type": "object"
                   },
-                  "top": { "type": "number" },
-                  "bottom": { "type": "number" }
+                  "top": {
+                    "type": "number"
+                  },
+                  "bottom": {
+                    "type": "number"
+                  }
                 },
                 "required": ["map", "outline"],
                 "type": "object"
@@ -1002,8 +860,12 @@
                 "properties": {
                   "map": {
                     "properties": {
-                      "id": { "type": "string" },
-                      "name": { "type": "string" }
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
                     },
                     "required": ["id", "name"],
                     "type": "object"
@@ -1012,9 +874,15 @@
                     "items": {
                       "additionalProperties": false,
                       "properties": {
-                        "x": { "type": "number" },
-                        "y": { "type": "number" },
-                        "z": { "type": "number" }
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        },
+                        "z": {
+                          "type": "number"
+                        }
                       },
                       "required": ["x", "z"],
                       "type": "object"
@@ -1156,204 +1024,20 @@
         "type": "array"
       },
       "taskRequirements": {
-        "description": "Task prerequisites/requirements",
-        "items": {
-          "additionalProperties": true,
-          "properties": {
-            "task": {
-              "additionalProperties": false,
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            },
-            "status": {
-              "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
-              "items": {
-                "enum": [
-                  "locked",
-                  "availableForStart",
-                  "accepted",
-                  "active",
-                  "availableForFinish",
-                  "complete",
-                  "completed",
-                  "failed",
-                  "failedRestartable",
-                  "markedFailed",
-                  "expired",
-                  "availableAfter"
-                ],
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "notes": {
-              "description": "Optional upstream explanation for this prerequisite",
-              "type": "string"
-            }
-          },
-          "required": ["task"],
-          "type": "object"
-        },
-        "type": "array"
+        "$ref": "task-shared.schema.json#/definitions/taskRequirements",
+        "description": "Task prerequisites/requirements"
       },
       "taskRequirementGroups": {
-        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed. An empty array clears upstream groups.",
-        "items": {
-          "minItems": 1,
-          "items": {
-            "additionalProperties": true,
-            "properties": {
-              "task": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": { "type": "string" },
-                  "name": { "type": "string" }
-                },
-                "required": ["id", "name"],
-                "type": "object"
-              },
-              "status": {
-                "description": "Allowed prerequisite statuses, covering the distinct BSG task lifecycle states: locked, availableForStart, active (alias accepted), availableForFinish, complete (alias completed), failed, failedRestartable, markedFailed, expired, availableAfter. The requirement is satisfied when the recorded status matches a listed value after alias normalization; complete/completed is the normal prerequisite, accepted/active requires the predecessor to be in progress, and the failed family marks alternatives",
-                "items": {
-                  "enum": [
-                    "locked",
-                    "availableForStart",
-                    "accepted",
-                    "active",
-                    "availableForFinish",
-                    "complete",
-                    "completed",
-                    "failed",
-                    "failedRestartable",
-                    "markedFailed",
-                    "expired",
-                    "availableAfter"
-                  ],
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "notes": {
-                "description": "Optional explanation for this prerequisite",
-                "type": "string"
-              }
-            },
-            "required": ["task"],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "type": "array"
+        "$ref": "task-shared.schema.json#/definitions/taskRequirementGroups",
+        "description": "ANDed groups of alternative task prerequisites; entries inside each group are ORed. An empty array clears upstream groups."
       },
       "otherRequirements": {
-        "description": "Additional start gates such as dialogue flags or persistent global variables",
-        "items": {
-          "additionalProperties": true,
-          "properties": {
-            "id": { "type": "string" },
-            "type": { "type": "string" },
-            "traders": {
-              "items": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": { "type": "string" },
-                  "name": { "type": "string" }
-                },
-                "required": ["id", "name"],
-                "type": "object"
-              },
-              "type": "array"
-            },
-            "storyChapter": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "id": { "type": "string", "minLength": 1 },
-                "name": { "type": "string", "minLength": 1 }
-              },
-              "required": ["id", "name"]
-            },
-            "objective": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "id": { "type": "string", "minLength": 1 },
-                "name": { "type": "string", "minLength": 1 }
-              },
-              "required": ["id", "name"]
-            },
-            "variableId": { "type": "string" },
-            "compareMethod": { "enum": [">=", "<=", ">", "<", "=", "=="] },
-            "value": { "type": "number" }
-          },
-          "allOf": [
-            {
-              "if": {
-                "properties": { "type": { "const": "dialogue" } },
-                "required": ["type"]
-              },
-              "then": { "required": ["traders"] }
-            },
-            {
-              "if": {
-                "properties": { "type": { "const": "globalVariable" } },
-                "required": ["type"]
-              },
-              "then": { "required": ["variableId", "compareMethod", "value"] }
-            },
-            {
-              "if": {
-                "properties": { "type": { "const": "storyObjective" } },
-                "required": ["type"]
-              },
-              "then": { "required": ["storyChapter", "objective"] }
-            }
-          ],
-          "required": ["id", "type"],
-          "type": "object"
-        },
-        "type": "array"
+        "$ref": "task-shared.schema.json#/definitions/otherRequirements",
+        "description": "Additional start gates such as dialogue flags or persistent global variables"
       },
       "neededKeys": {
-        "description": "Keys required to enter the map for a task objective; not a task start gate",
-        "items": {
-          "additionalProperties": false,
-          "properties": {
-            "map": {
-              "additionalProperties": false,
-              "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" }
-              },
-              "required": ["id", "name"],
-              "type": "object"
-            },
-            "keys": {
-              "items": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": { "type": "string" },
-                  "name": { "type": "string" },
-                  "shortName": { "type": "string" }
-                },
-                "required": ["id", "name"],
-                "type": "object"
-              },
-              "type": "array"
-            }
-          },
-          "required": ["map", "keys"],
-          "type": "object"
-        },
-        "type": "array"
+        "$ref": "task-shared.schema.json#/definitions/neededKeys",
+        "description": "Keys required to enter the map for a task objective; not a task start gate"
       },
       "availableDelaySecondsMin": {
         "description": "Minimum delay before availability after other start gates are met",
@@ -1385,7 +1069,9 @@
         "then": {
           "properties": {
             "availableDelaySecondsMax": {
-              "minimum": { "$data": "1/availableDelaySecondsMin" }
+              "minimum": {
+                "$data": "1/availableDelaySecondsMin"
+              }
             }
           }
         }

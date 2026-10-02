@@ -17,7 +17,7 @@
     "tasks:availability": "tsx scripts/task-availability.ts",
     "wiki:compare": "tsx scripts/wiki-compare.ts",
     "monitor": "node monitor/server.js",
-    "check:monitor": "node --check monitor/server.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
+    "check:monitor": "node --check monitor/server.js && node --check monitor/lib/tarkov-api.js && node --check monitor/lib/tarkov-transport.js && node --check monitor/lib/config.js && node --check monitor/lib/sections.js && node --check monitor/public/view-config.js && node --check monitor/public/app.js && node --check src/lib/tarkov-api-shared.cjs",
     "audit:dependencies": "node scripts/audit-dependencies.cjs",
     "fallow:check": "fallow dead-code",
     "fallow:dupes": "fallow dupes",
@@ -29,7 +29,8 @@
     "format:check": "prettier --check \"**/*.{ts,cts,json,json5,md}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "status:locale": "tsx scripts/status-locale.ts"
+    "status:locale": "tsx scripts/status-locale.ts",
+    "maintenance:ci": "tsx scripts/maintenance-ci.ts"
   },
   "keywords": [
     "tarkov",
