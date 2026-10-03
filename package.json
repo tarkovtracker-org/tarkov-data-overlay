@@ -46,15 +46,15 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.6",
+    "@types/node": "^24.19.0",
     "ajv": "^8.20.0",
-    "fallow": "^3.28.0",
+    "fallow": "^3.30.0",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.23.3",
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.2"
   },
   "overrides": {
     "smol-toml": "^1.7.2"
